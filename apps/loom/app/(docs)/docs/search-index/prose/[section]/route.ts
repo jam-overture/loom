@@ -24,6 +24,14 @@ import { searchProseFor } from "@/app/(docs)/_lib/search/build"
  * reference used to be that section; since 26 September its words are read off
  * what its pages render rather than off a file nobody wrote
  * (`search/generated.ts`), and this address serves 24 KB of them.
+ *
+ * **The keys in the body are relative to the section in the address above
+ * them.** The browser asked for this file by its section, so the section is the
+ * one part of every address inside it that the browser already has; the file
+ * says it once in `under` and `parseSearchProse` puts it back. Nothing about
+ * this route changes — it is the same `searchProseFor` served at the same
+ * address — and it is written here because somebody reading a served file for
+ * the first time will wonder why the keys look half-finished.
  */
 
 export const dynamic = "force-static"

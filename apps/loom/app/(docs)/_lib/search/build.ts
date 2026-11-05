@@ -245,6 +245,8 @@ export const searchContents = (): TravellingIndex => ({
  * from one that has quietly started repeating itself.
  */
 export const searchProse = (): SearchProse => ({
+  /** Whole addresses: this is the whole site, so there is no one section to be under. */
+  under: "",
   bodies: buildSearchIndex()
     .entries.filter((entry) => entry.body !== "")
     .map((entry) => [entry.href, entry.body] as const),
@@ -260,10 +262,24 @@ export const searchProse = (): SearchProse => ({
  * ask for. A section nobody has written words under answers with an empty list
  * rather than a 404, so the browser can ask for every section the table of
  * contents mentions without holding a second idea of which of them are written.
+ *
+ * **The keys are relative to the section**, which is the only difference
+ * between a body here and the same body in the whole above. The browser asked
+ * for this file by its section, so the section is the part of every address in
+ * it that it already knows; the file states it once as `under` and
+ * `parseSearchProse` puts it back. A landing page's key is therefore the empty
+ * string — it is the section itself and nothing is left over.
  */
-export const searchProseFor = (sectionSlug: string): SearchProse => ({
-  bodies: searchProse().bodies.filter(([href]) => docsSectionOfPath(href) === sectionSlug),
-})
+export const searchProseFor = (sectionSlug: string): SearchProse => {
+  const under = `/docs/${sectionSlug}`
+
+  return {
+    under,
+    bodies: searchProse()
+      .bodies.filter(([href]) => docsSectionOfPath(href) === sectionSlug)
+      .map(([href, body]) => [href.slice(under.length), body] as const),
+  }
+}
 
 /** The blocks nobody waits for, keyed the same way. */
 export const searchCode = (): SearchCode => ({

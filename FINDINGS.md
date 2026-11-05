@@ -8,6 +8,84 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-11-05 — this site has room for about 331 more words of prose in total, which is less than its shortest page
+
+**Filed by:** `Loom docs` · **Owned by:** the maintainer, then `Loom docs`
+(`apps/loom/app/(docs)/_lib/search/`) · **Status:** open — **the documentation
+site cannot take another page until this is answered**, and the answer is one
+word on [0353](decisions/0353-the-search-box-sends-a-reader-the-sentences-of-their-own-section-and-the-rest-of-the-site-by-title.md)
+
+The search box sends a reader the sentences of every page on this site. There is
+a cap on that — **80,000 compressed bytes for all five sections' words** — and
+after this branch's saving the site spends **79,414** of it.
+
+Converted into the unit a page is written in, by `_lib/search/room.ts`: **about
+331 words, for every page this site will ever add.** The shortest page already
+written here is *Decision records* at **346**. The median written page is about
+**1,200**.
+
+**So the next page on this site is red before it is written**, and this is the
+first run at which that is a fact rather than a worry. Nine reports have carried
+it as *the search box is near its cap*; what was missing was the conversion into
+words and the comparison with a real page, and both are now derived rather than
+typed.
+
+**Three remedies are ruled out with numbers, not opinions.** A bigger cap is
+refused by a rule older than the cap (`build.ts`, when the names left the
+contents file): *split the index rather than take the number up*. Splitting
+further makes it **worse** — five files of this prose cost 2,786 more compressed
+bytes than one, so cutting the runtime's file by page, which its own cap's
+comment recommends, raises the bill. And a shorter page cannot be written: 331
+words is shorter than anything here, and a page that just fitted would leave
+nothing for the next one.
+
+**What is asked of the maintainer** is the choice in 0353 — four candidates,
+each with its measured bill and the room it leaves. The recommendation is **C**:
+the box sends the sentences of the reader's own section and the rest of the site
+by title and summary, with an affordance to ask for the rest. It leaves about
+**2,305 words per section** and it is the only candidate that scales, because
+the cap that binds stops being a number about all five sections at once.
+
+**What this lane did instead of waiting.** The one reduction that is
+promise-preserving and entirely inside this lane: a section's prose file states
+once what its addresses are `under` and writes down only what is left of them,
+which is the lesson the names file learned on 19 September applied to the other
+file still writing addresses down. It is worth **5,223 raw bytes and 251
+compressed** — honestly small, which is why it is reported as a saving rather
+than as a remedy. It took the room from 201 words to 331.
+
+---
+## 2026-11-05 — `@jam-overture/loom/cli` says it drives a proposal from the terminal, and it scaffolds
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom daily build` (`src/cli/`) ·
+**Status:** open — **nothing is broken**; the sentence is in a docblock and no
+page on this site prints it
+
+`src/cli/index.ts` opens:
+
+> The commands `loom` runs. Scaffolding a new project, **and driving a proposal
+> from the terminal against the same runtime a server would use.**
+
+The second half is not true of the module. `parseArguments` accepts `init`,
+`add primitive` and `--help`, and nothing else; `CLI_USAGE` — the command's own
+answer to `--help` — describes itself as *scaffolding for the Loom primitive
+registry* and lists those three. There is no proposal anywhere behind this door.
+
+**Found while costing a page about this import**, which is why it is filed
+rather than fixed: the sentence is in `src/` and this lane does not edit `src/`.
+
+**It does not reach a reader today**, and that was checked rather than assumed:
+the API reference generator reads the docblocks of the *sub-modules* — `cli/args`,
+`cli/run`, `cli/plan` — and not the index's, so the string appears nowhere in
+`reference.generated.json` and on no page of this site. It is a sentence read by
+the next person to open the file.
+
+**Recommendation: delete the clause**, rather than widen the CLI. Whether the
+terminal should be able to drive a proposal is a real question and a different
+one; a docblock is not where it gets answered, and a door whose summary promises
+a capability is how a reader spends an afternoon looking for it.
+
+---
 ## 2026-11-05 — the *Events* tab needs reader events kept for 30 days, and the intake deletes each one once it is collected
 
 **Filed by:** `Loom portal` · **Owned by:** `Loom signals` (`src/signals/`,
@@ -65461,6 +65539,25 @@ find it, and it is the first candidate on the queue that is not a measurement.
 written about, and the generated page carries every signature and every
 declaration sentence. What they lack is the paragraph that says what the tool is
 for.
+
+---
+> **Still open on 5 November, and now blocked rather than queued.** This was the
+> first candidate on this lane's queue and the run that picked it up could not
+> write it. The reason is not the page: **this site has room for about 331 more
+> words of prose in total** and the shortest honest version of this page is about
+> 400. The measurement, the four candidate remedies and what each buys are in
+> today's entry at the top of this file and in
+> [0353](decisions/0353-the-search-box-sends-a-reader-the-sentences-of-their-own-section-and-the-rest-of-the-site-by-title.md).
+>
+> **The page was not trimmed to fit and should not be.** 331 words is shorter
+> than any page on this site; a page squeezed into it would leave nothing for
+> the one after it and would be the worst version of the page that answers the
+> question.
+>
+> **The recommendation of 4 November is unchanged** — a page in *The runtime*,
+> about the tool, naming the import once. What is added is a second thing to say
+> on it: the door's own docblock claims it can drive a proposal from the terminal
+> and it cannot, which is filed separately for `Loom daily build`.
 
 ---
 > **Fourth measurement, 4 November**, on #761, and the pattern is now stable
