@@ -2,9 +2,15 @@
 
 **Lane:** `Loom signals` · **Date:** 5 November 2026 (morning run) ·
 **Branch:** `signals-74-a-counted-delivery-is-kept` ·
-**Record:** [0350](../decisions/0350-a-counted-delivery-is-kept-for-a-stated-window-rather-than-deleted-by-the-fold.md),
+**Record:** [0351](../decisions/0351-a-counted-delivery-is-kept-for-a-stated-window-rather-than-deleted-by-the-fold.md),
 which **partially supersedes [0158](../decisions/0158-counting-a-window-of-reader-signals-and-forgetting-it-are-one-operation.md)** ·
 **Plan:** [§74](../docs/signals.md)
+
+**Renumbered.** This unit's record was written as 0350 and is **0351**: `Loom
+portal` took 0350 the same morning and it reached `main` as #774 while this
+branch was being built. Renumbered here rather than left for `Loom merge`,
+because two records with one number fail `pnpm decisions:index`, with a dated
+note under the record's header and nothing it decides changed.
 
 ## Read this part first
 
@@ -24,12 +30,12 @@ the copy-to-a-second-table variant breaks the same clause and keeps the same
 `view` keys in a second place.
 
 So the contradiction is 0349's doing, not this lane reweighing 0158's argument.
-Writing 0350 `Proposed` and building nothing would have left the lane with no
+Writing 0351 `Proposed` and building nothing would have left the lane with no
 unit and the portal's finding open on a question you had already answered. What
-I did instead: the supersession is written at both ends (0193), 0350 carries a
+I did instead: the supersession is written at both ends (0193), 0351 carries a
 section saying exactly which of 0158's clauses are overturned and which still
 stand, and this report and the pull request both lead on it. If you would rather
-it had waited, say so and I will mark 0350 `Proposed` and revert the branch.
+it had waited, say so and I will mark 0351 `Proposed` and revert the branch.
 
 ## What I completed
 
@@ -120,13 +126,13 @@ is one of the clauses that stands.
 
 ## Records added
 
-- **[0350](../decisions/0350-a-counted-delivery-is-kept-for-a-stated-window-rather-than-deleted-by-the-fold.md)**
+- **[0351](../decisions/0351-a-counted-delivery-is-kept-for-a-stated-window-rather-than-deleted-by-the-fold.md)**
   — Accepted, partially superseding 0158. Six alternatives recorded with the
   reason each was rejected, including the second table, a durable watermark row,
   deleting by age alone, two stated intervals, a fifth `ExpiryStop`, and
   **doing nothing until you confirm the supersession**.
 - **0158** is marked at its own end and carries a note saying which of its
-  clauses 0350 overturns and which the subsystem still runs on.
+  clauses 0351 overturns and which the subsystem still runs on.
 
 ## Findings
 
@@ -216,7 +222,8 @@ Real, from this branch.
 | `src/signals` whole suite | **60 files, 2,015 passed**, 0 failed |
 | the intake suite in `apps/loom` | **15 files, 195 passed**, 0 failed |
 | the app suite inside `pnpm verify` | **398 files, 6,464 passed**, 0 failed |
-| `pnpm verify` | **green, exit 0** |
+| `pnpm verify`, before `main` was merged in | **green, exit 0** |
+| `pnpm verify`, with #774 merged in | **green, exit 0** — 403 files, **6,542 passed**, 0 failed |
 
 Nothing was skipped and no test was weakened. The one bound that was *raised* is
 the ledger's and it is the closed finding above, taken as another lane filed it;
@@ -225,7 +232,7 @@ the one assertion that was *restated* is the cross-lane one above.
 `pnpm verify` was red four times before it was green, all four mine and none of
 them in the change itself:
 
-1. **Two decision links in 0350** where I guessed a record's filename from its
+1. **Two decision links in 0351** where I guessed a record's filename from its
    number. The citation check catches that by design.
 2. **Three doc comments naming a record number inside a sentence**, which the
    reference generator would withhold — the maintainer's own rule on the API
@@ -286,7 +293,7 @@ is parked stays shut by the same thing that shut it: a reader id would be a new
 column, a new consent obligation and a new record, none of which this makes
 smaller.
 
-What it does change, and 0350 and `docs/signals.md` rule 5 both now say so, is
+What it does change, and 0351 and `docs/signals.md` rule 5 both now say so, is
 that **the window in which one page view's signals can be read together is
 thirty days rather than an hour**. 0158's argument for the buffer rested partly
 on how briefly the `view` key lived. What the key *is* has not changed — random
@@ -300,7 +307,7 @@ is written into the plan so nobody has to rediscover it.
 Three, each with a recommendation. The first is the only one that could want a
 revert.
 
-1. **Whether 0350 should have been `Proposed`.** Set out at the top.
+1. **Whether 0351 should have been `Proposed`.** Set out at the top.
    **Recommendation: leave it `Accepted`.** 0349 is yours, is dated today, and
    its fourth clause assigns this build to this lane; there is no implementation
    of it that leaves 0158 whole, so a `Proposed` record would have been a

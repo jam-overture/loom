@@ -87,7 +87,7 @@ export const loomReaderSignals = pgTable(
       .notNull()
       .default(sql`now()`),
     /**
-     * When a fold counted this delivery into the counters (0350).
+     * When a fold counted this delivery into the counters (0351).
      *
      * Nullable and undefaulted, and null is a state rather than a gap: *not yet
      * counted*. It is the only column on this table a second statement ever
@@ -117,7 +117,7 @@ export const loomReaderSignals = pgTable(
     index("loom_reader_signals_tree_seq_idx").on(table.applicationId, table.treeId, table.seq),
     /**
      * The oldest end of the whole application, which both sweeps start from
-     * (0350).
+     * (0351).
      *
      * It did not exist while the table held an hour of deliveries, because a
      * scan of an hour is cheap however it is served. The kept window makes it

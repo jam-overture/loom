@@ -35,7 +35,7 @@ import {
  * is counted at all, and the portal's numbers stay at zero while the batches
  * pile up.
  *
- * **Two sweeps in one run, counting first** (0350). A delivery is counted once
+ * **Two sweeps in one run, counting first** (0351). A delivery is counted once
  * it is ripe and deleted once it is past the window this deployment keeps
  * events for — thirty days by default, so that an operator can look at the
  * deliveries behind a counter (0349) — and nothing may delete a delivery no
@@ -77,11 +77,11 @@ const settings = readIntakeSettings()
  * The age a batch reaches before it is counted — one number for two facts
  * (0158): how long a page view is given to finish, and how far the tallies lag
  * the buffer. **It stopped being the third** on 5 November: how long a view key
- * lives is now the kept window below (0350).
+ * lives is now the kept window below (0351).
  */
 const sweepWindow = settings.window
 
-/** The age a counted delivery reaches before it is deleted (0349, 0350). */
+/** The age a counted delivery reaches before it is deleted (0349, 0351). */
 const keptWindow = settings.kept
 
 /**
@@ -218,7 +218,7 @@ try {
     /**
      * Whether this run's own evidence agrees with what its readers are told.
      *
-     * **Judged on the expiry run, because the ceiling is about deletion** (0350):
+     * **Judged on the expiry run, because the ceiling is about deletion** (0351):
      * the fold's own figure says how far behind counting is, which is the stall
      * check's question, not this one. A run that could not read its kept window
      * has no evidence at all, which is what `unavailable` says here — the

@@ -65958,7 +65958,7 @@ whichever rung it skipped, not the leaf.
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom signals`
 (`apps/loom/app/_lib/reader-signals/reading.ts`) · **Status:** open — **the
-stated remainder of [0350](decisions/0350-a-counted-delivery-is-kept-for-a-stated-window-rather-than-deleted-by-the-fold.md)**;
+stated remainder of [0351](decisions/0351-a-counted-delivery-is-kept-for-a-stated-window-rather-than-deleted-by-the-fold.md)**;
 nothing is broken and the portal is not blocked on anything it can do today
 
 `Loom portal`'s entry of this morning asked the intake for four things. Three
@@ -65974,7 +65974,7 @@ landed on `signals-74-a-counted-delivery-is-kept`:
 **The fourth is the one left and it is one module.** The rows are reachable
 today only through `ReaderSignalJournal.read`, which is the store's own handle:
 it pages by an opaque cursor newest-first already (`direction: "older"`), it
-filters by tree, and since 0350 it filters counted from uncounted. What it does
+filters by tree, and since 0351 it filters counted from uncounted. What it does
 not do is anything the portal's rule 4 asks for — it is not scoped to an
 application the way `readingsFor(applicationId)` is, it hands back a
 `ReceivedBatch` rather than a shape a screen can draw, and a portal calling it
@@ -66046,7 +66046,7 @@ it("says the root door is the widest and still has less than half of it", () => 
 ```
 
 **It went red on this branch**, which adds one module to `src/signals/` for
-[0350](decisions/0350-a-counted-delivery-is-kept-for-a-stated-window-rather-than-deleted-by-the-fold.md).
+[0351](decisions/0351-a-counted-delivery-is-kept-for-a-stated-window-rather-than-deleted-by-the-fold.md).
 Measured off the regenerated reference: `@jam-overture/loom/signals` publishes
 **610** names and `@jam-overture/loom` publishes **600**, of 1,896 in the
 package. Before this branch the signals door was 594 and the root door was

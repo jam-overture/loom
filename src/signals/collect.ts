@@ -74,7 +74,7 @@ import type { ReaderTallyStore } from "./tally.js"
  * **Shorter is more anonymous — and since 5 November this is no longer the
  * window that governs that.** The view key stops existing when the row holding
  * it is deleted, and that is now the kept window rather than this one
- * (0349, 0350): a delivery is counted at this age and deleted at the age
+ * (0349, 0351): a delivery is counted at this age and deleted at the age
  * `expire.ts` is given. This setting still decides how much over-count a
  * straddling page view causes, which is the accuracy argument above; what it no
  * longer decides is how long a page view's signals stay correlatable. That
@@ -210,7 +210,7 @@ export type CollectionSummary = {
    * caller's clock is not this run's: a surface that read the age against its
    * own `now` would publish a number nothing had measured.
    *
-   * **It is the fold's lag, not the kept window** (0350). It was both while a
+   * **It is the fold's lag, not the kept window** (0351). It was both while a
    * counted delivery was deleted in the same breath, which is why
    * `retentionPromiseOf` used to be handed this outcome; the ceiling readers
    * are promised is now about deletion, so that reading is handed the expiry
@@ -271,7 +271,7 @@ type Scan =
  * needs only the first of them to know where the ripe prefix ends — so reading
  * further would be reading the busiest part of the table to throw it away.
  *
- * **Uncounted rows only** (0350), which is what makes the oldest end of the
+ * **Uncounted rows only** (0351), which is what makes the oldest end of the
  * table the oldest *uncounted* delivery rather than the oldest kept one. Without
  * it this scan would read the whole kept window — thirty days by default — to
  * reach the handful of rows a run is for, and the cost of collecting would grow

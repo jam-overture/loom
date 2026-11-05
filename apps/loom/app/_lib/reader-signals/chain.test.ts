@@ -160,7 +160,7 @@ describe("a batch a browser posts becomes a number the portal can read", () => {
     expect(row?.dwellMs).toBe(11_300)
 
     /**
-     * **And the delivery is still there, marked counted** (0349, 0350). It used
+     * **And the delivery is still there, marked counted** (0349, 0351). It used
      * to be deleted in the same operation; it is now kept for the window this
      * deployment states, so that an operator can look at the deliveries behind
      * the row above.

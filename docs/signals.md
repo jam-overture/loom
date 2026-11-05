@@ -33,7 +33,7 @@ the portal every day.
 | Configuration | the host's argument, never a prop in the tree |
 | Default | off; an unaddressed render is byte-identical |
 | Browser cost | **6.4 KB** minified, 2.9 KB gzipped, measured 2 November; `src/signals/browser-weight.test.ts` fails if an import reaches a package |
-| How long a delivery lives | two windows since 5 November: counted once it is ripe, **kept for 30 days by default** and then deleted ([0349](../decisions/0349-a-projects-reader-events-are-kept-thirty-days-by-default-and-the-tallies-stay-the-durable-record.md), [0350](../decisions/0350-a-counted-delivery-is-kept-for-a-stated-window-rather-than-deleted-by-the-fold.md)) — and nothing deletes a delivery no fold has counted, so a deployment whose collection stopped keeps rather than loses them |
+| How long a delivery lives | two windows since 5 November: counted once it is ripe, **kept for 30 days by default** and then deleted ([0349](../decisions/0349-a-projects-reader-events-are-kept-thirty-days-by-default-and-the-tallies-stay-the-durable-record.md), [0351](../decisions/0351-a-counted-delivery-is-kept-for-a-stated-window-rather-than-deleted-by-the-fold.md)) — and nothing deletes a delivery no fold has counted, so a deployment whose collection stopped keeps rather than loses them |
 | Which page a change helped and which it hurt | every page's sharpest movement in each direction, at the later window's door scale ([0291](../decisions/0291-a-deployments-change-is-two-orders-at-the-doors-scale-because-a-page-has-no-net-movement.md)), as two orders rather than one — because a page the change both helped and hurt has no net |
 | What a change did to the funnel | the rate bracketed by each window's own ceiling, with a counterfactual saying which half moved ([0288](../decisions/0288-a-change-to-a-funnel-is-two-shares-that-factor-and-a-difference-of-two-floors-is-a-bracket.md)), so a rollup window a deployment shortened cannot read as a collapse |
 | How much of what it says gets read | words readers reached against the words the window can speak for ([0235](../decisions/0235-how-much-of-a-page-gets-read-is-a-share-of-words-that-partition-it-and-the-typical-reader-is-a-ceiling.md), [0287](../decisions/0287-a-share-of-a-pages-words-is-a-share-of-the-words-the-window-can-speak-for-and-spoken-for-is-one-predicate.md)), with the passages nobody saw — and no share at all where nothing reports reach |
@@ -145,7 +145,7 @@ call inside a pull request.
    correlating nothing across two page views, so a row thirty days old
    identifies nobody. What has changed is the window in which one page view's
    signals can be read together, and 0349 decided it knowing that
-   ([0350](../decisions/0350-a-counted-delivery-is-kept-for-a-stated-window-rather-than-deleted-by-the-fold.md)
+   ([0351](../decisions/0351-a-counted-delivery-is-kept-for-a-stated-window-rather-than-deleted-by-the-fold.md)
    partially supersedes 0158 on this point and no other lane's).
 6. **The vocabulary stays closed.** Five kinds, `completed` having landed on
    1 October ([0211](../decisions/0211-a-completion-is-a-form-the-browser-let-go.md)).
@@ -4642,7 +4642,7 @@ replaces the delete as the thing that stops the next fold counting the same
 window**.
 
 **Done**
-([0350](../decisions/0350-a-counted-delivery-is-kept-for-a-stated-window-rather-than-deleted-by-the-fold.md)),
+([0351](../decisions/0351-a-counted-delivery-is-kept-for-a-stated-window-rather-than-deleted-by-the-fold.md)),
 as one table with two lifetimes and two operations.
 
 - **A counted delivery is marked, not deleted.** `ReaderSignalJournal.counted({

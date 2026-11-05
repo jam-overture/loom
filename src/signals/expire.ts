@@ -15,7 +15,7 @@ import type { ReaderSignalJournal, ReaderSignalStoreError, ReceivedBatch } from 
  * operator can look at the deliveries behind a counter rather than only at the
  * counter ([0349](../../decisions/0349-a-projects-reader-events-are-kept-thirty-days-by-default-and-the-tallies-stay-the-durable-record.md)),
  * and the two halves of that one call became two operations with two windows
- * ([0350](../../decisions/0350-a-counted-delivery-is-kept-for-a-stated-window-rather-than-deleted-by-the-fold.md)).
+ * ([0351](../../decisions/0351-a-counted-delivery-is-kept-for-a-stated-window-rather-than-deleted-by-the-fold.md)).
  *
  * This is the second half. It deletes and counts nothing, exactly as
  * `collect.ts` counts and deletes nothing.

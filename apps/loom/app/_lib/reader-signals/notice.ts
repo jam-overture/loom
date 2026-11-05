@@ -57,7 +57,7 @@ export const deploymentNoticeOf = (settings: IntakeSettings): CollectionNotice =
     windowMs: settings.window.windowMs,
     /**
      * The window this deployment keeps a counted delivery for, which is the one
-     * of the two ages a reader is promised a deletion at (0349, 0350).
+     * of the two ages a reader is promised a deletion at (0349, 0351).
      *
      * Read as configured rather than as clamped, for the collection window's
      * reason — and a value that could not be read publishes the default, which

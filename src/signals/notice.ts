@@ -344,7 +344,7 @@ export type SweepNotice =
        * is given**, and a deployment states the interval once rather than
        * keeping a reader's ceiling and an operator's threshold in step by hand.
        *
-       * **The later of the two windows rather than their sum** (0350). A
+       * **The later of the two windows rather than their sum** (0351). A
        * delivery is counted once it is `bufferMs` old and deleted once it is
        * `keptMs` old, and both are measured from the same instant — the moment
        * it arrived — so the second condition is met at the later of the two
@@ -373,7 +373,7 @@ export type CollectionNotice = {
    * milliseconds.
    *
    * The deployment's own number (`collect.ts`). **It was the bound on the life
-   * of the page-view key and is not any more** (0350): a counted delivery used
+   * of the page-view key and is not any more** (0351): a counted delivery used
    * to be deleted in the same operation, and is now kept for
    * {@link CollectionNotice.keptMs}. **The framework cannot promise the moment
    * either sweep runs**, because a host schedules them: this is the age at
@@ -410,7 +410,7 @@ export type CollectionNotice = {
    *
    * **One stated interval covers both sweeps**, because a deployment runs them
    * from one place — counting and then expiring, in that order, in one cron
-   * route (0350). A deployment that ran them on two schedules would be stating
+   * route (0351). A deployment that ran them on two schedules would be stating
    * the longer of the two here, which is what the ceiling needs.
    */
   readonly sweep: SweepNotice
@@ -442,7 +442,7 @@ const OBSERVES: Readonly<Record<ReaderSignalKind, string>> = {
  * — so a notice reading *0 minutes* would be reporting a window the collector
  * would refuse to run on.
  *
- * **Days above a day**, which the kept window asked for (0350): thirty days is
+ * **Days above a day**, which the kept window asked for (0351): thirty days is
  * the default a deployment keeps individual deliveries for, and *43200 minutes*
  * is a number no reader of a privacy page can hold. The break is at a day
  * rather than at an hour so that every figure a notice published before the
@@ -472,7 +472,7 @@ const inWords = (ms: number): string => {
  * A `Pick` of the notice rather than three arguments, so that the sentence
  * cannot be built from some of them. The ripeness age alone reads as a deletion
  * and is not one — and since 5 November it is not even the deletion's age
- * (0350).
+ * (0351).
  */
 export type DeliveryRetention = Pick<CollectionNotice, "bufferMs" | "keptMs" | "sweep">
 
@@ -488,7 +488,7 @@ export type DeliveryRetention = Pick<CollectionNotice, "bufferMs" | "keptMs" | "
  * as many words rather than leaving the ages to be read as a promise.
  *
  * **Two ages since 5 November, and saying one of them would be the lie** (0349,
- * 0350). A delivery is counted at the first age and deleted at the second, and
+ * 0351). A delivery is counted at the first age and deleted at the second, and
  * the sentence is explicit about what the gap is for: so that the deployment
  * can look at the deliveries behind its totals. A reader told only *counted
  * into totals* would reasonably assume the delivery was gone.

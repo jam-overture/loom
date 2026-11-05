@@ -8,7 +8,7 @@ import type { DeliveryRetention } from "./notice.js"
  * A notice tells the reader three things about a delivery's life: the age it is
  * counted at and the age it is deleted at, which are this deployment's own
  * numbers, and how often its sweep runs, which is a claim about a cron nobody
- * here can see (0320, 0350). They make a ceiling — *gone within 31 days of
+ * here can see (0320, 0351). They make a ceiling — *gone within 31 days of
  * arriving* — and a deployment that states a day and sweeps monthly publishes
  * that sentence to every reader of its privacy page with nothing behind it.
  *
@@ -21,7 +21,7 @@ import type { DeliveryRetention } from "./notice.js"
  * So the check costs no read, no column, no byte on any wire and nothing in a
  * browser: it is a subtraction over what a sweep already looked at.
  *
- * **It is the expiry run's evidence, not the fold's** (0350). Until 5 November
+ * **It is the expiry run's evidence, not the fold's** (0351). Until 5 November
  * the fold was the deletion, so the run that counted a window was also the run
  * whose scan proved when deliveries went; now counting and deleting are two
  * operations with two windows, and the published ceiling is about the second.

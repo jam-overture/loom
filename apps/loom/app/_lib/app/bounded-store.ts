@@ -229,7 +229,7 @@ export const boundedTelemetryJournal = (
  *
  * `receive` is the intake endpoint writing what a reader's browser sent,
  * `counted` is the collector recording the window it folded, and `forget` is
- * the expiry sweep deleting what this deployment no longer keeps (0350). None
+ * the expiry sweep deleting what this deployment no longer keeps (0351). None
  * of the three is a screen waiting for a page.
  */
 export const boundedReaderSignalJournal = (

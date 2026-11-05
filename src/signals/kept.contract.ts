@@ -1,7 +1,7 @@
 /**
  * The fifth contract suite both reader-signal journals are run against: **a
  * counted delivery is marked rather than deleted, and the mark is what the next
- * fold reads** (0350).
+ * fold reads** (0351).
  *
  * It is here rather than beside the three in `src/testing/reader-signal-contract.ts`
  * for the reason `applied-window.contract.ts` is: that directory is another

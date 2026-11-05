@@ -41,7 +41,7 @@ import type {
 export const memoryReaderSignalJournal = (clock: Clock = systemClock): ReaderSignalJournal => {
   /**
    * Mutable rows rather than a frozen list, because one field on a stored
-   * delivery changes after it is written: the fold's instant (0350). The array
+   * delivery changes after it is written: the fold's instant (0351). The array
    * is still replaced wholesale on a delete, so the only in-place write in this
    * store is the stamp — which is the same single-column `UPDATE` Postgres
    * makes.
@@ -101,7 +101,7 @@ export const memoryReaderSignalJournal = (clock: Clock = systemClock): ReaderSig
     },
 
     /**
-     * Stamp the fold's instant on an unstamped prefix (0350).
+     * Stamp the fold's instant on an unstamped prefix (0351).
      *
      * `foldedAt !== undefined` is the guard rather than a position comparison,
      * so the second call over one prefix moves nothing — the property Postgres

@@ -12,7 +12,7 @@ import type { ReaderSignalBatch } from "./signal.js"
  * followed from that: aggregates are the durable artefact (0146), and a raw
  * batch existed for as long as it took rollup to read it and no longer. That is
  * now two lifetimes rather than one
- * ([0350](../../decisions/0350-a-counted-delivery-is-kept-for-a-stated-window-rather-than-deleted-by-the-fold.md),
+ * ([0351](../../decisions/0351-a-counted-delivery-is-kept-for-a-stated-window-rather-than-deleted-by-the-fold.md),
  * and the policy it serves,
  * [0349](../../decisions/0349-a-projects-reader-events-are-kept-thirty-days-by-default-and-the-tallies-stay-the-durable-record.md)):
  * a delivery is **counted** when it ripens and **deleted** when it is past the
@@ -77,7 +77,7 @@ export type ReceivedBatch = ReaderSignalBatch & {
    */
   readonly audienceId: AudienceId
   /**
-   * When a fold counted this delivery into the counters, where one has (0350).
+   * When a fold counted this delivery into the counters, where one has (0351).
    *
    * Absent is *not yet counted*, which is what every row in the table used to
    * be: before the kept window existed a counted delivery was deleted in the
@@ -155,7 +155,7 @@ export type ForgetOutcome = {
  * The same prefix shape {@link ForgetBefore} takes, because it replaces that
  * call in the one place a fold used to make it: counting and dropping were one
  * operation and are now counting and *marking*, which is the same operation
- * against a table that keeps the row (0350).
+ * against a table that keeps the row (0351).
  *
  * The instant is the fold's, handed in rather than read from a clock here, for
  * the reason every other stored timestamp in this subsystem is handed in: a run
@@ -197,7 +197,7 @@ export interface ReaderSignalJournal {
     request?: ReaderSignalReadRequest
   ) => Promise<Result<ReaderSignalPage, ReaderSignalStoreError>>
   /**
-   * Record that a fold counted every row below a position (0350).
+   * Record that a fold counted every row below a position (0351).
    *
    * Idempotent by construction — it stamps only what carries nothing — because
    * the caller has already written the counters when it gets here, so the one

@@ -423,7 +423,7 @@ describe("collectReaderSignals", () => {
     expect(unwrap(await store.tallies({ treeId: TREE }))).toContainEqual(
       expect.objectContaining({ nodeId: nodeId("pricing"), dwellMs: 1_000, views: 2, reached: 2 })
     )
-    /** Nothing uncounted is left, and nothing was deleted (0350). */
+    /** Nothing uncounted is left, and nothing was deleted (0351). */
     expect(unwrap(await journal.read({ counted: false })).batches).toEqual([])
     expect(unwrap(await journal.read({ counted: true })).batches).toHaveLength(2)
   })
@@ -484,7 +484,7 @@ describe("collectReaderSignals", () => {
    * twice is counted twice forever — there is no idempotence to fall back on,
    * and the wrong number looks exactly like a busy afternoon.
    *
-   * **It was a delete until 5 November and is now a mark** (0350), which is
+   * **It was a delete until 5 November and is now a mark** (0351), which is
    * exactly the kind of change that can reopen a double-count with nothing
    * noticing, so this is the case the unit is tested against.
    */

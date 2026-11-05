@@ -121,7 +121,7 @@ const receivedSchema = z.object({
   receivedAt: instantSchema,
   /**
    * `null` in the column, absent on the row — a delivery no fold has counted
-   * (0350). The same nullable-to-absent transform `view` takes, for the same
+   * (0351). The same nullable-to-absent transform `view` takes, for the same
    * reason: an optional field is how the rest of the subsystem spells *there is
    * nothing here*, and two spellings of that is how a `null` comes to be read
    * as a value.
@@ -278,7 +278,7 @@ const journalIn = (db: LoomDatabase, application: ApplicationId): ReaderSignalJo
             /**
              * Served by the partial index where it is `false`, which is the
              * fold's read and the one that would otherwise scan the kept window
-             * (0350).
+             * (0351).
              */
             request?.counted === undefined
               ? undefined
@@ -325,7 +325,7 @@ const journalIn = (db: LoomDatabase, application: ApplicationId): ReaderSignalJo
   },
 
   /**
-   * One `UPDATE`, carrying its own idempotence in the `WHERE` (0350).
+   * One `UPDATE`, carrying its own idempotence in the `WHERE` (0351).
    *
    * `folded_at IS NULL` is what makes a repeat of this statement a no-op rather
    * than a rewrite: the caller has already made the counters durable before it

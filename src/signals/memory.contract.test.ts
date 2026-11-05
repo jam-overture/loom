@@ -25,5 +25,5 @@ describeReaderRegionStoreContract("memoryReaderRegionStore", () => memoryReaderR
 /** The fourth suite, and the one that is this lane's own file (0316). */
 describeWindowApplyContract("memoryReaderTallyStore", () => memoryReaderTallyStore())
 
-/** The fifth, for the same reason, over the mark the kept window asked for (0350). */
+/** The fifth, for the same reason, over the mark the kept window asked for (0351). */
 describeKeptDeliveryContract("memoryReaderSignalJournal", () => memoryReaderSignalJournal())

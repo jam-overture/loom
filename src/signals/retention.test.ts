@@ -82,7 +82,7 @@ describe("retentionPromiseOf", () => {
 
   /**
    * The ceiling is taken off the kept window and not the collection window
-   * (0350), which is the one substitution that would read *kept* on a
+   * (0351), which is the one substitution that would read *kept* on a
    * deployment keeping deliveries three times longer than it says.
    */
   it("judges against the window a delivery is deleted at, not the one it is counted at", () => {
@@ -194,7 +194,7 @@ describe("retentionPromiseOf", () => {
    * The gap is real whichever sweep is at fault, and the one case where the
    * remedy is not the expiry run's is named rather than softened: nothing may
    * delete a delivery no fold has counted, so a deployment whose collection has
-   * stopped breaks this promise by not counting (0350).
+   * stopped breaks this promise by not counting (0351).
    */
   it("says when the oldest delivery is held by a fold that has not run", () => {
     expect(

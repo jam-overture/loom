@@ -226,7 +226,7 @@ export const KEPT_KEY = "LOOM_SIGNAL_KEPT_MS"
  * How long this deployment keeps an individual delivery after counting it.
  *
  * **The second window, and the one a reader is actually promised** (0349,
- * 0350). The window above is the age a delivery is counted at; this is the age
+ * 0351). The window above is the age a delivery is counted at; this is the age
  * it is deleted at, and until 5 November the two were one number because
  * counting deleted. The maintainer settled thirty days by default so that a
  * deployment can look at the deliveries behind its counters rather than only at
@@ -367,7 +367,7 @@ export type IntakeSettings = {
    *
    * Read here for the reason the collection window is, and it is the one of the
    * two that a reader is promised: the ceiling on a notice is this window plus
-   * one sweep (0350).
+   * one sweep (0351).
    *
    * **The door does not refuse on it.** A window that cannot be read stops the
    * expiry sweep and nothing else: refusing batches as well would lose the

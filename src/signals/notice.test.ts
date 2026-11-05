@@ -224,7 +224,7 @@ describe("collectionNoticeOf", () => {
     })
 
     /**
-     * **The sentence the kept window made true** (0349, 0350). A delivery is
+     * **The sentence the kept window made true** (0349, 0351). A delivery is
      * counted at one age and deleted at another, and a notice that said only
      * the first would tell a reader a delivery was gone an hour after it
      * arrived when the deployment keeps it for a month.
@@ -308,7 +308,7 @@ describe("collectionNoticeOf", () => {
      * The ceiling is the **later of the two windows** plus one sweep, because a
      * delivery is not deleted until it is past both and then not until the next
      * run — the same addition the stall check asks a deployment for in one
-     * number (0274), over the window that governs deletion (0350).
+     * number (0274), over the window that governs deletion (0351).
      *
      * The three lengths are deliberately different. Fifteen kept and five swept
      * make twenty; summing the two windows would make twenty-five, reading the

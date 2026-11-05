@@ -63,7 +63,7 @@ describe("deploymentNoticeOf", () => {
 
     /**
      * The second age, which is the one a reader is promised a deletion at
-     * (0349, 0350). Thirty days where the deployment set nothing, because that
+     * (0349, 0351). Thirty days where the deployment set nothing, because that
      * is what the expiry sweep would use, and the deployment's own number where
      * it set one.
      */
@@ -98,7 +98,7 @@ describe("deploymentNoticeOf", () => {
 
     /**
      * The ceiling is over **this deployment's** windows and not the framework's
-     * defaults, and it is over the one that governs deletion (0350): fifteen
+     * defaults, and it is over the one that governs deletion (0351): fifteen
      * minutes kept and a ten-minute cron is twenty-five, where the default kept
      * window would have published a month.
      */

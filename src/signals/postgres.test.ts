@@ -282,7 +282,7 @@ describe("the reader signal tables — Postgres specifics", () => {
   })
 
   /**
-   * The migration the kept window needs (0350).
+   * The migration the kept window needs (0351).
    *
    * A deployment counting readers today has a `loom_reader_signals` with no
    * `folded_at` in it, and the rows in it are — by the rule that was in force

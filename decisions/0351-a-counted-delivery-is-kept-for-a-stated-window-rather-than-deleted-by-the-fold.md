@@ -1,10 +1,17 @@
-# 0350 — A counted delivery is kept for a stated window rather than deleted by the fold, and nothing deletes what no fold has counted
+# 0351 — A counted delivery is kept for a stated window rather than deleted by the fold, and nothing deletes what no fold has counted
 
 **Status:** Accepted — partially supersedes [0158](0158-counting-a-window-of-reader-signals-and-forgetting-it-are-one-operation.md)
 
 **Date:** 5 November 2026
 
 **Section:** §4c (reader signals)
+
+> **Renumbered from 0350 on 5 November 2026**, mechanically and with nothing it
+> decides changed. `Loom portal` took 0350 the same morning for *a project sets
+> goals from signals already collected*, which reached `main` as #774 while this
+> branch was being built; the clash is renumbered here rather than left for
+> `Loom merge`, because two records with one number make `pnpm decisions:index`
+> fail and the resolution is not a conflict anybody has to think about.
 
 0158 is marked at its own end (0193). What this overturns is set out under *What
 of 0158 this overturns* below — and it overturns it **because

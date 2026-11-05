@@ -14,7 +14,7 @@ import type { LoomDatabase } from "../store/database.js"
  * but the buffer holds view keys, and a view key plus another deployment's rows
  * is the only combination in Loom that could correlate anything across a
  * tenancy boundary. It used to expire within hours and now expires within the
- * window the deployment states, thirty days by default (0349, 0350); the policy
+ * window the deployment states, thirty days by default (0349, 0351); the policy
  * never depended on that and now carries more of the weight.
  *
  * Every table is led by `application_id` (0269). The backfill is the column
@@ -56,7 +56,7 @@ export const READER_SIGNALS_DDL: readonly string[] = [
   )`,
   /**
    * **When the fold counted the delivery**, for a deployment whose buffer
-   * predates the kept window (0350).
+   * predates the kept window (0351).
    *
    * Additive, nullable and undefaulted, and the absence is a state the readings
    * publish: *not yet counted*. There is no backfill and none is wanted — a row
@@ -97,7 +97,7 @@ export const READER_SIGNALS_DDL: readonly string[] = [
   `DROP INDEX IF EXISTS loom_reader_signals_tree_seq_idx`,
   `CREATE INDEX IF NOT EXISTS loom_reader_signals_tree_seq_idx ON loom_reader_signals (application_id, tree_id, seq)`,
   /**
-   * **The oldest end across every tree** (0350), which is where both sweeps
+   * **The oldest end across every tree** (0351), which is where both sweeps
    * start: the fold scans for the oldest uncounted delivery and retention for
    * the oldest kept one.
    *
@@ -107,7 +107,7 @@ export const READER_SIGNALS_DDL: readonly string[] = [
    */
   `CREATE INDEX IF NOT EXISTS loom_reader_signals_seq_idx ON loom_reader_signals (application_id, seq)`,
   /**
-   * **The uncounted prefix** (0350), which is the fold's own read and the one
+   * **The uncounted prefix** (0351), which is the fold's own read and the one
    * index here that is partial.
    *
    * It is partial because the set it serves is bounded by the collection window
