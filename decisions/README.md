@@ -442,3 +442,5 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0350](0350-a-project-sets-goals-from-signals-already-collected-and-one-of-them-is-primary.md) | A project sets goals from signals already collected, and one of them is primary | Accepted | §5 (portal), the reasoning plane |
 | 0351 | *No record on this branch* | — | — |
 | [0352](0352-every-proposal-serves-one-goal-and-a-page-no-goal-is-on-gets-none.md) | Every proposal serves one goal, and a page no goal is on gets none | Accepted | §5 (portal), the reasoning plane |
+| 0353 | *No record on this branch* | — | — |
+| [0354](0354-the-names-a-render-writes-on-a-published-page-are-published-on-the-light-side-of-the-split.md) | The names a render writes on a published page are published on the light side of the split | Accepted | §3 |

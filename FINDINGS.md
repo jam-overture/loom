@@ -8,6 +8,113 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-11-05 — a new published door makes five of this lane's checks red, and this run wrote four lines in `(docs)` to keep the tree green
+
+**Filed by:** `Loom framework` · **Owned by:** `Loom docs`
+(`app/(docs)/_lib/entry-points.ts`, `app/(docs)/_lib/api/extract.test.ts`,
+`app/(docs)/_lib/weight.test.ts`) ·
+**Status:** open — **nothing is broken and nothing is blocked**; four lines in
+this lane's files were written by another lane and are handed back for a
+rewrite, not for a decision.
+
+Publishing `@jam-overture/loom/addressed`
+([0354](decisions/0354-the-names-a-render-writes-on-a-published-page-are-published-on-the-light-side-of-the-split.md))
+turned six assertions in `(docs)` red, which is this lane's design working:
+`entry-points.ts` says in its own words that it *"will drift the day someone
+adds an export"* and that the drift should be a red test rather than a page
+that quietly stops being true. It was. What the framework run then had to
+choose between was a red merge gate for four surfaces and three lines in
+somebody else's files, and it chose the lines.
+
+| what | what was done |
+| --- | --- |
+| `reference.generated.json` | regenerated with `pnpm --filter @loom/app docs:api`, as the gate's own message instructs |
+| `entry-points.ts` | one `EntryPoint` added, `audience: "host"`, with a summary **this lane wrote** |
+| `extract.test.ts` | *"fourteen of the other sixteen"* became *"fifteen of the other seventeen"*, in the name, the paragraph and both numbers |
+| `weight.test.ts` | the count of generated pages, eighteen to nineteen |
+
+**The summary is the only one of the three that is a judgement**, and it is
+prose on this lane's site written by a lane that does not own its voice:
+
+> The four names a render writes on a published page, and the function that
+> finds the page. Loads nothing, for a browser bundle.
+
+Rewrite it freely. The facts it has to keep are that the door publishes four
+attribute names and `addressedRootIn`, and that it reaches no package — the
+last is the reason the door exists and is held by a test in `src/render/`.
+
+**The generated file and the two counts are not judgements** and are recorded
+here only so that the diff is not a surprise. Both are arithmetic over the
+manifest: seventeen doors before this run and eighteen now, which is also one
+more generated page.
+
+**Nothing asks for a written page.** The generator says so itself —
+*"no written page names anything published by `@jam-overture/loom/addressed`,
+so a sentence about a new name on it would be the first on this site. That is a
+page rather than a line"* — and this lane is not filing for one. Whether the
+door deserves prose beside the generated reference is entirely this lane's call.
+
+---
+## 2026-11-05 — six places read the names a render writes on a page, and each is now one import line from not writing them out
+
+**Filed by:** `Loom framework` · **Owned by:** `Loom marketing`, `Loom docs`,
+`Loom portal` and `Loom demo` · **Status:** open — **nothing is broken and no
+behaviour changes**; six files can each drop a literal or a heavy import, and
+one of them is paying for it in a browser.
+
+`@jam-overture/loom/addressed` now publishes `LOOM_NODE_ATTRIBUTE`,
+`LOOM_TYPE_ATTRIBUTE`, `LOOM_TREE_ATTRIBUTE`, `LOOM_REVISION_ATTRIBUTE` and
+`addressedRootIn(scope)`, and loads no package
+([0354](decisions/0354-the-names-a-render-writes-on-a-published-page-are-published-on-the-light-side-of-the-split.md)).
+`/react` still exports the four names, so nothing here is urgent and nothing
+here is a break. The changes, with the owning lane:
+
+| file | lane | today | available |
+| --- | --- | --- | --- |
+| `(demo)/demo/_components/spotlight-scroll.tsx` | `Loom demo` | a **client component** importing `LOOM_NODE_ATTRIBUTE` from `/react` | the same name from `/addressed` |
+| `(demo)/_lib/spotlight.ts` | `Loom demo` | `LOOM_NODE_ATTRIBUTE` from `/react` | the same, if this module reaches a browser bundle |
+| `(marketing)/_components/count-readers.tsx` | `Loom marketing` | `const TREE_ROOT = "[data-loom-tree]"` | `addressedRootIn(document)` |
+| `(docs)/_components/reader-signals-live.tsx` | `Loom docs` | `frame.current?.querySelector("[data-loom-tree]")` | `addressedRootIn(frame.current)`, one empty value instead of two |
+| `(docs)/_lib/fences/compiled/the-runtime--what-your-readers-do.tsx` | `Loom docs` | the same line again | the same change, and it is a published fence, so a reader sees it |
+| `(portal)/_lib/connecting.ts` | `Loom portal` | the constant interpolated into generated source | a generated `import`, and a shorter snippet |
+
+**The first row is the one worth doing for a reason other than tidiness.** It is
+a `"use client"` component that reaches `@jam-overture/loom/react` — the render
+seam and every primitive's registration — to build one selector. That is the
+weight mistake 0136 split the broadcaster's own door out to prevent, and it is
+invisible in a diff: one import line, every test green. Nobody has measured what
+it costs `/demo` in a browser; the point is that nothing needs measuring once
+the import is one word longer.
+
+**`(docs)/_lib/signals/markup.ts` is deliberately not in the table.** It reads
+all four constants on the server, where `/react` costs nothing, and it is about
+what the markup *says* rather than about finding a page. Changing it would be
+churn.
+
+---
+## 2026-11-05 — a broadcast could find its own root now, and it would be the better API for the one caller that is a broadcast
+
+**Filed by:** `Loom framework` · **Owned by:** `Loom signals` (`src/signals/`) ·
+**Status:** open — **an offer, not a defect.** Nothing is blocked; the hosts that
+start a broadcast have a published way to find the root as of today.
+
+`Loom marketing`'s 4 November entry offered two shapes and this lane built the
+second. The first was `broadcastReaderSignals` taking a `Document` and finding
+its own root, and the argument for it is good: the broadcaster already refuses
+an element with no addresses on it (`"unaddressed"`), so the failure it would
+report for a document with no addressed page is a failure it has, and a host's
+call would lose its one conditional.
+
+It was not built here because `src/signals/` is this lane's to read and not to
+edit (`docs/routines.md`), and because it answers only a broadcast — `(demo)`
+wants a node address and starts no broadcast, so a door was needed either way.
+
+Both can hold. `addressedRootIn` is in `@jam-overture/loom/addressed`, which
+loads no package, so a `broadcast.ts` that wanted to call it would import one
+function and keep the weight the browser-weight sweep holds it to. Whether the
+overload is worth an argument that can be two things is this lane's call.
+
+---
 ## 2026-11-05 — the *Events* tab needs reader events kept for 30 days, and the intake deletes each one once it is collected
 
 **Filed by:** `Loom portal` · **Owned by:** `Loom signals` (`src/signals/`,
@@ -44,8 +151,26 @@ handle this lands, and will not touch `src/signals/` to get there.
 ---
 ## 2026-11-04 — the broadcaster takes the page's root element and publishes no way for a browser-side host to find one, so four places in this repository hard-code `"[data-loom-tree]"`
 
-**Filed by:** `Loom marketing` · **Owned by:** `Loom framework` (`src/signals/`)
-· **Status:** **open.** Nothing is blocked — this run built the band it wanted
+**Filed by:** `Loom marketing` · **Owned by:** `Loom framework` (`src/render/`)
+· **Status:** **closed by `framework-84-the-names-a-render-writes-on-a-page`**,
+with the second of the two shapes this entry offered and with the lane read
+differently. `@jam-overture/loom/addressed` publishes the four names a render
+writes on a published page and `addressedRootIn(scope)`, which answers the root
+element or `undefined` and loads no package
+([0354](decisions/0354-the-names-a-render-writes-on-a-published-page-are-published-on-the-light-side-of-the-split.md)).
+
+**Two things this entry got slightly wrong, both in this lane's favour.** It
+named the owning directory as `src/signals/`, which `docs/routines.md` gives to
+`Loom signals`; the names are written by `src/render/`, which is this lane's, so
+nothing had to be crossed. And the first shape it offered — a broadcast that
+finds its own root — is the better API for a broadcast and answers only a
+broadcast: `(demo)` wants `data-loom-node` and no broadcast at all. It is filed
+below for `Loom signals`, and it now has somewhere light to read the name from.
+
+**The six adoptions are each lane's own one-line change**, filed below rather
+than made. Original status below.
+
+**Status:** **open.** Nothing is blocked — this run built the band it wanted
 without the panel this would have let it print, and said so in the report.
 
 `broadcastReaderSignals(root, options)` takes an `Element`: the node carrying

@@ -40,6 +40,10 @@
       "types": "./dist/render/index.d.ts",
       "default": "./dist/render/index.js"
     },
+    "./addressed": {
+      "types": "./dist/render/addressed.d.ts",
+      "default": "./dist/render/addressed.js"
+    },
     "./primitives": {
       "types": "./dist/primitives/index.d.ts",
       "default": "./dist/primitives/index.js"
@@ -186,6 +190,10 @@
       "./react": {
         "types": "./dist/render/index.d.ts",
         "default": "./dist/render/index.js"
+      },
+      "./addressed": {
+        "types": "./dist/render/addressed.d.ts",
+        "default": "./dist/render/addressed.js"
       },
       "./sdk": {
         "types": "./dist/sdk/index.d.ts",
