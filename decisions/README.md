@@ -440,3 +440,5 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0348](0348-a-repeated-payload-is-measured-by-a-landmark-that-escaping-cannot-rewrite.md) | A repeated payload is measured by a landmark that escaping cannot rewrite | Accepted | §1 (process) |
 | [0349](0349-a-projects-reader-events-are-kept-thirty-days-by-default-and-the-tallies-stay-the-durable-record.md) | A project's reader events are kept thirty days by default, and the tallies stay the durable record | Accepted | §5 (portal), the observation plane |
 | [0350](0350-a-project-sets-goals-from-signals-already-collected-and-one-of-them-is-primary.md) | A project sets goals from signals already collected, and one of them is primary | Accepted | §5 (portal), the reasoning plane |
+| 0351 | *No record on this branch* | — | — |
+| [0352](0352-every-proposal-serves-one-goal-and-a-page-no-goal-is-on-gets-none.md) | Every proposal serves one goal, and a page no goal is on gets none | Accepted | §5 (portal), the reasoning plane |

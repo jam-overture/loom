@@ -3,6 +3,7 @@
 import { useActionState } from "react"
 
 import { Submit } from "@/app/(portal)/_components/form"
+import { GoalChip } from "@/app/(portal)/_components/goal-chip"
 import { toneClasses } from "@/app/(portal)/_lib/outcome"
 
 import { lookAction, type LookReport } from "../actions"
@@ -27,6 +28,7 @@ export const LookForm = ({ projectId, treeId }: { projectId: string; treeId: str
       {answer?.report === undefined ? null : (
         <div className={`flex flex-col gap-1 rounded-md p-3 ${toneClasses(answer.report.tone)}`}>
           <span className="text-sm font-medium">{answer.report.headline}</span>
+          {answer.report.goal === undefined ? null : <GoalChip goal={answer.report.goal} />}
           {answer.report.request === undefined ? null : (
             <span className="text-sm">&ldquo;{answer.report.request}&rdquo;</span>
           )}

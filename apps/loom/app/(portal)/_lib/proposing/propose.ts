@@ -10,6 +10,8 @@ import {
 import type { PartDeclarations, ReaderWindowSources } from "@jam-overture/loom/signals"
 import { commitIntent, type WriteOutcome, type WritePath } from "@jam-overture/loom/write"
 
+import type { Goal } from "../goals/goal"
+import { goalForPage, proposalGoalOf, type ProposalGoalStore } from "../goals/serving"
 import { briefFor, type BriefError } from "./brief"
 import type { PageCopyStore } from "./copies"
 import { readEvidence, type EvidenceSilence } from "./evidence"
@@ -31,6 +33,11 @@ import { REMEMBERED_PER_PAGE, type TurnedDownStore } from "./turned-down"
  *
  * The model is shown what was turned down on the page before, and weighs a
  * change against it (0341).
+ *
+ * Every proposal serves one goal (0352): the page's own, or else the primary
+ * one. A page no goal is on has nothing proposed for it, and which goal a
+ * proposal serves is recorded before the proposal is made, so no change ever
+ * waits without naming what it is for.
  */
 
 /** Who an AI proposal is from, as the record names it. */
@@ -41,11 +48,17 @@ export type Passed =
   | { readonly kind: "waiting" }
   | { readonly kind: "unshipped"; readonly copy: number }
   | { readonly kind: "apart" }
+  | { readonly kind: "no-goal" }
   | { readonly kind: "silent"; readonly silence: EvidenceSilence }
   | { readonly kind: "nothing"; readonly reason: string }
 
 export type Proposed =
-  | { readonly kind: "proposed"; readonly request: string; readonly outcome: WriteOutcome }
+  | {
+      readonly kind: "proposed"
+      readonly request: string
+      readonly goal: Goal
+      readonly outcome: WriteOutcome
+    }
   | { readonly kind: "passed"; readonly passed: Passed }
 
 export type ProposeError =
@@ -77,6 +90,9 @@ export type ProposeFor = {
   readonly path: WritePath
   readonly copies: PageCopyStore
   readonly turnedDown: Pick<TurnedDownStore, "forPage">
+  /** The project's goals, as its store listed them. */
+  readonly goals: readonly Goal[]
+  readonly proposalGoals: Pick<ProposalGoalStore, "record">
   /** False for this deployment's own site, which serves the copy itself (0259). */
   readonly follows: boolean
   /** What decides the request; the path's interpreter then turns it into a change. */
@@ -92,7 +108,10 @@ export type ProposeFor = {
 const passed = (reason: Passed): Result<Proposed, ProposeError> =>
   ok({ kind: "passed", passed: reason })
 
-const fromBrief = (error: BriefError): ProposeError => ({ code: "model", detail: error.detail })
+const fromBrief = (error: BriefError): ProposeError => ({
+  code: "model",
+  detail: error.detail,
+})
 
 export const proposeFor = async (given: ProposeFor): Promise<Result<Proposed, ProposeError>> => {
   const { path, published } = given
@@ -123,6 +142,10 @@ export const proposeFor = async (given: ProposeFor): Promise<Result<Proposed, Pr
   if (!waiting.ok) return err(waiting.error)
   if (waiting.value.length > 0) return passed({ kind: "waiting" })
 
+  const goal = goalForPage(given.goals, published)
+
+  if (goal === undefined) return passed({ kind: "no-goal" })
+
   const evidence = await readEvidence(given.sources, given.declarations, published)
 
   if (!evidence.ok) {
@@ -135,20 +158,29 @@ export const proposeFor = async (given: ProposeFor): Promise<Result<Proposed, Pr
 
   if (!turnedDown.ok) return err({ code: "store", detail: turnedDown.error.detail })
 
-  const brief = await briefFor(given.client, given.name, evidence.value, turnedDown.value)
+  const brief = await briefFor(given.client, {
+    pageName: given.name,
+    goal,
+    evidence: evidence.value,
+    turnedDown: turnedDown.value,
+  })
 
   if (!brief.ok) return err(fromBrief(brief.error))
   if (brief.value.kind === "nothing") return passed({ kind: "nothing", reason: brief.value.reason })
 
-  const outcome = await commitIntent(
-    path,
-    intentFor({
-      ids: given.ids,
-      page: followed.value.copy,
-      request: brief.value.request,
-      at: given.at,
-    })
+  const intent = intentFor({
+    ids: given.ids,
+    page: followed.value.copy,
+    request: brief.value.request,
+    at: given.at,
+  })
+  const recorded = await given.proposalGoals.record(
+    proposalGoalOf(goal, intent.intentId, given.at.getTime())
   )
 
-  return ok({ kind: "proposed", request: brief.value.request, outcome })
+  if (!recorded.ok) return err({ code: "store", detail: recorded.error.detail })
+
+  const outcome = await commitIntent(path, intent)
+
+  return ok({ kind: "proposed", request: brief.value.request, goal, outcome })
 }
