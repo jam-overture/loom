@@ -53,7 +53,7 @@ stopped buying headroom and started costing it.
 **A shorter page is not one.** 331 words is shorter than anything on the site,
 and a page that fits would leave nothing for the one after it.
 
-## Alternatives considered
+## The candidates, measured
 
 Every figure is the **compressed bill for a reader who opens the box** — what
 the browser really fetches — and the room is for a page in *The runtime*, the
@@ -62,22 +62,14 @@ largest section and the one this lane writes in most. Measured on this branch.
 | | the bill | room for a runtime page | what it gives up |
 | --- | --- | --- | --- |
 | **Today** | 79,414 | **331 words** | — |
-| **A. Un-shard: the words become one file again** | 76,628 | 1,909 words | the reader's own section no longer arrives first |
-| **B. Two files: the reader's section, and all the rest** | 77,890 | 1,194 words | a second section opened in a second page load re-fetches the lot |
-| **C. The reader's section only; the rest of the site by title** | **35,928** | **2,305 words** | the box stops sending sentences for sections the reader is not in |
+| **Un-shard: one file again** | 76,628 | 1,909 words | the reader's own section no longer arrives first |
+| **Two files: the reader's section, and all the rest** | 77,890 | 1,194 words | a second section opened in a second page load re-fetches the lot |
+| **The reader's section only; the rest by title** | **35,928** | **2,305 words** | sentences inside pages the reader is not on |
 
-**A** is the simplest and it buys one page. The ordering it gives up was bought
-deliberately in September and matters more at 77 KB than it did at 55 KB.
-
-**B** keeps the ordering for one more compressed kilobyte, and pays for it in a
-cache: the five per-section files are each useful to every reader, and a
-*complement* file is useful only to a reader standing in one section. Two
-sections read in two page loads cost the whole corpus twice.
-
-**C** is the only one that scales. The total cap stops describing anything a
+The third is the only one that scales. The total cap stops describing anything a
 reader receives, each section is held by its own 40,000, and the runtime's file
 has 4,072 compressed bytes of headroom — about 2,305 words, two more pages at
-the median, and the same again for every other section.
+this site's median, and the same again for every other section.
 
 ## Decision
 
@@ -132,3 +124,37 @@ lane's own, and the first candidate on its queue. It was costed at about 400
 words of plain prose for the shortest honest version and **it does not fit in
 331**. It is not written, it is not trimmed to fit, and the finding stays open
 with the number in it.
+
+## Alternatives considered
+
+- **Un-sharding the words back into one file.** Buys 1,909 words, which is one
+  page at this site's median and then the same conversation again. Rejected
+  because of what it gives up rather than what it buys: the reader's own
+  section arriving first was bought deliberately in September, and it matters
+  more at 77 KB than it did at the 55 KB it was bought at. It is the fallback
+  if the loss under the decision above is judged too large.
+
+- **Two files — the reader's section, and a complement holding all the rest.**
+  Keeps the ordering for one more compressed kilobyte than un-sharding, and
+  buys 1,194 words. Rejected on the cache rather than on the bytes: the five
+  per-section files are each useful to every reader, while a complement is
+  useful only to a reader standing in one section, so two sections opened in
+  two page loads cost the whole corpus twice.
+
+- **A larger cap.** Rejected by a rule older than any of these numbers, written
+  in `build.ts` when the published names left the contents file: *the run that
+  hits it should split the index rather than take the number up.* The cap is a
+  statement about what a reader's connection is spent on; moving it when the
+  spending reaches it turns it into a record of the spending.
+
+- **Sharding the runtime's words by page**, which is the remedy that section's
+  own cap comment names. Rejected because it makes the bill **larger**:
+  compression works on one file at a time, and five files of this prose already
+  cost 2,786 more compressed bytes than one. Sharding has stopped buying
+  headroom and started costing it.
+
+- **Writing a shorter page.** Rejected because 331 words is shorter than
+  anything on this site — the shortest is 346 — and a page that just fitted
+  would leave nothing for the one after it. This is the alternative a careful
+  reader of the failing cap reaches on their own, which is why `room.ts` prints
+  a sentence saying it is not the remedy.
