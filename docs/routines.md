@@ -157,7 +157,7 @@ Each routine owns one part of the repository and does not edit another's.
 | Framework (`Loom daily build`) | `src/` **except `src/primitives/` and `src/signals/`**, and the application shell |
 | Signals (`Loom signals`) | `src/signals/`, the reader-signal intake under `apps/loom/app/`, and `docs/signals.md` |
 | Primitives (`Loom primitives`) | `src/primitives/` — breadth and quality of the library |
-| Portal (`Loom portal`) | `apps/loom/app/(portal)/` — **paused 13 October 2026** |
+| Portal (`Loom portal`) | `apps/loom/app/(portal)/` — paused 13 October, **resumed 5 November 2026**, several runs a day, and merges its own pull requests |
 | Documentation (`Loom docs`) | `apps/loom/app/(docs)/` |
 | Marketing (`Loom marketing`) | `apps/loom/app/(marketing)/` and `docs/positioning.md` |
 | Lessons (`Loom lessons`) | `apps/loom/app/(lessons)/` and `lessons/` |
@@ -166,7 +166,15 @@ Each routine owns one part of the repository and does not edit another's.
 
 ### A paused routine
 
-**`Loom portal` is paused as of 13 October 2026**, at the maintainer's
+> **Resumed 5 November 2026.** The maintainer: *"I want all hands on deck for
+> this. So I want to increase the number of portal runs a day, as part of the
+> portal run, it has authority to merge the PR it opens (resolving any merge
+> conflicts it encounters)."* It builds toward the screens in
+> [`portal-wireframes.md`](portal-wireframes.md), in the order
+> [`docs/portal.md`](portal.md) gives. The convention below still holds for any
+> routine that is paused.
+
+**`Loom portal` was paused on 13 October 2026**, at the maintainer's
 instruction: *"I am pausing the current Loom portal routine, because we need a
 fresh start."* Paused is a state this table had no way to say until now, and it
 is worth a convention rather than a note somebody remembers.
@@ -242,7 +250,10 @@ not done.
 
 ## Merging
 
-**`Loom merge` is the only routine that merges to `main`.** The maintainer created
+**`Loom merge` is the only routine that merges to `main`, with one exception:**
+`Loom portal` merges the pull request it opened in the same run, once
+`pnpm verify` is green on it with `main` merged in (the maintainer's instruction
+of 5 November 2026). It merges nothing else. The maintainer created
 it on 13 September 2026 after a morning spent landing four pull requests by hand,
 each conflicting with the one merged before it. It runs once a day at 15:00 UTC
 (08:00 Pacific in summer, 07:00 in winter), after most lanes have opened their
@@ -299,7 +310,8 @@ It never closes a pull request, deletes a branch, or schedules anything.
    cost lands on the maintainer at merge time rather than on the run. If you do
    not, **branch off `main`. Never stack** on another lane's branch — a stack
    once cost four days of visibility. **Never merge to `main` yourself** — that is
-   `Loom merge`'s job, and only its (see *Merging* below).
+   `Loom merge`'s job, and only its (see *Merging* below), except `Loom portal`
+   landing its own pull request.
 4. Build **one coherent unit**, with tests.
 5. `pnpm install && pnpm verify`. **Never open a pull request on red**; say so
    rather than weakening a test to get green.

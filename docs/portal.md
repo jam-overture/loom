@@ -272,8 +272,15 @@ started until the five above are on `main`:
 | --- | --- | --- | --- |
 | 6 | **The read path.** A repository hands Loom its current tree — ~~snapshot artifact or evaluated module, shape still owed (0275)~~ **a snapshot** ([0312](../decisions/0312-a-site-hands-loom-a-snapshot-of-its-pages-with-a-secret-key-and-loom-never-runs-its-code.md)), the maintainer's choice. **6a done:** a site's build posts `{ "pages": [trees] }` to `/api/pages` with a secret publish key (`lp_…`, minted by an owner on *Connect your site*, shown once, kept as a digest). Every tree is parsed and one bad tree refuses the snapshot; 1 MB and 200 pages at most; a closed project takes none. Pages are kept in `loom_published_pages`, apart from the governed tree store, and a snapshot adds and replaces but never removes. A *Pages* tab lists them by the name their heading gives them. ~~**Still owed:** 6b, this deployment's own site publishing its pages; and *Signals* naming pages from what was published~~ **6b done:** `pnpm pages:publish <address>` hands a deployment this site's own pages with `LOOM_PUBLISH_KEY`, through the same door a customer's build uses, and a test keeps every page of the site within what the door accepts. *Signals* names each page by what the project published, with its id beneath, and by its id alone when nothing was published | connection | unit 5, **0275** |
 | 7 | **The queue.** Revisions waiting on a person: what the proposal would change, accept, refuse, revert, and who may release it. **Done** ([0329](../decisions/0329-loom-proposes-changes-to-a-published-page-from-what-its-readers-did-on-a-copy-that-starts-as-that-page.md), [0332](../decisions/0332-every-model-call-for-a-project-is-paid-with-that-projects-own-key-kept-sealed.md)): Loom proposes changes itself. Once a day, and on *Look now* on a page, it reads what readers did on each published page and, with thirty page views or more, asks the project's model for one change and the figure behind it; the interpreter drafts it and the Gate applies, holds or refuses it. The change is made to the project's own copy of the page, which starts as the published tree exactly, and nothing more is proposed for a page while a change waits or the copy is ahead of the site. When the site publishes a newer version, a copy no accepted change has moved starts again from it, and each waiting change is checked against it: *stale* if it still fits, *conflicts* if not, which can only be turned down ([0340](../decisions/0340-a-pages-copy-starts-again-from-a-newer-published-version-and-a-waiting-change-is-checked-against-it.md)). A turned-down change is remembered with an optional reason, and the AI weighs every new proposal for the page against what was turned down ([0341](../decisions/0341-a-turned-down-change-is-remembered-and-the-ai-weighs-a-new-proposal-against-it.md)). Every model call is paid with the project's own Anthropic key, set by an owner on *Settings* and kept sealed. A *For review* tab (named *Waiting* until 5 November) lists held changes, oldest first, with *Accept* and *Turn down* for a role whose ceiling covers the change's stake; *Accept* runs the Gate again. | governance | unit 6 |
-| 8 | **The pull request.** An accepted revision becomes a PR against their repository. The loop closes here | connection | unit 7 |
-| 9 | **Audiences, then the model seam** | governance, reasoning | unit 8 |
+| 8a | **Signals you can open.** *Signals* is paginated, newest first, with a right drawer for one event or one page, and a *By page* tab ([wireframes](portal-wireframes.md)). *By page* reads the tallies already kept. *Events* needs individual events kept for a window, which is the maintainer's retention choice and waits on it | observation | unit 5 |
+| 8b | **Goals.** One outcome per project, built from a signal kind on a part on some or all pages, one of them primary. Every proposal names the goal it serves, and *For review* leads with it | reasoning | unit 7 |
+| 8 | **The pull request.** An accepted revision becomes a PR against their repository, followed on one timeline to the published version. The loop closes here | connection | unit 7 |
+| 8c | **Page history.** Versions on a timeline, each with before and after on its goal and a plain verdict | observation | units 8b and 8 |
+| 9 | **Audiences, then the model seam.** Segments are the audiences of 0263; a record before any build | governance, reasoning | unit 8 |
+
+**The rows from 8a down are in the order the maintainer agreed on 5 November
+2026.** The pull request and the audiences keep their numbers, 8 and 9, because
+records and code cite them; the units added that day are lettered.
 
 **The target shape for everything after unit 7** is
 [`portal-wireframes.md`](portal-wireframes.md), the concept wireframes the
@@ -337,8 +344,9 @@ unit 0.
 2. ~~**Go-ahead for unit 0.**~~ **Given, and done on 13 October** — the section
    above records what the deletion actually cost and the three amendments it
    landed with.
-3. **When `Loom portal` resumes, and under what charter.** `docs/routines.md`
-   now records it as paused.
+3. ~~**When `Loom portal` resumes, and under what charter.**~~ **Resumed on
+   5 November**, several runs a day, building units 8a onward and merging its own
+   pull request (`docs/routines.md`).
 4. **Nothing else is waiting on a decision.** Units 1, 2 and 3 are on `main`,
    and the two questions they raised were answered rather than parked: delete
    versus close became [0289](../decisions/0289-a-project-is-closed-rather-than-deleted-and-closing-is-a-column-and-a-filter.md),
@@ -349,6 +357,8 @@ unit 0.
    settled both choices: on 19 October, that every delivery carries a key,
    the marketing site included; on 20 October, that the key is stored
    readable, because it is printed in every page that sends one.
+6. **How long individual reader events are kept.** Unit 8a's *Events* tab needs
+   them; *By page* does not.
 
 ## Not in scope, and one of them deserves naming
 
