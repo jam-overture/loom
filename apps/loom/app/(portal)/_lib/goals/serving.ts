@@ -50,6 +50,22 @@ export const proposalGoalOf = (goal: Goal, intentId: IntentId, at: number): Prop
   at,
 })
 
+/**
+ * How many of the changes waiting serve each goal, for *changes for it* on
+ * *Goals*. A change no goal was recorded for counts towards none. Pure.
+ */
+export const waitingByGoalOf = (
+  waiting: readonly IntentId[],
+  served: ReadonlyMap<IntentId, ProposalGoal>
+): ReadonlyMap<GoalId, number> =>
+  waiting.reduce((counts, intentId) => {
+    const goalId = served.get(intentId)?.goalId
+
+    return goalId === undefined
+      ? counts
+      : new Map(counts).set(goalId, (counts.get(goalId) ?? 0) + 1)
+  }, new Map<GoalId, number>())
+
 export type ProposalGoalStoreError = {
   readonly code: "unavailable"
   readonly detail: string

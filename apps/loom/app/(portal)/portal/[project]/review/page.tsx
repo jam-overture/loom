@@ -7,10 +7,18 @@ import { GoalChip } from "@/app/(portal)/_components/goal-chip"
 import { Screen } from "@/app/(portal)/_components/screen"
 import { StateNotice } from "@/app/(portal)/_components/state-notice"
 import { requireActor, requireRole } from "@/app/(portal)/_lib/auth/identity"
-import { proposalGoalsFor } from "@/app/(portal)/_lib/goals/stores"
+import { goalsFor, proposalGoalsFor } from "@/app/(portal)/_lib/goals/stores"
 import { pageCopiesFor } from "@/app/(portal)/_lib/proposing/stores"
 import { pageNamesOf } from "@/app/(portal)/_lib/published-view"
 import { queueRowOf } from "@/app/(portal)/_lib/queue"
+import {
+  EVERY_CHANGE,
+  filteredRows,
+  goalChoicesOf,
+  reviewFilterOf,
+  reviewHrefOf,
+  standingChoicesOf,
+} from "@/app/(portal)/_lib/review-filter"
 import { portalApplications, portalProjects } from "@/app/(portal)/_lib/store"
 import { holdsFor } from "@/app/(portal)/_lib/write"
 import { PORTAL_READ_BUDGET_MS } from "@/app/_lib/app/bounded"
@@ -19,6 +27,7 @@ import { soleApplicationOf } from "@/app/_lib/app/sole-application"
 import { publishedPagesFor } from "@/app/_lib/pages/store"
 
 import { AnswerControls } from "./_components/answer-controls"
+import { FilterChips } from "./_components/filter-chips"
 
 /**
  * *For review* (formerly *Waiting*): the changes proposed for this project's pages that the Gate
@@ -28,14 +37,27 @@ import { AnswerControls } from "./_components/answer-controls"
  * much is at stake, whether it was proposed for an older version of the page (0340), and offers *Accept* and *Turn down* to a person whose
  * role may accept a change of that stake. Anybody else is told which role can.
  *
- * Each card leads with the goal the change serves (0352).
+ * Each card leads with the goal the change serves (0352). A goal picker and
+ * standing chips (`?goal=`, `?standing=`) narrow the list, each choice with its
+ * count; the goal picker is left out where which goal a change serves, or the
+ * goals themselves, cannot be read, rather than offering goals it cannot place.
  *
  * Oldest first, as the store lists them, so whatever has waited longest is
  * read first. A change the store could not read is counted rather than
  * skipped, so the list never claims to be complete when it is not.
  */
-const ForReviewPage = async ({ params }: { params: Promise<{ project: string }> }) => {
+const single = (value: string | readonly string[] | undefined): string | undefined =>
+  typeof value === "string" ? value : undefined
+
+const ForReviewPage = async ({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ project: string }>
+  searchParams: Promise<Readonly<Record<string, string | readonly string[] | undefined>>>
+}) => {
   const asked = projectIdSchema.safeParse((await params).project)
+  const query = await searchParams
 
   if (!asked.success) notFound()
 
@@ -53,9 +75,9 @@ const ForReviewPage = async ({ params }: { params: Promise<{ project: string }> 
 
   const application = applications.ok ? soleApplicationOf(applications.value, projectId) : undefined
 
-  const [waiting, published, copies] =
+  const [waiting, published, copies, projectGoals] =
     application === undefined
-      ? [undefined, undefined, undefined]
+      ? [undefined, undefined, undefined, undefined]
       : await Promise.all([
           holdsFor(application.applicationId).waiting(),
           readWithin(
@@ -68,8 +90,14 @@ const ForReviewPage = async ({ params }: { params: Promise<{ project: string }> 
             unavailable,
             PORTAL_READ_BUDGET_MS
           ),
+          readWithin(
+            () => goalsFor(application.applicationId).list(),
+            unavailable,
+            PORTAL_READ_BUDGET_MS
+          ),
         ])
 
+  const filter = reviewFilterOf({ goal: single(query.goal), standing: single(query.standing) })
   const names = published?.ok === true ? pageNamesOf(published.value) : new Map<string, string>()
   const goals =
     application === undefined || waiting?.ok !== true
@@ -107,6 +135,19 @@ const ForReviewPage = async ({ params }: { params: Promise<{ project: string }> 
     }
 
     const { held, unreadable } = waiting.value
+    const rows = held.map((change) =>
+      queueRowOf(change, {
+        names,
+        role,
+        copies: copies.value,
+        goals: goals?.ok === true ? goals.value : new Map(),
+      })
+    )
+    const shown = filteredRows(rows, filter)
+    const goalChoices =
+      goals?.ok === true && projectGoals?.ok === true
+        ? goalChoicesOf(rows, projectGoals.value, filter, projectId)
+        : undefined
 
     if (held.length === 0 && unreadable.length === 0) {
       return (
@@ -140,16 +181,22 @@ const ForReviewPage = async ({ params }: { params: Promise<{ project: string }> 
             moment.
           </p>
         )}
-        {held
-          .map((change) =>
-            queueRowOf(change, {
-              names,
-              role,
-              copies: copies.value,
-              goals: goals?.ok === true ? goals.value : new Map(),
-            })
-          )
-          .map((row) => (
+        {goalChoices === undefined ? null : <FilterChips label="Goal" choices={goalChoices} />}
+        <FilterChips label="Standing" choices={standingChoicesOf(rows, filter, projectId)} />
+        {shown.length === 0 ? (
+          <StateNotice
+            tone="empty"
+            title="Nothing waiting matches"
+            action={
+              <Link href={reviewHrefOf(projectId, EVERY_CHANGE)} className="text-ink underline">
+                Everything for review
+              </Link>
+            }
+          >
+            No change waiting for review fits the goal and standing picked.
+          </StateNotice>
+        ) : (
+          shown.map((row) => (
             <section
               key={row.proposalId}
               className="border-edge-subtle bg-surface-base flex flex-col gap-2 rounded-lg border p-4"
@@ -189,7 +236,8 @@ const ForReviewPage = async ({ params }: { params: Promise<{ project: string }> 
                 <p className="text-ink-muted m-0 text-xs">Waiting on an {row.waitsOn}.</p>
               )}
             </section>
-          ))}
+          ))
+        )}
       </div>
     )
   })()
