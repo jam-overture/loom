@@ -273,20 +273,72 @@ export const parseSearchIndex = (value: unknown): SearchIndex => {
  * `[href, words]` and nothing else. That is about a fifth of what repeating the
  * entries would cost, and it cannot drift from the index, because an href it
  * does not recognize is simply dropped.
+ *
+ * **The key is the part of the address the browser does not already know.**
+ * A prose file holds one section's words and the browser asked for it by that
+ * section, so writing `/docs/the-runtime` at the front of all ninety of its
+ * keys is ninety copies of the question. The file says once what its addresses
+ * are `under` and the keys are what is left; `parseSearchProse` puts them back
+ * together on the way in, so nothing downstream can tell the difference.
+ *
+ * This is the lesson the names file learned on 19 September, applied to the
+ * other file that was still writing addresses down: *what is written down is a
+ * name and not an address.* It is worth 5,377 raw bytes and 341 compressed
+ * across the five files — measured in `build.test.ts`, and small, which is
+ * stated here rather than left to be inferred from the absence of a number.
  */
 export type SearchProse = {
+  /**
+   * What every key in this file is relative to — `/docs/the-runtime` for the
+   * runtime's words — or the empty string for a file whose keys are whole
+   * addresses.
+   *
+   * Empty is the tolerance rather than a shape of its own: a file from before
+   * this field existed, or one that genuinely spans sections, parses as itself
+   * and needs no second code path. It is what an absent field reads as, which
+   * is the tolerance `parseSearchIndex` already gives the text fields.
+   */
+  readonly under: string
   readonly bodies: readonly (readonly [string, string])[]
 }
 
 const isBody = (value: unknown): value is readonly [string, string] =>
   Array.isArray(value) && value.length === 2 && typeof value[0] === "string" && typeof value[1] === "string"
 
+/**
+ * The address a key stands for.
+ *
+ * A **landing page's key is the empty string** — it is the section itself, so
+ * there is nothing left of its address once the section is taken off the front.
+ * That is the same empty string `DOCS_LANDING_SLUG` names in `nav.ts` and it is
+ * handled here for the same reason: joining it blindly would ask the browser
+ * for the words of `/docs/the-runtime` under the address
+ * `/docs/the-runtime` + `""`, which is right by accident rather than by rule.
+ */
+export const proseAddressOf = (under: string, key: string): string => `${under}${key}`
+
 export const parseSearchProse = (value: unknown): SearchProse => {
   if (!isRecord(value) || !Array.isArray(value.bodies)) {
     throw new Error("loom: the search prose has no bodies")
   }
 
-  return { bodies: value.bodies.filter(isBody) }
+  const under = typeof value.under === "string" ? value.under : ""
+
+  /*
+   * **Parsed, the keys are whole addresses, so `under` is the empty string and
+   * not the prefix they arrived with.** It is the one field of this type that
+   * says something about the *file* rather than about the words, and leaving
+   * the prefix on a value whose keys no longer need it is how a value gets
+   * prefixed twice — by anything that serialises what it parsed, which is what
+   * every test in this directory does. Empty is true of the result and makes
+   * the round trip idempotent.
+   */
+  return {
+    under: "",
+    bodies: value.bodies
+      .filter(isBody)
+      .map(([key, words]) => [proseAddressOf(under, key), words] as const),
+  }
 }
 
 /**

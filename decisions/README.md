@@ -442,3 +442,4 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0350](0350-a-project-sets-goals-from-signals-already-collected-and-one-of-them-is-primary.md) | A project sets goals from signals already collected, and one of them is primary | Accepted | §5 (portal), the reasoning plane |
 | 0351 | *No record on this branch* | — | — |
 | [0352](0352-every-proposal-serves-one-goal-and-a-page-no-goal-is-on-gets-none.md) | Every proposal serves one goal, and a page no goal is on gets none | Accepted | §5 (portal), the reasoning plane |
+| [0353](0353-the-search-box-sends-a-reader-the-sentences-of-their-own-section-and-the-rest-of-the-site-by-title.md) | The search box sends a reader the sentences of their own section, and the rest of the site by title | Proposed | §4c (the documentation site) |

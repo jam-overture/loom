@@ -145,10 +145,19 @@ const names = { entryPoints: [{ specifier: "@jam-overture/loom", names: ["evalua
  */
 const PROSE_SECTIONS = ["the-runtime", "getting-started", "api-reference"] as const
 
+/*
+ * **Keyed relative to the section, as the real files are.** A prose file states
+ * once what its addresses are `under` and writes down only what is left, so a
+ * fixture holding whole addresses would be a fixture that passes while the box
+ * has forgotten how to put one back together — which is the one thing this
+ * shape can get wrong and the reason the comment above says *the way the
+ * builder cuts them*.
+ */
 const proseFor = (section: string): unknown => ({
+  under: `/docs/${section}`,
   bodies: index.entries
     .filter((entry) => entry.body !== "" && docsSectionOfPath(entry.href) === section)
-    .map((entry) => [entry.href, entry.body]),
+    .map((entry) => [entry.href.slice(`/docs/${section}`.length), entry.body]),
 })
 
 const code = {

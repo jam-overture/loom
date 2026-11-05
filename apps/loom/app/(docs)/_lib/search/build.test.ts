@@ -15,7 +15,22 @@ import {
   searchProseFor,
 } from "./build"
 import { readPageHeadings } from "./headings"
-import { namesToEntries, parseSearchIndex, parseSearchNames, withCode, withNames, withProse } from "./model"
+import {
+  namesToEntries,
+  parseSearchIndex,
+  parseSearchNames,
+  parseSearchProse,
+  withCode,
+  withNames,
+  withProse,
+} from "./model"
+import {
+  PROSE_SECTION_GZIP_CAP,
+  PROSE_SECTION_RAW_CAP,
+  PROSE_TOTAL_GZIP_CAP,
+  PROSE_TOTAL_RAW_CAP,
+  roomSentence,
+} from "./room"
 
 /**
  * The index, held against the site it claims to describe.
@@ -430,13 +445,20 @@ describe("what the index contains", () => {
     // these splits existed, so no single fetch this box makes is bigger than
     // the one fetch it used to make. When it fires, the section it fires on
     // shards by page: the browser already knows which page a reader is on.
+    //
+    // **The four numbers below are read from `room.ts` and the message is
+    // written there too.** A cap that fails tells whoever reads it how much
+    // room is left in *words*, names the shortest page already on this site,
+    // and says when trimming a page is not the remedy — because the honest
+    // answer to one of these firing is usually not a shorter page, and a bare
+    // `expected 80631 to be less than 80000` does not say so.
     const proseFiles = docsSections.map((section) => JSON.stringify(searchProseFor(section.slug)))
 
     for (const [at, words] of proseFiles.entries()) {
       const slug = docsSections[at]?.slug ?? ""
 
-      expect(gzipSync(words).length, slug).toBeLessThan(40_000)
-      expect(bytes(words), slug).toBeLessThan(120_000)
+      expect(gzipSync(words).length, roomSentence(slug)).toBeLessThan(PROSE_SECTION_GZIP_CAP)
+      expect(bytes(words), roomSentence(slug)).toBeLessThan(PROSE_SECTION_RAW_CAP)
     }
 
     // And the bill: every section's words, which is what a reader who leaves
@@ -445,8 +467,26 @@ describe("what the index contains", () => {
     // question becomes whether a browser should be sent the whole site's prose
     // at all. It is measured over the files as served rather than over the
     // whole, because four files of one text cost more than one file of it.
-    expect(proseFiles.reduce((total, words) => total + gzipSync(words).length, 0)).toBeLessThan(80_000)
-    expect(proseFiles.reduce((total, words) => total + bytes(words), 0)).toBeLessThan(260_000)
+    //
+    // **This is the one that binds today**, at a few hundred words of headroom
+    // for the whole site — less than the shortest page on it. `roomSentence`
+    // says so in the section it is asked about, which is the sentence a run
+    // that has just written a page needs to read rather than the number.
+    const widest = docsSections.reduce((section, candidate) =>
+      gzipSync(JSON.stringify(searchProseFor(candidate.slug))).length >
+      gzipSync(JSON.stringify(searchProseFor(section.slug))).length
+        ? candidate
+        : section
+    )
+
+    expect(
+      proseFiles.reduce((total, words) => total + gzipSync(words).length, 0),
+      roomSentence(widest.slug)
+    ).toBeLessThan(PROSE_TOTAL_GZIP_CAP)
+    expect(
+      proseFiles.reduce((total, words) => total + bytes(words), 0),
+      roomSentence(widest.slug)
+    ).toBeLessThan(PROSE_TOTAL_RAW_CAP)
 
     // The blocks. Capped an order of magnitude below the words rather than
     // beside them, because a code file that ever approached the prose file
@@ -466,14 +506,46 @@ describe("what the index contains", () => {
    * and the search box cannot find, and nothing else in this repository would
    * notice — the caps would only read *smaller*, which is the direction they
    * are written to be happy about.
+   *
+   * **Measured through the round trip**, which is what makes it a statement
+   * about the browser rather than about the builder: a section's file is
+   * serialised and parsed back the way the box parses it, so a key written
+   * relative to the wrong section, or a prefix put back twice, lands here as a
+   * body that is no longer in the whole rather than as a passing test over a
+   * shape only this file has seen.
    */
   it("cuts the words up without losing or repeating one", () => {
     const whole = searchProse().bodies
-    const parts = docsSections.flatMap((section) => searchProseFor(section.slug).bodies)
+    const parts = docsSections.flatMap(
+      (section) => parseSearchProse(JSON.parse(JSON.stringify(searchProseFor(section.slug)))).bodies
+    )
 
     expect([...parts].sort()).toEqual([...whole].sort())
     expect(new Set(parts.map(([href]) => href)).size).toBe(parts.length)
     expect(whole.length).toBeGreaterThan(100)
+  })
+
+  /**
+   * The part of an address a section's file does not write down.
+   *
+   * The companion to the test above, and the one that fails if the saving is
+   * quietly given back. A file's keys are what is left of its bodies' addresses
+   * once the section the browser asked for is taken off the front — so none of
+   * them starts with `/docs`, and the landing page's key is the empty string
+   * because the landing page *is* the section.
+   */
+  it("writes down only the part of an address the browser does not know", () => {
+    for (const section of docsSections) {
+      const file = searchProseFor(section.slug)
+
+      expect(file.under).toBe(`/docs/${section.slug}`)
+
+      for (const [key] of file.bodies) expect(key.startsWith("/docs")).toBe(false)
+    }
+
+    const runtime = searchProseFor("the-runtime")
+
+    expect(runtime.bodies.map(([key]) => key)).toContain("")
   })
 
   /**
