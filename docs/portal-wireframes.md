@@ -110,10 +110,12 @@ how many were turned away (the 0311 counts, linking to the reasons).
 
 **New data this needs, and it comes first:** today the portal reads tallies and
 the short-lived buffer, so individual events are gone once collection runs. A
-paginated event list needs events kept for a window. **How long is the
-maintainer's call** (the boards assume 30 days); it is a retention setting and
-a table, it belongs with `docs/signals.md` rule 5, and it needs a decision
-record before the Events tab is built. The By page tab does not wait on it.
+paginated event list needs events kept for a window. **Settled by the
+maintainer on 5 November: individual events are kept for 30 days**, then
+deleted; the tallies stay as they are. It is a retention setting and a table,
+it belongs with `docs/signals.md` rule 5 (retention is per-deployment
+configuration, so 30 days is the default, not a constant), and the record that
+writes it down cites this decision. The By page tab does not wait on it.
 
 ### By page
 
@@ -230,9 +232,18 @@ A page's screen gets tabs: *The page · History · For review (N)*, and a
 - Loom does not judge changes it did not make: a site edit shows its before and
   after for context and says *Not a Loom change*.
 
-**Open, for the maintainer:** how long counts as *after*, and how many page
-views a side needs before any verdict but *Too early*. Proposing needs 30;
-results likely need more.
+**Settled by the maintainer on 5 November:**
+
+- **The window is 14 days each side**: the last 14 days on the old version
+  against the first 14 days on the new one, counted from when the snapshot with
+  the new version arrives. When the old version was live for less than 14 days,
+  the before side is however long it was live, and the card says so.
+- **Each side needs at least 1,000 page views** of the page before Loom gives
+  any verdict but *Too early*. Below that on either side, the card shows the
+  figures and says *Too early*, with how many more page views it needs.
+- *Helped* and *Hurt* also need the difference to hold up statistically (a
+  two-proportion test at 95%); otherwise the verdict is *No clear change*. The
+  test stays behind a disclosure, never in the verdict.
 
 ## 6 · Segments (later, rough)
 
@@ -252,7 +263,7 @@ It needs its own decision record before any of it is built.
 
 | # | Screen | What changes | Needs first |
 | --- | --- | --- | --- |
-| 1 | Signals | Figures, chart, Events and By page tabs, the drawer | Event retention (maintainer's call) for Events only |
+| 1 | Signals | Figures, chart, Events and By page tabs, the drawer | A table keeping events 30 days (settled), for Events only |
 | 2 | For review | Rename, goal-led cards, before and after in the drawer | #767; the goal field arrives with 3 |
 | 3 | Goals | Define goals, one primary; proposals name one | A goals table and a record |
 | 4 | Unit 8 | An accepted change opens a PR; the timeline follows it | GitHub App; where each page lives in the repo |
