@@ -60836,8 +60836,14 @@ second measurement that argues for it.
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom daily build`
 (`docs/routines.md`) and the maintainer (the routine brief) · **Status:**
-**open** — nothing is broken and the site is unaffected; this is about whether
-the next run finds the file
+**half closed by `framework-82-where-a-pages-bytes-are`**, 4 November — **the
+lane-table cell is done and the brief half is not this lane's to do.** The
+marketing row now reads ``apps/loom/app/(marketing)/` and `docs/positioning.md``,
+in the spelling the entry asked for and the signals row established. The second
+half is the routine brief, which is the maintainer's file: this lane cannot edit
+it for the reason this entry itself gives, so it is raised on the pull request
+under *Needs your input* rather than done. It stays open until he adds the line
+or says it is not wanted
 
 `docs/positioning.md` landed today. It holds the maintainer's answers to the six
 questions this lane had been asking since 1 October, verbatim, and it overrules
@@ -65656,6 +65662,142 @@ reading ever has to cross deployments — two hosts over one database disagree
 about which trees are seedable, and both are right — that is the schema change
 0028 named, and it is `ARCHITECTURAL — needs review` rather than this lane's to
 take.
+
+---
+## 2026-11-04 (evening) — the heavy page's copies are in the flight payload and not in the markup, so the remedy is a `<link>` and the 42 call sites are one lane's
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom primitives`
+(`src/primitives/stylesheet.ts` and its 42 callers) · **Status:** **open** — the
+measurement is done and reproducible, the remedy is a one-line change repeated
+42 times in a directory this lane does not edit
+
+The maintainer reported `/why-use-it` as slow. Two framework runs named the cause
+as *"93% of 2.4MB is one 47KB stylesheet carried 42 times"* and asked for a
+scheduling call. **The cause was right and the figure was wrong, and the reason
+nobody caught that is that the measurement could not be reproduced.** It can now:
+`pnpm weigh` exists ([0348](decisions/0348-a-repeated-payload-is-measured-by-a-landmark-that-escaping-cannot-rewrite.md)),
+and against a response captured from a real `next start` it says:
+
+```
+/why-use-it  2,491,320 bytes
+    style  47,981 bytes  carried 43 times  at least 2,015,202 bytes repeated (81% of the document)
+    style  2,255 bytes  carried 4 times  at least 6,765 bytes repeated (0% of the document)
+```
+
+**`src/primitives/stylesheet.ts` is right about React and that is the whole
+surprise.** Its doc comment says *"React 19 dedupes and hoists a `<style>`
+carrying `href` and `precedence`, so twenty animated primitives on one page emit
+one stylesheet in the document head"*, and that is exactly what happens: the
+served document holds **two** `<style>` elements and the library's CSS appears in
+the markup **once**. Nothing is wrong with the markup.
+
+The copies are in the **RSC flight payload** — 2,309,548 bytes of the 2,491,320,
+in `self.__next_f.push(…)` — where the CSS is JSON-escaped, `>` written
+`\u003e`. React deduplicates the element it *renders*; it cannot deduplicate the
+tree it *serialises*, because the serialisation is the tree before React resolves
+it. So the 47,981-byte string is a prop on 42 elements and travels 42 times.
+
+**What would close it.** `libraryStylesheet()` must stop carrying the CSS text as
+a prop. The text keeps its one home in that file; what changes is what the
+element says:
+
+```
+createElement("link", { rel: "stylesheet", href: <a served URL>, precedence: "loom" })
+```
+
+A copy then costs about 120 bytes instead of about 51,000, and React's dedupe
+still collapses them. `libraryStylesheetText()` already exists and is already
+exported for documents React is not assembling, so the served URL has a source
+with no second copy of the rules in it.
+
+**Two things this lane owes that decision and they are both ready.** Where the
+URL is served from is an application-shell question, which is this lane's, and
+the shell can serve it today from `libraryStylesheetText()`. And the figure is
+now takeable by one command, so the change can be measured rather than argued.
+
+**What this lane did not do, and why.** The 42 call sites are in
+`src/primitives/`, and a framework run editing them is the race
+`docs/routines.md` split the two lanes to prevent. `Loom primitives`' last report
+is 11 October. **If that lane is not going to run, this is the one function worth
+handing to this one** — it is the maintainer's own reported performance problem,
+it is 81% of his heaviest page, and the change is mechanical. That is a
+scheduling call and it is raised on the pull request rather than taken.
+
+---
+## 2026-11-04 (evening) — a finding addressed to `Loom framework` over `src/signals/` is addressed to a lane that does not own the directory
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom signals`
+(`src/signals/broadcast.ts`) · **Status:** **open** — a re-addressing, not a new
+defect; the defect is this morning's entry and is unchanged
+
+This morning `Loom marketing` filed *the broadcaster takes the page's root
+element and publishes no way for a browser-side host to find one*, addressed
+**Owned by: `Loom framework` (`src/signals/`)**. It is a good entry and its
+remedy is the smaller of the two shapes it offers.
+
+**It is addressed to the wrong lane, by one table.** `docs/routines.md` gives
+`src/signals/` to `Loom signals` and gives this lane *"`src/` **except
+`src/primitives/` and `src/signals/`**"*. This lane read the entry, agreed with
+it, and did not act on it for that reason: `src/signals/` has an active routine
+shipping into it — #760 and #756 this week — and two routines editing one
+directory on one day is the conflict the lane boundary exists to prevent.
+
+The confusion is this lane's name rather than anyone's mistake. **`Loom
+framework` and `Loom daily build` are the same routine**, and its brief describes
+its lane as *"`src/` except `src/primitives/`"* — which includes `src/signals/`
+and is stale, in the same way the brief is stale about the one-application
+migration and about owning the demo. `routines.md`'s own rule is that the brief
+wins where they disagree, so this is recorded rather than resolved: on the brief's
+wording the entry is correctly addressed, and on the table it is not. **The table
+is what matches reality**, which is why nothing was edited.
+
+`Loom signals`: the entry is this morning's, under its own heading, and asks for
+one string on the light side of the `signals/broadcast` split.
+
+---
+## 2026-11-04 (evening) — the merge gate carries a wall-clock ratio with no headroom, and it is the gate for four surfaces
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom signals`
+(`src/signals/ledger.test.ts`) · **Status:** **open** — it cost this run one
+full gate re-run and nothing else; the test is right about what it is testing
+
+`the signal ledger > costs the same per node on a large page as on a small one`
+failed on this branch at **4.038217117460102 against a bound of 4**, on a diff
+that touches `tools/weigh/`, `docs/routines.md`, `package.json`, `FINDINGS.md`,
+`decisions/` and `reports/` and no runtime code at all.
+
+It is flaky rather than broken. Run on its own immediately afterwards it passed
+**three times out of three**; the failing run was the full 258-file suite on a
+container that had just finished a `next build` and a `next start`. The comment
+on the assertion says the bound is *"loose so a busy machine does not fail it"* —
+the measurement was 0.95% over it.
+
+**The test is measuring the right thing and the bound is the wrong instrument
+for it.** Its subject is that the ledger is linear rather than quadratic: the
+copying ledger it replaced grew with the square of the page, which at sixteen
+times the nodes would be a ratio near 16, not near 4. A quadratic regression
+would blow a bound of 4 by a factor of four. What a bound of 4 actually catches,
+on a loaded machine, is the scheduler.
+
+**Why this is worth an entry rather than a shrug.** `pnpm verify` green is the
+merge gate for four surfaces now, not one. A timing assertion that fails
+sub-1%-over on a busy container fails for whichever lane happens to be running
+when the container is busy — and the lane it fails for cannot fix it, because
+`src/signals/` is not theirs. The next run to hit this has three bad options:
+re-run the gate and hope, weaken another lane's test, or open a pull request on
+red. This run took the first.
+
+**Recommendations, in order, all `Loom signals`' call:**
+
+1. **Raise the bound and say what it is for.** A ratio near 16 is the regression;
+   anything under 8 is linear with scheduler noise in it. The comment already
+   makes this argument, so the number is what disagrees with it.
+2. **Take the best of three runs rather than one.** `scroll` is already called
+   three times and already discards the first as a warm-up; the cheap version of
+   this is a `Math.min` over two more measurements of each size.
+3. **Not a skip**, and `docs/routines.md` says why in another context: a test
+   that silently does not run is how the next regression goes unnoticed for a
+   month.
 ## 2026-11-04 — the fix-list said *nothing to do* about a door refusing every delivery, and the reading that knew had existed for four days
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom signals`
