@@ -74,55 +74,90 @@ export type GoalReading = {
   readonly pageViews: number
 }
 
+export type GoalCounts = {
+  readonly pageViews: readonly StoredPageViews[]
+  readonly tallies: readonly StoredTally[]
+  readonly parts: PartsByPage
+}
+
 /**
- * What one goal has counted.
- *
- * The pages a goal covers are the ones it names, or, for *all pages*, every
- * page that has the part: as published, or as counted where a version the site
- * no longer publishes had it. Page views of a page without the part would be
+ * The pages a goal covers: the ones it names, or, for *all pages*, every page
+ * that has the part, as published or as counted where a version the site no
+ * longer publishes had it. Page views of a page without the part would be
  * readers who could never have done it, and would sink the rate for nothing.
  */
-export const goalReadingOf = (
-  goal: Goal,
-  readings: {
-    readonly pageViews: readonly StoredPageViews[]
-    readonly tallies: readonly StoredTally[]
-    readonly parts: PartsByPage
-  }
-): GoalReading => {
-  const onPart = readings.tallies.filter((tally) => tally.nodeId === goal.nodeId)
-  const covered = new Set<string>(
+const pagesCoveredBy = (goal: Goal, readings: GoalCounts): ReadonlySet<string> =>
+  new Set<string>(
     goal.pages ?? [
       ...[...readings.parts.entries()]
         .filter(([, parts]) => parts.has(goal.nodeId))
         .map(([treeId]) => treeId),
-      ...onPart.map((tally) => tally.treeId),
+      ...readings.tallies
+        .filter((tally) => tally.nodeId === goal.nodeId)
+        .map((tally) => tally.treeId),
     ]
   )
 
-  return {
-    count: onPart
-      .filter((tally) => covered.has(tally.treeId))
-      .reduce((sum, tally) => sum + counted[goal.kind](tally), 0),
-    pageViews: readings.pageViews
-      .filter((row) => covered.has(row.treeId))
-      .reduce((sum, row) => sum + row.opened, 0),
-  }
+/**
+ * What one goal has counted on each page it covers, and on no other: a rate
+ * of nought on a page without the part would say readers ignored something
+ * they were never shown.
+ */
+export const goalReadingsByPage = (
+  goal: Goal,
+  readings: GoalCounts
+): ReadonlyMap<string, GoalReading> => {
+  const covered = pagesCoveredBy(goal, readings)
+  const onPart = readings.tallies.filter(
+    (tally) => tally.nodeId === goal.nodeId && covered.has(tally.treeId)
+  )
+  const views = readings.pageViews.filter((row) => covered.has(row.treeId))
+
+  return new Map(
+    [...covered].map((treeId) => [
+      treeId,
+      {
+        count: onPart
+          .filter((tally) => tally.treeId === treeId)
+          .reduce((sum, tally) => sum + counted[goal.kind](tally), 0),
+        pageViews: views
+          .filter((row) => row.treeId === treeId)
+          .reduce((sum, row) => sum + row.opened, 0),
+      },
+    ])
+  )
 }
+
+/** What one goal has counted, on every page it covers. */
+export const goalReadingOf = (goal: Goal, readings: GoalCounts): GoalReading =>
+  [...goalReadingsByPage(goal, readings).values()].reduce(
+    (sum, page) => ({
+      count: sum.count + page.count,
+      pageViews: sum.pageViews + page.pageViews,
+    }),
+    { count: 0, pageViews: 0 }
+  )
 
 const number = (value: number): string => value.toLocaleString("en-GB")
 
+/** How many times in a hundred page views, to one place: *3.5*. `undefined` with no page views. */
+export const per100Of = (reading: GoalReading): string | undefined =>
+  reading.pageViews === 0
+    ? undefined
+    : (Math.round((reading.count / reading.pageViews) * 1000) / 10).toLocaleString("en-GB")
+
 /** *12 presses in 480 page views*, and how many that is per hundred. */
 export const readingSentence = (kind: GoalKind, reading: GoalReading): string => {
-  if (reading.pageViews === 0) return "Nothing counted yet on the pages it covers."
+  const rate = per100Of(reading)
+
+  if (rate === undefined) return "Nothing counted yet on the pages it covers."
 
   const words = GOAL_KIND_WORDS[kind]
-  const per100 = Math.round((reading.count / reading.pageViews) * 1000) / 10
 
   return (
     `${number(reading.count)} ${reading.count === 1 ? words.one : words.many} in ` +
     `${number(reading.pageViews)} page ${reading.pageViews === 1 ? "view" : "views"}, ` +
-    `${per100.toLocaleString("en-GB")} per 100.`
+    `${rate} per 100.`
   )
 }
 

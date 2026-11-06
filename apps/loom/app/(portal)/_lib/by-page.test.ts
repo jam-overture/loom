@@ -16,6 +16,7 @@ import {
   waitingByPage,
   type ByPageRow,
 } from "./by-page"
+import { goalIdSchema, type Goal } from "./goals/goal"
 import { elementIdsOf, tallyOf } from "./proposing/fixtures"
 
 const home = pageFixture("home", "Welcome", 3)
@@ -43,6 +44,7 @@ const nothingElse = {
   tallies: [],
   published: [],
   waiting: new Map<string, number>(),
+  goals: undefined,
 }
 
 const rowAt = (treeId: string, lastMoved: string): ByPageRow => ({
@@ -53,6 +55,7 @@ const rowAt = (treeId: string, lastMoved: string): ByPageRow => ({
   lastMoved,
   mostPressed: undefined,
   waiting: 0,
+  primaryGoal: undefined,
 })
 
 /** Rows `t_00` to `t_<n-1>`, each a minute older than the last, so the list's order is their names'. */
@@ -107,6 +110,7 @@ describe("a project's pages, one row each", () => {
       tallies: [tallyOf(home, heading, { activations: 4 })],
       published: [{ tree: home, receivedAt: 0 }],
       waiting: new Map(),
+      goals: undefined,
     })
 
     expect(row).toMatchObject({
@@ -126,6 +130,7 @@ describe("a project's pages, one row each", () => {
       tallies: [tallyOf(home, heading, { reached: 5 })],
       published: [],
       waiting: new Map(),
+      goals: undefined,
     })
 
     expect(row?.mostPressed).toBeUndefined()
@@ -140,6 +145,7 @@ describe("a project's pages, one row each", () => {
         tallies: [],
         published: [],
         waiting: new Map([["t_a", 2]]),
+        goals: undefined,
       })[0]?.waiting
     ).toBe(2)
     expect(
@@ -148,6 +154,7 @@ describe("a project's pages, one row each", () => {
         tallies: [],
         published: [],
         waiting: undefined,
+        goals: undefined,
       })[0]?.waiting
     ).toBeUndefined()
   })
@@ -234,6 +241,7 @@ describe("the drawer for one page", () => {
     tallies: [],
     published: [],
     waiting: new Map(),
+    goals: undefined,
   })
 
   if (row === undefined) throw new Error("one page was counted")
@@ -245,9 +253,9 @@ describe("the drawer for one page", () => {
   })
 
   it("draws a bar for each kind of thing readers did, against the longest", () => {
-    const drawer = pageDrawerOf(
-      row,
-      [
+    const drawer = pageDrawerOf(row, {
+      pageViews: [],
+      tallies: [
         tallyOf(home, heading, {
           activations: 5,
           opens: 1,
@@ -255,8 +263,9 @@ describe("the drawer for one page", () => {
           completions: 0,
         }),
       ],
-      [{ tree: home, receivedAt: 0 }]
-    )
+      published: [{ tree: home, receivedAt: 0 }],
+      goals: undefined,
+    })
 
     expect(drawer.bars.map(({ technical, count, share }) => [technical, count, share])).toEqual([
       ["viewed", 10, 1],
@@ -271,15 +280,16 @@ describe("the drawer for one page", () => {
 
     if (root === undefined) throw new Error("the fixture has a root")
 
-    const drawer = pageDrawerOf(
-      row,
-      [
+    const drawer = pageDrawerOf(row, {
+      pageViews: [],
+      tallies: [
         tallyOf(home, heading, { activations: 2, reached: 4, dwellMs: 6_000 }),
         tallyOf(home, root, { activations: 7, reached: 10, dwellMs: 9_000 }),
         tallyOf({ ...home, revision: 2 }, heading, { activations: 1 }),
       ],
-      [{ tree: home, receivedAt: 0 }]
-    )
+      published: [{ tree: home, receivedAt: 0 }],
+      goals: undefined,
+    })
 
     expect(drawer.pressed.map((part) => [part.nodeId, part.presses])).toEqual([
       [root, 7],
@@ -293,10 +303,100 @@ describe("the drawer for one page", () => {
   })
 
   it("draws empty bars and names no part for a page readers only opened", () => {
-    const quiet = pageDrawerOf({ ...row, opened: 0 }, [], [])
+    const quiet = pageDrawerOf(
+      { ...row, opened: 0 },
+      { pageViews: [], tallies: [], published: [], goals: undefined }
+    )
 
     expect(quiet.bars.every((bar) => bar.share === 0)).toBe(true)
     expect(quiet.pressed).toEqual([])
     expect(quiet.longest).toBeUndefined()
+  })
+})
+
+describe("goals, measured one page at a time", () => {
+  const pricing = pageFixture("pricing", "Plans", 1)
+  const [, pricingHeading] = elementIdsOf(pricing)
+
+  if (pricingHeading === undefined) throw new Error("the fixture has a heading")
+
+  const goal = (id: string, overrides: Partial<Goal>): Goal => ({
+    goalId: goalIdSchema.parse(`g_${id.repeat(32)}`),
+    name: `Goal ${id}`,
+    kind: "activated",
+    nodeId: heading,
+    pages: null,
+    primarySince: null,
+    createdAt: 1,
+    createdBy: null,
+    ...overrides,
+  })
+
+  const readings = {
+    pageViews: [
+      views(home.treeId, 3, 200, "2026-11-05T10:00:00.000Z"),
+      views(pricing.treeId, 1, 50, "2026-11-05T11:00:00.000Z"),
+    ],
+    tallies: [
+      tallyOf(home, heading, { activations: 7, completions: 2 }),
+      tallyOf(pricing, pricingHeading, { activations: 10 }),
+    ],
+    published: [
+      { tree: home, receivedAt: 0 },
+      { tree: pricing, receivedAt: 0 },
+    ],
+    waiting: undefined,
+  }
+
+  const presses = goal("a", { primarySince: 5, createdAt: 2 })
+  const sends = goal("b", { kind: "completed" })
+  const onPricing = goal("c", { nodeId: pricingHeading, pages: [pricing.treeId] })
+  const goals = [onPricing, sends, presses]
+
+  const rowsFor = (kept: readonly Goal[] | undefined) =>
+    new Map(byPageRowsOf({ ...readings, goals: kept }).map((row) => [row.treeId, row]))
+
+  it("gives each page the primary goal's count over that page's own page views", () => {
+    expect(rowsFor(goals).get(home.treeId)?.primaryGoal).toEqual({
+      goalId: presses.goalId,
+      name: "Goal a",
+      kind: "activated",
+      primary: true,
+      reading: { count: 7, pageViews: 200 },
+    })
+  })
+
+  it("gives no rate where the primary goal does not cover the page, there is none, or goals were not read", () => {
+    expect(rowsFor(goals).get(pricing.treeId)?.primaryGoal).toBeUndefined()
+    expect(rowsFor([sends, onPricing]).get(home.treeId)?.primaryGoal).toBeUndefined()
+    expect(rowsFor(undefined).get(home.treeId)?.primaryGoal).toBeUndefined()
+  })
+
+  it("lists in the drawer every goal covering the page, the primary first, and no other", () => {
+    const rows = rowsFor(goals)
+    const drawerOn = (treeId: string) => {
+      const row = rows.get(treeId)
+
+      if (row === undefined) throw new Error(`${treeId} was counted`)
+
+      return pageDrawerOf(row, { ...readings, goals }).goals
+    }
+
+    expect(drawerOn(home.treeId)?.map((each) => [each.name, each.primary, each.reading])).toEqual([
+      ["Goal a", true, { count: 7, pageViews: 200 }],
+      ["Goal b", false, { count: 2, pageViews: 200 }],
+    ])
+    expect(drawerOn(pricing.treeId)?.map((each) => [each.name, each.reading])).toEqual([
+      ["Goal c", { count: 10, pageViews: 50 }],
+    ])
+  })
+
+  it("says the drawer's goals could not be read rather than that there are none", () => {
+    const row = rowsFor(undefined).get(home.treeId)
+
+    if (row === undefined) throw new Error("home was counted")
+
+    expect(pageDrawerOf(row, { ...readings, goals: undefined }).goals).toBeUndefined()
+    expect(pageDrawerOf(row, { ...readings, goals: [] }).goals).toEqual([])
   })
 })

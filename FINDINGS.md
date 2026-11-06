@@ -8,6 +8,43 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-11-06 — *Signals*' range picker and hourly chart need page views counted by hour, and the kept deliveries can only be walked one page at a time
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom signals` (`src/signals/`,
+`apps/loom/app/_lib/reader-signals/`) · **Status:** open — **nothing is
+broken.** It is the input for the rest of 8a in `docs/portal.md`, which the
+portal will not build around.
+
+`docs/portal-wireframes.md` *1 · Signals* puts a range picker (last 24 hours,
+7 days, 30 days) over the whole screen, a figure for *page views in the range*
+with the change on the period before, and a bar chart of page views by hour
+across the range. The tallies keep no time (`docs/signals.md` rule 5), so the
+only source with time in it is the kept deliveries (0351), and the one way to
+read those is `journal.read`, which pages by delivery, 2,000 at most a call.
+
+A 30-day chart would have to read every delivery in thirty days on every
+render. The *Events* tab already caps itself at 2,000 deliveries a screen and
+says how far back it looked; a chart cannot do that honestly, because a bar
+drawn from part of an hour is a wrong number rather than a shorter list. So the
+portal has not drawn one, and will not draw one from a capped scan.
+
+What the portal needs, and nothing more:
+
+1. **Page views counted by hour for one application**, over a stated range of
+   receipt times (`receivedAt`, the only time the journal vouches for), so the
+   chart and both range figures are one bounded read. Counted from the kept
+   deliveries or kept beside the tallies as a counter by hour: the intake's
+   choice.
+2. **The range limited to the kept window**, and the answer saying where its
+   data starts, so *30 days* on a deployment that began keeping deliveries
+   last week says so rather than drawing three empty weeks.
+3. **Through a scoped handle** like `readingsFor(applicationId)`, so the portal
+   never reaches the table.
+
+Once it lands, the portal draws the range picker, the chart and the figures
+above both *Signals* tabs, and *By page*'s bars for a range on the same read.
+
+---
 ## 2026-11-05 — the comparison band tells a reader to look right, and on a phone there is no right
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom marketing`
