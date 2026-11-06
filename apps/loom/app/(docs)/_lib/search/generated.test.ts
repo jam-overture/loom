@@ -6,9 +6,9 @@ import { docsHref, docsSections } from "../nav"
 import {
   everyPageSummary,
   generatedPageWords,
-  repeatedSummaries,
   repeatedSummarySentence,
   summariesRepeatedIn,
+  summaryAudit,
 } from "./generated"
 
 /**
@@ -252,6 +252,42 @@ describe("a summary the index would hold twice", () => {
 })
 
 describe("the summaries this site's index holds", () => {
+  const audit = summaryAudit()
+
+  /**
+   * **Both sides are real, and this is asserted before the answer below is
+   * believed.** A mutation is what put this test here: handing the reading an
+   * empty map of bodies made it look at no words at all and return the same
+   * empty list, and every assertion over that list stayed green. A site with
+   * nothing duplicated and a reader that never opened a page give the same
+   * answer, which is [0347]'s point exactly — *nothing to fix* and *nothing to
+   * fix it with* are two answers, and an empty one has to name its subject.
+   */
+  it("is asked of every page on the site and every body a generated page has", () => {
+    expect(audit.pages).toBeGreaterThan(50)
+    expect(audit.bodies).toBeGreaterThan(15)
+    expect(everyPageSummary().filter(({ summary }) => summary.trim() === "")).toEqual([])
+    expect(everyPageSummary().map(({ href }) => href)).toContain("/docs/api-reference/signals")
+    expect(everyPageSummary().map(({ href }) => href)).toContain("/docs/getting-started/introduction")
+  })
+
+  /**
+   * The bodies are not merely present, they are **these** bodies.
+   *
+   * A count of sixteen says a map was handed over; it does not say the map
+   * holds the words the reference pages really contribute. So a sentence only
+   * the front door says is handed in as if it were some page's summary, and
+   * the real bodies have to find it in the real place.
+   */
+  it("compares against the words the reference pages really contribute", () => {
+    const found = summariesRepeatedIn(
+      [{ href: "/docs/invented", summary: "Loom is one package" }],
+      generatedPageWords()
+    )
+
+    expect(found.map((repeat) => repeat.indexedUnder)).toEqual(["/docs/api-reference"])
+  })
+
   /**
    * **Eighteen before this shipped, and the eighteen were the doors.** The
    * front door printed each door's summary under its specifier, and the
@@ -264,18 +300,6 @@ describe("the summaries this site's index holds", () => {
    * its count, which is why both of those are now absent above.
    */
   it("holds no page's summary twice", () => {
-    const repeats = repeatedSummaries()
-
-    expect(repeats.map(repeatedSummarySentence)).toEqual([])
-  })
-
-  /** The reader has to be real for the absence above to mean anything. */
-  it("is asked about every page on the site, written and generated", () => {
-    const summaries = everyPageSummary()
-
-    expect(summaries.length).toBeGreaterThan(50)
-    expect(summaries.filter(({ summary }) => summary.trim() === "")).toEqual([])
-    expect(summaries.map(({ href }) => href)).toContain("/docs/api-reference/signals")
-    expect(summaries.map(({ href }) => href)).toContain("/docs/getting-started/introduction")
+    expect(audit.repeats.map(repeatedSummarySentence)).toEqual([])
   })
 })

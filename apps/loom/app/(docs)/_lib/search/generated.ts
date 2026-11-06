@@ -128,9 +128,39 @@ export const everyPageSummary = (): readonly { readonly href: string; readonly s
     }))
   )
 
-/** The same question, asked of the real site. Empty, and the test says so. */
-export const repeatedSummaries = (): readonly RepeatedSummary[] =>
-  summariesRepeatedIn(everyPageSummary(), generatedPageWords())
+/**
+ * What the real site holds twice, and what the question was asked of.
+ *
+ * **The answer is nothing, so the answer has to name its subject.** That is
+ * [0347](../../../../../../decisions/0347-an-empty-fix-list-names-its-subject-so-nothing-to-fix-and-nothing-to-fix-it-with-are-two-answers.md)
+ * — *nothing to fix* and *nothing to fix it with* are two answers — and it is
+ * the rule rather than a flourish here, because a mutation proved the
+ * difference is invisible otherwise.
+ *
+ * Replacing the bodies with an empty map made this reading look at **no words
+ * at all** and return the same empty list, and the whole block of assertions
+ * over it stayed green: a site with no duplicated summary and a reader that
+ * never opened a page agree exactly. `pages` and `bodies` are what tell them
+ * apart, and the test asserts both are real before it believes the third.
+ */
+export type SummaryAudit = {
+  /** How many pages' summaries were compared. */
+  readonly pages: number
+  /** How many generated bodies they were compared against. */
+  readonly bodies: number
+  readonly repeats: readonly RepeatedSummary[]
+}
+
+export const summaryAudit = (): SummaryAudit => {
+  const summaries = everyPageSummary()
+  const bodies = generatedPageWords()
+
+  return {
+    pages: summaries.length,
+    bodies: bodies.size,
+    repeats: summariesRepeatedIn(summaries, bodies),
+  }
+}
 
 /**
  * The sentence a repeat prints.

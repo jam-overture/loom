@@ -279,11 +279,15 @@ describe("how much of the site writes about each import", () => {
  * number and the digit is read off another lane's package.
  *
  * It is asserted here, on the row, as well as on the index in
- * `search/generated.test.ts`, because the two failures are different. An index
- * assertion goes red if the attribute is dropped. **A row assertion goes red if
- * the attribute is put somewhere that takes the words off the page** — which is
- * the mistake this change is one keystroke away from, and the one a byte count
- * would congratulate.
+ * `search/generated.test.ts`, because the two failures are opposite. An index
+ * assertion goes red if the attribute is **dropped**. A row assertion goes red
+ * if the sentence or the count is **deleted** — which is the cheaper way to get
+ * the same byte count, which is the mistake a saving measured in bytes would
+ * congratulate, and which costs a reader the one line on this page that says
+ * what an import is for.
+ *
+ * So the pair is the point rather than either half: *out of the index, and
+ * still on the screen.*
  */
 describe("a door's row", () => {
   const row = () => {
