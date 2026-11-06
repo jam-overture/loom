@@ -21,7 +21,6 @@ describe("who may set Loom looking at a page", () => {
 describe("passedSentence", () => {
   it.each<[string, Passed, RegExp]>([
     ["a change is waiting", { kind: "waiting" }, /already under For review/u],
-    ["the copy is ahead", { kind: "unshipped", copy: 4 }, /does not serve yet \(version 4\)/u],
     ["this deployment serves its copy", { kind: "apart" }, /serves Loom's copy of this page/u],
     ["no goal is on the page", { kind: "no-goal" }, /No goal is on this page.*under Goals/u],
     [

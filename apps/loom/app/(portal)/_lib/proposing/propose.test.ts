@@ -157,14 +157,18 @@ describe("proposeFor", () => {
     )
   })
 
-  it("proposes nothing more while the copy has a change the site does not serve", async () => {
+  it("goes on proposing for a page once a change to it was accepted, against the live copy", async () => {
     const path = pathFor()
 
     await proposeFor(given(path))
 
-    expect(await proposeFor(given(path))).toEqual(
-      ok({ kind: "passed", passed: { kind: "unshipped", copy: 4 } })
-    )
+    const second = await proposeFor(given(path, { at: LATER }))
+
+    expect(second.ok && second.value.kind).toBe("proposed")
+    expect(await path.store.head(PUBLISHED.treeId)).toMatchObject({
+      ok: true,
+      value: { revision: 5 },
+    })
   })
 
   it("follows a newer published version, carrying a waiting change that still fits it", async () => {
