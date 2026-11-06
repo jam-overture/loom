@@ -48,7 +48,7 @@ import { GoalForm } from "./_components/goal-form"
  * **What it does not say yet**, because the data is not there: a 7-day rate
  * and its trend (the tallies keep no time; 0349's kept events will), and how
  * many changes for a goal were shipped, which waits for an accepted change to
- * become a pull request the site publishes (unit 8). The screen says the
+ * go live on the site (unit 8, 0356). The screen says the
  * second in a sentence rather than drawing a figure it cannot count.
  */
 
@@ -331,8 +331,8 @@ const GoalsPage = async ({
           <p className="text-ink-muted m-0 text-xs">
             Each figure counts what readers did since this project&rsquo;s pages were first counted,
             across every version. Loom proposes each change toward one goal, and the changes counted
-            here are those waiting for review; how many were shipped follows once an accepted change
-            opens a pull request on your site.
+            here are those waiting for review; how many went live follows once an accepted change
+            goes live on your site.
           </p>
         </div>
         {adding && (

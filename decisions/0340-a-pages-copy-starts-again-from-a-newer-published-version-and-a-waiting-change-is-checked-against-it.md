@@ -1,6 +1,6 @@
 # 0340. A page's copy starts again from a newer published version, and a waiting change is checked against it
 
-**Status:** Accepted
+**Status:** Accepted — partially superseded by 0356
 **Date:** 2026-11-03
 **Section:** §5 (portal), §3 (write path)
 
