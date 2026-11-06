@@ -655,10 +655,17 @@ const forAReader = (ids: IdFactory): LoomNode =>
        * band was a wipe, and the wipe is gone. A sentence describing a control
        * that is not there is the worst line this site could carry, on a page
        * arguing that Loom can say what a thing actually is.
+       *
+       * **It named the two sides until 6 November** — *"The page on the left is
+       * the one above. On the right is…"* — and `loom.split` wraps to one
+       * column when there is no room, so at 390 there was no left and no right.
+       * It now names the order, which is true at every width and is what the
+       * band under it already did. `positions.test.ts` holds the general
+       * version over every page of this site.
        */
       prose(
         ids,
-        "The page on the left is the one above. On the right is what a visitor who came looking for a gift gets.",
+        "The first of these is the page above. The second is what a visitor who came looking for a gift gets.",
         { tone: "muted", align: "center", measured: true }
       ),
       rearrangedExample(ids),
