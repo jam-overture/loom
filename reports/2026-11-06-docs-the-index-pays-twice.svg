@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 486" width="900" height="486" font-family="Geist, ui-sans-serif, system-ui, sans-serif">
+  <style>
+    .t { fill: #18181b; }
+    .m { fill: #52525b; }
+    .box { fill: #fafafa; stroke: #d4d4d8; }
+    .ok { fill: #f0fdf4; stroke: #86efac; }
+    .bad { fill: #fef2f2; stroke: #fca5a5; }
+    .okt { fill: #166534; }
+    .badt { fill: #991b1b; }
+    .spent { fill: #a1a1aa; }
+    .room { fill: #86efac; }
+    .gone { fill: #fca5a5; }
+    .line { stroke: #a1a1aa; }
+    text { font-size: 13px; }
+    .h { font-size: 15px; font-weight: 700; }
+    .k { font-size: 11px; letter-spacing: .06em; font-weight: 700; }
+    .mono { font-size: 11.5px; font-family: "Geist Mono", ui-monospace, monospace; }
+    .sm { font-size: 11.5px; }
+    .big { font-size: 20px; font-weight: 700; }
+    @media (prefers-color-scheme: dark) {
+      .t { fill: #fafafa } .m { fill: #a1a1aa }
+      .box { fill: #1c1c1f; stroke: #3f3f46 }
+      .ok { fill: #0d2017; stroke: #15803d }
+      .bad { fill: #220f0f; stroke: #b91c1c }
+      .okt { fill: #4ade80 } .badt { fill: #f87171 }
+      .spent { fill: #52525b } .room { fill: #15803d } .gone { fill: #b91c1c }
+      .line { stroke: #52525b }
+    }
+  </style>
+
+  <text class="h t" x="24" y="30">The cap that decides whether this site may have another page</text>
+  <text class="sm m" x="24" y="50">Every section's prose, gzipped, as the browser fetches it. The cap is 80,000 and it is not raisable — the rule is older than the number.</text>
+
+  <!-- BEFORE BAR -->
+  <text class="k badt" x="24" y="88">BEFORE — main at d1c3db5</text>
+  <rect class="spent" x="24" y="98" width="772" height="34" rx="2"/>
+  <rect class="room" x="796" y="98" width="3" height="34" rx="1"/>
+  <rect class="box" x="24" y="98" width="775" height="34" rx="2" fill="none"/>
+  <text class="mono t" x="34" y="120">79,733 spent</text>
+  <text class="mono badt" x="640" y="120" text-anchor="end">267 left</text>
+  <text class="sm m" x="24" y="152">267 bytes is about 331 words of prose. The shortest page on this site is 346. <tspan class="badt">The next page is red before it is written.</tspan></text>
+
+  <!-- WHAT THE 267 IS BEING SPENT ON -->
+  <text class="k t" x="24" y="192">AND IT MOVES WITHOUT ANYBODY WRITING A SENTENCE HERE</text>
+  <rect class="bad" x="24" y="204" width="400" height="86" rx="4"/>
+  <text class="sm t" x="36" y="226">@jam-overture/loom/addressed arrived two days ago.</text>
+  <text class="sm t" x="36" y="246">Five published names, no page written for it here.</text>
+  <text class="mono badt" x="36" y="272">it cost the index 64 of those 267 bytes</text>
+  <rect class="box" x="444" y="204" width="352" height="86" rx="4"/>
+  <text class="sm t" x="456" y="226">So the headroom is not only pages this lane writes.</text>
+  <text class="sm t" x="456" y="246">Measured both ways, the same number:</text>
+  <text class="mono t" x="456" y="272">267 bytes = 0 pages, or 4 more imports</text>
+
+  <!-- THE DEFECT -->
+  <text class="k t" x="24" y="330">WHERE 654 OF THOSE BYTES WERE GOING</text>
+  <rect class="bad" x="24" y="342" width="772" height="52" rx="4"/>
+  <text class="sm t" x="36" y="364">The front door printed each door's summary under its specifier — and the contents file already carries every page's</text>
+  <text class="sm t" x="36" y="382">summary, under the page it is about, ranked above any body match. <tspan class="badt">Eighteen sentences in the index twice.</tspan></text>
+
+  <!-- AFTER BAR -->
+  <text class="k okt" x="24" y="428">AFTER — out of the index, unchanged on the screen</text>
+  <rect class="spent" x="24" y="438" width="765" height="30" rx="2"/>
+  <rect class="room" x="789" y="438" width="10" height="30" rx="1"/>
+  <rect class="box" x="24" y="438" width="775" height="30" rx="2" fill="none"/>
+  <text class="mono t" x="34" y="458">79,079 spent</text>
+  <text class="mono okt" x="640" y="458" text-anchor="end">921 left</text>
+  <text class="big okt" x="812" y="459">3.4×</text>
+</svg>

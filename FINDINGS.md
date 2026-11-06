@@ -8,6 +8,132 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-11-06 — the cap that stops this site having another page moves when another lane publishes an import, and it has four imports of room
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/_lib/search/`) · **Status:** open — **the number is the
+finding.** 654 bytes were bought back today, which turns four imports of room
+into fourteen; the shape of the thing is unchanged and it is the maintainer's
+to settle on #778.
+
+The prose search index has a cap of **80,000 compressed bytes for all five
+sections together**, and every report this lane has written for nine runs has
+ended on it. It has always been described as a budget for **pages somebody
+writes here**: 0353 converts the headroom into words, and the sentence is *this
+site has room for about 331 words, and its shortest page is 346.*
+
+**That description is incomplete, and the half it leaves out is not this lane's
+to spend.**
+
+The *api-reference* section's words are not read off files. They are walked off
+the bands the reference pages render (`search/generated.ts`), and those bands
+print figures read from the package: a door's name count, *18 imports, 1,897
+names*, *153 pairs of imports*, *47 of the 1,897 names carry a British
+spelling*. **So the index moves when `src/` publishes, with nothing written on
+this surface.**
+
+### What one import costs, measured rather than reasoned
+
+`@jam-overture/loom/addressed` was published between 4 and 6 November — the
+eighteenth door, five names. Measured by removing its entry from
+`reference.generated.json` and its row from `entry-points.ts`, with everything
+else held fixed, on `main` at `d1c3db5`:
+
+| | gzipped | raw |
+| --- | --- | --- |
+| the whole site's prose, 18 doors | 79,733 | 256,168 |
+| the same, 17 doors | 79,669 | 254,782 |
+| **one import** | **64** | **1,386** |
+
+**The headroom on `main` was 267 bytes. That is four more imports, or nought
+pages.** A door of five names spent a quarter of what was left, and the lane
+that published it had no way to know and no reason to look.
+
+This is the shape `search/build.test.ts` already names as the mistake worth
+avoiding — *this lane's number about somebody else's growth* — arrived at from
+the other direction. The cap is this lane's and right to be; what is wrong is
+that the number it holds is partly another lane's and the message says nothing
+about it.
+
+### What shipped against it today
+
+**654 compressed bytes**, by taking out of the index two things that were never
+a query: the eighteen door summaries, which the contents file already carries
+under the page each is about (606 bytes), and the eighteen name counts beside
+them (48). Headroom **267 → 921**, which is **fourteen imports** instead of
+four. Both are still on the screen; the general rule is in
+`search/generated.ts` and goes red on the next instance.
+
+**It buys time and settles nothing.** At the rate of the last two days it is a
+fortnight, and the page this lane came to write in the first place — the CLI
+door, the one import with no prose anywhere — still does not fit.
+
+### The recommendation, which is one line of somebody else's module
+
+`_lib/search/room.ts` on #778 converts each cap's headroom into words. **It
+should give the second figure too: how many more imports the site can take.**
+Both come off the same two measurements and the second is the one no reader of
+the first would guess. It is not in this pull request because `room.ts` is on
+an open branch of this lane's and a second branch touching it is a conflict the
+lane would have created for itself.
+
+Where it should print is where the word figure already prints: when a cap
+fires. A run that trips this cap on a branch that wrote no prose — which is now
+the likely way to trip it — needs to be told that in the failure, because the
+remedy is nothing it did.
+
+---
+## 2026-11-06 — a reading whose honest answer is empty cannot say what it looked at with a count beside it
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** closed on
+filing by `docs-79-the-index-pays-twice-for-one-sentence` — **recorded for the
+shape**, which cost two rounds of mutation testing and is the second instance
+of a rule this surface already has as a decision record
+
+[0347](../decisions/0347-an-empty-fix-list-names-its-subject-so-nothing-to-fix-and-nothing-to-fix-it-with-are-two-answers.md)
+settled it on 4 November for the deployment fix-list: *nothing to fix* and
+*nothing to fix it with* are two answers, and an empty answer has to name its
+subject. Today's rule — no generated page's body repeats a summary the contents
+file carries — is in exactly that position: it returns an empty list about the
+real site, and it is supposed to, which `plain.ts` has twice written down as
+the state in which every assertion is satisfiable by a reader that looks at
+nothing.
+
+**0347 was applied and the application was wrong.** The reading published
+
+```ts
+{ pages: number; bodies: number; repeats: readonly RepeatedSummary[] }
+```
+
+with the counts taken from the arguments and `repeats` computed from them. It
+reads like the record asks for. **Three mutations walked straight through it:**
+
+| what was put in | what failed |
+| --- | --- |
+| the comparison handed an empty map, the counts left reading the real arguments | **nothing** |
+| `pages` replaced with the literal `51`, which is what its test asked to exceed | **nothing** |
+| `bodies` replaced with the literal `16`, likewise | **nothing** |
+
+**A count beside a comparison is a claim about the comparison, and a claim is
+what goes stale or lies.** This lane filed the stale half of that on 2 November
+and met it in a comment on 4 November; this is the lying half, and it is worse,
+because the whole purpose of the number was to make an empty answer
+trustworthy.
+
+What the record wants is that **the subject is the comparison's own two sides.**
+There is now one function returning one value: `pages` and `bodies` are the
+addresses themselves, derived in the same expression from the very arguments
+`repeats` is computed from, so no edit can make the three disagree without
+changing all three. The site assertions ask for **membership** — that
+`/docs/api-reference/signals` is among the pages and `/docs/api-reference`
+among the bodies — because membership is the thing a mutation cannot fabricate
+without naming the real answer.
+
+All three mutations are killed by the shape and not by an added assertion,
+which is the part worth keeping: *a count is a second value that can be wrong
+on its own; a list of what was compared is the comparison.*
+
+---
 ## 2026-11-06 — *Signals*' range picker and hourly chart need page views counted by hour, and the kept deliveries can only be walked one page at a time
 
 **Filed by:** `Loom portal` · **Owned by:** `Loom signals` (`src/signals/`,
