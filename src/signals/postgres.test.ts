@@ -20,6 +20,7 @@ import {
 import { rowSecurityOn } from "../testing/row-security.js"
 
 import { describeWindowApplyContract } from "./applied-window.contract.js"
+import { describeArrivalHourContract } from "./arrivals.contract.js"
 import { describeCorrelatedDeliveryContract } from "./correlated.contract.js"
 import { describeKeptDeliveryContract } from "./kept.contract.js"
 import { ensureReaderSignalsSchema } from "./migrate.js"
@@ -66,6 +67,10 @@ describeCorrelatedDeliveryContract("postgresReaderSignalJournal", async () =>
   postgresReaderSignalJournal(await freshDatabase())
 )
 
+describeArrivalHourContract("postgresReaderTallyStore", async () =>
+  postgresReaderTallyStore(await freshDatabase())
+)
+
 const tally = (overrides: Partial<ReaderTally> = {}): ReaderTally => ({
   treeId: TREE,
   revision: 1,
@@ -85,7 +90,7 @@ const tally = (overrides: Partial<ReaderTally> = {}): ReaderTally => ({
 const AT = "2026-09-14T00:00:00.000Z"
 
 describe("the reader signal tables — Postgres specifics", () => {
-  it("protects all five with row level security", async () => {
+  it("protects all six with row level security", async () => {
     const db = await freshDatabase()
 
     expect(await rowSecurityOn(db, "loom_reader_signals")).toBe(true)
@@ -93,6 +98,7 @@ describe("the reader signal tables — Postgres specifics", () => {
     expect(await rowSecurityOn(db, "loom_reader_funnels")).toBe(true)
     expect(await rowSecurityOn(db, "loom_reader_regions")).toBe(true)
     expect(await rowSecurityOn(db, "loom_reader_page_views")).toBe(true)
+    expect(await rowSecurityOn(db, "loom_reader_arrivals")).toBe(true)
   })
 
   it("runs its migration twice without complaining", async () => {
@@ -496,6 +502,56 @@ describe("the reader signal tables — Postgres specifics", () => {
     expect(
       rows.ok && Object.fromEntries(rows.value.map((row) => [row.audienceId, row.views]))
     ).toEqual({ [SKIERS]: 7, [DEFAULT_AUDIENCE_ID]: 2 })
+  })
+
+  /**
+   * Both writes or neither (`arrivals.ts`). A failure between them would leave
+   * a deployment whose hourly chart does not sum to the page-view count drawn
+   * beside it, for ever, with no way to tell which of the two is wrong — so the
+   * pair is a transaction and this is the assertion that it is one.
+   */
+  it("writes neither counter where the hour cannot be written", async () => {
+    const db = await freshDatabase()
+    const store = postgresReaderTallyStore(db)
+    await db.execute(sql`ALTER TABLE loom_reader_arrivals DROP COLUMN views`)
+
+    const written = await store.opened([{ treeId: TREE, revision: 1, views: 2 }], AT)
+
+    expect(written.ok).toBe(false)
+    const totals = await store.pageViews()
+
+    expect(totals.ok && totals.value).toEqual([])
+  })
+
+  /**
+   * An hour is a `timestamptz` in the column and the instant it began above the
+   * boundary, so a row holding something that is not an instant must not come
+   * back as a bucket on a chart.
+   */
+  it("refuses to hand back an arrival whose hour is not an instant", async () => {
+    const db = await freshDatabase()
+    const store = postgresReaderTallyStore(db)
+    await store.opened([{ treeId: TREE, revision: 1, views: 2 }], AT)
+    await db.execute(sql`ALTER TABLE loom_reader_arrivals ALTER COLUMN hour TYPE text`)
+    await db.execute(sql`UPDATE loom_reader_arrivals SET hour = 'the afternoon'`)
+
+    const read = await store.arrivals()
+
+    expect(read.ok).toBe(false)
+    expect(!read.ok && read.error.detail).toContain("hour")
+  })
+
+  it("does not read one application's arrivals as another's", async () => {
+    const db = await freshDatabase()
+    const ours = postgresReaderTallyStore(db, { application: APPLICATION })
+    const theirs = postgresReaderTallyStore(db)
+    await ours.opened([{ treeId: TREE, revision: 1, views: 2 }], AT)
+
+    const mine = await ours.arrivals()
+    const yours = await theirs.arrivals()
+
+    expect(yours.ok && yours.value).toEqual({ hours: [] })
+    expect(mine.ok && mine.value.hours).toHaveLength(1)
   })
 
   it("refuses to hand back a batch whose stored signals no longer parse", async () => {

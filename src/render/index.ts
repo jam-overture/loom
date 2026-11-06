@@ -20,6 +20,7 @@ export * from "./decorative.js"
 export * from "./diagnostics.js"
 export * from "./document-theme.js"
 export * from "./editable.js"
+export * from "./expected.js"
 export * from "./frame.js"
 /**
  * Named one at a time rather than `export *`: `literalThemeElement` is how the

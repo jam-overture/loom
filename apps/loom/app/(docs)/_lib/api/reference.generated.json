@@ -8,7 +8,7 @@
       "files": 100,
       "narrower": [],
       "standing": {
-        "packageNames": 1897,
+        "packageNames": 1939,
         "otherDoors": 17,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -96,7 +96,7 @@
             {
               "name": "DataUnavailable",
               "kind": "type",
-              "signature": "type DataUnavailable = {\n    readonly reason: \"no-such-source\" | \"not-resolved\" | \"invalid-params\" | \"invalid-answer\" | \"adapter-threw\" | SourceFailure[\"code\"];\n    readonly detail: string;\n};",
+              "signature": "type DataUnavailable = {\n    readonly reason: \"no-such-source\" | \"not-resolved\" | \"invalid-params\" | \"invalid-answer\" | \"unreadable-answer\" | \"adapter-threw\" | SourceFailure[\"code\"];\n    readonly detail: string;\n};",
               "summary": "Why a binding has no value. Every one of these is something a primitive may be told about and a diagnostic says out loud; none of them is an exception anyone catches."
             },
             {
@@ -4252,7 +4252,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 1897,
+        "packageNames": 1939,
         "otherDoors": 17,
         "doorsSharingNothing": 17,
         "widest": false,
@@ -4293,10 +4293,10 @@
           "reach": "loaded"
         }
       ],
-      "files": 62,
+      "files": 63,
       "narrower": [],
       "standing": {
-        "packageNames": 1897,
+        "packageNames": 1939,
         "otherDoors": 17,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -4700,6 +4700,61 @@
               "kind": "function",
               "signature": "const editableAttributes: (node: ElementNode, tree?: LoomTree) => EditableAttributes",
               "summary": "The root element additionally carries the tree it belongs to and the revision it was rendered from, which is exactly the pair an `EditIntent` needs as its base. A portal can author an intent from the DOM alone, and an intent authored against a stale render names the stale revision rather than silently claiming the current one."
+            }
+          ]
+        },
+        {
+          "module": "render/expected",
+          "title": "Expected",
+          "summary": "What a primitive said it could read, and the answer that arrived instead.",
+          "symbols": [
+            {
+              "name": "AnswerVerdict",
+              "kind": "type",
+              "signature": "type AnswerVerdict = {\n    readonly outcome: \"readable\";\n} | {\n    readonly outcome: \"unreadable\";\n    readonly detail: string;\n};",
+              "summary": "Whether an answer is the shape the primitive declared it reads."
+            },
+            {
+              "name": "AnswerExpectation",
+              "kind": "type",
+              "signature": "type AnswerExpectation = (answer: JsonValue) => AnswerVerdict;",
+              "summary": "One primitive's reading of one binding's answer, with its schema erased."
+            },
+            {
+              "name": "AnswerReader",
+              "kind": "interface",
+              "signature": "interface AnswerReader {\n    readonly answersExpectedBy: (type: PrimitiveType) => Readonly<Record<string, AnswerExpectation>> | undefined;\n}",
+              "summary": "Which answers a primitive says it can read, asked per type."
+            },
+            {
+              "name": "isAnswerReader",
+              "kind": "function",
+              "signature": "const isAnswerReader: (value: object) => value is AnswerReader",
+              "summary": ""
+            },
+            {
+              "name": "declaredName",
+              "kind": "function",
+              "signature": "const declaredName: (declaration: BindingDeclaration) => string",
+              "summary": "The name a declaration is keyed under: itself, or the name it falls back to."
+            },
+            {
+              "name": "RefusedAnswer",
+              "kind": "type",
+              "signature": "type RefusedAnswer = {\n    /** The name the node asked under, which is what a reader of the tree sees. */\n    readonly name: string;\n    readonly detail: string;\n};",
+              "summary": "One answer this node's primitive was given and said it could not read."
+            },
+            {
+              "name": "CheckedAnswers",
+              "kind": "type",
+              "signature": "type CheckedAnswers = {\n    readonly data: NodeData;\n    readonly refused: readonly RefusedAnswer[];\n};",
+              "summary": ""
+            },
+            {
+              "name": "checkAnswers",
+              "kind": "function",
+              "signature": "const checkAnswers: (data: NodeData, declared: readonly BindingDeclaration[] | undefined, expectations: Readonly<Record<string, AnswerExpectation>> | undefined, props: JsonObject) => CheckedAnswers",
+              "summary": "This node's answers with every one its primitive cannot read turned into the named absence of an answer, and the list of the ones that moved."
             }
           ]
         },
@@ -5200,7 +5255,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 1897,
+        "packageNames": 1939,
         "otherDoors": 17,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -5272,10 +5327,10 @@
           "reach": "loaded"
         }
       ],
-      "files": 218,
+      "files": 220,
       "narrower": [],
       "standing": {
-        "packageNames": 1897,
+        "packageNames": 1939,
         "otherDoors": 17,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -5745,7 +5800,7 @@
       "files": 81,
       "narrower": [],
       "standing": {
-        "packageNames": 1897,
+        "packageNames": 1939,
         "otherDoors": 17,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -6830,10 +6885,10 @@
           "reach": "loaded"
         }
       ],
-      "files": 37,
+      "files": 38,
       "narrower": [],
       "standing": {
-        "packageNames": 1897,
+        "packageNames": 1939,
         "otherDoors": 17,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -7188,16 +7243,16 @@
               "signature": "type PrimitiveDefinition<TProps extends JsonObjectView = JsonObject, TText extends string = never, TBehaviour extends BehaviourName = never> = {\n    readonly type: string;\n    readonly description: string;\n    readonly props: ZodType<TProps, ZodTypeDef, unknown>;\n    readonly slots?: readonly string[];\n    /**\n     * Declared strings, by key. The keys are inferred, so the component's\n     * `loom.text` is typed to exactly what was declared here — an author who\n     * reads a key they did not declare finds out at the declaration, which is the\n     * same bargain the props schema makes.\n     */\n    readonly text?: Readonly<Record<TText, string>>;\n    /**\n     * `\"always\"` for a primitive that is a target however it is configured, or\n     * `{ whenProps }` naming the props that make it one — `href` on a card, which\n     * is a plain surface without it. The named props must be props the schema\n     * declares; the registry refuses a declaration that names one it does not, so\n     * a renamed prop cannot leave this quietly pointing at nothing.\n     */\n    readonly interactive?: InteractiveWhen;\n    /**\n     * `true` for a primitive whose job includes sending what it collected. It\n     * takes no conditional form, unlike `interactive`: a card is a target only\n     * when the tree gives it an `href`, but a form is a form, and a primitive\n     * that posts under one prop value and not another is two primitives.\n     *\n     * Nothing reads it at render time and nothing needs it to render — a\n     * component is handed `loom.submit` whenever its node declared one, declared\n     * or not. What it buys is that the audit can tell the two silent failures\n     * apart: a primitive that says it posts and places no address, and one that\n     * places an address without ever having said it posts.\n     */\n    readonly submits?: boolean;\n    /**\n     * The props whose values this primitive puts in an `iframe` — `[\"src\"]` on an\n     * embed. Empty for everything else, which is every other primitive there is.\n     *\n     * A list of prop names rather than a `true`, because the runtime has to know\n     * *which* string to check and there is nothing it could infer that from: a\n     * `src` reaching an `iframe` and a `src` reaching an `img` are the same JSON.\n     * The named props must be props the schema declares; the registry refuses a\n     * declaration that names one it does not, the same way it refuses an\n     * `interactive` trigger that has been renamed out from under it — the drift\n     * that actually happens is a prop renamed and a declaration left pointing at\n     * nothing, which would silently stop checking the URL rather than fail.\n     */\n    readonly frames?: readonly string[];\n    /**\n     * The controls this primitive takes from the runtime's closed behaviour\n     * vocabulary — `[\"copy\"]` on a code panel. Optional, and empty for almost\n     * everything: a Loom page is data, and a behaviour is the exception that has\n     * to be asked for by name.\n     *\n     * Declaring one is a claim with two consequences the registry checks. The\n     * strings the control needs become strings this primitive must declare, so it\n     * has a name in every language the deployment serves; and a control is a\n     * target the reader aims at, so this primitive must also declare itself\n     * `interactive` or the Gate will let one sit inside an anchor.\n     */\n    readonly behaviours?: readonly TBehaviour[];\n    /**\n     * The prop each control takes its name from — `{ present: \"label\" }` on a\n     * dialog whose trigger carries the page's own call to action.\n     *\n     * Optional, and absent for almost every primitive that takes a control at all.\n     * A control's name is normally a string this primitive declares, which is what\n     * makes *Copy* the same word on every code panel in a deployment and lets one\n     * dictionary translate all of them. This is the exception for the control whose\n     * words are **content**: a trigger that opens a dialog says *Watch the demo*,\n     * the next one says *Book a call*, and neither is a fact about the primitive or\n     * a thing a translator should hold.\n     *\n     * Three checks follow, and the first two are the registry's. The behaviour must\n     * be one this primitive declared, and the prop must be one its schema declares\n     * — the same drift `frames` and `interactive` are checked against, failing the\n     * same silent way: a prop renamed and a declaration left pointing at nothing\n     * would quietly go back to the declared string for ever. The third is not a\n     * check but a property: the declared text is still required, so the control has\n     * a name in every language before any node is written, and a node that fills\n     * the prop with nothing gets it.\n     */\n    readonly names?: Readonly<Partial<Record<TBehaviour, string>>>;\n…",
               "cut": {
                 "shown": 82,
-                "whole": 176,
+                "whole": 218,
                 "source": "src/sdk/definition.ts",
-                "line": 66
+                "line": 72
               },
               "summary": ""
             },
             {
               "name": "PrimitiveEntry",
               "kind": "type",
-              "signature": "type PrimitiveEntry = {\n    readonly type: string;\n    readonly description: string;\n    readonly slots: readonly string[];\n    readonly component: LoomPrimitive;\n    readonly declaredProps: readonly CataloguedProp[] | undefined;\n    /**\n     * The props whose accepted values can be listed, so the conformance probe can\n     * ask the primitive what it does under each one rather than under whichever\n     * shape it happens to take with no props at all. Empty for the\n     * primitive whose rendering does not turn on a closed choice, which is most.\n     */\n    readonly choices: readonly ClosedChoice[];\n    /** Declared strings, keys erased alongside the props type. Empty when none. */\n    readonly text: PrimitiveText<string>;\n    /** Absent for the ordinary primitive, which is not a target at all. */\n    readonly interactive: InteractiveWhen | undefined;\n    /** `false` for the ordinary primitive, which sends nothing anywhere. */\n    readonly submits: boolean;\n    /** Declared framable prop names, still raw: the registry is what checks them. */\n    readonly frames: readonly string[];\n    /** Declared behaviour names, still raw: the registry is what checks them. */\n    readonly behaviours: readonly string[];\n    /**\n     * Which prop names which control, still raw: the registry is what checks that\n     * both halves of each pair exist. Empty for the primitive that named none,\n     * which is almost all of them.\n     */\n    readonly names: Readonly<Record<string, string>>;\n    /**\n     * The declared role, still raw: the registry is what checks it, for the same\n     * reason it checks a behaviour name. `undefined` for the primitive that plays\n     * no part a consumer asks about, which is most of them.\n     */\n    readonly role: string | undefined;\n    /**\n     * Declared copy prop names, still raw: the registry is what checks them.\n     * `undefined` is carried through rather than defaulted to `[]`, because the\n     * two mean different things here and all the way out to `copyIn`.\n     */\n    readonly copy: readonly string[] | undefined;\n    /**\n     * Declared binding names, still raw: the registry is what checks them.\n     * `undefined` is carried through rather than defaulted to `[]`, because the\n     * two mean different things here and all the way out to the render walk.\n     */\n    readonly reads: readonly BindingDeclaration[] | undefined;\n    /**\n     * The declared reading of this node's answers, or `undefined` where the author\n     * has not said. Nothing to check at registration — there are no names in it\n     * and no props it could name — so it is carried straight through.\n     */\n    readonly unshown: UnshownDeclaration | undefined;\n    readonly validate: (props: JsonObject) => PropsVerdict;\n};",
+              "signature": "type PrimitiveEntry = {\n    readonly type: string;\n    readonly description: string;\n    readonly slots: readonly string[];\n    readonly component: LoomPrimitive;\n    readonly declaredProps: readonly CataloguedProp[] | undefined;\n    /**\n     * The props whose accepted values can be listed, so the conformance probe can\n     * ask the primitive what it does under each one rather than under whichever\n     * shape it happens to take with no props at all. Empty for the\n     * primitive whose rendering does not turn on a closed choice, which is most.\n     */\n    readonly choices: readonly ClosedChoice[];\n    /** Declared strings, keys erased alongside the props type. Empty when none. */\n    readonly text: PrimitiveText<string>;\n    /** Absent for the ordinary primitive, which is not a target at all. */\n    readonly interactive: InteractiveWhen | undefined;\n    /** `false` for the ordinary primitive, which sends nothing anywhere. */\n    readonly submits: boolean;\n    /** Declared framable prop names, still raw: the registry is what checks them. */\n    readonly frames: readonly string[];\n    /** Declared behaviour names, still raw: the registry is what checks them. */\n    readonly behaviours: readonly string[];\n    /**\n     * Which prop names which control, still raw: the registry is what checks that\n     * both halves of each pair exist. Empty for the primitive that named none,\n     * which is almost all of them.\n     */\n    readonly names: Readonly<Record<string, string>>;\n    /**\n     * The declared role, still raw: the registry is what checks it, for the same\n     * reason it checks a behaviour name. `undefined` for the primitive that plays\n     * no part a consumer asks about, which is most of them.\n     */\n    readonly role: string | undefined;\n    /**\n     * Declared copy prop names, still raw: the registry is what checks them.\n     * `undefined` is carried through rather than defaulted to `[]`, because the\n     * two mean different things here and all the way out to `copyIn`.\n     */\n    readonly copy: readonly string[] | undefined;\n    /**\n     * Declared binding names, still raw: the registry is what checks them.\n     * `undefined` is carried through rather than defaulted to `[]`, because the\n     * two mean different things here and all the way out to the render walk.\n     */\n    readonly reads: readonly BindingDeclaration[] | undefined;\n    /**\n     * The declared answer shapes, erased to validators and keyed by declared\n     * name. `undefined` for the primitive that declared none, which is every\n     * primitive that reads no data and most of the ones that do.\n     *\n     * Erased here rather than carried as schemas for `validate`'s reason: the one\n     * place that still holds every schema is the one place that should turn it\n     * into a function, and nothing in the render path then depends on which\n     * schema library declared it.\n     */\n    readonly expects: Readonly<Record<string, AnswerExpectation>> | undefined;\n    /**\n     * The declared reading of this node's answers, or `undefined` where the author\n     * has not said. Nothing to check at registration — there are no names in it\n     * and no props it could name — so it is carried straight through.\n     */\n    readonly unshown: UnshownDeclaration | undefined;\n    readonly validate: (props: JsonObject) => PropsVerdict;\n};",
               "summary": "A definition with its prop type erased, which is what a heterogeneous registry can hold. `definePrimitive` is the only way to build one, so the erasure happens exactly once, in the one place that still has both the schema and the component type in hand and can prove they agree."
             },
             {
@@ -7272,19 +7327,19 @@
             {
               "name": "RegisteredPrimitive",
               "kind": "type",
-              "signature": "type RegisteredPrimitive = {\n    readonly type: PrimitiveType;\n    readonly description: string;\n    readonly slots: readonly SlotName[];\n    readonly component: LoomPrimitive;\n    readonly declaredProps: PrimitiveEntry[\"declaredProps\"];\n    /** The props the conformance probe can vary, from the declared schema. */\n    readonly choices: PrimitiveEntry[\"choices\"];\n    /** Declared strings in the author's language, before any dictionary. */\n    readonly text: PrimitiveText<string>;\n    /** Whether it renders a target, and what makes it one. Absent for most. */\n    readonly interactive: InteractiveWhen | undefined;\n    /** Whether its author says it posts. `false` for most. */\n    readonly submits: boolean;\n    /** The props it puts in a frame. Empty for all but one primitive. */\n    readonly frames: readonly string[];\n    /** The controls it takes from the runtime's vocabulary. Empty for most. */\n    readonly behaviours: readonly BehaviourName[];\n    /**\n     * The prop each of those controls is named by, where its author said so\n     *. Empty for almost every primitive that takes a control at all: a\n     * control's name is normally a string the primitive declared, and this is the\n     * exception for the trigger whose words are the page's.\n     */\n    readonly names: ControlNameProps;\n    /** What part it plays. `undefined` for most, which play none. */\n    readonly role: PrimitiveRole | undefined;\n    /**\n     * The props a reader reads as words. `undefined` where the primitive\n     * has not said, which is not the same answer as `[]` and is not rounded to\n     * it.\n     */\n    readonly copy: readonly string[] | undefined;\n    /**\n     * The binding names it reads an answer under, each either a name or\n     * the prop that gives one. `undefined` where the primitive has not\n     * said, which is not the same answer as `[]` and is not rounded to it — the\n     * walk reports under the first and stays quiet under the second.\n     */\n    readonly reads: readonly BindingDeclaration<BindingName>[] | undefined;\n    /**\n     * Its own reading of the answers it was given. `undefined` where the\n     * author has not said, which here is the same answer as declaring one that\n     * reports nothing — unlike `copy` and `reads`, because there is no emptiness\n     * to distinguish: a reading is made per answer at render time, and a primitive\n     * that has said nothing about its answers is reported on by nothing.\n     */\n    readonly unshown: UnshownDeclaration | undefined;\n    readonly validate: (props: JsonObject) => PropsVerdict;\n};",
+              "signature": "type RegisteredPrimitive = {\n    readonly type: PrimitiveType;\n    readonly description: string;\n    readonly slots: readonly SlotName[];\n    readonly component: LoomPrimitive;\n    readonly declaredProps: PrimitiveEntry[\"declaredProps\"];\n    /** The props the conformance probe can vary, from the declared schema. */\n    readonly choices: PrimitiveEntry[\"choices\"];\n    /** Declared strings in the author's language, before any dictionary. */\n    readonly text: PrimitiveText<string>;\n    /** Whether it renders a target, and what makes it one. Absent for most. */\n    readonly interactive: InteractiveWhen | undefined;\n    /** Whether its author says it posts. `false` for most. */\n    readonly submits: boolean;\n    /** The props it puts in a frame. Empty for all but one primitive. */\n    readonly frames: readonly string[];\n    /** The controls it takes from the runtime's vocabulary. Empty for most. */\n    readonly behaviours: readonly BehaviourName[];\n    /**\n     * The prop each of those controls is named by, where its author said so\n     *. Empty for almost every primitive that takes a control at all: a\n     * control's name is normally a string the primitive declared, and this is the\n     * exception for the trigger whose words are the page's.\n     */\n    readonly names: ControlNameProps;\n    /** What part it plays. `undefined` for most, which play none. */\n    readonly role: PrimitiveRole | undefined;\n    /**\n     * The props a reader reads as words. `undefined` where the primitive\n     * has not said, which is not the same answer as `[]` and is not rounded to\n     * it.\n     */\n    readonly copy: readonly string[] | undefined;\n    /**\n     * The binding names it reads an answer under, each either a name or\n     * the prop that gives one. `undefined` where the primitive has not\n     * said, which is not the same answer as `[]` and is not rounded to it — the\n     * walk reports under the first and stays quiet under the second.\n     */\n    readonly reads: readonly BindingDeclaration<BindingName>[] | undefined;\n    /**\n     * The shape of answer it can read under each of those names, erased to\n     * a validator. `undefined` where the primitive has declared none, which here\n     * is the same answer as declaring an empty map — unlike `reads` and `copy`,\n     * because there is no claim in the absence to tell apart: a name with no\n     * expectation is handed its answer unchecked either way.\n     *\n     * Keyed by the name as declared, so a prop-named declaration's expectation is\n     * found under its `default` and not under whatever a node renamed it to.\n     */\n    readonly expects: Readonly<Record<string, AnswerExpectation>> | undefined;\n    /**\n     * Its own reading of the answers it was given. `undefined` where the\n     * author has not said, which here is the same answer as declaring one that\n     * reports nothing — unlike `copy` and `reads`, because there is no emptiness\n     * to distinguish: a reading is made per answer at render time, and a primitive\n     * that has said nothing about its answers is reported on by nothing.\n     */\n    readonly unshown: UnshownDeclaration | undefined;\n    readonly validate: (props: JsonObject) => PropsVerdict;\n};",
               "summary": ""
             },
             {
               "name": "RegistryError",
               "kind": "type",
-              "signature": "type RegistryError = {\n    readonly code: \"invalid-primitive-type\";\n    readonly type: string;\n} | {\n    readonly code: \"invalid-slot-name\";\n    readonly type: string;\n    readonly slot: string;\n} | {\n    readonly code: \"invalid-text-key\";\n    readonly type: string;\n    readonly key: string;\n} | {\n    readonly code: \"blank-text\";\n    readonly type: string;\n    readonly key: string;\n} | {\n    readonly code: \"undeclared-interactive-prop\";\n    readonly type: string;\n    readonly prop: string;\n} | {\n    readonly code: \"undeclared-frame-prop\";\n    readonly type: string;\n    readonly prop: string;\n} | {\n    readonly code: \"undeclared-copy-prop\";\n    readonly type: string;\n    readonly prop: string;\n} | {\n    readonly code: \"unknown-behaviour\";\n    readonly type: string;\n    readonly behaviour: string;\n} | {\n    readonly code: \"unnamed-behaviour\";\n    readonly type: string;\n    readonly behaviour: string;\n    readonly key: string;\n} | {\n    readonly code: \"undeclared-interactive-behaviour\";\n    readonly type: string;\n    readonly behaviour: string;\n} | {\n    readonly code: \"unpaired-behaviour\";\n    readonly type: string;\n    readonly behaviour: string;\n    readonly requires: string;\n} | {\n    readonly code: \"undeclared-named-behaviour\";\n    readonly type: string;\n    readonly behaviour: string;\n    readonly prop: string;\n} | {\n    readonly code: \"undeclared-control-name-prop\";\n    readonly type: string;\n    readonly behaviour: string;\n    readonly prop: string;\n} | {\n    readonly code: \"unknown-role\";\n    readonly type: string;\n    readonly role: string;\n} | {\n    readonly code: \"invalid-binding-name\";\n    readonly type: string;\n    readonly name: string;\n} | {\n    readonly code: \"undeclared-reads-prop\";\n    readonly type: string;\n    readonly prop: string;\n} | {\n    readonly code: \"duplicate-primitive-type\";\n    readonly type: string;\n};",
+              "signature": "type RegistryError = {\n    readonly code: \"invalid-primitive-type\";\n    readonly type: string;\n} | {\n    readonly code: \"invalid-slot-name\";\n    readonly type: string;\n    readonly slot: string;\n} | {\n    readonly code: \"invalid-text-key\";\n    readonly type: string;\n    readonly key: string;\n} | {\n    readonly code: \"blank-text\";\n    readonly type: string;\n    readonly key: string;\n} | {\n    readonly code: \"undeclared-interactive-prop\";\n    readonly type: string;\n    readonly prop: string;\n} | {\n    readonly code: \"undeclared-frame-prop\";\n    readonly type: string;\n    readonly prop: string;\n} | {\n    readonly code: \"undeclared-copy-prop\";\n    readonly type: string;\n    readonly prop: string;\n} | {\n    readonly code: \"unknown-behaviour\";\n    readonly type: string;\n    readonly behaviour: string;\n} | {\n    readonly code: \"unnamed-behaviour\";\n    readonly type: string;\n    readonly behaviour: string;\n    readonly key: string;\n} | {\n    readonly code: \"undeclared-interactive-behaviour\";\n    readonly type: string;\n    readonly behaviour: string;\n} | {\n    readonly code: \"unpaired-behaviour\";\n    readonly type: string;\n    readonly behaviour: string;\n    readonly requires: string;\n} | {\n    readonly code: \"undeclared-named-behaviour\";\n    readonly type: string;\n    readonly behaviour: string;\n    readonly prop: string;\n} | {\n    readonly code: \"undeclared-control-name-prop\";\n    readonly type: string;\n    readonly behaviour: string;\n    readonly prop: string;\n} | {\n    readonly code: \"unknown-role\";\n    readonly type: string;\n    readonly role: string;\n} | {\n    readonly code: \"invalid-binding-name\";\n    readonly type: string;\n    readonly name: string;\n} | {\n    readonly code: \"undeclared-reads-prop\";\n    readonly type: string;\n    readonly prop: string;\n} | {\n    readonly code: \"unread-expects-binding\";\n    readonly type: string;\n    readonly name: string;\n} | {\n    readonly code: \"duplicate-primitive-type\";\n    readonly type: string;\n};",
               "summary": ""
             },
             {
               "name": "PrimitiveRegistry",
               "kind": "type",
-              "signature": "type PrimitiveRegistry = PrimitiveResolver & PropsValidator & TextResolver & BehaviourResolver & FrameResolver & BindingReader & SlotPlacer & UnshownReader & CopyDeclarations & {\n    /** In registration order, so a catalogue and an audit read predictably. */\n    readonly primitives: readonly RegisteredPrimitive[];\n    /**\n     * The types that declared a given role, in registration order.\n     *\n     * Empty for a role nothing here declares, which is the honest answer and\n     * not a failure: a deployment that registered no heading has no heading,\n     * and a consumer deriving a page name from one should show what it shows\n     * for a page that has none.\n     *\n     * Types rather than whole registrations, because every consumer this exists\n     * for is matching nodes in a tree, and a node carries a type. A caller that\n     * wants the registration has `primitives` and this is not in its way.\n     */\n    readonly typesWithRole: (role: PrimitiveRole) => readonly PrimitiveType[];\n};",
+              "signature": "type PrimitiveRegistry = PrimitiveResolver & PropsValidator & TextResolver & BehaviourResolver & FrameResolver & BindingReader & AnswerReader & SlotPlacer & UnshownReader & CopyDeclarations & {\n    /** In registration order, so a catalogue and an audit read predictably. */\n    readonly primitives: readonly RegisteredPrimitive[];\n    /**\n     * The types that declared a given role, in registration order.\n     *\n     * Empty for a role nothing here declares, which is the honest answer and\n     * not a failure: a deployment that registered no heading has no heading,\n     * and a consumer deriving a page name from one should show what it shows\n     * for a page that has none.\n     *\n     * Types rather than whole registrations, because every consumer this exists\n     * for is matching nodes in a tree, and a node carries a type. A caller that\n     * wants the registration has `primitives` and this is not in its way.\n     */\n    readonly typesWithRole: (role: PrimitiveRole) => readonly PrimitiveType[];\n};",
               "summary": ""
             },
             {
@@ -7410,7 +7465,7 @@
       "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 1897,
+        "packageNames": 1939,
         "otherDoors": 17,
         "doorsSharingNothing": 17,
         "widest": false,
@@ -7610,10 +7665,10 @@
       "slug": "store",
       "types": "./dist/store/index.d.ts",
       "requires": [],
-      "files": 40,
+      "files": 42,
       "narrower": [],
       "standing": {
-        "packageNames": 1897,
+        "packageNames": 1939,
         "otherDoors": 17,
         "doorsSharingNothing": 17,
         "widest": false,
@@ -7748,6 +7803,98 @@
               "kind": "value",
               "signature": "const DEFAULT_AUDIENCE_ID: AudienceId",
               "summary": "The audience that matches every reader."
+            }
+          ]
+        },
+        {
+          "module": "audience/compose",
+          "title": "Compose",
+          "summary": "A page as the reader in front of it gets it: the base tree, plus the deltas the audiences they are in have earned.",
+          "symbols": [
+            {
+              "name": "AudienceForm",
+              "kind": "type",
+              "signature": "type AudienceForm = {\n    readonly audienceId: AudienceId;\n    readonly delta: TreeDelta;\n};",
+              "summary": "The delta one audience earns, against the base it was authored on."
+            },
+            {
+              "name": "AudienceOverlay",
+              "kind": "type",
+              "signature": "type AudienceOverlay = {\n    readonly rules: readonly AudienceRule[];\n    readonly forms: readonly AudienceForm[];\n};",
+              "summary": "Everything a deployment needs to serve one page to more than one audience: the rules that sort readers, and the delta each audience earns."
+            },
+            {
+              "name": "ComposeError",
+              "kind": "type",
+              "signature": "type ComposeError = \n/** A rule matched an audience the overlay has no delta for. */\n{\n    readonly code: \"no-form\";\n    readonly audienceId: AudienceId;\n}\n/** The base moved and this delta was authored against an older revision. */\n | {\n    readonly code: \"stale-form\";\n    readonly audienceId: AudienceId;\n    readonly expected: number;\n    readonly actual: number;\n}\n/** The delta is for another page. */\n | {\n    readonly code: \"form-mismatch\";\n    readonly audienceId: AudienceId;\n    readonly treeId: string;\n}\n/** The operations did not apply, or what they produced is not a tree. */\n | {\n    readonly code: \"unapplicable\";\n    readonly audienceId: AudienceId;\n    readonly detail: string;\n};",
+              "summary": ""
+            },
+            {
+              "name": "ComposedTree",
+              "kind": "type",
+              "signature": "type ComposedTree = {\n    readonly tree: LoomTree;\n    /**\n     * In the order the rules gave them, which is the order the deltas were\n     * applied in. A caller names this on the signals the page sends, so that what\n     * was measured and what was served are the same claim.\n     */\n    readonly audiences: readonly AudienceId[];\n};",
+              "summary": "The tree this reader gets, and the audiences that made it that."
+            },
+            {
+              "name": "describeComposeError",
+              "kind": "function",
+              "signature": "const describeComposeError: (error: ComposeError) => string",
+              "summary": ""
+            },
+            {
+              "name": "composeTreeForContext",
+              "kind": "function",
+              "signature": "const composeTreeForContext: (base: LoomTree, overlay: AudienceOverlay, context: JsonObject | undefined) => Result<ComposedTree, ComposeError>",
+              "summary": "The page this context earns, or why it cannot be served."
+            }
+          ]
+        },
+        {
+          "module": "audience/rule",
+          "title": "Rule",
+          "summary": "Which audiences a reader is in, decided in the customer's own process.",
+          "symbols": [
+            {
+              "name": "AudienceValue",
+              "kind": "type",
+              "signature": "type AudienceValue = string | number | boolean | null;",
+              "summary": "The values a clause may compare against."
+            },
+            {
+              "name": "AudienceClause",
+              "kind": "type",
+              "signature": "type AudienceClause = {\n    readonly key: string;\n    /** Non-empty: a clause accepting nothing is a rule that can never match. */\n    readonly anyOf: readonly AudienceValue[];\n};",
+              "summary": "One context key, and the values of it this clause accepts."
+            },
+            {
+              "name": "audienceClauseSchema",
+              "kind": "schema",
+              "signature": "const audienceClauseSchema: z.ZodObject<…>",
+              "summary": ""
+            },
+            {
+              "name": "AudienceRule",
+              "kind": "type",
+              "signature": "type AudienceRule = {\n    readonly audienceId: AudienceId;\n    readonly clauses: readonly AudienceClause[];\n};",
+              "summary": "An audience, and what puts a reader in it."
+            },
+            {
+              "name": "audienceRuleSchema",
+              "kind": "schema",
+              "signature": "const audienceRuleSchema: z.ZodObject<…>",
+              "summary": ""
+            },
+            {
+              "name": "ruleMatches",
+              "kind": "function",
+              "signature": "const ruleMatches: (rule: AudienceRule, context: JsonObject) => boolean",
+              "summary": ""
+            },
+            {
+              "name": "audiencesFor",
+              "kind": "function",
+              "signature": "const audiencesFor: (rules: readonly AudienceRule[], context: JsonObject | undefined) => readonly AudienceId[]",
+              "summary": "Every audience this reader is in, in the order the rules were given."
             }
           ]
         },
@@ -8272,6 +8419,18 @@
               "kind": "function",
               "signature": "const treeSourceFromStore: (store: TreeReader) => TreeSource",
               "summary": "The store, as the renderer's `TreeSource`."
+            },
+            {
+              "name": "AudienceOverlaySource",
+              "kind": "interface",
+              "signature": "interface AudienceOverlaySource {\n    readonly load: (treeId: TreeId) => Promise<Result<AudienceOverlay, TreeSourceError>>;\n}",
+              "summary": "Where a deployment's audience rules and audience-scoped deltas come from."
+            },
+            {
+              "name": "composingTreeSourceFromStore",
+              "kind": "function",
+              "signature": "const composingTreeSourceFromStore: (store: TreeReader, overlays: AudienceOverlaySource) => TreeSource",
+              "summary": "The composing sibling of `treeSourceFromStore` — one tree per id stays the right answer for a deployment that wants it, so this is a second function rather than an option on the first."
             }
           ]
         },
@@ -8419,7 +8578,7 @@
       "files": 61,
       "narrower": [],
       "standing": {
-        "packageNames": 1897,
+        "packageNames": 1939,
         "otherDoors": 17,
         "doorsSharingNothing": 17,
         "widest": false,
@@ -8798,7 +8957,7 @@
       "files": 41,
       "narrower": [],
       "standing": {
-        "packageNames": 1897,
+        "packageNames": 1939,
         "otherDoors": 17,
         "doorsSharingNothing": 17,
         "widest": false,
@@ -9013,7 +9172,7 @@
       "slug": "signals",
       "types": "./dist/signals/index.d.ts",
       "requires": [],
-      "files": 78,
+      "files": 79,
       "narrower": [
         {
           "specifier": "@jam-overture/loom/signals/broadcast",
@@ -9026,7 +9185,7 @@
         }
       ],
       "standing": {
-        "packageNames": 1897,
+        "packageNames": 1939,
         "otherDoors": 17,
         "doorsSharingNothing": 15,
         "widest": true,
@@ -9231,6 +9390,121 @@
               "kind": "function",
               "signature": "const deploymentAgendaOf: (order: DeploymentReading, conversion: DeploymentConversion, health: CollectionHealth, arrival: Pick<ArrivalStanding, \"standing\"> | null) => DeploymentAgenda",
               "summary": "Join an order of a deployment's pages to the health of its collection, and publish the two orders that come out."
+            }
+          ]
+        },
+        {
+          "module": "signals/arrivals",
+          "title": "Arrivals",
+          "summary": "**When** readers arrived, which is the one thing every counter in this subsystem had thrown away.",
+          "symbols": [
+            {
+              "name": "ARRIVAL_HOUR_MS",
+              "kind": "value",
+              "signature": "const ARRIVAL_HOUR_MS = 3600000",
+              "summary": "One hour, in milliseconds, which is the bucket every row here is filed in."
+            },
+            {
+              "name": "arrivalHourOf",
+              "kind": "function",
+              "signature": "const arrivalHourOf: (instant: string) => number | undefined",
+              "summary": "The hour an instant falls in, as the instant that hour began."
+            },
+            {
+              "name": "ArrivalHourCount",
+              "kind": "type",
+              "signature": "type ArrivalHourCount = {\n    readonly treeId: TreeId;\n    readonly revision: number;\n    /** The hour they arrived in, as the instant it began (UTC). */\n    readonly hour: number;\n    /** Page views that *began* in this hour, so a longer visit is not a bigger number. */\n    readonly views: number;\n};",
+              "summary": "Page views that began in one hour, of one revision of one tree."
+            },
+            {
+              "name": "StoredArrivalHour",
+              "kind": "type",
+              "signature": "type StoredArrivalHour = ArrivalHourCount & {\n    readonly audienceId: AudienceId;\n    readonly updatedAt: string;\n};",
+              "summary": "An hour's count as the store keeps it. See `StoredTally.audienceId`."
+            },
+            {
+              "name": "arrivalHoursOf",
+              "kind": "function",
+              "signature": "const arrivalHoursOf: (openings: readonly RevisionViews[], at: string) => Result<readonly ArrivalHourCount[], ReaderSignalStoreError>",
+              "summary": "What one delivery adds, which is its openings filed under the hour the door read them in."
+            },
+            {
+              "name": "StoredArrivals",
+              "kind": "type",
+              "signature": "type StoredArrivals = {\n    /** Every hour in the range that has a row, in no particular order. */\n    readonly hours: readonly StoredArrivalHour[];\n    /**\n     * The first hour this scope has ever counted an arrival in, whatever range\n     * was asked for.\n     *\n     * Absent means *nothing has ever been counted here*, which is a different\n     * sentence from *nobody arrived in the range you asked about* — the\n     * distinction this subsystem keeps everywhere a reading can be empty for two\n     * reasons.\n     *\n     * It narrows with the request's tree, revision and audience, so *By page* can\n     * say when counting began for that page rather than for the deployment.\n     */\n    readonly begins?: number;\n};",
+              "summary": "What a ranged read of the counter hands back."
+            },
+            {
+              "name": "ArrivalRange",
+              "kind": "type",
+              "signature": "type ArrivalRange = {\n    readonly from: number;\n    readonly to: number;\n};",
+              "summary": "A stretch of time, in milliseconds, closed at the start and open at the end."
+            },
+            {
+              "name": "ArrivalHour",
+              "kind": "type",
+              "signature": "type ArrivalHour = {\n    /** The instant the hour began (UTC). */\n    readonly hour: number;\n    readonly views: number;\n    /**\n     * Whether this hour is over and inside the range.\n     *\n     * The last bar is the one this is for: *the last 24 hours* ends in an hour\n     * nobody has finished arriving in, and a screen that drew it like the other\n     * twenty-three would show every reader a dip at the right-hand edge that is\n     * the clock rather than the traffic. False also where the range itself cuts\n     * the hour short, which is what an unaligned range does to its last bucket.\n     */\n    readonly whole: boolean;\n};",
+              "summary": "One hour of a range, which is one bar."
+            },
+            {
+              "name": "arrivalRangeOf",
+              "kind": "function",
+              "signature": "const arrivalRangeOf: (now: number, hours: number) => ArrivalRange",
+              "summary": "The whole hours ending with the hour an instant falls in."
+            },
+            {
+              "name": "ArrivalSeries",
+              "kind": "type",
+              "signature": "type ArrivalSeries = {\n    /** The range this is a series over, as asked for. */\n    readonly range: ArrivalRange;\n    /**\n     * One entry per hour, ascending, from the later of the range's first hour and\n     * the hour counting began.\n     *\n     * Dense: an hour nobody arrived in is `views: 0` and is present, because a\n     * chart that omits a quiet hour draws a narrower week. Empty where counting\n     * began after the range ended, or where nothing has ever been counted.\n     */\n    readonly hours: readonly ArrivalHour[];\n    /** Page views that began inside the range, which is the sum of the hours above. */\n    readonly views: number;\n    /**\n     * The first hour the scope has ever counted, carried through from the store.\n     *\n     * A surface says *counting began on the 23rd* with it. Absent means nothing\n     * has ever been counted, and the series is then empty for a reason that is\n     * not *nobody came*.\n     */\n    readonly begins?: number;\n    /**\n     * Whether the range starts before counting did.\n     *\n     * The reason the series can be shorter than the range asked for, published\n     * rather than left to a caller comparing two instants — because the\n     * comparison has an edge (counting may have begun inside the range's first\n     * hour) and a surface getting it wrong would claim a quiet week.\n     */\n    readonly clipped: boolean;\n};",
+              "summary": "Page views by hour over a range, dense, with the hours this deployment cannot speak for left out rather than drawn as nought."
+            },
+            {
+              "name": "ArrivalSeriesOptions",
+              "kind": "type",
+              "signature": "type ArrivalSeriesOptions = {\n    /**\n     * Now, where a caller has it, so the hour in progress is marked as one.\n     *\n     * Omitted is a series about a stretch that is over, where every bucket the\n     * range covers whole is whole. Handed in rather than read from a clock here\n     * for the reason every other instant in this subsystem is: a reading is a\n     * pure function of what it was given, so two figures on one screen cannot\n     * disagree about when it was taken.\n     */\n    readonly now?: number;\n};",
+              "summary": "What a series may be told besides the rows, which is the one thing a clock knows."
+            },
+            {
+              "name": "arrivalSeriesOf",
+              "kind": "function",
+              "signature": "const arrivalSeriesOf: (stored: StoredArrivals, range: ArrivalRange, options?: ArrivalSeriesOptions) => ArrivalSeries",
+              "summary": "The hours of a range, as the counter answers for them."
+            },
+            {
+              "name": "arrivalRangeBefore",
+              "kind": "function",
+              "signature": "const arrivalRangeBefore: (range: ArrivalRange) => ArrivalRange",
+              "summary": "The stretch of the same length immediately before a range."
+            },
+            {
+              "name": "ArrivalChange",
+              "kind": "type",
+              "signature": "type ArrivalChange = {\n    readonly range: ArrivalRange;\n    /** The equal-length period the comparison is against, which is {@link arrivalRangeBefore}. */\n    readonly before: ArrivalRange;\n    readonly views: number;\n    /**\n     * Page views in the earlier period, or `null` where counting had not begun\n     * when it started.\n     *\n     * `null` is not nought and the difference is the whole of this field: a\n     * deployment that upgraded on Tuesday has no arrivals before Tuesday and\n     * never had any readers missing either. Reporting nought there would publish\n     * *every reader you have is new this week* on every deployment's first month.\n     */\n    readonly was: number | null;\n    /**\n     * The quotient, or why there is none (`ratios.ts`).\n     *\n     * `unmeasured` where the earlier period predates counting, `from-nothing`\n     * where it was counted and held no arrivals — which is the rise a surface\n     * most wants to draw and could least afford to read as *nothing to compare*.\n     */\n    readonly ratio: Ratio;\n};",
+              "summary": "Page views in a range against page views in the period before it."
+            },
+            {
+              "name": "arrivalChangeOf",
+              "kind": "function",
+              "signature": "const arrivalChangeOf: (stored: StoredArrivals, range: ArrivalRange, options?: ArrivalSeriesOptions) => ArrivalChange",
+              "summary": "Both figures and the quotient, from one read."
+            },
+            {
+              "name": "ArrivalReadingRequest",
+              "kind": "type",
+              "signature": "type ArrivalReadingRequest = {\n    readonly range: ArrivalRange;\n    /** Absent reads every tree the handle can see, which is the scope rule. */\n    readonly treeId?: TreeId;\n    /** Absent reads every audience, whose arrivals then add. */\n    readonly audience?: AudienceId;\n    /** Absent reads every revision, whose arrivals then add. */\n    readonly revision?: number;\n    /** Now, where the caller has it, so the hour in progress is marked as one. */\n    readonly now?: number;\n};",
+              "summary": "What a surface asks for: a range, the narrowing, and the clock."
+            },
+            {
+              "name": "ArrivalReading",
+              "kind": "type",
+              "signature": "type ArrivalReading = {\n    readonly series: ArrivalSeries;\n    readonly change: ArrivalChange;\n};",
+              "summary": "The chart and the two figures above it, from one read."
+            },
+            {
+              "name": "readReaderArrivals",
+              "kind": "function",
+              "signature": "const readReaderArrivals: (store: {\n    readonly arrivals: (request?: {\n        readonly treeId?: TreeId;\n        readonly audience?: AudienceId;\n        readonly revision?: number;\n        readonly from?: number;\n        readonly to?: number;\n    }) => Promise<Result<StoredArrivals, ReaderSignalStoreError>>;\n}, request: ArrivalReadingRequest) => Promise<Result<ArrivalReading, ReaderSignalStoreError>>",
+              "summary": "The chart, the range's figure and the change on the period before it, in one call against a counter handle."
             }
           ]
         },
@@ -12826,7 +13100,7 @@
             {
               "name": "ReaderOpeningCounter",
               "kind": "interface",
-              "signature": "interface ReaderOpeningCounter {\n    /**\n     * Add the page views a delivery opened, creating rows that do not exist yet.\n     *\n     * Additive like everything else in this file, and for the sharpest reason of\n     * any of them: every call is one delivery's worth of arrivals, so a store\n     * that replaced would report the last reader rather than the readership.\n     */\n    readonly opened: (openings: readonly RevisionViews[], at: string,\n    /**\n     * The audience the delivery was served under. Omitted is\n     * `aud_everyone`, so a door that serves one form of every page calls this\n     * exactly as it did.\n     *\n     * One audience per call rather than one per opening, because a delivery is\n     * one page view of one form of one page — the same reason the batch carries\n     * it and a signal does not.\n     */\n    audience?: AudienceId) => Promise<Result<void, ReaderSignalStoreError>>;\n}",
+              "signature": "interface ReaderOpeningCounter {\n    /**\n     * Add the page views a delivery opened, creating rows that do not exist yet.\n     *\n     * Additive like everything else in this file, and for the sharpest reason of\n     * any of them: every call is one delivery's worth of arrivals, so a store\n     * that replaced would report the last reader rather than the readership.\n     *\n     * **It writes two rows for every opening: the revision's total and the hour\n     * it arrived in** (`arrivals.ts`), in one atomic write. One call rather than\n     * two because the two numbers are the same arrivals counted under two keys,\n     * and a door that could move one without the other would be a deployment\n     * whose hourly chart does not sum to its own page-view count — for ever,\n     * invisibly, with no way to tell which of the two is the wrong one. `at` is\n     * the hour, so the second row needs nothing this call did not already have.\n     */\n    readonly opened: (openings: readonly RevisionViews[], at: string,\n    /**\n     * The audience the delivery was served under. Omitted is\n     * `aud_everyone`, so a door that serves one form of every page calls this\n     * exactly as it did.\n     *\n     * One audience per call rather than one per opening, because a delivery is\n     * one page view of one form of one page — the same reason the batch carries\n     * it and a signal does not.\n     */\n    audience?: AudienceId) => Promise<Result<void, ReaderSignalStoreError>>;\n}",
               "summary": "The one write the door makes into the durable counters."
             },
             {
@@ -12844,8 +13118,14 @@
             {
               "name": "ReaderTallyStore",
               "kind": "interface",
-              "signature": "interface ReaderTallyStore extends ReaderOpeningCounter {\n    /**\n     * Add a whole window's counters to what is already there, every audience in\n     * it, in one atomic write — creating rows that do not exist yet.\n     *\n     * **This is the method a collection run calls, and the atomicity is the\n     * reason it exists rather than a property it happens to have.**\n     *\n     * A window holds whatever arrived in it, so a deployment serving two forms of\n     * a page holds two audiences interleaved and is folded once per audience\n     *. Writing those folds as separate calls leaves a state between them\n     * where some are durable and the rest are not — and because counting and\n     * forgetting are one operation (`collect.ts`), the buffer still holds the\n     * window, so the next run folds it again and **adds the already-durable\n     * audiences a second time.** Of a tally's nine counters, `views`, `reached`\n     * and `engaged` are distinct counts and would move little; `dwellMs`,\n     * `activations`, `opens`, `closes` and `completions` are occurrences and\n     * would double, which every rate in this subsystem divides by the first kind\n     * — so the damage is invisible, permanent and looks like a readership\n     * twice as interested as it was.\n     *\n     * So the window is one write or it is none. A store that cannot be atomic\n     * over several audiences cannot be correct here, which is why this is a\n     * required method rather than a capability a caller probes for.\n     *\n     * Two entries naming one audience are added together, not refused: the\n     * guarantee is the same one `counters.ts` gives for two rows naming one\n     * counter, and it is here so that the two shipped stores cannot disagree\n     * about it.\n     */\n    readonly applyWindow: (window: readonly AudienceCounters[], at: string) => Promise<Result<void, ReaderSignalStoreError>>;\n    /**\n     * One audience's counters, which is {@link applyWindow} over a single entry\n     * and is implemented as exactly that in both shipped stores — so the two\n     * cannot drift on the half that matters.\n     *\n     * Kept because a caller composing counters by hand — a backfill, a fixture, a\n     * migration — has one audience and no window, and should not have to wrap it\n     * in a list to say so.\n     */\n    readonly apply: (counters: AppliedCounters, at: string,\n    /**\n     * The audience whose counters these are. Omitted is `aud_everyone`.\n     */\n    audience?: AudienceId) => Promise<Result<void, ReaderSignalStoreError>>;\n    readonly tallies: (request?: TallyReadRequest) => Promise<Result<readonly StoredTally[], ReaderSignalStoreError>>;\n    readonly funnels: (request?: TallyReadRequest) => Promise<Result<readonly StoredFunnel[], ReaderSignalStoreError>>;\n    /**\n     * How many page views there were, which is the denominator every rate on a\n     * screen needs and the only row here written from two sides.\n     */\n    readonly pageViews: (request?: TallyReadRequest) => Promise<Result<readonly StoredPageViews[], ReaderSignalStoreError>>;\n}",
+              "signature": "interface ReaderTallyStore extends ReaderOpeningCounter {\n    /**\n     * Add a whole window's counters to what is already there, every audience in\n     * it, in one atomic write — creating rows that do not exist yet.\n     *\n     * **This is the method a collection run calls, and the atomicity is the\n     * reason it exists rather than a property it happens to have.**\n     *\n     * A window holds whatever arrived in it, so a deployment serving two forms of\n     * a page holds two audiences interleaved and is folded once per audience\n     *. Writing those folds as separate calls leaves a state between them\n     * where some are durable and the rest are not — and because counting and\n     * forgetting are one operation (`collect.ts`), the buffer still holds the\n     * window, so the next run folds it again and **adds the already-durable\n     * audiences a second time.** Of a tally's nine counters, `views`, `reached`\n     * and `engaged` are distinct counts and would move little; `dwellMs`,\n     * `activations`, `opens`, `closes` and `completions` are occurrences and\n     * would double, which every rate in this subsystem divides by the first kind\n     * — so the damage is invisible, permanent and looks like a readership\n     * twice as interested as it was.\n     *\n     * So the window is one write or it is none. A store that cannot be atomic\n     * over several audiences cannot be correct here, which is why this is a\n     * required method rather than a capability a caller probes for.\n     *\n     * Two entries naming one audience are added together, not refused: the\n     * guarantee is the same one `counters.ts` gives for two rows naming one\n     * counter, and it is here so that the two shipped stores cannot disagree\n     * about it.\n     */\n    readonly applyWindow: (window: readonly AudienceCounters[], at: string) => Promise<Result<void, ReaderSignalStoreError>>;\n    /**\n     * One audience's counters, which is {@link applyWindow} over a single entry\n     * and is implemented as exactly that in both shipped stores — so the two\n     * cannot drift on the half that matters.\n     *\n     * Kept because a caller composing counters by hand — a backfill, a fixture, a\n     * migration — has one audience and no window, and should not have to wrap it\n     * in a list to say so.\n     */\n    readonly apply: (counters: AppliedCounters, at: string,\n    /**\n     * The audience whose counters these are. Omitted is `aud_everyone`.\n     */\n    audience?: AudienceId) => Promise<Result<void, ReaderSignalStoreError>>;\n    readonly tallies: (request?: TallyReadRequest) => Promise<Result<readonly StoredTally[], ReaderSignalStoreError>>;\n    readonly funnels: (request?: TallyReadRequest) => Promise<Result<readonly StoredFunnel[], ReaderSignalStoreError>>;\n    /**\n     * How many page views there were, which is the denominator every rate on a\n     * screen needs and the only row here written from two sides.\n     */\n    readonly pageViews: (request?: TallyReadRequest) => Promise<Result<readonly StoredPageViews[], ReaderSignalStoreError>>;\n    /**\n     * The same page views, by the hour they began in, over a range (`arrivals.ts`).\n     *\n     * The one read here that takes a stretch of time, because it is the one\n     * counter that has one. It answers two things in a call — the hours in the\n     * range, and the first hour this scope ever counted — so that a surface\n     * drawing a chart over a range the deployment is younger than can say so\n     * instead of drawing it empty.\n     */\n    readonly arrivals: (request?: ArrivalReadRequest) => Promise<Result<StoredArrivals, ReaderSignalStoreError>>;\n}",
               "summary": ""
+            },
+            {
+              "name": "ArrivalReadRequest",
+              "kind": "type",
+              "signature": "type ArrivalReadRequest = TallyReadRequest & {\n    /** Inclusive. Absent reads from the first hour the scope has. */\n    readonly from?: number;\n    /** Exclusive. Absent reads to the last hour the scope has. */\n    readonly to?: number;\n};",
+              "summary": "A counter read, narrowed to a stretch of time."
             }
           ]
         },
@@ -13170,7 +13450,7 @@
       "files": 10,
       "narrower": [],
       "standing": {
-        "packageNames": 1897,
+        "packageNames": 1939,
         "otherDoors": 17,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -13302,10 +13582,10 @@
           "reach": "loaded"
         }
       ],
-      "files": 19,
+      "files": 21,
       "narrower": [],
       "standing": {
-        "packageNames": 1897,
+        "packageNames": 1939,
         "otherDoors": 17,
         "doorsSharingNothing": 17,
         "widest": false,
@@ -13316,13 +13596,13 @@
         {
           "module": "signals/migrate",
           "title": "Migrate",
-          "summary": "Creating the five reader-signal tables, with row level security switched on.",
+          "summary": "Creating the six reader-signal tables, with row level security switched on.",
           "symbols": [
             {
               "name": "READER_SIGNALS_DDL",
               "kind": "value",
               "signature": "const READER_SIGNALS_DDL: readonly string[]",
-              "summary": "The five tables, as statements a host can run."
+              "summary": "The six tables, as statements a host can run."
             },
             {
               "name": "ensureReaderSignalsSchema",
@@ -13367,7 +13647,7 @@
       "files": 65,
       "narrower": [],
       "standing": {
-        "packageNames": 1897,
+        "packageNames": 1939,
         "otherDoors": 17,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -13941,7 +14221,7 @@
       "files": 43,
       "narrower": [],
       "standing": {
-        "packageNames": 1897,
+        "packageNames": 1939,
         "otherDoors": 17,
         "doorsSharingNothing": 17,
         "widest": false,
@@ -14008,10 +14288,10 @@
           "reach": "loaded"
         }
       ],
-      "files": 99,
+      "files": 100,
       "narrower": [],
       "standing": {
-        "packageNames": 1897,
+        "packageNames": 1939,
         "otherDoors": 17,
         "doorsSharingNothing": 17,
         "widest": false,
@@ -14433,7 +14713,7 @@
       "files": 79,
       "narrower": [],
       "standing": {
-        "packageNames": 1897,
+        "packageNames": 1939,
         "otherDoors": 17,
         "doorsSharingNothing": 17,
         "widest": false,

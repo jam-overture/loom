@@ -35,6 +35,7 @@ the portal every day.
 | Browser cost | **6.4 KB** minified, 2.9 KB gzipped, measured 2 November; `src/signals/browser-weight.test.ts` fails if an import reaches a package |
 | How long a delivery lives | two windows since 5 November: counted once it is ripe, **kept for 30 days by default** and then deleted ([0349](../decisions/0349-a-projects-reader-events-are-kept-thirty-days-by-default-and-the-tallies-stay-the-durable-record.md), [0351](../decisions/0351-a-counted-delivery-is-kept-for-a-stated-window-rather-than-deleted-by-the-fold.md)) — and nothing deletes a delivery no fold has counted, so a deployment whose collection stopped keeps rather than loses them |
 | What an operator can look at, delivery by delivery | one row per signal the deployment still keeps, newest first, in exact pages, with the rest of one page view beside any of them ([0355](../decisions/0355-the-events-a-screen-lists-are-one-row-per-signal-and-one-page-view-is-read-on-a-key-the-caller-already-holds.md)) — the handle the *Events* tab is drawn from, which counts nothing, names no page and cannot be asked which page views exist |
+| When readers arrived | page views counted under the hour they began in as well as in total ([0356](../decisions/0356-page-views-are-counted-under-the-hour-they-began-in-as-a-sixth-counter-written-at-the-door.md)), written at the door in the same transaction as the total — so a chart by hour sums to the count drawn beside it, and a reading over a range says where its data starts |
 | Which page a change helped and which it hurt | every page's sharpest movement in each direction, at the later window's door scale ([0291](../decisions/0291-a-deployments-change-is-two-orders-at-the-doors-scale-because-a-page-has-no-net-movement.md)), as two orders rather than one — because a page the change both helped and hurt has no net |
 | What a change did to the funnel | the rate bracketed by each window's own ceiling, with a counterfactual saying which half moved ([0288](../decisions/0288-a-change-to-a-funnel-is-two-shares-that-factor-and-a-difference-of-two-floors-is-a-bracket.md)), so a rollup window a deployment shortened cannot read as a collapse |
 | How much of what it says gets read | words readers reached against the words the window can speak for ([0235](../decisions/0235-how-much-of-a-page-gets-read-is-a-share-of-words-that-partition-it-and-the-typical-reader-is-a-ceiling.md), [0287](../decisions/0287-a-share-of-a-pages-words-is-a-share-of-the-words-the-window-can-speak-for-and-spoken-for-is-one-predicate.md)), with the passages nobody saw — and no share at all where nothing reports reach |
@@ -161,6 +162,17 @@ call inside a pull request.
    signals can be read together, and 0349 decided it knowing that
    ([0351](../decisions/0351-a-counted-delivery-is-kept-for-a-stated-window-rather-than-deleted-by-the-fold.md)
    partially supersedes 0158 on this point and no other lane's).
+
+   **An aggregate may now carry a clock, and one does (6 November).** The rule
+   said nothing about time either way and every counter here happened to be
+   timeless, which is what the portal read it as. Page views are now counted
+   under the hour they began in as well as in total
+   ([0356](../decisions/0356-page-views-are-counted-under-the-hour-they-began-in-as-a-sixth-counter-written-at-the-door.md)),
+   because *how many readers arrived yesterday* is not answerable from a counter
+   with no time in it or from a capped scan of the kept deliveries. The second
+   limit is the one to hold: **an hour outlives the delivery it could have been
+   derived from.** It is a count of page views of a revision, which names
+   nowhere and nobody, and it is a count against a clock, which is new.
 6. **The vocabulary stays closed.** Five kinds, `completed` having landed on
    1 October ([0211](../decisions/0211-a-completion-is-a-form-the-browser-let-go.md)).
    A sixth is a record.
@@ -4779,6 +4791,51 @@ added for precisely that panel. Filed for `Loom portal` with that as the one
 recommendation to take now; which of the two readings survives is a question
 about where the lane boundary sits and is the maintainer's rather than either
 lane's.
+
+### 76. The hour readers arrived in · `Loom signals` · **done, 6 November**
+
+`Loom portal` filed it this morning, against `portal-wireframes.md` *1 ·
+Signals*: a range picker over the whole screen, *page views in the range* with
+the change on the period before, and **a bar chart of page views by hour**. It
+could draw none of the three and said so rather than drawing one badly — the
+tallies keep no time, and the only rows with an instant on them are the kept
+deliveries, which page by delivery and live as long as the window a deployment
+keeps them for. *A bar drawn from part of an hour is a wrong number rather than
+a shorter list.*
+
+**Done**
+([0356](../decisions/0356-page-views-are-counted-under-the-hour-they-began-in-as-a-sixth-counter-written-at-the-door.md)),
+as a sixth counter rather than a read of the deliveries.
+
+- **The marker was already arriving.** A delivery says whether it opened its
+  page view (0214), and two things are already derived from it at the door: how
+  many page views began on a revision, and where. The hour is the third, and the
+  door was already stamping every counter this delivery moves with one instant.
+- **`loom_reader_arrivals`** is an application, an audience, a tree, a revision,
+  an hour and a number of page views that began in it. The hour is UTC and the
+  bucket is the instant it began; finer is sixty times the rows for a resolution
+  nothing has asked for, and coarser cannot draw twenty-four bars.
+- **One call writes both rows or neither.** `opened` writes the revision's total
+  and the hour in one transaction, from the openings `openingsOf` already found,
+  so the hourly chart sums to the page-view count drawn beside it — which it
+  would otherwise stop doing permanently and invisibly (0158).
+- **A reading has a beginning.** The counter read answers the hours in the range
+  *and* the first hour the same narrowing ever counted, so thirty days on a
+  deployment that has counted for a week draws a week and says where its data
+  starts. `readReaderArrivals` derives the read from the range, because the
+  obvious composition reads only the range on the screen and then reports an
+  earlier period that is empty *because it was not read*.
+- **An earlier period that predates counting has no figure, not a nought** —
+  `unmeasured` rather than `from-nothing`, which is the one reserved for a
+  period that was counted and held nobody.
+
+**Nothing reaches a reader's browser.** `broadcast.ts` is byte-identical and the
+bundle measures 6,513 bytes minified, 2,993 gzipped. No payload field, no new
+kind, and the one new table is one no browser can see.
+
+**What is left and is filed:** the chart is the portal's to draw, and this
+reading does not compose into `windowAssemblyOf` — a window is a set of counters
+and this is a stretch of time, so a caller reads it directly.
 
 ## Still not in scope
 

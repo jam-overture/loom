@@ -1,6 +1,6 @@
 import type { ReactElement } from "react"
 import { renderToStaticMarkup } from "react-dom/server"
-import { describe, expect, it, vi } from "vitest"
+import { describe, expect, it } from "vitest"
 
 import { askedFor, type AddressedState, type AddressParams } from "./addressed"
 import { renderSitePage } from "./render"
@@ -33,15 +33,27 @@ import {
  *
  * ## The one thing here that is not the address
  *
- * `servedOrigin` reads the forwarded host, so a preview deployment frames itself
- * rather than production, and `next/headers` throws outside a request. It is
- * stubbed empty below, which is a case the function already answers: it falls
- * back to `siteOrigin()`, and that is the origin everything here compares
- * against. A route cannot be asked what it reads without being called, and this
- * is the whole of what calling one needs.
+ * `servedOrigin` reads the forwarded host, so a preview deployment frames
+ * itself rather than production, and `next/headers` throws where there is no
+ * request. **Nothing is stubbed for it.** The function answers that case for
+ * itself — it falls back to `siteOrigin()`, which is the origin everything here
+ * compares against — and `serving.test.ts` holds that without a mock either.
+ *
+ * It was stubbed here until 6 November, and the stub is why this file went red
+ * on `main` on 5 November with twelve failures and green on an immediate re-run
+ * of the same tree. The application suite keeps a worker warm across files
+ * (`forks: { isolate: false }`, for the reason its config gives), so a mock of
+ * a module an earlier file in that worker has already loaded arrives too late.
+ * `announced.test.ts` imports all three page modules and stubs nothing, which
+ * loads `serving.ts` holding the real `next/headers`; whichever of the two
+ * files the suite happens to hand that worker first decided whether this one
+ * passed. `serving.test.ts` has the reproduction and the two remedies that were
+ * measured and do not hold.
+ *
+ * **So there is no `vi.mock` in this file, and one should not come back.** A
+ * route cannot be asked what it reads without being called, and calling one now
+ * needs nothing arranged at all.
  */
-
-vi.mock("next/headers", () => ({ headers: async () => new Headers() }))
 
 /** A page module of this site, of which only the body matters here. */
 type PageModule = {
