@@ -70,12 +70,19 @@ journal can be called directly — the narrowing is the part that matters.
   lane boundary** rather than about code. It is in the finding, addressed to the
   maintainer, with the undertaking that the losing module goes in one commit
   once he says which way it falls.
-- **It did not start the next unit.** `Loom portal` filed a well-specified
-  finding this morning — *page views counted by hour*, for the range picker, the
-  hourly chart and the range figures, through a scoped handle. That is this
-  lane's queue and it is the first item of the next scheduled pass. Starting a
-  table-and-migration unit from a notification wake is the shape this lane is
-  told not to take.
+- **It did not start the next unit, and was right not to.** `Loom portal` filed
+  a well-specified finding this morning — *page views counted by hour*, for the
+  range picker, the hourly chart and the range figures, through a scoped handle
+  — and starting a table-and-migration unit from a notification wake is the
+  shape this lane is told not to take. **It shipped while this branch was
+  open**, as §76 and
+  [0356](../decisions/0356-page-views-are-counted-under-the-hour-they-began-in-as-a-sixth-counter-written-at-the-door.md)
+  (#786), a sixth counter written at the door rather than a read of the
+  deliveries — so the restraint cost nothing and a scheduled pass did the work
+  this wake would have duplicated. It also means **two things are called
+  *Signals 76***: that unit, which is the plan's §76, and this branch, which
+  adds no step and whose number is dropped from its title rather than
+  renumbered.
 
 ## Test numbers, as they ran
 
