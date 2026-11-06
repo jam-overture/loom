@@ -1,6 +1,6 @@
 # 0275 — A connection is a read path and a write-back path, and Loom never writes into the customer's store
 
-**Status:** Accepted — partially superseded by 0356
+**Status:** Accepted — partially superseded by 0358
 **Date:** 2026-10-13
 **Section:** §1, §5
 

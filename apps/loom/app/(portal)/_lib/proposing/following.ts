@@ -32,7 +32,7 @@ import {
  * A copy an accepted change has moved is left where it is until the site
  * serves what it reached, since starting again would lose the change. Unit 8
  * replaces this: the site pulls the copy itself and a newer snapshot replays
- * the accepted changes onto it (0356).
+ * the accepted changes onto it (0358).
  */
 
 /** Where a page's copy stands against what its site serves. */

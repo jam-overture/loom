@@ -31,7 +31,7 @@ import { LookForm } from "./_components/look-form"
  * It says two versions because there are two: the one the site last
  * published, and the one Loom's copy of the page has reached through the
  * changes proposed for it. They start equal and part when a change is made,
- * and until unit 8 has the site pull Loom's copy (0356), the site keeps
+ * and until unit 8 has the site pull Loom's copy (0358), the site keeps
  * serving the published one.
  *
  * Loom looks at every page once a day by itself. *Look now* is offered only

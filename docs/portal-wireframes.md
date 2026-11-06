@@ -31,7 +31,7 @@ its unit serves.
 | 2 | A goal says which signals count | Goals | built (goals kept and measured, 0350; proposals aim at them, 0352) |
 | 3 | Loom proposes one change toward a goal | For review | partly (each proposal names its goal, 0352; no goal picker or predicted effect yet) |
 | 4 | A person accepts or turns it down | For review | partly (the queue exists, as *Waiting*) |
-| 5 | An accepted change goes live on the site, with no pull request (0356) | Unit 8 | new |
+| 5 | An accepted change goes live on the site, with no pull request (0358) | Unit 8 | new |
 | 6 | The next version is measured against the last, on its goal | Pages · History | new |
 
 ## The chrome
@@ -185,7 +185,7 @@ looks at the pages under the title.
 
 ## 4 · Unit 8 · An accepted change goes live
 
-> **Changed on 6 November 2026** ([0356](../decisions/0356-an-accepted-change-goes-live-from-the-portal-and-the-site-pulls-it-with-no-pull-request.md)).
+> **Changed on 6 November 2026** ([0358](../decisions/0358-an-accepted-change-goes-live-from-the-portal-and-the-site-pulls-it-with-no-pull-request.md)).
 > The board drew a pull request. The maintainer chose that the review stays in
 > the portal and *Accept* makes the change live, with no pull request and no
 > third party. The section below is the board as amended.
@@ -211,7 +211,7 @@ Reached from *Accept* and from the change itself afterwards. Breadcrumb
 
 **Needs:** a read door that hands a project's live pages to its key, the pull
 in the customer's app (framework code), and the replay of accepted changes
-onto a newer snapshot (0356).
+onto a newer snapshot (0358).
 
 ## 5 · Pages · History
 
@@ -266,7 +266,7 @@ It needs its own decision record before any of it is built.
 | 1 | Signals | Figures, chart, Events and By page tabs, the drawer | A table keeping events 30 days (settled), for Events only |
 | 2 | For review | Rename, goal-led cards, before and after in the drawer | #767; the goal field arrives with 3 |
 | 3 | Goals | Define goals, one primary; proposals name one | A goals table and a record |
-| 4 | Unit 8 | Accept goes live; the timeline follows it | A read door, the site's pull (framework), the replay (0356) |
+| 4 | Unit 8 | Accept goes live; the timeline follows it | A read door, the site's pull (framework), the replay (0358) |
 | 5 | Pages · History | Versions on a timeline with before and after | Goals |
 | 6 | Segments | Rough concept only | Its own record, on 0263 |
 

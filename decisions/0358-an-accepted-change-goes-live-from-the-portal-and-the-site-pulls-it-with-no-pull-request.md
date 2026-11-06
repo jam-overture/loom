@@ -1,8 +1,12 @@
-# 0356. An accepted change goes live from the portal, and the site pulls it with no pull request
+# 0358. An accepted change goes live from the portal, and the site pulls it with no pull request
 
 **Status:** Accepted — partially supersedes 0275 and 0340
 **Date:** 2026-11-06
 **Section:** §1, §5 (portal), the connection plane
+
+> **Renumbered from 0356 on 6 November 2026**, the day it was written: `0356`
+> merged on `main` first for another record, and `0357` is claimed by an open
+> branch.
 
 ## Context
 

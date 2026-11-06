@@ -48,7 +48,7 @@ import { GoalForm } from "./_components/goal-form"
  * **What it does not say yet**, because the data is not there: a 7-day rate
  * and its trend (the tallies keep no time; 0349's kept events will), and how
  * many changes for a goal were shipped, which waits for an accepted change to
- * go live on the site (unit 8, 0356). The screen says the
+ * go live on the site (unit 8, 0358). The screen says the
  * second in a sentence rather than drawing a figure it cannot count.
  */
 
