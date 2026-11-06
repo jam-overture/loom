@@ -271,4 +271,11 @@ export const boundedReaderTallyStore = (
    * grows with what a screen asks for, because a range is a parameter.
    */
   arrivals: (request) => readWithin(() => store.arrivals(request), unavailable, budgetMs),
+  /**
+   * The fifth listing, over the same range of hours for what readers *did*
+   * (`acted.ts`). Bounded for the reason the fourth is, and narrower whenever a
+   * screen names the part: a goal's series is one part and a page's bars are
+   * one tree.
+   */
+  acted: (request) => readWithin(() => store.acted(request), unavailable, budgetMs),
 })

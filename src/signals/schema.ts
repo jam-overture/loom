@@ -310,8 +310,9 @@ export const loomReaderPageViews = pgTable(
 /**
  * Page views that began, by the hour they began in.
  *
- * **The sixth table, and the only one in this subsystem with a clock in its
- * key.** Everything else here is either timeless — a tally, a funnel answer, a
+ * **The sixth table, and the first in this subsystem with a clock in its
+ * key** — the seventh, what readers did by hour, is the other. Everything else
+ * here is either timeless — a tally, a funnel answer, a
  * region bucket and a page-view total say *so far* and nothing about when — or
  * short-lived, which is the buffer. `docs/portal-wireframes.md` asks for a
  * range picker and a chart of page views by hour, and neither is answerable
@@ -363,5 +364,90 @@ export const loomReaderArrivals = pgTable(
      * and without this it would scan every row of every page to find a month.
      */
     index("loom_reader_arrivals_hour_idx").on(table.applicationId, table.hour),
+  ]
+)
+
+/**
+ * What readers did to a part, by the hour they did it in.
+ *
+ * **The seventh table, and the second with a clock in its key.** Page views by
+ * hour (0356) let the portal draw a range picker and one chart; every other
+ * question on that screen — a goal's figure for the range, each goal's trend,
+ * the `By page` drawer's bars for what readers did — needs the *parts* counted
+ * by hour, and a tally keeps no time (`acted.ts`, which says why at length).
+ *
+ * **It holds the three delegated kinds and no others**, which is the whole of
+ * what keeps it affordable: `activations`, `opens`, `closes` and `completions`
+ * are things a reader aimed at something to cause (0167), so a row exists only
+ * where a reader did something. The distinct counters are not here because
+ * distinctness does not add across hours and the honest hourly denominator is
+ * the door's own arrivals; `dwell_ms` is not here because a `dwelled` signal is
+ * observed for every part that comes into view, so slicing it by hour would be
+ * thousands of rows an hour on one large page, for ever, in a table nothing
+ * sweeps.
+ *
+ * It is written by the fold, in the same transaction as the tallies it slices
+ * and from the same pass over the window — so a part's hours sum to the part's
+ * own counters for every window folded since this table existed.
+ *
+ * Keyed like the tallies with the hour last, so a reading of one part over a
+ * range is a prefix scan.
+ */
+export const loomReaderActedHours = pgTable(
+  "loom_reader_acted_hours",
+  {
+    /** See `loomReaderSignals.applicationId`. */
+    applicationId: text("application_id").notNull().default("app_default"),
+    /** See `loomReaderSignals.audienceId`. In the key here, as it is on the other counters. */
+    audienceId: text("audience_id").notNull().default("aud_everyone"),
+    treeId: text("tree_id").notNull(),
+    revision: integer("revision").notNull(),
+    nodeId: text("node_id").notNull(),
+    /**
+     * The hour, as the instant it began, in UTC — a `timestamptz` for the
+     * reasons `loomReaderArrivals.hour` gives, and truncated by the writer
+     * rather than by the column, because `arrivals.ts` is the one place the
+     * unit is decided.
+     */
+    hour: timestamp("hour", { withTimezone: true }).notNull(),
+    /** What the part is, as the latest signal about it said. Not in the key, as on a tally. */
+    type: text("type").notNull(),
+    activations: bigint("activations", { mode: "number" }).notNull().default(0),
+    opens: bigint("opens", { mode: "number" }).notNull().default(0),
+    closes: bigint("closes", { mode: "number" }).notNull().default(0),
+    completions: bigint("completions", { mode: "number" }).notNull().default(0),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull(),
+  },
+  (table) => [
+    primaryKey({
+      columns: [
+        table.applicationId,
+        table.audienceId,
+        table.treeId,
+        table.revision,
+        table.nodeId,
+        table.hour,
+      ],
+    }),
+    /**
+     * **One part of one page over a range**, which is a goal's series and the
+     * commonest read here.
+     *
+     * The primary key cannot serve it: a goal sums every revision a part has
+     * had and reads every audience unless it is comparing two, so a read naming
+     * the tree and the part names neither of the two columns that sit between
+     * them in the key.
+     */
+    index("loom_reader_acted_part_idx").on(
+      table.applicationId,
+      table.treeId,
+      table.nodeId,
+      table.hour
+    ),
+    /**
+     * **Every part of one application, by hour**, which is the deployment-wide
+     * reading and the only one here whose cost grows with the range.
+     */
+    index("loom_reader_acted_hour_idx").on(table.applicationId, table.hour),
   ]
 )
