@@ -23,6 +23,7 @@ import {
   searchOf,
   SEARCH_LENGTH,
   type EventFilter,
+  type EventView,
   type ReaderEvent,
 } from "./events"
 import { goalIdSchema, type Goal } from "./goals/goal"
@@ -150,6 +151,7 @@ describe("the filter", () => {
       page: home.treeId,
       view: VIEW_A,
       search: "sign up",
+      live: false,
       before: { seq: 4, index: 1 },
       open: { seq: 3, index: 0 },
     })
@@ -166,9 +168,17 @@ describe("the filter", () => {
       page: undefined,
       view: undefined,
       search: undefined,
+      live: false,
       before: undefined,
       open: undefined,
     })
+  })
+
+  it("is live only on the newest page, and only when the address says so", () => {
+    expect(eventQueryOf({ live: "on" }).live).toBe(true)
+    expect(eventQueryOf({ live: "yes" }).live).toBe(false)
+    expect(eventQueryOf({ live: ["on", "on"] }).live).toBe(false)
+    expect(eventQueryOf({ live: "on", before: "4.1" }).live).toBe(false)
   })
 
   it("keeps an event only when it matches every part of the filter", () => {
@@ -188,17 +198,34 @@ describe("the filter", () => {
   })
 
   it("writes an address that keeps the filter and names what changes", () => {
-    const filter: EventFilter = {
+    const filter: EventView = {
       ...EVERYTHING,
       kind: "activated",
       page: home.treeId,
       search: "sign up",
+      live: false,
     }
 
     expect(eventsHref("/portal/prj_a/signals", filter, { before: "4.1", event: "3.0" })).toBe(
       `/portal/prj_a/signals?kind=activated&on=${home.treeId}&q=sign+up&before=4.1&event=3.0`
     )
-    expect(eventsHref("/portal/prj_a/signals", EVERYTHING)).toBe("/portal/prj_a/signals")
+    expect(eventsHref("/portal/prj_a/signals", { ...EVERYTHING, live: false })).toBe(
+      "/portal/prj_a/signals"
+    )
+  })
+
+  it("carries live to every address but one that names a cursor", () => {
+    const live: EventView = { ...EVERYTHING, kind: "viewed", live: true }
+
+    expect(eventsHref("/portal/prj_a/signals", live)).toBe(
+      "/portal/prj_a/signals?kind=viewed&live=on"
+    )
+    expect(eventsHref("/portal/prj_a/signals", live, { event: "3.0" })).toBe(
+      "/portal/prj_a/signals?kind=viewed&live=on&event=3.0"
+    )
+    expect(eventsHref("/portal/prj_a/signals", live, { before: "4.1" })).toBe(
+      "/portal/prj_a/signals?kind=viewed&before=4.1"
+    )
   })
 })
 

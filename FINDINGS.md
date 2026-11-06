@@ -175,6 +175,13 @@ invisible in a diff: one import line, every test green. Nobody has measured what
 it costs `/demo` in a browser; the point is that nothing needs measuring once
 the import is one word longer.
 
+**`Loom portal`, 6 November: its row waits for a release.** The snippet is
+what a customer pastes into their own site, against the version of
+`@jam-overture/loom` they installed, and 0.2.0 has no `/addressed` entry. A
+snippet importing it would fail on every site that pastes it today, so the
+portal keeps the selector until a release carries the entry, and then takes
+the row.
+
 **`(docs)/_lib/signals/markup.ts` is deliberately not in the table.** It reads
 all four constants on the server, where `/react` costs nothing, and it is about
 what the markup *says* rather than about finding a page. Changing it would be
