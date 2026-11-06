@@ -2,10 +2,11 @@ import type { ZodType, ZodTypeAny, ZodTypeDef } from "zod"
 
 import { catalogueFields, closedChoices, type CataloguedProp, type ClosedChoice } from "../catalogue.js"
 import type { InteractiveWhen } from "../interactivity.js"
-import type { JsonObject, JsonObjectView } from "../json.js"
+import type { JsonObject, JsonObjectView, JsonValue } from "../json.js"
 import type { BehaviourName } from "../render/behaviour.js"
 import type { LoomPrimitive } from "../render/primitive.js"
 import type { PropsIssue, PropsVerdict } from "../render/props.js"
+import type { AnswerExpectation, AnswerVerdict } from "../render/expected.js"
 import type { BindingDeclaration } from "../render/reads.js"
 import type { UnshownDeclaration } from "../render/unshown.js"
 import { NO_TEXT, type PrimitiveText } from "../render/text.js"
@@ -57,6 +58,11 @@ import type { PrimitiveRole } from "../role.js"
  *   primitive never reads (0181). Each entry is a fixed name or the name a prop
  *   gives (0184). Optional, and the second declaration where leaving it out and
  *   declaring it empty differ.
+ * - `expects` — the shape of answer it can read under each of those names, so an
+ *   answer the source was happy with and this primitive cannot draw is the named
+ *   absence of an answer rather than whatever a hand-written parse fell through
+ *   to (0357). Optional, keyed by declared name, and the top level only: each
+ *   row stays the primitive's to read.
  * - `unshown` — its own reading of the answers it was given, so the walk can say
  *   that eleven of twelve rows arrived and were not drawn (0206). The only
  *   declaration here that is a function, because how many rows survived a shape
@@ -216,6 +222,48 @@ export type PrimitiveDefinition<
    */
   readonly reads?: readonly BindingDeclaration[]
   /**
+   * The shape of answer this primitive can read, per binding name it reads —
+   * `{ entries: z.array(z.unknown()) }` on a feed, `{ value: figureSchema }` on
+   * a figure.
+   *
+   * The seam validates an answer against the **source's** schema, which is a
+   * claim about a host's database and says nothing about what can go on a page;
+   * so a bound primitive carries its own schema for what it draws (0180). Until
+   * this existed that schema was private to the component, which left the one
+   * mistake nothing could catch: a list bound to a primitive that draws a
+   * figure resolves cleanly, is handed over, and is refused inside a component
+   * where the only report of it is whatever that component chose to draw.
+   *
+   * **The top level only.** A row's shape is the one thing only the component
+   * knows, and a listing that skips a row it cannot read is doing its job
+   * rather than failing (0175); what it dropped is reported with a count by
+   * `unshown` (0206). So an expectation answers *is this the kind of answer I
+   * asked for* and never *is every row in it drawable*, and the two halves stay
+   * where each can be told the truth.
+   *
+   * Keyed by the name as **declared** — the string, or a prop-named
+   * declaration's `default` (0184). A node that renames the binding it draws
+   * from has not changed the shape this primitive draws, so the expectation
+   * belongs to the declaration rather than to whatever the node called it.
+   *
+   * Every key must be a name `reads` declares. The registry refuses one that is
+   * not, which is the drift `frames`, `copy` and `names` are each checked for
+   * and fails the same silent way: a binding renamed in `reads` would leave an
+   * expectation here checking nothing, for ever.
+   *
+   * `ZodTypeAny`, like every other schema this file holds and for the same
+   * reason: the output type is discarded, so the only thing the declaration has
+   * to be is a Zod schema. Narrowing it to one producing `JsonValue` would
+   * refuse `z.array(z.unknown())`, which is the schema the library's own feed
+   * actually holds.
+   *
+   * Optional, and unlike `reads` and `copy` there is no claim in its absence to
+   * distinguish from an empty one: a primitive that has declared no expectation
+   * for a name is handed that name's answer exactly as it was before this
+   * existed. `{}` says the same thing, so nothing reads it differently.
+   */
+  readonly expects?: Readonly<Record<string, ZodTypeAny>>
+  /**
    * What this primitive made of each answer it was given: the rows it found and
    * the rows it placed. The walk reports the ones where those differ.
    *
@@ -298,6 +346,17 @@ export type PrimitiveEntry = {
    */
   readonly reads: readonly BindingDeclaration[] | undefined
   /**
+   * The declared answer shapes, erased to validators and keyed by declared
+   * name. `undefined` for the primitive that declared none, which is every
+   * primitive that reads no data and most of the ones that do.
+   *
+   * Erased here rather than carried as schemas for `validate`'s reason: the one
+   * place that still holds every schema is the one place that should turn it
+   * into a function, and nothing in the render path then depends on which
+   * schema library declared it.
+   */
+  readonly expects: Readonly<Record<string, AnswerExpectation>> | undefined
+  /**
    * The declared reading of this node's answers, or `undefined` where the author
    * has not said. Nothing to check at registration — there are no names in it
    * and no props it could name — so it is carried straight through.
@@ -350,6 +409,62 @@ const freezeNames = (
   return Object.freeze(copy)
 }
 
+/**
+ * The first reason a schema gave, as one line a diagnostic can carry.
+ *
+ * Private here and private again in `data/adapter.ts`, which says the same
+ * sentence about a source's own schema. Shared between them it would have to be
+ * exported from the package, and a formatter for somebody else's error type is
+ * not a thing this library should promise to keep.
+ */
+const firstIssueOf = (error: {
+  issues: readonly { path: readonly PropertyKey[]; message: string }[]
+}): string => {
+  const [issue] = error.issues
+  if (!issue) return "refused, without saying why"
+
+  const path = issue.path.length === 0 ? "" : `${issue.path.map(String).join(".")}: `
+
+  return `${path}${issue.message}`
+}
+
+/**
+ * Declared answer shapes, erased to validators at declaration.
+ *
+ * Copied into a frozen null-prototype map for `freezeText`'s reason, and erased
+ * for `validate`'s: the schema is turned into a function in the one place that
+ * still holds it, so the render path never has to know it was Zod.
+ *
+ * The parse output is discarded and the answer the primitive receives is the one
+ * the source gave, which is the same bargain `verdictFor` makes with props and is
+ * load-bearing for the same reason. An expectation is a gate rather than a
+ * transform: 0180 is explicit that unknown keys on a row are stripped and not
+ * refused, and a page assembled from whatever this schema happened to keep would
+ * be a function of this deployment's schema version rather than of the answer.
+ */
+const freezeExpectations = (
+  expects: Readonly<Record<string, ZodTypeAny>> | undefined
+): Readonly<Record<string, AnswerExpectation>> | undefined => {
+  if (!expects) return undefined
+
+  const copy: Record<string, AnswerExpectation> = Object.create(null) as Record<
+    string,
+    AnswerExpectation
+  >
+
+  for (const [name, schema] of Object.entries(expects)) {
+    copy[name] = (answer: JsonValue): AnswerVerdict => {
+      const parsed = schema.safeParse(answer)
+
+      return parsed.success
+        ? { outcome: "readable" }
+        : { outcome: "unreadable", detail: firstIssueOf(parsed.error) }
+    }
+  }
+
+  return Object.freeze(copy)
+}
+
 const toIssue = (issue: { path: readonly (string | number | symbol)[]; message: string }): PropsIssue => ({
   path: issue.path.length === 0 ? "props" : issue.path.map(String).join("."),
   message: issue.message,
@@ -396,6 +511,7 @@ export const definePrimitive = <
   role: definition.role,
   copy: definition.copy,
   reads: definition.reads,
+  expects: freezeExpectations(definition.expects),
   unshown: definition.unshown,
   /**
    * The one narrowing cast in the SDK, and the invariant that makes it sound:

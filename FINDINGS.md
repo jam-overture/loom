@@ -8,6 +8,71 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-11-05 (evening) — a page can be served per audience now, and the two halves that would let the portal offer it are a schema change and a screen
+
+**Filed by:** `Loom framework` · **Owned by:** `Loom portal` (the screen) and
+`Loom framework` (the store dimension) · **Status:** open — **nothing is
+broken and nothing is blocked today**; filed because unit 9 now has its record
+and the remaining work is nameable
+
+[0359](decisions/0359-an-audience-rule-is-a-conjunction-of-scalar-clauses-and-a-composed-page-is-a-projection-of-a-revision.md)
+built 0263 clauses 1 to 4: `audiencesFor` sorts a reader by rules over
+`RenderRequest.context`, `composeTreeForContext` lays the matched deltas onto
+the base, and `composingTreeSourceFromStore` is the sibling 0263 said
+`treeSourceFromStore` would gain. All published through `./store`.
+
+**What `docs/portal.md` unit 9 still needs, and neither half is in that record:**
+
+| half | whose | what it is |
+| --- | --- | --- |
+| the store dimension | `Loom framework` | audience-scoped deltas and their rules, persisted. A schema change on top of 0260's, which is why 0359 took a seam (`AudienceOverlaySource`) instead and said so |
+| a rule editor | `Loom portal` | an owner naming an audience, writing its clauses, and **ordering the rules**, because the last matching rule wins a contested node |
+
+**The one thing a screen has to teach**, and it is the only part of 0359 a
+person must understand: rules are an ordered list, general to specific, and the
+order is what resolves two deltas reaching one node. A screen that presents
+rules as an unordered set would be presenting a different model from the one
+that runs.
+
+**And a reading that will be wanted the first time a base moves.** A base edit
+stales every audience delta authored against the revision it left, and 0359
+refuses the render rather than quietly serving the base — so a deployment
+serving three audiences cannot publish a base change without rebasing three
+deltas. That is the same shape 0340 gave a waiting proposal, and the *stale /
+conflicts* reading that screen already has is the one audience deltas will need.
+
+---
+## 2026-11-05 (evening) — a defensive invariant check in new code was unreachable, and the thing that makes it unreachable is one line in `insert`
+
+**Filed by:** `Loom framework` · **Owned by:** `Loom framework` · **Status:**
+open — **no defect and no edit outstanding**; filed for the same reason the
+8 October entry on types printed whole was: the constraint is real, it is not
+written where a run would meet it, and the next thing that composes operations
+from two sources will have the same fear
+
+`composeTreeForContext` is the first place in this repository where
+**operations authored by two separate deltas, each judged against the same base,
+are applied to one tree**. The obvious fear is a pair that each insert the same
+node id: each is fine alone, and together they would make a tree with two of one
+id, which every downstream address resolves to the wrong half of.
+
+So it shipped with `validateTreeInvariants` over the composed root and a
+`collides` error beside it. **A planted mutation that removed the check changed
+nothing** — `insert` already refuses a node whose id the tree holds, so the
+second insert fails as `duplicate-node-id` long before a tree exists to
+invalidate, and duplicate ids are the only invariant that function has. The
+check and its error code were deleted rather than kept, and the reason is now a
+comment where the check was.
+
+**Why it is filed rather than just removed.** The reasoning took a mutation to
+settle and it is not written anywhere a future run would find it: nothing says
+*the only structural invariant a tree has is unique ids*, and nothing says
+*`insert` is where that is enforced*. Both are true, both are one grep away
+from being forgotten, and the next composer — the store dimension above, a
+merge of two proposals, anything that replays two logs — will write the same
+defensive branch. Cheapest fix is a sentence in `src/tree/apply.ts`'s own
+comment; it was not taken here because this branch had no other reason to touch
+that file and the claim deserves its own diff.
 ## 2026-11-06 — *Signals*' range picker and hourly chart need page views counted by hour, and the kept deliveries can only be walked one page at a time
 
 **Filed by:** `Loom portal` · **Owned by:** `Loom signals` (`src/signals/`,
@@ -32926,8 +32991,16 @@ deliberate.
 
 ## 2026-09-12 — the data seam has been published for four weeks and nothing in the library reads one
 
-**Filed by:** `Loom docs` · **Owned by:** `Loom daily build` · **Status:** open —
-the page that needed it shipped around it
+**Filed by:** `Loom docs` · **Owned by:** `Loom daily build` · **Status:**
+**part 1 closed** by `reads` ([0181](decisions/0181-a-primitive-declares-the-binding-names-it-reads-and-saying-nothing-is-not-saying-none.md),
+[0184](decisions/0184-a-primitive-may-read-under-whichever-name-a-prop-gives.md));
+**part 2 closed** by `expects` on 6 November 2026
+([0357](decisions/0357-a-primitive-declares-the-shape-of-answer-it-reads-and-the-rows-inside-it-stay-its-own.md),
+#781) — **except the catalogue projection, which is still open and is now its
+own entry at the bottom of this file.** The warning callout on the page can lose
+the half that says the shape is the reader's to write; the half that says no
+starter primitive binds anything is still true until `Loom primitives` adopts
+the field, which is also filed below.
 
 *Where the content comes from* is the site's page on `loom:data`. Writing it
 meant answering a reader's obvious next question — *so which primitive do I put
@@ -66373,6 +66446,103 @@ a `decisions/` link in a record. So far it has only ever hit prose links, where
 the cost is one ugly line.
 
 ---
+## 2026-11-06 — the two bound primitives carry the shape they draw as a private schema, and there is now a declaration for it
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom primitives`
+(`src/primitives/loom.feed.ts`, `src/primitives/loom.tally.ts`) · **Status:**
+open — **nothing is broken and no test is failing.** Both primitives work
+exactly as they did; this is a declaration they can now make and could not
+before.
+
+[0180](decisions/0180-a-primitive-that-draws-an-answer-declares-the-shape-it-can-draw.md)
+clause 2 decided that a primitive declaring an answer carries its own schema for
+what it draws, and had nowhere to put it: `definePrimitive` had no field, which
+0180 says in its own consequences and filed. That field now exists —
+`expects`, [0357](decisions/0357-a-primitive-declares-the-shape-of-answer-it-reads-and-the-rows-inside-it-stay-its-own.md)
+— and this lane owns the two primitives that would use it.
+
+What moves, and it is one line each:
+
+- **`loom.feed`** declares `expects: { entries: entriesSchema }`, where
+  `entriesSchema` is the `z.array(z.unknown())` it already holds. Its
+  `entrySchema` stays exactly where it is: 0357 clause 2 is explicit that the
+  top-level shape is the framework's question and each row stays the
+  primitive's, because skipping a row it cannot read is
+  [0175](decisions/0175-a-listing-skips-the-row-it-cannot-read-and-fails-the-one-it-cannot-place.md)
+  doing its job.
+- **`loom.tally`** declares `expects: { value: figureSchema }`, the union it
+  already holds. That one *is* the whole answer, so the top-level parse in
+  `readAnswer` becomes dead and can go.
+
+What it buys, in both: an answer in a shape the primitive cannot draw stops
+being invisible outside the component. It is reported as `data-unavailable` with
+reason `unreadable-answer`, against the source that answered and the name it
+answered under, and the component is handed the `unavailable` outcome it already
+renders a declared line for (0180 clause 3) instead of falling through a
+hand-written parse. A list of services bound to a `loom.tally` is the case this
+closes.
+
+Two things to know before adopting:
+
+1. **The expectation is keyed by the name as *declared*** — for both of these
+   that is the prop-named declaration's `default`, so `entries` and `value`,
+   never the prop and never what a node renamed it to
+   ([0184](decisions/0184-a-primitive-may-read-under-whichever-name-a-prop-gives.md)).
+   The registry refuses a key that is not a name `reads` declares.
+2. **The answer handed over is still the source's own**, unparsed. 0357 clause 3
+   discards the parse output deliberately, so unknown keys on a row are still
+   neither stripped nor refused, which is what 0180 asked for.
+
+No deadline and nothing blocked on it. Until one of them declares, `expects` is
+a field nothing in the library uses, which is said plainly in 0357's
+consequences.
+
+---
+## 2026-11-06 — an answer's shape is checked at the seam and the catalogue still cannot tell a model what shape a primitive wants
+
+**Filed by:** `Loom daily build` · **Owned by:** `@jonathanbravecredit` — it is
+a question about a documented limit rather than a defect · **Status:** open —
+**the half that catches a mistake shipped; this is the half that would prevent
+one being written.**
+
+The 12 September entry above asked for two things and named one remedy for both:
+a declared shape on `definePrimitive`, *projected into the catalogue beside
+`props`*. The declaration and the check shipped today (0357). **The projection
+did not, and it is being raised rather than quietly dropped.**
+
+`catalogue.ts` says why, deliberately and in its own words:
+
+> It is deliberately shallower than the Zod schemas it comes from: prop names
+> and whether each is required, not their types. **A structural description of
+> arbitrary Zod is a second schema language to maintain**, and the model already
+> sees concrete prop values in the tree outline, so the marginal value is small
+> next to the cost of keeping it honest.
+
+That argument was made about **props**, and props have a tree outline beside
+them that shows a model concrete values. An **answer** has nothing of the kind:
+it comes from a host's database at request time, so there is no example of one
+anywhere a model can see. The reasoning may still hold and may not, and that is
+the question.
+
+Three ways to go, with what each costs:
+
+1. **Nothing.** A model writing a binding is told which sources exist and which
+   names a primitive reads, and learns the shapes do not match when the page
+   reports `unreadable-answer`. Cheapest, and the mistake is now at least named.
+2. **A closed vocabulary for the outermost layer only** — `object`, `array`,
+   `string`, `number`, `boolean`, `null`, `unknown` — plus the fields when it is
+   an object, which `catalogueFields` already projects for props. Six members
+   and one layer, which is a long way from a schema language, and enough to stop
+   a list being bound to a figure before anyone writes it. **This is the
+   recommendation.**
+3. **A full structural projection.** What `catalogue.ts` rejects, and the thing
+   that would also make a *compose-time* compatibility check possible against a
+   source's declared `answers` schema — 0357's first rejected alternative, which
+   is unsound without it.
+
+It is yours rather than this lane's because (2) edits the sentence above, and a
+documented deliberate limit is not something to widen in passing on the strength
+of one finding.
 ## 2026-11-06 — page views are counted by hour now, so the range picker and the chart are the portal's to draw
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom portal`

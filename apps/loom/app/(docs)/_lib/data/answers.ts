@@ -278,6 +278,7 @@ const CAUSED_BY: Readonly<Record<DataUnavailable["reason"], TroubleBinding | "no
   "not-resolved": "nothing one page can do",
   "invalid-params": "services",
   "invalid-answer": "reviews",
+  "unreadable-answer": "nothing one page can do",
   "adapter-threw": "slots",
   unavailable: "stock",
   refused: "orders",

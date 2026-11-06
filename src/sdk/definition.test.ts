@@ -5,7 +5,7 @@ import { z } from "zod"
 import type { JsonObjectView } from "../json.js"
 import type { LoomPrimitiveProps } from "../render/primitive.js"
 
-import { definePrimitive } from "./definition.js"
+import { definePrimitive, type PrimitiveDefinition } from "./definition.js"
 
 const anyPrimitive = ({ children }: LoomPrimitiveProps) => createElement("div", null, children)
 
@@ -237,5 +237,57 @@ describe("the control names a definition declares", () => {
     })
 
     expect(dialogFor({ present: "label" }).names["present"]).toBe("label")
+  })
+})
+
+describe("the answer shapes a primitive declares", () => {
+  const listingFor = (expects: PrimitiveDefinition["expects"]) =>
+    definePrimitive({
+      type: "loom.listing",
+      description: "A list of entries a source answered with",
+      props: z.object({}),
+      reads: ["entries"],
+      ...(expects ? { expects } : {}),
+      component: anyPrimitive,
+    })
+
+  /**
+   * `undefined` rather than an empty map, and unlike `reads` and `copy` the two
+   * say the same thing: a name with no expectation is handed its answer
+   * unchecked either way. It is carried as absence because that is what the
+   * author wrote.
+   */
+  it("is undefined when the author declared none", () => {
+    expect(listingFor(undefined).expects).toBeUndefined()
+  })
+
+  it("erases each schema to a verdict the render path can call", () => {
+    const entry = listingFor({ entries: z.array(z.unknown()) })
+
+    expect(entry.expects?.["entries"]?.([])).toEqual({ outcome: "readable" })
+    expect(entry.expects?.["entries"]?.("not a list")).toMatchObject({ outcome: "unreadable" })
+  })
+
+  it("carries the first reason the schema gave, so a diagnostic can say it", () => {
+    const entry = listingFor({ entries: z.object({ title: z.string() }) })
+    const verdict = entry.expects?.["entries"]?.({ title: 7 })
+
+    expect(verdict).toMatchObject({ outcome: "unreadable" })
+    if (verdict?.outcome !== "unreadable") return
+
+    expect(verdict.detail).toContain("title")
+  })
+
+  it("copies what it was given, so a later mutation cannot change a rendered page", () => {
+    const declared = { entries: z.array(z.unknown()) }
+    const entry = listingFor(declared)
+
+    declared.entries = z.array(z.string()) as never
+
+    expect(entry.expects?.["entries"]?.([1, 2])).toEqual({ outcome: "readable" })
+  })
+
+  it("has no prototype, so a binding named after one of Object's is an ordinary key", () => {
+    expect(Object.getPrototypeOf(listingFor({ entries: z.array(z.unknown()) }).expects)).toBeNull()
   })
 })
