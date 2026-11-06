@@ -288,7 +288,48 @@ the branch head; what they were is in the finding.
 
 ### The gate
 
-GATE_PLACEHOLDER
+`pnpm install && pnpm verify` — **`EXIT=0`**, read out of a file written as the
+last thing on its line and read in a separate command. **The harness's own
+completion notice also said exit code 0 and that is not why this says green**;
+the file is. (This is the fourth-instance rule in `docs/routines.md`, and the
+notice happened to agree this time.)
+
+| | measured | tests |
+| --- | --- | --- |
+| framework | 261 files | **6,292** |
+| application | 415 files | **6,762** |
+| of which `(docs)` | 144 files | **2,235** |
+
+**13,054 pass in total. Nothing failed, nothing was skipped, and no test was
+weakened.**
+
+**+14 tests, all of them this lane's** — 10 in `search/generated.test.ts` and 4
+in `api-doors.test.tsx`. The `(docs)` baseline was **2,221 across the same 144
+files**, measured in this session on `origin/main` at `d1c3db5` with this
+branch's changes stashed, green. The framework is untouched by this branch and
+the application's total is that baseline plus the same 14 — derived rather than
+separately measured, which is said here rather than left to be assumed.
+
+**One pre-existing assertion changed its claim, and it is the point of the
+change rather than a casualty of it.** `generated.test.ts`' *carries each
+door's own sentence* expected `"The starter library"` in the front door's
+indexed body. That expectation **was the duplication**: the sentence it wanted
+there is the `@jam-overture/loom-primitives` page's own summary, which the
+contents file carries under that page and ranks above any body match. It now
+reads *carries the specifier a reader types, and not the summary the door's own
+page already has*, and asserts the absence it used to assert the presence of.
+Nothing was loosened: the assertion that the specifier is present is unchanged,
+and two more were added beside it.
+
+- `findings:check`: **1,442 findings, 0 malformed**
+- `reports:check`: **2,104 visuals, 148.1MB, none over 1.1MB** (417 cited by no
+  file, all pre-existing — this run's four are cited by this report)
+- `prerender:check`: **138 prerendered pages**, 2,067 text junctions, 0 run
+  together; 3 metadata conventions, 0 unserved
+
+**One red run, and it was mine and not the branch's** — the stale `dist/`
+above. It is in this report because the failure it produced names a remedy
+that would have been the wrong thing to do.
 
 ### The search index
 
@@ -365,4 +406,15 @@ composed from the library rather than arranged locally (#709).
 
 ## The preview
 
-PREVIEW_PLACEHOLDER
+*Taken from the `vercel[bot]` comment after the pull request was opened, not
+composed from the branch name.*
+
+https://loom-git-docs-79-the-index-p-8cc419-jpizzolato36-6341s-projects.vercel.app
+
+The page the pictures are of:
+
+- https://loom-git-docs-79-the-index-p-8cc419-jpizzolato36-6341s-projects.vercel.app/docs/api-reference
+
+Every picture above was taken against a build in this container, not fetched
+from the preview: `*.vercel.app` is denied by the environment's egress policy,
+which is the open finding of 12 October and still true.
