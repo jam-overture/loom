@@ -12,7 +12,7 @@ import {
 } from "drizzle-orm/pg-core"
 
 /**
- * Five tables: the buffer batches wait in, and the four counters that outlive
+ * Six tables: the buffer batches wait in, and the five counters that outlive
  * them.
  *
  * The split is 0146's — raw signals are short-lived and aggregates are durable
@@ -20,11 +20,11 @@ import {
  * would make the retention rule a `DELETE` somebody has to remember to write
  * correctly forever.
  *
- * All five carry `application_id` (0269), led by it in every key and every
+ * All six carry `application_id` (0269), led by it in every key and every
  * index, on the same terms as the store's four: a reader is filed against the
  * application whose page they read, and no reading here spans two.
  *
- * All five then carry `audience_id` immediately after it
+ * All six then carry `audience_id` immediately after it
  * ([0284](../../decisions/0284-a-signal-names-the-audience-it-was-collected-under-and-the-predicate-stays-in-the-control-plane.md)),
  * which is the second of the two migrations
  * [0273](../../decisions/0273-the-reader-tables-take-the-application-now-and-the-audience-when-it-is-ratified.md)
@@ -304,5 +304,64 @@ export const loomReaderPageViews = pgTable(
     primaryKey({
       columns: [table.applicationId, table.audienceId, table.treeId, table.revision],
     }),
+  ]
+)
+
+/**
+ * Page views that began, by the hour they began in.
+ *
+ * **The sixth table, and the only one in this subsystem with a clock in its
+ * key.** Everything else here is either timeless — a tally, a funnel answer, a
+ * region bucket and a page-view total say *so far* and nothing about when — or
+ * short-lived, which is the buffer. `docs/portal-wireframes.md` asks for a
+ * range picker and a chart of page views by hour, and neither is answerable
+ * from a counter with no time in it or from a capped scan of the deliveries
+ * (`arrivals.ts`, which says why at length).
+ *
+ * It is written by the door, in the same transaction as the page-view total it
+ * slices, from the same openings — so the hours of a revision sum to its
+ * `opened` for every arrival counted after this table existed, and the two can
+ * never disagree about how many readers arrived.
+ *
+ * Keyed like every other counter — the application, the audience, the tree and
+ * the revision — with the hour last, so a reading for one page is a prefix scan
+ * and a reading for the deployment is the second index below.
+ */
+export const loomReaderArrivals = pgTable(
+  "loom_reader_arrivals",
+  {
+    /** See `loomReaderSignals.applicationId`. */
+    applicationId: text("application_id").notNull().default("app_default"),
+    /** See `loomReaderSignals.audienceId`. In the key here, as it is on the other counters. */
+    audienceId: text("audience_id").notNull().default("aud_everyone"),
+    treeId: text("tree_id").notNull(),
+    revision: integer("revision").notNull(),
+    /**
+     * The hour, as the instant it began, in UTC.
+     *
+     * A `timestamptz` rather than a number of hours since an epoch, so that a
+     * range is a `BETWEEN` an operator can read and a bucket is an instant
+     * every other column in this schema is comparable with. The truncation is
+     * the writer's, not the column's: nothing here constrains it to the hour,
+     * and `arrivals.ts` is the one place the unit is decided.
+     */
+    hour: timestamp("hour", { withTimezone: true }).notNull(),
+    /** Page views that began in this hour. Counted once, at the door, never recounted. */
+    views: bigint("views", { mode: "number" }).notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull(),
+  },
+  (table) => [
+    primaryKey({
+      columns: [table.applicationId, table.audienceId, table.treeId, table.revision, table.hour],
+    }),
+    /**
+     * Every tree of one application, by hour, which is the deployment-wide
+     * chart and the only read here whose cost grows with the range.
+     *
+     * The primary key serves a reading of one page, because that read names the
+     * tree and the revision; a reading over the whole deployment names neither,
+     * and without this it would scan every row of every page to find a month.
+     */
+    index("loom_reader_arrivals_hour_idx").on(table.applicationId, table.hour),
   ]
 )
