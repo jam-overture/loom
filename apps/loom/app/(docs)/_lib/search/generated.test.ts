@@ -3,7 +3,13 @@ import { describe, expect, it } from "vitest"
 import { apiEntries } from "../api/reference"
 import { docsHref, docsSections } from "../nav"
 
-import { generatedPageWords } from "./generated"
+import {
+  everyPageSummary,
+  generatedPageWords,
+  repeatedSummaries,
+  repeatedSummarySentence,
+  summariesRepeatedIn,
+} from "./generated"
 
 /**
  * The words the reference pages contribute to the search box.
@@ -92,11 +98,49 @@ describe("the front door of the reference", () => {
     expect(front()).toContain("it is almost certainly behind one you have not opened")
   })
 
-  it("carries each door's own sentence, and the specifier it is about", () => {
+  /**
+   * **The specifier, and not the sentence under it.**
+   *
+   * This assertion used to read *carries each door's own sentence* and expect
+   * *"The starter library"* in this body. It was wrong in the one way an
+   * assertion about an index can be: the sentence it wanted here is the
+   * `@jam-overture/loom-primitives` page's own summary, which the contents
+   * file carries under that page and ranks above any body match. Holding it
+   * here held **eighteen summaries in the index twice**, and the second copy
+   * answers a query about one door with the page that lists all of them.
+   *
+   * What a reader types is the specifier, and that is what this body keeps.
+   * The sentence is still on the screen; it is the search box that has stopped
+   * being told it twice. `summariesRepeatedIn` below is the general form.
+   */
+  it("carries the specifier a reader types, and not the summary the door's own page already has", () => {
     /* The starter library, under the package it ships as rather than the
        subpath this workspace reaches it through — `_lib/packages.ts`. */
     expect(front()).toContain("@jam-overture/loom-primitives")
-    expect(front()).toContain("The starter library")
+    expect(front()).not.toContain("The starter library")
+  })
+
+  it("carries no door's summary and no door's name count", () => {
+    const doors = docsSections
+      .filter((section) => section.slug === "api-reference")
+      .flatMap((section) => section.pages.filter((page) => page.slug !== ""))
+
+    expect(doors.length).toBeGreaterThan(15)
+
+    for (const door of doors) expect(front(), door.slug).not.toContain(door.summary)
+
+    /*
+     * The counts: eighteen digits read off the package, so eighteen things
+     * that move when another lane publishes a name. `600 names` is a label
+     * beside a row rather than a query.
+     *
+     * Asserted as *no specifier is followed by a number*, which is the shape
+     * of a row and nothing else on the page. The whole-package figures stay
+     * indexed and should — *this package publishes 1,897 names in all* is a
+     * sentence somebody wrote here, and the argument around it is the one
+     * thing only this page says.
+     */
+    expect(front()).not.toMatch(/@jam-overture\/[\w./-]+\s+\d/)
   })
 })
 
@@ -122,5 +166,116 @@ describe("a page about one import", () => {
        page — which is what `data-search="off"` on that list is for. */
     expect(react()).toContain("Start with the prose")
     expect(react()).not.toContain("Rendering a tree")
+  })
+})
+
+/**
+ * The rule that notices the next instance, held against made-up pages.
+ *
+ * The site's own answer is **nothing**, which is what the last block here
+ * asserts and also what makes it worthless on its own: a reader that always
+ * returned an empty list would pass it. So the rule is exercised against
+ * summaries and bodies written for the purpose, the way `plain.ts` is, and the
+ * real site is asked the same question afterwards.
+ */
+describe("a summary the index would hold twice", () => {
+  const bodies = (entries: readonly (readonly [string, string])[]) => new Map(entries)
+
+  it("is found, and names the page it belongs to and the body that repeats it", () => {
+    const found = summariesRepeatedIn(
+      [{ href: "/docs/api-reference/signals", summary: "Reader signals, and the parser." }],
+      bodies([["/docs/api-reference", "Every door on the site. Reader signals, and the parser. 610 names."]])
+    )
+
+    expect(found).toHaveLength(1)
+    expect(found[0]?.page).toBe("/docs/api-reference/signals")
+    expect(found[0]?.indexedUnder).toBe("/docs/api-reference")
+    expect(found[0]?.summary).toBe("Reader signals, and the parser.")
+  })
+
+  it("is not found where a body merely writes about the same subject", () => {
+    expect(
+      summariesRepeatedIn(
+        [{ href: "/docs/api-reference/signals", summary: "Reader signals, and the parser." }],
+        bodies([["/docs/api-reference", "Reader signals have a door of their own, and a parser behind it."]])
+      )
+    ).toEqual([])
+  })
+
+  it("is found once per body, so a sentence on two pages is two repeats", () => {
+    const found = summariesRepeatedIn(
+      [{ href: "/docs/a", summary: "One line." }],
+      bodies([
+        ["/docs/api-reference", "Before. One line. After."],
+        ["/docs/api-reference/door", "One line."],
+        ["/docs/api-reference/other", "Nothing of the sort."],
+      ])
+    )
+
+    expect(found.map((repeat) => repeat.indexedUnder)).toEqual([
+      "/docs/api-reference",
+      "/docs/api-reference/door",
+    ])
+  })
+
+  /**
+   * A page with no summary is a page the contents file describes by title
+   * alone, which `build.test.ts` holds against elsewhere. Here it matters for a
+   * duller reason: `"".includes` is true of every string, so an empty summary
+   * would report every body on the site as a repeat of nothing.
+   */
+  it("is not reported for a page with no summary at all", () => {
+    expect(
+      summariesRepeatedIn(
+        [
+          { href: "/docs/a", summary: "" },
+          { href: "/docs/b", summary: "   " },
+        ],
+        bodies([["/docs/api-reference", "Any words at all."]])
+      )
+    ).toEqual([])
+  })
+
+  it("prints the page, the body and the one attribute that fixes it", () => {
+    const sentence = repeatedSummarySentence({
+      page: "/docs/api-reference/signals",
+      indexedUnder: "/docs/api-reference",
+      summary: "Reader signals, and the parser.",
+    })
+
+    expect(sentence).toContain("/docs/api-reference/signals")
+    expect(sentence).toContain("/docs/api-reference")
+    expect(sentence).toContain("twice")
+    expect(sentence).toContain('data-search="off"')
+    expect(sentence).toContain("Reader signals, and the parser.")
+  })
+})
+
+describe("the summaries this site's index holds", () => {
+  /**
+   * **Eighteen before this shipped, and the eighteen were the doors.** The
+   * front door printed each door's summary under its specifier, and the
+   * contents file already carries every one of them under the page it is
+   * about — so one sentence was in the index twice and the second copy
+   * answered a query about one import with the page that lists all of them.
+   *
+   * 654 compressed bytes of a cap with 267 left on it, measured against `main`
+   * at `d1c3db5`. The remedy is `data-search="off"` on the row's sentence and
+   * its count, which is why both of those are now absent above.
+   */
+  it("holds no page's summary twice", () => {
+    const repeats = repeatedSummaries()
+
+    expect(repeats.map(repeatedSummarySentence)).toEqual([])
+  })
+
+  /** The reader has to be real for the absence above to mean anything. */
+  it("is asked about every page on the site, written and generated", () => {
+    const summaries = everyPageSummary()
+
+    expect(summaries.length).toBeGreaterThan(50)
+    expect(summaries.filter(({ summary }) => summary.trim() === "")).toEqual([])
+    expect(summaries.map(({ href }) => href)).toContain("/docs/api-reference/signals")
+    expect(summaries.map(({ href }) => href)).toContain("/docs/getting-started/introduction")
   })
 })
