@@ -182,15 +182,18 @@ describe("a summary the index would hold twice", () => {
   const bodies = (entries: readonly (readonly [string, string])[]) => new Map(entries)
 
   it("is found, and names the page it belongs to and the body that repeats it", () => {
-    const found = summariesRepeatedIn(
+    const { repeats } = summariesRepeatedIn(
       [{ href: "/docs/api-reference/signals", summary: "Reader signals, and the parser." }],
       bodies([["/docs/api-reference", "Every door on the site. Reader signals, and the parser. 610 names."]])
     )
 
-    expect(found).toHaveLength(1)
-    expect(found[0]?.page).toBe("/docs/api-reference/signals")
-    expect(found[0]?.indexedUnder).toBe("/docs/api-reference")
-    expect(found[0]?.summary).toBe("Reader signals, and the parser.")
+    expect(repeats).toEqual([
+      {
+        page: "/docs/api-reference/signals",
+        indexedUnder: "/docs/api-reference",
+        summary: "Reader signals, and the parser.",
+      },
+    ])
   })
 
   it("is not found where a body merely writes about the same subject", () => {
@@ -198,12 +201,12 @@ describe("a summary the index would hold twice", () => {
       summariesRepeatedIn(
         [{ href: "/docs/api-reference/signals", summary: "Reader signals, and the parser." }],
         bodies([["/docs/api-reference", "Reader signals have a door of their own, and a parser behind it."]])
-      )
+      ).repeats
     ).toEqual([])
   })
 
-  it("is found once per body, so a sentence on two pages is two repeats", () => {
-    const found = summariesRepeatedIn(
+  it("is found once per body, so a sentence in two bodies is two repeats", () => {
+    const { repeats } = summariesRepeatedIn(
       [{ href: "/docs/a", summary: "One line." }],
       bodies([
         ["/docs/api-reference", "Before. One line. After."],
@@ -212,7 +215,7 @@ describe("a summary the index would hold twice", () => {
       ])
     )
 
-    expect(found.map((repeat) => repeat.indexedUnder)).toEqual([
+    expect(repeats.map((repeat) => repeat.indexedUnder)).toEqual([
       "/docs/api-reference",
       "/docs/api-reference/door",
     ])
@@ -232,22 +235,47 @@ describe("a summary the index would hold twice", () => {
           { href: "/docs/b", summary: "   " },
         ],
         bodies([["/docs/api-reference", "Any words at all."]])
-      )
+      ).repeats
     ).toEqual([])
   })
 
-  it("prints the page, the body and the one attribute that fixes it", () => {
-    const sentence = repeatedSummarySentence({
-      page: "/docs/api-reference/signals",
-      indexedUnder: "/docs/api-reference",
-      summary: "Reader signals, and the parser.",
-    })
+  /**
+   * **What was compared comes back with the answer, and off the same
+   * arguments.**
+   *
+   * Three mutations are the reason this is asserted rather than assumed, and
+   * all three were survivors of the shape this replaced: the comparison handed
+   * an empty map while a `bodies: number` beside it still counted the real
+   * ones, and either count replaced by the literal a test expected. A count is
+   * a claim about a comparison; these are the comparison's own two sides.
+   */
+  it("says which pages and which bodies the answer is about", () => {
+    const audit = summariesRepeatedIn(
+      [
+        { href: "/docs/a", summary: "One line." },
+        { href: "/docs/b", summary: "Another." },
+      ],
+      bodies([
+        ["/docs/api-reference", "Nothing of the sort."],
+        ["/docs/api-reference/door", "Nor here."],
+      ])
+    )
 
-    expect(sentence).toContain("/docs/api-reference/signals")
-    expect(sentence).toContain("/docs/api-reference")
-    expect(sentence).toContain("twice")
-    expect(sentence).toContain('data-search="off"')
-    expect(sentence).toContain("Reader signals, and the parser.")
+    expect(audit.repeats).toEqual([])
+    expect(audit.pages).toEqual(["/docs/a", "/docs/b"])
+    expect(audit.bodies).toEqual(["/docs/api-reference", "/docs/api-reference/door"])
+  })
+
+  it("prints the body, the page and the one attribute that fixes it, in that order", () => {
+    expect(
+      repeatedSummarySentence({
+        page: "/docs/api-reference/signals",
+        indexedUnder: "/docs/api-reference",
+        summary: "Reader signals, and the parser.",
+      })
+    ).toBe(
+      'loom: /docs/api-reference prints the summary of /docs/api-reference/signals into its indexed words, so the search box holds that one sentence twice and answers it with the wrong page. Mark the region data-search="off": "Reader signals, and the parser."'
+    )
   })
 })
 
@@ -255,37 +283,40 @@ describe("the summaries this site's index holds", () => {
   const audit = summaryAudit()
 
   /**
-   * **Both sides are real, and this is asserted before the answer below is
-   * believed.** A mutation is what put this test here: handing the reading an
-   * empty map of bodies made it look at no words at all and return the same
-   * empty list, and every assertion over that list stayed green. A site with
-   * nothing duplicated and a reader that never opened a page give the same
-   * answer, which is [0347]'s point exactly — *nothing to fix* and *nothing to
-   * fix it with* are two answers, and an empty one has to name its subject.
+   * **Both sides are real, and named, before the answer below is believed.**
+   *
+   * Asserted as membership rather than as a count, because a count is what a
+   * mutation can fabricate: `pages: 51` passed a `toBeGreaterThan(50)` while
+   * the comparison looked at nothing.
    */
   it("is asked of every page on the site and every body a generated page has", () => {
-    expect(audit.pages).toBeGreaterThan(50)
-    expect(audit.bodies).toBeGreaterThan(15)
+    expect(audit.pages).toContain("/docs/api-reference/signals")
+    expect(audit.pages).toContain("/docs/getting-started/introduction")
+    expect(audit.pages).toContain("/docs/architecture/decision-records")
+    expect(audit.pages.length).toBe(everyPageSummary().length)
+
+    expect(audit.bodies).toContain("/docs/api-reference")
+    expect(audit.bodies).toContain("/docs/api-reference/signals")
+    expect(audit.bodies).toContain("/docs/api-reference/cli")
+
     expect(everyPageSummary().filter(({ summary }) => summary.trim() === "")).toEqual([])
-    expect(everyPageSummary().map(({ href }) => href)).toContain("/docs/api-reference/signals")
-    expect(everyPageSummary().map(({ href }) => href)).toContain("/docs/getting-started/introduction")
   })
 
   /**
-   * The bodies are not merely present, they are **these** bodies.
+   * The bodies are not merely named, they hold the words.
    *
-   * A count of sixteen says a map was handed over; it does not say the map
-   * holds the words the reference pages really contribute. So a sentence only
-   * the front door says is handed in as if it were some page's summary, and
-   * the real bodies have to find it in the real place.
+   * A list of addresses says a map was handed over; it does not say the map
+   * holds the sentences the reference pages really contribute. So a sentence
+   * only the front door says is handed in as if it were some page's summary,
+   * and the real bodies have to find it in the real place.
    */
   it("compares against the words the reference pages really contribute", () => {
-    const found = summariesRepeatedIn(
+    const { repeats } = summariesRepeatedIn(
       [{ href: "/docs/invented", summary: "Loom is one package" }],
       generatedPageWords()
     )
 
-    expect(found.map((repeat) => repeat.indexedUnder)).toEqual(["/docs/api-reference"])
+    expect(repeats.map((repeat) => repeat.indexedUnder)).toEqual(["/docs/api-reference"])
   })
 
   /**

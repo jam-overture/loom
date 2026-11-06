@@ -60,6 +60,39 @@ export type RepeatedSummary = {
 }
 
 /**
+ * What was compared, and what came back — one value, because they cannot be
+ * two.
+ *
+ * **The answer this reading gives about the real site is `repeats: []`, so the
+ * answer has to name its subject.** That is
+ * [0347](../../../../../../decisions/0347-an-empty-fix-list-names-its-subject-so-nothing-to-fix-and-nothing-to-fix-it-with-are-two-answers.md)
+ * — *nothing to fix* and *nothing to fix it with* are two answers — and it is
+ * the rule here rather than a flourish, because a mutation showed the two are
+ * otherwise indistinguishable: swap the bodies for an empty map and this looks
+ * at no words at all, returns the same empty list, and every assertion over
+ * that list stays green.
+ *
+ * **The subject is the pages and bodies themselves, not a count of them**, and
+ * that distinction cost a second round of mutations. The first attempt
+ * published `pages: number` and `bodies: number` beside the repeats, and
+ * *three* mutations walked through it: the comparison handed an empty map
+ * while the counts still read the real arguments, and either count replaced by
+ * the literal the test expected. A count beside a comparison is a claim about
+ * it, and a claim is what goes stale or lies.
+ *
+ * So there is one function and one value. `pages` and `bodies` are derived from
+ * the very arguments `repeats` is computed from, in the same expression, and no
+ * edit can make the three disagree without changing all three.
+ */
+export type SummaryAudit = {
+  /** Every page whose summary was looked for, by address. */
+  readonly pages: readonly string[]
+  /** Every body it was looked for in, by address. */
+  readonly bodies: readonly string[]
+  readonly repeats: readonly RepeatedSummary[]
+}
+
+/**
  * Every page summary a generated page's body says again.
  *
  * **The plain version.** The search box ranks in four bands. The first three —
@@ -90,12 +123,12 @@ export type RepeatedSummary = {
  * carries.** It costs nothing to keep and it is the shape that notices the
  * third instance.
  *
- * ## It is split in two, because the site's own answer is empty
+ * ## Both sides are arguments, because the site's own answer is empty
  *
- * `repeatedSummaries()` reads the real site and is supposed to return nothing,
- * which makes every assertion over it true by accident — the lesson `plain.ts`
- * paid for twice. `summariesRepeatedIn` takes the two sides as arguments, so
- * the rule itself is held against summaries and bodies written to exercise it.
+ * `summaryAudit()` reads the real site and is supposed to find nothing, which
+ * makes every assertion over it true by accident — the lesson `plain.ts` paid
+ * for twice. This takes the two sides as arguments, so the rule itself is held
+ * against summaries and bodies written to exercise it.
  *
  * **Written pages are not excluded and do not need to be.** A written page's
  * words come from its file and its summary is written in `nav.ts`, so the two
@@ -107,8 +140,10 @@ export type RepeatedSummary = {
 export const summariesRepeatedIn = (
   summaries: readonly { readonly href: string; readonly summary: string }[],
   bodies: ReadonlyMap<string, string>
-): readonly RepeatedSummary[] =>
-  summaries.flatMap(({ href, summary }) =>
+): SummaryAudit => ({
+  pages: summaries.map(({ href }) => href),
+  bodies: [...bodies.keys()],
+  repeats: summaries.flatMap(({ href, summary }) =>
     /* An empty summary is in every body by `includes`, and says nothing. A
        page without one is a page the contents file describes by title alone,
        which `build.test.ts` already holds against. */
@@ -117,7 +152,8 @@ export const summariesRepeatedIn = (
       : [...bodies.entries()].flatMap(([indexedUnder, body]) =>
           body.includes(summary) ? [{ page: href, indexedUnder, summary }] : []
         )
-  )
+  ),
+})
 
 /** Every page on this site and the one line the contents file carries for it. */
 export const everyPageSummary = (): readonly { readonly href: string; readonly summary: string }[] =>
@@ -128,47 +164,17 @@ export const everyPageSummary = (): readonly { readonly href: string; readonly s
     }))
   )
 
-/**
- * What the real site holds twice, and what the question was asked of.
- *
- * **The answer is nothing, so the answer has to name its subject.** That is
- * [0347](../../../../../../decisions/0347-an-empty-fix-list-names-its-subject-so-nothing-to-fix-and-nothing-to-fix-it-with-are-two-answers.md)
- * — *nothing to fix* and *nothing to fix it with* are two answers — and it is
- * the rule rather than a flourish here, because a mutation proved the
- * difference is invisible otherwise.
- *
- * Replacing the bodies with an empty map made this reading look at **no words
- * at all** and return the same empty list, and the whole block of assertions
- * over it stayed green: a site with no duplicated summary and a reader that
- * never opened a page agree exactly. `pages` and `bodies` are what tell them
- * apart, and the test asserts both are real before it believes the third.
- */
-export type SummaryAudit = {
-  /** How many pages' summaries were compared. */
-  readonly pages: number
-  /** How many generated bodies they were compared against. */
-  readonly bodies: number
-  readonly repeats: readonly RepeatedSummary[]
-}
-
-export const summaryAudit = (): SummaryAudit => {
-  const summaries = everyPageSummary()
-  const bodies = generatedPageWords()
-
-  return {
-    pages: summaries.length,
-    bodies: bodies.size,
-    repeats: summariesRepeatedIn(summaries, bodies),
-  }
-}
+/** The same question, asked of the real site. Nothing repeated, and it says over what. */
+export const summaryAudit = (): SummaryAudit =>
+  summariesRepeatedIn(everyPageSummary(), generatedPageWords())
 
 /**
  * The sentence a repeat prints.
  *
- * It names the page whose summary it is first, because that is the page the
- * reader should have been sent to, and the body second, because that is the
- * file somebody has to edit. The remedy is named, since it is one attribute
- * and nobody would guess which.
+ * It names the body first, because that is the file somebody has to edit, and
+ * the page whose summary it is second, because that is where the search box
+ * already had the sentence. The remedy is named, since it is one attribute and
+ * nobody would guess which.
  */
 export const repeatedSummarySentence = (repeat: RepeatedSummary): string =>
   `loom: ${repeat.indexedUnder} prints the summary of ${repeat.page} into its indexed words, so the search box holds that one sentence twice and answers it with the wrong page. Mark the region data-search="off": "${repeat.summary}"`
