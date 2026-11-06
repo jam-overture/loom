@@ -118,6 +118,14 @@ export const READER_SIGNALS_DDL: readonly string[] = [
    * question only ever asked about the newest few.
    */
   `CREATE INDEX IF NOT EXISTS loom_reader_signals_uncounted_idx ON loom_reader_signals (application_id, seq) WHERE folded_at IS NULL`,
+  /**
+   * **One page view's deliveries** (0355), which is the *Events* drawer's read.
+   *
+   * Partial for the reason the uncounted index is partial, though the set it
+   * leaves out is the other one: a delivery that names no page view is never
+   * looked up by one, so an entry for it would be paid for and never read.
+   */
+  `CREATE INDEX IF NOT EXISTS loom_reader_signals_view_idx ON loom_reader_signals (application_id, view) WHERE view IS NOT NULL`,
   `ALTER TABLE loom_reader_signals ENABLE ROW LEVEL SECURITY`,
   `CREATE TABLE IF NOT EXISTS loom_reader_tallies (
     application_id text NOT NULL DEFAULT 'app_default',

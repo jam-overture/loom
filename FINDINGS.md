@@ -175,6 +175,13 @@ invisible in a diff: one import line, every test green. Nobody has measured what
 it costs `/demo` in a browser; the point is that nothing needs measuring once
 the import is one word longer.
 
+**`Loom portal`, 6 November: its row waits for a release.** The snippet is
+what a customer pastes into their own site, against the version of
+`@jam-overture/loom` they installed, and 0.2.0 has no `/addressed` entry. A
+snippet importing it would fail on every site that pastes it today, so the
+portal keeps the selector until a release carries the entry, and then takes
+the row.
+
 **`(docs)/_lib/signals/markup.ts` is deliberately not in the table.** It reads
 all four constants on the server, where `/react` costs nothing, and it is about
 what the markup *says* rather than about finding a page. Changing it would be
@@ -66485,3 +66492,107 @@ range threaded through the assembly. If it is ever built, the test to write
 first is that the hours it reports sum to the arrivals the window's own door
 rows report, because those two numbers come from different tables written by
 different writers and nothing today holds them together.
+## 2026-11-05 (evening) — the *Events* tab's reading handle landed, and the two things it will not do are the portal's to draw around
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom portal`
+(`apps/loom/app/(portal)/portal/[project]/signals/`) · **Status:** open —
+**nothing is blocked**; the handle is on `main`'s way and the screen is the
+remaining work. **It closes this lane's own 5 November (morning) entry — *the
+Events tab's store landed and its reading handle did not* — by
+`signals-75-the-events-a-screen-can-list`.**
+
+This closes this lane's own entry of this morning, *the Events tab's store
+landed and its reading handle did not*. All four of the things `Loom portal`
+asked the intake for are now there:
+[0355](decisions/0355-the-events-a-screen-lists-are-one-row-per-signal-and-one-page-view-is-read-on-a-key-the-caller-already-holds.md)
+is `readerEventsFor(applicationId)` in
+`apps/loom/app/_lib/reader-signals/events.ts`, scoped the way `readingsFor` is
+and bounded inside the handle rather than at the call site — so a screen cannot
+forget the budget, which it can with the journal the *Signals* screen reads
+today.
+
+**What it gives you.**
+
+| | |
+| --- | --- |
+| `list({ treeId?, cursor?, limit? })` | one row **per signal**, newest delivery first, exactly `limit` of them, with `older` for the next page and `undefined` where the page reaches the oldest kept delivery |
+| `ReaderEvent` | the signal **whole** (`event.signal`, the closed five-kind union, so `ms`, `open` and `within` are typed per kind), plus `id` for `?event=`, `receivedAt`, `sentAt`, `treeId`, `revision`, `audienceId`, `view`, and `countedAt` |
+| `pageView(key, limit?)` | the drawer's panel: that one page view's signals, oldest first, with `more` where there are more |
+
+**Two limits, both deliberate, both wanting a sentence on the screen rather than
+a change here.**
+
+1. **The kind chips are not a filter the handle has.** A kind lives inside the
+   delivery's JSON array, so filtering on it is either a predicate over a
+   thirty-day table or an over-read that discards — which breaks the exact page.
+   **Recommendation: the chips read the tallies**, which hold those counts
+   already and go on answering after a row is swept; the facet *counts* must
+   come from there anyway, because 0349's second clause is that nothing read
+   over all time comes out of these rows. The same reason there is no *of 4,812*
+   on the list: this handle counts nothing, by decision.
+2. **The drawer's panel shows the start of a page view.** It is bounded rather
+   than paged — a reader who stayed an hour has thousands of signals in one page
+   view — so an event late in a long page view is not inside its own panel.
+   `more` says so. If that reads badly on the screen, the fix is a cursor on the
+   panel and it is one field; ask rather than build around it.
+
+**And one thing that is a refusal rather than a gap.** There is no *this is
+where the page view began*. A batch says so on the wire and both journals drop
+it at the door
+([0219](decisions/0219-a-page-view-is-counted-once-at-the-door-and-the-over-count-in-the-node-counters-is-a-measurement.md)),
+because a row saying *this page view began at this instant* is the step toward a
+profile §7 of `docs/signals.md` refused — and a thirty-day window makes that
+argument stronger rather than weaker. The oldest kept delivery of a page view is
+not evidence either, since the sweep takes the oldest first. There is a test
+that fails if the field reappears, so please do not add one; a drawer that wants
+to say it should say *the deliveries kept from this page view* instead.
+
+**The `view` key is now read by a screen, which one clause of 0146 said nothing
+in the portal would do.** 0355 partially supersedes it, on the authority of
+[0349](decisions/0349-a-projects-reader-events-are-kept-thirty-days-by-default-and-the-tallies-stay-the-durable-record.md)
+rather than of this lane, and the four clauses carrying 0146's argument stand —
+including that correlation is scoped to one page view, which the narrowing
+enforces by signature: one key in, one page view out, with nothing that
+enumerates keys and nothing that asks what a row shares a key with. If the
+maintainer would rather the drawer did not show the key at all, the panel is one
+method and the list does not depend on it.
+
+---
+## 2026-11-05 (evening) — a page of events is exact because the handle holds a cursor the store could not give it, and that is the shape to copy rather than to tidy
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`apps/loom/app/_lib/reader-signals/events.ts`) · **Status:** open — **a note
+for a future run, not a defect**; nothing is asked of anybody today
+
+The *Events* list pages in **events** and the store pages in **deliveries**, and
+a delivery carries one signal to hundreds. So a page of fifty can end inside a
+delivery of sixty, at a position no `ReaderSignalPage` names — every cursor this
+repository hands out sits at a page boundary, which is the whole of what keyset
+paging promises.
+
+The handle's cursor is therefore `[the store's cursor, events already shown]`,
+base64url, opaque: *resume this chunk of deliveries and skip what has been
+drawn*. **It costs at most two reads per page**, and that is a property rather
+than luck — a chunk is `limit` deliveries, every delivery carries at least one
+signal, so a chunk that is not the last always holds enough to fill what a
+resumed chunk left short. The test that matters asserts every event appears
+exactly once across a full walk at eight different page sizes, which is this
+lane's double-count rule applied to a list.
+
+**Two things a future run should not do to it.**
+
+1. **Do not mint a store cursor from `seq`.** It is two lines — cursors are
+   `String(position)` and `seq` is published on the row — and it would be the
+   only place in the repository where a caller depends on the *encoding* of a
+   value every contract calls opaque and passed back unread. The day a store
+   pages by anything else, nothing would catch it.
+2. **Do not replace it with *skip N from the newest end*.** Page seven would
+   read six pages of deliveries to find its own, which is the cost that grows
+   with the kept window — the same objection that keeps the facet counts on the
+   tallies, one table down.
+
+**Where the shape generalises.** Any later list over these rows has the same
+mismatch between what a row is and what the store pages. The thing to copy is
+not the arithmetic but the discipline: the module above the store may keep a
+cursor of its own, and it may compose the store's cursor into it, and it may not
+take the store's cursor apart.
