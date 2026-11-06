@@ -20,6 +20,7 @@ import {
 import { rowSecurityOn } from "../testing/row-security.js"
 
 import { describeWindowApplyContract } from "./applied-window.contract.js"
+import { describeCorrelatedDeliveryContract } from "./correlated.contract.js"
 import { describeKeptDeliveryContract } from "./kept.contract.js"
 import { ensureReaderSignalsSchema } from "./migrate.js"
 import {
@@ -58,6 +59,10 @@ describeWindowApplyContract("postgresReaderTallyStore", async () =>
 )
 
 describeKeptDeliveryContract("postgresReaderSignalJournal", async () =>
+  postgresReaderSignalJournal(await freshDatabase())
+)
+
+describeCorrelatedDeliveryContract("postgresReaderSignalJournal", async () =>
   postgresReaderSignalJournal(await freshDatabase())
 )
 

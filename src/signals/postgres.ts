@@ -285,6 +285,13 @@ const journalIn = (db: LoomDatabase, application: ApplicationId): ReaderSignalJo
               : request.counted
                 ? isNotNull(loomReaderSignals.foldedAt)
                 : isNull(loomReaderSignals.foldedAt),
+            /**
+             * One page view's deliveries (0355), served by the partial index on
+             * the column. A request naming a key that no row carries is an
+             * empty page, which is what a page view whose rows have been swept
+             * is.
+             */
+            request?.view === undefined ? undefined : eq(loomReaderSignals.view, request.view),
             from === undefined
               ? undefined
               : direction === "older"
