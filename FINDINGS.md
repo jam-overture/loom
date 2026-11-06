@@ -73,6 +73,41 @@ merge of two proposals, anything that replays two logs — will write the same
 defensive branch. Cheapest fix is a sentence in `src/tree/apply.ts`'s own
 comment; it was not taken here because this branch had no other reason to touch
 that file and the claim deserves its own diff.
+## 2026-11-06 — *Signals*' range picker and hourly chart need page views counted by hour, and the kept deliveries can only be walked one page at a time
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom signals` (`src/signals/`,
+`apps/loom/app/_lib/reader-signals/`) · **Status:** open — **nothing is
+broken.** It is the input for the rest of 8a in `docs/portal.md`, which the
+portal will not build around.
+
+`docs/portal-wireframes.md` *1 · Signals* puts a range picker (last 24 hours,
+7 days, 30 days) over the whole screen, a figure for *page views in the range*
+with the change on the period before, and a bar chart of page views by hour
+across the range. The tallies keep no time (`docs/signals.md` rule 5), so the
+only source with time in it is the kept deliveries (0351), and the one way to
+read those is `journal.read`, which pages by delivery, 2,000 at most a call.
+
+A 30-day chart would have to read every delivery in thirty days on every
+render. The *Events* tab already caps itself at 2,000 deliveries a screen and
+says how far back it looked; a chart cannot do that honestly, because a bar
+drawn from part of an hour is a wrong number rather than a shorter list. So the
+portal has not drawn one, and will not draw one from a capped scan.
+
+What the portal needs, and nothing more:
+
+1. **Page views counted by hour for one application**, over a stated range of
+   receipt times (`receivedAt`, the only time the journal vouches for), so the
+   chart and both range figures are one bounded read. Counted from the kept
+   deliveries or kept beside the tallies as a counter by hour: the intake's
+   choice.
+2. **The range limited to the kept window**, and the answer saying where its
+   data starts, so *30 days* on a deployment that began keeping deliveries
+   last week says so rather than drawing three empty weeks.
+3. **Through a scoped handle** like `readingsFor(applicationId)`, so the portal
+   never reaches the table.
+
+Once it lands, the portal draws the range picker, the chart and the figures
+above both *Signals* tabs, and *By page*'s bars for a range on the same read.
 
 ---
 ## 2026-11-05 — the comparison band tells a reader to look right, and on a phone there is no right
@@ -237,9 +272,14 @@ overload is worth an argument that can be two things is this lane's call.
 ## 2026-11-05 — the *Events* tab needs reader events kept for 30 days, and the intake deletes each one once it is collected
 
 **Filed by:** `Loom portal` · **Owned by:** `Loom signals` (`src/signals/`,
-`apps/loom/app/api/reader-signals/`) · **Status:** **open.** Nothing in the
-portal is blocked: *Signals · By page* shipped on the tallies, and the *Events*
-tab waits for this.
+`apps/loom/app/api/reader-signals/`) · **Status:** **closed, 5 November 2026.**
+\#775 (0351) keeps each counted delivery for the window, thirty days by
+default and set by `LOOM_SIGNAL_KEPT_MS`, sweeps what is older, and states both
+ages on the reader-facing notice: points 1 to 3. Point 4 needed nothing new.
+The handle the portal already held, `readingsFor(application).journal`, is
+scoped to the application and its `read` pages kept deliveries newest first
+by cursor and narrows to one page, so `Loom portal` built *Signals · Events*
+on it without touching `src/signals/`.
 
 The maintainer settled on 5 November that individual reader events are kept for
 **30 days** by default, as per-deployment configuration, with the tallies

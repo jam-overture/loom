@@ -9,7 +9,9 @@ import { goalIdSchema, type Goal } from "./goal"
 import {
   countsWhen,
   goalReadingOf,
+  goalReadingsByPage,
   pageChoicesOf,
+  per100Of,
   partsByPageOf,
   readingSentence,
   whereSentence,
@@ -85,7 +87,39 @@ describe("goalReadingOf", () => {
   })
 })
 
+describe("goalReadingsByPage", () => {
+  const readings = {
+    pageViews: [pageViewsOf(HOME, 200), pageViewsOf(PRICING, 50)],
+    tallies: [tallyOf(HOME, homeHeading, { activations: 7 })],
+    parts: partsByPageOf(pages),
+  }
+
+  it("measures each page the goal covers on that page's own page views, and no other page", () => {
+    expect([...goalReadingsByPage(goal(), readings)]).toEqual([
+      [HOME.treeId, { count: 7, pageViews: 200 }],
+    ])
+  })
+
+  it("covers a page the goal names even where nothing on it was done yet", () => {
+    expect(new Map(goalReadingsByPage(goal({ pages: [PRICING.treeId] }), readings))).toEqual(
+      new Map([[PRICING.treeId, { count: 0, pageViews: 50 }]])
+    )
+  })
+
+  it("adds up to what the goal counted across its pages", () => {
+    const both = goal({ pages: [HOME.treeId, PRICING.treeId] })
+
+    expect(goalReadingOf(both, readings)).toEqual({ count: 7, pageViews: 250 })
+  })
+})
+
 describe("the sentences", () => {
+  it("says the rate per hundred to one place, and nothing with no page views", () => {
+    expect(per100Of({ count: 7, pageViews: 200 })).toBe("3.5")
+    expect(per100Of({ count: 1, pageViews: 3 })).toBe("33.3")
+    expect(per100Of({ count: 0, pageViews: 0 })).toBeUndefined()
+  })
+
   it("says the count, the page views and the rate per hundred", () => {
     expect(readingSentence("activated", { count: 7, pageViews: 200 })).toBe(
       "7 presses in 200 page views, 3.5 per 100."

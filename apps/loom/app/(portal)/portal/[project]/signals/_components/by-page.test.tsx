@@ -5,6 +5,7 @@ import {
   byPageListOf,
   cursorOf,
   type ByPageRow,
+  type GoalOnPage,
   type PageDrawer,
 } from "@/app/(portal)/_lib/by-page"
 
@@ -18,10 +19,11 @@ const row = (treeId: string, overrides: Partial<ByPageRow> = {}): ByPageRow => (
   lastMoved: "2026-11-05T10:00:00.000Z",
   mostPressed: undefined,
   waiting: 0,
+  primaryGoal: undefined,
   ...overrides,
 })
 
-const address = { base: "/portal/prj_a/signals", from: undefined }
+const address = { base: "/portal/prj_a/signals/pages", from: undefined }
 
 describe("By page", () => {
   it("shows each page by its published name with its id, and by its id alone otherwise", () => {
@@ -30,11 +32,12 @@ describe("By page", () => {
         list={byPageListOf([row("t_home", { name: "Welcome" }), row("t_bare")], undefined)}
         address={address}
         open={undefined}
+        primaryGoal={undefined}
       />
     )
 
     expect(screen.getByRole("link", { name: /Welcome/ }).getAttribute("href")).toBe(
-      "/portal/prj_a/signals?page=t_home"
+      "/portal/prj_a/signals/pages?page=t_home"
     )
     expect(screen.getByText("t_home")).toBeTruthy()
     expect(screen.getByRole("link", { name: "t_bare" })).toBeTruthy()
@@ -58,6 +61,7 @@ describe("By page", () => {
         )}
         address={address}
         open={undefined}
+        primaryGoal={undefined}
       />
     )
 
@@ -71,11 +75,48 @@ describe("By page", () => {
         list={byPageListOf([row("t_a", { waiting: 2 }), row("t_b")], undefined)}
         address={address}
         open={undefined}
+        primaryGoal={undefined}
       />
     )
 
     expect(screen.getAllByText(/waiting/)).toHaveLength(1)
     expect(screen.getByText("2 waiting")).toBeTruthy()
+  })
+
+  it("draws the primary goal's rate on each page it covers, and no column without one", () => {
+    const signUps: GoalOnPage = {
+      goalId: "g_a",
+      name: "Sign-ups",
+      kind: "activated",
+      primary: true,
+      reading: { count: 7, pageViews: 200 },
+    }
+    const list = byPageListOf(
+      [
+        row("t_a", { primaryGoal: signUps }),
+        row("t_b"),
+        row("t_c", { primaryGoal: { ...signUps, reading: { count: 0, pageViews: 0 } } }),
+      ],
+      undefined
+    )
+    const { unmount } = render(
+      <ByPageTable list={list} address={address} open={undefined} primaryGoal="Sign-ups" />
+    )
+
+    expect(screen.getByRole("columnheader", { name: /Sign-ups/ }).textContent).toBe(
+      "Sign-upsper 100 page views"
+    )
+    expect(screen.getByText("3.5").getAttribute("title")).toBe(
+      "7 presses in 200 page views, 3.5 per 100."
+    )
+    expect(screen.getByText("Not on this page")).toBeTruthy()
+    expect(screen.getByText("Nothing counted")).toBeTruthy()
+
+    unmount()
+    render(<ByPageTable list={list} address={address} open={undefined} primaryGoal={undefined} />)
+
+    expect(screen.queryByText("Not on this page")).toBeNull()
+    expect(screen.getAllByRole("columnheader")).toHaveLength(5)
   })
 
   it("says which rows it shows and links to the older ones, keeping the drawer's page out", () => {
@@ -85,12 +126,19 @@ describe("By page", () => {
       })
     )
 
-    render(<ByPageTable list={byPageListOf(rows, undefined)} address={address} open="t_00" />)
+    render(
+      <ByPageTable
+        list={byPageListOf(rows, undefined)}
+        address={address}
+        open="t_00"
+        primaryGoal={undefined}
+      />
+    )
 
     expect(screen.getByText("1–50 of 60")).toBeTruthy()
     expect(screen.getByText("Newer").getAttribute("aria-disabled")).toBe("true")
     expect(screen.getByRole("link", { name: "Older" }).getAttribute("href")).toBe(
-      `/portal/prj_a/signals?from=${cursorOf(rows[50] as ByPageRow)}`
+      `/portal/prj_a/signals/pages?from=${cursorOf(rows[50] as ByPageRow)}`
     )
   })
 })
@@ -109,6 +157,7 @@ describe("the drawer for one page", () => {
     ],
     pressed: [{ nodeId: "n_cta", name: "the button “Start”", presses: 1 }],
     longest: { nodeId: "n_intro", name: undefined, seconds: 4.5 },
+    goals: [],
   }
 
   it("says what readers did, what they pressed and what they kept on screen", () => {
@@ -123,7 +172,66 @@ describe("the drawer for one page", () => {
     )
   })
 
-  it("links to what waits for the page, to the page itself, and closes back to the list", () => {
+  it("names each goal covering the page with what it counted here, the primary marked", () => {
+    render(
+      <PageDrawerPanel
+        drawer={{
+          ...drawer,
+          goals: [
+            {
+              goalId: "g_a",
+              name: "Sign-ups",
+              kind: "activated",
+              primary: true,
+              reading: { count: 7, pageViews: 200 },
+            },
+            {
+              goalId: "g_b",
+              name: "Contact",
+              kind: "completed",
+              primary: false,
+              reading: { count: 1, pageViews: 200 },
+            },
+          ],
+        }}
+        address={address}
+        projectId="prj_a"
+      />
+    )
+
+    const goals = screen.getByRole("heading", { name: "Goals on this page" }).parentElement
+
+    if (goals === null) throw new Error("the section holds its heading")
+
+    expect(within(goals).getByText("Goal: Sign-ups")).toBeTruthy()
+    expect(within(goals).getAllByText("Primary")).toHaveLength(1)
+    expect(within(goals).getByText("7 presses in 200 page views, 3.5 per 100.")).toBeTruthy()
+    expect(within(goals).getByText("1 form sent in 200 page views, 0.5 per 100.")).toBeTruthy()
+  })
+
+  it("says plainly when no goal covers the page, and when goals could not be read", () => {
+    const { unmount } = render(
+      <PageDrawerPanel drawer={drawer} address={address} projectId="prj_a" />
+    )
+
+    expect(screen.getByText(/No goal covers this page/)).toBeTruthy()
+    expect(screen.getByRole("link", { name: "Goals" }).getAttribute("href")).toBe(
+      "/portal/prj_a/goals"
+    )
+
+    unmount()
+    render(
+      <PageDrawerPanel
+        drawer={{ ...drawer, goals: undefined }}
+        address={address}
+        projectId="prj_a"
+      />
+    )
+
+    expect(screen.getByText("This deployment could not read its goals just now.")).toBeTruthy()
+  })
+
+  it("links to what waits for the page, to the page and its events, and closes back to the list", () => {
     render(<PageDrawerPanel drawer={drawer} address={address} projectId="prj_a" />)
 
     expect(
@@ -134,8 +242,11 @@ describe("the drawer for one page", () => {
     expect(screen.getByRole("link", { name: "Open the page" }).getAttribute("href")).toBe(
       "/portal/prj_a/pages/t_home"
     )
+    expect(screen.getByRole("link", { name: "Events on this page" }).getAttribute("href")).toBe(
+      "/portal/prj_a/signals?on=t_home"
+    )
     expect(screen.getByRole("link", { name: "Close" }).getAttribute("href")).toBe(
-      "/portal/prj_a/signals"
+      "/portal/prj_a/signals/pages"
     )
   })
 })

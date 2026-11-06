@@ -1,6 +1,8 @@
 import Link from "next/link"
 
-import type { ByPageList, NamedPart, PageDrawer } from "@/app/(portal)/_lib/by-page"
+import { GoalChip } from "@/app/(portal)/_components/goal-chip"
+import type { ByPageList, GoalOnPage, NamedPart, PageDrawer } from "@/app/(portal)/_lib/by-page"
+import { per100Of, readingSentence } from "@/app/(portal)/_lib/goals/goal-view"
 import { plainMoment } from "@/app/(portal)/_lib/when"
 
 /**
@@ -54,6 +56,17 @@ const WaitingBadge = ({ waiting }: { waiting: number | undefined }) =>
     </span>
   )
 
+/** The primary goal's rate on one page, or that the goal does not cover it. */
+const GoalRate = ({ goal }: { goal: GoalOnPage | undefined }) => {
+  const rate = goal === undefined ? undefined : per100Of(goal.reading)
+
+  return goal === undefined ? (
+    <span className="text-ink-muted whitespace-nowrap">Not on this page</span>
+  ) : (
+    <span title={readingSentence(goal.kind, goal.reading)}>{rate ?? "Nothing counted"}</span>
+  )
+}
+
 const Pager = ({ list, address }: { list: ByPageList; address: ByPageAddress }) => (
   <div className="text-ink-muted flex items-center justify-between gap-3 text-xs">
     <span>
@@ -80,14 +93,21 @@ const Pager = ({ list, address }: { list: ByPageList; address: ByPageAddress }) 
   </div>
 )
 
+/**
+ * `primaryGoal` is the primary goal's name, and its column is drawn only when
+ * there is one: a project with no goal has no rate to show, and a column of
+ * blanks would say every page scored nothing.
+ */
 export const ByPageTable = ({
   list,
   address,
   open,
+  primaryGoal,
 }: {
   list: ByPageList
   address: ByPageAddress
   open: string | undefined
+  primaryGoal: string | undefined
 }) => (
   <div className="flex min-w-0 flex-1 flex-col gap-2">
     <table className="w-full text-left text-xs">
@@ -96,6 +116,12 @@ export const ByPageTable = ({
           <th className="py-1.5 font-normal">Page</th>
           <th className="py-1.5 font-normal">Live version</th>
           <th className="py-1.5 text-right font-normal">Page views</th>
+          {primaryGoal === undefined ? null : (
+            <th className="py-1.5 pl-3 text-right font-normal">
+              {primaryGoal}
+              <span className="block text-[11px]">per 100 page views</span>
+            </th>
+          )}
           <th className="py-1.5 pl-3 font-normal">Pressed most</th>
           <th className="py-1.5 text-right font-normal">Last moved</th>
         </tr>
@@ -119,6 +145,11 @@ export const ByPageTable = ({
             </td>
             <td className="py-1.5">{row.liveVersion}</td>
             <td className="py-1.5 text-right">{count(row.opened)}</td>
+            {primaryGoal === undefined ? null : (
+              <td className="py-1.5 pl-3 text-right">
+                <GoalRate goal={row.primaryGoal} />
+              </td>
+            )}
             <td className="py-1.5 pl-3">
               {row.mostPressed === undefined ? (
                 <span className="text-ink-muted">Nothing pressed</span>
@@ -136,6 +167,41 @@ export const ByPageTable = ({
 )
 
 const seconds = (value: number): string => (value === 1 ? "1 second" : `${value} seconds`)
+
+/** Every goal covering the page, the primary first, each with what it counted here. */
+const GoalsOnPage = ({
+  goals,
+  projectId,
+}: {
+  goals: readonly GoalOnPage[] | undefined
+  projectId: string
+}) => (
+  <section className="flex flex-col gap-2">
+    <h3 className="text-xs font-medium">Goals on this page</h3>
+    {goals === undefined ? (
+      <p className="text-ink-muted text-xs">This deployment could not read its goals just now.</p>
+    ) : goals.length === 0 ? (
+      <p className="text-ink-muted text-xs">
+        No goal covers this page.{" "}
+        <Link href={`/portal/${projectId}/goals`} className="text-ink">
+          Goals
+        </Link>
+      </p>
+    ) : (
+      <ul className="m-0 flex list-none flex-col gap-2 p-0">
+        {goals.map((goal) => (
+          <li key={goal.goalId} className="flex flex-col gap-1">
+            <span className="flex flex-wrap items-center gap-2">
+              <GoalChip goal={goal.name} />
+              {goal.primary && <span className="text-ink-muted text-[11px]">Primary</span>}
+            </span>
+            <span className="text-xs">{readingSentence(goal.kind, goal.reading)}</span>
+          </li>
+        ))}
+      </ul>
+    )}
+  </section>
+)
 
 const waitingSentence = (waiting: number): string =>
   waiting === 1
@@ -216,6 +282,8 @@ export const PageDrawerPanel = ({
         )}
       </section>
 
+      <GoalsOnPage goals={drawer.goals} projectId={projectId} />
+
       {drawer.row.waiting === undefined || drawer.row.waiting === 0 ? null : (
         <Link
           href={`/portal/${projectId}/review`}
@@ -225,9 +293,14 @@ export const PageDrawerPanel = ({
         </Link>
       )}
 
-      <Link href={`/portal/${projectId}/pages/${drawer.row.treeId}`} className="text-ink text-xs">
-        Open the page
-      </Link>
+      <div className="flex gap-4 text-xs">
+        <Link href={`/portal/${projectId}/pages/${drawer.row.treeId}`} className="text-ink">
+          Open the page
+        </Link>
+        <Link href={`/portal/${projectId}/signals?on=${drawer.row.treeId}`} className="text-ink">
+          Events on this page
+        </Link>
+      </div>
     </div>
   </aside>
 )
