@@ -3,6 +3,7 @@ import Link from "next/link"
 import { GoalChip } from "@/app/(portal)/_components/goal-chip"
 import type { ByPageList, GoalOnPage, NamedPart, PageDrawer } from "@/app/(portal)/_lib/by-page"
 import { per100Of, readingSentence } from "@/app/(portal)/_lib/goals/goal-view"
+import { rangeParam, type SignalsRange } from "@/app/(portal)/_lib/signals-range"
 import { plainMoment } from "@/app/(portal)/_lib/when"
 
 /**
@@ -10,18 +11,25 @@ import { plainMoment } from "@/app/(portal)/_lib/when"
  * and the drawer for the one the URL names (8a of `docs/portal.md`).
  *
  * Every link is a plain address — `from` for where the list starts, `page`
- * for the drawer's subject — so a link a person sends reopens exactly what
+ * for the drawer's subject, `range` for the figures above — so a link a person sends reopens exactly what
  * they were looking at, and the screen needs no client code to do it.
  */
 
 export type ByPageAddress = {
   readonly base: string
   readonly from: string | undefined
+  readonly range: SignalsRange
 }
 
-const hrefOf = ({ base }: ByPageAddress, query: Readonly<Record<string, string | undefined>>) => {
+/** An address on this tab, keeping the range the figures above it are read over. */
+export const byPageHref = (
+  { base, range }: ByPageAddress,
+  query: Readonly<Record<string, string | undefined>>
+) => {
   const kept = new URLSearchParams(
-    Object.entries(query).flatMap(([key, value]) => (value === undefined ? [] : [[key, value]]))
+    Object.entries({ ...query, range: rangeParam(range) }).flatMap(([key, value]) =>
+      value === undefined ? [] : [[key, value]]
+    )
   ).toString()
 
   return kept === "" ? base : `${base}?${kept}`
@@ -78,14 +86,14 @@ const Pager = ({ list, address }: { list: ByPageList; address: ByPageAddress }) 
       {list.newer === undefined && list.first <= 1 ? (
         <span aria-disabled="true">Newer</span>
       ) : (
-        <Link href={hrefOf(address, { from: list.newer })} className="text-ink">
+        <Link href={byPageHref(address, { from: list.newer })} className="text-ink">
           Newer
         </Link>
       )}
       {list.older === undefined ? (
         <span aria-disabled="true">Older</span>
       ) : (
-        <Link href={hrefOf(address, { from: list.older })} className="text-ink">
+        <Link href={byPageHref(address, { from: list.older })} className="text-ink">
           Older
         </Link>
       )}
@@ -136,7 +144,7 @@ export const ByPageTable = ({
           >
             <td className="py-1.5">
               <Link
-                href={hrefOf(address, { from: address.from, page: row.treeId })}
+                href={byPageHref(address, { from: address.from, page: row.treeId })}
                 className="text-ink no-underline hover:underline"
               >
                 <PageName name={row.name} treeId={row.treeId} />
@@ -226,7 +234,7 @@ export const PageDrawerPanel = ({
         <PageName name={drawer.row.name} treeId={drawer.row.treeId} />
       </div>
       <Link
-        href={hrefOf(address, { from: address.from })}
+        href={byPageHref(address, { from: address.from })}
         className="text-ink-muted text-xs no-underline"
         aria-label="Close"
       >

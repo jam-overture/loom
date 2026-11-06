@@ -143,6 +143,7 @@ describe("the filter", () => {
         on: home.treeId,
         view: VIEW_A,
         q: "  sign   up ",
+        range: "7d",
         before: "4.1",
         event: "3.0",
       })
@@ -152,6 +153,7 @@ describe("the filter", () => {
       view: VIEW_A,
       search: "sign up",
       live: false,
+      range: "7d",
       before: { seq: 4, index: 1 },
       open: { seq: 3, index: 0 },
     })
@@ -161,6 +163,7 @@ describe("the filter", () => {
         on: "not a page",
         view: "short",
         q: ["a", "b"],
+        range: "a year",
         before: ["1.0", "2.0"],
       })
     ).toEqual({
@@ -169,6 +172,7 @@ describe("the filter", () => {
       view: undefined,
       search: undefined,
       live: false,
+      range: "24h",
       before: undefined,
       open: undefined,
     })
@@ -204,18 +208,19 @@ describe("the filter", () => {
       page: home.treeId,
       search: "sign up",
       live: false,
+      range: "24h",
     }
 
     expect(eventsHref("/portal/prj_a/signals", filter, { before: "4.1", event: "3.0" })).toBe(
       `/portal/prj_a/signals?kind=activated&on=${home.treeId}&q=sign+up&before=4.1&event=3.0`
     )
-    expect(eventsHref("/portal/prj_a/signals", { ...EVERYTHING, live: false })).toBe(
+    expect(eventsHref("/portal/prj_a/signals", { ...EVERYTHING, live: false, range: "24h" })).toBe(
       "/portal/prj_a/signals"
     )
   })
 
   it("carries live to every address but one that names a cursor", () => {
-    const live: EventView = { ...EVERYTHING, kind: "viewed", live: true }
+    const live: EventView = { ...EVERYTHING, kind: "viewed", live: true, range: "24h" }
 
     expect(eventsHref("/portal/prj_a/signals", live)).toBe(
       "/portal/prj_a/signals?kind=viewed&live=on"
@@ -225,6 +230,15 @@ describe("the filter", () => {
     )
     expect(eventsHref("/portal/prj_a/signals", live, { before: "4.1" })).toBe(
       "/portal/prj_a/signals?kind=viewed&before=4.1"
+    )
+  })
+
+  it("carries a range other than the default to every address", () => {
+    const week: EventView = { ...EVERYTHING, live: true, range: "7d" }
+
+    expect(eventsHref("/portal/prj_a/signals", week)).toBe("/portal/prj_a/signals?range=7d&live=on")
+    expect(eventsHref("/portal/prj_a/signals", week, { before: "4.1" })).toBe(
+      "/portal/prj_a/signals?range=7d&before=4.1"
     )
   })
 })

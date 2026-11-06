@@ -14,6 +14,7 @@ import type { PublishedPage } from "@/app/_lib/pages/published"
 import type { Goal } from "./goals/goal"
 import { pageNameOf } from "./page-name"
 import { namesInTree, nounOf } from "./part-name"
+import { rangeOf, rangeParam, type SignalsRange } from "./signals-range"
 
 /**
  * *Signals · Events*: one row per thing a reader did, newest first (8a of
@@ -153,8 +154,9 @@ export const LIVE_EVERY_MS = 5_000
 export const LIVE_ON = "on"
 
 /**
- * The filter and whether the list is live: what every link on the screen
- * carries, so moving between kinds, pages and searches stays live.
+ * The filter, whether the list is live and the range the figures above it
+ * are read over: what every link on the screen carries, so moving between
+ * kinds, pages and searches keeps both.
  *
  * **Live is the newest page only.** It reads again every
  * {@link LIVE_EVERY_MS}, and a list that started further back would either
@@ -163,6 +165,7 @@ export const LIVE_ON = "on"
  */
 export type EventView = EventFilter & {
   readonly live: boolean
+  readonly range: SignalsRange
 }
 
 export type EventQuery = EventView & {
@@ -193,6 +196,7 @@ export const eventQueryOf = (
     view: parsedOr(viewKeySchema, one("view")),
     search: searchOf(one("q")),
     live: one("live") === LIVE_ON && before === undefined,
+    range: rangeOf(one("range")),
     before,
     open: parseEventKey(one("event")),
   }
@@ -208,8 +212,8 @@ export const matchesFilter =
     (search === undefined || matchesSearch(search, naming)(event))
 
 /**
- * An address on the Events screen, keeping the filter and whether it is live,
- * and naming what changes. Live is dropped where a cursor is named, as
+ * An address on the Events screen, keeping the filter, whether it is live and
+ * the range, and naming what changes. Live is dropped where a cursor is named, as
  * {@link EventView} says.
  */
 export const eventsHref = (
@@ -223,6 +227,7 @@ export const eventsHref = (
       on: view.page,
       view: view.view,
       q: view.search,
+      range: rangeParam(view.range),
       live: view.live && more.before === undefined ? LIVE_ON : undefined,
       before: more.before,
       event: more.event,

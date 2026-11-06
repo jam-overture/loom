@@ -52,7 +52,14 @@ const firstOf = (list: readonly ReaderEvent[]): ReaderEvent => {
 
 const address: EventsAddress = {
   base: "/portal/prj_a/signals",
-  filter: { kind: "activated", page: undefined, view: undefined, search: undefined, live: false },
+  filter: {
+    kind: "activated",
+    page: undefined,
+    view: undefined,
+    search: undefined,
+    live: false,
+    range: "24h",
+  },
   before: undefined,
 }
 

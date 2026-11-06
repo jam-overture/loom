@@ -2,16 +2,27 @@ import Link from "next/link"
 import type { ReactNode } from "react"
 
 import { Screen } from "@/app/(portal)/_components/screen"
+import { FilterChips } from "@/app/(portal)/_components/filter-chips"
 import { StateNotice } from "@/app/(portal)/_components/state-notice"
-import type { Arrivals } from "@/app/(portal)/_lib/arrivals"
+import {
+  rangeChartOf,
+  rangeFigureOf,
+  rangeLabel,
+  rangeParam,
+  SIGNALS_RANGES,
+  type SignalsRange,
+} from "@/app/(portal)/_lib/signals-range"
 import type { TurnedAway } from "@/app/(portal)/_lib/turned-away"
 import { plainMoment } from "@/app/(portal)/_lib/when"
 
 import type { SignalsReading } from "../_lib/reading"
 
+import { RangeChart } from "./range-chart"
+
 /**
- * What both *Signals* tabs share: the heading, the three figures, what was
- * turned away, and the two tabs (`docs/portal-wireframes.md`, *1 · Signals*).
+ * What both *Signals* tabs share: the heading, the range picker, the three
+ * figures, page views by hour, what was turned away, and the two tabs
+ * (`docs/portal-wireframes.md`, *1 · Signals*).
  *
  * The tab's own list is handed in and drawn only once something has arrived:
  * a store that did not answer, a project with no single site, and a project
@@ -54,30 +65,48 @@ const TurnedAwayList = ({ turnedAway }: { turnedAway: TurnedAway | undefined }) 
     </section>
   )
 
-const Figures = ({
-  arrivals,
-  turnedAway,
+const Figures = ({ reading }: { reading: Extract<SignalsReading, { state: "read" }> }) => {
+  const { arrivals, turnedAway } = reading
+
+  return (
+    <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+      <Figure {...rangeFigureOf(reading.hourly, reading.range, arrivals.opened)} />
+      <Figure
+        label={arrivals.latest?.kind === "counted" ? "Last counted" : "Last arrival"}
+        value={arrivals.latest === undefined ? "Nothing yet" : plainMoment(arrivals.latest.at)}
+        note={
+          arrivals.latest?.kind === "counted"
+            ? "Nothing that arrived is still kept, so this is when something was last added up."
+            : "When this deployment last received something from one of your pages."
+        }
+      />
+      <Figure label="Turned away" {...refusedFigure(turnedAway)} />
+    </div>
+  )
+}
+
+/** The address of the tab being drawn, with another range. */
+export type RangeHref = (range: SignalsRange) => string
+
+/**
+ * The range picker. Each choice is an address the tab builds, so changing the
+ * range keeps whatever else the tab's address holds.
+ */
+const RangePicker = ({
+  current,
+  hrefOf,
 }: {
-  arrivals: Arrivals
-  turnedAway: TurnedAway | undefined
+  current: SignalsRange
+  hrefOf: RangeHref
 }) => (
-  <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-    <Figure
-      label="Page views counted"
-      value={arrivals.opened.toLocaleString("en-GB")}
-      note="Every time a reader opened one of this project's pages."
-    />
-    <Figure
-      label={arrivals.latest?.kind === "counted" ? "Last counted" : "Last arrival"}
-      value={arrivals.latest === undefined ? "Nothing yet" : plainMoment(arrivals.latest.at)}
-      note={
-        arrivals.latest?.kind === "counted"
-          ? "Nothing that arrived is still kept, so this is when something was last added up."
-          : "When this deployment last received something from one of your pages."
-      }
-    />
-    <Figure label="Turned away" {...refusedFigure(turnedAway)} />
-  </div>
+  <FilterChips
+    label="Range"
+    choices={SIGNALS_RANGES.map((range) => ({
+      label: rangeLabel(range),
+      href: hrefOf(range),
+      selected: range === current,
+    }))}
+  />
 )
 
 const TABS: readonly {
@@ -89,12 +118,27 @@ const TABS: readonly {
   { tab: "pages", label: "By page", href: (projectId) => `/portal/${projectId}/signals/pages` },
 ]
 
-const Tabs = ({ projectId, current }: { projectId: string; current: SignalsTab }) => (
+/** A tab's address, keeping the range so moving between tabs does not reset it. */
+const tabHref = (path: string, range: SignalsRange): string => {
+  const kept = rangeParam(range)
+
+  return kept === undefined ? path : `${path}?range=${kept}`
+}
+
+const Tabs = ({
+  projectId,
+  current,
+  range,
+}: {
+  projectId: string
+  current: SignalsTab
+  range: SignalsRange
+}) => (
   <nav aria-label="Signals" className="border-edge-subtle flex gap-4 border-b text-sm">
     {TABS.map(({ tab, label, href }) => (
       <Link
         key={tab}
-        href={href(projectId)}
+        href={tabHref(href(projectId), range)}
         aria-current={tab === current ? "page" : undefined}
         className={`-mb-px border-b-2 pb-2 no-underline ${
           tab === current
@@ -112,11 +156,13 @@ const Body = ({
   reading,
   projectId,
   tab,
+  rangeHref,
   children,
 }: {
   reading: SignalsReading
   projectId: string
   tab: SignalsTab
+  rangeHref: RangeHref
   children?: ReactNode
 }) => {
   if (reading.state === "failed") {
@@ -158,10 +204,14 @@ const Body = ({
 
   return (
     <div className="flex flex-col gap-6">
-      <Figures arrivals={reading.arrivals} turnedAway={reading.turnedAway} />
+      <RangePicker current={reading.range} hrefOf={rangeHref} />
+      <Figures reading={reading} />
+      {reading.hourly === undefined ? null : (
+        <RangeChart chart={rangeChartOf(reading.hourly.series, reading.range)} />
+      )}
       <TurnedAwayList turnedAway={reading.turnedAway} />
       <div className="flex flex-col gap-4">
-        <Tabs projectId={projectId} current={tab} />
+        <Tabs projectId={projectId} current={tab} range={reading.range} />
         {children}
       </div>
     </div>
@@ -172,11 +222,13 @@ export const SignalsFrame = ({
   reading,
   projectId,
   tab,
+  rangeHref,
   children,
 }: {
   reading: SignalsReading
   projectId: string
   tab: SignalsTab
+  rangeHref: RangeHref
   children?: ReactNode
 }) => {
   const project = reading.project
@@ -197,7 +249,7 @@ export const SignalsFrame = ({
         )}
       </div>
 
-      <Body reading={reading} projectId={projectId} tab={tab}>
+      <Body reading={reading} projectId={projectId} tab={tab} rangeHref={rangeHref}>
         {children}
       </Body>
     </Screen>
