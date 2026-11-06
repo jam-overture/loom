@@ -2,6 +2,7 @@ import type { AudienceId } from "../audience/audience.js"
 import type { TreeId } from "../ids.js"
 import type { Result } from "../result.js"
 
+import type { StoredArrivals } from "./arrivals.js"
 import type { ReaderSignalStoreError } from "./journal.js"
 import type { RevisionViews, StoredPageViews } from "./page-views.js"
 import type { FunnelAnswer, ReaderTally } from "./rollup.js"
@@ -102,6 +103,14 @@ export interface ReaderOpeningCounter {
    * Additive like everything else in this file, and for the sharpest reason of
    * any of them: every call is one delivery's worth of arrivals, so a store
    * that replaced would report the last reader rather than the readership.
+   *
+   * **It writes two rows for every opening: the revision's total and the hour
+   * it arrived in** (`arrivals.ts`), in one atomic write. One call rather than
+   * two because the two numbers are the same arrivals counted under two keys,
+   * and a door that could move one without the other would be a deployment
+   * whose hourly chart does not sum to its own page-view count — for ever,
+   * invisibly, with no way to tell which of the two is the wrong one. `at` is
+   * the hour, so the second row needs nothing this call did not already have.
    */
   readonly opened: (
     openings: readonly RevisionViews[],
@@ -219,4 +228,32 @@ export interface ReaderTallyStore extends ReaderOpeningCounter {
   readonly pageViews: (
     request?: TallyReadRequest
   ) => Promise<Result<readonly StoredPageViews[], ReaderSignalStoreError>>
+  /**
+   * The same page views, by the hour they began in, over a range (`arrivals.ts`).
+   *
+   * The one read here that takes a stretch of time, because it is the one
+   * counter that has one. It answers two things in a call — the hours in the
+   * range, and the first hour this scope ever counted — so that a surface
+   * drawing a chart over a range the deployment is younger than can say so
+   * instead of drawing it empty.
+   */
+  readonly arrivals: (
+    request?: ArrivalReadRequest
+  ) => Promise<Result<StoredArrivals, ReaderSignalStoreError>>
+}
+
+/**
+ * A counter read, narrowed to a stretch of time.
+ *
+ * The three optional narrowings every counter read takes, and the range. Both
+ * ends are optional and absent is *unbounded on that side*: a surface asking
+ * when counting began passes neither, and a chart passes both. Hours are
+ * matched by the instant they began, which is the rule `ArrivalRange` states —
+ * a bucket belongs to the range its start falls in.
+ */
+export type ArrivalReadRequest = TallyReadRequest & {
+  /** Inclusive. Absent reads from the first hour the scope has. */
+  readonly from?: number
+  /** Exclusive. Absent reads to the last hour the scope has. */
+  readonly to?: number
 }

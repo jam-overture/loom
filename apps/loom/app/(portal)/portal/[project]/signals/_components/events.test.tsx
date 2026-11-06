@@ -1,5 +1,5 @@
 import { render, screen, within } from "@testing-library/react"
-import { describe, expect, it } from "vitest"
+import { describe, expect, it, vi } from "vitest"
 
 import type { ReaderSignal, ReceivedBatch } from "@jam-overture/loom/signals"
 
@@ -8,6 +8,9 @@ import { eventsOf, namingOf, type EventPage, type ReaderEvent } from "@/app/(por
 import { elementIdsOf } from "@/app/(portal)/_lib/proposing/fixtures"
 
 import { EventDrawerPanel, EventFacets, EventsTable, type EventsAddress } from "./events"
+
+/** A live list asks the router to draw it again, which a test has no router for. */
+vi.mock("next/navigation", () => ({ useRouter: () => ({ refresh: () => undefined }) }))
 
 const home = pageFixture("home", "Welcome", 3)
 const [, heading] = elementIdsOf(home)
@@ -49,7 +52,7 @@ const firstOf = (list: readonly ReaderEvent[]): ReaderEvent => {
 
 const address: EventsAddress = {
   base: "/portal/prj_a/signals",
-  filter: { kind: "activated", page: undefined, view: undefined, search: undefined },
+  filter: { kind: "activated", page: undefined, view: undefined, search: undefined, live: false },
   before: undefined,
 }
 
@@ -179,6 +182,52 @@ describe("the filter above the list", () => {
 
     expect(within(kinds).getByRole("link", { name: "All kinds" }).getAttribute("href")).toBe(
       "/portal/prj_a/signals?q=cta"
+    )
+  })
+})
+
+describe("the Live switch", () => {
+  const live = { ...address, filter: { ...address.filter, live: true } }
+
+  it("is off by default, and switching it on keeps the filter", () => {
+    render(<EventFacets address={address} pages={[]} />)
+
+    const toggle = screen.getByRole("switch", { name: "Live" })
+
+    expect(toggle.getAttribute("aria-checked")).toBe("false")
+    expect(toggle.getAttribute("href")).toBe("/portal/prj_a/signals?kind=activated&live=on")
+    expect(screen.getByText("Switch on to see new events as they arrive.")).toBeTruthy()
+  })
+
+  it("says that switching on from an older page goes back to the newest", () => {
+    render(<EventFacets address={{ ...address, before: "4.1" }} pages={[]} />)
+
+    expect(screen.getByRole("switch", { name: "Live" }).getAttribute("href")).toBe(
+      "/portal/prj_a/signals?kind=activated&live=on"
+    )
+    expect(screen.getByText("Switching on goes back to the newest events.")).toBeTruthy()
+  })
+
+  it("while on, says so, switches off to the same filter, and stays on through the form", () => {
+    const { container } = render(<EventFacets address={live} pages={[]} />)
+
+    const toggle = screen.getByRole("switch", { name: "Live" })
+
+    expect(toggle.getAttribute("aria-checked")).toBe("true")
+    expect(toggle.getAttribute("href")).toBe("/portal/prj_a/signals?kind=activated")
+    expect(screen.getByText("New events appear at the top as they arrive.")).toBeTruthy()
+    expect(
+      container.querySelector('input[type="hidden"][name="live"]')?.getAttribute("value")
+    ).toBe("on")
+  })
+
+  it("stays on across the kind chips", () => {
+    render(<EventFacets address={live} pages={[]} />)
+
+    const kinds = screen.getByRole("navigation", { name: "Kind" })
+
+    expect(within(kinds).getByRole("link", { name: "All kinds" }).getAttribute("href")).toBe(
+      "/portal/prj_a/signals?live=on"
     )
   })
 })

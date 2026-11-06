@@ -30,8 +30,9 @@ import {
  * copy, marked as conflicting, and can only be turned down.
  *
  * A copy an accepted change has moved is left where it is until the site
- * serves what it reached: turning accepted changes into the site's own pages is
- * unit 8's, and starting again would lose them.
+ * serves what it reached, since starting again would lose the change. Unit 8
+ * replaces this: the site pulls the copy itself and a newer snapshot replays
+ * the accepted changes onto it (0358).
  */
 
 /** Where a page's copy stands against what its site serves. */

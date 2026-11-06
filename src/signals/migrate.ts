@@ -3,7 +3,7 @@ import { sql } from "drizzle-orm"
 import type { LoomDatabase } from "../store/database.js"
 
 /**
- * Creating the five reader-signal tables, with row level security switched on.
+ * Creating the six reader-signal tables, with row level security switched on.
  *
  * The same shape as the store's and the journal's migrations, and here for the
  * same reason: a DDL statement that lives in a document is a DDL statement a
@@ -18,7 +18,7 @@ import type { LoomDatabase } from "../store/database.js"
  * never depended on that and now carries more of the weight.
  *
  * Every table is led by `application_id` (0269). The backfill is the column
- * default rather than an `UPDATE`: these five never carried `project_id`, so
+ * default rather than an `UPDATE`: these six never carried `project_id`, so
  * there is no earlier spelling to correct the way `APPLICATION_ID_MIGRATION`
  * corrects the store's — rows that predate the column belong to the deployment
  * that wrote them, which is what `app_default` names.
@@ -34,7 +34,7 @@ import type { LoomDatabase } from "../store/database.js"
  */
 
 /**
- * The five tables, as statements a host can run.
+ * The six tables, as statements a host can run.
  *
  * One statement per entry for the same reason the store's DDL is a list: a
  * driver may refuse several commands in a single prepared statement, and
@@ -118,6 +118,14 @@ export const READER_SIGNALS_DDL: readonly string[] = [
    * question only ever asked about the newest few.
    */
   `CREATE INDEX IF NOT EXISTS loom_reader_signals_uncounted_idx ON loom_reader_signals (application_id, seq) WHERE folded_at IS NULL`,
+  /**
+   * **One page view's deliveries** (0355), which is the *Events* drawer's read.
+   *
+   * Partial for the reason the uncounted index is partial, though the set it
+   * leaves out is the other one: a delivery that names no page view is never
+   * looked up by one, so an entry for it would be paid for and never read.
+   */
+  `CREATE INDEX IF NOT EXISTS loom_reader_signals_view_idx ON loom_reader_signals (application_id, view) WHERE view IS NOT NULL`,
   `ALTER TABLE loom_reader_signals ENABLE ROW LEVEL SECURITY`,
   `CREATE TABLE IF NOT EXISTS loom_reader_tallies (
     application_id text NOT NULL DEFAULT 'app_default',
@@ -224,6 +232,35 @@ export const READER_SIGNALS_DDL: readonly string[] = [
   `ALTER TABLE loom_reader_page_views DROP CONSTRAINT IF EXISTS loom_reader_page_views_pkey`,
   `ALTER TABLE loom_reader_page_views ADD PRIMARY KEY (application_id, audience_id, tree_id, revision)`,
   `ALTER TABLE loom_reader_page_views ENABLE ROW LEVEL SECURITY`,
+  /**
+   * **When the page views began**, which is the sixth table and the only one
+   * here with a clock in its key (`arrivals.ts`).
+   *
+   * No `ALTER` beside it and no backfill, which is the one thing about this
+   * table an operator has to know: nothing but this counter ever knew which
+   * hour an arrival was in, so a deployment that upgrades starts counting hours
+   * from the moment it runs this and has no earlier ones. The reading publishes
+   * that as the hour counting began, so a chart over thirty days on a
+   * deployment that has counted for a week draws a week and says so rather than
+   * drawing three empty weeks.
+   */
+  `CREATE TABLE IF NOT EXISTS loom_reader_arrivals (
+    application_id text NOT NULL DEFAULT 'app_default',
+    audience_id text NOT NULL DEFAULT 'aud_everyone',
+    tree_id text NOT NULL,
+    revision integer NOT NULL,
+    hour timestamptz NOT NULL,
+    views bigint NOT NULL,
+    updated_at timestamptz NOT NULL,
+    PRIMARY KEY (application_id, audience_id, tree_id, revision, hour)
+  )`,
+  /**
+   * **Every tree of one application, by hour**, which is the deployment-wide
+   * chart. The primary key already serves a reading of one page, because that
+   * read names the tree and the revision.
+   */
+  `CREATE INDEX IF NOT EXISTS loom_reader_arrivals_hour_idx ON loom_reader_arrivals (application_id, hour)`,
+  `ALTER TABLE loom_reader_arrivals ENABLE ROW LEVEL SECURITY`,
 ]
 
 /** Idempotent, so running it against a populated database is a no-op. */

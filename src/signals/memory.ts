@@ -13,12 +13,14 @@ import {
   type ReaderSignalStoreError,
   type ReceivedBatch,
 } from "./journal.js"
-import { funnelKey, inAudience, pageViewKey, regionKey, tallyKey } from "./counters.js"
+import { arrivalKey, funnelKey, inAudience, pageViewKey, regionKey, tallyKey } from "./counters.js"
+import { arrivalHoursOf, type StoredArrivalHour, type StoredArrivals } from "./arrivals.js"
 import type { RevisionViews, StoredPageViews } from "./page-views.js"
 import type { ReaderRegionStore, StoredRegionCount } from "./region.js"
 import type { FunnelAnswer, ReaderTally } from "./rollup.js"
 import type { ReaderSignalBatch } from "./signal.js"
 import type {
+  ArrivalReadRequest,
   AudienceCounters,
   ReaderTallyStore,
   StoredFunnel,
@@ -83,6 +85,7 @@ export const memoryReaderSignalJournal = (clock: Clock = systemClock): ReaderSig
           (request?.treeId === undefined || batch.treeId === request.treeId) &&
           (request?.counted === undefined ||
             request.counted === (batch.foldedAt !== undefined)) &&
+          (request?.view === undefined || batch.view === request.view) &&
           (from === undefined || (direction === "older" ? batch.seq < from : batch.seq > from))
       )
 
@@ -150,6 +153,7 @@ export const memoryReaderTallyStore = (): ReaderTallyStore => {
   const tallies = new Map<string, StoredTally>()
   const funnels = new Map<string, StoredFunnel>()
   const pageViews = new Map<string, StoredPageViews>()
+  const arrivals = new Map<string, StoredArrivalHour>()
 
   /**
    * One row written from two sides, so the add is spelled once and told which
@@ -250,8 +254,32 @@ export const memoryReaderTallyStore = (): ReaderTallyStore => {
     apply: (counters, at, audience = DEFAULT_AUDIENCE_ID) =>
       applyWindow([{ ...counters, audience }], at),
 
+    /**
+     * The total and the hour, or neither (`arrivals.ts`).
+     *
+     * Nothing here can fail once the hour is in hand, so the atomicity the
+     * interface promises costs this store nothing — which is exactly why the
+     * instant is turned into an hour **first**: the one failure the pair has is
+     * an instant that is not one, and a reference implementation that wrote the
+     * total and then discovered it would be a reference for the wrong thing.
+     */
     opened: (openings, at, audience = DEFAULT_AUDIENCE_ID) => {
+      const hours = arrivalHoursOf(openings, at)
+      if (!hours.ok) return Promise.resolve(hours)
+
       addPageViews(openings, "opened", at, audience)
+
+      for (const count of hours.value) {
+        const key = inAudience(audience, arrivalKey(count))
+        const existing = arrivals.get(key)
+
+        arrivals.set(key, {
+          ...count,
+          audienceId: audience,
+          views: (existing?.views ?? 0) + count.views,
+          updatedAt: at,
+        })
+      }
 
       return Promise.resolve(ok(undefined))
     },
@@ -264,6 +292,31 @@ export const memoryReaderTallyStore = (): ReaderTallyStore => {
 
     pageViews: (request?: TallyReadRequest) =>
       Promise.resolve(ok([...pageViews.values()].filter((row) => matches(row, request)))),
+
+    /**
+     * The rows in the range, and the first hour the scope has at all.
+     *
+     * The second figure is taken over the same narrowing without the range,
+     * which is the half a caller cannot compute from the first: a range that
+     * came back empty is *nobody arrived* or *we were not counting*, and the
+     * only way to tell is to look outside the range.
+     */
+    arrivals: (request?: ArrivalReadRequest) => {
+      const scoped = [...arrivals.values()].filter((row) => matches(row, request))
+      const hours = scoped.filter(
+        (row) =>
+          (request?.from === undefined || row.hour >= request.from) &&
+          (request?.to === undefined || row.hour < request.to)
+      )
+      const begins = scoped.reduce<number | undefined>(
+        (first, row) => (first === undefined || row.hour < first ? row.hour : first),
+        undefined
+      )
+
+      return Promise.resolve(
+        ok<StoredArrivals>({ hours, ...(begins === undefined ? {} : { begins }) })
+      )
+    },
   }
 }
 

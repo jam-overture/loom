@@ -3,7 +3,7 @@ import type { TreeId } from "../ids.js"
 import { clampLimit, type PageDirection, type PageEnds } from "../paging.js"
 import type { Result } from "../result.js"
 
-import type { ReaderSignalBatch } from "./signal.js"
+import type { ReaderSignalBatch, ViewKey } from "./signal.js"
 
 /**
  * Where deliveries wait to be rolled up, and then where they are kept.
@@ -109,6 +109,25 @@ export type ReaderSignalReadRequest = {
    * — and the kept window is the one a deployment is invited to lengthen.
    */
   readonly counted?: boolean
+  /**
+   * Narrow to the deliveries of **one page view**, named by its key (0355).
+   *
+   * The one correlation the subsystem allows, and the whole of it: a caller
+   * hands in a key it is already holding — off a row it could already see —
+   * and gets that page view's deliveries. There is deliberately nothing here
+   * that would **enumerate** keys, and nothing that takes a row and asks *what
+   * else shares this one's key*, because either of those is a stitching
+   * primitive wearing a narrowing's clothes. One key in, one page view out.
+   *
+   * It is a filter rather than a second method so that the paging rules are the
+   * ones this request already has. A page view holds few deliveries, but *few*
+   * is a sender's choice rather than a bound, so the read that serves a drawer
+   * is a page like every other read here.
+   *
+   * Served by a partial index on the column, which exists because a delivery
+   * that names no page view is never looked up by one.
+   */
+  readonly view?: ViewKey
   /** A cursor from a previous page's `older`/`newer`, passed back unread. */
   readonly cursor?: string
   /** Default `newer`, which with no cursor is the oldest page — where rollup starts. */
