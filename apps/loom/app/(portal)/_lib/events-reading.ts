@@ -16,6 +16,7 @@ import {
   type EventFilter,
   type EventPage,
   type EventPosition,
+  type Naming,
   type ReaderEvent,
 } from "./events"
 
@@ -95,9 +96,10 @@ const scan = async (
 export const readEventPage = async (
   read: Read,
   filter: EventFilter,
-  before: EventPosition | undefined
+  before: EventPosition | undefined,
+  naming: Naming
 ): Promise<Result<EventPage, ReaderSignalStoreError>> => {
-  const matches = matchesFilter(filter)
+  const matches = matchesFilter(filter, naming)
   const keep =
     before === undefined
       ? matches
