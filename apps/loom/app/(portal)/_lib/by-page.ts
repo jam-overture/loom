@@ -5,6 +5,14 @@ import type { HeldProposal } from "@jam-overture/loom/write"
 
 import type { PublishedPage } from "@/app/_lib/pages/published"
 
+import { primaryFirst, type Goal, type GoalKind } from "./goals/goal"
+import {
+  goalReadingsByPage,
+  pageChoicesOf,
+  partsByPageOf,
+  type GoalCounts,
+  type GoalReading,
+} from "./goals/goal-view"
 import { pageNameOf } from "./page-name"
 import { namesInTree, type PartName } from "./part-name"
 import { pageOfCopy, type PageCopy } from "./proposing/copies"
@@ -21,6 +29,10 @@ import { SIGNAL_KINDS } from "./vocabulary"
  * counting began* rather than drawing a range picker it cannot honour. The
  * range arrives with the events kept for 30 days, which is the *Events* tab's
  * data and not this one's.
+ *
+ * **Goals are measured here exactly as on *Goals*** (0350), one page at a
+ * time: a goal's rate on a page is its count on the page over that page's
+ * page views, and a page the goal does not cover has no rate for it at all.
  */
 
 /** Rows a page of the list holds, the wireframes' 50. */
@@ -34,6 +46,15 @@ export type NamedPart = {
 }
 
 export type PressedPart = NamedPart & { readonly presses: number }
+
+/** One goal as measured on one page. */
+export type GoalOnPage = {
+  readonly goalId: string
+  readonly name: string
+  readonly kind: GoalKind
+  readonly primary: boolean
+  readonly reading: GoalReading
+}
 
 export type ByPageRow = {
   readonly treeId: string
@@ -49,6 +70,11 @@ export type ByPageRow = {
   readonly mostPressed: PressedPart | undefined
   /** Changes waiting on a person for this page, `undefined` where they could not be read. */
   readonly waiting: number | undefined
+  /**
+   * The primary goal on this page, `undefined` where there is none, the goals
+   * could not be read, or the primary goal does not cover this page.
+   */
+  readonly primaryGoal: GoalOnPage | undefined
 }
 
 /** What readers did on one page, as one bar per signal kind that counts occurrences. */
@@ -70,6 +96,8 @@ export type PageDrawer = {
   /** The three parts pressed most, most first. Empty where nothing was pressed. */
   readonly pressed: readonly PressedPart[]
   readonly longest: LongestLooked | undefined
+  /** Every goal covering the page, the primary first; `undefined` where goals could not be read. */
+  readonly goals: readonly GoalOnPage[] | undefined
 }
 
 export type ByPageReadings = {
@@ -78,6 +106,43 @@ export type ByPageReadings = {
   readonly published: readonly PublishedPage[]
   /** `undefined` where the changes waiting could not be read. */
   readonly waiting: ReadonlyMap<string, number> | undefined
+  /** `undefined` where the goals could not be read. */
+  readonly goals: readonly Goal[] | undefined
+}
+
+/** The figures a page's drawer reads, which are the list's without the changes waiting. */
+export type PageDrawerReadings = Omit<ByPageReadings, "waiting">
+
+/** Each goal's readings by page, the primary goal first, measured once for the whole list. */
+const goalsByPageOf = (
+  goals: readonly Goal[],
+  readings: PageDrawerReadings
+): ((treeId: string) => readonly GoalOnPage[]) => {
+  const counts: GoalCounts = {
+    pageViews: readings.pageViews,
+    tallies: readings.tallies,
+    parts: partsByPageOf(pageChoicesOf(readings.published)),
+  }
+  const measured = primaryFirst(goals).map(
+    (goal) => [goal, goalReadingsByPage(goal, counts)] as const
+  )
+
+  return (treeId) =>
+    measured.flatMap(([goal, byPage]) => {
+      const reading = byPage.get(treeId)
+
+      return reading === undefined
+        ? []
+        : [
+            {
+              goalId: goal.goalId,
+              name: goal.name,
+              kind: goal.kind,
+              primary: goal.primarySince !== null,
+              reading,
+            },
+          ]
+    })
 }
 
 /** Changes waiting on a person, by the page they would change rather than the copy they were made to. */
@@ -154,12 +219,9 @@ const newestFirst = (a: ByPageRow, b: ByPageRow): number => byPosition(positionO
  * page nobody has opened is on *Pages*, and listing it here would be a row of
  * noughts on a screen that answers *what did readers do*.
  */
-export const byPageRowsOf = ({
-  pageViews,
-  tallies,
-  published,
-  waiting,
-}: ByPageReadings): readonly ByPageRow[] => {
+export const byPageRowsOf = (readings: ByPageReadings): readonly ByPageRow[] => {
+  const { pageViews, tallies, published, waiting, goals } = readings
+  const goalsOn = goalsByPageOf(goals ?? [], readings)
   const trees = new Map(published.map(({ tree }) => [tree.treeId as string, tree] as const))
   const talliesByPage = groupBy(tallies, (tally) => tally.treeId)
 
@@ -177,6 +239,7 @@ export const byPageRowsOf = ({
         lastMoved: rows.map((row) => row.updatedAt).reduce(later),
         mostPressed: pressedParts(partsOf(talliesByPage.get(treeId) ?? []), named)[0],
         waiting: waiting === undefined ? undefined : (waiting.get(treeId) ?? 0),
+        primaryGoal: goalsOn(treeId).find((goal) => goal.primary),
       }
     })
     .sort(newestFirst)
@@ -257,12 +320,12 @@ export const byPageListOf = (
  * not a count and is said in seconds instead: the part with the longest
  * average over the page views that reached it, because a total would favour
  * whatever sits at the top of every page.
+ *
+ * Below them, every goal that covers the page with its rate here, the primary
+ * first, since counting began like everything else on this tab.
  */
-export const pageDrawerOf = (
-  row: ByPageRow,
-  tallies: readonly StoredTally[],
-  published: readonly PublishedPage[]
-): PageDrawer => {
+export const pageDrawerOf = (row: ByPageRow, readings: PageDrawerReadings): PageDrawer => {
+  const { tallies, published, goals } = readings
   const own = tallies.filter((tally) => tally.treeId === row.treeId)
   const tree = published.find((page) => page.tree.treeId === row.treeId)?.tree
   const named = partNamer(tree === undefined ? new Map() : namesInTree(tree))
@@ -304,6 +367,7 @@ export const pageDrawerOf = (
             ...named(longest.nodeId),
             seconds: Math.round(longest.seconds * 10) / 10,
           },
+    goals: goals === undefined ? undefined : goalsByPageOf(goals, readings)(row.treeId),
   }
 }
 

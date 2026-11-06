@@ -11,6 +11,8 @@ import {
   waitingByPage,
 } from "@/app/(portal)/_lib/by-page"
 import { requireActor, requireRole } from "@/app/(portal)/_lib/auth/identity"
+import { primaryOf } from "@/app/(portal)/_lib/goals/goal"
+import { goalsFor } from "@/app/(portal)/_lib/goals/stores"
 import { pageCopiesFor } from "@/app/(portal)/_lib/proposing/stores"
 import { holdsFor } from "@/app/(portal)/_lib/write"
 import { PORTAL_READ_BUDGET_MS } from "@/app/_lib/app/bounded"
@@ -29,7 +31,8 @@ import { readSignals } from "../_lib/reading"
  * Page names come from what the project's site published (0312), and a page
  * it has not published is shown by the id its renderer gave it. The changes
  * waiting are a figure the list can do without, so a failure to read them
- * costs the badge alone.
+ * costs the badge alone. The goals likewise cost the primary goal's column
+ * alone, and the drawer says they could not be read.
  */
 
 /** A query value as one string, or `undefined` for none or for a repeated key. */
@@ -62,10 +65,11 @@ const ByPageScreen = async ({
 
   const { applicationId } = reading.application
 
-  const [tallies, waiting, copies] = await Promise.all([
+  const [tallies, waiting, copies, goals] = await Promise.all([
     boundedReaderTallyStore(reading.readings.tallies).tallies(),
     holdsFor(applicationId).waiting(),
     readWithin(() => pageCopiesFor(applicationId).list(), unavailable, PORTAL_READ_BUDGET_MS),
+    readWithin(() => goalsFor(applicationId).list(), unavailable, PORTAL_READ_BUDGET_MS),
   ])
 
   if (!tallies.ok) {
@@ -78,12 +82,15 @@ const ByPageScreen = async ({
     )
   }
 
-  const rows = byPageRowsOf({
+  const readings = {
     pageViews: reading.pageViews,
     tallies: tallies.value,
     published: reading.published,
-    waiting:
-      waiting.ok && copies.ok ? waitingByPage(waiting.value.held, copies.value) : undefined,
+    goals: goals.ok ? goals.value : undefined,
+  }
+  const rows = byPageRowsOf({
+    ...readings,
+    waiting: waiting.ok && copies.ok ? waitingByPage(waiting.value.held, copies.value) : undefined,
   })
   const from = single(query.from)
   const address = { base, from }
@@ -99,10 +106,11 @@ const ByPageScreen = async ({
             list={byPageListOf(rows, parseCursor(from))}
             address={address}
             open={opened?.treeId}
+            primaryGoal={goals.ok ? primaryOf(goals.value)?.name : undefined}
           />
           {opened === undefined ? null : (
             <PageDrawerPanel
-              drawer={pageDrawerOf(opened, tallies.value, reading.published)}
+              drawer={pageDrawerOf(opened, readings)}
               address={address}
               projectId={projectId}
             />
