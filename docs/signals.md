@@ -34,6 +34,8 @@ the portal every day.
 | Default | off; an unaddressed render is byte-identical |
 | Browser cost | **6.4 KB** minified, 2.9 KB gzipped, measured 2 November; `src/signals/browser-weight.test.ts` fails if an import reaches a package |
 | How long a delivery lives | two windows since 5 November: counted once it is ripe, **kept for 30 days by default** and then deleted ([0349](../decisions/0349-a-projects-reader-events-are-kept-thirty-days-by-default-and-the-tallies-stay-the-durable-record.md), [0351](../decisions/0351-a-counted-delivery-is-kept-for-a-stated-window-rather-than-deleted-by-the-fold.md)) — and nothing deletes a delivery no fold has counted, so a deployment whose collection stopped keeps rather than loses them |
+| What an operator can look at, delivery by delivery | one row per signal the deployment still keeps, newest first, in exact pages, with the rest of one page view beside any of them ([0355](../decisions/0355-the-events-a-screen-lists-are-one-row-per-signal-and-one-page-view-is-read-on-a-key-the-caller-already-holds.md)) — the handle the *Events* tab is drawn from, which counts nothing, names no page and cannot be asked which page views exist |
+| When readers arrived | page views counted under the hour they began in as well as in total ([0356](../decisions/0356-page-views-are-counted-under-the-hour-they-began-in-as-a-sixth-counter-written-at-the-door.md)), written at the door in the same transaction as the total — so a chart by hour sums to the count drawn beside it, and a reading over a range says where its data starts |
 | Which page a change helped and which it hurt | every page's sharpest movement in each direction, at the later window's door scale ([0291](../decisions/0291-a-deployments-change-is-two-orders-at-the-doors-scale-because-a-page-has-no-net-movement.md)), as two orders rather than one — because a page the change both helped and hurt has no net |
 | What a change did to the funnel | the rate bracketed by each window's own ceiling, with a counterfactual saying which half moved ([0288](../decisions/0288-a-change-to-a-funnel-is-two-shares-that-factor-and-a-difference-of-two-floors-is-a-bracket.md)), so a rollup window a deployment shortened cannot read as a collapse |
 | How much of what it says gets read | words readers reached against the words the window can speak for ([0235](../decisions/0235-how-much-of-a-page-gets-read-is-a-share-of-words-that-partition-it-and-the-typical-reader-is-a-ceiling.md), [0287](../decisions/0287-a-share-of-a-pages-words-is-a-share-of-the-words-the-window-can-speak-for-and-spoken-for-is-one-predicate.md)), with the passages nobody saw — and no share at all where nothing reports reach |
@@ -102,9 +104,22 @@ call inside a pull request.
    fingerprint, no cross-page stitching, no replay, no cursor coordinates
    ([0146](../decisions/0146-a-reader-signal-stays-anonymous-and-a-funnel-is-correlated-inside-one-page-view.md)).
 2. **A funnel is correlated inside one page view** — an opaque random `view` key
-   that never leaves the aggregation step, never persists, and is never derived
-   from anything about the reader (0146). This is what makes conversion
-   answerable without making a reader identifiable.
+   that never persists and is never derived from anything about the reader
+   (0146). This is what makes conversion answerable without making a reader
+   identifiable.
+
+   **It no longer *never leaves the aggregation step*, and the rule holds in the
+   half it rests on.** 0146 said nothing in the portal reads the key and nothing
+   joins on it; the *Events* drawer reads it and joins on it, once, to show the
+   rest of one page view
+   ([0355](../decisions/0355-the-events-a-screen-lists-are-one-row-per-signal-and-one-page-view-is-read-on-a-key-the-caller-already-holds.md)
+   partially supersedes 0146 on that clause and no other). It stopped holding
+   because 0349 did not leave it standing: deliveries are kept for thirty days
+   **so that** an operator can look at the ones their totals were made from, and
+   that drawer is the screen the maintainer took the decision for. What the key
+   is has not changed, and the scoping is now enforced by a signature rather
+   than by a convention — the one read that uses it takes a single key and
+   cannot be asked which keys exist, or what a row shares a key with.
 3. **Measurement is never a prop in the tree.** A proposal must not be able to
    switch reader measurement on by writing a delta (0136). This rules out a
    "tracking component" a page could drop in, and it is deliberate.
@@ -147,6 +162,17 @@ call inside a pull request.
    signals can be read together, and 0349 decided it knowing that
    ([0351](../decisions/0351-a-counted-delivery-is-kept-for-a-stated-window-rather-than-deleted-by-the-fold.md)
    partially supersedes 0158 on this point and no other lane's).
+
+   **An aggregate may now carry a clock, and one does (6 November).** The rule
+   said nothing about time either way and every counter here happened to be
+   timeless, which is what the portal read it as. Page views are now counted
+   under the hour they began in as well as in total
+   ([0356](../decisions/0356-page-views-are-counted-under-the-hour-they-began-in-as-a-sixth-counter-written-at-the-door.md)),
+   because *how many readers arrived yesterday* is not answerable from a counter
+   with no time in it or from a capped scan of the kept deliveries. The second
+   limit is the one to hold: **an hour outlives the delivery it could have been
+   derived from.** It is a count of page views of a revision, which names
+   nowhere and nobody, and it is a count against a clock, which is new.
 6. **The vocabulary stays closed.** Five kinds, `completed` having landed on
    1 October ([0211](../decisions/0211-a-completion-is-a-form-the-browser-let-go.md)).
    A sixth is a record.
@@ -4686,6 +4712,113 @@ because it needs a **scoped reading handle** over the kept rows — the way it
 calls `readingsFor(applicationId)` today — and this unit built the store and not
 the handle. That is one module in `apps/loom/app/_lib/reader-signals/` and is
 the next step.
+
+### 75. The events a screen can list · `Loom signals` · **done, 5 November**
+
+§74's stated remainder, and the fourth of the four things `Loom portal` asked
+the intake for: **a scoped reading handle over the kept rows**. The deliveries
+have been there since the morning — a counted one is marked rather than deleted
+(0351) and kept for thirty days (0349) — and the only way to read them was
+`ReaderSignalJournal.read`, which is the store's own handle: unscoped,
+delivery-shaped, and the table rather than a reading.
+
+**Done**
+([0355](../decisions/0355-the-events-a-screen-lists-are-one-row-per-signal-and-one-page-view-is-read-on-a-key-the-caller-already-holds.md)),
+as one module — `apps/loom/app/_lib/reader-signals/events.ts` — and one filter on
+the store's read request. **Nothing reaches a reader's browser**: `broadcast.ts`
+is byte-identical and the bundle measures 6,513 bytes minified, unchanged.
+
+- **A row is a signal, not a delivery.** The screen's columns are *time, kind,
+  page, part, version*, and a delivery carries one signal to hundreds. The
+  signal is carried **whole** — the closed five-kind union — beside its
+  delivery's facts, because a parallel shape would be a second vocabulary to
+  keep in step and the first thing it would lose is that a `dwelled` has no
+  instant of its own and a `viewed` does.
+- **The order is arrival, and the reader's clock is shown and never sorted by.**
+  A browser's clock is attacker-controlled, so a list sorted by it is a list a
+  page could hide a row at the bottom of. Inside one delivery the sender's own
+  array order stands: it is the only account of that sequence anybody has, so
+  reversing it to make the whole list descend would assert a claim the sender
+  never made.
+- **A page holds exactly the limit, and the cursor is the store's plus what has
+  been shown.** The store pages deliveries and hands out no position *inside*
+  one, so fifty events ending in the middle of a delivery of sixty is a place no
+  `ReaderSignalPage` can name. `[cursor, skip]` says *resume this chunk and skip
+  what has been drawn*, which costs **at most two reads** whatever page the
+  reader is on — a chunk is `limit` deliveries and every delivery carries at
+  least one signal, so a chunk that is not the last can always fill what a
+  resumed one left short.
+- **One page view is read on a key the caller already holds.**
+  `ReaderSignalReadRequest.view`, served by a partial index, and
+  `pageView(key)` on the handle. One key in, one page view out: nothing
+  enumerates keys and nothing takes a row and asks what else shares its key,
+  which is rule 2 as a signature rather than as a convention. **This is where a
+  clause of 0146 stops holding, and it stops because 0349 does** — see the rule
+  below.
+- **It counts nothing and names nothing.** No list total and no facet count:
+  0349's second clause is that nothing read over all time comes out of these
+  rows, and the tallies hold exactly those numbers already. Page headings and
+  part labels are the portal's join from what the site published (0312).
+- **It says nothing about which delivery opened a page view**, and that is a
+  refusal rather than a gap. The wire carries the marker and both journals drop
+  it at the door (0219), because a row saying *this page view began at this
+  instant* is the step toward a profile §7 refused — and thirty days makes that
+  argument stronger, not weaker. There is a test that fails if the field
+  reappears.
+
+**What is left and is filed:** the screen, which is `Loom portal`'s — and two
+limits of this handle that are the portal's call to draw around. The kind chips
+are not a filter it has (kind is inside the delivery's JSON array, so filtering
+on it is either a predicate over a thirty-day table or an over-read that breaks
+the exact page; the recommendation is that the chips read the tallies, as the
+counts already must). And the drawer's panel shows the **start** of a page view
+with `more` where there is more, so an event late in a long page view is not
+inside its own panel.
+
+### 76. The hour readers arrived in · `Loom signals` · **done, 6 November**
+
+`Loom portal` filed it this morning, against `portal-wireframes.md` *1 ·
+Signals*: a range picker over the whole screen, *page views in the range* with
+the change on the period before, and **a bar chart of page views by hour**. It
+could draw none of the three and said so rather than drawing one badly — the
+tallies keep no time, and the only rows with an instant on them are the kept
+deliveries, which page by delivery and live as long as the window a deployment
+keeps them for. *A bar drawn from part of an hour is a wrong number rather than
+a shorter list.*
+
+**Done**
+([0356](../decisions/0356-page-views-are-counted-under-the-hour-they-began-in-as-a-sixth-counter-written-at-the-door.md)),
+as a sixth counter rather than a read of the deliveries.
+
+- **The marker was already arriving.** A delivery says whether it opened its
+  page view (0214), and two things are already derived from it at the door: how
+  many page views began on a revision, and where. The hour is the third, and the
+  door was already stamping every counter this delivery moves with one instant.
+- **`loom_reader_arrivals`** is an application, an audience, a tree, a revision,
+  an hour and a number of page views that began in it. The hour is UTC and the
+  bucket is the instant it began; finer is sixty times the rows for a resolution
+  nothing has asked for, and coarser cannot draw twenty-four bars.
+- **One call writes both rows or neither.** `opened` writes the revision's total
+  and the hour in one transaction, from the openings `openingsOf` already found,
+  so the hourly chart sums to the page-view count drawn beside it — which it
+  would otherwise stop doing permanently and invisibly (0158).
+- **A reading has a beginning.** The counter read answers the hours in the range
+  *and* the first hour the same narrowing ever counted, so thirty days on a
+  deployment that has counted for a week draws a week and says where its data
+  starts. `readReaderArrivals` derives the read from the range, because the
+  obvious composition reads only the range on the screen and then reports an
+  earlier period that is empty *because it was not read*.
+- **An earlier period that predates counting has no figure, not a nought** —
+  `unmeasured` rather than `from-nothing`, which is the one reserved for a
+  period that was counted and held nobody.
+
+**Nothing reaches a reader's browser.** `broadcast.ts` is byte-identical and the
+bundle measures 6,513 bytes minified, 2,993 gzipped. No payload field, no new
+kind, and the one new table is one no browser can see.
+
+**What is left and is filed:** the chart is the portal's to draw, and this
+reading does not compose into `windowAssemblyOf` — a window is a set of counters
+and this is a stretch of time, so a caller reads it directly.
 
 ## Still not in scope
 
