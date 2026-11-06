@@ -12,11 +12,13 @@ import {
   eventsHref,
   happenedOf,
   lengthOf,
+  LIVE_EVERY_MS,
+  LIVE_ON,
   partKindOf,
   SEARCH_LENGTH,
-  type EventFilter,
   type EventPageChoice,
   type EventPage,
+  type EventView,
   type Naming,
   type ReaderEvent,
 } from "@/app/(portal)/_lib/events"
@@ -24,20 +26,23 @@ import type { OpenedEvent } from "@/app/(portal)/_lib/events-reading"
 import { SIGNAL_KINDS } from "@/app/(portal)/_lib/vocabulary"
 import { plainMoment } from "@/app/(portal)/_lib/when"
 
+import { LiveRefresh } from "./live-refresh"
+
 /**
  * *Signals · Events*: what readers did, one row each, newest first, and the
  * drawer for the one the address names (`docs/portal-wireframes.md`,
  * *1 · Signals*).
  *
  * Every control is an address — `kind`, `on`, `view` and `q` for the filter,
- * `before` for where the list starts, `event` for the drawer's subject — so a
- * link a person sends reopens exactly what they were looking at, and the
- * screen needs no client code to do it.
+ * `live` for reading the newest again as it arrives, `before` for where the
+ * list starts, `event` for the drawer's subject — so a link a person sends
+ * reopens exactly what they were looking at. Being live is the one piece of
+ * client code, and all it does is ask the server to draw the address again.
  */
 
 export type EventsAddress = {
   readonly base: string
-  readonly filter: EventFilter
+  readonly filter: EventView
   readonly before: string | undefined
 }
 
@@ -65,6 +70,44 @@ const PartCell = ({ event, naming }: { event: ReaderEvent; naming: Naming }) => 
   )
 }
 
+/**
+ * The *Live* switch, and while it is on, the reading again that makes it so.
+ *
+ * Switching on from an older page goes to the newest, because that is the
+ * only page live can be ({@link EventView}); the sentence beside it says so
+ * before it is pressed.
+ */
+const LiveSwitch = ({ address }: { address: EventsAddress }) => {
+  const { base, filter, before } = address
+
+  return (
+    <p className="text-ink-muted m-0 flex flex-wrap items-center gap-2 text-xs">
+      <Link
+        href={eventsHref(base, { ...filter, live: !filter.live })}
+        role="switch"
+        aria-checked={filter.live}
+        className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 no-underline ${
+          filter.live
+            ? "bg-applied text-applied-ink border-applied-ink/20"
+            : "border-edge-subtle text-ink"
+        }`}
+      >
+        <span
+          aria-hidden="true"
+          className={`size-1.5 rounded-full ${filter.live ? "bg-applied-ink" : "bg-ink-muted"}`}
+        />
+        Live
+      </Link>
+      {filter.live
+        ? "New events appear at the top as they arrive."
+        : before === undefined
+          ? "Switch on to see new events as they arrive."
+          : "Switching on goes back to the newest events."}
+      {filter.live ? <LiveRefresh everyMs={LIVE_EVERY_MS} /> : null}
+    </p>
+  )
+}
+
 export const EventFacets = ({
   address,
   pages,
@@ -76,6 +119,7 @@ export const EventFacets = ({
 
   return (
     <div className="flex flex-col gap-3">
+      <LiveSwitch address={address} />
       <FilterChips
         label="Kind"
         choices={[
@@ -118,6 +162,7 @@ export const EventFacets = ({
         />
         {filter.kind === undefined ? null : <input type="hidden" name="kind" value={filter.kind} />}
         {filter.view === undefined ? null : <input type="hidden" name="view" value={filter.view} />}
+        {filter.live ? <input type="hidden" name="live" value={LIVE_ON} /> : null}
         <button type="submit" className="border-edge-subtle rounded border px-2 py-1">
           Show
         </button>
@@ -363,6 +408,7 @@ export const EventDrawerPanel = ({
                 page: undefined,
                 view: event.view,
                 search: undefined,
+                live: address.filter.live,
               })}
               className="text-ink"
             >

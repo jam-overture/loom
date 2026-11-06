@@ -142,7 +142,30 @@ export const matchesSearch =
       .every((word) => said.includes(word))
   }
 
-export type EventQuery = EventFilter & {
+/**
+ * How often a live list reads again: the five seconds a page's broadcast
+ * waits before it sends what it saw, so a reading rarely finds nothing new
+ * and a new event is never more than two of these behind.
+ */
+export const LIVE_EVERY_MS = 5_000
+
+/** The one value `live` takes in an address; any other leaves the list still. */
+export const LIVE_ON = "on"
+
+/**
+ * The filter and whether the list is live: what every link on the screen
+ * carries, so moving between kinds, pages and searches stays live.
+ *
+ * **Live is the newest page only.** It reads again every
+ * {@link LIVE_EVERY_MS}, and a list that started further back would either
+ * never change or jump to the top under the reader, so an address with a
+ * cursor is never live, however it was written.
+ */
+export type EventView = EventFilter & {
+  readonly live: boolean
+}
+
+export type EventQuery = EventView & {
   readonly before: EventPosition | undefined
   readonly open: EventPosition | undefined
 }
@@ -162,12 +185,15 @@ export const eventQueryOf = (
     return typeof value === "string" ? value : undefined
   }
 
+  const before = parseEventKey(one("before"))
+
   return {
     kind: parsedOr(readerSignalKindSchema, one("kind")),
     page: parsedOr(treeIdSchema, one("on")),
     view: parsedOr(viewKeySchema, one("view")),
     search: searchOf(one("q")),
-    before: parseEventKey(one("before")),
+    live: one("live") === LIVE_ON && before === undefined,
+    before,
     open: parseEventKey(one("event")),
   }
 }
@@ -181,18 +207,23 @@ export const matchesFilter =
     (view === undefined || event.view === view) &&
     (search === undefined || matchesSearch(search, naming)(event))
 
-/** An address on the Events screen, keeping the filter and naming what changes. */
+/**
+ * An address on the Events screen, keeping the filter and whether it is live,
+ * and naming what changes. Live is dropped where a cursor is named, as
+ * {@link EventView} says.
+ */
 export const eventsHref = (
   base: string,
-  filter: EventFilter,
+  view: EventView,
   more: { readonly before?: string | undefined; readonly event?: string | undefined } = {}
 ): string => {
   const query = new URLSearchParams(
     Object.entries({
-      kind: filter.kind,
-      on: filter.page,
-      view: filter.view,
-      q: filter.search,
+      kind: view.kind,
+      on: view.page,
+      view: view.view,
+      q: view.search,
+      live: view.live && more.before === undefined ? LIVE_ON : undefined,
       before: more.before,
       event: more.event,
     }).flatMap(([key, value]) => (value === undefined ? [] : [[key, value]]))
