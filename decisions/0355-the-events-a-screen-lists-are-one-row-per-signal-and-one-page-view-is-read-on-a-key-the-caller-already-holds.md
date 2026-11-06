@@ -18,6 +18,14 @@
 > the pull request for that reason. *What of 0146 this overturns* sets out the
 > one clause and the four that stand.
 
+> **Ratified by the maintainer on 6 November 2026**, on #780: *"okay, go with
+> your recommendations."* The three questions this unit left open were each
+> recommended as built and are settled that way — the drawer shows the page-view
+> key as the wireframe has it, a delivery's own signals keep the order the sender
+> put them in, and the drawer's panel stays bounded rather than paged. So the
+> supersession above is agreed rather than assumed, and a later run need not
+> re-open it.
+
 ## Context
 
 Two decisions on 5 November left the *Events* tab one module short. 0349 settled

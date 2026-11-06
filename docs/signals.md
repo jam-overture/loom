@@ -4754,14 +4754,31 @@ is byte-identical and the bundle measures 6,513 bytes minified, unchanged.
   argument stronger, not weaker. There is a test that fails if the field
   reappears.
 
-**What is left and is filed:** the screen, which is `Loom portal`'s — and two
-limits of this handle that are the portal's call to draw around. The kind chips
-are not a filter it has (kind is inside the delivery's JSON array, so filtering
-on it is either a predicate over a thirty-day table or an over-read that breaks
-the exact page; the recommendation is that the chips read the tallies, as the
-counts already must). And the drawer's panel shows the **start** of a page view
-with `more` where there is more, so an event late in a long page view is not
-inside its own panel.
+**Ratified on 6 November.** The three questions this step left open were each
+recommended as built, and the maintainer took all three on #780: the drawer
+shows the page-view key as the wireframe has it, a delivery's own signals keep
+the sender's order, and the panel stays bounded rather than paged.
+
+**What is left, and it is not what this step expected.** The screen shipped
+**before this handle did** — `Loom portal` built *Events* on 5 and 6 November
+(#782, #784, #785) against `readingsFor(application).journal` directly, having
+read §74's finding as saying the journal already *was* the handle. Both lanes
+solved the same morning's problem on the same morning, and `main` now holds two
+readings of these rows: this one, which nothing calls, and
+`apps/loom/app/(portal)/_lib/events-reading.ts`, which the screen uses.
+
+**The part of that worth acting on is not the duplication but one capability
+that landed hours too late to be used.** The screen's drawer finds the rest of a
+page view by reading the **200 deliveries either side** of the event and keeping
+those whose key matches, and it says so when there were more; `?view=` filters
+the same capped scan. On a busy site a page view's own deliveries are
+interleaved with hundreds of others, so that panel is a sample rather than the
+page view, and *Events from this view* can quietly omit. `read({ view })` is
+exact, is one indexed read, and cannot miss — it is the narrowing this step
+added for precisely that panel. Filed for `Loom portal` with that as the one
+recommendation to take now; which of the two readings survives is a question
+about where the lane boundary sits and is the maintainer's rather than either
+lane's.
 
 ## Still not in scope
 

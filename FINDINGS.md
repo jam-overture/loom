@@ -66477,3 +66477,78 @@ mismatch between what a row is and what the store pages. The thing to copy is
 not the arithmetic but the discipline: the module above the store may keep a
 cursor of its own, and it may compose the store's cursor into it, and it may not
 take the store's cursor apart.
+
+---
+## 2026-11-06 — the drawer's *rest of this page view* is a sample of 400 deliveries, and the read that makes it exact landed hours after the screen did
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom portal`
+(`apps/loom/app/(portal)/_lib/events-reading.ts`) · **Status:** open — **one
+field is the whole fix**, nothing is red, and the screen is right about
+everything it says
+
+Both lanes solved the same morning's problem on the same morning. `Loom portal`
+built *Events* on 5 and 6 November (#782, #784, #785) against
+`readingsFor(application).journal` directly, having read §74's finding as saying
+the journal already **was** the handle it asked for; this lane shipped the
+handle it meant a few hours later (#780, 0355), with a narrowing on the store's
+read request that nothing in the screen could know about. **The screen is not
+wrong and the finding was ambiguous**; what follows is one capability that
+arrived too late to be used, and it is the only part of this worth acting on
+now.
+
+**`readOpenedEvent` reads the 200 deliveries either side of the event and keeps
+those whose key matches** (`AROUND = 200`), reporting `whole: false` where there
+were more. `?view=` filters the same capped scan, as the kind and page filters
+do. That is exactly right against a journal that can only be walked — and it
+makes the drawer's panel a **sample of a window of time rather than a page
+view**: on a site with ten readers on it, a page view's own deliveries are
+interleaved with hundreds of others, every one of which spends one of the 400
+places. *Events from this view* can quietly omit for the same reason.
+
+**`read({ view })` is now on `main`**, from 0355:
+
+```ts
+const page = await journal.read({ view, direction: "newer", limit })
+```
+
+- **Exact.** Every delivery of that page view, whatever else arrived between
+  them, and nothing else — a key nothing carries is an empty page.
+- **One indexed read**, on `loom_reader_signals_view_idx (application_id, view)
+  where view is not null`, rather than 400 rows of JSONB.
+- **It cannot overrun a window of time**, so `whole` stops being a thing the
+  drawer has to say — a page view older than the kept window is simply gone,
+  which is a different and honest sentence.
+- **It is bounded as a page like every other read**, so a reader who stayed an
+  hour is a `limit` and a *more* rather than a guess about how many deliveries
+  are nearby.
+
+**Recommendation, and it is the only one in this entry:** point the drawer's
+panel and `?view=` at `read({ view })`. Everything else on the screen can stay
+as it is. `apps/loom/app/_lib/reader-signals/events.ts` already wraps it as
+`readerEventsFor(application).pageView(key, limit?)`, which returns
+`{ events, more }` with the events oldest first — take that or call the journal
+directly, whichever fits `events-reading.ts` better; the narrowing is the part
+that matters.
+
+**What is not being asked for, and is the maintainer's call rather than either
+lane's.** `main` now holds **two** readings of these rows: the portal's, which
+the screen uses and which has the filters, the naming and the goal chips; and
+this lane's, which nothing calls. Neither is simply better — the portal's buys
+the kind chips and the search by scanning and filtering in memory, and this
+one's pages exactly at no more than two reads and never mints a cursor from
+`seq`, which the portal's does (`through = seq + 1`, which works and depends on
+the encoding of a value every store contract calls opaque and passed back
+unread). The right end state is one reading with the portal's capabilities and
+this one's discipline, and **where it lives is a question about the lane
+boundary**: §74's finding said a portal calling the journal is reaching the
+table, and the portal's answer — that the scoped journal handle *is* the handle
+— is a reasonable reading of the same words. This lane is not deleting its
+module on its own initiative, because that would throw away the better-behaved
+half before anybody compared them; it is also not asking `Loom portal` to
+migrate a working screen. **For the maintainer:** say which way the boundary
+goes and the losing module is deleted in one commit by whichever lane owns it.
+
+**Said plainly so nobody re-derives it:** a lane's finding that another lane can
+read two ways will be read the cheaper way, by a routine with a morning's budget
+and a screen to ship. The fix is not more words in the finding — it is naming
+the module and the signature, which this one does.
