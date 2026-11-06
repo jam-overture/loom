@@ -5,6 +5,7 @@ import {
 } from "../testing/reader-signal-contract.js"
 
 import { describeWindowApplyContract } from "./applied-window.contract.js"
+import { describeArrivalHourContract } from "./arrivals.contract.js"
 import { describeCorrelatedDeliveryContract } from "./correlated.contract.js"
 import { describeKeptDeliveryContract } from "./kept.contract.js"
 import {
@@ -31,3 +32,6 @@ describeKeptDeliveryContract("memoryReaderSignalJournal", () => memoryReaderSign
 
 /** The sixth, over the one narrowing a page view is read with (0355). */
 describeCorrelatedDeliveryContract("memoryReaderSignalJournal", () => memoryReaderSignalJournal())
+
+/** The seventh, over the hour an arrival is counted under (`arrivals.ts`). */
+describeArrivalHourContract("memoryReaderTallyStore", () => memoryReaderTallyStore())

@@ -1,5 +1,6 @@
 import { createElement, Fragment, type CSSProperties, type ReactNode } from "react"
 
+import { parseBindings } from "../data/binding.js"
 import { NO_DATA, type DataResolution, type NodeData } from "../data/resolution.js"
 import type { FrameOriginRegistry } from "../frame/origin.js"
 import type { NodeId } from "../ids.js"
@@ -36,6 +37,12 @@ import type { DecorativeChildren } from "./decorative.js"
 import type { RenderDiagnostic } from "./diagnostics.js"
 import { literalThemeElement } from "./inline-variables.js"
 import { editableAttributes } from "./editable.js"
+import {
+  checkAnswers,
+  isAnswerReader,
+  type AnswerReader,
+  type RefusedAnswer,
+} from "./expected.js"
 import { isFrameResolver, resolveNodeFrames, type FrameResolver } from "./frame.js"
 import {
   NO_SLOTS,
@@ -45,7 +52,12 @@ import {
   type SlotChildren,
 } from "./primitive.js"
 import type { PropsValidator } from "./props.js"
-import { isBindingReader, unreadBindings, type BindingReader } from "./reads.js"
+import {
+  isBindingReader,
+  unreadBindings,
+  type BindingDeclaration,
+  type BindingReader,
+} from "./reads.js"
 import { isSlotPlacer, unplacedSlots, type SlotPlacer } from "./slots.js"
 import {
   isUnshownReader,
@@ -206,6 +218,11 @@ type RenderContext = {
   readonly frames: FrameResolver | undefined
   /** Absent for the same reason `frames` is: a plain map declares nothing. */
   readonly reads: BindingReader | undefined
+  /**
+   * Absent for the same reason `reads` may be: a plain map has registered
+   * nothing that could declare the shape of answer it reads. See `expected.ts`.
+   */
+  readonly expects: AnswerReader | undefined
   /**
    * Absent for the same reason `reads` may be: a plain map has registered
    * nothing that could declare a reading. See `unshown.ts`.
@@ -395,7 +412,16 @@ const nodeDataFor = (node: ElementNode, declared: unknown, context: RenderContex
     )
   }
 
-  const data = context.data.lookup(node.id)
+  const given = context.data.lookup(node.id)
+  const declaredReads = context.reads?.bindingsReadBy(node.type)
+  const { data, refused } = checkAnswers(
+    given,
+    declaredReads,
+    context.expects?.answersExpectedBy(node.type),
+    node.props
+  )
+
+  if (refused.length > 0) reportRefusedAnswers(node, declared, refused, context)
 
   /**
    * A resolution that answered nothing for a node that asked for something has
@@ -412,7 +438,7 @@ const nodeDataFor = (node: ElementNode, declared: unknown, context: RenderContex
     context.collect({ code: "data-unresolved", nodeId: node.id, resolution: "unrelated" })
   }
 
-  reportUnreadBindings(node, data, context)
+  reportUnreadBindings(node, data, declaredReads, context)
   reportUnshownRows(node, data, context)
 
   return data
@@ -446,6 +472,51 @@ const reportUnplacedSlots = (node: ElementNode, context: RenderContext): void =>
 }
 
 /**
+ * A diagnostic for every answer this node was given that its primitive declared
+ * it cannot read.
+ *
+ * Reported as `data-unavailable`, which is the code it is: the binding has no
+ * value, and the reason it carries says whose schema refused it — the source's
+ * own, or the primitive reading it (0357). A code of its own would have said the
+ * same thing one word differently and split anything counting bindings that went
+ * unanswered across two codes.
+ *
+ * The source id comes from the node's own `loom:data`, re-parsed here rather
+ * than carried down from the plan. It costs a parse on the one path where an
+ * answer was refused and nothing at all on every other node, which is the
+ * trade worth making: the plan's own copy would have to travel through the
+ * resolution to reach here, and a resolution is asked about a node id and
+ * deliberately knows nothing about what the node declared.
+ *
+ * A refusal whose name is not in that map cannot happen on a rendered node — a
+ * ready answer under a name is there because the plan read that name off this
+ * node — and is passed over rather than reported against a source nobody named.
+ * `nameRead` guards the same impossibility for the same reason.
+ */
+const reportRefusedAnswers = (
+  node: ElementNode,
+  declared: unknown,
+  refused: readonly RefusedAnswer[],
+  context: RenderContext
+): void => {
+  const bindings = parseBindings(declared)
+  if (!bindings.ok) return
+
+  for (const [name, bound] of bindings.value) {
+    const refusal = refused.find((candidate) => candidate.name === name)
+    if (!refusal) continue
+
+    context.collect({
+      code: "data-unavailable",
+      nodeId: node.id,
+      name,
+      source: bound.source,
+      unavailable: { reason: "unreadable-answer", detail: refusal.detail },
+    })
+  }
+}
+
+/**
  * A diagnostic for every name this node was answered under that its primitive
  * says it does not read.
  *
@@ -468,9 +539,9 @@ const reportUnplacedSlots = (node: ElementNode, context: RenderContext): void =>
 const reportUnreadBindings = (
   node: ElementNode,
   data: NodeData,
+  declared: readonly BindingDeclaration[] | undefined,
   context: RenderContext
 ): void => {
-  const declared = context.reads?.bindingsReadBy(node.type)
   if (declared === undefined) return
 
   const asked: string[] = []
@@ -985,6 +1056,7 @@ const renderFrom = (
     origins: options.origins,
     frames: isFrameResolver(options.resolver) ? options.resolver : undefined,
     reads: isBindingReader(options.resolver) ? options.resolver : undefined,
+    expects: isAnswerReader(options.resolver) ? options.resolver : undefined,
     unshown: isUnshownReader(options.resolver) ? options.resolver : undefined,
     placer: isSlotPlacer(options.resolver) ? options.resolver : undefined,
     text: composeText(options.resolver, options.text),

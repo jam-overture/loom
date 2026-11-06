@@ -1,5 +1,6 @@
 import type { AudienceId } from "../audience/audience.js"
 
+import type { ArrivalHourCount } from "./arrivals.js"
 import type { ReaderRegionCount } from "./region.js"
 import type { FunnelAnswer, FunnelPair, ReaderTally } from "./rollup.js"
 
@@ -53,6 +54,19 @@ export const funnelKey = (answer: FunnelAnswer): string =>
 
 export const regionKey = (count: ReaderRegionCount): string =>
   `${revisionKey(count)} ${count.region}`
+
+/**
+ * A revision and an hour.
+ *
+ * The fourth counter the door writes and the second it composes by hand: one
+ * delivery's openings all carry the same hour, so two of these can only collide
+ * where a delivery opened page views of one revision twice over — which
+ * `openingsOf` has already folded. The key is here anyway, with the other
+ * three, because *today's callers cannot emit a duplicate* is a property of
+ * today's callers (see the note above).
+ */
+export const arrivalKey = (count: ArrivalHourCount): string =>
+  `${revisionKey(count)} ${count.hour}`
 
 /**
  * The same counter, in one audience (0284).
@@ -126,6 +140,12 @@ export const addFunnelAnswers = (standing: FunnelAnswer, next: FunnelAnswer): Fu
   reached: standing.reached + next.reached,
   converted: standing.converted + next.converted,
 })
+
+/** Page views that began in one hour, added. */
+export const addArrivalCounts = (
+  standing: ArrivalHourCount,
+  next: ArrivalHourCount
+): ArrivalHourCount => ({ ...next, views: standing.views + next.views })
 
 export const addRegionCounts = (
   standing: ReaderRegionCount,
