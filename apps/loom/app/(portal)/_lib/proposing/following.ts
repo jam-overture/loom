@@ -5,11 +5,12 @@ import {
   ok,
   type IdFactory,
   type LoomTree,
+  type ProposalId,
   type Result,
   type TreeError,
   type TreeId,
 } from "@jam-overture/loom"
-import type { StoreError, TreeStore } from "@jam-overture/loom/store"
+import type { AppendRequest, StoreError, StoredRevision, TreeStore } from "@jam-overture/loom/store"
 import type { HeldProposal, HoldStore } from "@jam-overture/loom/write"
 
 import {
@@ -21,32 +22,34 @@ import {
 } from "./copies"
 
 /**
- * Keeping a page's copy on the version its site serves (0340).
+ * Keeping a page's copy on the version its site publishes (0340, 0358).
  *
- * A copy that no accepted change has moved starts again from the site's newer
- * version, and every change waiting on the old copy is checked against the new
- * one: a change whose operations still apply waits on, marked as proposed for
- * an older version; a change whose operations no longer apply stays on the old
- * copy, marked as conflicting, and can only be turned down.
- *
- * A copy an accepted change has moved is left where it is until the site
- * serves what it reached, since starting again would lose the change. Unit 8
- * replaces this: the site pulls the copy itself and a newer snapshot replays
- * the accepted changes onto it (0358).
+ * The copy is the live page (0358 clause 5): the site's version plus the
+ * changes accepted on it. A snapshot that brings a newer version starts the
+ * copy again from it, and the changes accepted since the last start are
+ * applied to the new copy again, oldest first; one whose operations no longer
+ * fit is dropped and stays only on the old copy's record (clause 6). Then
+ * every change waiting on the old copy is checked against the new one: a
+ * change whose operations still apply waits on, marked as proposed for an
+ * older version; a change whose operations no longer apply stays on the old
+ * copy, marked as conflicting, and can only be turned down (0340 clause 3).
  */
 
-/** Where a page's copy stands against what its site serves. */
+/** Where a page's copy stands against what its site publishes. */
 export type Followed =
-  /** The copy is the page the site serves. */
+  /** The copy is the site's version, with whatever was accepted on it. */
   | { readonly kind: "serving"; readonly copy: LoomTree }
-  /** The copy carries accepted changes the site does not serve yet. */
-  | { readonly kind: "unshipped"; readonly copy: LoomTree }
   /** The site sent a different page, and this deployment serves the copy instead (0259). */
   | { readonly kind: "apart"; readonly copy: LoomTree }
-  /** The copy started again from the site's version; waiting changes were carried or left conflicting. */
+  /**
+   * The copy started again from the site's version: accepted changes were
+   * applied again or dropped, and waiting ones carried or left conflicting.
+   */
   | {
       readonly kind: "followed"
       readonly copy: LoomTree
+      readonly replayed: readonly ProposalId[]
+      readonly dropped: readonly ProposalId[]
       readonly carried: number
       readonly conflicting: number
     }
@@ -54,7 +57,7 @@ export type Followed =
 export type FollowError = { readonly code: "store"; readonly detail: string }
 
 export type Following = {
-  readonly trees: Pick<TreeStore, "head" | "create" | "revisions">
+  readonly trees: Pick<TreeStore, "head" | "create" | "revisions" | "append">
   readonly holds: Pick<HoldStore, "forTree" | "hold" | "release">
   readonly copies: PageCopyStore
   readonly ids: Pick<IdFactory, "treeId" | "proposalId" | "deltaId">
@@ -162,21 +165,154 @@ export const waitingOnPage = async (
   return ok(listings.flatMap((listing) => (listing.ok ? listing.value.held : [])))
 }
 
+/** Every change accepted on a copy, oldest first: its whole record, read forward a page at a time. */
+export const acceptedOn = async (
+  trees: Pick<TreeStore, "revisions">,
+  copyId: TreeId,
+  cursor?: string,
+  read: readonly StoredRevision[] = []
+): Promise<Result<readonly StoredRevision[], StoreError>> => {
+  const page = await trees.revisions(copyId, cursor === undefined ? {} : { cursor })
+
+  if (!page.ok) return page
+
+  const all = [...read, ...page.value.revisions]
+
+  return page.value.newer === null ? ok(all) : acceptedOn(trees, copyId, page.value.newer, all)
+}
+
+/** What applying a copy's accepted changes to another version of its page comes to. */
+export type Replay = {
+  /** The version with every change that fit applied. */
+  readonly tree: LoomTree
+  /** What to write to the new copy's record, in order: one entry per change that fit. */
+  readonly entries: readonly AppendRequest[]
+  readonly dropped: readonly ProposalId[]
+}
+
+type Replaying = Replay & {
+  /** Where each change applied again landed, by the revision it had on the old copy. */
+  readonly landed: ReadonlyMap<number, number>
+}
+
 /**
- * Start a new copy from the site's version and carry the old copy's waiting
- * changes onto it.
+ * Apply accepted changes to a version of their page, oldest first, keeping the
+ * ones that fit (0358 clause 6). Pure, apart from minting delta ids.
  *
- * Each carried change is held on the new copy before it is released from the
- * old one, so a run cut off between the two leaves the change twice rather
- * than not at all; the old one then reads as conflicting and is turned down.
+ * Each change keeps its proposal id, provenance and who allowed it, so the new
+ * copy's record says which accepted change each entry is; only its address
+ * changes. An undo is applied again only if the change it undoes was, and then
+ * names where that change landed; undoing a change that was dropped would undo
+ * nothing that is there.
+ */
+export const replayOnto = (
+  start: LoomTree,
+  accepted: readonly StoredRevision[],
+  ids: Pick<IdFactory, "deltaId">,
+  appliedAt: string
+): Replay => {
+  const ended = accepted.reduce<Replaying>(
+    (state, revision) => {
+      const undoes = revision.provenance.undoes
+      const undone = undoes === undefined ? undefined : state.landed.get(undoes)
+      const drop = (): Replaying => ({
+        ...state,
+        dropped: [...state.dropped, revision.proposalId],
+      })
+
+      if (undoes !== undefined && undone === undefined) return drop()
+
+      const delta = {
+        ...revision.delta,
+        deltaId: ids.deltaId(),
+        treeId: state.tree.treeId,
+        baseRevision: state.tree.revision,
+      }
+      const applied = applyDelta(state.tree, delta)
+
+      if (!applied.ok) return drop()
+
+      const entry: AppendRequest = {
+        proposalId: revision.proposalId,
+        delta,
+        provenance:
+          undone === undefined ? revision.provenance : { ...revision.provenance, undoes: undone },
+        appliedAt,
+        ...(revision.answeredBy === undefined ? {} : { answeredBy: revision.answeredBy }),
+      }
+
+      return {
+        tree: applied.value,
+        entries: [...state.entries, entry],
+        dropped: state.dropped,
+        landed: new Map([...state.landed, [revision.revision, applied.value.revision]]),
+      }
+    },
+    { tree: start, entries: [], dropped: [], landed: new Map() }
+  )
+
+  return { tree: ended.tree, entries: ended.entries, dropped: ended.dropped }
+}
+
+/**
+ * Whether a snapshot is the version a copy already stands on: the copy's
+ * accepted changes, applied to it, give the copy. Pure, apart from minting
+ * delta ids.
+ *
+ * This is how a site sending its unchanged pages again is told apart from a
+ * newer version, since the store keeps a copy's head and its changes but not
+ * the tree it began as.
+ */
+export const standsOn = (
+  copy: LoomTree,
+  accepted: readonly StoredRevision[],
+  published: LoomTree,
+  ids: Pick<IdFactory, "deltaId">
+): boolean => {
+  const replay = replayOnto({ ...published, treeId: copy.treeId }, accepted, ids, "")
+
+  return replay.dropped.length === 0 && samePage(replay.tree, copy)
+}
+
+/** Write each entry to a copy's record in turn, stopping at the first the store refuses. */
+const appendAll = (
+  trees: Pick<TreeStore, "append">,
+  copy: LoomTree,
+  entries: readonly AppendRequest[]
+): Promise<Result<LoomTree, StoreError>> =>
+  entries.reduce<Promise<Result<LoomTree, StoreError>>>(
+    async (prior, entry) => {
+      const tree = await prior
+
+      return tree.ok ? trees.append(copy.treeId, entry) : tree
+    },
+    Promise.resolve(ok(copy))
+  )
+
+/**
+ * Start a new copy from the site's version, apply the accepted changes to it
+ * again, and carry the old copy's waiting changes onto it.
+ *
+ * The new copy is recorded as the page's current one only once every accepted
+ * change that fits is on it, so a run cut off half way leaves a tree nothing
+ * names and the next look starts again. Each carried change is held on the new
+ * copy before it is released from the old one, so a run cut off between the
+ * two leaves the change twice rather than not at all; the old one then reads
+ * as conflicting and is turned down.
  */
 const startAgain = async (
   given: Following,
   published: LoomTree,
-  from: PageCopy
+  from: PageCopy,
+  accepted: readonly StoredRevision[]
 ): Promise<Result<Followed, FollowError>> => {
   const copyId = given.ids.treeId()
-  const copy = await governedCopyOf(given.trees, published, copyId)
+  const made = await governedCopyOf(given.trees, published, copyId)
+
+  if (!made.ok) return err(storeFailure(made.error.code))
+
+  const replay = replayOnto(made.value, accepted, given.ids, new Date(given.now()).toISOString())
+  const copy = await appendAll(given.trees, made.value, replay.entries)
 
   if (!copy.ok) return err(storeFailure(copy.error.code))
 
@@ -210,12 +346,14 @@ const startAgain = async (
   return ok({
     kind: "followed",
     copy: copy.value,
+    replayed: replay.entries.map((entry) => entry.proposalId),
+    dropped: replay.dropped,
     carried,
     conflicting: outcomes.length - carried,
   })
 }
 
-/** Bring a page's copy to the version its site serves, as far as it can be (0340). */
+/** Bring a page's copy to the version its site publishes (0340, 0358). */
 export const followPublished = async (
   given: Following,
   published: LoomTree
@@ -233,19 +371,14 @@ export const followPublished = async (
 
   if (!given.follows) return ok({ kind: same ? "serving" : "apart", copy: copy.value })
 
-  const accepted = await given.trees.revisions(current.copyId, { direction: "older", limit: 1 })
+  /** The site now publishes the page the copy reached, accepted changes and all. */
+  if (same) return ok({ kind: "serving", copy: copy.value })
+
+  const accepted = await acceptedOn(given.trees, current.copyId)
 
   if (!accepted.ok) return err(storeFailure(accepted.error.code))
 
-  const moved = accepted.value.revisions.length > 0
-
-  if (same && !moved) return ok({ kind: "serving", copy: copy.value })
-  if (!same && moved) return ok({ kind: "unshipped", copy: copy.value })
-
-  /**
-   * Either the site published a page the copy has not seen, or it now serves
-   * what accepted changes took the copy to. Both are the site's version, and
-   * the copy starts again from it.
-   */
-  return startAgain(given, published, current)
+  return standsOn(copy.value, accepted.value, published, given.ids)
+    ? ok({ kind: "serving", copy: copy.value })
+    : startAgain(given, published, current, accepted.value)
 }

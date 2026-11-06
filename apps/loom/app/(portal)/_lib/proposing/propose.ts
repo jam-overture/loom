@@ -24,12 +24,11 @@ import { REMEMBERED_PER_PAGE, type TurnedDownStore } from "./turned-down"
  * nobody typed.
  *
  * It proposes against the project's governed copy of the page, never the
- * published table (clause 2), and only while that copy is the page the site
- * serves: the readings are about that page. So the copy is first brought to
- * the site's newest version where it can be (0340), and a page whose copy
- * carries accepted changes the site does not serve yet is left alone. A page
- * with a change still waiting, on any copy of it, is left alone too, so the
- * queue holds one question per page rather than a pile of them.
+ * published table (clause 2). That copy is the live page (0358 clause 5), so
+ * it is first brought to the site's newest version (0340), with the changes
+ * accepted on it applied again, and proposing goes on whatever was accepted
+ * before. A page with a change still waiting, on any copy of it, is left
+ * alone, so the queue holds one question per page rather than a pile of them.
  *
  * The model is shown what was turned down on the page before, and weighs a
  * change against it (0341).
@@ -46,7 +45,6 @@ export const PROPOSER = "Loom"
 /** Why a page had nothing proposed for it, each of which a person can be told. */
 export type Passed =
   | { readonly kind: "waiting" }
-  | { readonly kind: "unshipped"; readonly copy: number }
   | { readonly kind: "apart" }
   | { readonly kind: "no-goal" }
   | { readonly kind: "silent"; readonly silence: EvidenceSilence }
@@ -128,9 +126,6 @@ export const proposeFor = async (given: ProposeFor): Promise<Result<Proposed, Pr
   )
 
   if (!followed.ok) return err(followed.error)
-  if (followed.value.kind === "unshipped") {
-    return passed({ kind: "unshipped", copy: followed.value.copy.revision })
-  }
   if (followed.value.kind === "apart") return passed({ kind: "apart" })
 
   const copies = await given.copies.list()
