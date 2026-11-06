@@ -1,0 +1,124 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 600" width="880" height="600" font-family="Geist, ui-sans-serif, system-ui, sans-serif">
+  <style>
+    .bg { fill: #ffffff; }
+    .t { fill: #18181b; }
+    .m { fill: #52525b; }
+    .ok { fill: #dcfce7; stroke: #16a34a; }
+    .bad { fill: #fee2e2; stroke: #dc2626; }
+    .new { fill: #fef9c3; stroke: #ca8a04; }
+    .box { fill: #f4f4f5; stroke: #d4d4d8; }
+    .okt { fill: #166534; }
+    .badt { fill: #991b1b; }
+    .newt { fill: #854d0e; }
+    .wire { stroke: #a1a1aa; fill: none; }
+    .wirebad { stroke: #dc2626; fill: none; }
+    .rule { stroke: #d4d4d8; fill: none; }
+    text { font-size: 13px; }
+    .h { font-size: 16px; font-weight: 700; }
+    .sh { font-size: 13px; font-weight: 700; }
+    .k { font-size: 11px; letter-spacing: .06em; font-weight: 700; }
+    .mono { font-size: 11.5px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .tiny { font-size: 10.5px; }
+    @media (prefers-color-scheme: dark) {
+      .bg { fill: #09090b }
+      .t { fill: #fafafa } .m { fill: #a1a1aa }
+      .ok { fill: #14532d; stroke: #4ade80 }
+      .bad { fill: #7f1d1d; stroke: #f87171 }
+      .new { fill: #713f12; stroke: #facc15 }
+      .box { fill: #27272a; stroke: #52525b }
+      .okt { fill: #4ade80 } .badt { fill: #f87171 } .newt { fill: #facc15 }
+      .wire { stroke: #71717a } .wirebad { stroke: #f87171 }
+      .rule { stroke: #3f3f46 }
+    }
+  </style>
+  <rect class="bg" x="0" y="0" width="880" height="600"/>
+
+  <text class="h t" x="32" y="38">Four ways a binding can be wrong. Three were refused. This is the fourth.</text>
+  <text class="m" x="32" y="60">A source schema is a claim about a host&#8217;s database. It says nothing about what can go on a page.</text>
+
+  <line class="rule" x1="32" y1="80" x2="848" y2="80"/>
+
+  <!-- the pipeline -->
+  <text class="k m" x="32" y="106">THE SEAM, LEFT TO RIGHT</text>
+
+  <rect class="box" x="32" y="120" width="122" height="62" rx="6"/>
+  <text class="sh t" x="44" y="142">the tree</text>
+  <text class="mono m" x="44" y="162">loom:data</text>
+  <text class="tiny m" x="44" y="176">a name &#8594; a source</text>
+
+  <path class="wire" d="M154 151 H196" marker-end="url(#a)"/>
+
+  <rect class="ok" x="196" y="120" width="140" height="62" rx="6"/>
+  <text class="sh okt" x="208" y="142">source registry</text>
+  <text class="tiny okt" x="208" y="160">refuses an unregistered</text>
+  <text class="tiny okt" x="208" y="174">source, and bad params</text>
+
+  <path class="wire" d="M336 151 H378" marker-end="url(#a)"/>
+
+  <rect class="ok" x="378" y="120" width="140" height="62" rx="6"/>
+  <text class="sh okt" x="390" y="142">the source&#8217;s own</text>
+  <text class="mono okt" x="390" y="160">answers</text>
+  <text class="tiny okt" x="390" y="174">refuses invalid-answer</text>
+
+  <path class="wire" d="M518 151 H560" marker-end="url(#a)"/>
+
+  <rect class="new" x="560" y="120" width="150" height="62" rx="6"/>
+  <text class="sh newt" x="572" y="142">the primitive&#8217;s</text>
+  <text class="mono newt" x="572" y="160">expects</text>
+  <text class="tiny newt" x="572" y="174">new &#8212; the top level only</text>
+
+  <path class="wire" d="M710 151 H752" marker-end="url(#a)"/>
+
+  <rect class="box" x="752" y="120" width="96" height="62" rx="6"/>
+  <text class="sh t" x="764" y="142">the</text>
+  <text class="sh t" x="764" y="158">primitive</text>
+  <text class="tiny m" x="764" y="175">draws it</text>
+
+  <!-- the name a reader was told, since 0181 -->
+  <rect class="ok" x="196" y="200" width="322" height="34" rx="6"/>
+  <text class="tiny okt" x="208" y="221">and since 0181, a name no primitive reads is refused here too</text>
+
+  <line class="rule" x1="32" y1="262" x2="848" y2="262"/>
+
+  <!-- the division -->
+  <text class="k m" x="32" y="288">WHERE THE LINE IS DRAWN, AND WHY</text>
+
+  <rect class="new" x="32" y="302" width="392" height="128" rx="6"/>
+  <text class="sh newt" x="48" y="326">The top-level shape &#8212; the framework&#8217;s</text>
+  <text class="mono newt" x="48" y="348">expects: { entries: z.array(z.unknown()) }</text>
+  <text class="tiny newt" x="48" y="372">Is this even the kind of answer I asked for?</text>
+  <text class="tiny newt" x="48" y="390">A list bound to a figure is this question, and it is the</text>
+  <text class="tiny newt" x="48" y="406">one the seam could not ask until today.</text>
+  <text class="tiny newt" x="48" y="422">Refused &#8594; unavailable, reason unreadable-answer.</text>
+
+  <rect class="box" x="456" y="302" width="392" height="128" rx="6"/>
+  <text class="sh t" x="472" y="326">Each row inside it &#8212; still the primitive&#8217;s</text>
+  <text class="mono m" x="472" y="348">entrySchema, per row, as before</text>
+  <text class="tiny m" x="472" y="372">A row&#8217;s shape is the one thing only the component</text>
+  <text class="tiny m" x="472" y="390">knows. One row this build is older than must not take</text>
+  <text class="tiny m" x="472" y="406">the whole band off the page (0175), and what it</text>
+  <text class="tiny m" x="472" y="422">dropped is counted by unshown (0206).</text>
+
+  <line class="rule" x1="32" y1="458" x2="848" y2="458"/>
+
+  <!-- what a reader is told -->
+  <text class="k m" x="32" y="484">THE TWO REASONS, AND WHICH FILE EACH SENDS YOU TO</text>
+
+  <rect class="bad" x="32" y="498" width="392" height="68" rx="6"/>
+  <text class="mono badt" x="48" y="520">invalid-answer</text>
+  <text class="tiny badt" x="48" y="540">The source answered something its own schema refuses.</text>
+  <text class="tiny badt" x="48" y="556">Fixed by whoever owns the data.</text>
+
+  <rect class="bad" x="456" y="498" width="392" height="68" rx="6"/>
+  <text class="mono badt" x="472" y="520">unreadable-answer</text>
+  <text class="tiny badt" x="472" y="540">The source answered; the primitive reading it says that</text>
+  <text class="tiny badt" x="472" y="556">is not a shape it can draw. Fixed by whoever bound it.</text>
+
+  <text class="tiny m" x="32" y="588">Both travel on data-unavailable, because the binding has no value either way &#8212; and anything counting unanswered bindings still reads one code.</text>
+
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#a1a1aa"/>
+    </marker>
+  </defs>
+</svg>
