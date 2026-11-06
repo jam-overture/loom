@@ -1,13 +1,18 @@
-# 0356 — An audience rule is a conjunction of scalar clauses, and a composed page is a projection of a revision
+# 0359 — An audience rule is a conjunction of scalar clauses, and a composed page is a projection of a revision
 
 **Status:** Accepted
 **Date:** 2026-11-05
 **Section:** §1, §3
 
-> **Renumbered 6 November 2026, 0355 → 0356.** Written as `0355` on 5 November,
-> the same number `Loom signals` took on #780 a minute earlier. Moved by the
-> framework routine rather than left for `Loom merge` to move at merge time.
-> What this record decides is unchanged.
+> **Renumbered 6 November 2026, 0355 → 0356 → 0359.** Written as `0355` on
+> 5 November, the same number `Loom signals` took on #780 a minute earlier; the
+> framework routine moved it to `0356` rather than leave it for `Loom merge` to
+> move at merge time. `0356` was then taken on `main` by `Loom signals`' *page
+> views are counted under the hour they began in* (#786), which merged first, so
+> `Loom merge` moved this record again on 6 November when it merged `main` into
+> #781. `0359` is the next number free on `main` — `0353` is claimed by the open
+> #778, `0357` is this branch's own, and `0358` merged on `main`. What this
+> record decides is unchanged, and every link and citation to it moved with it.
 
 > **Why it is raised.** [0263](0263-a-page-is-a-base-tree-and-the-deltas-an-audience-earns.md)
 > is Accepted and says *a page is one base tree, plus deltas that apply when an

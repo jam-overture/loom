@@ -128,7 +128,7 @@ schema, which is what every other schema in that file is typed as.
   union; no tree schema, no delta, nothing about how a page is stored. A
   primitive that declares nothing renders exactly as it did. Supersedes nothing.
 - **0355 renumbered to
-  [0356](../decisions/0356-an-audience-rule-is-a-conjunction-of-scalar-clauses-and-a-composed-page-is-a-projection-of-a-revision.md)**,
+  [0359](../decisions/0359-an-audience-rule-is-a-conjunction-of-scalar-clauses-and-a-composed-page-is-a-projection-of-a-revision.md)**,
   with a dated note under its header. Yesterday's unit on this branch took
   `0355` and so did `Loom signals` on #780, a minute apart — the clash the
   convention exists to catch, and neither run could see the other's branch.

@@ -15,7 +15,7 @@ list and it is not a report.
 broken and nothing is blocked today**; filed because unit 9 now has its record
 and the remaining work is nameable
 
-[0356](decisions/0356-an-audience-rule-is-a-conjunction-of-scalar-clauses-and-a-composed-page-is-a-projection-of-a-revision.md)
+[0359](decisions/0359-an-audience-rule-is-a-conjunction-of-scalar-clauses-and-a-composed-page-is-a-projection-of-a-revision.md)
 built 0263 clauses 1 to 4: `audiencesFor` sorts a reader by rules over
 `RenderRequest.context`, `composeTreeForContext` lays the matched deltas onto
 the base, and `composingTreeSourceFromStore` is the sibling 0263 said
@@ -25,17 +25,17 @@ the base, and `composingTreeSourceFromStore` is the sibling 0263 said
 
 | half | whose | what it is |
 | --- | --- | --- |
-| the store dimension | `Loom framework` | audience-scoped deltas and their rules, persisted. A schema change on top of 0260's, which is why 0356 took a seam (`AudienceOverlaySource`) instead and said so |
+| the store dimension | `Loom framework` | audience-scoped deltas and their rules, persisted. A schema change on top of 0260's, which is why 0359 took a seam (`AudienceOverlaySource`) instead and said so |
 | a rule editor | `Loom portal` | an owner naming an audience, writing its clauses, and **ordering the rules**, because the last matching rule wins a contested node |
 
-**The one thing a screen has to teach**, and it is the only part of 0356 a
+**The one thing a screen has to teach**, and it is the only part of 0359 a
 person must understand: rules are an ordered list, general to specific, and the
 order is what resolves two deltas reaching one node. A screen that presents
 rules as an unordered set would be presenting a different model from the one
 that runs.
 
 **And a reading that will be wanted the first time a base moves.** A base edit
-stales every audience delta authored against the revision it left, and 0356
+stales every audience delta authored against the revision it left, and 0359
 refuses the render rather than quietly serving the base — so a deployment
 serving three audiences cannot publish a base change without rebasing three
 deltas. That is the same shape 0340 gave a waiting proposal, and the *stale /

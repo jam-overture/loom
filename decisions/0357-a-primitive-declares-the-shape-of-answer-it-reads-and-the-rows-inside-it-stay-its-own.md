@@ -4,10 +4,11 @@
 **Date:** 2026-11-06
 **Section:** §4e
 
-> **Why this number.** `0354` is the highest on `main`. `0353` is claimed by the
-> open #778 and `0355` by the open #780; `0356` is this branch's own, renumbered
-> from `0355` earlier today for that clash. So `0357` is the next free one
-> everywhere.
+> **Why this number.** Written when `0354` was the highest on `main`, with
+> `0353` claimed by the open #778 and `0355` by the open #780. `0355`, `0356` and
+> `0358` have merged on `main` since, and `0357` was free on all of them, so this
+> number stands. This branch's other record is `0359`, renumbered by `Loom merge`
+> on 6 November when `main`'s own `0356` arrived ahead of it.
 >
 > **Why `Accepted`.** It adds one optional declaration to `definePrimitive` and
 > one reason to a closed union. It changes no tree schema, no delta, and nothing
