@@ -97,7 +97,50 @@ export type EventFilter = {
   readonly kind: ReaderSignalKind | undefined
   readonly page: TreeId | undefined
   readonly view: string | undefined
+  /** Words to find in the part or the page, as {@link searchOf} keeps them. */
+  readonly search: string | undefined
 }
+
+/** Longer than any part's name a person would type, short enough to keep an address readable. */
+export const SEARCH_LENGTH = 80
+
+/**
+ * The search as typed, with its spacing tidied and cut to
+ * {@link SEARCH_LENGTH}; nothing to search for when nothing is left.
+ */
+export const searchOf = (typed: string | undefined): string | undefined => {
+  const tidied = typed?.trim().replace(/\s+/gu, " ").slice(0, SEARCH_LENGTH).trim()
+
+  return tidied === undefined || tidied === "" ? undefined : tidied
+}
+
+/**
+ * Whether every word searched for is somewhere in the part or the page: its
+ * name, its id, or the kind of part it is. The words a person sees on a row
+ * are what they can find it by, the ids included, because an id is what they
+ * paste from a log line. Case does not matter, and the order of the words
+ * does not either.
+ */
+export const matchesSearch =
+  (search: string, naming: Naming) =>
+  (event: ReaderEvent): boolean => {
+    const { treeId, signal } = event
+    const said = [
+      naming.page(treeId),
+      treeId,
+      naming.part(treeId, signal.nodeId),
+      signal.nodeId,
+      partKindOf(signal),
+    ]
+      .filter((each) => each !== undefined)
+      .join(" ")
+      .toLocaleLowerCase("en-GB")
+
+    return search
+      .toLocaleLowerCase("en-GB")
+      .split(" ")
+      .every((word) => said.includes(word))
+  }
 
 export type EventQuery = EventFilter & {
   readonly before: EventPosition | undefined
@@ -123,17 +166,20 @@ export const eventQueryOf = (
     kind: parsedOr(readerSignalKindSchema, one("kind")),
     page: parsedOr(treeIdSchema, one("on")),
     view: parsedOr(viewKeySchema, one("view")),
+    search: searchOf(one("q")),
     before: parseEventKey(one("before")),
     open: parseEventKey(one("event")),
   }
 }
 
+/** The search needs the site's words for its parts and pages, which only `naming` has. */
 export const matchesFilter =
-  ({ kind, page, view }: EventFilter) =>
+  ({ kind, page, view, search }: EventFilter, naming: Naming) =>
   (event: ReaderEvent): boolean =>
     (kind === undefined || event.signal.kind === kind) &&
     (page === undefined || event.treeId === page) &&
-    (view === undefined || event.view === view)
+    (view === undefined || event.view === view) &&
+    (search === undefined || matchesSearch(search, naming)(event))
 
 /** An address on the Events screen, keeping the filter and naming what changes. */
 export const eventsHref = (
@@ -146,6 +192,7 @@ export const eventsHref = (
       kind: filter.kind,
       on: filter.page,
       view: filter.view,
+      q: filter.search,
       before: more.before,
       event: more.event,
     }).flatMap(([key, value]) => (value === undefined ? [] : [[key, value]]))

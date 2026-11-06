@@ -49,7 +49,7 @@ const firstOf = (list: readonly ReaderEvent[]): ReaderEvent => {
 
 const address: EventsAddress = {
   base: "/portal/prj_a/signals",
-  filter: { kind: "activated", page: undefined, view: undefined },
+  filter: { kind: "activated", page: undefined, view: undefined, search: undefined },
   before: undefined,
 }
 
@@ -143,6 +143,42 @@ describe("the filter above the list", () => {
 
     expect(screen.getByRole("link", { name: "Show every page view" }).getAttribute("href")).toBe(
       "/portal/prj_a/signals?kind=activated"
+    )
+  })
+
+  it("searches the part and the page in the same form as the page picker", () => {
+    render(
+      <EventFacets
+        address={{ ...address, filter: { ...address.filter, search: "sign up" } }}
+        pages={[]}
+      />
+    )
+
+    const search = screen.getByRole("searchbox", { name: "Find" })
+
+    expect(search.getAttribute("name")).toBe("q")
+    expect((search as HTMLInputElement).defaultValue).toBe("sign up")
+    expect(search.closest("form")).toBe(
+      screen.getByRole("combobox", { name: "Page" }).closest("form")
+    )
+    expect(screen.getByText(/Showing what mentions “sign up” in its part or page/)).toBeTruthy()
+    expect(screen.getByRole("link", { name: "Clear the search" }).getAttribute("href")).toBe(
+      "/portal/prj_a/signals?kind=activated"
+    )
+  })
+
+  it("keeps the search on every kind chip", () => {
+    render(
+      <EventFacets
+        address={{ ...address, filter: { ...address.filter, search: "cta" } }}
+        pages={[]}
+      />
+    )
+
+    const kinds = screen.getByRole("navigation", { name: "Kind" })
+
+    expect(within(kinds).getByRole("link", { name: "All kinds" }).getAttribute("href")).toBe(
+      "/portal/prj_a/signals?q=cta"
     )
   })
 })

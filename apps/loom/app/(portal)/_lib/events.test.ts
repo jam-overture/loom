@@ -16,9 +16,13 @@ import {
   happenedOf,
   isOlderThan,
   matchesFilter,
+  matchesSearch,
   namingOf,
   pageViewOf,
   parseEventKey,
+  searchOf,
+  SEARCH_LENGTH,
+  type EventFilter,
   type ReaderEvent,
 } from "./events"
 import { goalIdSchema, type Goal } from "./goals/goal"
@@ -63,6 +67,13 @@ const eventOf = (signal: ReaderSignal, overrides: Partial<ReceivedBatch> = {}): 
   if (event === undefined) throw new Error("one signal is one event")
 
   return event
+}
+
+const EVERYTHING: EventFilter = {
+  kind: undefined,
+  page: undefined,
+  view: undefined,
+  search: undefined,
 }
 
 const goal = (overrides: Partial<Goal>): Goal => ({
@@ -130,6 +141,7 @@ describe("the filter", () => {
         kind: "activated",
         on: home.treeId,
         view: VIEW_A,
+        q: "  sign   up ",
         before: "4.1",
         event: "3.0",
       })
@@ -137,15 +149,23 @@ describe("the filter", () => {
       kind: "activated",
       page: home.treeId,
       view: VIEW_A,
+      search: "sign up",
       before: { seq: 4, index: 1 },
       open: { seq: 3, index: 0 },
     })
     expect(
-      eventQueryOf({ kind: "clicked", on: "not a page", view: "short", before: ["1.0", "2.0"] })
+      eventQueryOf({
+        kind: "clicked",
+        on: "not a page",
+        view: "short",
+        q: ["a", "b"],
+        before: ["1.0", "2.0"],
+      })
     ).toEqual({
       kind: undefined,
       page: undefined,
       view: undefined,
+      search: undefined,
       before: undefined,
       open: undefined,
     })
@@ -153,25 +173,68 @@ describe("the filter", () => {
 
   it("keeps an event only when it matches every part of the filter", () => {
     const event = eventOf(pressed())
+    const naming = namingOf([{ tree: home, receivedAt: 0 }])
+    const keeps = (filter: Partial<EventFilter>): boolean =>
+      matchesFilter({ ...EVERYTHING, ...filter }, naming)(event)
 
-    expect(matchesFilter({ kind: undefined, page: undefined, view: undefined })(event)).toBe(true)
-    expect(matchesFilter({ kind: "activated", page: home.treeId, view: VIEW_A })(event)).toBe(true)
-    expect(matchesFilter({ kind: "viewed", page: undefined, view: undefined })(event)).toBe(false)
-    expect(
-      matchesFilter({ kind: undefined, page: "t_other" as TreeId, view: undefined })(event)
-    ).toBe(false)
-    expect(matchesFilter({ kind: undefined, page: undefined, view: VIEW_B })(event)).toBe(false)
+    expect(keeps({})).toBe(true)
+    expect(keeps({ kind: "activated", page: home.treeId, view: VIEW_A, search: "welcome" })).toBe(
+      true
+    )
+    expect(keeps({ kind: "viewed" })).toBe(false)
+    expect(keeps({ page: "t_other" as TreeId })).toBe(false)
+    expect(keeps({ view: VIEW_B })).toBe(false)
+    expect(keeps({ search: "pricing" })).toBe(false)
   })
 
   it("writes an address that keeps the filter and names what changes", () => {
-    const filter = { kind: "activated", page: home.treeId, view: undefined } as const
+    const filter: EventFilter = {
+      ...EVERYTHING,
+      kind: "activated",
+      page: home.treeId,
+      search: "sign up",
+    }
 
     expect(eventsHref("/portal/prj_a/signals", filter, { before: "4.1", event: "3.0" })).toBe(
-      `/portal/prj_a/signals?kind=activated&on=${home.treeId}&before=4.1&event=3.0`
+      `/portal/prj_a/signals?kind=activated&on=${home.treeId}&q=sign+up&before=4.1&event=3.0`
     )
-    expect(
-      eventsHref("/portal/prj_a/signals", { kind: undefined, page: undefined, view: undefined })
-    ).toBe("/portal/prj_a/signals")
+    expect(eventsHref("/portal/prj_a/signals", EVERYTHING)).toBe("/portal/prj_a/signals")
+  })
+})
+
+describe("the search over part and page", () => {
+  const naming = namingOf([{ tree: home, receivedAt: 0 }])
+  const finds = (search: string, signal: ReaderSignal = pressed()): boolean =>
+    matchesSearch(search, naming)(eventOf(signal))
+
+  it("keeps what it was typed as, tidied, and is nothing when nothing is left", () => {
+    expect(searchOf("  the   heading ")).toBe("the heading")
+    expect(searchOf("x".repeat(SEARCH_LENGTH + 20))).toHaveLength(SEARCH_LENGTH)
+    expect(searchOf("   ")).toBeUndefined()
+    expect(searchOf(undefined)).toBeUndefined()
+  })
+
+  it("finds an event by its page's name or id, whatever the case", () => {
+    expect(finds("WELCOME")).toBe(true)
+    expect(finds(home.treeId)).toBe(true)
+  })
+
+  it("finds an event by its part's name, id or kind", () => {
+    expect(finds("heading")).toBe(true)
+    expect(finds(heading)).toBe(true)
+    expect(finds("button")).toBe(false)
+  })
+
+  it("needs every word somewhere, in any order", () => {
+    expect(finds("welcome heading")).toBe(true)
+    expect(finds("heading welcome")).toBe(true)
+    expect(finds("welcome pricing")).toBe(false)
+  })
+
+  it("finds a part the site has not published by its id and kind alone", () => {
+    expect(finds("n_gone", pressed("n_gone"))).toBe(true)
+    expect(finds("heading", pressed("n_gone"))).toBe(true)
+    expect(matchesSearch("welcome", namingOf([]))(eventOf(pressed()))).toBe(false)
   })
 })
 

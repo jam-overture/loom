@@ -7,7 +7,13 @@ import {
   type ReaderSignalJournal,
 } from "@jam-overture/loom/signals"
 
-import { EVENTS_PAGE_SIZE, parseEventKey, type EventFilter, type EventPosition } from "./events"
+import {
+  EVENTS_PAGE_SIZE,
+  namingOf,
+  parseEventKey,
+  type EventFilter,
+  type EventPosition,
+} from "./events"
 import { AROUND, readEventPage, readOpenedEvent, SCAN } from "./events-reading"
 
 const VIEW_A = "a".repeat(32)
@@ -43,7 +49,10 @@ const journalOf = async (
   return journal
 }
 
-const ALL: EventFilter = { kind: undefined, page: undefined, view: undefined }
+const ALL: EventFilter = { kind: undefined, page: undefined, view: undefined, search: undefined }
+
+/** Nothing published, so a part and a page are found by their ids and kinds. */
+const UNNAMED = namingOf([])
 
 const position = (key: string | undefined): EventPosition => {
   const parsed = parseEventKey(key)
@@ -59,7 +68,7 @@ const walk = async (journal: ReaderSignalJournal, filter: EventFilter = ALL) => 
   let before: EventPosition | undefined
 
   for (;;) {
-    const page = await readEventPage(journal.read, filter, before)
+    const page = await readEventPage(journal.read, filter, before, UNNAMED)
 
     if (!page.ok) throw new Error("the memory journal answers")
 
@@ -112,8 +121,19 @@ describe("a page of events", () => {
     expect(await walk(journal, { ...ALL, view: VIEW_B })).toEqual([["3.0"]])
   })
 
+  it("narrows to what a search finds in the part or the page", async () => {
+    const journal = await journalOf([
+      delivery([signal("viewed"), signal("activated", "n_signup")]),
+      delivery([signal("activated")], { treeId: "t_pricing" } as Partial<ReaderSignalBatch>),
+    ])
+
+    expect(await walk(journal, { ...ALL, search: "n_signup" })).toEqual([["1.1"]])
+    expect(await walk(journal, { ...ALL, search: "pricing button" })).toEqual([["2.0"]])
+    expect(await walk(journal, { ...ALL, search: "n_signup t_pricing" })).toEqual([[]])
+  })
+
   it("is empty with nothing older when nothing is kept", async () => {
-    const page = await readEventPage((await journalOf([])).read, ALL, undefined)
+    const page = await readEventPage((await journalOf([])).read, ALL, undefined, UNNAMED)
 
     expect(page).toEqual({
       ok: true,
@@ -132,7 +152,12 @@ describe("a page of events", () => {
       ...Array.from({ length: budget }, () => delivery([signal("viewed")])),
     ])
 
-    const first = await readEventPage(journal.read, { ...ALL, kind: "activated" }, undefined)
+    const first = await readEventPage(
+      journal.read,
+      { ...ALL, kind: "activated" },
+      undefined,
+      UNNAMED
+    )
 
     if (!first.ok) throw new Error("the memory journal answers")
 
@@ -143,7 +168,8 @@ describe("a page of events", () => {
     const next = await readEventPage(
       journal.read,
       { ...ALL, kind: "activated" },
-      position(first.value.older)
+      position(first.value.older),
+      UNNAMED
     )
 
     expect(next.ok && next.value.events.map((event) => event.key)).toEqual(["1.0"])

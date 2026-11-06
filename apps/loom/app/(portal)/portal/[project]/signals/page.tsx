@@ -59,9 +59,10 @@ const EventsScreen = async ({
 
   const journal = boundedReaderSignalJournal(reading.readings.journal)
   const { applicationId } = reading.application
+  const naming = namingOf(reading.published)
 
   const [page, opened, goals] = await Promise.all([
-    readEventPage(journal.read, query, query.before),
+    readEventPage(journal.read, query, query.before, naming),
     query.open === undefined ? undefined : readOpenedEvent(journal.read, query.open),
     query.open === undefined
       ? undefined
@@ -78,7 +79,6 @@ const EventsScreen = async ({
     )
   }
 
-  const naming = namingOf(reading.published)
   const address = {
     base,
     filter: query,

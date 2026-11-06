@@ -13,6 +13,7 @@ import {
   happenedOf,
   lengthOf,
   partKindOf,
+  SEARCH_LENGTH,
   type EventFilter,
   type EventPageChoice,
   type EventPage,
@@ -28,7 +29,7 @@ import { plainMoment } from "@/app/(portal)/_lib/when"
  * drawer for the one the address names (`docs/portal-wireframes.md`,
  * *1 · Signals*).
  *
- * Every control is an address — `kind`, `on` and `view` for the filter,
+ * Every control is an address — `kind`, `on`, `view` and `q` for the filter,
  * `before` for where the list starts, `event` for the drawer's subject — so a
  * link a person sends reopens exactly what they were looking at, and the
  * screen needs no client code to do it.
@@ -103,12 +104,32 @@ export const EventFacets = ({
             </option>
           ))}
         </select>
+        <label htmlFor="events-search" className="text-ink-muted">
+          Find
+        </label>
+        <input
+          id="events-search"
+          type="search"
+          name="q"
+          defaultValue={filter.search ?? ""}
+          maxLength={SEARCH_LENGTH}
+          placeholder="A part or a page"
+          className="border-edge-subtle bg-surface-base w-64 max-w-full min-w-0 rounded border px-2 py-1"
+        />
         {filter.kind === undefined ? null : <input type="hidden" name="kind" value={filter.kind} />}
         {filter.view === undefined ? null : <input type="hidden" name="view" value={filter.view} />}
         <button type="submit" className="border-edge-subtle rounded border px-2 py-1">
           Show
         </button>
       </form>
+      {filter.search === undefined ? null : (
+        <p className="text-ink-muted text-xs">
+          Showing what mentions “{filter.search}” in its part or page.{" "}
+          <Link href={eventsHref(base, { ...filter, search: undefined })} className="text-ink">
+            Clear the search
+          </Link>
+        </p>
+      )}
       {filter.view === undefined ? null : (
         <p className="text-ink-muted text-xs">
           Showing one page view only.{" "}
@@ -341,6 +362,7 @@ export const EventDrawerPanel = ({
                 kind: undefined,
                 page: undefined,
                 view: event.view,
+                search: undefined,
               })}
               className="text-ink"
             >
