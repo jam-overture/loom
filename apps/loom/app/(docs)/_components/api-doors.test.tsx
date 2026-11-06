@@ -268,3 +268,63 @@ describe("how much of the site writes about each import", () => {
     expect(said(0)).not.toContain("Named on 0")
   })
 })
+
+/**
+ * What a row shows a reader, and what it hands the search box.
+ *
+ * **These two are not the same thing and that is the whole of this block.** The
+ * sentence under a specifier and the count beside it are both on the screen and
+ * neither is in the index: the sentence because the contents file already
+ * carries it under the page it is about, the count because nobody types a
+ * number and the digit is read off another lane's package.
+ *
+ * It is asserted here, on the row, as well as on the index in
+ * `search/generated.test.ts`, because the two failures are opposite. An index
+ * assertion goes red if the attribute is **dropped**. A row assertion goes red
+ * if the sentence or the count is **deleted** — which is the cheaper way to get
+ * the same byte count, which is the mistake a saving measured in bytes would
+ * congratulate, and which costs a reader the one line on this page that says
+ * what an import is for.
+ *
+ * So the pair is the point rather than either half: *out of the index, and
+ * still on the screen.*
+ */
+describe("a door's row", () => {
+  const row = () => {
+    const { container } = render(<ApiDoors doorway={doorway()} spelling={spelling()} />)
+
+    return container
+  }
+
+  it("shows the reader the sentence and the count, both of them", () => {
+    const said = row().textContent ?? ""
+
+    expect(said).toContain("What is behind the root import.")
+    expect(said).toContain("100 names")
+  })
+
+  it("keeps the sentence out of the index, because the page it is about has it", () => {
+    /* Both doors in the fixture carry the same sentence, so this asks about
+       the first of them rather than the only one. */
+    const summary = within(row()).getAllByText("What is behind the root import.")[0]
+
+    expect(summary?.getAttribute("data-search")).toBe("off")
+  })
+
+  it("keeps the count out of the index, because it is a label and not a query", () => {
+    const count = within(row()).getAllByText(/^100\s+names$/)[0]
+
+    expect(count?.getAttribute("data-search")).toBe("off")
+  })
+
+  /**
+   * The specifier is the one part of a row a reader does type, so it stays
+   * indexed — and it is the part that makes the row findable at all.
+   */
+  it("leaves the specifier in the index, which is what a reader types", () => {
+    const link = within(row()).getAllByRole("link", { name: "@invented" })[0]
+
+    expect(link?.getAttribute("data-search")).toBeNull()
+    expect(link?.closest("[data-search='off']")).toBeNull()
+  })
+})

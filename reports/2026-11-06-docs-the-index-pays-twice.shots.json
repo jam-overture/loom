@@ -1,0 +1,28 @@
+{
+  "baseUrl": "http://localhost:3000",
+  "outDir": "reports",
+  "shots": [
+    {
+      "path": "/docs/api-reference",
+      "out": "2026-11-06-docs-the-index-pays-twice-wide-doors",
+      "viewport": "wide",
+      "waitFor": "h1",
+      "clip": "section:has-text(\"If you are building a page\")",
+      "measure": ["text=The tree, the delta, the ids, the builders, the Gate and the pipeline. Start here."]
+    },
+    {
+      "path": "/docs/api-reference",
+      "out": "2026-11-06-docs-the-index-pays-twice-wide-terminal",
+      "viewport": "wide",
+      "waitFor": "h1",
+      "clip": "section:has-text(\"From a terminal, and from your tests\")"
+    },
+    {
+      "path": "/docs/api-reference",
+      "out": "2026-11-06-docs-the-index-pays-twice-phone-doors",
+      "viewport": "phone",
+      "waitFor": "h1",
+      "do": [{ "scrollTo": "li:has-text(\"@jam-overture/loom/cli\")" }]
+    }
+  ]
+}

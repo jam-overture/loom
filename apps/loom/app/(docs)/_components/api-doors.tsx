@@ -56,6 +56,41 @@ const AUDIENCES: readonly {
  * the page and a phone is 390 pixels wide, so a three-column table of these
  * either scrolls sideways or squeezes the sentence into a column two words
  * across. A row that stacks reads the same at both widths.
+ *
+ * ## Two of the three things in a row are not indexed, for two reasons
+ *
+ * **The sentence, because the search box already has it — under the page it is
+ * about.** Every page on this site contributes its title, its section and its
+ * one-line summary to the contents file, which is the one file a reader waits
+ * for and the first three bands the box ranks on. A door's summary is that
+ * page's summary: it is in the index before this row renders. Reading it again
+ * here put **eighteen sentences into the index twice**, and the second copy is
+ * the worse of the two — it answers a query about `@jam-overture/loom/signals`
+ * with *the page listing the doors* instead of the door, below the right
+ * answer and above everything else.
+ *
+ * The rule and its reason are not new; the instance is. The per-door band's
+ * list of written pages beside it is already `data-search="off"`, and
+ * `generated.test.ts` has carried the argument since the day it shipped:
+ * *"those page titles are in the index already, each under the page it names. A
+ * reference page that carried them too would answer a query about another
+ * page."* This is the same sentence about a summary rather than a title, and
+ * about the one page that holds all eighteen of them.
+ *
+ * **The count, because nobody types a number and it is not this lane's
+ * number.** *600 names* is a label beside a row, in the sense `WrittenAbout`
+ * below already argues — and it is read off the package, so every one of these
+ * eighteen digits moves when another lane publishes a name. An index that moves
+ * when nothing on this surface was written is the shape
+ * `search/build.test.ts` names as the mistake worth avoiding, and here it was
+ * costing the cap that is the binding constraint on this whole site.
+ *
+ * **Measured, against `main` at `d1c3db5`:** the eighteen sentences are **606
+ * compressed bytes** and the eighteen counts a further **48**. Together 654 —
+ * against a site-wide prose cap with **267 bytes left on it.** What a reader
+ * can find is unchanged in both directions: the specifier is still indexed,
+ * because it is the thing a reader types, and both the sentence and the count
+ * are still on the screen.
  */
 const Door = ({ door }: { readonly door: ApiDoor }) => (
   <li className="border-edge border-b py-3 last:border-b-0">
@@ -67,12 +102,14 @@ const Door = ({ door }: { readonly door: ApiDoor }) => (
         {door.specifier}
       </Link>
 
-      <span className="text-ink-faint shrink-0 font-mono text-xs">
+      <span data-search="off" className="text-ink-faint shrink-0 font-mono text-xs">
         {grouped(door.publishes)} {door.publishes === 1 ? "name" : "names"}
       </span>
     </div>
 
-    <p className="text-ink-muted mt-1 text-sm leading-relaxed">{door.summary}</p>
+    <p data-search="off" className="text-ink-muted mt-1 text-sm leading-relaxed">
+      {door.summary}
+    </p>
 
     <WrittenAbout door={door} />
   </li>
