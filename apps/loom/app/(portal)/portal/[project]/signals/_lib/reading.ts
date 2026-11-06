@@ -1,7 +1,12 @@
-import type { StoredPageViews } from "@jam-overture/loom/signals"
+import {
+  readReaderArrivals,
+  type ArrivalReading,
+  type StoredPageViews,
+} from "@jam-overture/loom/signals"
 import type { Application, Project, ProjectId } from "@jam-overture/loom/store"
 
 import { arrivalsOf, type Arrivals } from "@/app/(portal)/_lib/arrivals"
+import { arrivalRangeFor, type SignalsRange } from "@/app/(portal)/_lib/signals-range"
 import { portalApplications, portalProjects } from "@/app/(portal)/_lib/store"
 import { turnedAwayOf, type TurnedAway } from "@/app/(portal)/_lib/turned-away"
 import { PORTAL_READ_BUDGET_MS } from "@/app/_lib/app/bounded"
@@ -29,6 +34,12 @@ import { readingsFor, type Readings } from "@/app/_lib/reader-signals/intake"
  * costs that figure alone: a deployment that has not run `db:push` since the
  * table arrived still shows everything that was kept.
  *
+ * **Page views by hour** (0356) are read over the range the address names and
+ * the period of the same length before it, in one call. They are the figure
+ * and chart at the top, and the screen can do without them too: a deployment
+ * whose database predates the hourly counter shows the total it always showed
+ * and says the hours could not be read.
+ *
  * The journal is read on the portal's budget here rather than in `intake.ts`,
  * because the door writes through the same handles and a write cut off by a
  * screen's budget would lose a reader's batch.
@@ -43,12 +54,19 @@ export type SignalsReading =
       readonly readings: Readings
       readonly pageViews: readonly StoredPageViews[]
       readonly arrivals: Arrivals
+      readonly range: SignalsRange
+      /** `undefined` where the hourly counts could not be read, which the screen says. */
+      readonly hourly: ArrivalReading | undefined
       /** `undefined` where the refusals could not be read, which is said rather than drawn as a nought. */
       readonly turnedAway: TurnedAway | undefined
       readonly published: readonly PublishedPage[]
     }
 
-export const readSignals = async (projectId: ProjectId): Promise<SignalsReading> => {
+export const readSignals = async (
+  projectId: ProjectId,
+  range: SignalsRange,
+  now: number
+): Promise<SignalsReading> => {
   const [project, applications] = await Promise.all([
     portalProjects.get(projectId),
     portalApplications.list({ closed: "all" }),
@@ -63,10 +81,12 @@ export const readSignals = async (projectId: ProjectId): Promise<SignalsReading>
   if (application === undefined) return { state: "no-site", project: project.value }
 
   const readings = readingsFor(application.applicationId)
+  const tallies = boundedReaderTallyStore(readings.tallies)
 
-  const [pageViews, newest, refusals, published] = await Promise.all([
-    boundedReaderTallyStore(readings.tallies).pageViews(),
+  const [pageViews, newest, hourly, refusals, published] = await Promise.all([
+    tallies.pageViews(),
     boundedReaderSignalJournal(readings.journal).read({ direction: "older", limit: 1 }),
+    readReaderArrivals(tallies, { range: arrivalRangeFor(range, now), now }),
     readWithin(() => readings.refusals.read(), unavailable, PORTAL_READ_BUDGET_MS),
     readWithin(
       () => publishedPagesFor(application.applicationId).list(),
@@ -84,6 +104,8 @@ export const readSignals = async (projectId: ProjectId): Promise<SignalsReading>
     readings,
     pageViews: pageViews.value,
     arrivals: arrivalsOf(pageViews.value, newest.value.batches),
+    range,
+    hourly: hourly.ok ? hourly.value : undefined,
     turnedAway: refusals.ok ? turnedAwayOf(refusals.value) : undefined,
     published: published.ok ? published.value : [],
   }

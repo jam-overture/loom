@@ -23,7 +23,7 @@ const row = (treeId: string, overrides: Partial<ByPageRow> = {}): ByPageRow => (
   ...overrides,
 })
 
-const address = { base: "/portal/prj_a/signals/pages", from: undefined }
+const address = { base: "/portal/prj_a/signals/pages", from: undefined, range: "24h" as const }
 
 describe("By page", () => {
   it("shows each page by its published name with its id, and by its id alone otherwise", () => {

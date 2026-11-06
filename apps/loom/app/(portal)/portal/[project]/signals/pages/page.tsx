@@ -13,12 +13,13 @@ import {
 import { requireActor, requireRole } from "@/app/(portal)/_lib/auth/identity"
 import { primaryOf } from "@/app/(portal)/_lib/goals/goal"
 import { goalsFor } from "@/app/(portal)/_lib/goals/stores"
+import { rangeOf, type SignalsRange } from "@/app/(portal)/_lib/signals-range"
 import { pageCopiesFor } from "@/app/(portal)/_lib/proposing/stores"
 import { holdsFor } from "@/app/(portal)/_lib/write"
 import { PORTAL_READ_BUDGET_MS } from "@/app/_lib/app/bounded"
 import { boundedReaderTallyStore, readWithin, unavailable } from "@/app/_lib/app/bounded-store"
 
-import { ByPageTable, PageDrawerPanel } from "../_components/by-page"
+import { byPageHref, ByPageTable, PageDrawerPanel } from "../_components/by-page"
 import { drawsTab, SignalsFrame } from "../_components/signals-frame"
 import { readSignals } from "../_lib/reading"
 
@@ -57,10 +58,17 @@ const ByPageScreen = async ({
   await requireActor(base)
   await requireRole(projectId)
 
-  const reading = await readSignals(projectId)
+  const range = rangeOf(single(query.range))
+  const from = single(query.from)
+  const opening = single(query.page)
+  const reading = await readSignals(projectId, range, Date.now())
+  const rangeHref = (next: SignalsRange) =>
+    byPageHref({ base, from, range: next }, { from, page: opening })
 
   if (!drawsTab(reading)) {
-    return <SignalsFrame reading={reading} projectId={projectId} tab="pages" />
+    return (
+      <SignalsFrame reading={reading} projectId={projectId} tab="pages" rangeHref={rangeHref} />
+    )
   }
 
   const { applicationId } = reading.application
@@ -78,6 +86,7 @@ const ByPageScreen = async ({
         reading={{ state: "failed", project: reading.project }}
         projectId={projectId}
         tab="pages"
+        rangeHref={rangeHref}
       />
     )
   }
@@ -92,12 +101,11 @@ const ByPageScreen = async ({
     ...readings,
     waiting: waiting.ok && copies.ok ? waitingByPage(waiting.value.held, copies.value) : undefined,
   })
-  const from = single(query.from)
-  const address = { base, from }
-  const opened = openRowOf(rows, single(query.page))
+  const address = { base, from, range }
+  const opened = openRowOf(rows, opening)
 
   return (
-    <SignalsFrame reading={reading} projectId={projectId} tab="pages">
+    <SignalsFrame reading={reading} projectId={projectId} tab="pages" rangeHref={rangeHref}>
       {rows.length === 0 ? (
         <p className="text-ink-muted text-xs">No page view has been counted yet.</p>
       ) : (

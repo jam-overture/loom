@@ -341,12 +341,54 @@ merge of two proposals, anything that replays two logs — will write the same
 defensive branch. Cheapest fix is a sentence in `src/tree/apply.ts`'s own
 comment; it was not taken here because this branch had no other reason to touch
 that file and the claim deserves its own diff.
-## 2026-11-06 — *Signals*' range picker and hourly chart need page views counted by hour, and the kept deliveries can only be walked one page at a time
+## 2026-11-06 — a goal's figure for a range, and *By page*'s bars for one, need what readers did on a part counted by hour, and only page views are
 
 **Filed by:** `Loom portal` · **Owned by:** `Loom signals` (`src/signals/`,
 `apps/loom/app/_lib/reader-signals/`) · **Status:** open — **nothing is
-broken.** It is the input for the rest of 8a in `docs/portal.md`, which the
-portal will not build around.
+broken.** It is the input for the last of 8a in `docs/portal.md`.
+
+The finding below this one is closed: page views are counted by hour (0356),
+and *Signals* now draws its range picker, page views in the range and the
+hourly chart from them. Three things on `docs/portal-wireframes.md` *1 ·
+Signals* still read a range and cannot:
+
+- the figure for the primary goal over the range (its rate in the range, with
+  the change on the period before);
+- on *By page*, the drawer's bar per kind of thing readers did **for the
+  range**;
+- each goal's trend on *By page* and *Goals*.
+
+A goal is a kind on a part (0350): *presses* of a button, *sends* of a form,
+*opens* of a disclosure. The tallies that count those keep no time (rule 5),
+and the hourly counter counts page views only. The kept deliveries have the
+time, but a range read from them is the capped scan 0356 refused for the same
+reason the portal did: a figure from part of a range is a wrong number.
+
+What the portal needs, and nothing more:
+
+1. **The tally counts for one application, by UTC hour**, over a stated range:
+   per tree, part and kind, the same counts `tallies()` answers since counting
+   began. Counted at the door or by the fold: the intake's choice, as long as
+   an hour's count does not move once its hour and the fold after it are over.
+2. **The first hour counted**, as `readReaderArrivals` already says it, so a
+   range that starts before counting says so rather than drawing a fall.
+3. **Through the scoped tally handle**, so the portal never reaches the table.
+
+With it the portal draws all three on the same range picker, and the figure
+for the goal sits beside page views in the range, where the wireframe puts it.
+
+---
+
+## 2026-11-06 — *Signals*' range picker and hourly chart need page views counted by hour, and the kept deliveries can only be walked one page at a time
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom signals` (`src/signals/`,
+`apps/loom/app/_lib/reader-signals/`) · **Status:** **closed, 6 November
+2026.** \#786 ([0356](decisions/0356-page-views-are-counted-under-the-hour-they-began-in-as-a-sixth-counter-written-at-the-door.md))
+counts page views under the UTC hour they began in, and `readReaderArrivals`
+reads a range and the period before it in one call through the tally store
+`readingsFor(application)` already hands the portal, saying the first hour
+counting began: points 1 to 3. `Loom portal` drew the range picker, the
+figure and the chart on it the same day without touching `src/signals/`.
 
 `docs/portal-wireframes.md` *1 · Signals* puts a range picker (last 24 hours,
 7 days, 30 days) over the whole screen, a figure for *page views in the range*

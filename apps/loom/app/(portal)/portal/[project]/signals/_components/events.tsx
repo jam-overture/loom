@@ -23,6 +23,7 @@ import {
   type ReaderEvent,
 } from "@/app/(portal)/_lib/events"
 import type { OpenedEvent } from "@/app/(portal)/_lib/events-reading"
+import { rangeParam } from "@/app/(portal)/_lib/signals-range"
 import { SIGNAL_KINDS } from "@/app/(portal)/_lib/vocabulary"
 import { plainMoment } from "@/app/(portal)/_lib/when"
 
@@ -34,10 +35,11 @@ import { LiveRefresh } from "./live-refresh"
  * *1 · Signals*).
  *
  * Every control is an address — `kind`, `on`, `view` and `q` for the filter,
- * `live` for reading the newest again as it arrives, `before` for where the
- * list starts, `event` for the drawer's subject — so a link a person sends
- * reopens exactly what they were looking at. Being live is the one piece of
- * client code, and all it does is ask the server to draw the address again.
+ * `range` for the stretch the figures above are read over, `live` for reading
+ * the newest again as it arrives, `before` for where the list starts, `event`
+ * for the drawer's subject — so a link a person sends reopens exactly what
+ * they were looking at. Being live is the one piece of client code, and all it
+ * does is ask the server to draw the address again.
  */
 
 export type EventsAddress = {
@@ -116,6 +118,7 @@ export const EventFacets = ({
   pages: readonly EventPageChoice[]
 }) => {
   const { base, filter } = address
+  const range = rangeParam(filter.range)
 
   return (
     <div className="flex flex-col gap-3">
@@ -162,6 +165,7 @@ export const EventFacets = ({
         />
         {filter.kind === undefined ? null : <input type="hidden" name="kind" value={filter.kind} />}
         {filter.view === undefined ? null : <input type="hidden" name="view" value={filter.view} />}
+        {range === undefined ? null : <input type="hidden" name="range" value={range} />}
         {filter.live ? <input type="hidden" name="live" value={LIVE_ON} /> : null}
         <button type="submit" className="border-edge-subtle rounded border px-2 py-1">
           Show
@@ -409,6 +413,7 @@ export const EventDrawerPanel = ({
                 view: event.view,
                 search: undefined,
                 live: address.filter.live,
+                range: address.filter.range,
               })}
               className="text-ink"
             >

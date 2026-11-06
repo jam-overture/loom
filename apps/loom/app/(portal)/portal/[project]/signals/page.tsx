@@ -7,12 +7,14 @@ import {
   eventKeyOf,
   eventPagesOf,
   eventQueryOf,
+  eventsHref,
   goalsCountedBy,
   namingOf,
 } from "@/app/(portal)/_lib/events"
 import { readEventPage, readOpenedEvent } from "@/app/(portal)/_lib/events-reading"
 import { primaryFirst } from "@/app/(portal)/_lib/goals/goal"
 import { goalsFor } from "@/app/(portal)/_lib/goals/stores"
+import type { SignalsRange } from "@/app/(portal)/_lib/signals-range"
 import { PORTAL_READ_BUDGET_MS } from "@/app/_lib/app/bounded"
 import { boundedReaderSignalJournal, readWithin, unavailable } from "@/app/_lib/app/bounded-store"
 
@@ -52,10 +54,13 @@ const EventsScreen = async ({
   await requireActor(base)
   await requireRole(projectId)
 
-  const reading = await readSignals(projectId)
+  const reading = await readSignals(projectId, query.range, Date.now())
+  const rangeHref = (range: SignalsRange) => eventsHref(base, { ...query, range })
 
   if (!drawsTab(reading))
-    return <SignalsFrame reading={reading} projectId={projectId} tab="events" />
+    return (
+      <SignalsFrame reading={reading} projectId={projectId} tab="events" rangeHref={rangeHref} />
+    )
 
   const journal = boundedReaderSignalJournal(reading.readings.journal)
   const { applicationId } = reading.application
@@ -75,6 +80,7 @@ const EventsScreen = async ({
         reading={{ state: "failed", project: reading.project }}
         projectId={projectId}
         tab="events"
+        rangeHref={rangeHref}
       />
     )
   }
@@ -91,7 +97,7 @@ const EventsScreen = async ({
       : goalsCountedBy(shown.event, primaryFirst(goals.value)).map((goal) => goal.name)
 
   return (
-    <SignalsFrame reading={reading} projectId={projectId} tab="events">
+    <SignalsFrame reading={reading} projectId={projectId} tab="events" rangeHref={rangeHref}>
       <EventFacets
         address={address}
         pages={eventPagesOf(
