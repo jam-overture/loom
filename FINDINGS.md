@@ -66364,3 +66364,124 @@ maintainer is the only one who can ask it. Worth raising only if it ever mangles
 something load-bearing — a URL inside a code fence a reader is meant to copy, or
 a `decisions/` link in a record. So far it has only ever hit prose links, where
 the cost is one ugly line.
+
+---
+## 2026-11-06 — page views are counted by hour now, so the range picker and the chart are the portal's to draw
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom portal`
+(`app/(portal)/portal/[project]/signals/`) · **Status:** **closes `Loom portal`'s
+entry of this morning** — *Signals' range picker and hourly chart need page views
+counted by hour*. All three points landed on
+`signals-76-the-hour-readers-arrived-in`
+([0356](decisions/0356-page-views-are-counted-under-the-hour-they-began-in-as-a-sixth-counter-written-at-the-door.md)).
+
+| asked | landed |
+| --- | --- |
+| page views counted by hour for one application, over a stated range of receipt times, as one bounded read | **yes** — a sixth counter, written at the door from the opening marker, read by range |
+| the range limited to the kept window, and the answer saying where its data starts | **better than asked** — the series is a counter rather than a read of the deliveries, so it is **not** limited to the kept window; and it says where its data starts, which is the hour this deployment first counted one |
+| through a scoped handle like `readingsFor(applicationId)` | **yes** — `readingsFor(application).tallies.arrivals(…)`, and `readReaderArrivals` above it |
+
+**The three calls, and the one you should use.**
+
+```ts
+import { arrivalRangeOf, readReaderArrivals } from "@jam-overture/loom/signals"
+
+const range = arrivalRangeOf(Date.now(), 24) // or 24 * 7, or 24 * 30
+const read = await readReaderArrivals(readingsFor(application).tallies, {
+  range,
+  now: Date.now(),
+  // treeId, audience and revision narrow it; absent sums them, because arrivals add
+})
+// read.value.series.hours — one bar per hour, ascending, dense, `whole: false` on the hour in progress
+// read.value.change      — { views, was, ratio } for the range against the equal period before it
+```
+
+**Four things worth holding before you draw it.**
+
+1. **Use `readReaderArrivals` rather than the store's `arrivals` directly.** The
+   change is over two periods, so the read has to span both — and
+   `arrivals({ from: range.from, to: range.to })`, which is the obvious line,
+   gives a comparison whose earlier period is empty *because it was not read*.
+   That draws as *every reader you have is new*, from a store holding the right
+   answer. The composed call derives the read from the range.
+2. **`was: null` is not nought.** It means the earlier period predates the hour
+   this deployment began counting, and the quotient says `unmeasured` rather
+   than `from-nothing` (`ratios.ts`). A deployment that upgrades today has no
+   earlier figure for a month and has not lost any readers. `from-nothing` is
+   the other one — counted, and nobody came — and it is the rise worth drawing.
+3. **`series.clipped` and `series.begins` are the sentence under a short
+   chart.** Thirty days on a deployment that began counting a week ago gives
+   seven days of bars, `clipped: true`, and `begins` naming the hour. The series
+   deliberately does **not** pad the other twenty-three days with noughts.
+4. **`whole: false` on the last bar is the clock, not the traffic.** Pass `now`
+   and the hour in progress says so; draw it differently or leave it off, but do
+   not draw it like a finished hour or every screen shows a dip at the
+   right-hand edge.
+
+**What this is not.** It counts page views that *began* in an hour, which is the
+only unit the door can count (0214) — not deliveries, and not readers present.
+A reader who arrived at 10:58 and stayed an hour is one arrival in the ten
+o'clock bar and nothing in the eleven o'clock one. The facets your wireframe
+puts beside the list are still the tallies', as the 5 November entry said.
+
+---
+## 2026-11-06 — a sixth counter table means `boundedReaderTallyStore` forwards a fourth listing, and this lane wrote the line
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom portal`
+(`app/_lib/app/bounded-store.ts`) · **Status:** open — **the line is already on
+`signals-76-the-hour-readers-arrived-in` and `pnpm verify` is green**; what is
+open is whether the comment is worded the way that file wants, and nothing is
+blocked either way.
+
+`ReaderTallyStore` gained `arrivals`
+([0356](decisions/0356-page-views-are-counted-under-the-hour-they-began-in-as-a-sixth-counter-written-at-the-door.md)),
+so the portal's bounded wrapper did not implement the interface and the app
+typecheck went red. One line, forwarding, inside the same read budget as the
+other three listings:
+
+```ts
+arrivals: (request) => readWithin(() => store.arrivals(request), unavailable, budgetMs),
+```
+
+**It is the fifth time a widened store interface has asked this of that file**
+and the second in two days — `boundedReaderSignalJournal` took `counted` on
+5 November for the same reason. The gate is doing its job both times: a wrapper
+that silently did not forward a method would be a screen reading an unbounded
+store.
+
+**One thing is worth a second look rather than a line.** This is the only read
+in that file whose cost grows with what the caller asks for, because a range is
+a parameter — a thirty-day chart is 720 buckets and a badly-chosen range is
+more. The budget bounds the wait and not the work. If that file would rather cap
+the range than cap the clock, the cap belongs there and not in `src/signals/`,
+because the store answers what it is asked and the portal is what knows how long
+a screen may wait.
+
+---
+## 2026-11-06 — the hourly series does not compose into `windowAssemblyOf`, and probably should not
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/window.ts`, `src/signals/window-figures.ts`) · **Status:** open —
+**nothing is broken and nothing is asked of anybody today.** Recorded so that
+the next run reading the second rung does not read the absence as a gap.
+
+Forty-two readings of a window are one call with one argument because
+`windowAssemblyOf` publishes the three subjects they take, and the three that
+were not reachable that way were filed as a pattern and then built
+(`window-figures.ts`). **The arrivals series is a fourth thing the assembly
+does not publish, and it is unlike the other three.**
+
+A window is a *set of counters* — whatever arrived in a stretch of the buffer,
+folded — and the series is a *stretch of time* read off a durable counter. The
+assembly holds no clock, has no range to pass, and the series needs no tally,
+no pair and no library. Composing them would mean giving the assembly a range
+it has nothing else to do with, or giving the series a window whose boundaries
+have nothing to do with the hours it answers for.
+
+**Recommendation: leave it.** The thing to watch for is a reading that genuinely
+wants both — *the hours inside the window this fold covered* is the plausible
+one — and the honest shape for that is a third rung above both rather than a
+range threaded through the assembly. If it is ever built, the test to write
+first is that the hours it reports sum to the arrivals the window's own door
+rows report, because those two numbers come from different tables written by
+different writers and nothing today holds them together.

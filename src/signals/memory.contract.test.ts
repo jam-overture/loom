@@ -5,6 +5,7 @@ import {
 } from "../testing/reader-signal-contract.js"
 
 import { describeWindowApplyContract } from "./applied-window.contract.js"
+import { describeArrivalHourContract } from "./arrivals.contract.js"
 import { describeKeptDeliveryContract } from "./kept.contract.js"
 import {
   memoryReaderRegionStore,
@@ -13,7 +14,7 @@ import {
 } from "./memory.js"
 
 /**
- * The same five suites Postgres runs. `memory.ts` calls itself the reference
+ * The same six suites Postgres runs. `memory.ts` calls itself the reference
  * implementation; this is the file that makes the claim checkable.
  */
 describeReaderSignalJournalContract("memoryReaderSignalJournal", () => memoryReaderSignalJournal())
@@ -27,3 +28,6 @@ describeWindowApplyContract("memoryReaderTallyStore", () => memoryReaderTallySto
 
 /** The fifth, for the same reason, over the mark the kept window asked for (0351). */
 describeKeptDeliveryContract("memoryReaderSignalJournal", () => memoryReaderSignalJournal())
+
+/** The sixth, over the hour an arrival is counted under (`arrivals.ts`). */
+describeArrivalHourContract("memoryReaderTallyStore", () => memoryReaderTallyStore())
