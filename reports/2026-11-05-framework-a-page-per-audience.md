@@ -29,7 +29,7 @@ Three modules, published through `./store`:
 | `src/store/source.ts` | `composingTreeSourceFromStore` — the composing sibling 0263 said `treeSourceFromStore` would gain |
 
 Recorded as
-[0355](../decisions/0355-an-audience-rule-is-a-conjunction-of-scalar-clauses-and-a-composed-page-is-a-projection-of-a-revision.md).
+[0356](../decisions/0356-an-audience-rule-is-a-conjunction-of-scalar-clauses-and-a-composed-page-is-a-projection-of-a-revision.md).
 `docs/portal.md` unit 9 asks for *a record before any build*; this is that
 record, with the build it describes.
 
@@ -40,7 +40,7 @@ matches nothing — which is every request this repository makes today.
 ## Decisions taken that were not specified
 
 0263 settles what a page **is** and leaves three things open that nothing which
-runs can leave open. All three are in 0355 with their rejected alternatives;
+runs can leave open. All three are in 0356 with their rejected alternatives;
 these are the two that were not obvious and the one that was a conflict to
 resolve first.
 
@@ -169,7 +169,7 @@ composes two logs will have the same fear.
 ## Records
 
 **Added:**
-[0355](../decisions/0355-an-audience-rule-is-a-conjunction-of-scalar-clauses-and-a-composed-page-is-a-projection-of-a-revision.md)
+[0356](../decisions/0356-an-audience-rule-is-a-conjunction-of-scalar-clauses-and-a-composed-page-is-a-projection-of-a-revision.md)
 — *An audience rule is a conjunction of scalar clauses, and a composed page is a
 projection of a revision.* Seven alternatives recorded, including an expression
 language, a host-supplied predicate function, bumping the revision per delta,
@@ -182,9 +182,13 @@ untouched, and composition adds a projection rather than a new kind of change.
 So this is not `ARCHITECTURAL — needs review` under the escalation rule, and the
 store dimension that *would* be is explicitly not in it.
 
-**Numbering: 0355.** `main` holds up to `0354`; `0353` is claimed on #778, which
-is open. `pnpm decisions:index` regenerated and reports `0151`–`0154` and `0353`
-as claimed on unmerged branches.
+**Numbering: 0356, renumbered from 0355 on 6 November.** `main` holds up to
+`0354`; `0353` is claimed on #778. This record was written as `0355` on
+5 November and so was `Loom signals`' on #780, a minute apart — the clash this
+convention exists to catch, and neither run could see the other's branch.
+`Loom merge` merges oldest first, so #780 lands first and this is the number
+that would have moved; moving it here rather than at merge time costs nothing
+and leaves the merge mechanical. `0355` is `Loom signals`'.
 
 ## Findings
 
@@ -195,7 +199,7 @@ unit.
 
 **Filed: two.**
 
-- **`Loom portal` and `Loom framework`** — what unit 9 still needs after 0355:
+- **`Loom portal` and `Loom framework`** — what unit 9 still needs after 0356:
   the store dimension (this lane's, a schema change) and a rule editor
   (theirs), with the one thing that screen has to teach — rules are ordered,
   general to specific — and a note that audience deltas will want the same
@@ -247,7 +251,7 @@ around.**
 needs to wire this: the rule types and their schemas to write and parse rules,
 `AudienceOverlay`/`AudienceForm`/`AudienceOverlaySource` to supply them,
 `composingTreeSourceFromStore` to wire it, `audiencesFor` to name the audience
-on the signals a page sends (0355 clause 7), and
+on the signals a page sends (0356 clause 7), and
 `composeTreeForContext`/`ComposedTree`/`ComposeError`/`describeComposeError` for
 a host composing without a store. The fifteenth is `ruleMatches`, which
 `audiencesFor` could have kept private; it is published because a rule editor
@@ -256,7 +260,7 @@ that editor is filed in this run.
 
 ## Open questions
 
-**Nothing in this unit is blocking.** 0263 is Accepted, 0355 implements it, and
+**Nothing in this unit is blocking.** 0263 is Accepted, 0356 implements it, and
 the two halves that remain are filed with owners.
 
 **One question for the maintainer, and it is a scheduling one rather than a

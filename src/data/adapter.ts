@@ -55,6 +55,14 @@ export interface DataAdapter<TParams = JsonObject, TAnswer extends JsonValue = J
  * be told about and a diagnostic says out loud; none of them is an exception
  * anyone catches.
  *
+ * `invalid-answer` and `unreadable-answer` are the other pair, and the two
+ * schemas behind them are why. An answer is refused by the **source's** own
+ * declaration, which is a claim about a host's database; or it satisfies that
+ * and is refused by the **primitive's**, which is a claim about what can go on a
+ * page (0180). The first is fixed by whoever owns the data and the second by
+ * whoever bound this node to that source, so a reader holding one code knows
+ * which file to open.
+ *
  * `no-such-source` and `not-resolved` are the pair worth keeping apart, and they
  * were one code until 12 September. An unregistered source is fixed in the
  * registry by whoever owns the data; a binding nothing resolved is fixed in the
@@ -70,6 +78,7 @@ export type DataUnavailable = {
     | "not-resolved"
     | "invalid-params"
     | "invalid-answer"
+    | "unreadable-answer"
     | "adapter-threw"
     | SourceFailure["code"]
   readonly detail: string
@@ -85,6 +94,8 @@ export const describeDataUnavailable = (unavailable: DataUnavailable): string =>
       return `the params in the tree are not what the source accepts — ${unavailable.detail}`
     case "invalid-answer":
       return `the source answered with something its own schema refuses — ${unavailable.detail}`
+    case "unreadable-answer":
+      return `the source answered, and the primitive reading it says that is not a shape it can draw — ${unavailable.detail}`
     case "adapter-threw":
       return `the source threw instead of answering — ${unavailable.detail}`
     case "unavailable":
