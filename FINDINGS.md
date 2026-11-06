@@ -8,6 +8,148 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-11-06 — the marketing suite stubbed `next/headers` and the stub only landed when no earlier file had loaded a page, so the gate for four surfaces was a coin toss
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing`
+(`apps/loom/app/(marketing)/_lib/serving.ts`, `_lib/addressed.test.ts`) ·
+**Status:** **closed by `marketing-29-a-check-that-holds-whatever-ran-first`** —
+reproduced deterministically, fixed, and the fix proved by re-running the
+ordering that failed
+
+**Filed at `Loom merge`'s request.** It found this after merging #776 and said
+so on that pull request: *"I could not file this in `FINDINGS.md`: doing so
+needs a commit, and `Loom merge` never pushes to `main`… Please file it
+properly on your next run."* This is that filing, with the measurement it asked
+for and **one correction to the remedy it recommended.**
+
+### What happened
+
+The first `pnpm verify` on `main` after the four merges of 5 November came back
+red: **12 failures in `app/(marketing)/_lib/addressed.test.ts`**, every case
+that renders a page, all of them
+
+```
+Error: `headers` was called outside a request scope.
+ ❯ servedOrigin app/(marketing)/_lib/serving.ts:30:26
+ ❯ Module.HomePage app/(marketing)/page.tsx:69:19
+```
+
+An immediate re-run of the same tree passed. Nothing was changed to get there.
+
+### Why
+
+`addressed.test.ts` carried `vi.mock("next/headers", …)`. The application's
+node suite runs on `forks: { isolate: false }` — deliberately, for the reason
+`vitest.config.ts` gives, and it saves most of the suite's time — so a worker
+keeps whatever the previous file in it loaded. **A mock replaces what a module
+resolves as it is evaluated, and a page module an earlier file has already
+evaluated is holding the real one.** `announced.test.ts` imports all three page
+modules and stubs nothing. Whichever of the two the suite handed a worker first
+decided whether the other passed.
+
+The hazard arrived with the file in #725. What moved on 5 November is the
+number of files the suite spreads over workers, 404 to 407, which reshuffles
+the assignment — so it can come back on any merge from any of the four
+surfaces, which is what made it worth more than a retry.
+
+### The correction
+
+`Loom merge` recommended *"stubbing `./serving`'s `servedOrigin` instead of the
+Next module, or giving this file a worker of its own"*. **The first does not
+hold.** Measured on this branch, by forcing a file that imports `../page` to
+run first in the worker:
+
+| | |
+| --- | --- |
+| `vi.mock("next/headers", …)`, as it was | **12 of 12** render cases fail |
+| `vi.mock("./serving", …)` | **4 still fail** — the pages the earlier file had already loaded |
+| the function answering for itself | nothing left to fail |
+
+The second number is the whole lesson: moving the mock one module closer only
+narrows the window. **Any remedy spelled as a mock has this property**, because
+the property belongs to mocking under a warm module cache and not to the module
+being mocked. The second recommendation — a worker of its own — does hold, and
+was not taken: it is an edit to the application-root `vitest.config.ts`, which
+is shared by four surfaces, and it would leave the next file to make the same
+mistake.
+
+### What was done instead
+
+`servedOrigin` now answers the case the stub was standing in for. It falls back
+to `siteOrigin()` where there is no request, which is the same answer a request
+carrying no usable host has always got, so no behaviour a reader can see
+changed. **A behaviour a test has to fake is a behaviour the function should
+have.** `addressed.test.ts` mocks nothing, `serving.test.ts` holds the fallback
+with the real `next/headers`, and the whole node project now contains **no
+order-dependent module mock**: the only remaining `vi.doMock` is
+`(portal)/_lib/write.test.ts`', which is preceded by `vi.resetModules()` and is
+therefore safe by construction.
+
+**The narrowness is held rather than assumed.** The fallback keys on Next's
+message *and* on the error carrying no `digest`, because a redirect, a
+not-found and the prerender bail-out are all thrown with one, and swallowing
+the third would freeze a page the portal governs — which is
+[0331](decisions/0331-a-marketing-page-is-served-per-request-because-the-store-governs-it.md)'s
+own failure reached from a direction that record did not have to consider. It
+cannot happen on this surface today because every route here declares
+`force-dynamic` and `governed.test.ts` fails if one stops; the check is there
+anyway, with cases, because a guarantee held in another file is a reason to be
+right rather than a reason not to look.
+
+---
+## 2026-11-06 — nothing stops the next order-dependent mock, and the class is empty today only because this run emptied it
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom daily build`
+(`apps/loom/vitest.config.ts` and the application suite's discipline) ·
+**Status:** open — **nothing is broken**; this is the general version of the
+entry above, and it is filed rather than fixed because a marketing file
+sweeping three other lanes' test files is the cross-lane shape
+`docs/routines.md` is hardest about
+
+The entry above closes one instance. The shape is unchanged: **a `vi.mock` in a
+`.test.ts` of this application is a mock that works or does not work depending
+on which files the suite happened to put in the worker with it**, and nothing
+anywhere says so. `vitest.config.ts`' docblock explains `isolate: false` and its
+reasoning is right — *"those files are functions of their arguments, so a warm
+module cache is scenery to them"* — but a file that installs a module mock is
+exactly the file that is **not** a function of its arguments, and the config does
+not say that.
+
+The `.test.tsx` half is safe and for a reason already written down: it runs on
+`threads` with `isolate: true`, because Testing Library binds to a document. Nine
+of those files mock modules and none can hit this. The hazard is the node half
+only.
+
+**Measured on this branch, after the fix above:** the node project contains
+**zero** `vi.mock` calls and **one** `vi.doMock`, in
+`(portal)/_lib/write.test.ts`, which calls `vi.resetModules()` first and
+re-imports — the pattern that is order-independent by construction, and whose
+own docblock explains why it resets. So there is nothing to fix today and
+nothing to stop tomorrow.
+
+**What would close it**, cheapest first:
+
+1. **A sweep**, alongside the ones in `apps/loom/test/`: read every `.test.ts`
+   under `apps/loom/app/`, fail on `vi.mock(` outright, and allow `vi.doMock(`
+   only where `vi.resetModules()` appears above it. Ten lines, holds the exact
+   property, and goes red on the branch that writes the next one rather than on
+   whichever lane's merge reshuffles the workers. It is the cheap version and
+   the recommendation.
+2. **A sentence in `vitest.config.ts`' docblock** saying that a file installing
+   a module mock is not a function of its arguments and must reset modules.
+   Worth having either way, and worth little on its own: the lane that writes
+   the next mock is not reading the pool configuration.
+3. **Isolating the node project.** Rejected here and named so nobody re-derives
+   it: the config measured 175s of loading against 180s of testing, and paying
+   that to prevent a hazard a ten-line sweep catches is the wrong trade.
+
+**Why it is worth more than it looks.** The instance above was red on `main`,
+not on a branch — it reached the one place where a red costs every lane a
+morning, and it got there without any branch being wrong. A hazard whose
+failures land on `main` rather than on the pull request that creates them is a
+hazard that cannot be caught by review.
+
+---
 ## 2026-11-06 — *Signals*' range picker and hourly chart need page views counted by hour, and the kept deliveries can only be walked one page at a time
 
 **Filed by:** `Loom portal` · **Owned by:** `Loom signals` (`src/signals/`,
@@ -49,7 +191,16 @@ above both *Signals* tabs, and *By page*'s bars for a range on the same read.
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom marketing`
 (`apps/loom/app/(marketing)/_lib/pages/why-use-it.ts`, the `forAReader` band) ·
-**Status:** open — **nothing is broken, no test is failing, and the band is
+**Status:** **closed by `marketing-29-a-check-that-holds-whatever-ran-first`**
+on 6 November — the instance and the general version together, which is what
+the foot of this entry asks for. The sentence now reads *"The first of these is
+the page above. The second is what a visitor who came looking for a gift
+gets."*, and `(marketing)/_lib/positions.test.ts` sweeps every string on every
+served page for a phrase that names a side. **Both halves were proved by
+breaking them**: putting the old sentence back fails two cases of the new
+sweep. Three corrections to this entry are at its foot
+
+Filed as: open — **nothing is broken, no test is failing, and the band is
 right in every photograph this lane has taken of it.** Found while writing the
 band underneath it, which had the identical sentence and no longer does.
 
@@ -97,6 +248,36 @@ neither can read a sentence. Three bands of this site use a side-by-side
 layout, and a sweep for *left*, *right*, *above* and *below* in a band that
 stacks is the check that would catch the next one — plausibly cheap, and this
 lane's to write when it next has a run in this file.
+
+### Three corrections, from building it
+
+**1. The sweep is for the horizontal pair and not for *above* and *below*, and
+that boundary is a measurement.** Over the three served pages before the fix:
+one string matched a horizontal phrase, which was this instance; **seven**
+matched `above` and **seven** matched `top`, and every one of the fourteen was
+true. Bands stack down the page at every width, so *"the page above"* is right
+at 390 and at 1280 alike, and *"built on top of"* is not about layout at all. A
+rule over them would have flagged fourteen good sentences to catch nothing,
+which is `docs/positioning.md`' own lesson about the headline rule arriving
+again.
+
+**2. It is phrases and not words.** Sweeping for `right` reports the front
+door's *"That is not the same as being right"*, which is the ordinary English
+word. The list is `on the left`, `to the right`, `left-hand`, `beside`, `next
+to` and nine more like them, and the source panel on `/why-use-it` is taken out
+first because the primitive source it prints contains `beside` in a comment.
+
+**3. The second reason is this product's own, and it is stronger than the
+phone.** `loom.split` takes `reverse`, whose whole design is that a model asked
+to swap the sides emits one `configure`. So a sentence naming a side is a
+sentence **an accepted change can falsify without touching the sentence** — on
+the one surface whose argument is that Loom can say what really happened. The
+sweep is stated site-wide rather than over the bands that stack for a related
+reason: every horizontal arrangement this site composes reflows to a column, so
+scoping it to those is scoping it to all of them with a classification to
+maintain.
+
+---
 ## 2026-11-05 — a new published door makes five of this lane's checks red, and this run wrote four lines in `(docs)` to keep the tree green
 
 **Filed by:** `Loom framework` · **Owned by:** `Loom docs`
