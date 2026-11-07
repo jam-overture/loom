@@ -973,3 +973,203 @@ describe("broadcastReaderSignals", () => {
     if (started.ok) started.value.stop()
   })
 })
+
+/**
+ * The broadcaster handed the document rather than an element.
+ *
+ * The thing under test is a counting rule and not an API shape: which changes
+ * to a page end a page view and which do not. Every assertion below is about
+ * the view key, the `first` marker and the revision a batch is filed under,
+ * because those three are what an intake counts arrivals and page views from.
+ */
+describe("broadcastReaderSignals, handed the document", () => {
+  /** A second page, as a client-side navigation leaves the document. */
+  const OTHER = `
+    <main data-loom-node="n_9" data-loom-type="loom.page" data-loom-tree="t_2" data-loom-revision="1">
+      <article data-loom-node="n_8" data-loom-type="loom.card">
+        <a href="/signup"><span id="signup">Sign up</span></a>
+      </article>
+    </main>
+  `
+
+  const follow = (options: ReaderSignalOptions = {}): ReaderSignalBatch[] => {
+    const batches: ReaderSignalBatch[] = []
+    const started = broadcastReaderSignals(document, {
+      observeVisibility: fakeVisibility,
+      now: () => clock,
+      send: (batch) => void batches.push(batch),
+      ...options,
+    })
+    if (!started.ok) throw new Error(started.error.detail)
+    broadcast = started.value
+    return batches
+  }
+
+  /** A press on something inside the page, by the id the markup gives it. */
+  const press = (id: string): void => void (document.getElementById(id) as HTMLElement).click()
+
+  const navigate = (markup: string): Promise<void> => {
+    document.body.innerHTML = markup
+    return settle()
+  }
+
+  it("finds the addressed page itself, so a host hands over no selector", () => {
+    const batches = follow()
+
+    press("link-text")
+    broadcast?.flush()
+
+    expect(kindsIn(batches)).toEqual(["activated:n_3"])
+    expect(batches[0]).toMatchObject({ treeId: "t_1", revision: 4, first: true })
+  })
+
+  it("refuses a document holding no addressed page, as it refuses an unaddressed element", () => {
+    document.body.innerHTML = "<main><p>nothing addressed here</p></main>"
+
+    const started = broadcastReaderSignals(document, { observeVisibility: fakeVisibility })
+
+    if (started.ok) started.value.stop()
+    expect(started.ok).toBe(false)
+    if (!started.ok) expect(started.error.code).toBe("unaddressed")
+  })
+
+  /**
+   * **The case that would double-count.** Every band a proposal writes, every
+   * Suspense boundary resolving and every list that grows is a mutation under
+   * the root, and a broadcast that read any of them as a new page would turn one
+   * reader into several — permanently, in the counter arrivals are taken from.
+   */
+  it("reads a page that re-renders as one page view, however much of it is replaced", async () => {
+    const batches = follow()
+
+    appendBand("n_6")
+    byId("n_4").remove()
+    ;(byId("n_2") as HTMLElement).append(document.createElement("p"))
+    await settle()
+
+    press("link-text")
+    broadcast?.flush()
+    clock += 1
+    press("n_6-link")
+    broadcast?.flush()
+
+    expect(batches).toHaveLength(2)
+    expect(batches.filter((batch) => batch.first === true)).toHaveLength(1)
+    expect(new Set(batches.map((batch) => batch.view)).size).toBe(1)
+    expect(batches.every((batch) => batch.treeId === "t_1" && batch.revision === 4)).toBe(true)
+  })
+
+  it("does not search the document while the page it is observing is still the page", async () => {
+    follow()
+    const searched = vi.spyOn(document, "querySelector")
+
+    appendBand("n_6")
+    byId("n_4").remove()
+    await settle()
+
+    expect(searched).not.toHaveBeenCalled()
+    searched.mockRestore()
+  })
+
+  it("begins a second page view when the reader navigates, and never files it under the page they left", async () => {
+    const batches = follow()
+
+    press("link-text")
+    await navigate(OTHER)
+    clock += 1
+    press("signup")
+    broadcast?.flush()
+
+    expect(batches).toHaveLength(2)
+    expect(batches[0]).toMatchObject({ treeId: "t_1", revision: 4, first: true })
+    expect(batches[0]?.signals.map((signal) => signal.nodeId)).toEqual(["n_3"])
+    expect(batches[1]).toMatchObject({ treeId: "t_2", revision: 1, first: true })
+    expect(batches[1]?.signals.map((signal) => signal.nodeId)).toEqual(["n_8"])
+    expect(batches[1]?.view).not.toBe(batches[0]?.view)
+  })
+
+  it("begins a second page view when the same root is re-rendered at a new revision", async () => {
+    const batches = follow()
+
+    root.setAttribute("data-loom-revision", "5")
+    await settle()
+    press("link-text")
+    broadcast?.flush()
+
+    expect(batches).toHaveLength(1)
+    expect(batches[0]).toMatchObject({ treeId: "t_1", revision: 5, first: true })
+  })
+
+  /**
+   * **The other case that would double-count**, and the reason a page view is a
+   * value a broadcast is handed rather than state it owns. A host that unmounts
+   * the element it rendered into and renders the same revision again has sent
+   * nobody anywhere.
+   */
+  it("continues the page view when the same revision is rendered again into a new element", async () => {
+    const batches = follow()
+
+    press("link-text")
+    broadcast?.flush()
+    await navigate(PAGE)
+    clock += 1
+    press("link-text")
+    broadcast?.flush()
+
+    expect(batches).toHaveLength(2)
+    expect(batches[0]?.first).toBe(true)
+    expect(batches[1]?.first).toBeUndefined()
+    expect(batches[1]?.view).toBe(batches[0]?.view)
+  })
+
+  it("delivers what it gathered when the page goes, and takes the page view up again if it returns", async () => {
+    const batches = follow()
+
+    press("link-text")
+    await navigate("<p>between pages</p>")
+
+    expect(batches).toHaveLength(1)
+    expect(batches[0]).toMatchObject({ treeId: "t_1", revision: 4, first: true })
+
+    await navigate(PAGE)
+    clock += 1
+    press("link-text")
+    broadcast?.flush()
+
+    expect(batches).toHaveLength(2)
+    expect(batches[1]?.view).toBe(batches[0]?.view)
+    expect(batches[1]?.first).toBeUndefined()
+  })
+
+  it("takes up a page that arrives at a revision it could not read, once the revision is readable", async () => {
+    const batches = follow()
+
+    press("link-text")
+    await navigate(OTHER.replace('data-loom-revision="1"', 'data-loom-revision="later"'))
+    press("signup")
+    broadcast?.flush()
+
+    expect(batches).toHaveLength(1)
+    expect(batches[0]).toMatchObject({ treeId: "t_1", revision: 4 })
+
+    ;(document.querySelector("[data-loom-tree]") as HTMLElement).setAttribute("data-loom-revision", "2")
+    await settle()
+    clock += 1
+    press("signup")
+    broadcast?.flush()
+
+    expect(batches).toHaveLength(2)
+    expect(batches[1]).toMatchObject({ treeId: "t_2", revision: 2, first: true })
+  })
+
+  it("stops following when it is stopped, so a later navigation broadcasts nothing", async () => {
+    const batches = follow()
+
+    broadcast?.stop()
+    await navigate(OTHER)
+    press("signup")
+    broadcast?.flush()
+
+    expect(batches).toEqual([])
+  })
+})

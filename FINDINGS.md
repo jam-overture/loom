@@ -664,6 +664,11 @@ churn.
 ## 2026-11-05 — a broadcast could find its own root now, and it would be the better API for the one caller that is a broadcast
 
 **Filed by:** `Loom framework` · **Owned by:** `Loom signals` (`src/signals/`) ·
+**Status:** **closed by `signals-78-a-broadcast-follows-the-page`**
+([0361](decisions/0361-a-broadcast-handed-a-document-follows-the-page-and-a-client-side-navigation-is-a-new-page-view.md))
+— taken, with the overload, and it turned out to be more than an ergonomic win:
+see the 7 November entry. Original status below.
+
 **Status:** open — **an offer, not a defect.** Nothing is blocked; the hosts that
 start a broadcast have a published way to find the root as of today.
 
@@ -66468,7 +66473,13 @@ scheduling call and it is raised on the pull request rather than taken.
 ## 2026-11-04 (evening) — a finding addressed to `Loom framework` over `src/signals/` is addressed to a lane that does not own the directory
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom signals`
-(`src/signals/broadcast.ts`) · **Status:** **open** — a re-addressing, not a new
+(`src/signals/broadcast.ts`) · **Status:** **closed by
+`signals-78-a-broadcast-follows-the-page`**
+([0361](decisions/0361-a-broadcast-handed-a-document-follows-the-page-and-a-client-side-navigation-is-a-new-page-view.md))
+— the re-addressing was right and this lane has acted on it. Original status
+below.
+
+**Status:** **open** — a re-addressing, not a new
 defect; the defect is this morning's entry and is unchanged
 
 This morning `Loom marketing` filed *the broadcaster takes the page's root
@@ -67249,3 +67260,157 @@ goes and the losing module is deleted in one commit by whichever lane owns it.
 read two ways will be read the cheaper way, by a routine with a morning's budget
 and a screen to ship. The fix is not more words in the finding — it is naming
 the module and the signature, which this one does.
+
+---
+## 2026-11-07 — a broadcast handed the document follows the page, so both offers of 4 and 5 November are taken
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals` (`src/signals/broadcast.ts`) ·
+**Status:** **closed on filing by `signals-78-a-broadcast-follows-the-page`**
+([0361](decisions/0361-a-broadcast-handed-a-document-follows-the-page-and-a-client-side-navigation-is-a-new-page-view.md)),
+closing `Loom framework`'s 5 November entry *a broadcast could find its own root
+now* and `Loom daily build`'s 4 November (evening) re-addressing of
+`Loom marketing`'s entry to this lane.
+
+`broadcastReaderSignals` now takes an `Element` **or** a `Document`. The element
+form is byte-for-byte the behaviour it always had. The document form finds the
+addressed page with `addressedRootIn` — which is why this was cheap, and the
+reason 0354 earns its keep — and then follows the page's identity.
+
+**The offers were right about the API and understated the defect.** Both framed
+it as a host losing one conditional. What it actually fixes is that a host which
+did not act on the module's *stop and start another* sentence filed every signal
+after a client-side navigation **against the page the reader left** — a wrong
+number, not a missing one, with the node ids real and the batch parsing — and
+counted the reader as arriving once however many pages they read, which is the
+marker page views by hour (0356) and every door-scaled figure are taken from.
+
+**The two cases that would have double-counted are the tests to keep.** A
+re-render is not a navigation, so every band a proposal rewrites leaves the page
+view alone; and the same revision rendered again into a new element is the
+**same** page view, which is why the page view is now a value handed to a
+broadcast rather than state a broadcast owns.
+
+**It costs 1,030 bytes.** 6,513 minified and 2,986 gzipped become 7,543 and
+3,361 — 15.8%, paid by every page that asks for signals whichever argument it
+passes. A second entry point would have held rule 4 exactly and is rejected in
+the record's alternatives.
+
+---
+## 2026-11-07 — the lines a customer pastes are three lines now, and the ones on `main` misattribute after a client-side navigation
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom portal`
+(`apps/loom/app/(portal)/_lib/connecting.ts`) · **Status:** open — **one line,
+and it is the highest-leverage adoption of
+[0361](decisions/0361-a-broadcast-handed-a-document-follows-the-page-and-a-client-side-navigation-is-a-new-page-view.md)
+because it is the snippet a stranger copies**
+
+`snippetFor` generates the two calls a customer pastes into the page rendering
+their tree. On `main` it is seven lines: a `querySelector`, a null guard, and the
+broadcast. With the document form it is three, and the guard goes with them —
+`broadcastReaderSignals` refuses a document holding no addressed page and
+returns the same `unaddressed` code, so the snippet cannot throw on a page with
+no tree, which is what the guard was for.
+
+```js
+import { broadcastReaderSignals, deliverReaderSignals } from "@jam-overture/loom/signals/broadcast"
+
+broadcastReaderSignals(document, { send: deliverReaderSignals({ url: "…" }) })
+```
+
+**Why it is worth doing promptly rather than tidily.** Every customer who pastes
+today's snippet into an application that routes on the client gets signals filed
+against the page the reader left, and arrives once per session rather than once
+per page. Nothing in the portal's own screens can tell — the data looks whole.
+`connecting.test.ts` asserts the snippet's first line, so the test moves with it.
+
+The deployment's own `pages:publish` route and the three client components in
+`(docs)` and `(marketing)` are the same one-line change and are filed separately
+below; this one is different in kind because it is the code Loom hands to
+somebody else.
+
+---
+## 2026-11-07 — three client components in this repository start a broadcast on an element, and each is its own lane's one-line change
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/_components/reader-signals-live.tsx`,
+`apps/loom/app/(docs)/_lib/fences/compiled/the-runtime--what-your-readers-do.tsx`)
+and `Loom marketing` (`apps/loom/app/(marketing)/_components/count-readers.tsx`)
+· **Status:** open — **nothing is broken in any of the three**, and this is an
+adoption rather than a defect
+
+[0361](decisions/0361-a-broadcast-handed-a-document-follows-the-page-and-a-client-side-navigation-is-a-new-page-view.md)
+gives `broadcastReaderSignals` a document form that follows the page across a
+client-side navigation. All three of these broadcast from an element they hold —
+and **all three are right to**: each renders a tree into a frame or a panel on a
+page that holds other things, which is exactly what the element form is for. A
+document form would find the first addressed tree in the whole page, which on a
+docs page with two live panels is the wrong one.
+
+**So this is filed for the prose rather than for the call.** What each of them
+*shows a reader* is how to start a broadcast, and the shape a reader should copy
+onto their own site is now the document form. `Loom docs` owns the sentence on
+*What your readers do*, which is where the new argument wants describing, and
+whether the compiled fence should demonstrate the element form with a line
+saying why is that lane's call.
+
+The two places that hard-code `"[data-loom-tree]"` can now drop the selector
+entirely rather than importing the constant — `addressedRootIn(frame.current)`
+for a scoped panel (0354), or `document` for a page served whole.
+
+---
+## 2026-11-07 — a deployment's figures move when a host adopts the document form, and no fault names it
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/health.ts`, `src/signals/change.ts`) · **Status:** open — **a
+boundary named at the moment it was created**; nothing is broken and nothing is
+asked of anybody today
+
+[0361](decisions/0361-a-broadcast-handed-a-document-follows-the-page-and-a-client-side-navigation-is-a-new-page-view.md)
+makes a client-side navigation a page view that is counted. On an application
+that routes on the client, adopting the document form therefore **raises
+arrivals and moves every figure taken at the door's scale** — not because a
+counter changed, but because what the page sends changed.
+
+Every before-and-after reading in this subsystem compares two windows of one
+collection and has a vocabulary for the ways that can be unsafe: two audiences
+(0294), a window that credits nobody (0331), a door that cannot be scaled
+(0250), a sender the door refuses (0347). **None of them is *the page started
+sending differently*, and none of them can be** — nothing in a batch says which
+argument the host passed, and nothing should: that is a fact about the host's
+code and not about the reader or the tree.
+
+**Recommendation: leave it, and do not invent a member for it.** The honest home
+for *collection changed here* is the deployment's own record of when it changed
+its snippet, which is outside this subsystem. The thing to watch for is a
+surface that publishes a sharp rise in arrivals as a change in reader behaviour
+during the week a customer adopts 0361; the sentence that fixes that is in the
+portal's release note, not in a silence vocabulary.
+
+---
+## 2026-11-07 — rule 4's size half is a test now, and the ceiling is the only place it is written down
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/browser-weight.test.ts`) · **Status:** **closed on filing by
+`signals-78-a-broadcast-follows-the-page`**, and filed because the shape is one
+this lane walked into on 2 November and has now paid for
+
+*Performance is not traded for measurement* had two halves and only one of them
+was enforced. The import graph has been walked since 0136 and fails on any
+package. **The size was a sentence in `docs/signals.md` and a figure in each
+report**, re-measured by whoever remembered — and on 2 November that figure was
+found to be a third out of date, which is the same failure 0218 recorded about
+an exported name: a browser cost that moves is invisible in a diff.
+
+`browser-weight.test.ts` now builds the entry point with `esbuild` (already a
+dev dependency, already how every report measured it by hand), gzips it, and
+holds it to **8,000 bytes minified and 3,600 gzipped**. Both, because they do not
+move together: the minified figure is what a browser parses and the gzipped one
+is what the network carries, and a paragraph of code shaped like its neighbours
+costs almost nothing over the wire and still has to be parsed.
+
+**What a future run should not do to it.** Do not pin it to the figure of the
+day — the ceiling exists so that spending bytes is a line somebody wrote with
+the number in it, and an exact-match assertion would fail on an esbuild patch
+bump and teach the next run to loosen rather than to think. Do not raise it
+without putting the new figure in the comment's history, which is now three
+entries long: 4.8 KB at 0136, 6,513 for most of October, 7,543 at 0361.

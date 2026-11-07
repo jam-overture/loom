@@ -455,7 +455,8 @@ describe("which door a reader should have gone through instead", () => {
         slug: "signals-broadcast",
         avoids: ["zod"],
         shared: 15,
-        files: 10,
+        /** 11 since 0361: the broadcaster reads `addressedRootIn` to find a page in a document. */
+        files: 11,
       },
     ])
   })
