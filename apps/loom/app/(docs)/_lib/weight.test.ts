@@ -267,6 +267,31 @@ describe("what a page puts in front of a reader", () => {
     })
 
     /**
+     * **The price is the rows, measured as the rows.**
+     *
+     * A mutation that measured the modules themselves instead —
+     * `JSON.stringify(groups)` — was invisible, because every assertion about
+     * the price was about a number rather than about where it came from. The
+     * two halves below are what a wrong source gets wrong: the figure is the
+     * rows a cut would publish, derived here from the package by a second
+     * route, and it is **bigger** than the same rows without the module
+     * sentences, because a row carries the module's own opening paragraph and
+     * that paragraph is the heaviest thing in it.
+     */
+    it("prices a cut as the bytes of the rows it would publish", () => {
+      const entry = apiReference.entries.find((candidate) => candidate.slug === "signals")
+
+      expect(entry).toBeDefined()
+
+      const groups = groupWeightsOn("signals")
+      const summaries = new Map((entry?.groups ?? []).map((group) => [group.module, group.summary] as const))
+      const bytesOf = (rows: unknown) => new TextEncoder().encode(JSON.stringify(rows)).length
+
+      expect(pageCutOf("signals")?.contents).toBe(bytesOf(cutContentsRows("signals", groups, summaries)))
+      expect(pageCutOf("signals")?.contents).toBeGreaterThan(bytesOf(cutContentsRows("signals", groups)))
+    })
+
+    /**
      * The landing page has no modules, and that is not the same answer as a
      * page the reference does not serve — it is, here, and deliberately:
      * neither is a page with a cut, and `pageCutOf` says so for both rather
@@ -427,6 +452,19 @@ describe("what a page puts in front of a reader", () => {
     it("spells an address from the whole module path", () => {
       expect(cutAddressFor("signals/window")).toBe("signals-window")
       expect(cutAddressFor("project/store")).not.toBe(cutAddressFor("store/store"))
+    })
+
+    /**
+     * **A door with no modules is offered no cut.**
+     *
+     * Not a state this package reaches, which is why the guard was dead and a
+     * mutation deleting it changed nothing. Stated here rather than hunted for
+     * in the reference: a real door, no modules, and the answer is no cut
+     * rather than a cut of nought addresses whose clause ends on a colon.
+     */
+    it("offers no cut for a door that publishes no modules", () => {
+      expect(pageCutOf("signals", [])).toBeUndefined()
+      expect(cutClause(pageCutOf("signals", []))).toBe("")
     })
 
     /** A cap is an argument, so it can be moved for a test and the reader follows. */

@@ -345,11 +345,22 @@ export const cutContentsRows = (
  *
  * `undefined` where the address has no modules to cut along, which is the
  * landing page and anything the reference does not serve. A fault about such a
- * page says nothing about a cut rather than offering one of nought addresses.
+ * page says nothing about a cut rather than offering one of nought addresses —
+ * *cutting it along its modules is 0 more addresses and 2 bytes of rows,
+ * heaviest first:* is the sentence that guard exists to prevent.
+ *
+ * **The modules arrive as an argument so that guard is reachable.** A door
+ * that publishes no modules is not a thing this package does today, so held
+ * against the real reference the branch is dead code and a mutation that
+ * deleted it was invisible. The default is the real answer and a caller may
+ * state one, which is the same shape `weightFaults` gives its caps and its cut
+ * reader, and for the same reason.
  */
-export const pageCutOf = (pageSlug: string): PageCut | undefined => {
+export const pageCutOf = (
+  pageSlug: string,
+  groups: readonly GroupWeight[] = groupWeightsOn(pageSlug)
+): PageCut | undefined => {
   const entry = apiEntryAt(pageSlug)
-  const groups = groupWeightsOn(pageSlug)
 
   if (entry === undefined || groups.length === 0) return undefined
 
