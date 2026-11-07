@@ -16,7 +16,8 @@ import {
   viewKey,
 } from "../testing/reader-signal-contract.js"
 
-import { rollUp, type FunnelPair } from "./rollup.js"
+import { ARRIVAL_HOUR_MS } from "./arrivals.js"
+import { rollUp, type DatedBatch, type FunnelPair } from "./rollup.js"
 import type { ReaderSignal } from "./signal.js"
 
 /**
@@ -565,6 +566,211 @@ describe("rollUp", () => {
       expect(tallyFor(rollup, "buy")).toMatchObject({ activations: 2 })
       expect(rollup.redelivered).toBe(0)
       expect(rollup.uncorrelated).toBe(2)
+    })
+  })
+
+  /**
+   * The hourly slice (`acted.ts`). It comes out of this same pass, so the
+   * assertions that matter most are the two that say it agrees with the
+   * tallies: the sum, and the repeat.
+   */
+  describe("what readers did, by the hour the door received it in", () => {
+    const HOUR = ARRIVAL_HOUR_MS
+    const MIDNIGHT = Date.parse("2026-11-06T00:00:00.000Z")
+    const hourOf = (hour: number): number => MIDNIGHT + hour * HOUR
+
+    /** A batch as a buffer holds it: with the instant the door stamped on it. */
+    const atHour = (
+      signals: readonly ReaderSignal[],
+      hour: number,
+      overrides: Parameters<typeof batchOf>[1] = {}
+    ): DatedBatch => ({
+      ...batchOf(signals, overrides),
+      receivedAt: new Date(hourOf(hour) + 15 * 60_000).toISOString(),
+    })
+
+    const actedFor = (rollup: ReturnType<typeof rollUp>, name: string, hour: number) =>
+      rollup.acted.find((row) => row.nodeId === nodeId(name) && row.hour === hourOf(hour))
+
+    it("files a press under the hour it was received in", () => {
+      const rollup = rollUp([atHour([activated("buy")], 9, { view: viewKey(1) })])
+
+      expect(rollup.acted).toEqual([
+        {
+          treeId: TREE,
+          revision: 1,
+          nodeId: nodeId("buy"),
+          type: primitiveType("loom.button"),
+          hour: hourOf(9),
+          activations: 1,
+          opens: 0,
+          closes: 0,
+          completions: 0,
+        },
+      ])
+      expect(rollup.undated).toBe(0)
+    })
+
+    it("puts two presses of one part in two hours in two rows", () => {
+      const rollup = rollUp([
+        atHour([activated("buy")], 9, { view: viewKey(1) }),
+        atHour([activated("buy")], 10, { view: viewKey(2) }),
+      ])
+
+      expect(rollup.acted).toHaveLength(2)
+      expect(actedFor(rollup, "buy", 9)?.activations).toBe(1)
+      expect(actedFor(rollup, "buy", 10)?.activations).toBe(1)
+    })
+
+    it("adds two deliveries of one hour into one row", () => {
+      const rollup = rollUp([
+        atHour([activated("buy")], 9, { view: viewKey(1) }),
+        atHour([activated("buy")], 9, { view: viewKey(2), sentAt: 2_000 }),
+      ])
+
+      expect(rollup.acted).toHaveLength(1)
+      expect(actedFor(rollup, "buy", 9)?.activations).toBe(2)
+    })
+
+    it("counts openings and shuttings apart, as the tally does", () => {
+      const rollup = rollUp([
+        atHour([disclosedIn("more", true), disclosedIn("more", false)], 9, { view: viewKey(1) }),
+      ])
+
+      expect(actedFor(rollup, "more", 9)).toMatchObject({ opens: 1, closes: 1, activations: 0 })
+    })
+
+    it("counts a send", () => {
+      const rollup = rollUp([atHour([completed("signup")], 9, { view: viewKey(1) })])
+
+      expect(actedFor(rollup, "signup", 9)?.completions).toBe(1)
+    })
+
+    /**
+     * The clause that keeps this counter bounded by what readers did rather
+     * than by how big a page is: a 6,000-node page of nothing but attention
+     * writes 6,000 tallies and no hourly rows at all.
+     */
+    it("writes nothing for what readers only saw", () => {
+      const rollup = rollUp([
+        atHour([viewed("hero"), dwelled("hero", 9_000), viewed("pricing")], 9, {
+          view: viewKey(1),
+        }),
+      ])
+
+      expect(rollup.tallies).toHaveLength(2)
+      expect(rollup.acted).toEqual([])
+    })
+
+    it("files a region's credit nowhere, because the press is the control's", () => {
+      const rollup = rollUp([
+        atHour([activatedIn("buy", "pricing", "page")], 9, { view: viewKey(1) }),
+      ])
+
+      expect(rollup.acted.map((row) => row.nodeId)).toEqual([nodeId("buy")])
+      expect(tallyFor(rollup, "pricing")).toMatchObject({ engaged: 1 })
+    })
+
+    it("keeps two revisions of one part apart", () => {
+      const rollup = rollUp([
+        atHour([activated("buy")], 9, { view: viewKey(1) }),
+        atHour([activated("buy")], 9, { view: viewKey(2), revision: 2 }),
+      ])
+
+      expect(rollup.acted).toHaveLength(2)
+      expect(rollup.acted.map((row) => row.revision).sort()).toEqual([1, 2])
+    })
+
+    /**
+     * **The invariant the design rests on.** The hours are a slice of the
+     * tallies, so a window's hourly rows add up to the same occurrences its
+     * tallies carry — whatever the window held and however it straddles an
+     * hour.
+     */
+    it("holds exactly the occurrences the tallies do", () => {
+      const rollup = rollUp([
+        atHour([viewed("pricing"), activated("buy")], 9, { view: viewKey(1) }),
+        atHour([activated("buy"), disclosedIn("more", true)], 9, { view: viewKey(2) }),
+        atHour([activated("buy"), completed("signup")], 10, { view: viewKey(3) }),
+        atHour([disclosedIn("more", false)], 11, { view: viewKey(4) }),
+      ])
+
+      const summed = rollup.acted.reduce(
+        (totals, row) => ({
+          activations: totals.activations + row.activations,
+          opens: totals.opens + row.opens,
+          closes: totals.closes + row.closes,
+          completions: totals.completions + row.completions,
+        }),
+        { activations: 0, opens: 0, closes: 0, completions: 0 }
+      )
+      const tallied = rollup.tallies.reduce(
+        (totals, tally) => ({
+          activations: totals.activations + tally.activations,
+          opens: totals.opens + tally.opens,
+          closes: totals.closes + tally.closes,
+          completions: totals.completions + tally.completions,
+        }),
+        { activations: 0, opens: 0, closes: 0, completions: 0 }
+      )
+
+      expect(summed).toEqual(tallied)
+      expect(summed).toEqual({ activations: 3, opens: 1, closes: 1, completions: 1 })
+    })
+
+    /**
+     * The double-count this lane's rule asks for, in the shape that would be
+     * invisible: a batch delivered twice is folded once (0314), and the hours
+     * are folded by the same judgement rather than by a second one.
+     */
+    it("folds a repeat once, in the hours as well as in the tallies", () => {
+      const batch = atHour([activated("buy")], 9, { view: viewKey(1) })
+      const rollup = rollUp([batch, batch])
+
+      expect(rollup.redelivered).toBe(1)
+      expect(actedFor(rollup, "buy", 9)?.activations).toBe(1)
+      expect(tallyFor(rollup, "buy")).toMatchObject({ activations: 1 })
+    })
+
+    it("counts the same batch twice in the hours where it does in the tallies, so the two never disagree", () => {
+      const batch = atHour([activated("buy")], 9)
+      const rollup = rollUp([batch, batch])
+
+      expect(rollup.redelivered).toBe(0)
+      expect(rollup.uncorrelated).toBe(2)
+      expect(actedFor(rollup, "buy", 9)?.activations).toBe(2)
+      expect(tallyFor(rollup, "buy")).toMatchObject({ activations: 2 })
+    })
+
+    it("counts a batch with no receive instant into the tallies and into no hour", () => {
+      const rollup = rollUp([batchOf([activated("buy")], { view: viewKey(1) })])
+
+      expect(tallyFor(rollup, "buy")).toMatchObject({ activations: 1 })
+      expect(rollup.acted).toEqual([])
+      expect(rollup.undated).toBe(1)
+    })
+
+    it("counts a batch whose instant will not parse as undated rather than filing it under NaN", () => {
+      const rollup = rollUp([
+        { ...batchOf([activated("buy")], { view: viewKey(1) }), receivedAt: "whenever" },
+      ])
+
+      expect(rollup.acted).toEqual([])
+      expect(rollup.undated).toBe(1)
+    })
+
+    it("takes the hour from the door and not from the sender's clock", () => {
+      const rollup = rollUp([
+        atHour([activated("buy")], 9, { view: viewKey(1), sentAt: hourOf(2) }),
+      ])
+
+      expect(rollup.acted[0]?.hour).toBe(hourOf(9))
+    })
+
+    it("carries no view key into the hourly rows either", () => {
+      const rollup = rollUp([atHour([activated("buy")], 9, { view: viewKey(1) })])
+
+      expect(JSON.stringify(rollup.acted)).not.toContain(viewKey(1))
     })
   })
 

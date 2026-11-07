@@ -179,6 +179,15 @@ export type CollectionSummary = {
   readonly counted: number
   readonly tallies: number
   readonly funnels: number
+  /**
+   * Hourly rows this run wrote for what readers did (`acted.ts`).
+   *
+   * A slice of the tallies rather than a figure beside them: a window in which
+   * nobody pressed, opened or sent anything writes none, however many tallies
+   * it wrote, because the counter holds what readers *did* and a page being on
+   * screen is not one of those.
+   */
+  readonly acted: number
   /** Distinct page views the window held. */
   readonly views: number
   /**
@@ -391,6 +400,7 @@ export const collectReaderSignals = async (
     counted: plan.ripe.length,
     oldestMs: Date.parse(now) - Date.parse(oldest),
     tallies: folded.reduce((total, { rollup }) => total + rollup.tallies.length, 0),
+    acted: folded.reduce((total, { rollup }) => total + rollup.acted.length, 0),
     funnels: folded.reduce((total, { rollup }) => total + rollup.funnels.length, 0),
     views: folded.reduce((total, { rollup }) => total + rollup.views, 0),
     uncorrelated: folded.reduce((total, { rollup }) => total + rollup.uncorrelated, 0),
@@ -419,6 +429,7 @@ export const collectReaderSignals = async (
       tallies: rollup.tallies,
       funnels: rollup.funnels,
       appearances: rollup.appearances,
+      acted: rollup.acted,
     })),
     now
   )

@@ -1,6 +1,8 @@
 import type { NodeId, TreeId } from "../ids.js"
 import type { PrimitiveType } from "../primitive-type.js"
 
+import { arrivalHourOf } from "./arrivals.js"
+import type { ActedHourCount } from "./acted.js"
 import type { SignalAddress } from "./ledger.js"
 import type { RevisionViews } from "./page-views.js"
 import type { ReaderSignalBatch, ReaderSignalKind, ViewKey } from "./signal.js"
@@ -182,6 +184,33 @@ export type Rollup = {
    * every run is a retry loop somebody should find.
    */
   readonly redelivered: number
+  /**
+   * The same occurrences as the tallies' three delegated kinds, filed under the
+   * hour the door received them in (`acted.ts`).
+   *
+   * **A slice of the tallies rather than a second measurement**, and it comes
+   * out of this one pass for that reason: the repeat refusal above is a
+   * judgement made once per batch, and a second walk grouping by hour would
+   * make it twice against a different grouping — so an hour's rows would stop
+   * summing to the tally they slice, permanently and invisibly (0158).
+   * `rollup.test.ts` asserts the sum.
+   *
+   * Empty where no batch carried a receive instant, which is every caller that
+   * composes batches by hand; {@link Rollup.undated} says how many.
+   */
+  readonly acted: readonly ActedHourCount[]
+  /**
+   * Batches that carried no instant the door received them at, so their
+   * occurrences are in the tallies and in no hour.
+   *
+   * The same shape of report as {@link Rollup.uncorrelated} and for the same
+   * reason: one counter cannot be written honestly and the number is a fact
+   * about the input rather than about readers. A window read from either
+   * journal always carries one — both stamp it on the way in — so this is
+   * non-nought only for batches somebody composed, and a run that reports some
+   * is a run whose hourly rows are short by that many batches' worth.
+   */
+  readonly undated: number
 }
 
 export const EMPTY_ROLLUP: Rollup = {
@@ -191,6 +220,8 @@ export const EMPTY_ROLLUP: Rollup = {
   appearances: [],
   uncorrelated: 0,
   redelivered: 0,
+  acted: [],
+  undated: 0,
 }
 
 /**
@@ -296,6 +327,22 @@ type Accumulating = {
   readonly engaged: Set<ViewKey>
 }
 
+/**
+ * One part's hourly row as it is being added up, which is the four occurrence
+ * counters of the three delegated kinds and nothing else (`acted.ts`).
+ */
+type Acting = {
+  readonly treeId: TreeId
+  readonly revision: number
+  readonly nodeId: NodeId
+  readonly hour: number
+  type: PrimitiveType
+  activations: number
+  opens: number
+  closes: number
+  completions: number
+}
+
 const accumulatorFor = (
   into: Map<string, Accumulating>,
   batch: ReaderSignalBatch,
@@ -346,6 +393,46 @@ const accumulatorFor = (
  */
 const endKey = (treeId: TreeId, revision: number, nodeId: NodeId, kind: ReaderSignalKind): string =>
   `${revisionKey(treeId, revision)}${SEP}${nodeId}${SEP}${kind}`
+
+/**
+ * The hourly accumulator for one part in one hour, created on first sight.
+ *
+ * Keyed by the revision, the node **and** the hour, so a part a reader pressed
+ * either side of an hour boundary is two rows rather than one — which is the
+ * whole point of the counter and the one way its key differs from a tally's.
+ */
+const actingFor = (
+  into: Map<string, Acting>,
+  batch: DatedBatch,
+  nodeId: NodeId,
+  type: PrimitiveType,
+  hour: number
+): Acting => {
+  const key = `${revisionKey(batch.treeId, batch.revision)}${SEP}${nodeId}${SEP}${hour}`
+  const existing = into.get(key)
+
+  if (existing !== undefined) {
+    /** The later reading of a node's type wins, exactly as it does on a tally. */
+    existing.type = type
+
+    return existing
+  }
+
+  const fresh: Acting = {
+    treeId: batch.treeId,
+    revision: batch.revision,
+    nodeId,
+    hour,
+    type,
+    activations: 0,
+    opens: 0,
+    closes: 0,
+    completions: 0,
+  }
+  into.set(key, fresh)
+
+  return fresh
+}
 
 const tallyOf = (accumulating: Accumulating): ReaderTally => ({
   treeId: accumulating.treeId,
@@ -407,8 +494,23 @@ export type RollupOptions = {
  * window's rollup twice still doubles it, because that is two runs rather than
  * two batches, and nothing here can see the other run.
  */
+/**
+ * A batch as a buffer holds it: with the instant **the door** received it.
+ *
+ * Optional, because a caller may compose a batch by hand — a backfill, a
+ * fixture, a test — and because it is the only field here that does not come
+ * off the wire. Where it is absent the batch is counted into the tallies like
+ * any other and into no hour, and {@link Rollup.undated} says so.
+ *
+ * It is `receivedAt` and never `sentAt`: a sender's clock is a number a page
+ * said, and a chart drawn from it is a chart a page can move bars on (0355).
+ */
+export type DatedBatch = ReaderSignalBatch & {
+  readonly receivedAt?: string
+}
+
 export const rollUp = (
-  batches: readonly ReaderSignalBatch[],
+  batches: readonly DatedBatch[],
   options: RollupOptions = {}
 ): Rollup => {
   const accumulators = new Map<string, Accumulating>()
@@ -435,8 +537,16 @@ export const rollUp = (
    * batch, so the fold stays linear in the signals it was handed (rule 4).
    */
   const taken = new Set<string>()
+  /**
+   * The hourly slice, keyed by revision, node and hour (`acted.ts`).
+   *
+   * One more map over the same pass rather than a second walk, so the repeat
+   * refusal below is made once for both outputs.
+   */
+  const acting = new Map<string, Acting>()
   let uncorrelated = 0
   let redelivered = 0
+  let undated = 0
 
   for (const batch of batches) {
     const { view } = batch
@@ -458,6 +568,14 @@ export const rollUp = (
       taken.add(identity)
     }
 
+    /**
+     * The hour this delivery's actions are filed under, read once per batch:
+     * every signal in it arrived at the same instant, so parsing per signal
+     * would be the same answer at ten times the cost.
+     */
+    const hour = batch.receivedAt === undefined ? undefined : arrivalHourOf(batch.receivedAt)
+    if (hour === undefined) undated += 1
+
     const key = revisionKey(batch.treeId, batch.revision)
     const touched = revisions.get(key)
     const seen = touched ?? {
@@ -478,6 +596,26 @@ export const rollUp = (
         else into.closes += 1
       }
       if (signal.kind === "completed") into.completions += 1
+
+      /**
+       * The same four counters again, under the hour (`acted.ts`).
+       *
+       * Written here rather than derived afterwards because *here* is where the
+       * batch, the signal and the hour are all in hand and where the repeat has
+       * already been refused. The three kinds are the delegated ones; `viewed`
+       * and `dwelled` are deliberately not sliced by hour, and the module says
+       * why at length.
+       */
+      if (hour !== undefined) {
+        const acted = actingFor(acting, batch, signal.nodeId, signal.type, hour)
+
+        if (signal.kind === "activated") acted.activations += 1
+        if (signal.kind === "disclosed") {
+          if (signal.open) acted.opens += 1
+          else acted.closes += 1
+        }
+        if (signal.kind === "completed") acted.completions += 1
+      }
 
       if (view === undefined) continue
 
@@ -518,5 +656,14 @@ export const rollUp = (
       .map(({ treeId, revision, views: seen }) => ({ treeId, revision, views: seen.size })),
     uncorrelated,
     redelivered,
+    /**
+     * Rows with nothing on them are dropped, which is what keeps this counter
+     * bounded by what readers did: a `viewed` on every part of a page creates
+     * an accumulator above and no row here.
+     */
+    acted: [...acting.values()].filter(
+      (row) => row.activations + row.opens + row.closes + row.completions > 0
+    ),
+    undated,
   }
 }
