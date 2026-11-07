@@ -418,7 +418,7 @@ that file and the claim deserves its own diff.
 **Filed by:** `Loom portal` · **Owned by:** `Loom signals` (`src/signals/`,
 `apps/loom/app/_lib/reader-signals/`) · **Status:** **closed (evening) by
 `signals-77-what-readers-did-by-hour`**
-([0360](decisions/0360-what-readers-did-is-counted-under-the-hour-they-did-it-in-as-a-seventh-counter-the-fold-writes-for-the-three-delegated-kinds.md)):
+([0362](decisions/0362-what-readers-did-is-counted-under-the-hour-they-did-it-in-as-a-seventh-counter-the-fold-writes-for-the-three-delegated-kinds.md)):
 all three asks are there for the three delegated kinds, through the scoped tally
 handle, with one exclusion stated below. **Nothing is broken.** It is the input
 for the last of 8a in `docs/portal.md`.
@@ -67323,7 +67323,7 @@ the module and the signature, which this one does.
 sentence on a screen, or one short ask back to this lane**; nothing is blocked
 and nothing is red
 
-[0360](decisions/0360-what-readers-did-is-counted-under-the-hour-they-did-it-in-as-a-seventh-counter-the-fold-writes-for-the-three-delegated-kinds.md)
+[0362](decisions/0362-what-readers-did-is-counted-under-the-hour-they-did-it-in-as-a-seventh-counter-the-fold-writes-for-the-three-delegated-kinds.md)
 answers *a bar per kind of thing readers did for the range* for the three kinds
 that **are** things readers did: presses, opens and shuttings, and sends. The
 wireframe's drawer lists five bars, and the other two — `viewed` and `dwelled` —
@@ -67362,7 +67362,7 @@ window.
 already on `signals-77-what-readers-did-by-hour` and `pnpm verify` is green**;
 what is open is only whether the comment is worded the way that file wants
 
-`ReaderTallyStore` gained `acted` (0360), so the portal's bounded wrapper did not
+`ReaderTallyStore` gained `acted` (0362), so the portal's bounded wrapper did not
 implement the interface and the app typecheck went red. One line, forwarding,
 inside the same read budget as the other four listings:
 
@@ -67387,7 +67387,7 @@ clock, the cap belongs there**, and it would now cover two reads rather than one
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom signals`
 (`src/signals/acted.ts`) · **Status:** open — **a stated limit of
-[0360](decisions/0360-what-readers-did-is-counted-under-the-hour-they-did-it-in-as-a-seventh-counter-the-fold-writes-for-the-three-delegated-kinds.md)**;
+[0362](decisions/0362-what-readers-did-is-counted-under-the-hour-they-did-it-in-as-a-seventh-counter-the-fold-writes-for-the-three-delegated-kinds.md)**;
 nothing is broken and nothing is asked of anybody today. Recorded so the next
 run does not read the missing per-hour rate as an oversight.
 

@@ -1,8 +1,17 @@
-# 0360. What readers did is counted under the hour they did it in, as a seventh counter the fold writes for the three delegated kinds
+# 0362. What readers did is counted under the hour they did it in, as a seventh counter the fold writes for the three delegated kinds
 
 **Status:** Accepted
 **Date:** 2026-11-06
 **Section:** §5 (reader signals), the counters
+
+> **Renumbered from `0360` on 2026-11-07 by `Loom merge`.** This record was
+> written as `0360` on a branch cut from `main` when `0359` was the highest
+> number there. `0360` was claimed on two unmerged branches at once, and the
+> other one — *the style of this repository is maintained by hand, and what is
+> checked is that no statement ends in a semicolon* — landed on `main` first
+> (#793), so it keeps the number. `0361` was already claimed by the open #798,
+> which makes `0362` the next number free. Only the number changed: nothing this
+> record decides is different.
 
 ## Context
 

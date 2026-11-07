@@ -4848,7 +4848,7 @@ the *By page* drawer's **bar per kind of thing readers did for the range**, and
 count those keep no time.
 
 **Done**
-([0360](../decisions/0360-what-readers-did-is-counted-under-the-hour-they-did-it-in-as-a-seventh-counter-the-fold-writes-for-the-three-delegated-kinds.md)),
+([0362](../decisions/0362-what-readers-did-is-counted-under-the-hour-they-did-it-in-as-a-seventh-counter-the-fold-writes-for-the-three-delegated-kinds.md)),
 as a seventh counter written by the fold.
 
 - **It holds the three delegated kinds and no others.** `activated`,

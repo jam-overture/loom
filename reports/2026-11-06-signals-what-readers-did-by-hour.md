@@ -2,7 +2,7 @@
 
 **Lane:** `Loom signals` · **Date:** 6 November 2026 (evening) ·
 **Branch:** `signals-77-what-readers-did-by-hour` ·
-**Records:** [0360](../decisions/0360-what-readers-did-is-counted-under-the-hour-they-did-it-in-as-a-seventh-counter-the-fold-writes-for-the-three-delegated-kinds.md) ·
+**Records:** [0362](../decisions/0362-what-readers-did-is-counted-under-the-hour-they-did-it-in-as-a-seventh-counter-the-fold-writes-for-the-three-delegated-kinds.md) ·
 **Plan:** [`docs/signals.md`](../docs/signals.md) §77 ·
 **Closes:** `Loom portal`'s 6 November finding, *a goal's figure for a range,
 and `By page`'s bars for one, need what readers did on a part counted by hour*
