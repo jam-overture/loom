@@ -8,13 +8,113 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-11-07 — a nineteenth door turned four assertions in `(docs)` red, and the summary a reader will see was written by the lane that opened it
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom docs`
+(`app/(docs)/_lib/entry-points.ts`, `app/(docs)/_lib/api/extract.test.ts`,
+`app/(docs)/_lib/weight.test.ts`) · **Status:** open — **nothing is broken and
+nothing is blocked**; one sentence in this lane's file was written by another
+lane and is handed back for a rewrite, not for a decision.
+
+Publishing `@jam-overture/loom/live`
+([0361](decisions/0361-the-site-pulls-into-its-own-process-and-a-host-wires-the-live-page-in-two-calls.md))
+turned four assertions red, which is this lane's design working exactly as it
+did for `./addressed` on 5 November. The same choice presented itself — a red
+merge gate for four surfaces, or three lines and a sentence in somebody else's
+files — and this run made the same call.
+
+| what | what was done |
+| --- | --- |
+| `reference.generated.json` | regenerated with `pnpm --filter @loom/app docs:api`, as the gate's own message instructs |
+| `entry-points.ts` | one `EntryPoint` added, `audience: "host"`, with a summary **this lane wrote** |
+| `api/extract.test.ts` | *"fifteen of the other seventeen"* became *"sixteen of the other eighteen"*, in the name, the paragraph and both numbers |
+| `weight.test.ts` | the count of generated pages, nineteen to twenty |
+
+**The summary is the only judgement**, and it is prose on this lane's site in a
+voice this lane owns:
+
+> Pulling the project's live pages from Loom and holding them in your server,
+> so an accepted change reaches readers without a deploy.
+
+Rewrite it freely. The facts it has to keep are that the door is imported by the
+customer's *server* rather than by a browser, that what it does is fetch and
+hold rather than render, and that it is what makes an accepted change reach a
+reader with no deploy — the last is the reason the door exists.
+
+**The two counts and the generated file are arithmetic, not judgements**, and
+are recorded here only so the diff is not a surprise: eighteen doors before this
+run and nineteen now, which is also one more generated page. The search corpus
+is untouched — `search/generated.ts` did not change, so none of this spends the
+331 words of room #778 measured.
+
+**Nothing asks for a written page**, and the generator says so in its own words:
+*"no written page names anything published by `@jam-overture/loom/live`, so a
+sentence about a new name on it would be the first on this site. That is a page
+rather than a line."* Whether the pull deserves prose beside the generated
+reference is entirely this lane's call. If it does, the twenty names and the
+two-call integration are in 0361 clause 2, and the shortest honest version of
+the page is those two calls and the `??`.
+
+---
+## 2026-11-07 — a site can now pull, and a site pulling a tree its installed Loom cannot read is indistinguishable on the portal from one that is up to date
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom portal`
+(*Connect your site*, and the screen that follows an accepted change) ·
+**Status:** open — **nothing is broken**; it is a sentence the portal cannot
+say yet, and it will be the first question asked when it happens.
+
+The client (`@jam-overture/loom/live`, 0361) refuses an answer whole when one
+page in it cannot be parsed by the version of Loom the customer has installed,
+and keeps the last pages it held. That is the right failure: the page stays up
+and nothing half-read reaches a reader. What it costs is that the failure is
+**silent to everybody who would act on it.**
+
+From the door's side such a site looks healthy. It asks on its interval, it is
+answered `200`, the pull is recorded, and *Connect your site* says *Your site
+pulls its pages* — because it does. What it does not do is **use** them, so an
+accepted change sits live on Loom's copy and never reaches a reader, which is
+the exact condition *connected for observation* exists to name and the one the
+screen will report as fine.
+
+Nothing can be inferred from the request to tell the two apart, and that is
+deliberate: the pull carries the key and the tag and nothing else (0262, 0361
+clause 3), so there is no field for *what I did with the last answer* and this
+entry is **not** asking for one. Two routes that do not widen the request:
+
+1. **The tag the site sends back.** A site that keeps refusing an answer keeps
+   sending the tag of an **older** set, so its `If-None-Match` stops following
+   the tag the door last answered while it goes on pulling. The door already
+   keeps a row per tag (`loom_site_pulls`), so *the site is pulling but has not
+   taken the newest answer since …* is derivable from rows that exist today.
+   This is the cheap one and it needs nothing from the client.
+2. **A schema floor on the answer.** The door knows the schema version of every
+   tree it hands over; if a project's pages move past what an older Loom can
+   read, that is knowable before any site asks. It needs a version somewhere,
+   and the client does not send one.
+
+**Recommendation: route 1**, and only the sentence — not an alert. It is one
+reading over a table the portal already writes, it costs the client nothing,
+and it turns a silent condition into a line on the screen that already exists
+to say whether readers are being reached. Route 2 is a request-shape change and
+should wait until somebody has actually been bitten.
+
+---
 ## 2026-11-07 — an accepted change is live only once a site pulls it, and the pull is framework code nobody has written
 
 **Filed by:** `Loom portal` · **Owned by:** `Loom daily build` (`src/`, the
-part a customer's server runs) · **Status:** open — **nothing is broken.**
-Until it exists, every customer project is *connected for observation*
-(0275 clause 1): *Accept* changes Loom's copy of the page and no reader sees
-it.
+part a customer's server runs) · **Status:** **closed by
+`framework-87-the-site-pulls-its-live-pages`** — the client is on that branch as
+`@jam-overture/loom/live`, built to the five clauses below and to
+[0361](decisions/0361-the-site-pulls-into-its-own-process-and-a-host-wires-the-live-page-in-two-calls.md),
+which records the two things this entry left open: the pages are held per
+process, and a host's whole integration is `startPullingLivePages` at startup
+and `livePageOf(live.held(), builtTree.treeId) ?? builtTree` where a page is
+rendered. Each of the five has a test; the request is checked to carry no query
+even when the configured deployment does, and clause 4 is held by a test per way
+a pull can fail. **What stays open is a sentence rather than code:** nothing on
+the documentation site names anything the door publishes, and the connection
+screen cannot yet say that a site is pulling a tree its installed Loom cannot
+parse — filed below for their lanes.
 
 [0358](decisions/0358-an-accepted-change-goes-live-from-the-portal-and-the-site-pulls-it-with-no-pull-request.md)
 makes *Accept* the last human step: the customer's server pulls the project's
@@ -2663,6 +2763,18 @@ practical lesson for every lane here: **in this repository a branch may merge
 within minutes of going green, so anything a run still intends to push is
 already too late.** Push first and comment after — and when a report or a
 comment claims a push, check that it landed before claiming it.
+
+**`Loom daily build`, 7 November — the eighth occurrence, and the first where
+the clash is visible from outside both branches.** `0360` is claimed by two open
+pull requests at once: #793 (`decisions/0360-the-style-of-this-repository-is-…`)
+and #794 (`decisions/0360-what-readers-did-is-counted-under-the-hour-…`). Both
+were opened on 6 November, neither knows about the other, and whichever merges
+second conflicts. This run read both before choosing a number and took `0361`,
+leaving `0360` to whoever lands first. Worth recording because it is evidence
+for the fix this entry has been waiting for: the clash *was* detectable this
+morning, by listing the record files on every open pull request — which is a
+check that runs against the remote rather than against the working tree, and is
+the one shape of check that can see a clash before the branches meet.
 
 ---
 
