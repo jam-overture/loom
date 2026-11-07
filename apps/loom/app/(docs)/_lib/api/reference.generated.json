@@ -8,7 +8,7 @@
       "files": 100,
       "narrower": [],
       "standing": {
-        "packageNames": 1959,
+        "packageNames": 1986,
         "otherDoors": 18,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -4252,7 +4252,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 1959,
+        "packageNames": 1986,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -4296,7 +4296,7 @@
       "files": 63,
       "narrower": [],
       "standing": {
-        "packageNames": 1959,
+        "packageNames": 1986,
         "otherDoors": 18,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -5255,7 +5255,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 1959,
+        "packageNames": 1986,
         "otherDoors": 18,
         "doorsSharingNothing": 17,
         "widest": false,
@@ -5330,7 +5330,7 @@
       "files": 220,
       "narrower": [],
       "standing": {
-        "packageNames": 1959,
+        "packageNames": 1986,
         "otherDoors": 18,
         "doorsSharingNothing": 17,
         "widest": false,
@@ -5800,7 +5800,7 @@
       "files": 81,
       "narrower": [],
       "standing": {
-        "packageNames": 1959,
+        "packageNames": 1986,
         "otherDoors": 18,
         "doorsSharingNothing": 17,
         "widest": false,
@@ -6888,7 +6888,7 @@
       "files": 38,
       "narrower": [],
       "standing": {
-        "packageNames": 1959,
+        "packageNames": 1986,
         "otherDoors": 18,
         "doorsSharingNothing": 17,
         "widest": false,
@@ -7465,7 +7465,7 @@
       "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 1959,
+        "packageNames": 1986,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -7668,7 +7668,7 @@
       "files": 42,
       "narrower": [],
       "standing": {
-        "packageNames": 1959,
+        "packageNames": 1986,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -8578,7 +8578,7 @@
       "files": 61,
       "narrower": [],
       "standing": {
-        "packageNames": 1959,
+        "packageNames": 1986,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -8957,7 +8957,7 @@
       "files": 41,
       "narrower": [],
       "standing": {
-        "packageNames": 1959,
+        "packageNames": 1986,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -9175,7 +9175,7 @@
       "files": 14,
       "narrower": [],
       "standing": {
-        "packageNames": 1959,
+        "packageNames": 1986,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -9331,7 +9331,7 @@
       "slug": "signals",
       "types": "./dist/signals/index.d.ts",
       "requires": [],
-      "files": 79,
+      "files": 80,
       "narrower": [
         {
           "specifier": "@jam-overture/loom/signals/broadcast",
@@ -9344,7 +9344,7 @@
         }
       ],
       "standing": {
-        "packageNames": 1959,
+        "packageNames": 1986,
         "otherDoors": 18,
         "doorsSharingNothing": 16,
         "widest": true,
@@ -9369,6 +9369,139 @@
         ]
       },
       "groups": [
+        {
+          "module": "signals/acted",
+          "title": "Acted",
+          "summary": "**What readers did, by the hour they did it in.**",
+          "symbols": [
+            {
+              "name": "ActedKind",
+              "kind": "type",
+              "signature": "type ActedKind = (typeof DELEGATED_READER_SIGNAL_KINDS)[number];",
+              "summary": "The three kinds this counter holds, which are the kinds a reader aimed at something to cause and the kinds a goal may be made of."
+            },
+            {
+              "name": "ACTED_KINDS",
+              "kind": "value",
+              "signature": "const ACTED_KINDS: readonly ActedKind[]",
+              "summary": ""
+            },
+            {
+              "name": "isActedKind",
+              "kind": "function",
+              "signature": "const isActedKind: (kind: string) => kind is ActedKind",
+              "summary": "Whether a signal kind is one this counter holds."
+            },
+            {
+              "name": "ActedHourCount",
+              "kind": "type",
+              "signature": "type ActedHourCount = {\n    readonly treeId: TreeId;\n    readonly revision: number;\n    readonly nodeId: NodeId;\n    readonly type: PrimitiveType;\n    /** The hour it happened in, as the instant that hour began (UTC). */\n    readonly hour: number;\n    readonly activations: number;\n    readonly opens: number;\n    readonly closes: number;\n    readonly completions: number;\n};",
+              "summary": "What readers did to one part of one revision, in one hour."
+            },
+            {
+              "name": "StoredActedHour",
+              "kind": "type",
+              "signature": "type StoredActedHour = ActedHourCount & {\n    readonly audienceId: AudienceId;\n    readonly updatedAt: string;\n};",
+              "summary": "An hour's row as the store keeps it. See `StoredTally.audienceId`."
+            },
+            {
+              "name": "actedCountOf",
+              "kind": "function",
+              "signature": "const actedCountOf: (row: ActedHourCount, kind: ActedKind) => number",
+              "summary": "The counter a kind is counted in."
+            },
+            {
+              "name": "StoredActed",
+              "kind": "type",
+              "signature": "type StoredActed = {\n    /** Every row in the range, in no particular order. */\n    readonly hours: readonly StoredActedHour[];\n    readonly begins?: number;\n};",
+              "summary": "What a ranged read of the counter hands back, which is the shape {@link StoredArrivals } has and for the same two reasons."
+            },
+            {
+              "name": "ActedHour",
+              "kind": "type",
+              "signature": "type ActedHour = {\n    /** The instant the hour began (UTC). */\n    readonly hour: number;\n    /** What readers did in it, in the kind this series is of. */\n    readonly count: number;\n    /**\n     * Whether this hour is over and inside the range.\n     *\n     * False on the hour in progress, and false where the range cuts the hour\n     * short — so a surface does not draw the clock as a fall.\n     */\n    readonly whole: boolean;\n};",
+              "summary": "One hour of a range, which is one bar. See {@link ArrivalHour }."
+            },
+            {
+              "name": "ActedSeries",
+              "kind": "type",
+              "signature": "type ActedSeries = {\n    readonly range: ArrivalRange;\n    readonly kind: ActedKind;\n    /**\n     * One entry per hour, ascending, from the later of the range's first hour and\n     * the hour counting began. Dense: an hour nobody acted in is `count: 0` and\n     * is present.\n     */\n    readonly hours: readonly ActedHour[];\n    /** What readers did inside the range, which is the sum of the hours above. */\n    readonly count: number;\n    /** The first hour this scope ever counted, carried through from the store. */\n    readonly begins?: number;\n    /** Whether the range starts before counting did, so the series is shorter than asked for. */\n    readonly clipped: boolean;\n};",
+              "summary": "What readers did over a range, by hour, in one kind."
+            },
+            {
+              "name": "ActedSeriesOptions",
+              "kind": "type",
+              "signature": "type ActedSeriesOptions = ArrivalSeriesOptions & {\n    /** Absent reads presses, which is the commonest goal there is. */\n    readonly kind?: ActedKind;\n};",
+              "summary": "What a series may be told besides the rows: the kind, and the clock."
+            },
+            {
+              "name": "actedSeriesOf",
+              "kind": "function",
+              "signature": "const actedSeriesOf: (stored: StoredActed, range: ArrivalRange, options?: ActedSeriesOptions) => ActedSeries",
+              "summary": "The hours of a range, as the counter answers for them."
+            },
+            {
+              "name": "ActedChange",
+              "kind": "type",
+              "signature": "type ActedChange = {\n    readonly range: ArrivalRange;\n    /** The equal-length period before, which is `arrivalRangeBefore`. */\n    readonly before: ArrivalRange;\n    readonly kind: ActedKind;\n    readonly count: number;\n    /**\n     * What readers did in the earlier period, or `null` where counting had not\n     * begun when it started.\n     *\n     * `null` is not nought, and the difference is the whole of this field: a\n     * deployment that upgraded on Tuesday had no counter before Tuesday and no\n     * missing presses either.\n     */\n    readonly was: number | null;\n    /** The quotient, or why there is none (`ratios.ts`). */\n    readonly ratio: Ratio;\n};",
+              "summary": "What readers did in a range against what they did in the period before it."
+            },
+            {
+              "name": "actedChangeOf",
+              "kind": "function",
+              "signature": "const actedChangeOf: (stored: StoredActed, range: ArrivalRange, options?: ActedSeriesOptions) => ActedChange",
+              "summary": "Both figures and the quotient, from one read spanning both periods."
+            },
+            {
+              "name": "ActedReadingRequest",
+              "kind": "type",
+              "signature": "type ActedReadingRequest = {\n    readonly range: ArrivalRange;\n    /** The kind the series is of. Absent reads presses. */\n    readonly kind?: ActedKind;\n    /** Absent reads every tree the handle can see, which is the scope rule. */\n    readonly treeId?: TreeId;\n    /**\n     * The one part this is about, where it is about one.\n     *\n     * A goal is a kind on a part, so a goal's series passes this and the store\n     * answers it from an index rather than by reading the page's other parts.\n     * Absent sums every part the narrowing holds, which is *what readers did on\n     * this page* rather than *on this part*.\n     */\n    readonly nodeId?: NodeId;\n    /** Absent reads every audience, whose counts then add. */\n    readonly audience?: AudienceId;\n    /** Absent reads every revision, whose counts then add — which is what a goal wants. */\n    readonly revision?: number;\n    /** Now, where the caller has it, so the hour in progress is marked as one. */\n    readonly now?: number;\n};",
+              "summary": "What a surface asks for: a range, the narrowing, the kind and the clock."
+            },
+            {
+              "name": "ActedReading",
+              "kind": "type",
+              "signature": "type ActedReading = {\n    readonly series: ActedSeries;\n    readonly change: ActedChange;\n};",
+              "summary": "The chart and the figure beside it, from one read."
+            },
+            {
+              "name": "ActedCounterHandle",
+              "kind": "type",
+              "signature": "type ActedCounterHandle = {\n    readonly acted: (request?: {\n        readonly treeId?: TreeId;\n        readonly nodeId?: NodeId;\n        readonly audience?: AudienceId;\n        readonly revision?: number;\n        readonly from?: number;\n        readonly to?: number;\n    }) => Promise<Result<StoredActed, ReaderSignalStoreError>>;\n};",
+              "summary": "The one method of the counter handle a reading of this needs."
+            },
+            {
+              "name": "readReaderActed",
+              "kind": "function",
+              "signature": "const readReaderActed: (store: ActedCounterHandle, request: ActedReadingRequest) => Promise<Result<ActedReading, ReaderSignalStoreError>>",
+              "summary": "The chart, the range's figure and the change on the period before it, in one call against a counter handle."
+            },
+            {
+              "name": "ActedRate",
+              "kind": "type",
+              "signature": "type ActedRate = {\n    /**\n     * What readers did per hundred page views in the range, or `null` where there\n     * is no quotient to take.\n     *\n     * `null` where the range held no page views at all — including the case worth\n     * naming, which is a range holding actions and no arrivals: every reader in\n     * it arrived before it began. A nought there would read as *nobody acts*, and\n     * the counts beside it say what actually happened.\n     */\n    readonly per100: number | null;\n    /** The same figure for the period before, or `null` on the same terms. */\n    readonly was: number | null;\n    /** The quotient of the two rates, or why there is none (`ratios.ts`). */\n    readonly ratio: Ratio;\n};",
+              "summary": "What readers did in a range, over the page views they did it in."
+            },
+            {
+              "name": "ActedRateReading",
+              "kind": "type",
+              "signature": "type ActedRateReading = {\n    readonly acted: ActedReading;\n    readonly arrivals: ArrivalReading;\n    readonly rate: ActedRate;\n};",
+              "summary": "What readers did over a range, the page views it happened in, and the rate."
+            },
+            {
+              "name": "ActedRateHandle",
+              "kind": "type",
+              "signature": "type ActedRateHandle = ActedCounterHandle & ArrivalCounterHandle;",
+              "summary": "Both figures' handles, which one counter store satisfies."
+            },
+            {
+              "name": "readReaderActedRate",
+              "kind": "function",
+              "signature": "const readReaderActedRate: (store: ActedRateHandle, request: ActedReadingRequest) => Promise<Result<ActedRateReading, ReaderSignalStoreError>>",
+              "summary": "The figure, the chart, the denominator and the trend, from two reads of one store over one range."
+            }
+          ]
+        },
         {
           "module": "signals/action",
           "title": "Action",
@@ -9630,6 +9763,24 @@
               "summary": "The hours of a range, as the counter answers for them."
             },
             {
+              "name": "HourlyBucket",
+              "kind": "type",
+              "signature": "type HourlyBucket = {\n    readonly hour: number;\n    readonly count: number;\n    readonly whole: boolean;\n};",
+              "summary": "One bucket of a dense hourly series, before a reading names what it counted."
+            },
+            {
+              "name": "HourlyFill",
+              "kind": "type",
+              "signature": "type HourlyFill = {\n    readonly hours: readonly HourlyBucket[];\n    readonly total: number;\n    readonly clipped: boolean;\n};",
+              "summary": "A dense series and what it adds up to, which is what a reading dresses."
+            },
+            {
+              "name": "hourlySeriesOf",
+              "kind": "function",
+              "signature": "const hourlySeriesOf: <Row extends {\n    readonly hour: number;\n}>(rows: readonly Row[], begins: number | undefined, range: ArrivalRange, count: (row: Row) => number, options?: ArrivalSeriesOptions) => HourlyFill",
+              "summary": "The rule every hourly series in this subsystem follows, spelled once."
+            },
+            {
               "name": "arrivalRangeBefore",
               "kind": "function",
               "signature": "const arrivalRangeBefore: (range: ArrivalRange) => ArrivalRange",
@@ -9654,6 +9805,12 @@
               "summary": "What a surface asks for: a range, the narrowing, and the clock."
             },
             {
+              "name": "ArrivalCounterHandle",
+              "kind": "type",
+              "signature": "type ArrivalCounterHandle = {\n    readonly arrivals: (request?: {\n        readonly treeId?: TreeId;\n        readonly audience?: AudienceId;\n        readonly revision?: number;\n        readonly from?: number;\n        readonly to?: number;\n    }) => Promise<Result<StoredArrivals, ReaderSignalStoreError>>;\n};",
+              "summary": "The one method of the counter handle a reading of this needs."
+            },
+            {
               "name": "ArrivalReading",
               "kind": "type",
               "signature": "type ArrivalReading = {\n    readonly series: ArrivalSeries;\n    readonly change: ArrivalChange;\n};",
@@ -9662,7 +9819,7 @@
             {
               "name": "readReaderArrivals",
               "kind": "function",
-              "signature": "const readReaderArrivals: (store: {\n    readonly arrivals: (request?: {\n        readonly treeId?: TreeId;\n        readonly audience?: AudienceId;\n        readonly revision?: number;\n        readonly from?: number;\n        readonly to?: number;\n    }) => Promise<Result<StoredArrivals, ReaderSignalStoreError>>;\n}, request: ArrivalReadingRequest) => Promise<Result<ArrivalReading, ReaderSignalStoreError>>",
+              "signature": "const readReaderArrivals: (store: ArrivalCounterHandle, request: ArrivalReadingRequest) => Promise<Result<ArrivalReading, ReaderSignalStoreError>>",
               "summary": "The chart, the range's figure and the change on the period before it, in one call against a counter handle."
             }
           ]
@@ -10105,7 +10262,7 @@
             {
               "name": "CollectionSummary",
               "kind": "type",
-              "signature": "type CollectionSummary = {\n    readonly counted: number;\n    readonly tallies: number;\n    readonly funnels: number;\n    /** Distinct page views the window held. */\n    readonly views: number;\n    /**\n     * Batches that carried no view key, whose occurrences counted and whose views\n     * did not. A rate shown without saying which denominator it used is the\n     * failure mode here, so the number travels with the run that produced it.\n     */\n    readonly uncorrelated: number;\n    /**\n     * Of the batches counted, how many were a repeat of one already folded in\n     * this window and were therefore folded once (`rollup.ts`).\n     *\n     * A subset of `counted` rather than a number beside it: every one of them was\n     * read from the buffer and is forgotten with the rest. Non-zero every run is\n     * a sender retrying deliveries it already made, which is worth finding — and\n     * the figure is in the run's outcome rather than in a stored row because a\n     * fold's own numbers are not durable, only the counters it produced are.\n     */\n    readonly redelivered: number;\n    /**\n     * How old the oldest **uncounted** delivery the scan found was, in\n     * milliseconds, at the instant this run was taken.\n     *\n     * A fact about the buffer and about no reader, like every other figure here.\n     * It is free: a scan runs from the oldest uncounted end, so the first batch\n     * it read is the oldest one waiting, and this is one subtraction over it.\n     *\n     * **The run does the subtraction rather than the caller**, because the\n     * caller's clock is not this run's: a surface that read the age against its\n     * own `now` would publish a number nothing had measured.\n     *\n     * **It is the fold's lag, not the kept window**. It was both while a\n     * counted delivery was deleted in the same breath, which is why\n     * `retentionPromiseOf` used to be handed this outcome; the ceiling readers\n     * are promised is now about deletion, so that reading is handed the expiry\n     * run's own figure and this one answers the question it still owns — how far\n     * behind collection is.\n     *\n     * Never absent and always at least the ripeness window: a summary exists only\n     * where something was ripe.\n     */\n    readonly oldestMs: number;\n};",
+              "signature": "type CollectionSummary = {\n    readonly counted: number;\n    readonly tallies: number;\n    readonly funnels: number;\n    /**\n     * Hourly rows this run wrote for what readers did (`acted.ts`).\n     *\n     * A slice of the tallies rather than a figure beside them: a window in which\n     * nobody pressed, opened or sent anything writes none, however many tallies\n     * it wrote, because the counter holds what readers *did* and a page being on\n     * screen is not one of those.\n     */\n    readonly acted: number;\n    /** Distinct page views the window held. */\n    readonly views: number;\n    /**\n     * Batches that carried no view key, whose occurrences counted and whose views\n     * did not. A rate shown without saying which denominator it used is the\n     * failure mode here, so the number travels with the run that produced it.\n     */\n    readonly uncorrelated: number;\n    /**\n     * Of the batches counted, how many were a repeat of one already folded in\n     * this window and were therefore folded once (`rollup.ts`).\n     *\n     * A subset of `counted` rather than a number beside it: every one of them was\n     * read from the buffer and is forgotten with the rest. Non-zero every run is\n     * a sender retrying deliveries it already made, which is worth finding — and\n     * the figure is in the run's outcome rather than in a stored row because a\n     * fold's own numbers are not durable, only the counters it produced are.\n     */\n    readonly redelivered: number;\n    /**\n     * How old the oldest **uncounted** delivery the scan found was, in\n     * milliseconds, at the instant this run was taken.\n     *\n     * A fact about the buffer and about no reader, like every other figure here.\n     * It is free: a scan runs from the oldest uncounted end, so the first batch\n     * it read is the oldest one waiting, and this is one subtraction over it.\n     *\n     * **The run does the subtraction rather than the caller**, because the\n     * caller's clock is not this run's: a surface that read the age against its\n     * own `now` would publish a number nothing had measured.\n     *\n     * **It is the fold's lag, not the kept window**. It was both while a\n     * counted delivery was deleted in the same breath, which is why\n     * `retentionPromiseOf` used to be handed this outcome; the ceiling readers\n     * are promised is now about deletion, so that reading is handed the expiry\n     * run's own figure and this one answers the question it still owns — how far\n     * behind collection is.\n     *\n     * Never absent and always at least the ripeness window: a summary exists only\n     * where something was ripe.\n     */\n    readonly oldestMs: number;\n};",
               "summary": "The half of the outcome a caller shows or logs, with nothing in it about a reader."
             },
             {
@@ -12865,7 +13022,7 @@
             {
               "name": "Rollup",
               "kind": "type",
-              "signature": "type Rollup = {\n    readonly tallies: readonly ReaderTally[];\n    readonly funnels: readonly FunnelAnswer[];\n    /** Distinct page views seen, across every tree and revision in the input. */\n    readonly views: number;\n    /**\n     * The same page views, per tree and revision — one appearance each, in this\n     * window.\n     *\n     * Held apart from `views` because it is the number the durable page-view\n     * counter keeps, and it is only worth keeping beside the exact count of page\n     * views that *began*: the difference between the two is the straddle that\n     * makes a distinct count added across windows generous, measured rather than\n     * bounded. A revision whose batches carried no view key is absent\n     * rather than nought — there is nothing to compare, and a zero row would read\n     * as *no readers* rather than as *nobody minted a key*.\n     */\n    readonly appearances: readonly RevisionViews[];\n    /**\n     * Batches that carried no view key.\n     *\n     * Their occurrences are counted like any other; their views are not, because\n     * there is no honest number to add. Treating each uncorrelated batch as its\n     * own view would inflate every denominator by however often a page happened\n     * to flush, which is a number about the network rather than about readers.\n     * Reported so a portal can say the rate is computed over fewer views than the\n     * totals, instead of showing a rate that is quietly wrong.\n     */\n    readonly uncorrelated: number;\n    /**\n     * Batches this fold refused as a repeat of one it had already folded.\n     *\n     * A sender may deliver the same batch twice — a host's retry queue draining\n     * after an outage is the case `MAX_BATCHES_PER_DELIVERY` exists to allow, and\n     * an edge network replaying a `POST` is the case nobody writes. What that\n     * costs is **asymmetric and therefore invisible**: `views`, `reached`,\n     * `engaged` and `appearances` are sets of view keys, so a repeat adds the key\n     * it already holds and moves nothing, while `dwellMs`, `activations`, `opens`,\n     * `closes` and `completions` are occurrences and double. Every rate this\n     * subsystem publishes divides the second kind by the first, so a repeat does\n     * not look like noise — it looks like a reader who was twice as interested,\n     * and the cost of it is permanent.\n     *\n     * So a batch identical to one already folded in this window is folded once and\n     * counted here. **Only where it carries a view key**: without one, two\n     * identical batches are as likely to be two readers in the same millisecond as\n     * one batch arriving twice, and dropping a reader to avoid a repeat is the\n     * worse of the two mistakes.\n     *\n     * Reported rather than silent, because the number is a fact about a\n     * deployment's senders and not about its readers: a window with repeats in it\n     * every run is a retry loop somebody should find.\n     */\n    readonly redelivered: number;\n};",
+              "signature": "type Rollup = {\n    readonly tallies: readonly ReaderTally[];\n    readonly funnels: readonly FunnelAnswer[];\n    /** Distinct page views seen, across every tree and revision in the input. */\n    readonly views: number;\n    /**\n     * The same page views, per tree and revision — one appearance each, in this\n     * window.\n     *\n     * Held apart from `views` because it is the number the durable page-view\n     * counter keeps, and it is only worth keeping beside the exact count of page\n     * views that *began*: the difference between the two is the straddle that\n     * makes a distinct count added across windows generous, measured rather than\n     * bounded. A revision whose batches carried no view key is absent\n     * rather than nought — there is nothing to compare, and a zero row would read\n     * as *no readers* rather than as *nobody minted a key*.\n     */\n    readonly appearances: readonly RevisionViews[];\n    /**\n     * Batches that carried no view key.\n     *\n     * Their occurrences are counted like any other; their views are not, because\n     * there is no honest number to add. Treating each uncorrelated batch as its\n     * own view would inflate every denominator by however often a page happened\n     * to flush, which is a number about the network rather than about readers.\n     * Reported so a portal can say the rate is computed over fewer views than the\n     * totals, instead of showing a rate that is quietly wrong.\n     */\n    readonly uncorrelated: number;\n    /**\n     * Batches this fold refused as a repeat of one it had already folded.\n     *\n     * A sender may deliver the same batch twice — a host's retry queue draining\n     * after an outage is the case `MAX_BATCHES_PER_DELIVERY` exists to allow, and\n     * an edge network replaying a `POST` is the case nobody writes. What that\n     * costs is **asymmetric and therefore invisible**: `views`, `reached`,\n     * `engaged` and `appearances` are sets of view keys, so a repeat adds the key\n     * it already holds and moves nothing, while `dwellMs`, `activations`, `opens`,\n     * `closes` and `completions` are occurrences and double. Every rate this\n     * subsystem publishes divides the second kind by the first, so a repeat does\n     * not look like noise — it looks like a reader who was twice as interested,\n     * and the cost of it is permanent.\n     *\n     * So a batch identical to one already folded in this window is folded once and\n     * counted here. **Only where it carries a view key**: without one, two\n     * identical batches are as likely to be two readers in the same millisecond as\n     * one batch arriving twice, and dropping a reader to avoid a repeat is the\n     * worse of the two mistakes.\n     *\n     * Reported rather than silent, because the number is a fact about a\n     * deployment's senders and not about its readers: a window with repeats in it\n     * every run is a retry loop somebody should find.\n     */\n    readonly redelivered: number;\n    /**\n     * The same occurrences as the tallies' three delegated kinds, filed under the\n     * hour the door received them in (`acted.ts`).\n     *\n     * **A slice of the tallies rather than a second measurement**, and it comes\n     * out of this one pass for that reason: the repeat refusal above is a\n     * judgement made once per batch, and a second walk grouping by hour would\n     * make it twice against a different grouping — so an hour's rows would stop\n     * summing to the tally they slice, permanently and invisibly.\n     * `rollup.test.ts` asserts the sum.\n     *\n     * Empty where no batch carried a receive instant, which is every caller that\n     * composes batches by hand; {@link Rollup.undated} says how many.\n     */\n    readonly acted: readonly ActedHourCount[];\n    /**\n     * Batches that carried no instant the door received them at, so their\n     * occurrences are in the tallies and in no hour.\n     *\n     * The same shape of report as {@link Rollup.uncorrelated} and for the same\n     * reason: one counter cannot be written honestly and the number is a fact\n     * about the input rather than about readers. A window read from either\n     * journal always carries one — both stamp it on the way in — so this is\n     * non-nought only for batches somebody composed, and a run that reports some\n     * is a run whose hourly rows are short by that many batches' worth.\n     */\n    readonly undated: number;\n};",
               "summary": ""
             },
             {
@@ -12881,10 +13038,16 @@
               "summary": ""
             },
             {
+              "name": "DatedBatch",
+              "kind": "type",
+              "signature": "type DatedBatch = ReaderSignalBatch & {\n    readonly receivedAt?: string;\n};",
+              "summary": "A batch as a buffer holds it: with the instant **the door** received it."
+            },
+            {
               "name": "rollUp",
               "kind": "function",
-              "signature": "const rollUp: (batches: readonly ReaderSignalBatch[], options?: RollupOptions) => Rollup",
-              "summary": "Fold a window of stored batches into the counters that outlive them."
+              "signature": "const rollUp: (batches: readonly DatedBatch[], options?: RollupOptions) => Rollup",
+              "summary": ""
             }
           ]
         },
@@ -13265,7 +13428,7 @@
             {
               "name": "AppliedCounters",
               "kind": "type",
-              "signature": "type AppliedCounters = {\n    readonly tallies: readonly ReaderTally[];\n    readonly funnels: readonly FunnelAnswer[];\n    /**\n     * The window's page views, per revision, for the counter the exact count\n     * is compared against.\n     *\n     * Optional, and absent is not none: a caller applying counters it\n     * composed itself — a backfill, a fixture, a test — has no window to\n     * report, and a nought written there would read as *no page views* and\n     * make a reading claim the node counters were exact.\n     */\n    readonly appearances?: readonly RevisionViews[];\n};",
+              "signature": "type AppliedCounters = {\n    readonly tallies: readonly ReaderTally[];\n    readonly funnels: readonly FunnelAnswer[];\n    /**\n     * The window's page views, per revision, for the counter the exact count\n     * is compared against.\n     *\n     * Optional, and absent is not none: a caller applying counters it\n     * composed itself — a backfill, a fixture, a test — has no window to\n     * report, and a nought written there would read as *no page views* and\n     * make a reading claim the node counters were exact.\n     */\n    readonly appearances?: readonly RevisionViews[];\n    /**\n     * The same window's occurrences of the three delegated kinds, filed under the\n     * hour the door received them in (`acted.ts`).\n     *\n     * Optional on the same terms as `appearances`, and absent is not none: a\n     * caller composing counters by hand has no receive instants to file them\n     * under, and rows of noughts would claim that readers did nothing in an hour\n     * nothing was measured in.\n     *\n     * **Written in the same transaction as the tallies it slices**, because the\n     * two numbers a reading divides have to describe the same window — and\n     * because the hours of a part are expected to sum to the part's own counters\n     * for every window folded since the table existed.\n     */\n    readonly acted?: readonly ActedHourCount[];\n};",
               "summary": "One fold's output, as a caller hands it over."
             },
             {
@@ -13277,7 +13440,7 @@
             {
               "name": "ReaderTallyStore",
               "kind": "interface",
-              "signature": "interface ReaderTallyStore extends ReaderOpeningCounter {\n    /**\n     * Add a whole window's counters to what is already there, every audience in\n     * it, in one atomic write — creating rows that do not exist yet.\n     *\n     * **This is the method a collection run calls, and the atomicity is the\n     * reason it exists rather than a property it happens to have.**\n     *\n     * A window holds whatever arrived in it, so a deployment serving two forms of\n     * a page holds two audiences interleaved and is folded once per audience\n     *. Writing those folds as separate calls leaves a state between them\n     * where some are durable and the rest are not — and because counting and\n     * forgetting are one operation (`collect.ts`), the buffer still holds the\n     * window, so the next run folds it again and **adds the already-durable\n     * audiences a second time.** Of a tally's nine counters, `views`, `reached`\n     * and `engaged` are distinct counts and would move little; `dwellMs`,\n     * `activations`, `opens`, `closes` and `completions` are occurrences and\n     * would double, which every rate in this subsystem divides by the first kind\n     * — so the damage is invisible, permanent and looks like a readership\n     * twice as interested as it was.\n     *\n     * So the window is one write or it is none. A store that cannot be atomic\n     * over several audiences cannot be correct here, which is why this is a\n     * required method rather than a capability a caller probes for.\n     *\n     * Two entries naming one audience are added together, not refused: the\n     * guarantee is the same one `counters.ts` gives for two rows naming one\n     * counter, and it is here so that the two shipped stores cannot disagree\n     * about it.\n     */\n    readonly applyWindow: (window: readonly AudienceCounters[], at: string) => Promise<Result<void, ReaderSignalStoreError>>;\n    /**\n     * One audience's counters, which is {@link applyWindow} over a single entry\n     * and is implemented as exactly that in both shipped stores — so the two\n     * cannot drift on the half that matters.\n     *\n     * Kept because a caller composing counters by hand — a backfill, a fixture, a\n     * migration — has one audience and no window, and should not have to wrap it\n     * in a list to say so.\n     */\n    readonly apply: (counters: AppliedCounters, at: string,\n    /**\n     * The audience whose counters these are. Omitted is `aud_everyone`.\n     */\n    audience?: AudienceId) => Promise<Result<void, ReaderSignalStoreError>>;\n    readonly tallies: (request?: TallyReadRequest) => Promise<Result<readonly StoredTally[], ReaderSignalStoreError>>;\n    readonly funnels: (request?: TallyReadRequest) => Promise<Result<readonly StoredFunnel[], ReaderSignalStoreError>>;\n    /**\n     * How many page views there were, which is the denominator every rate on a\n     * screen needs and the only row here written from two sides.\n     */\n    readonly pageViews: (request?: TallyReadRequest) => Promise<Result<readonly StoredPageViews[], ReaderSignalStoreError>>;\n    /**\n     * The same page views, by the hour they began in, over a range (`arrivals.ts`).\n     *\n     * The one read here that takes a stretch of time, because it is the one\n     * counter that has one. It answers two things in a call — the hours in the\n     * range, and the first hour this scope ever counted — so that a surface\n     * drawing a chart over a range the deployment is younger than can say so\n     * instead of drawing it empty.\n     */\n    readonly arrivals: (request?: ArrivalReadRequest) => Promise<Result<StoredArrivals, ReaderSignalStoreError>>;\n}",
+              "signature": "interface ReaderTallyStore extends ReaderOpeningCounter {\n    /**\n     * Add a whole window's counters to what is already there, every audience in\n     * it, in one atomic write — creating rows that do not exist yet.\n     *\n     * **This is the method a collection run calls, and the atomicity is the\n     * reason it exists rather than a property it happens to have.**\n     *\n     * A window holds whatever arrived in it, so a deployment serving two forms of\n     * a page holds two audiences interleaved and is folded once per audience\n     *. Writing those folds as separate calls leaves a state between them\n     * where some are durable and the rest are not — and because counting and\n     * forgetting are one operation (`collect.ts`), the buffer still holds the\n     * window, so the next run folds it again and **adds the already-durable\n     * audiences a second time.** Of a tally's nine counters, `views`, `reached`\n     * and `engaged` are distinct counts and would move little; `dwellMs`,\n     * `activations`, `opens`, `closes` and `completions` are occurrences and\n     * would double, which every rate in this subsystem divides by the first kind\n     * — so the damage is invisible, permanent and looks like a readership\n     * twice as interested as it was.\n     *\n     * So the window is one write or it is none. A store that cannot be atomic\n     * over several audiences cannot be correct here, which is why this is a\n     * required method rather than a capability a caller probes for.\n     *\n     * Two entries naming one audience are added together, not refused: the\n     * guarantee is the same one `counters.ts` gives for two rows naming one\n     * counter, and it is here so that the two shipped stores cannot disagree\n     * about it.\n     */\n    readonly applyWindow: (window: readonly AudienceCounters[], at: string) => Promise<Result<void, ReaderSignalStoreError>>;\n    /**\n     * One audience's counters, which is {@link applyWindow} over a single entry\n     * and is implemented as exactly that in both shipped stores — so the two\n     * cannot drift on the half that matters.\n     *\n     * Kept because a caller composing counters by hand — a backfill, a fixture, a\n     * migration — has one audience and no window, and should not have to wrap it\n     * in a list to say so.\n     */\n    readonly apply: (counters: AppliedCounters, at: string,\n    /**\n     * The audience whose counters these are. Omitted is `aud_everyone`.\n     */\n    audience?: AudienceId) => Promise<Result<void, ReaderSignalStoreError>>;\n    readonly tallies: (request?: TallyReadRequest) => Promise<Result<readonly StoredTally[], ReaderSignalStoreError>>;\n    readonly funnels: (request?: TallyReadRequest) => Promise<Result<readonly StoredFunnel[], ReaderSignalStoreError>>;\n    /**\n     * How many page views there were, which is the denominator every rate on a\n     * screen needs and the only row here written from two sides.\n     */\n    readonly pageViews: (request?: TallyReadRequest) => Promise<Result<readonly StoredPageViews[], ReaderSignalStoreError>>;\n    /**\n     * The same page views, by the hour they began in, over a range (`arrivals.ts`).\n     *\n     * The one read here that takes a stretch of time, because it is the one\n     * counter that has one. It answers two things in a call — the hours in the\n     * range, and the first hour this scope ever counted — so that a surface\n     * drawing a chart over a range the deployment is younger than can say so\n     * instead of drawing it empty.\n     */\n    readonly arrivals: (request?: ArrivalReadRequest) => Promise<Result<StoredArrivals, ReaderSignalStoreError>>;\n    /**\n     * What readers did, per part, by the hour they did it in, over a range\n     * (`acted.ts`).\n     *\n     * The second read here that takes a stretch of time, and the second that\n     * answers two things in a call — the rows in the range, and the first hour\n     * this scope ever counted — so a goal's figure over thirty days on a\n     * deployment that has counted for a week says so instead of drawing a fall.\n     */\n    readonly acted: (request?: ActedReadRequest) => Promise<Result<StoredActed, ReaderSignalStoreError>>;\n}",
               "summary": ""
             },
             {
@@ -13285,6 +13448,12 @@
               "kind": "type",
               "signature": "type ArrivalReadRequest = TallyReadRequest & {\n    /** Inclusive. Absent reads from the first hour the scope has. */\n    readonly from?: number;\n    /** Exclusive. Absent reads to the last hour the scope has. */\n    readonly to?: number;\n};",
               "summary": "A counter read, narrowed to a stretch of time."
+            },
+            {
+              "name": "ActedReadRequest",
+              "kind": "type",
+              "signature": "type ActedReadRequest = ArrivalReadRequest & {\n    readonly nodeId?: NodeId;\n};",
+              "summary": "The same read, narrowed to one part as well."
             }
           ]
         },
@@ -13609,7 +13778,7 @@
       "files": 10,
       "narrower": [],
       "standing": {
-        "packageNames": 1959,
+        "packageNames": 1986,
         "otherDoors": 18,
         "doorsSharingNothing": 17,
         "widest": false,
@@ -13744,7 +13913,7 @@
       "files": 21,
       "narrower": [],
       "standing": {
-        "packageNames": 1959,
+        "packageNames": 1986,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -13755,13 +13924,13 @@
         {
           "module": "signals/migrate",
           "title": "Migrate",
-          "summary": "Creating the six reader-signal tables, with row level security switched on.",
+          "summary": "Creating the seven reader-signal tables, with row level security switched on.",
           "symbols": [
             {
               "name": "READER_SIGNALS_DDL",
               "kind": "value",
               "signature": "const READER_SIGNALS_DDL: readonly string[]",
-              "summary": "The six tables, as statements a host can run."
+              "summary": "The seven tables, as statements a host can run."
             },
             {
               "name": "ensureReaderSignalsSchema",
@@ -13806,7 +13975,7 @@
       "files": 65,
       "narrower": [],
       "standing": {
-        "packageNames": 1959,
+        "packageNames": 1986,
         "otherDoors": 18,
         "doorsSharingNothing": 17,
         "widest": false,
@@ -14380,7 +14549,7 @@
       "files": 43,
       "narrower": [],
       "standing": {
-        "packageNames": 1959,
+        "packageNames": 1986,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -14450,7 +14619,7 @@
       "files": 100,
       "narrower": [],
       "standing": {
-        "packageNames": 1959,
+        "packageNames": 1986,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -14872,7 +15041,7 @@
       "files": 79,
       "narrower": [],
       "standing": {
-        "packageNames": 1959,
+        "packageNames": 1986,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
