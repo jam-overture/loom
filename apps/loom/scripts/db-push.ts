@@ -27,6 +27,7 @@ import { ensureSignInAttemptsSchema } from "../app/(portal)/_lib/auth/attempts-p
 import { ensureIngestKeysSchema } from "../app/_lib/reader-signals/keys-postgres"
 import { ensurePublishKeysSchema } from "../app/_lib/pages/publish-keys-postgres"
 import { ensurePublishedPagesSchema } from "../app/_lib/pages/published-postgres"
+import { ensureSitePullsSchema } from "../app/_lib/pages/pulls-postgres"
 import { ensureModelKeysSchema } from "../app/_lib/models/model-keys-postgres"
 import { ensureReaderRefusalsSchema } from "../app/_lib/reader-signals/refusals-postgres"
 import { ensurePageCopiesSchema } from "../app/(portal)/_lib/proposing/copies-postgres"
@@ -181,6 +182,13 @@ try {
    */
   await ensureProposalGoalsSchema(db)
   /**
+   * When each project's site took its live pages from the read door (0358).
+   * A deployment that has not run this still answers every pull; it keeps no
+   * record of them, and *Connect your site* says it cannot tell whether the
+   * site pulls.
+   */
+  await ensureSitePullsSchema(db)
+  /**
    * Last, because it is the only data statement here and every column it writes
    * to has to exist first. It carries rows written before 12 October from
    * `prj_default` to `app_default`, and is a no-op on a database that has
@@ -210,7 +218,7 @@ try {
       "loom_applications, loom_reader_signals, loom_reader_tallies, loom_reader_funnels, " +
       "loom_signin_attempts, loom_portal_accounts, loom_portal_memberships, loom_ingest_keys, " +
       "loom_reader_refusals, loom_publish_keys, loom_published_pages, loom_model_keys, " +
-      "loom_page_copies, loom_turned_down, loom_goals and loom_proposal_goals " +
+      "loom_page_copies, loom_turned_down, loom_goals, loom_proposal_goals and loom_site_pulls " +
       "are present, and this deployment's pages are in them"
   )
 } finally {
