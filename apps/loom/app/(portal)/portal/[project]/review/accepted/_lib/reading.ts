@@ -10,6 +10,7 @@ import {
   type Reach,
 } from "@/app/(portal)/_lib/going-live"
 import { namesInTree, type PartName } from "@/app/(portal)/_lib/part-name"
+import type { PageCopy } from "@/app/(portal)/_lib/proposing/copies"
 import { madeFromFor, pageCopiesFor } from "@/app/(portal)/_lib/proposing/stores"
 import { pageNamesOf } from "@/app/(portal)/_lib/published-view"
 import { pullingOf } from "@/app/(portal)/_lib/pulling"
@@ -29,9 +30,12 @@ export type AcceptedReading =
   | { readonly kind: "no-site" }
   | {
       readonly kind: "read"
+      readonly application: ApplicationId
       readonly projectName: string
       readonly changes: readonly AcceptedChange[]
       readonly reach: Reach
+      /** When each page's copies started after its first, which is when the site's newer versions were followed. */
+      readonly copyStarts: ReadonlyMap<TreeId, readonly number[]>
       /** What each change was made from and the goal it served, or that it could not be read. */
       readonly origins: Origins
       /** Each published page's name, by its id, where the site gave it one. */
@@ -63,6 +67,13 @@ const originsOf = async (
 
   return goals.ok ? { kind: "read", made: made.value, goals: goals.value } : { kind: "unreadable" }
 }
+
+const copyStartsOf = (copies: readonly PageCopy[]): ReadonlyMap<TreeId, readonly number[]> =>
+  copies.reduce(
+    (starts, copy) =>
+      new Map(starts).set(copy.pageId, [...(starts.get(copy.pageId) ?? []), copy.startedAt]),
+    new Map<TreeId, readonly number[]>()
+  )
 
 export const readAccepted = async (projectId: ProjectId, now: number): Promise<AcceptedReading> => {
   const [project, applications] = await Promise.all([
@@ -110,9 +121,11 @@ export const readAccepted = async (projectId: ProjectId, now: number): Promise<A
 
   return {
     kind: "read",
+    application,
     projectName: project.value.name,
     changes: changes.value,
     reach: reachOf(pulling, taken),
+    copyStarts: copyStartsOf(copies.value),
     origins,
     pages: pageNamesOf(published.value),
     parts: new Map(published.value.map((page) => [page.tree.treeId, namesInTree(page.tree)])),

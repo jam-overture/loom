@@ -2,6 +2,18 @@ import type { IntentId, ProposalId, StakeLevel, TreeId } from "@jam-overture/loo
 import type { StoredRevision } from "@jam-overture/loom/store"
 
 import type { ProposalGoal } from "./goals/serving"
+import {
+  isShort,
+  MEASURING_DAYS,
+  sideSentence,
+  soFarSentence,
+  testLines,
+  VERDICT_LABELS,
+  verdictOf,
+  verdictSentence,
+  type Bounds,
+  type Measurement,
+} from "./measuring"
 import { firstNamed, namesInOperations, type PartName } from "./part-name"
 import type { PageCopy } from "./proposing/copies"
 import type { MadeFrom } from "./proposing/made-from"
@@ -168,17 +180,43 @@ const arrivalOf = (change: AcceptedChange, reach: Reach): Arrival => {
   }
 }
 
+/** When a change went live, or `undefined` while no reader has been given it. */
+export const liveAtOf = (change: AcceptedChange, reach: Reach): number | undefined => {
+  const arrival = arrivalOf(change, reach)
+
+  return arrival.kind === "live" ? arrival.at : undefined
+}
+
 /**
- * How long each side of a change is measured on its goal: 14 days, the
- * maintainer's choice of 5 November (`docs/portal-wireframes.md`, *Settled by
- * the maintainer on 5 November*), from when the change went live (0358 clause
- * 7).
+ * When the page changed around a change that went live at `liveAt`: another
+ * change on the same page going live, or the site's newer version of it
+ * starting a new copy (`copyStarts`). Each version is measured on its own.
  */
-export const MEASURING_DAYS = 14
+export const boundsOf = (
+  change: AcceptedChange,
+  liveAt: number,
+  others: readonly AcceptedChange[],
+  copyStarts: readonly number[],
+  reach: Reach
+): Bounds => {
+  const changedAt = [
+    ...copyStarts,
+    ...others
+      .filter((other) => other.pageId === change.pageId && other.proposalId !== change.proposalId)
+      .flatMap((other) => {
+        const at = liveAtOf(other, reach)
 
-const DAY_MS = 24 * 60 * 60 * 1000
+        return at === undefined ? [] : [at]
+      }),
+  ]
+  const previous = changedAt.filter((at) => at < liveAt)
+  const next = changedAt.filter((at) => at > liveAt)
 
-export const MEASURING_MS = MEASURING_DAYS * DAY_MS
+  return {
+    ...(previous.length === 0 ? {} : { previous: Math.max(...previous) }),
+    ...(next.length === 0 ? {} : { next: Math.min(...next) }),
+  }
+}
 
 /** Done steps are green, the current one ringed, the rest grey, and an ending red. */
 export type StepState = "done" | "current" | "upcoming" | "ended"
@@ -191,6 +229,8 @@ export type TimelineStep = {
   readonly lines: readonly string[]
   /** The step a person can act on by connecting their site. */
   readonly connect?: true
+  /** How the step's verdict was reached, one click away. */
+  readonly detail?: readonly string[]
 }
 
 const iso = (at: number): string => new Date(at).toISOString()
@@ -274,53 +314,105 @@ const endingStep = (ending: Exclude<Ending, { kind: "standing" }>): TimelineStep
         lines: ["Someone undid it, so the page is back as it was before it."],
       }
 
+const AGAINST = `against the ${MEASURING_DAYS} days before`
+
+const onGoal = (goal: string | null): string => (goal === null ? "its goal" : `its goal, ${goal},`)
+
+const resultStep = (measurement: Extract<Measurement, { kind: "read" }>): TimelineStep => {
+  const verdict = verdictOf(measurement.before, measurement.after)
+  const short = [measurement.before, measurement.after].some((side) => isShort(side.range))
+
+  return {
+    title: `Result: ${VERDICT_LABELS[verdict.kind]}`,
+    state: "done",
+    at: measurement.windows.after.to,
+    lines: [
+      verdictSentence(verdict),
+      sideSentence("Before", measurement.before, measurement.goal),
+      sideSentence("After", measurement.after, measurement.goal),
+      ...(short
+        ? [
+            `A side is shorter than ${MEASURING_DAYS} days where the page changed, or counting began, inside it: each version is measured on its own.`,
+          ]
+        : []),
+    ],
+    detail: testLines(verdict),
+  }
+}
+
 const measuringSteps = (
-  arrival: Arrival,
+  measurement: Measurement,
   now: number,
   goal: string | null
 ): readonly TimelineStep[] => {
-  const before = `against the ${MEASURING_DAYS} days before`
-  const on = goal === null ? "its goal" : `its goal, ${goal},`
-
-  if (arrival.kind !== "live") {
-    return [
-      {
+  switch (measurement.kind) {
+    case "not-live":
+      return [
+        {
+          title: "Measuring",
+          state: "upcoming",
+          lines: [
+            `Once it is live, it is measured on ${onGoal(goal)} over the ${MEASURING_DAYS} days after, ${AGAINST}.`,
+          ],
+        },
+        {
+          title: "Result",
+          state: "upcoming",
+          lines: ["A verdict comes once it has been measured."],
+        },
+      ]
+    case "no-goal":
+      return [
+        {
+          title: "Not measured",
+          state: "upcoming",
+          at: measurement.liveAt,
+          lines: [
+            "Loom has no goal recorded for this change, so there is nothing to measure it on and no verdict to give.",
+          ],
+        },
+      ]
+    case "unreadable":
+    case "read": {
+      const { after } = measurement.windows
+      const over = now >= after.to
+      const measuring: TimelineStep = {
         title: "Measuring",
-        state: "upcoming",
+        state: over ? "done" : "current",
+        at: after.from,
         lines: [
-          `Once it is live, it is measured on ${on} over the ${MEASURING_DAYS} days after, ${before}.`,
+          `It ${over ? "was" : "is"} measured on ${onGoal(goal)} from ${day(after.from)} to ${day(after.to)}, ${AGAINST}.`,
         ],
-      },
-      {
-        title: "Result",
-        state: "upcoming",
-        lines: ["A verdict comes once it has been measured."],
-      },
-    ]
+      }
+
+      if (measurement.kind === "unreadable") {
+        return [
+          measuring,
+          {
+            title: "Result",
+            state: "upcoming",
+            lines: [
+              "Its figures could not be read. Nothing here is a statement about the change; try again in a moment.",
+            ],
+          },
+        ]
+      }
+
+      return over
+        ? [measuring, resultStep(measurement)]
+        : [
+            {
+              ...measuring,
+              lines: [...measuring.lines, soFarSentence(measurement.after, measurement.goal)],
+            },
+            {
+              title: "Result",
+              state: "upcoming",
+              lines: [`A verdict comes once the ${MEASURING_DAYS} days end, on ${day(after.to)}.`],
+            },
+          ]
+    }
   }
-
-  const ends = arrival.at + MEASURING_MS
-  const over = now >= ends
-
-  return [
-    {
-      title: "Measuring",
-      state: over ? "done" : "current",
-      at: arrival.at,
-      lines: [
-        `It ${over ? "was" : "is"} measured on ${on} from ${day(arrival.at)} to ${day(ends)}, ${before}.`,
-      ],
-    },
-    {
-      title: "Result",
-      state: "upcoming",
-      lines: [
-        over
-          ? "Its verdict is not shown here yet."
-          : `A verdict comes once the ${MEASURING_DAYS} days end, on ${day(ends)}.`,
-      ],
-    },
-  ]
 }
 
 /**
@@ -331,13 +423,13 @@ export const timelineOf = (
   change: AcceptedChange,
   reach: Reach,
   now: number,
-  served: Served
+  served: Served,
+  measurement: Measurement
 ): readonly TimelineStep[] => {
-  const arrival = arrivalOf(change, reach)
-  const reached = [acceptedStep(change), liveStep(arrival, reach)]
+  const reached = [acceptedStep(change), liveStep(arrivalOf(change, reach), reach)]
 
   return change.ending.kind === "standing"
-    ? [...reached, ...measuringSteps(arrival, now, goalOf(served))]
+    ? [...reached, ...measuringSteps(measurement, now, goalNameOf(served))]
     : [...reached, endingStep(change.ending)]
 }
 
@@ -370,7 +462,12 @@ export type Origins =
  * not be written, is `not-recorded`: nothing can be said of its goal or stake.
  */
 export type Served =
-  | { readonly kind: "recorded"; readonly goal: string | null; readonly stakes: StakeLevel }
+  | {
+      readonly kind: "recorded"
+      /** The goal as the proposal recorded it, so it is measured on what it was raised for. */
+      readonly goal: ProposalGoal | null
+      readonly stakes: StakeLevel
+    }
   | { readonly kind: "not-recorded" }
   | { readonly kind: "unreadable" }
 
@@ -383,12 +480,14 @@ export const servedOf = (proposalId: ProposalId, origins: Origins): Served => {
 
   return {
     kind: "recorded",
-    goal: origins.goals.get(made.intentId)?.name ?? null,
+    goal: origins.goals.get(made.intentId) ?? null,
     stakes: made.stakes,
   }
 }
 
-const goalOf = (served: Served): string | null => (served.kind === "recorded" ? served.goal : null)
+/** The name of the goal a change served, where one was recorded. */
+export const goalNameOf = (served: Served): string | null =>
+  served.kind === "recorded" ? (served.goal?.name ?? null) : null
 
 /** The stake in the portal's words, for the line under the heading; absent where none was kept. */
 export const stakeWordsOf = (served: Served): string | undefined =>
