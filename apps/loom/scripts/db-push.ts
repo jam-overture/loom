@@ -186,7 +186,9 @@ try {
    * When each project's site took its live pages from the read door (0358).
    * A deployment that has not run this still answers every pull; it keeps no
    * record of them, and *Connect your site* says it cannot tell whether the
-   * site pulls.
+   * site pulls. One pushed before the table's `kept` column still records
+   * every pull, and *Connect your site* says it cannot tell whether the site
+   * keeps the newest pages it is given.
    */
   await ensureSitePullsSchema(db)
   /**
