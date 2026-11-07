@@ -79,6 +79,12 @@ export const entryPoints: readonly EntryPoint[] = [
     audience: "host",
   },
   {
+    specifier: "@jam-overture/loom/live",
+    summary:
+      "Pulling the project's live pages from Loom and holding them in your server, so an accepted change reaches readers without a deploy.",
+    audience: "host",
+  },
+  {
     specifier: "@jam-overture/loom/signals",
     summary: "Reader signals — what a published page reports about how it is read, and the parser a receiver checks them with.",
     audience: "host",

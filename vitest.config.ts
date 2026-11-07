@@ -24,6 +24,12 @@ export default defineConfig({
      * each one meant importing the runtime afresh 246 times, which cost more
      * than the tests did.
      *
+     * **A file that installs a module mock is the exception, and it is not a
+     * function of its arguments.** `vi.mock` is hoisted and replaces a module as
+     * it is evaluated, so a module an earlier file in this worker already loaded
+     * is not replaced. Use `vi.doMock` after `vi.resetModules()` and import
+     * again; `tools/sources/mocks.ts` sweeps for both and explains why.
+     *
      * The Postgres suites keep a worker each, on the threads pool, because they
      * set their own timeout with `vi.setConfig`, and in Vitest 3 that only
      * reaches the first file a worker runs: the second file in a shared worker

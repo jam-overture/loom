@@ -13,13 +13,23 @@ import {
   type ReaderSignalStoreError,
   type ReceivedBatch,
 } from "./journal.js"
-import { arrivalKey, funnelKey, inAudience, pageViewKey, regionKey, tallyKey } from "./counters.js"
+import {
+  actedKey,
+  arrivalKey,
+  funnelKey,
+  inAudience,
+  pageViewKey,
+  regionKey,
+  tallyKey,
+} from "./counters.js"
 import { arrivalHoursOf, type StoredArrivalHour, type StoredArrivals } from "./arrivals.js"
+import type { ActedHourCount, StoredActed, StoredActedHour } from "./acted.js"
 import type { RevisionViews, StoredPageViews } from "./page-views.js"
 import type { ReaderRegionStore, StoredRegionCount } from "./region.js"
 import type { FunnelAnswer, ReaderTally } from "./rollup.js"
 import type { ReaderSignalBatch } from "./signal.js"
 import type {
+  ActedReadRequest,
   ArrivalReadRequest,
   AudienceCounters,
   ReaderTallyStore,
@@ -154,6 +164,7 @@ export const memoryReaderTallyStore = (): ReaderTallyStore => {
   const funnels = new Map<string, StoredFunnel>()
   const pageViews = new Map<string, StoredPageViews>()
   const arrivals = new Map<string, StoredArrivalHour>()
+  const acted = new Map<string, StoredActedHour>()
 
   /**
    * One row written from two sides, so the add is spelled once and told which
@@ -211,6 +222,25 @@ export const memoryReaderTallyStore = (): ReaderTallyStore => {
     })
   }
 
+  /**
+   * One part's hour, added — the hourly slice of the four occurrence counters
+   * above (`acted.ts`).
+   */
+  const addActed = (count: ActedHourCount, at: string, audience: AudienceId): void => {
+    const key = inAudience(audience, actedKey(count))
+    const existing = acted.get(key)
+
+    acted.set(key, {
+      ...count,
+      audienceId: audience,
+      activations: (existing?.activations ?? 0) + count.activations,
+      opens: (existing?.opens ?? 0) + count.opens,
+      closes: (existing?.closes ?? 0) + count.closes,
+      completions: (existing?.completions ?? 0) + count.completions,
+      updatedAt: at,
+    })
+  }
+
   const addFunnel = (answer: FunnelAnswer, at: string, audience: AudienceId): void => {
     const key = inAudience(audience, funnelKey(answer))
     const existing = funnels.get(key)
@@ -241,6 +271,7 @@ export const memoryReaderTallyStore = (): ReaderTallyStore => {
       const audience = counters.audience ?? DEFAULT_AUDIENCE_ID
 
       for (const tally of counters.tallies) addTally(tally, at, audience)
+      for (const count of counters.acted ?? []) addActed(count, at, audience)
       for (const answer of counters.funnels) addFunnel(answer, at, audience)
       addPageViews(counters.appearances ?? [], "appearances", at, audience)
     }
@@ -316,6 +347,34 @@ export const memoryReaderTallyStore = (): ReaderTallyStore => {
       return Promise.resolve(
         ok<StoredArrivals>({ hours, ...(begins === undefined ? {} : { begins }) })
       )
+    },
+
+    /**
+     * The same two answers as `arrivals`, narrowed to a part as well.
+     *
+     * The part narrows **both** halves: the first hour a goal was ever counted
+     * in is the first hour that part was acted in, not the first hour the
+     * deployment counted anything — otherwise a goal made today would report
+     * that it has been measured since the deployment started and draw a flat
+     * nought back to then.
+     */
+    acted: (request?: ActedReadRequest) => {
+      const scoped = [...acted.values()].filter(
+        (row) =>
+          matches(row, request) &&
+          (request?.nodeId === undefined || row.nodeId === request.nodeId)
+      )
+      const hours = scoped.filter(
+        (row) =>
+          (request?.from === undefined || row.hour >= request.from) &&
+          (request?.to === undefined || row.hour < request.to)
+      )
+      const begins = scoped.reduce<number | undefined>(
+        (first, row) => (first === undefined || row.hour < first ? row.hour : first),
+        undefined
+      )
+
+      return Promise.resolve(ok<StoredActed>({ hours, ...(begins === undefined ? {} : { begins }) }))
     },
   }
 }

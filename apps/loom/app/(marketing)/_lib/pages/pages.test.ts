@@ -7,6 +7,7 @@ import { describe, expect, it } from "vitest"
 
 import { BAND } from "../bands"
 import { PALETTE_SWITCHER_LABEL, READ_NEXT_EYEBROW } from "../chrome"
+import { CONNECTED_FILES } from "../connected"
 import { PLACEHOLDER_STRINGS } from "../copy"
 import { DOC_PAGES } from "../docs-pages"
 import { unhonored } from "../frames"
@@ -589,8 +590,13 @@ describe("the panels that print data", () => {
    * **It did it again on 4 November**, naming the report *What your page
    * reports* prints. That one is `reported.ts`', for the same reason, and the
    * list is in the order a reader meets them down the page.
+   *
+   * **And a third time on 7 November**, naming the function *Hook up your
+   * model* prints. `connected.ts` publishes it and is last in the list because
+   * the band is under the report on the page; the pin has now caught every
+   * panel this site has ever grown, on the run that grew it.
    */
-  it("is the install line, the two source panels and the one report, counted rather than assumed", async () => {
+  it("is the install line, three source panels and the one report, counted rather than assumed", async () => {
     const panels = await everyPanel()
     const printed = panels.flatMap((panel) =>
       panel.children.flatMap((child) => (child.kind === "text" ? [child.value] : []))
@@ -600,6 +606,7 @@ describe("the panels that print data", () => {
       "npm install @jam-overture/loom @jam-overture/loom-primitives",
       ...WRITTEN_FILES.map((file) => file.source),
       THE_REPORT,
+      ...CONNECTED_FILES.map((file) => file.source),
     ])
   })
 

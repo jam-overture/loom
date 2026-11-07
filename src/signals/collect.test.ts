@@ -204,6 +204,107 @@ describe("horizonOf", () => {
 })
 
 describe("collectReaderSignals", () => {
+  /**
+   * The hourly slice reaching the counters (`acted.ts`).
+   *
+   * The end-to-end property is the one no unit of either half can assert: the
+   * hour a press is filed under is the instant **the buffer** stamped on the
+   * delivery, so a window that spans an hour boundary writes two rows and not
+   * one — and both go in with the tallies, in the single window write.
+   */
+  describe("what readers did, by hour", () => {
+    const pressedOverTwoHours = async () => {
+      const time = movingClock(-3 * HOUR)
+      const journal = memoryReaderSignalJournal(time.clock)
+      const store = memoryReaderTallyStore()
+
+      await journal.receive([batchOf([activated("buy")], { view: viewKey(1) })])
+      time.moveTo(-2 * HOUR)
+      await journal.receive([batchOf([activated("buy")], { view: viewKey(2) })])
+      time.moveTo(0)
+
+      return { journal, store, time }
+    }
+
+    it("files a window's presses under the hours the door received them in", async () => {
+      const { journal, store, time } = await pressedOverTwoHours()
+
+      const outcome = await collectReaderSignals(journal, store, { clock: time.clock })
+
+      expect(outcome.outcome).toBe("collected")
+      const { hours } = unwrap(await store.acted())
+      expect(hours).toHaveLength(2)
+      expect(hours.map((row) => row.activations)).toEqual([1, 1])
+      expect(new Set(hours.map((row) => row.hour)).size).toBe(2)
+    })
+
+    it("reports how many hourly rows it wrote, and nought where readers only looked", async () => {
+      const { journal, store, time } = await pressedOverTwoHours()
+      const pressed = await collectReaderSignals(journal, store, { clock: time.clock })
+
+      expect(pressed.outcome === "collected" && pressed.summary.acted).toBe(2)
+
+      const quiet = await ripeBuffer()
+      const looked = await collectReaderSignals(quiet.journal, quiet.store, {
+        clock: quiet.time.clock,
+      })
+
+      expect(looked.outcome === "collected" && looked.summary.tallies).toBeGreaterThan(0)
+      expect(looked.outcome === "collected" && looked.summary.acted).toBe(1)
+    })
+
+    it("writes the hours in the same window write as the tallies they slice", async () => {
+      const { journal, store, time } = await pressedOverTwoHours()
+      const watched = watchingWrites(store)
+
+      await collectReaderSignals(journal, watched.store, { clock: time.clock })
+
+      expect(watched.windows()).toHaveLength(1)
+      expect(watched.windows()[0]?.[0]?.acted).toHaveLength(2)
+    })
+
+    it("keeps two audiences' hours apart, because each is folded on its own (0284)", async () => {
+      const time = movingClock(-2 * HOUR)
+      const journal = memoryReaderSignalJournal(time.clock)
+      const store = memoryReaderTallyStore()
+
+      await journal.receive([
+        batchOf([activated("buy")], { view: viewKey(1), audience: SKIERS }),
+        batchOf([activated("buy")], { view: viewKey(2), audience: RIDERS }),
+      ])
+      time.moveTo(0)
+
+      await collectReaderSignals(journal, store, { clock: time.clock })
+
+      expect(unwrap(await store.acted({ audience: SKIERS })).hours).toHaveLength(1)
+      expect(unwrap(await store.acted({ audience: RIDERS })).hours).toHaveLength(1)
+    })
+
+    /**
+     * The sum the chart is drawn against: a part's hours add up to the part's
+     * own tally, over however many runs folded them.
+     */
+    it("leaves a part's hours summing to the part's own counters across two runs", async () => {
+      const time = movingClock(-3 * HOUR)
+      const journal = memoryReaderSignalJournal(time.clock)
+      const store = memoryReaderTallyStore()
+
+      await journal.receive([batchOf([activated("buy")], { view: viewKey(1) })])
+      time.moveTo(-2 * HOUR)
+      await collectReaderSignals(journal, store, { clock: time.clock })
+
+      await journal.receive([batchOf([activated("buy")], { view: viewKey(2) })])
+      time.moveTo(0)
+      await collectReaderSignals(journal, store, { clock: time.clock })
+
+      const { hours } = unwrap(await store.acted({ nodeId: nodeId("buy") }))
+      const [tally] = unwrap(await store.tallies())
+
+      expect(hours.reduce((sum, row) => sum + row.activations, 0)).toBe(2)
+      expect(tally?.activations).toBe(2)
+    })
+  })
+
   const ripeBuffer = async () => {
     const time = movingClock(-2 * HOUR)
     const journal = memoryReaderSignalJournal(time.clock)
@@ -673,6 +774,7 @@ describe("describeCollection", () => {
     counted: 2,
     tallies: 1,
     funnels: 0,
+    acted: 0,
     views: 2,
     uncorrelated: 0,
     redelivered: 0,

@@ -1,7 +1,8 @@
 import type { AudienceId } from "../audience/audience.js"
-import type { TreeId } from "../ids.js"
+import type { NodeId, TreeId } from "../ids.js"
 import type { Result } from "../result.js"
 
+import type { ActedHourCount, StoredActed } from "./acted.js"
 import type { StoredArrivals } from "./arrivals.js"
 import type { ReaderSignalStoreError } from "./journal.js"
 import type { RevisionViews, StoredPageViews } from "./page-views.js"
@@ -156,6 +157,21 @@ export type AppliedCounters = {
    * make a reading claim the node counters were exact.
    */
   readonly appearances?: readonly RevisionViews[]
+  /**
+   * The same window's occurrences of the three delegated kinds, filed under the
+   * hour the door received them in (`acted.ts`).
+   *
+   * Optional on the same terms as `appearances`, and absent is not none: a
+   * caller composing counters by hand has no receive instants to file them
+   * under, and rows of noughts would claim that readers did nothing in an hour
+   * nothing was measured in.
+   *
+   * **Written in the same transaction as the tallies it slices**, because the
+   * two numbers a reading divides have to describe the same window — and
+   * because the hours of a part are expected to sum to the part's own counters
+   * for every window folded since the table existed.
+   */
+  readonly acted?: readonly ActedHourCount[]
 }
 
 /** One audience's share of a window, which is what {@link ReaderTallyStore.applyWindow} takes a list of. */
@@ -240,6 +256,18 @@ export interface ReaderTallyStore extends ReaderOpeningCounter {
   readonly arrivals: (
     request?: ArrivalReadRequest
   ) => Promise<Result<StoredArrivals, ReaderSignalStoreError>>
+  /**
+   * What readers did, per part, by the hour they did it in, over a range
+   * (`acted.ts`).
+   *
+   * The second read here that takes a stretch of time, and the second that
+   * answers two things in a call — the rows in the range, and the first hour
+   * this scope ever counted — so a goal's figure over thirty days on a
+   * deployment that has counted for a week says so instead of drawing a fall.
+   */
+  readonly acted: (
+    request?: ActedReadRequest
+  ) => Promise<Result<StoredActed, ReaderSignalStoreError>>
 }
 
 /**
@@ -256,4 +284,17 @@ export type ArrivalReadRequest = TallyReadRequest & {
   readonly from?: number
   /** Exclusive. Absent reads to the last hour the scope has. */
   readonly to?: number
+}
+
+/**
+ * The same read, narrowed to one part as well.
+ *
+ * A goal is a kind on a part (0350), so the reading that serves one names the
+ * part and the store answers it from an index rather than by reading the rest
+ * of the page. Absent reads every part the narrowing holds, which is *what
+ * readers did on this page* — the bars the wireframe puts in the `By page`
+ * drawer.
+ */
+export type ActedReadRequest = ArrivalReadRequest & {
+  readonly nodeId?: NodeId
 }
