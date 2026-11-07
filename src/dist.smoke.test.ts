@@ -72,6 +72,7 @@ const NAMED_EXPORT: Readonly<Record<string, string>> = {
   "./primitives/compositions": "heroBand",
   "./sdk": "definePrimitive",
   "./cli": "runCli",
+  "./live": "startPullingLivePages",
   "./store": "memoryTreeStore",
   "./write": "commitIntent",
   "./postgres": "postgresTreeStore",

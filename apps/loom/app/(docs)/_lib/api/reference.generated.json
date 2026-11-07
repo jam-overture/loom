@@ -8,9 +8,9 @@
       "files": 100,
       "narrower": [],
       "standing": {
-        "packageNames": 1939,
-        "otherDoors": 17,
-        "doorsSharingNothing": 15,
+        "packageNames": 1959,
+        "otherDoors": 18,
+        "doorsSharingNothing": 16,
         "widest": false,
         "sharedWith": [
           {
@@ -4252,9 +4252,9 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 1939,
-        "otherDoors": 17,
-        "doorsSharingNothing": 17,
+        "packageNames": 1959,
+        "otherDoors": 18,
+        "doorsSharingNothing": 18,
         "widest": false,
         "sharedWith": [],
         "collisions": []
@@ -4296,9 +4296,9 @@
       "files": 63,
       "narrower": [],
       "standing": {
-        "packageNames": 1939,
-        "otherDoors": 17,
-        "doorsSharingNothing": 15,
+        "packageNames": 1959,
+        "otherDoors": 18,
+        "doorsSharingNothing": 16,
         "widest": false,
         "sharedWith": [
           {
@@ -5255,9 +5255,9 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 1939,
-        "otherDoors": 17,
-        "doorsSharingNothing": 16,
+        "packageNames": 1959,
+        "otherDoors": 18,
+        "doorsSharingNothing": 17,
         "widest": false,
         "sharedWith": [
           {
@@ -5330,9 +5330,9 @@
       "files": 220,
       "narrower": [],
       "standing": {
-        "packageNames": 1939,
-        "otherDoors": 17,
-        "doorsSharingNothing": 16,
+        "packageNames": 1959,
+        "otherDoors": 18,
+        "doorsSharingNothing": 17,
         "widest": false,
         "sharedWith": [
           {
@@ -5800,9 +5800,9 @@
       "files": 81,
       "narrower": [],
       "standing": {
-        "packageNames": 1939,
-        "otherDoors": 17,
-        "doorsSharingNothing": 16,
+        "packageNames": 1959,
+        "otherDoors": 18,
+        "doorsSharingNothing": 17,
         "widest": false,
         "sharedWith": [
           {
@@ -6888,9 +6888,9 @@
       "files": 38,
       "narrower": [],
       "standing": {
-        "packageNames": 1939,
-        "otherDoors": 17,
-        "doorsSharingNothing": 16,
+        "packageNames": 1959,
+        "otherDoors": 18,
+        "doorsSharingNothing": 17,
         "widest": false,
         "sharedWith": [
           {
@@ -7465,9 +7465,9 @@
       "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 1939,
-        "otherDoors": 17,
-        "doorsSharingNothing": 17,
+        "packageNames": 1959,
+        "otherDoors": 18,
+        "doorsSharingNothing": 18,
         "widest": false,
         "sharedWith": [],
         "collisions": []
@@ -7668,9 +7668,9 @@
       "files": 42,
       "narrower": [],
       "standing": {
-        "packageNames": 1939,
-        "otherDoors": 17,
-        "doorsSharingNothing": 17,
+        "packageNames": 1959,
+        "otherDoors": 18,
+        "doorsSharingNothing": 18,
         "widest": false,
         "sharedWith": [],
         "collisions": []
@@ -8578,9 +8578,9 @@
       "files": 61,
       "narrower": [],
       "standing": {
-        "packageNames": 1939,
-        "otherDoors": 17,
-        "doorsSharingNothing": 17,
+        "packageNames": 1959,
+        "otherDoors": 18,
+        "doorsSharingNothing": 18,
         "widest": false,
         "sharedWith": [],
         "collisions": []
@@ -8957,9 +8957,9 @@
       "files": 41,
       "narrower": [],
       "standing": {
-        "packageNames": 1939,
-        "otherDoors": 17,
-        "doorsSharingNothing": 17,
+        "packageNames": 1959,
+        "otherDoors": 18,
+        "doorsSharingNothing": 18,
         "widest": false,
         "sharedWith": [],
         "collisions": []
@@ -9168,6 +9168,165 @@
       ]
     },
     {
+      "specifier": "@jam-overture/loom/live",
+      "slug": "live",
+      "types": "./dist/live/index.d.ts",
+      "requires": [],
+      "files": 14,
+      "narrower": [],
+      "standing": {
+        "packageNames": 1959,
+        "otherDoors": 18,
+        "doorsSharingNothing": 18,
+        "widest": false,
+        "sharedWith": [],
+        "collisions": []
+      },
+      "groups": [
+        {
+          "module": "live/pages",
+          "title": "Pages",
+          "summary": "The live pages a customer's server holds, and the one question a render asks of them.",
+          "symbols": [
+            {
+              "name": "LivePages",
+              "kind": "type",
+              "signature": "type LivePages = {\n    /** The live pages, by the id of the page each one is. */\n    readonly pages: ReadonlyMap<TreeId, LoomTree>;\n    /** The entity tag the door gave for exactly these pages, if it gave one. */\n    readonly tag: string | undefined;\n    /** When the door last answered, whether it answered pages or `304`. */\n    readonly pulledAt: number | undefined;\n    /** When these pages arrived, which is older than `pulledAt` after a `304`. */\n    readonly freshAt: number | undefined;\n    /** Failed pulls since the last one the door answered. Zero while current. */\n    readonly failures: number;\n};",
+              "summary": "What a pull leaves behind: the pages, the tag that names them, and enough of the last outcome to say whether the site is current."
+            },
+            {
+              "name": "NO_LIVE_PAGES",
+              "kind": "value",
+              "signature": "const NO_LIVE_PAGES: LivePages",
+              "summary": "A server that has not pulled yet, which is every server at the moment it starts."
+            },
+            {
+              "name": "livePageOf",
+              "kind": "function",
+              "signature": "const livePageOf: (held: LivePages, page: TreeId) => LoomTree | undefined",
+              "summary": "The live page for this page id, or `undefined` to render the page as built."
+            },
+            {
+              "name": "livePagesHeld",
+              "kind": "function",
+              "signature": "const livePagesHeld: (held: LivePages) => readonly LoomTree[]",
+              "summary": "Every live page held, in the order the door answered them."
+            },
+            {
+              "name": "isPulling",
+              "kind": "function",
+              "signature": "const isPulling: (held: LivePages) => boolean",
+              "summary": "Whether the server is drawing on pages the door confirmed, rather than on nothing."
+            }
+          ]
+        },
+        {
+          "module": "live/pull",
+          "title": "Pull",
+          "summary": "One pull of a project's live pages, and what it does to the pages a server already holds.",
+          "symbols": [
+            {
+              "name": "LIVE_PAGES_PATH",
+              "kind": "value",
+              "signature": "const LIVE_PAGES_PATH = \"/api/pages/live\"",
+              "summary": "The one path the client asks for, so no customer's configuration holds it."
+            },
+            {
+              "name": "DEFAULT_PULL_CEILING_MS",
+              "kind": "value",
+              "signature": "const DEFAULT_PULL_CEILING_MS = 10000",
+              "summary": "`10s`. A pull nobody is waiting for, with a ceiling well inside the interval."
+            },
+            {
+              "name": "SitePullFailure",
+              "kind": "type",
+              "signature": "type SitePullFailure = {\n    readonly reason: \"unconfigured\" | \"unreachable\" | \"expired\" | \"refused\" | \"unreadable\";\n    readonly detail: string;\n    readonly status?: number;\n};",
+              "summary": "Why a pull did not move what the server holds."
+            },
+            {
+              "name": "SitePullOutcome",
+              "kind": "type",
+              "signature": "type SitePullOutcome = {\n    readonly kind: \"fresh\";\n    readonly pages: readonly LoomTree[];\n    readonly tag: string | undefined;\n} | {\n    readonly kind: \"unchanged\";\n} | {\n    readonly kind: \"failed\";\n    readonly failure: SitePullFailure;\n};",
+              "summary": "What one pull did: brought pages, confirmed the ones held, or failed."
+            },
+            {
+              "name": "PullFetch",
+              "kind": "type",
+              "signature": "type PullFetch = (url: string, init: {\n    readonly method: \"GET\";\n    readonly headers: Readonly<Record<string, string>>;\n    readonly signal: AbortSignal;\n    readonly cache: \"no-store\";\n}) => Promise<Response>;",
+              "summary": "The shape of `fetch` a pull needs, which is narrower than the global."
+            },
+            {
+              "name": "PullLivePagesOptions",
+              "kind": "type",
+              "signature": "type PullLivePagesOptions = {\n    /**\n     * Where this project's Loom deployment is, as an origin — `https://loom.example.com`.\n     * The path is this module's, so a project's configuration never carries one.\n     */\n    readonly deployment: string;\n    /**\n     * The project's public key, the one its pages already post signals with\n     *. Opaque here: what a key may look like is the door's to say, and a\n     * second spelling of the rule in the client would be a second place to be\n     * wrong.\n     */\n    readonly key: string;\n    /** How long to wait for the door. `DEFAULT_PULL_CEILING_MS` when unset. */\n    readonly ceilingMs?: number;\n    /** `globalThis.fetch` unless a host hands over its own. */\n    readonly fetch?: PullFetch;\n};",
+              "summary": ""
+            },
+            {
+              "name": "livePagesUrlOf",
+              "kind": "function",
+              "signature": "const livePagesUrlOf: (deployment: string) => Result<URL, SitePullFailure>",
+              "summary": "The URL a pull asks for, which by construction carries no query and no fragment."
+            },
+            {
+              "name": "pullLivePages",
+              "kind": "function",
+              "signature": "const pullLivePages: (options: PullLivePagesOptions, held: LivePages) => Promise<SitePullOutcome>",
+              "summary": "Asks the door once, and says what the answer was."
+            },
+            {
+              "name": "withPullOutcome",
+              "kind": "function",
+              "signature": "const withPullOutcome: (held: LivePages, outcome: SitePullOutcome, at: number) => LivePages",
+              "summary": "What the server holds after an outcome: the pure half, and the only place the holding changes."
+            },
+            {
+              "name": "describeSitePullFailure",
+              "kind": "function",
+              "signature": "const describeSitePullFailure: (failure: SitePullFailure) => string",
+              "summary": "One sentence for a log, naming what failed and what it cost."
+            }
+          ]
+        },
+        {
+          "module": "live/pulling",
+          "title": "Pulling",
+          "summary": "The loop that keeps a customer's server current: pull, hold, wait, pull again.",
+          "symbols": [
+            {
+              "name": "DEFAULT_PULL_INTERVAL_MS",
+              "kind": "value",
+              "signature": "const DEFAULT_PULL_INTERVAL_MS = 60000",
+              "summary": "A minute, which is a change live within a minute of somebody accepting it."
+            },
+            {
+              "name": "PullSchedule",
+              "kind": "type",
+              "signature": "type PullSchedule = (run: () => void, afterMs: number) => () => void;",
+              "summary": "How the loop waits, as a function, so a test can drive it without a clock."
+            },
+            {
+              "name": "StartPullingOptions",
+              "kind": "type",
+              "signature": "type StartPullingOptions = PullLivePagesOptions & {\n    /** How long between pulls. `DEFAULT_PULL_INTERVAL_MS` when unset. */\n    readonly intervalMs?: number;\n    /**\n     * Told of every outcome, after what is held has moved.\n     *\n     * This is where a deployment logs a failed pull, and the only way it learns\n     * of one: nothing here writes to a console, because a library that logs on\n     * its host's behalf logs in the wrong format and at the wrong level.\n     */\n    readonly onOutcome?: (outcome: SitePullOutcome, held: LivePages) => void;\n    readonly now?: () => number;\n    readonly schedule?: PullSchedule;\n};",
+              "summary": ""
+            },
+            {
+              "name": "LivePullLoop",
+              "kind": "type",
+              "signature": "type LivePullLoop = {\n    readonly held: () => LivePages;\n    readonly pullNow: () => Promise<SitePullOutcome>;\n    readonly stop: () => void;\n};",
+              "summary": "A running pull: what it holds, a way to pull out of turn, and a way to stop."
+            },
+            {
+              "name": "startPullingLivePages",
+              "kind": "function",
+              "signature": "const startPullingLivePages: (options: StartPullingOptions) => LivePullLoop",
+              "summary": ""
+            }
+          ]
+        }
+      ]
+    },
+    {
       "specifier": "@jam-overture/loom/signals",
       "slug": "signals",
       "types": "./dist/signals/index.d.ts",
@@ -9185,9 +9344,9 @@
         }
       ],
       "standing": {
-        "packageNames": 1939,
-        "otherDoors": 17,
-        "doorsSharingNothing": 15,
+        "packageNames": 1959,
+        "otherDoors": 18,
+        "doorsSharingNothing": 16,
         "widest": true,
         "sharedWith": [
           {
@@ -13450,9 +13609,9 @@
       "files": 10,
       "narrower": [],
       "standing": {
-        "packageNames": 1939,
-        "otherDoors": 17,
-        "doorsSharingNothing": 16,
+        "packageNames": 1959,
+        "otherDoors": 18,
+        "doorsSharingNothing": 17,
         "widest": false,
         "sharedWith": [
           {
@@ -13585,9 +13744,9 @@
       "files": 21,
       "narrower": [],
       "standing": {
-        "packageNames": 1939,
-        "otherDoors": 17,
-        "doorsSharingNothing": 17,
+        "packageNames": 1959,
+        "otherDoors": 18,
+        "doorsSharingNothing": 18,
         "widest": false,
         "sharedWith": [],
         "collisions": []
@@ -13647,9 +13806,9 @@
       "files": 65,
       "narrower": [],
       "standing": {
-        "packageNames": 1939,
-        "otherDoors": 17,
-        "doorsSharingNothing": 16,
+        "packageNames": 1959,
+        "otherDoors": 18,
+        "doorsSharingNothing": 17,
         "widest": false,
         "sharedWith": [
           {
@@ -14221,9 +14380,9 @@
       "files": 43,
       "narrower": [],
       "standing": {
-        "packageNames": 1939,
-        "otherDoors": 17,
-        "doorsSharingNothing": 17,
+        "packageNames": 1959,
+        "otherDoors": 18,
+        "doorsSharingNothing": 18,
         "widest": false,
         "sharedWith": [],
         "collisions": []
@@ -14291,9 +14450,9 @@
       "files": 100,
       "narrower": [],
       "standing": {
-        "packageNames": 1939,
-        "otherDoors": 17,
-        "doorsSharingNothing": 17,
+        "packageNames": 1959,
+        "otherDoors": 18,
+        "doorsSharingNothing": 18,
         "widest": false,
         "sharedWith": [],
         "collisions": []
@@ -14713,9 +14872,9 @@
       "files": 79,
       "narrower": [],
       "standing": {
-        "packageNames": 1939,
-        "otherDoors": 17,
-        "doorsSharingNothing": 17,
+        "packageNames": 1959,
+        "otherDoors": 18,
+        "doorsSharingNothing": 18,
         "widest": false,
         "sharedWith": [],
         "collisions": []
