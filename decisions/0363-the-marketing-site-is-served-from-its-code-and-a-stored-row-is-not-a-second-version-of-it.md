@@ -1,16 +1,16 @@
 # 0363. The marketing site is served from its code, and a stored row is not a second version of it
 
-**Status:** Proposed
+**Status:** Accepted
 **Date:** 2026-11-07
 **Section:** §5 (portal), the marketing surface
 
 > **Why this number.** `0362` is the highest on `main`, and no open pull request
 > adds `0363`.
 >
-> **Why `Proposed`.** It partially supersedes
+> **Accepted on 7 November**, the day it was raised. It partially supersedes
 > [0259](0259-a-surface-the-portal-governs-renders-from-the-store-and-a-page-built-at-render-time-is-not-one.md),
-> which the maintainer accepted, so it is his to accept. The code it describes
-> is on the same pull request and should not merge without him.
+> which the maintainer accepted, so it was his to accept. He answered
+> *"Accept 0363"* on #805.
 
 ## Context
 
