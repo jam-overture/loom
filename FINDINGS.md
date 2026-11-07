@@ -63679,6 +63679,26 @@ being well built.
 
 Whichever is taken, the half that matters is the **phone**. A hover reveal is
 not an affordance for most of the people reading this site.
+
+> **Dated note, 7 November 2026, by the lane that filed it. The blast radius on
+> this one page has doubled and the recommendation is unchanged.**
+>
+> The front door's *Four steps* band now carries an `href` on each of its four
+> steps, for the reason the chain carries five: a band that states four claims
+> about what adopting Loom costs and offers no way to see any of them being true
+> is four dead ends. So this page now has **two** rails of invisible links and
+> **two** sentences of prose standing in for the affordance, eleven words apart
+> in the tree.
+>
+> Photographed rather than argued: `2026-11-07-marketing-four-steps-linked-wide.webp`
+> is the band with every step linked, and it is indistinguishable from the band
+> before this run. That is the finding, taken at 1280 with a mouse, which is the
+> viewport **most** likely to reveal it.
+>
+> It strengthens shape 1 — the lift `loom.card` already defaults to when it is
+> linked — for the reason that entry gives rather than a new one: the breadth is
+> the argument for it. Two of the rails it would change are now on one screen of
+> one page.
 ## 2026-10-30 — a census over a window's silences is one call now, and nothing reminds a caller it exists
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom signals`
@@ -67249,3 +67269,110 @@ goes and the losing module is deleted in one commit by whichever lane owns it.
 read two ways will be read the cheaper way, by a routine with a morning's budget
 and a screen to ship. The fix is not more words in the finding — it is naming
 the module and the signature, which this one does.
+
+---
+## 2026-11-07 — a source panel a phone cuts in half has no rest state saying so, and `wrap: false` is the reason it cannot be fixed in copy
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom primitives`
+(`src/primitives/loom.code.ts`) · **Status:** **open** — nothing is broken, no
+test failed, and the site has shipped a line-length ceiling standing in for the
+affordance
+
+`/why-use-it` prints three source panels now: the two files under *What you
+write* and the one function under *Hook up your model*, which landed today.
+All three say `wrap: false`, and that is correct and argued in two places —
+a wrapped line of TypeScript reads as two statements, and an indented
+continuation reads as a block, so a panel printing **source** is the one case
+the `wrap` prop was written to let a caller refuse.
+
+**Measured on the band that landed today**, production build, with
+`pnpm shoot`'s `measure`:
+
+| viewport | panel | the code inside it | behind the gesture |
+| --- | --- | --- | --- |
+| 1280 | 1078 | 655 | **0** |
+| **390** | **361** | **655** | **294px** |
+
+The document never scrolls sideways — `scrollWidth` is exactly 390 at 390 — so
+this is contained inside the panel and is not a layout bug. What a reader with
+a phone gets is roughly **the first 44 of a 78-character line** and no sign that
+the line continues: `overflow-x: auto` is the containment, and a touch viewport
+draws that scrollbar only while a finger is already moving it
+([0236](decisions/0236-a-viewport-names-a-device-and-the-pointer-is-part-of-it.md)
+is what made the harness honest enough to photograph this).
+
+### Why this is not the finding that was closed on 12 September
+
+That one was *a long line of pretty-printed data is hidden and wrapping it loses
+nothing*, and the remedy was the `wrap` prop. It was the right remedy and this
+lane takes it on the panel that prints JSON. **This is the other half**: a panel
+whose lines genuinely must not wrap, where the content really is wider than the
+viewport and no setting available to a caller changes that.
+
+So there is nothing for the composition to do. What this lane has instead is
+`connected.test.ts`' `CHARACTERS_IN_A_LINE = 80`, which bounds how far the
+overflow goes and is explicitly **not** a promise that nothing scrolls. The
+specimen was cut to it by hand, which is what took `authorization` and
+`content-type` onto their own lines.
+
+### Three shapes, costed, and the recommendation
+
+1. **A fade at the trailing edge while there is more to come.** Cheap, needs no
+   script, and it is what every code block a developer has seen does. **This is
+   the recommendation.**
+2. **A persistent slim track on a coarse pointer**, under
+   `@media (pointer: coarse)`. Honest, and it spends vertical space on every
+   panel including the ones that fit.
+3. **A caption affordance** — the panel says so in words. Rejected before
+   filing: that is the shape this site already uses for the invisible link
+   (30 October), and a library whose answer to every missing rest state is a
+   sentence in the composition is a library three lanes are writing prose
+   around.
+
+It is one surface's panels today. It is `(docs)` and `(lessons)` the moment
+either prints a file.
+
+---
+## 2026-11-07 — the site's word ceiling is no longer the thing blocking a fourth page, and the shape question it was filed about is unchanged
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing`
+(`app/(marketing)/_lib/budget.test.ts`) · **Status:** **open** — this is a
+measurement against the 26 October entry rather than a new finding, and the
+question in that entry is still the maintainer's and still unanswered
+
+The entry of 26 October — *the site's word ceiling was measured against three
+pages, so a fourth page is red before a word of it is written* — has been
+carried on four pull requests. Its premise was true when it was written and
+**it is no longer true**, which is worth recording before another run reads it
+and decides it cannot write a page.
+
+Measured on `main` today, over the authored tree, which is the binding reading:
+
+| | words |
+| --- | --- |
+| `/` | 1,366 |
+| `/why-use-it` | 1,103 |
+| `/what-you-run` | 481 |
+| **the site** | **2,950 of 3,900** |
+
+That is **950 of headroom**, which is more than `/what-you-run` entire. What
+changed is not an edit to the ceiling: it is
+[0328](decisions/0328-the-marketing-site-has-no-demonstration-and-no-mechanism-page.md),
+the maintainer's instruction of 31 October taking `/how-it-works` and the
+demonstration off the site. The run that measured 3,889-of-3,900 was measuring
+a four-page site that is now three pages.
+
+**The ceiling has not moved and must not**, which is the 27 October paragraph
+in `budget.test.ts` being honoured rather than reopened: it has been raised
+twice in two days by this lane, against a shape this lane has twice said is
+wrong, and a third raise is not a thing to reach for. None is needed. It is
+still binding from below — 0.76 of the site ceiling, and `/` is at 0.91 of a
+page's — so nothing here reports as stale.
+
+**What is unchanged is the question**, which is the whole reason that entry
+exists: *is the total number of words on this site a thing he wants capped at
+all*, now that a total with no term for how many pages it is a total of
+re-decides the size of the site every time somebody adds or removes one. Today
+is the second half of that sentence demonstrating itself — a page coming **off**
+moved the ceiling's meaning exactly as much as a page going on did, and no
+reviewer saw either.

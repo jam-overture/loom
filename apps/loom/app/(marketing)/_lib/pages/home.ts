@@ -9,7 +9,7 @@ import {
 } from "@jam-overture/loom"
 import { THEME_PROP_KEY } from "@jam-overture/loom/react"
 
-import { BAND, WHY_USE_IT_ANCHOR } from "../bands"
+import { ALLOWED_ANCHOR, BAND, WHY_USE_IT_ANCHOR } from "../bands"
 import {
   siteFooter,
   siteHeader,
@@ -589,6 +589,22 @@ type UsingItStep = {
   readonly title: string
   readonly body: string
   readonly state: "done" | "current"
+  /**
+   * The band of `/why-use-it` where a reader can watch this step being true.
+   *
+   * **Every step has one as of today**, and the third is why this field
+   * exists. Three of these four steps already had a band and a reader had no
+   * way to find it: the step made a claim about what the step costs and the
+   * evidence sat on another page under a different heading. The third had no
+   * band at all, which is the half of this that was work rather than a link
+   * (`connected.ts`).
+   *
+   * It is the argument `chain.ts` makes about the six links, applied to the
+   * four steps, and `using-it.test.ts` holds it the same way: the press lands
+   * on a band that declares the anchor, read off the markup rather than off the
+   * tree that built it.
+   */
+  readonly shownAt: string
 }
 
 const USING_IT: readonly UsingItStep[] = [
@@ -597,24 +613,28 @@ const USING_IT: readonly UsingItStep[] = [
     title: "Build your components",
     body: "Use whatever framework you already use. Loom does not write code into your page, and it does not ask you to rebuild anything.",
     state: "done",
+    shownAt: WHY_USE_IT_ANCHOR.staysYours,
   },
   {
     marker: "2",
     title: "Register them with Loom",
     body: "Tell Loom which of your components the AI is allowed to use. That is all the setup there is.",
     state: "done",
+    shownAt: WHY_USE_IT_ANCHOR.whatYouWrite,
   },
   {
     marker: "3",
     title: "Hook up your preferred AI model",
     body: "Loom is AI model agnostic. Pick the model you already use, or bring your own. Loom sends it what your users are doing, and it suggests changes from there.",
     state: "done",
+    shownAt: WHY_USE_IT_ANCHOR.connected,
   },
   {
     marker: "4",
     title: "Adapt your page within your rules",
     body: "Define your acceptance policy up front, so an AI model can only make changes you already approved. Anything else gets rejected, and Loom tells you why.",
     state: "current",
+    shownAt: ALLOWED_ANCHOR,
   },
 ]
 
@@ -682,6 +702,26 @@ const usingIt = (ids: IdFactory): LoomNode =>
         "You keep your framework and your components. Loom provides the oversight and governance.",
         { size: "lead", measured: true }
       ),
+      /**
+       * **The same scaffolding sentence the chain band carries, for the same
+       * reason**, and it comes off when the same finding is met.
+       *
+       * A `loom.milestone` with an `href` renders `.loom-underline`, whose rest
+       * state is `background-size: 0% 2px`, so a step that is a link is
+       * pixel-identical to one that is not until a pointer touches it. On a
+       * phone nothing ever does. That is filed for `Loom primitives` and the
+       * composition says in words what the library cannot say in paint.
+       *
+       * **It says *any* where the chain's says *a*, and the difference is
+       * load-bearing.** The chain's last rung has nowhere to go, so a universal
+       * would be a promise that band breaks once. All four of these steps land
+       * somewhere, `using-it.test.ts` holds that they do, and the day one stops
+       * this sentence is the thing that goes red.
+       */
+      prose(ids, "Press any step to see that part of it on this site.", {
+        size: "small",
+        tone: "muted",
+      }),
       buildElement(ids, {
         type: "loom.milestone-row",
         props: { rail: "line", density: "loose" },
@@ -693,6 +733,7 @@ const usingIt = (ids: IdFactory): LoomNode =>
               title: step.title,
               body: step.body,
               state: step.state,
+              href: `${sitePath(WHY_USE_IT.path)}#${step.shownAt}`,
             },
           })
         ),
