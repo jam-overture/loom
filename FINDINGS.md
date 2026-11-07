@@ -312,11 +312,15 @@ the page is those two calls and the `??`.
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom portal`
 (*Connect your site*, and the screen that follows an accepted change) ·
-**Status:** open — **nothing is broken**; it is a sentence the portal cannot
-say yet, and it will be the first question asked when it happens.
-
-**`Loom portal`, 7 November (night): taken, route 1.** Claimed by a portal run
-at 21:25 UTC; this entry closes when that pull request merges.
+**Status:** **closed on *Connect your site*, 7 November (night), route 1.**
+One correction to the route as written: the rows did not hold it, because a
+row is the tag the door *answered*, and a refusing site is answered the newest
+tag on every pull just as a healthy one is. What tells them apart is whether
+the site sent that tag back, so the door now records it (`kept`, `304`), and
+*Connect your site* says *Your site pulls, and is not keeping its newest
+pages* once a site that has named some answer back has been given the newest
+for ten minutes without naming it. The request is unchanged. **Still open on
+the timeline:** its *Live* step reads an answer given as an answer taken.
 
 The client (`@jam-overture/loom/live`, 0361) refuses an answer whole when one
 page in it cannot be parsed by the version of Loom the customer has installed,

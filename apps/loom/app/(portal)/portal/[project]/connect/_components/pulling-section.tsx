@@ -1,19 +1,21 @@
 import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"
-import { pullingWords, type Pulling } from "@/app/(portal)/_lib/pulling"
+import { connectionWords, type Keeping, type Pulling } from "@/app/(portal)/_lib/pulling"
 
 /**
- * Whether the site takes its live pages (0358), in plain words, with the
- * request its server makes one click away. This deployment's own site never
+ * Whether the site takes its live pages (0358), and keeps them, in plain
+ * words, with the request its server makes one click away. This deployment's own site never
  * pulls, so it is shown no request to make.
  */
 export const PullingSection = ({
   pulling,
+  keeping,
   command,
 }: {
   readonly pulling: Pulling
+  readonly keeping: Keeping
   readonly command: string
 }) => {
-  const { title, lines } = pullingWords(pulling)
+  const { title, lines } = connectionWords(pulling, keeping)
 
   return (
     <section className="border-edge-subtle bg-surface-base flex flex-col gap-3 rounded-lg border p-4">
