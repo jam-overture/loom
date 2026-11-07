@@ -30,8 +30,7 @@ import {
 /**
  * What a screen is handed when the database stops answering.
  *
- * `store-hangs.test.ts` next door asks this of the marketing site end to end.
- * This asks it of the handle, because the handle is now where the answer comes
+ * This asks it of the handle, because the handle is where the answer comes
  * from: ten portal screens read through it and not one of them says `within`
  * anywhere, which is the whole point of moving the budget here.
  */

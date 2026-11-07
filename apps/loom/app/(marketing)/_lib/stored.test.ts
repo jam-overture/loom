@@ -2,7 +2,6 @@ import { readdirSync, readFileSync } from "node:fs"
 import { fileURLToPath } from "node:url"
 
 import {
-  err,
   walkTree,
   type DeltaId,
   type ElementNode,
@@ -15,28 +14,20 @@ import {
 } from "@jam-overture/loom"
 import { beforeAll, describe, expect, it, vi } from "vitest"
 
-import { appStore, appStoreForWriting, siteStore } from "@/app/_lib/app/store"
+import { appStore, appStoreForWriting } from "@/app/_lib/app/store"
 
 import { treeFor } from "./builders"
 import { pageTreeFor } from "./render"
 import { HOME, SITE_ROUTES, WHAT_YOU_RUN, WHY_USE_IT } from "./site"
-import { seedSitePages, sitePagesStored, storedIdFor, storedPageFor } from "./stored"
+import { seedSitePages, sitePagesStored, storedIdFor } from "./stored"
 
 /**
- * The claim 0259 condition 1 is made of: **what this site serves comes out of
- * the store.**
+ * The rows this site's pages are stored as, and what they are not.
  *
- * Everything else in this route group's 1,300 tests asserts that the page is
- * still the page — they passed before this change and they pass after it, which
- * is the point of them and the reason not one of them would notice if the store
- * read were deleted tomorrow and the builder served directly again. These are
- * the tests that would.
- *
- * The decisive one is `a change in the store is a change on the page`. Until 12
- * October there was no way to write that test, because there was nothing to
- * write to: the page was a function call. A portal edit, an accepted proposal
- * and an adaptation the Gate allowed all arrive as an append to a stored tree,
- * so one append standing in for all three is the whole mechanism.
+ * Seeding puts each page in the store once and never writes over it: the rows
+ * are what the portal governs and what a proposal is held against (0259
+ * condition 1). Since 7 November they are not what a reader is served (0363);
+ * the last block below holds that.
  */
 
 const CONTEXT = { origin: "", theme: "minimal" } as const
@@ -222,119 +213,50 @@ describe("seeding", () => {
 })
 
 /**
- * What one request costs, counted rather than reasoned about.
+ * What a reader is served, whatever the store holds (0363).
  *
- * Until 13 October a marketing request made **four** store calls: three seeding
- * reads that each answered *already there*, and then the one the page is for.
- * The pool is `max: 1`, so those are four round trips in a row, and on a cold
- * instance they sit behind a TLS connection being opened as well.
- *
- * That is what put `the store did not answer within 1500ms` on `/portal` with
- * a database whose slowest statement is 31ms. A budget cannot fix a queue; the
- * only thing that does is not joining it.
- *
- * So the number is the test. Nothing here asserts *how fast* — that depends on
- * a network this suite does not have — only that a request asks the store for
- * the page it is serving and for nothing else.
+ * Until 7 November the route served the stored row and fell back to the
+ * builder when the store was slow. The row was seeded once and never
+ * overwritten, so the two were different pages, and the front door changed
+ * headline between requests with nothing merged in between. These hold the
+ * fix from both ends: the route does not ask the store, and a row that has
+ * moved away from the code does not reach a reader.
  */
-describe("what one request costs", () => {
-  it("reaches the database once, and writes nothing", async () => {
-    /**
-     * Counted on the **unbounded** handle, which is the one that actually talks
-     * to Postgres — `siteStore` is a wrapper over it, so one page read is one
-     * call here. Four would be the old shape: three seeding reads and then the
-     * page.
-     */
+describe("what the route serves", () => {
+  it("never reads the store", () => {
     const reads = vi.spyOn(appStoreForWriting, "head")
-    const writes = vi.spyOn(appStoreForWriting, "create")
 
     try {
-      await storedPageFor(HOME)
+      for (const route of SITE_ROUTES) pageTreeFor(route, CONTEXT)
 
-      expect({ reads: reads.mock.calls.length, writes: writes.mock.calls.length }).toEqual({
-        reads: 1,
-        writes: 0,
-      })
+      expect(reads.mock.calls.length).toBe(0)
     } finally {
       reads.mockRestore()
-      writes.mockRestore()
     }
   })
-})
 
-describe("what the route serves", () => {
-  it("is the stored page, not a fresh build", async () => {
-    const served = await pageTreeFor(HOME, CONTEXT)
-    const stored = await storedPageFor(HOME)
+  it("is the authored page when the stored row has moved away from it", async () => {
+    const id = storedIdFor(WHY_USE_IT)
+    if (id === undefined) throw new Error("loom: /why-use-it is not stored")
 
-    expect(served.treeId).toBe(stored?.treeId)
-  })
+    const stored = await appStore.head(id)
+    if (!stored.ok) throw new Error("loom: seeding did not store /why-use-it")
 
-  /**
-   * **The whole of the change, in one assertion.**
-   *
-   * An append is how every change to a page arrives — a portal edit, a
-   * proposal somebody accepted, an adaptation the Gate let through. If this
-   * passes, all three reach the page a stranger is served; if it fails, the
-   * portal is a window onto rows nobody reads.
-   */
-  it("is a change somebody made in the store", async () => {
-    const before = await storedPageFor(WHY_USE_IT)
-    if (before === undefined) throw new Error("loom: /why-use-it is not stored")
-
-    const heading = headingIn(before)
-
-    expect(heading.props["level"]).not.toBe(5)
-
-    const appended = await appStore.append(before.treeId, {
-      proposalId: "p_1" as ProposalId,
-      delta: configure(before, heading.id, { level: 5 }),
+    const appended = await appStore.append(id, {
+      proposalId: "p_2" as ProposalId,
+      delta: configure(stored.value, headingIn(stored.value).id, { level: 5 }),
       provenance: PROVENANCE,
-      appliedAt: "2026-10-12T00:00:00.000Z",
+      appliedAt: "2026-11-07T00:00:00.000Z",
     })
 
     if (!appended.ok) throw new Error("loom: the store refused the change")
 
-    const served = await pageTreeFor(WHY_USE_IT, CONTEXT)
+    const served = pageTreeFor(WHY_USE_IT, CONTEXT)
+    const authored = treeFor(WHY_USE_IT, CONTEXT)
 
     expect({
       revision: served.revision,
       level: headingIn(served).props["level"],
-    }).toEqual({ revision: 1, level: 5 })
-  })
-
-  /**
-   * And the fallback, which is the other half of being honest about a store:
-   * an unreachable one serves the authored page rather than an error, because
-   * a site that will not load because a database is down is a worse product
-   * than one serving what it was written as. The portal is where somebody
-   * finds out, and the portal does not render if its store is gone.
-   *
-   * The read is made to fail rather than the store emptied, because *emptied*
-   * is not the failure being claimed — and an earlier version of this test
-   * asserted against a store that was still seeded by every test above it,
-   * so it passed whether the fallback existed or not.
-   */
-  it("is the authored page when the store cannot be read", async () => {
-    /**
-     * On `siteStore`, which is the handle this surface reads through as of
-     * 13 October — `appStore` carries the portal's longer budget and is not
-     * what `storedPageFor` calls. A spy on it would never fire, and the
-     * assertion below would be made against a store that answered normally.
-     */
-    const refuse = vi
-      .spyOn(siteStore, "head")
-      .mockResolvedValue(err({ code: "unavailable", detail: "the database is down" }))
-
-    try {
-      const served = await pageTreeFor(WHAT_YOU_RUN, CONTEXT)
-
-      expect({ revision: served.revision, read: refuse.mock.calls.length > 0 }).toEqual({
-        revision: 0,
-        read: true,
-      })
-    } finally {
-      refuse.mockRestore()
-    }
+    }).toEqual({ revision: 0, level: headingIn(authored).props["level"] })
   })
 })

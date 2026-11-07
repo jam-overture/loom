@@ -112,7 +112,7 @@ describe("the copy on every page of this site", () => {
   let copy: readonly { readonly page: ServedPage; readonly string: ReaderString }[] = []
 
   beforeAll(async () => {
-    pages = await servedPages()
+    pages = servedPages()
     copy = pages.flatMap((page) =>
       readerCopy(page.tree.root)
         .filter(isCopy)

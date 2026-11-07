@@ -120,30 +120,11 @@ const hero = (ids: IdFactory): LoomNode =>
     children: [
       buildSlot(ids, "heading", [
         /**
-         * **The headline, and it is the maintainer's of 24 October.**
-         *
-         * Three were put to him on #704 and he took this one: *"I like the
-         * second headline. Simplest but gets to the point."*
-         * `docs/positioning.md` records it as settled. The literal is
-         * `HEADLINE` in `copy.ts`, beside the list of his lines, because the
-         * page and that list are its two readers.
-         *
-         * **It replaces a headline of his own**, *Make your web page dynamic
-         * with AI and Loom*, which he wrote on 27 September and which sat here
-         * for four weeks. That one was the only part of the page arguing a
-         * build case while everything under it argued governance, and this
-         * lane carried the tension as a standing question in six reports rather
-         * than resolving it by editing his sentence. His answers of 24 October
-         * resolved it the other way: the build case is the pitch and the
-         * governance is under the hood, so the headline that was out of step
-         * with the page is now the one the page is being rebuilt around.
-         *
-         * **What it claims is small and that is why it works.** It says what a
-         * reader gets rather than what the product is, it names no mechanism,
-         * and it survives the headline rule in `voice.test.ts` without
-         * punctuation tricks: no trailing clause, no inversion, nothing a
-         * person would not say out loud. The band directly under it is the
-         * chain, which is where the claim gets earned.
+         * **The headline is the maintainer's, and no run changes it.** The
+         * literal is `HEADLINE` in `copy.ts`, which has its history: written
+         * by him on 27 September, swapped out on 24 October on a misreading,
+         * restored at his instruction on 7 November. `headline.test.ts` pins
+         * it word for word.
          */
         /**
          * **`align` is set here because the hero's own `align` does not reach

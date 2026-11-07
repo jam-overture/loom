@@ -64,7 +64,7 @@ describe("what this site asks about its readers", () => {
   let BANDS: ReadonlySet<string> = new Set()
 
   beforeAll(async () => {
-    pages = await servedPages()
+    pages = servedPages()
     RENDERED = new Set(pages.flatMap((page) => typesIn(page.tree.root)))
     BANDS = new Set(pages.flatMap((page) => bandsOf(page.tree).map((band) => band.what)))
   })
