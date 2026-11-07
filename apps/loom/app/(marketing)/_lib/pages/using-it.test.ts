@@ -1,9 +1,11 @@
 import type { ElementNode, LoomNode, LoomTree } from "@jam-overture/loom"
+import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it } from "vitest"
 
 import { BAND } from "../bands"
-import { treeFor } from "../render"
-import { HOME, SITE_THEME_NAMES, type SiteThemeName } from "../site"
+import { pageTreeFor, renderTree, treeFor } from "../render"
+import { servedBy } from "../routes"
+import { HOME, SITE_ROUTES, SITE_THEME_NAMES, type SiteThemeName } from "../site"
 
 /**
  * The band that says what you would do, which the front door did not have.
@@ -204,5 +206,78 @@ describe("the band that says what you would do", () => {
         theme
       ).toEqual(stepsOf(home()).map((step) => step.props["title"]))
     }
+  })
+})
+
+/**
+ * **Every step lands somewhere, which is new on 7 November and is what the
+ * hint sentence on the band promises.**
+ *
+ * The band states four claims about what adopting Loom costs and showed none of
+ * them. Three of the four had a band on `/why-use-it` that a reader had no way
+ * to find from here; the third had no band at all, and `connected.ts` is the one
+ * this run built.
+ *
+ * This is `chain.test.ts`' argument about the six links applied to the four
+ * steps, and the assertions are the same three, for the same reasons: the
+ * address is one this application serves, it is never the page the reader is
+ * already on, and the band at the other end still declares the `id` the press
+ * is aimed at. The last of those is the one nothing else reports — a link that
+ * scrolls nowhere on a page that renders perfectly.
+ */
+describe("the four steps as four places to go", () => {
+  const hrefs = (): readonly string[] =>
+    stepsOf(home()).map((step) => String(step.props["href"] ?? ""))
+
+  it("is a link on every step, because the band says any step can be pressed", () => {
+    expect(hrefs().length).toBe(4)
+    expect(hrefs().filter((href) => href === "")).toEqual([])
+  })
+
+  it("sends nobody to the front door, and nowhere this application does not serve", () => {
+    for (const href of hrefs()) {
+      const [path] = href.split("#")
+
+      expect(path).not.toBe(HOME.path)
+      expect(servedBy(path ?? "")).toBeDefined()
+    }
+  })
+
+  /**
+   * Read off the markup a browser receives rather than off the tree that built
+   * it, which is the half `anchors.test.ts` cannot see and the reason this
+   * renders a second page.
+   */
+  it.each([...new Set(hrefs().map((href) => href.split("#")[0] ?? ""))])(
+    "lands on a band of %s rather than on the page",
+    async (path) => {
+      const route = SITE_ROUTES.find((candidate) => candidate.path === path)
+
+      if (route === undefined) {
+        throw new Error(`loom: a step points at ${path}, which is not a page of this site`)
+      }
+
+      const markup = renderToStaticMarkup(
+        renderTree(await pageTreeFor(route, { theme: "minimal" }), {
+          origin: "https://loom.example",
+        }).element
+      )
+
+      for (const href of hrefs().filter((candidate) => candidate.startsWith(`${path}#`))) {
+        expect(markup).toContain(`id="${href.split("#")[1] ?? ""}"`)
+      }
+    }
+  )
+
+  /**
+   * And the sentence that stands in for the affordance is on the band while the
+   * links are. `chain.test.ts` holds the same thing for the chain's own hint;
+   * both come off together when `Loom primitives` answers the finding.
+   */
+  it("still tells a reader the steps can be pressed", () => {
+    const band = bandOf(home())
+
+    expect(band).toBeDefined()
+    expect(band === undefined ? "" : textOf(band)).toContain("Press any step")
   })
 })

@@ -20,6 +20,7 @@ import {
   WHEN_IT_ASKS,
 } from "../allowed"
 import { ALLOWED_ANCHOR, COUNTED_ANCHOR, WHY_USE_IT_ANCHOR } from "../bands"
+import { CONNECTED_LANGUAGE, REFUSAL_CODES, YOUR_MODEL } from "../connected"
 import { FACTS } from "../copy"
 import { examplePage, rearrangedExample } from "../example"
 import { LIBRARY_PARTS } from "../library"
@@ -622,6 +623,89 @@ const whatItReports = (ids: IdFactory): LoomNode =>
   )
 
 /**
+ * The third of the maintainer's four steps, which is the one the site had never
+ * shown.
+ *
+ * ## Where it sits, and why it is here rather than on the front door
+ *
+ * The band above prints one report the page sends. The band below shows the
+ * page rearranged for a reader it was not built for. **Between those two
+ * something has to receive the report and answer it**, and until today this
+ * site said whose job that was in one sentence on the front door and never
+ * once said what it costs.
+ *
+ * That sentence is the third step: *"Loom is AI model agnostic. Pick the model
+ * you already use, or bring your own."* The first half is the maintainer's own
+ * line of 1 October. It is a claim about **what it takes**, and the three other
+ * steps each land on a band where a reader can see the quantity for themselves.
+ * This one landed nowhere, so the front door's step three pointed at nothing
+ * and now points here.
+ *
+ * ## One panel, and the reason it is not two
+ *
+ * `whatYouWrite` prints two files because adding a component really is two
+ * files. Connecting a model is one function with one method in it, and a second
+ * panel would have to be invented to fill the space. `connected.ts` says what
+ * the panel is checked against, which is more than compilation: the test starts
+ * a server, points this function at it, and hands the answer to the
+ * interpreter.
+ *
+ * ## The copy names the two refusals because Loom acts on them differently
+ *
+ * `REFUSAL_CODES` is read rather than typed, so the sentence under the panel
+ * cannot drift from the code in it. The distinction is the one thing in this
+ * panel a reader would be tempted to collapse, and `client.ts` records that
+ * the framework itself collapsed it until day 37 and reported a dead key as
+ * *ask again later*.
+ *
+ * ## `wrap: false`, like the two panels under *What you write*
+ *
+ * This is source and not data, so a wrapped line reads as two statements.
+ * `nodes.ts` wrote the prop for the distinction and `connected.test.ts` bounds
+ * how far the longest line runs, which is what makes saying `false` honest on
+ * a phone.
+ */
+const connected = (ids: IdFactory): LoomNode =>
+  section(
+    ids,
+    {
+      width: "wide",
+      eyebrow: "Hook up your model",
+      anchor: WHY_USE_IT_ANCHOR.connected,
+    },
+    "Connecting your own model is one function",
+    [
+      prose(
+        ids,
+        "Loom has no AI model of its own. You point it at the one you already use, and this is all you write to do it.",
+        { tone: "muted", align: "center", measured: true }
+      ),
+      code(ids, YOUR_MODEL.source, {
+        language: CONNECTED_LANGUAGE,
+        caption: YOUR_MODEL.caption,
+        wrap: false,
+      }),
+      prose(
+        ids,
+        "Each line pairs something Loom hands you with the name your provider expects for it. That translation is the only part that changes when you switch providers.",
+        { tone: "muted", align: "center", measured: true }
+      ),
+      proseParts(
+        ids,
+        [
+          "A key that will never work comes back as ",
+          codeSpan(ids, REFUSAL_CODES[0] ?? ""),
+          " and a service that is briefly down comes back as ",
+          codeSpan(ids, REFUSAL_CODES[1] ?? ""),
+          ". Loom waits for the second one and tells you about the first.",
+        ],
+        { tone: "muted", align: "center", measured: true }
+      ),
+    ],
+    { align: "center" }
+  )
+
+/**
  * The headline of this site, happening to a page the reader has just met.
  *
  * `onAPage` above answers *what do the parts look like together* and leaves
@@ -832,6 +916,7 @@ export const whyUseItPageTree = (context: PageContext): LoomTree => {
         whatYouWrite(ids),
         onAPage(ids),
         whatItReports(ids),
+        connected(ids),
         forAReader(ids),
         whatAllowedIt(ids),
         closing(ids),

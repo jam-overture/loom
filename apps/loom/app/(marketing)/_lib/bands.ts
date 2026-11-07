@@ -197,4 +197,14 @@ export const WHY_USE_IT_ANCHOR = {
    * outside link is most likely to want.
    */
   forAReader: "for-a-reader",
+  /**
+   * The one function a reader writes to connect a model of their own.
+   *
+   * It is not one of the chain's six, so it is in this map rather than beside
+   * it for a different reason: the front door's four steps now carry an `href`
+   * each, and this is the one of the four that had nowhere to point.
+   * `connected.ts` has why the band exists and `using-it.test.ts` holds every
+   * step to landing on a band that declares its anchor.
+   */
+  connected: "hook-up-your-model",
 } as const
