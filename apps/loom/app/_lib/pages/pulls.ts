@@ -35,4 +35,18 @@ export interface SitePullStore {
   readonly span: (
     application: ApplicationId
   ) => Promise<Result<PullSpan | null, SitePullStoreError>>
+  /**
+   * When each answer the site took was first taken, for the answers first taken
+   * at or after `since`, earliest first.
+   *
+   * Accepting a change changes the live pages and so their entity tag, so the
+   * first of these at or after the moment a change was accepted is when the
+   * site first took the pages that change made: the *Live* step of the
+   * timeline from *Accept*. An answer first taken before `since` and again
+   * after it is pages from before, so it is not listed.
+   */
+  readonly firstTakenSince: (
+    application: ApplicationId,
+    since: number
+  ) => Promise<Result<readonly number[], SitePullStoreError>>
 }
