@@ -16,13 +16,17 @@ import type { PublishKeyStore } from "./publish-keys"
 import { memoryPublishKeyStore } from "./publish-keys-memory"
 import { postgresPublishKeyStore } from "./publish-keys-postgres"
 import type { PublishedPageStore } from "./published"
+import type { SitePullStore } from "./pulls"
+import { memorySitePullStore } from "./pulls-memory"
+import { postgresSitePullStore } from "./pulls-postgres"
 import { memoryPublishedPageStore } from "./published-memory"
 import { postgresPublishedPageStore } from "./published-postgres"
 import type { ReadDoor } from "./live"
 import type { PublishDoor } from "./receive"
 
 /**
- * This deployment's publish keys and published pages: Postgres when one is
+ * This deployment's publish keys, published pages and the pulls of its read
+ * door: Postgres when one is
  * configured and memory when not, on the handle the store already uses.
  *
  * Memoised on a global carrier for `key-store.ts`'s reason: the door and the
@@ -32,6 +36,7 @@ import type { PublishDoor } from "./receive"
 type Held = {
   readonly keys: PublishKeyStore
   readonly pagesFor: (application: ApplicationId) => PublishedPageStore
+  readonly pulls: SitePullStore
 }
 
 const memoryHeld = (): Held => {
@@ -45,12 +50,14 @@ const memoryHeld = (): Held => {
 
       return known
     },
+    pulls: memorySitePullStore(),
   }
 }
 
 const postgresHeld = (db: LoomDatabase): Held => ({
   keys: postgresPublishKeyStore(db),
   pagesFor: (application) => postgresPublishedPageStore(db, { application }),
+  pulls: postgresSitePullStore(db),
 })
 
 const CARRIER_KEY = Symbol.for("loom.app.pages")
@@ -59,6 +66,9 @@ const held: Held = ((globalThis as unknown as { [CARRIER_KEY]?: Held })[CARRIER_
   portalDatabase === undefined ? memoryHeld() : postgresHeld(portalDatabase))
 
 export const appPublishKeys: PublishKeyStore = held.keys
+
+/** When each project's site took its live pages, for *Connect your site* to say whether it pulls. */
+export const appSitePulls: SitePullStore = held.pulls
 
 export const publishedPagesFor = (application: ApplicationId): PublishedPageStore =>
   held.pagesFor(application)
@@ -115,4 +125,12 @@ export const appReadDoor: ReadDoor = {
 
     return live.ok ? live : err({ detail: live.error.detail })
   },
+  /**
+   * After the answer, inside the same invocation. A record that fails is not
+   * retried: the next pull records the same fact.
+   */
+  pulled: (pull) => {
+    after(() => appSitePulls.record(pull))
+  },
+  now: () => Date.now(),
 }

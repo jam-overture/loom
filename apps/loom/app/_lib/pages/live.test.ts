@@ -14,6 +14,7 @@ import { memoryIngestKeyStore } from "@/app/_lib/reader-signals/keys-memory"
 
 import { pageFixture } from "./fixtures"
 import { entityTagOf, matchesTag, serveLivePages, type ReadDoor } from "./live"
+import type { SitePull } from "./pulls"
 
 const SITE: Application = {
   applicationId: DEFAULT_APPLICATION_ID,
@@ -32,6 +33,8 @@ type Fixture = {
   readonly key: IngestKey
   /** Which applications the door was asked for live pages of. */
   readonly asked: ApplicationId[]
+  /** What the door said the site took. */
+  readonly pulls: SitePull[]
 }
 
 /** A deployment that has issued its own application a key, and another application one too. */
@@ -48,11 +51,13 @@ const fixtureOf = async (
 
   const application = over.application === undefined ? SITE : over.application
   const asked: ApplicationId[] = []
+  const pulls: SitePull[] = []
 
   return {
     key: issued.value,
     otherKey: other.value,
     asked,
+    pulls,
     door: {
       keys,
       applicationOf: (id) =>
@@ -70,6 +75,10 @@ const fixtureOf = async (
 
         return Promise.resolve(ok(id === SITE.applicationId ? (over.pages ?? [HOME, PRICING]) : []))
       },
+      pulled: (taken) => {
+        pulls.push(taken)
+      },
+      now: () => AT,
       ...over,
     },
   }
@@ -136,6 +145,33 @@ describe("serveLivePages", () => {
 
     expect(again.status).toBe(200)
     expect(await again.json()).toEqual({ pages: [HOME] })
+  })
+
+  it("tells of each answer the site took, the 304s as well as the 200s, under its project", async () => {
+    const { door, key, pulls } = await fixtureOf()
+    const first = await serveLivePages(pull(`Bearer ${key}`), door)
+    const tag = first.headers.get("etag") ?? ""
+
+    await serveLivePages(pull(`Bearer ${key}`, { ifNoneMatch: tag }), door)
+
+    expect(pulls).toEqual([
+      { application: SITE.applicationId, tag, at: AT },
+      { application: SITE.applicationId, tag, at: AT },
+    ])
+  })
+
+  it("tells of no pull it refused, so a site that is turned away is not said to pull", async () => {
+    const closed = await fixtureOf({
+      application: { ...SITE, closedAt: "2026-11-01T00:00:00.000Z" },
+    })
+    const down = await fixtureOf({ livePagesOf: () => Promise.resolve(err(DOWN)) })
+
+    await serveLivePages(pull(`Bearer ${closed.key}`), closed.door)
+    await serveLivePages(pull(`Bearer ${down.key}`), down.door)
+    await serveLivePages(pull(`Bearer ${down.key}`, { query: "?reader=r_1" }), down.door)
+    await serveLivePages(pull(null), down.door)
+
+    expect([...closed.pulls, ...down.pulls]).toEqual([])
   })
 
   it("refuses a request that says anything but the key, so no reader or audience can be named", async () => {

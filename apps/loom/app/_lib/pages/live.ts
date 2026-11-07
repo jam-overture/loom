@@ -3,6 +3,7 @@ import type { Application, ApplicationId } from "@jam-overture/loom/store"
 
 import { ingestKeySchema, type IngestKeyStore } from "@/app/_lib/reader-signals/keys"
 
+import type { SitePull } from "./pulls"
 import { bearerOf } from "./receive"
 
 /**
@@ -34,6 +35,14 @@ export type ReadDoor = {
   readonly livePagesOf: (
     application: ApplicationId
   ) => Promise<Result<readonly LoomTree[], { readonly detail: string }>>
+  /**
+   * Told of every answer a site took, `200` and `304` alike, after it is
+   * answered: whether a site pulls is what tells a person whether *Accept*
+   * reaches readers. Fire and forget, because a pull that could fail on its
+   * own record would cost the site its pages over a fact about the site.
+   */
+  readonly pulled: (pull: SitePull) => void
+  readonly now: () => number
 }
 
 /** A pull is always checked with the door, and kept by the site rather than anything between. */
@@ -104,6 +113,8 @@ export const serveLivePages = async (request: Request, door: ReadDoor): Promise<
   const body = JSON.stringify({ pages: pages.value })
   const tag = await entityTagOf(body)
   const headers = { ...REVALIDATE, etag: tag }
+
+  door.pulled({ application: named.value, tag, at: door.now() })
 
   return matchesTag(request.headers.get("if-none-match"), tag)
     ? new Response(null, { status: 304, headers })

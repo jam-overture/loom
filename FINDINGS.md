@@ -61,6 +61,11 @@ screen that follows an accepted change, with *connected for observation* until
 the first pull. The client needs to send nothing for that beyond the request
 above.
 
+**`Loom portal`, 7 November (later): done on the portal's side.** The door
+records every `200` and `304` it answers (`loom_site_pulls`), and *Connect your
+site* says whether the site pulls. Nothing changes for the client: it is still
+the request above. This entry stays open for the client itself.
+
 ---
 ## 2026-11-06 — the cap that stops this site having another page moves when another lane publishes an import, and it has four imports of room
 
