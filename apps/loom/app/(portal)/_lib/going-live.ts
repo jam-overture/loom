@@ -1,11 +1,13 @@
-import type { ProposalId, TreeId } from "@jam-overture/loom"
+import type { IntentId, ProposalId, StakeLevel, TreeId } from "@jam-overture/loom"
 import type { StoredRevision } from "@jam-overture/loom/store"
 
+import type { ProposalGoal } from "./goals/serving"
 import { firstNamed, namesInOperations, type PartName } from "./part-name"
 import type { PageCopy } from "./proposing/copies"
+import type { MadeFrom } from "./proposing/made-from"
 import { pullingWords, type Pulling } from "./pulling"
 import { changesOf } from "./revision-view"
-import type { PlainLine } from "./vocabulary"
+import { STAKES, type PlainLine } from "./vocabulary"
 import { plainDay } from "./when"
 
 /**
@@ -272,8 +274,13 @@ const endingStep = (ending: Exclude<Ending, { kind: "standing" }>): TimelineStep
         lines: ["Someone undid it, so the page is back as it was before it."],
       }
 
-const measuringSteps = (arrival: Arrival, now: number): readonly TimelineStep[] => {
+const measuringSteps = (
+  arrival: Arrival,
+  now: number,
+  goal: string | null
+): readonly TimelineStep[] => {
   const before = `against the ${MEASURING_DAYS} days before`
+  const on = goal === null ? "its goal" : `its goal, ${goal},`
 
   if (arrival.kind !== "live") {
     return [
@@ -281,7 +288,7 @@ const measuringSteps = (arrival: Arrival, now: number): readonly TimelineStep[] 
         title: "Measuring",
         state: "upcoming",
         lines: [
-          `Once it is live, its goal is measured over the ${MEASURING_DAYS} days after, ${before}.`,
+          `Once it is live, it is measured on ${on} over the ${MEASURING_DAYS} days after, ${before}.`,
         ],
       },
       {
@@ -293,24 +300,22 @@ const measuringSteps = (arrival: Arrival, now: number): readonly TimelineStep[] 
   }
 
   const ends = arrival.at + MEASURING_MS
-  const measured = now >= ends
+  const over = now >= ends
 
   return [
     {
       title: "Measuring",
-      state: measured ? "done" : "current",
+      state: over ? "done" : "current",
       at: arrival.at,
       lines: [
-        measured
-          ? `Its goal was measured from ${day(arrival.at)} to ${day(ends)}, ${before}.`
-          : `Its goal is measured from ${day(arrival.at)} to ${day(ends)}, ${before}.`,
+        `It ${over ? "was" : "is"} measured on ${on} from ${day(arrival.at)} to ${day(ends)}, ${before}.`,
       ],
     },
     {
       title: "Result",
       state: "upcoming",
       lines: [
-        measured
+        over
           ? "Its verdict is not shown here yet."
           : `A verdict comes once the ${MEASURING_DAYS} days end, on ${day(ends)}.`,
       ],
@@ -320,18 +325,19 @@ const measuringSteps = (arrival: Arrival, now: number): readonly TimelineStep[] 
 
 /**
  * The timeline: *Accepted* → *Live* → *Measuring* → *Result*, or ending where
- * the change came off the page.
+ * the change came off the page. *Measuring* names the goal where it is known.
  */
 export const timelineOf = (
   change: AcceptedChange,
   reach: Reach,
-  now: number
+  now: number,
+  served: Served
 ): readonly TimelineStep[] => {
   const arrival = arrivalOf(change, reach)
   const reached = [acceptedStep(change), liveStep(arrival, reach)]
 
   return change.ending.kind === "standing"
-    ? [...reached, ...measuringSteps(arrival, now)]
+    ? [...reached, ...measuringSteps(arrival, now, goalOf(served))]
     : [...reached, endingStep(change.ending)]
 }
 
@@ -340,6 +346,65 @@ export const statusOf = (change: AcceptedChange, reach: Reach): TimelineStep =>
   change.ending.kind === "standing"
     ? liveStep(arrivalOf(change, reach), reach)
     : endingStep(change.ending)
+
+/**
+ * What was kept of where a change came from, read for the changes on screen:
+ * what each was made from by its proposal, and the goal each intent served.
+ */
+export type Origins =
+  | {
+      readonly kind: "read"
+      readonly made: ReadonlyMap<ProposalId, MadeFrom>
+      readonly goals: ReadonlyMap<IntentId, ProposalGoal>
+    }
+  | { readonly kind: "unreadable" }
+
+/**
+ * The goal a change served and the stake the Gate put on it, as the timeline
+ * and the list say them (`docs/portal-wireframes.md` section 4: *the change as
+ * a heading with its goal chip, and page · accepted by <who> on <date> ·
+ * stake*).
+ *
+ * The goal is `null` for a change made from a proposal that named none (0352).
+ * A change made before what it was made from was kept, or whose record could
+ * not be written, is `not-recorded`: nothing can be said of its goal or stake.
+ */
+export type Served =
+  | { readonly kind: "recorded"; readonly goal: string | null; readonly stakes: StakeLevel }
+  | { readonly kind: "not-recorded" }
+  | { readonly kind: "unreadable" }
+
+export const servedOf = (proposalId: ProposalId, origins: Origins): Served => {
+  if (origins.kind === "unreadable") return { kind: "unreadable" }
+
+  const made = origins.made.get(proposalId)
+
+  if (made === undefined) return { kind: "not-recorded" }
+
+  return {
+    kind: "recorded",
+    goal: origins.goals.get(made.intentId)?.name ?? null,
+    stakes: made.stakes,
+  }
+}
+
+const goalOf = (served: Served): string | null => (served.kind === "recorded" ? served.goal : null)
+
+/** The stake in the portal's words, for the line under the heading; absent where none was kept. */
+export const stakeWordsOf = (served: Served): string | undefined =>
+  served.kind === "recorded" ? STAKES[served.stakes].label : undefined
+
+/** What the timeline says in place of a goal chip where none can be drawn. Pure. */
+export const servedNoteOf = (served: Served): string | undefined => {
+  switch (served.kind) {
+    case "recorded":
+      return undefined
+    case "not-recorded":
+      return "Loom has no record of the goal this change served or of its risk. Changes made before 7 November were not recorded with them."
+    case "unreadable":
+      return "The goal this change served could not be read. If this stays, this deployment may not have the table that records it yet."
+  }
+}
 
 /** How many accepted changes a page of the list shows, as every list in the portal does. */
 export const ACCEPTED_PAGE_SIZE = 50

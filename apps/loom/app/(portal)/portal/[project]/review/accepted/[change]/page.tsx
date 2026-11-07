@@ -4,11 +4,18 @@ import { notFound } from "next/navigation"
 import { proposalIdSchema } from "@jam-overture/loom"
 import { projectIdSchema } from "@jam-overture/loom/store"
 
+import { GoalChip } from "@/app/(portal)/_components/goal-chip"
 import { Screen } from "@/app/(portal)/_components/screen"
 import { StateNotice } from "@/app/(portal)/_components/state-notice"
 import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"
 import { requireActor, requireRole } from "@/app/(portal)/_lib/auth/identity"
-import { sentencesOf, timelineOf } from "@/app/(portal)/_lib/going-live"
+import {
+  sentencesOf,
+  servedNoteOf,
+  servedOf,
+  stakeWordsOf,
+  timelineOf,
+} from "@/app/(portal)/_lib/going-live"
 import { plainDay } from "@/app/(portal)/_lib/when"
 
 import { Timeline } from "../_components/timeline"
@@ -23,6 +30,10 @@ import { readAccepted } from "../_lib/reading"
  *
  * Until the site pulls, *Live* says the project is connected for observation
  * only, and links to where the site is connected.
+ *
+ * The heading leads with the goal the change served and the line under it
+ * ends with its stake, as the wireframe draws them. A change nothing was kept
+ * for says so in place of the chip.
  */
 const ChangeScreen = async ({
   params,
@@ -71,11 +82,19 @@ const ChangeScreen = async ({
   const [heading, ...rest] = sentencesOf(change, reading.parts)
   const pageName = reading.pages.get(change.pageId) ?? change.pageId
   const by = change.accepted.answeredBy
+  const served = servedOf(change.proposalId, reading.origins)
+  const note = servedNoteOf(served)
+  const stake = stakeWordsOf(served)
 
   return (
     <Screen>
       <div className="flex flex-col gap-2">
         {back}
+        {served.kind === "recorded" ? (
+          <GoalChip goal={served.goal} />
+        ) : (
+          <p className="text-ink-muted m-0 text-xs">{note}</p>
+        )}
         <h1 className="text-2xl tracking-tight">{heading}</h1>
         {rest.map((line) => (
           <p key={line} className="text-ink-secondary m-0 text-sm">
@@ -87,11 +106,12 @@ const ChangeScreen = async ({
             {pageName}
           </Link>
           {` · accepted${by === undefined ? "" : ` by ${by}`} on ${plainDay(new Date(change.acceptedAt).toISOString())}`}
+          {stake === undefined ? null : ` · ${stake}`}
         </p>
       </div>
 
       <section className="border-edge-subtle bg-surface-base flex flex-col gap-3 rounded-lg border p-4">
-        <Timeline steps={timelineOf(change, reading.reach, now)} projectId={projectId} />
+        <Timeline steps={timelineOf(change, reading.reach, now, served)} projectId={projectId} />
         <TechnicalDetail summary="The change as Loom keeps it">
           <pre className="m-0 overflow-x-auto font-mono text-[11px] leading-relaxed">
             {JSON.stringify(change.accepted, null, 2)}

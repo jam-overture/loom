@@ -15,6 +15,8 @@ import { err, ok, type Result } from "../result.js"
 import type { LoomDatabase } from "../store/database.js"
 
 import {
+  actedKey,
+  addActedCounts,
   addArrivalCounts,
   addFunnelAnswers,
   addPageViewCounts,
@@ -28,6 +30,7 @@ import {
   tallyKey,
 } from "./counters.js"
 import { arrivalHoursOf, type StoredArrivalHour, type StoredArrivals } from "./arrivals.js"
+import type { StoredActed, StoredActedHour } from "./acted.js"
 import {
   clampReaderSignalLimit,
   type CountedOutcome,
@@ -45,6 +48,7 @@ import {
 } from "./region.js"
 import { readerSignalKindSchema, readerSignalSchema, viewKeySchema } from "./signal.js"
 import {
+  loomReaderActedHours,
   loomReaderArrivals,
   loomReaderFunnels,
   loomReaderPageViews,
@@ -54,6 +58,7 @@ import {
 } from "./schema.js"
 import type { StoredPageViews } from "./page-views.js"
 import type {
+  ActedReadRequest,
   AppliedCounters,
   ArrivalReadRequest,
   AudienceCounters,
@@ -439,6 +444,20 @@ const storedArrivalSchema = z.object({
   updatedAt: instantSchema,
 })
 
+const storedActedSchema = z.object({
+  audienceId: audienceIdSchema,
+  treeId: treeIdSchema,
+  revision: z.number().int().nonnegative(),
+  nodeId: nodeIdSchema,
+  type: primitiveTypeSchema,
+  hour: hourSchema,
+  activations: countSchema,
+  opens: countSchema,
+  closes: countSchema,
+  completions: countSchema,
+  updatedAt: instantSchema,
+})
+
 /** Scoped on the same terms as the journal — see its note. */
 export const postgresReaderTallyStore = (
   db: LoomDatabase,
@@ -464,8 +483,8 @@ const writable = (
 ): readonly (AppliedCounters & { readonly audience: AudienceId })[] =>
   window
     .filter(
-      ({ tallies, funnels, appearances = [] }) =>
-        tallies.length > 0 || funnels.length > 0 || appearances.length > 0
+      ({ tallies, funnels, appearances = [], acted = [] }) =>
+        tallies.length > 0 || funnels.length > 0 || appearances.length > 0 || acted.length > 0
     )
     .map((counters) => ({ ...counters, audience: counters.audience ?? DEFAULT_AUDIENCE_ID }))
 
@@ -496,7 +515,7 @@ const tallyStoreIn = (db: LoomDatabase, application: ApplicationId): ReaderTally
 
     try {
       await db.transaction(async (tx) => {
-        for (const { audience, tallies, funnels, appearances = [] } of groups) {
+        for (const { audience, tallies, funnels, appearances = [], acted = [] } of groups) {
           if (tallies.length > 0) {
             await tx
               .insert(loomReaderTallies)
@@ -537,6 +556,51 @@ const tallyStoreIn = (db: LoomDatabase, application: ApplicationId): ReaderTally
                   opens: sql`${loomReaderTallies.opens} + excluded.opens`,
                   closes: sql`${loomReaderTallies.closes} + excluded.closes`,
                   completions: sql`${loomReaderTallies.completions} + excluded.completions`,
+                  updatedAt,
+                },
+              })
+          }
+
+          if (acted.length > 0) {
+            /**
+             * The hourly slice of the four occurrence counters above
+             * (`acted.ts`), in the same transaction and from the same fold —
+             * so a part's hours sum to the part's own counters rather than to
+             * whatever survived a second write.
+             */
+            await tx
+              .insert(loomReaderActedHours)
+              .values(
+                foldedBy(acted, actedKey, addActedCounts).map((count) => ({
+                  applicationId: application,
+                  audienceId: audience,
+                  treeId: count.treeId,
+                  revision: count.revision,
+                  nodeId: count.nodeId,
+                  hour: new Date(count.hour),
+                  type: count.type,
+                  activations: count.activations,
+                  opens: count.opens,
+                  closes: count.closes,
+                  completions: count.completions,
+                  updatedAt,
+                }))
+              )
+              .onConflictDoUpdate({
+                target: [
+                  loomReaderActedHours.applicationId,
+                  loomReaderActedHours.audienceId,
+                  loomReaderActedHours.treeId,
+                  loomReaderActedHours.revision,
+                  loomReaderActedHours.nodeId,
+                  loomReaderActedHours.hour,
+                ],
+                set: {
+                  type: sql`excluded.type`,
+                  activations: sql`${loomReaderActedHours.activations} + excluded.activations`,
+                  opens: sql`${loomReaderActedHours.opens} + excluded.opens`,
+                  closes: sql`${loomReaderActedHours.closes} + excluded.closes`,
+                  completions: sql`${loomReaderActedHours.completions} + excluded.completions`,
                   updatedAt,
                 },
               })
@@ -840,6 +904,62 @@ const tallyStoreIn = (db: LoomDatabase, application: ApplicationId): ReaderTally
         })
       } catch (cause) {
         return err(failure(cause, "could not read reader arrivals"))
+      }
+    },
+
+    /**
+     * The rows in the range and the first hour the scope ever counted, as the
+     * arrivals read above answers them — with the part in **both** narrowings.
+     *
+     * A goal made today over a deployment that has counted for a year must
+     * report the first hour *that part* was acted in; taking the beginning over
+     * the deployment would draw a year of noughts behind a figure that has
+     * existed for an afternoon.
+     */
+    acted: async (request?: ActedReadRequest) => {
+      const scope = and(
+        within(loomReaderActedHours, application, request),
+        request?.nodeId === undefined ? undefined : eq(loomReaderActedHours.nodeId, request.nodeId)
+      )
+
+      try {
+        const rows = await db
+          .select()
+          .from(loomReaderActedHours)
+          .where(
+            and(
+              scope,
+              request?.from === undefined
+                ? undefined
+                : gte(loomReaderActedHours.hour, new Date(request.from)),
+              request?.to === undefined
+                ? undefined
+                : lt(loomReaderActedHours.hour, new Date(request.to))
+            )
+          )
+        const parsed = z.array(storedActedSchema).safeParse(rows)
+
+        if (!parsed.success) {
+          return err<ReaderSignalStoreError>({
+            code: "unavailable",
+            detail: `a stored action hour did not parse: ${
+              parsed.error.issues[0]?.path.join(".") ?? "unknown"
+            }`,
+          })
+        }
+
+        const [earliest] = await db
+          .select({ hour: min(loomReaderActedHours.hour) })
+          .from(loomReaderActedHours)
+          .where(scope)
+        const begins = hourSchema.safeParse(earliest?.hour)
+
+        return ok<StoredActed>({
+          hours: parsed.data as readonly StoredActedHour[],
+          ...(begins.success ? { begins: begins.data } : {}),
+        })
+      } catch (cause) {
+        return err(failure(cause, "could not read what readers did by hour"))
       }
     },
   }

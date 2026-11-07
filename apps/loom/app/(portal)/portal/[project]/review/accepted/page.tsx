@@ -3,10 +3,17 @@ import { notFound } from "next/navigation"
 
 import { projectIdSchema } from "@jam-overture/loom/store"
 
+import { GoalChip } from "@/app/(portal)/_components/goal-chip"
 import { Screen } from "@/app/(portal)/_components/screen"
 import { StateNotice } from "@/app/(portal)/_components/state-notice"
 import { requireActor, requireRole } from "@/app/(portal)/_lib/auth/identity"
-import { acceptedPage, sentencesOf, statusOf, type StepState } from "@/app/(portal)/_lib/going-live"
+import {
+  acceptedPage,
+  sentencesOf,
+  servedOf,
+  statusOf,
+  type StepState,
+} from "@/app/(portal)/_lib/going-live"
 import { plainMoment } from "@/app/(portal)/_lib/when"
 
 import { readAccepted } from "./_lib/reading"
@@ -18,6 +25,7 @@ import { readAccepted } from "./_lib/reading"
  * wireframes reach the timeline.
  *
  * Fifty to a page, with the last change shown in the address (`before`).
+ * Each leads with the goal it served where that was kept.
  */
 /** Live in green, an ending in red, and a change still on its way in the body's grey. */
 const STATUS_INK: Readonly<Record<StepState, string>> = {
@@ -93,6 +101,7 @@ const AcceptedPage = async ({
         {page.rows.map((change) => {
           const status = statusOf(change, reading.reach)
           const [said, ...more] = sentencesOf(change, reading.parts)
+          const served = servedOf(change.proposalId, reading.origins)
 
           return (
             <Link
@@ -100,6 +109,7 @@ const AcceptedPage = async ({
               href={`${here}/${change.proposalId}`}
               className="border-edge-subtle bg-surface-base hover:bg-surface-hover flex flex-col gap-1.5 rounded-lg border p-4 no-underline"
             >
+              {served.kind === "recorded" && <GoalChip goal={served.goal} />}
               <div className="flex flex-wrap items-baseline justify-between gap-2">
                 <span className="text-ink-muted text-xs">
                   {reading.pages.get(change.pageId) ?? change.pageId}
