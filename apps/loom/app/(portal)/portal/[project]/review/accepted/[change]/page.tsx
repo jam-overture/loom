@@ -20,8 +20,8 @@ import {
 import { plainDay } from "@/app/(portal)/_lib/when"
 
 import { Timeline } from "../_components/timeline"
-import { readMeasurement } from "../_lib/measurement"
-import { readAccepted } from "../_lib/reading"
+import { readMeasurement } from "@/app/(portal)/_lib/accepted/measurement"
+import { readAccepted } from "@/app/(portal)/_lib/accepted/reading"
 
 /**
  * One accepted change, from *Accept* to its result (unit 8, 0358;

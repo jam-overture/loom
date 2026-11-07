@@ -188,6 +188,40 @@ export const liveAtOf = (change: AcceptedChange, reach: Reach): number | undefin
 }
 
 /**
+ * Every time the page changed for its readers: a change accepted on it going
+ * live, or the site's newer version of it starting a new copy (`copyStarts`).
+ */
+export const changedAtOf = (
+  pageId: TreeId,
+  changes: readonly AcceptedChange[],
+  copyStarts: readonly number[],
+  reach: Reach
+): readonly number[] => [
+  ...copyStarts,
+  ...changes
+    .filter((change) => change.pageId === pageId)
+    .flatMap((change) => {
+      const at = liveAtOf(change, reach)
+
+      return at === undefined ? [] : [at]
+    }),
+]
+
+/**
+ * The page's last change before `at` and its first after, from every time it
+ * changed. A change at `at` itself is neither: it is the one being measured.
+ */
+export const boundsAround = (at: number, changedAt: readonly number[]): Bounds => {
+  const previous = changedAt.filter((other) => other < at)
+  const next = changedAt.filter((other) => other > at)
+
+  return {
+    ...(previous.length === 0 ? {} : { previous: Math.max(...previous) }),
+    ...(next.length === 0 ? {} : { next: Math.min(...next) }),
+  }
+}
+
+/**
  * When the page changed around a change that went live at `liveAt`: another
  * change on the same page going live, or the site's newer version of it
  * starting a new copy (`copyStarts`). Each version is measured on its own.
@@ -198,25 +232,16 @@ export const boundsOf = (
   others: readonly AcceptedChange[],
   copyStarts: readonly number[],
   reach: Reach
-): Bounds => {
-  const changedAt = [
-    ...copyStarts,
-    ...others
-      .filter((other) => other.pageId === change.pageId && other.proposalId !== change.proposalId)
-      .flatMap((other) => {
-        const at = liveAtOf(other, reach)
-
-        return at === undefined ? [] : [at]
-      }),
-  ]
-  const previous = changedAt.filter((at) => at < liveAt)
-  const next = changedAt.filter((at) => at > liveAt)
-
-  return {
-    ...(previous.length === 0 ? {} : { previous: Math.max(...previous) }),
-    ...(next.length === 0 ? {} : { next: Math.min(...next) }),
-  }
-}
+): Bounds =>
+  boundsAround(
+    liveAt,
+    changedAtOf(
+      change.pageId,
+      others.filter((other) => other.proposalId !== change.proposalId),
+      copyStarts,
+      reach
+    )
+  )
 
 /** Done steps are green, the current one ringed, the rest grey, and an ending red. */
 export type StepState = "done" | "current" | "upcoming" | "ended"

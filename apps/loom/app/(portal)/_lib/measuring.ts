@@ -225,7 +225,7 @@ export const measurementOf = (
     /** When the project first counted anything readers did, on any part. */
     readonly actedBegins: number | undefined
   }
-): Measurement => {
+): Extract<Measurement, { readonly kind: "read" }> => {
   const begins = [read.arrivals.begins, read.actedBegins].flatMap((at) =>
     at === undefined ? [] : [at]
   )

@@ -17,7 +17,7 @@ import {
 } from "@/app/(portal)/_lib/going-live"
 import { plainMoment } from "@/app/(portal)/_lib/when"
 
-import { readAccepted } from "./_lib/reading"
+import { readAccepted } from "@/app/(portal)/_lib/accepted/reading"
 
 /**
  * *Accepted*: every change accepted on the project's pages, newest first, each

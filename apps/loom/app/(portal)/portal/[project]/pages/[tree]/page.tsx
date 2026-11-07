@@ -24,6 +24,7 @@ import { modelKeyOf } from "@/app/_lib/models/store"
 import { publishedPagesFor } from "@/app/_lib/pages/store"
 
 import { LookForm } from "./_components/look-form"
+import { PageTabs } from "./_components/page-tabs"
 
 /**
  * One published page, and what Loom proposes for it (0329).
@@ -187,6 +188,8 @@ const PageScreen = async ({ params }: { params: Promise<{ project: string; tree:
         </h1>
         <p className="text-ink-muted font-mono text-xs">{row.treeId}</p>
       </div>
+
+      <PageTabs projectId={projectId} treeId={row.treeId} current="page" />
 
       <section className="border-edge-subtle bg-surface-base flex flex-col gap-1.5 rounded-lg border p-4">
         <p className="text-xs">
