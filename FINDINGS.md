@@ -8,6 +8,258 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-11-07 (evening) — the transit mangling has hit something load-bearing: it ate the `!` off three image embeds, and the backtick count escalated across one body
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom daily build` (run mechanics; it
+owns the 5 November entry this extends) · **Status:** open — **the remedy is
+still to stop rather than to fix**, and this run followed it. What is new is
+that the 5 November entry's own trigger for raising it with the maintainer has
+now been met.
+
+The 5 November entry closes: *"Worth raising only if it ever mangles something
+load-bearing — a URL inside a code fence a reader is meant to copy, or a
+`decisions/` link in a record. So far it has only ever hit prose links, where
+the cost is one ugly line."*
+
+**It has now hit an image embed.** #801's body was composed with four pictures
+as `![alt](url)`. Three arrived as **links rather than images**, with the `!`
+removed and the URL wrapped:
+
+| in the body as composed | as it arrived |
+| --- | --- |
+| `![…](…wide-head.webp)` | ``[…](``…wide-head.webp``)`` — 2 backticks each side |
+| `![…](…wide-modules.webp)` | 4 backticks each side |
+| `![…](…phone-modules.webp)` | 5 backticks each side |
+| `![…](….svg)` | **intact, `!` and all** |
+
+**Two things here that the earlier entry does not have.**
+
+1. **The `!` is removed, not just wrapped.** That is the difference between an
+   ugly line and a missing picture. A routine brief that requires a screenshot
+   on the pull request is not satisfied by a dead link, so this is the first
+   instance with a cost beyond cosmetics.
+2. **The backtick count escalates down the body** — two, then four, then five
+   — which the earlier entry's single-link examples could not show. Whatever
+   does this is accumulating something as it goes rather than applying a fixed
+   substitution, and the fourth embed escaping entirely says it is not simply
+   per-image.
+
+**Observation and not a measurement:** the three mangled are `.webp` and the
+survivor is `.svg`. One body is one sample and the file type may be
+coincidence; it is recorded because it is cheap to check next time and would
+narrow the cause if it held.
+
+**What this run did, which is what the 5 November entry says to do.** Nothing to
+the body: **no re-`PATCH`, no rewriting the embeds as bare URLs, and no commit
+pushed to straighten them.** Re-posting is measured as futile in that entry and
+a push re-runs the merge gate for four surfaces. The pictures themselves are in
+the repository, cited by the report and checked by `reports:check`, so a reader
+reaches them through the report; and the fourth embed — the one carrying the two
+caps, which is the one worth seeing — renders.
+
+**This commit records rather than repairs**, which is the distinction the
+earlier entry's prohibition turns on: it forbids pushing *to fix the
+backticks*, and a finding is how the next run finds out it is not their doing.
+
+**For the maintainer**, and only when something else brings you here: the path
+between a routine session and the GitHub API is now known to remove a character
+rather than only add two, and that is a question nobody inside the repository
+can ask.
+
+---
+## 2026-11-07 (evening) — six wakes in two minutes and nineteen seconds on one pull request, five of them one bot editing one comment, from a subscription the session did not ask for
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom daily build` (run mechanics; it
+owns the 3 November entry this measures) · **Status:** open — **the cost is the
+finding.** Nothing was armed and the subscription was cancelled.
+
+The 3 November entry says *declining to subscribe does not prevent the
+subscription, and the wake that creates it asks the session to arm a check-in
+chain.* It is right, and here is what it costs, counted.
+
+#801 was opened at 14:12:16Z. By 14:14:34Z this session had **six queued
+wakes**:
+
+| wake | what it was |
+| --- | --- |
+| 1 | `subscription.created` — **this session never called `subscribe_pr_activity`** |
+| 2 | `vercel[bot]` posts its deployment comment |
+| 3, 5, 6 | `vercel[bot]` **edits that same comment**, three times, as the build goes Building → Ready |
+| 4 | `check_suite.completed`, reporting nothing failed |
+
+**Five of the six are one bot keeping one comment up to date**, and the sixth
+says everything is fine. Not one of them needed a session.
+
+**And the first one asks for a check-in chain** — *"keep one safety-net self
+check-in… the first about 50 minutes after the last activity, later ones about
+4 hours apart."* That is the shape `docs/routines.md` records as having cost a
+week's allowance on 9 August, and this lane's brief forbids it in two
+sentences: *"Never schedule a follow-up or a self-check-in. Run, report,
+exit."*
+
+**What this run did.** Read all six, verified the pull request against primary
+sources once — `mergeable_state: clean`, one status, `success`, no review
+threads, nothing red and nothing conflicted — and then **called
+`unsubscribe_pr_activity`**, because a subscription whose purpose is to drive a
+check-in chain this lane may not arm is a subscription that can only generate
+noise. Nothing was armed. No comment was posted about any of the six.
+
+**Why unsubscribing is the right end of it rather than simply ignoring the
+wakes.** A wake is a cloud session. Left subscribed over a weekend with no
+maintainer, every base-branch push, every bot comment edit and every CI run on
+this branch spends one — for a pull request whose entire remaining content is
+*waiting for one word*. *Run, report, exit* has to include exit, and this is
+the call that implements it.
+
+**Recommendation, unchanged from 3 November and now with a number on it:** if
+the harness is going to subscribe a routine session regardless of whether it
+asked, the brief's rule and the harness's default are in direct conflict, and
+the maintainer is the only one who can settle which wins. Until then every
+routine of this lane will do what this one did — read, verify once, unsubscribe
+— which works and costs six sessions a pull request.
+
+---
+## 2026-11-07 — the merge gate for four surfaces goes red about 13 November on a documentation cap, and the remedy that cap pre-agrees is measured as unaffordable
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/_lib/weight.ts`), **and the maintainer for the one word
+that unlocks it** · **Status:** open — **nothing is red today.** Six days of
+headroom, measured, and the half that does not depend on the answer shipped
+with this entry.
+
+`weight.test.ts` asserts the heaviest **generated** page stays under 90% of
+`GENERATED_PAGE_CAP`, which is **540,000 bytes**.
+`/docs/api-reference/signals` is **500,755** today — 2,003 of prose and
+**498,752 of published signatures**, 629 of them in 60 modules. Headroom
+**39,245 bytes**.
+
+### The rate, from committed files rather than from a report
+
+`reference.generated.json` is in the repository at every commit, so the growth
+is exact rather than estimated:
+
+| date | commit | modules | symbols | signature bytes |
+| --- | --- | --- | --- | --- |
+| 1 Nov | `749e4c15` | 57 | 587 | 466,077 |
+| 3 Nov | `702e9569` | 58 | 591 | 474,237 |
+| 5 Nov | `ac599889` | 59 | 610 | 488,669 |
+| 6 Nov | `33d59038` | 60 | 629 | **498,752** |
+
+**+32,675 in five days, which is 6,535 bytes a day.** 39,245 of headroom at that
+rate is **six days: about 13 November.** It is lumpy rather than smooth — 6
+November alone was +9,037 as nineteen names landed — so one busy day in
+`src/signals/` could take a third of what is left.
+
+**Not one byte of it was written on this surface, and no editing here brings it
+down.** When it goes it goes on whichever lane's branch happens to be running,
+with a failure about a cap that lane has never heard of, and `pnpm verify` is
+the merge gate for all four surfaces (0067).
+
+### The remedy this cap pre-agrees, and what it actually costs
+
+`weight.ts` has said since the day it shipped that the answer is not to raise
+the number: *cut the page up along the line it grows on*, which is its modules.
+**That was never priced. It is now, and it does not fit.**
+
+Every page on this site has a row in the **table of contents** — the one file
+in the search index a reader sits in front of and waits for — so a cut puts one
+more row in it per module. Measured as the rows `searchContents` would really
+publish (`pageCutOf`, shipped with this entry):
+
+| | addresses | bytes of contents rows |
+| --- | --- | --- |
+| cutting `/docs/api-reference/signals` | **60** | **13,105** |
+| cutting every door | 337 | 73,627 |
+
+The contents file is **52,389 of its 60,000 raw bytes**, so it has **7,611 of
+room**. The cut of the one page that is over the line **overruns it by 5,494
+bytes**, and cutting every door asks for more than the whole file is allowed to
+be.
+
+### So both of this surface's caps are locked on the same unanswered question
+
+| cap | spent | room |
+| --- | --- | --- |
+| prose index, all five sections | 79,080 / 80,000 gz | **920** |
+| table of contents | 52,389 / 60,000 raw | **7,611** |
+| published names | 37,872 / 40,000 raw | 2,128 |
+| heaviest generated page | 500,755 / 540,000 | **39,245** |
+
+The prose cap has 920 bytes, which is **nought pages** (26 October, still open).
+The generated cap's only remedy needs 13,105 bytes in a file with 7,611. **0353
+on #778 is what moves both**: its recommendation C takes the prose bill from
+79,080 to about 35,928 by sending a reader their own section's sentences and the
+rest of the site by title, and the same sharding argument is what gives the
+table of contents room to carry a cut.
+
+**One word is still enough, and it now has a date on it.**
+
+### What shipped against this today, which is the half that does not depend on
+the answer
+
+A fault about a generated page now carries the cut: how many addresses it
+needs, the modules carrying the most, and the bytes those addresses would cost
+in the table of contents. The sentence the lane that goes red will read:
+
+> `/docs/api-reference/signals` renders 500755 bytes against a cap of 540000,
+> and 498752 of it is 629 published signatures; cutting it along its modules is
+> 60 more addresses and 13105 bytes of rows in the table of contents every
+> reader waits for, heaviest first: signals/library-reach-change (18574),
+> signals/copy-change (17477), signals/library-word-reach-change (17468)
+
+That does not stop the cap firing. It stops the lane that trips it spending half
+a day discovering the remedy is not available, and it names who to ask.
+
+---
+## 2026-11-07 — the reference page that is about to break the gate is 629 names behind one door, and the package already publishes the narrower door that would fix it
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom signals` (`src/signals/`, per
+`docs/routines.md`'s table — not `Loom daily build`, per the re-addressing of 4
+November) · **Status:** open — **a request, not a defect.** Nothing in `src/` is
+wrong. This is the one remedy for the entry above that costs this surface
+nothing, and it is not this lane's to make.
+
+`/docs/api-reference/signals` is heavy because **one entry point publishes 629
+names**. It is not the most names per module — the modules are ordinary, 10 or
+15 names each — it is that sixty of them are behind one specifier, and the
+reference gives one page per *published entry point* because that is what a
+reader types.
+
+**The package has already done the right thing once.** The page's own band says
+so today:
+
+> *"A narrower door opens onto part of this one. If that is all you came for,
+> import it instead and your program never loads the rest.
+> `@jam-overture/loom/signals/broadcast` publishes 15 of the 629 exports below —
+> the same names, declared the same way. It does not load …, which this import
+> does, and its JavaScript goes through 10 of the package's built files where
+> this one goes through 79."*
+
+`signals/broadcast` took 15 names off the critical path for a browser-side host
+and it took 15 names off this page. **Every further narrow door does both.**
+
+**What this lane is asking for, and what it is not.** Not a reorganisation of
+`src/signals/`, and not a door invented to shrink a documentation page — the
+sixty modules are real and the page would be right to list them. The request is
+narrower: **where a group of those modules is already a thing a consumer would
+import on its own, publish it as its own entry point**, the way `broadcast`
+already is. The reading side is the obvious candidate on the evidence of the
+last three days — `signals/window`, `signals/health`, `signals/funnel` and the
+`-change` family are 60% of the page between them — but which doors are real is
+`src/`'s judgement and not this lane's.
+
+**Why it is being asked now rather than filed and forgotten.** The entry above
+has six days on it, and of the three ways out, raising the cap is refused by the
+cap's own argument, cutting the page is measured as unaffordable until #778 is
+answered, and **this one is affordable today and helps a reader twice** — a
+narrower import is less JavaScript in their program and a shorter page in their
+browser. If a door lands before 13 November it moves the date out; if two land
+it may move it out indefinitely.
+
+Nothing is asked by a date. **Please do not take a test's deadline as a reason
+to publish a door you would not otherwise publish** — a door that exists to
+make a documentation page shorter is the tail wagging the dog, and this lane
+would rather the cap fired.
 ## 2026-11-07 — a nineteenth door turned four assertions in `(docs)` red, and the summary a reader will see was written by the lane that opened it
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom docs`
