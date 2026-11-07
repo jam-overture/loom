@@ -5,10 +5,16 @@ import { treeIdSchema, type TreeId } from "@jam-overture/loom"
 import { projectIdSchema } from "@jam-overture/loom/store"
 
 import { Screen } from "@/app/(portal)/_components/screen"
+import { FilterChips } from "@/app/(portal)/_components/filter-chips"
 import { StateNotice } from "@/app/(portal)/_components/state-notice"
-import { readMeasurement, readSides } from "@/app/(portal)/_lib/accepted/measurement"
+import {
+  readDailyChart,
+  readMeasurement,
+  readSides,
+} from "@/app/(portal)/_lib/accepted/measurement"
 import { readAccepted, type AcceptedReading } from "@/app/(portal)/_lib/accepted/reading"
 import { requireActor, requireRole } from "@/app/(portal)/_lib/auth/identity"
+import type { Goal } from "@/app/(portal)/_lib/goals/goal"
 import {
   boundsAround,
   changedAtOf,
@@ -17,20 +23,24 @@ import {
   servedOf,
 } from "@/app/(portal)/_lib/going-live"
 import { goalsFor } from "@/app/(portal)/_lib/goals/stores"
-import { goalForPage } from "@/app/(portal)/_lib/goals/serving"
+import { goalForPage, goalsOnPage, measuredOnFor } from "@/app/(portal)/_lib/goals/serving"
 import {
   historyOf,
   keyOf,
   loomOutcomeOf,
+  marksOf,
   originOf,
   siteOutcomeOf,
+  type Mark,
   type SiteFigures,
   type Version,
 } from "@/app/(portal)/_lib/page-history"
+import { single, type Query } from "@/app/(portal)/_lib/query"
 import { PORTAL_READ_BUDGET_MS } from "@/app/_lib/app/bounded"
 import { readWithin, unavailable } from "@/app/_lib/app/bounded-store"
 import { publishedPagesFor } from "@/app/_lib/pages/store"
 
+import { DailyChart } from "../_components/daily-chart"
 import { PageTabs } from "../_components/page-tabs"
 import { VersionCard } from "../_components/version-card"
 
@@ -40,7 +50,13 @@ type Read = Extract<AcceptedReading, { readonly kind: "read" }>
  * A page's *History* (8c; `docs/portal-wireframes.md`, *5 · Pages ·
  * History*): did the changes we shipped work?
  *
- * One card per version, newest first. A Loom change says where it came from
+ * On top, the goal's daily rate over the last 8 weeks, coloured by where each
+ * version came from, under a *Measured on* picker of the goals on the page
+ * (`?on=`, the goal a change to the page serves when none is named). The
+ * picked goal is the one the chart and the site's own edits are read on; a
+ * Loom change is always judged on the goal it served.
+ *
+ * Then one card per version, newest first. A Loom change says where it came from
  * and gives the verdict its own timeline gives, on the goal it served, by the
  * maintainer's rules of 5 November (14 days a side, 1,000 page views a side,
  * a two-proportion test at 95%). The site's own edit shows its before and
@@ -51,15 +67,24 @@ type Read = Extract<AcceptedReading, { readonly kind: "read" }>
  * only the figures on the card they were for.
  */
 
-/**
- * The figures around the site's own edits: on the goal on the page now, each
- * side ending where the page changed again. Read only where the page has such
- * an edit.
- */
-const siteFiguresOf = async (
+/** The goals on the page and the one picked to measure it on, or that they could not be read. */
+type MeasuredOn =
+  | { readonly kind: "unreadable" }
+  | { readonly kind: "no-goal" }
+  | {
+      readonly kind: "picked"
+      /** Every goal on the page, the primary first. */
+      readonly on: readonly Goal[]
+      /** The goal a change to the page serves, which the picker starts on. */
+      readonly serving: Goal
+      readonly picked: Goal
+    }
+
+const readMeasuredOn = async (
   reading: Read,
-  pageId: TreeId
-): Promise<(at: number) => Promise<SiteFigures>> => {
+  pageId: TreeId,
+  asked: string | undefined
+): Promise<MeasuredOn> => {
   const [goals, published] = await Promise.all([
     readWithin(() => goalsFor(reading.application).list(), unavailable, PORTAL_READ_BUDGET_MS),
     readWithin(
@@ -69,31 +94,119 @@ const siteFiguresOf = async (
     ),
   ])
 
-  if (!goals.ok || !published.ok) return async () => ({ kind: "unreadable" })
+  if (!goals.ok || !published.ok) return { kind: "unreadable" }
 
   const page = published.value.find((held) => held.tree.treeId === pageId)
-  const goal = page === undefined ? undefined : goalForPage(goals.value, page.tree)
 
-  if (goal === undefined) return async () => ({ kind: "no-goal" })
+  if (page === undefined) return { kind: "no-goal" }
 
-  const changedAt = changedAtOf(
-    pageId,
-    reading.changes,
-    reading.copyStarts.get(pageId) ?? [],
-    reading.reach
-  )
+  const serving = goalForPage(goals.value, page.tree)
+  const picked = measuredOnFor(goals.value, page.tree, asked)
 
-  return async (at) => ({
-    kind: "measured",
-    goal: goal.name,
-    measurement: await readSides(
-      reading.application,
+  return serving === undefined || picked === undefined
+    ? { kind: "no-goal" }
+    : { kind: "picked", on: goalsOnPage(goals.value, page.tree), serving, picked }
+}
+
+/**
+ * The figures around the site's own edits: on the goal picked, each side
+ * ending where the page changed again.
+ */
+const siteFiguresOf =
+  (reading: Read, pageId: TreeId, measuredOn: MeasuredOn) =>
+  async (at: number): Promise<SiteFigures> => {
+    if (measuredOn.kind !== "picked") return { kind: measuredOn.kind }
+
+    const goal = measuredOn.picked
+
+    const changedAt = changedAtOf(
       pageId,
-      goal,
-      at,
-      boundsAround(at, changedAt)
-    ),
-  })
+      reading.changes,
+      reading.copyStarts.get(pageId) ?? [],
+      reading.reach
+    )
+
+    return {
+      kind: "measured",
+      goal: goal.name,
+      measurement: await readSides(
+        reading.application,
+        pageId,
+        goal,
+        at,
+        boundsAround(at, changedAt)
+      ),
+    }
+  }
+
+/** The history measured on `goal`, the address left bare for the goal it starts on. */
+const historyAddress = (projectId: string, pageId: TreeId, goal: Goal, serving: Goal): string =>
+  `/portal/${projectId}/pages/${pageId}/history${
+    goal.goalId === serving.goalId ? "" : `?on=${goal.goalId}`
+  }`
+
+/** The *Measured on* picker and the chart under it, or what stands in their place. */
+const Trend = async ({
+  reading,
+  projectId,
+  pageId,
+  measuredOn,
+  marks,
+  now,
+}: {
+  reading: Read
+  projectId: string
+  pageId: TreeId
+  measuredOn: MeasuredOn
+  marks: readonly Mark[]
+  now: number
+}) => {
+  if (measuredOn.kind === "unreadable") {
+    return (
+      <p className="text-ink-muted m-0 text-xs">
+        The goals could not be read, so there is no chart. Try again in a moment.
+      </p>
+    )
+  }
+
+  if (measuredOn.kind === "no-goal") {
+    return (
+      <p className="text-ink-muted m-0 text-xs">
+        No goal is on this page, so there is nothing to chart.{" "}
+        <Link href={`/portal/${projectId}/goals`} className="text-ink">
+          Set a goal
+        </Link>
+      </p>
+    )
+  }
+
+  const { on, serving, picked } = measuredOn
+  const chart = await readDailyChart(reading.application, pageId, picked, marks, now)
+
+  return (
+    <section aria-label="The goal by day" className="flex flex-col gap-3">
+      <FilterChips
+        label="Measured on"
+        choices={on.map((goal) => ({
+          label: goal.name,
+          href: historyAddress(projectId, pageId, goal, serving),
+          selected: goal.goalId === picked.goalId,
+        }))}
+      />
+      {chart.kind === "unreadable" ? (
+        <p className="text-ink-muted m-0 text-xs">
+          The page&apos;s figures by day could not be read. The versions below stand; try again in a
+          moment.
+        </p>
+      ) : (
+        <DailyChart chart={chart.chart} />
+      )}
+      <p className="text-ink-muted m-0 max-w-prose text-xs">
+        The chart and your site&apos;s own edits are read on {picked.name}. Each Loom change is
+        judged on the goal it served.
+      </p>
+    </section>
+  )
 }
 
 const Card = async ({
@@ -147,10 +260,13 @@ const Card = async ({
 
 const HistoryScreen = async ({
   params,
+  searchParams,
 }: {
   params: Promise<{ project: string; tree: string }>
+  searchParams: Promise<Query>
 }) => {
   const route = await params
+  const query = await searchParams
   const asked = projectIdSchema.safeParse(route.project)
   const treeId = treeIdSchema.safeParse(route.tree)
 
@@ -186,11 +302,8 @@ const HistoryScreen = async ({
     reading.copyStarts.get(pageId) ?? [],
     reading.reach
   )
-  const figuresAt: (at: number) => Promise<SiteFigures> = history.versions.some(
-    (version) => version.kind === "site"
-  )
-    ? await siteFiguresOf(reading, pageId)
-    : async () => ({ kind: "no-goal" })
+  const measuredOn = await readMeasuredOn(reading, pageId, single(query.on))
+  const figuresAt = siteFiguresOf(reading, pageId, measuredOn)
 
   return (
     <Screen>
@@ -212,6 +325,15 @@ const HistoryScreen = async ({
       </div>
 
       <PageTabs projectId={projectId} treeId={pageId} current="history" />
+
+      <Trend
+        reading={reading}
+        projectId={projectId}
+        pageId={pageId}
+        measuredOn={measuredOn}
+        marks={marksOf(history.versions)}
+        now={now}
+      />
 
       {history.pending.length === 0 && history.versions.length === 0 ? (
         <StateNotice

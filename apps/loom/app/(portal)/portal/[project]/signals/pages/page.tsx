@@ -15,6 +15,7 @@ import { primaryOf } from "@/app/(portal)/_lib/goals/goal"
 import { goalsFor } from "@/app/(portal)/_lib/goals/stores"
 import { rangeOf, type SignalsRange } from "@/app/(portal)/_lib/signals-range"
 import { pageCopiesFor } from "@/app/(portal)/_lib/proposing/stores"
+import { single } from "@/app/(portal)/_lib/query"
 import { holdsFor } from "@/app/(portal)/_lib/write"
 import { PORTAL_READ_BUDGET_MS } from "@/app/_lib/app/bounded"
 import { boundedReaderTallyStore, readWithin, unavailable } from "@/app/_lib/app/bounded-store"
@@ -35,10 +36,6 @@ import { readSignals } from "../_lib/reading"
  * costs the badge alone. The goals likewise cost the primary goal's column
  * alone, and the drawer says they could not be read.
  */
-
-/** A query value as one string, or `undefined` for none or for a repeated key. */
-const single = (value: string | readonly string[] | undefined): string | undefined =>
-  typeof value === "string" ? value : undefined
 
 const ByPageScreen = async ({
   params,

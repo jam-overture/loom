@@ -5,7 +5,7 @@ import type { StoredRevision } from "@jam-overture/loom/store"
 
 import { acceptedChangesOf, type AcceptedChange, type Ending, type Reach } from "./going-live"
 import { MEASURING_MS, windowsOf, type Measurement, type Side } from "./measuring"
-import { historyOf, keyOf, loomOutcomeOf, originOf, siteOutcomeOf } from "./page-history"
+import { historyOf, keyOf, loomOutcomeOf, marksOf, originOf, siteOutcomeOf } from "./page-history"
 import { firstCopyOf } from "./proposing/copies"
 
 const PAGE = treeIdSchema.parse("t_home")
@@ -95,6 +95,25 @@ describe("historyOf", () => {
     const history = historyOf(PAGE, [older], [AT], { kind: "own-site" })
 
     expect(history.versions.map(keyOf)).toEqual(["p_old", `site-${AT}`])
+  })
+})
+
+describe("marksOf", () => {
+  it("marks each live change and each of the site's versions, oldest first", () => {
+    const reach = pulling([AT + HOUR, AT + 3 * DAY + HOUR])
+    const history = historyOf(PAGE, [newer, older], [AT + 2 * DAY], reach)
+
+    expect(marksOf(history.versions)).toEqual([
+      { at: AT + HOUR, origin: "loom", label: "Version 1" },
+      { at: AT + 2 * DAY, origin: "site", label: "Your site's version" },
+      { at: AT + 3 * DAY + HOUR, origin: "loom", label: "Version 2" },
+    ])
+  })
+
+  it("leaves out a change that came off before any reader had it", () => {
+    const dropped = ended(newer, { kind: "dropped", at: AT + 4 * DAY })
+
+    expect(marksOf(historyOf(PAGE, [dropped], [], pulling([])).versions)).toEqual([])
   })
 })
 

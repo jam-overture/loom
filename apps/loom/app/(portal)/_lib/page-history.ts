@@ -87,6 +87,37 @@ export const historyOf = (
   }
 }
 
+/** A moment the page changed for its readers, and the version it started. */
+export type Mark = {
+  readonly at: number
+  readonly origin: "loom" | "site"
+  readonly label: string
+}
+
+/**
+ * The moments the page changed that the chart marks: a Loom change from when
+ * it went live (one never given to a reader never changed the page), and each
+ * newer version of the site's page.
+ */
+export const marksOf = (versions: readonly Version[]): readonly Mark[] =>
+  versions
+    .flatMap((version): readonly Mark[] => {
+      if (version.kind === "site") {
+        return [{ at: version.at, origin: "site", label: "Your site's version" }]
+      }
+
+      return version.liveAt === undefined
+        ? []
+        : [
+            {
+              at: version.liveAt,
+              origin: "loom",
+              label: `Version ${version.change.accepted.revision}`,
+            },
+          ]
+    })
+    .sort((left, right) => left.at - right.at)
+
 /** What a card says about the version's effect on the goal. */
 export type Outcome = {
   /** The verdict, or the state that stands in for one: *Helped*, *Measuring*, *Not a Loom change*. */

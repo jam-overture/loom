@@ -7,6 +7,7 @@ import {
   type AcceptedChange,
   type Served,
 } from "@/app/(portal)/_lib/going-live"
+import { chartRangeOf, dailyChartOf, type DailyChart } from "@/app/(portal)/_lib/daily-rate"
 import type { GoalKind } from "@/app/(portal)/_lib/goals/goal"
 import {
   measurementOf,
@@ -15,6 +16,7 @@ import {
   type Bounds,
   type Measurement,
 } from "@/app/(portal)/_lib/measuring"
+import type { Mark } from "@/app/(portal)/_lib/page-history"
 import { boundedReaderTallyStore } from "@/app/_lib/app/bounded-store"
 import { readingsFor } from "@/app/_lib/reader-signals/intake"
 
@@ -88,4 +90,46 @@ export const readMeasurement = async (
       reading.reach
     )
   )
+}
+
+/** The chart on a page's history, or why it could not be drawn. */
+export type DailyChartReading =
+  | { readonly kind: "read"; readonly chart: DailyChart }
+  | { readonly kind: "unreadable" }
+
+/**
+ * A page's daily rate on a goal over the last 8 weeks, from the same hourly
+ * counters a verdict reads: one read of each over the 8 weeks, and when the
+ * project first counted anything readers did.
+ */
+export const readDailyChart = async (
+  application: ApplicationId,
+  pageId: TreeId,
+  on: MeasuredOn & { readonly name: string },
+  marks: readonly Mark[],
+  now: number
+): Promise<DailyChartReading> => {
+  const range = chartRangeOf(now)
+  const tallies = boundedReaderTallyStore(readingsFor(application).tallies)
+  const [arrivals, acted, anything] = await Promise.all([
+    tallies.arrivals({ treeId: pageId, ...range }),
+    tallies.acted({ treeId: pageId, nodeId: on.nodeId, ...range }),
+    tallies.acted({ from: range.from, to: range.from }),
+  ])
+
+  if (!arrivals.ok || !acted.ok || !anything.ok) return { kind: "unreadable" }
+
+  return {
+    kind: "read",
+    chart: dailyChartOf({
+      now,
+      range,
+      kind: on.kind,
+      goal: on.name,
+      marks,
+      arrivals: arrivals.value,
+      acted: acted.value,
+      actedBegins: anything.value.begins,
+    }),
+  }
 }
