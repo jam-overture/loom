@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest"
 import {
   buildElement,
   buildText,
+  intentIdSchema,
   nodeIdSchema,
   proposalIdSchema,
   sequentialIdFactory,
@@ -20,17 +21,25 @@ import {
   reachOf,
   sentencesOf,
   statusOf,
+  servedNoteOf,
+  servedOf,
+  stakeWordsOf,
   timelineOf,
   type AcceptedChange,
   type CopyRecord,
+  type Origins,
   type Reach,
+  type Served,
 } from "./going-live"
+import { goalIdSchema } from "./goals/goal"
 import { partNameOf } from "./part-name"
 import { firstCopyOf } from "./proposing/copies"
 
 const PAGE = treeIdSchema.parse("t_home")
 const SECOND_COPY = treeIdSchema.parse("t_home2")
 const THIRD_COPY = treeIdSchema.parse("t_home3")
+
+const NOT_RECORDED: Served = { kind: "not-recorded" }
 
 const AT = Date.UTC(2026, 10, 7, 9, 0)
 const MINUTE = 60_000
@@ -89,7 +98,7 @@ const pulling = (taken: readonly number[], quiet = false): Reach => ({
 })
 
 const titles = (change: AcceptedChange, reach: Reach, now = AT): readonly string[] =>
-  timelineOf(change, reach, now).map((step) => step.title)
+  timelineOf(change, reach, now, NOT_RECORDED).map((step) => step.title)
 
 describe("acceptedChangesOf", () => {
   it("finds nothing on a page nothing was accepted on", () => {
@@ -163,7 +172,12 @@ describe("timelineOf", () => {
   const accepted = only([first([entry(PAGE, 1, "p_1", AT, { answeredBy: "ana@example.com" })])])
 
   it("goes Accepted, Live, Measuring, Result, live on the first new answer the site took", () => {
-    const steps = timelineOf(accepted, pulling([AT - MINUTE, AT + 2 * MINUTE]), AT + 3 * MINUTE)
+    const steps = timelineOf(
+      accepted,
+      pulling([AT - MINUTE, AT + 2 * MINUTE]),
+      AT + 3 * MINUTE,
+      NOT_RECORDED
+    )
 
     expect(steps.map((step) => [step.title, step.state, step.at])).toEqual([
       ["Accepted", "done", AT],
@@ -173,42 +187,56 @@ describe("timelineOf", () => {
     ])
     expect(steps[0]?.lines[0]).toContain("ana@example.com said yes to it")
     expect(steps[2]?.lines[0]).toBe(
-      "Its goal is measured from 7 November 2026 to 21 November 2026, against the 14 days before."
+      "It is measured on its goal from 7 November 2026 to 21 November 2026, against the 14 days before."
     )
     expect(steps[3]?.lines[0]).toBe("A verdict comes once the 14 days end, on 21 November 2026.")
   })
 
   it("is live at once on this deployment's own site", () => {
-    const steps = timelineOf(accepted, { kind: "own-site" }, AT)
+    const steps = timelineOf(accepted, { kind: "own-site" }, AT, NOT_RECORDED)
 
     expect(steps[1]).toMatchObject({ title: "Live", state: "done", at: AT })
   })
 
   it("waits for the site's next pull, and says when the site seems to have stopped", () => {
-    expect(timelineOf(accepted, pulling([AT - MINUTE]), AT)[1]).toMatchObject({
+    expect(timelineOf(accepted, pulling([AT - MINUTE]), AT, NOT_RECORDED)[1]).toMatchObject({
       title: "Waiting for your site to pull",
       state: "current",
     })
-    expect(timelineOf(accepted, pulling([], true), AT)[1]?.lines[0]).toContain(
+    expect(timelineOf(accepted, pulling([], true), AT, NOT_RECORDED)[1]?.lines[0]).toContain(
       "has not pulled for over an hour"
     )
   })
 
   it("says a site that never pulled is connected for observation only, with the way to connect", () => {
-    const live = timelineOf(accepted, { kind: "never" }, AT)[1]
+    const live = timelineOf(accepted, { kind: "never" }, AT, NOT_RECORDED)[1]
 
     expect(live).toMatchObject({ title: "Your site is not pulling yet", connect: true })
     expect(live?.lines[0]).toContain("connected for observation only")
   })
 
+  it("names the goal it is measured on where the goal is known", () => {
+    const served: Served = { kind: "recorded", goal: "Start presses", stakes: "low" }
+
+    expect(timelineOf(accepted, { kind: "own-site" }, AT, served)[2]?.lines[0]).toBe(
+      "It is measured on its goal, Start presses, from 7 November 2026 to 21 November 2026, against the 14 days before."
+    )
+    expect(timelineOf(accepted, { kind: "never" }, AT, served)[2]?.lines[0]).toBe(
+      "Once it is live, it is measured on its goal, Start presses, over the 14 days after, against the 14 days before."
+    )
+    expect(timelineOf(accepted, { kind: "own-site" }, AT + MEASURING_MS, served)[2]?.lines[0]).toBe(
+      "It was measured on its goal, Start presses, from 7 November 2026 to 21 November 2026, against the 14 days before."
+    )
+  })
+
   it("measures nothing before the change is live", () => {
-    const steps = timelineOf(accepted, { kind: "never" }, AT)
+    const steps = timelineOf(accepted, { kind: "never" }, AT, NOT_RECORDED)
 
     expect(steps.slice(2).map((step) => step.state)).toEqual(["upcoming", "upcoming"])
   })
 
   it("marks measuring done once the window has passed, and claims no verdict it has not read", () => {
-    const steps = timelineOf(accepted, { kind: "own-site" }, AT + MEASURING_MS)
+    const steps = timelineOf(accepted, { kind: "own-site" }, AT + MEASURING_MS, NOT_RECORDED)
 
     expect(steps[2]?.state).toBe("done")
     expect(steps[3]).toMatchObject({
@@ -228,7 +256,7 @@ describe("timelineOf", () => {
       "Live",
       "No longer fits the site's newer version",
     ])
-    expect(timelineOf(dropped, pulling([AT + MINUTE]), AT).at(-1)).toMatchObject({
+    expect(timelineOf(dropped, pulling([AT + MINUTE]), AT, NOT_RECORDED).at(-1)).toMatchObject({
       state: "ended",
       at: AT + 60 * MINUTE,
     })
@@ -253,6 +281,61 @@ describe("timelineOf", () => {
     if (undone === undefined) throw new Error("expected the undone change")
 
     expect(titles(undone, { kind: "own-site" })).toEqual(["Accepted", "Live", "Undone"])
+  })
+})
+
+describe("servedOf", () => {
+  const P1 = proposalIdSchema.parse("p_1")
+  const P2 = proposalIdSchema.parse("p_2")
+  const P3 = proposalIdSchema.parse("p_3")
+  const I1 = intentIdSchema.parse("i_1")
+  const I2 = intentIdSchema.parse("i_2")
+  const origins: Origins = {
+    kind: "read",
+    made: new Map([
+      [P1, { proposalId: P1, intentId: I1, stakes: "medium", at: AT }],
+      [P2, { proposalId: P2, intentId: I2, stakes: "low", at: AT }],
+    ]),
+    goals: new Map([
+      [
+        I1,
+        {
+          intentId: I1,
+          goalId: goalIdSchema.parse(`g_${"1".padStart(32, "0")}`),
+          name: "Start presses",
+          kind: "activated",
+          nodeId: nodeIdSchema.parse("n_start"),
+          at: AT,
+        },
+      ],
+    ]),
+  }
+
+  it("gives the goal the change's intent served, as it was named then, and its stake", () => {
+    const served = servedOf(P1, origins)
+
+    expect(served).toEqual({ kind: "recorded", goal: "Start presses", stakes: "medium" })
+    expect(stakeWordsOf(served)).toBe("Some risk")
+    expect(servedNoteOf(served)).toBeUndefined()
+  })
+
+  it("names no goal for a change made from a proposal that named none, and still says its stake", () => {
+    expect(servedOf(P2, origins)).toEqual({ kind: "recorded", goal: null, stakes: "low" })
+  })
+
+  it("says nothing was recorded for a change made before it was kept", () => {
+    const served = servedOf(P3, origins)
+
+    expect(served).toEqual({ kind: "not-recorded" })
+    expect(stakeWordsOf(served)).toBeUndefined()
+    expect(servedNoteOf(served)).toContain("no record of the goal")
+  })
+
+  it("says the goal could not be read, rather than that there was none", () => {
+    const served = servedOf(P1, { kind: "unreadable" })
+
+    expect(served).toEqual({ kind: "unreadable" })
+    expect(servedNoteOf(served)).toContain("could not be read")
   })
 })
 

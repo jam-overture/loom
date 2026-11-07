@@ -16,6 +16,7 @@ import { briefFor, type BriefError } from "./brief"
 import type { PageCopyStore } from "./copies"
 import { readEvidence, type EvidenceSilence } from "./evidence"
 import { followPublished, waitingOnPage } from "./following"
+import { madeFromOf, type MadeFromStore } from "./made-from"
 import { REMEMBERED_PER_PAGE, type TurnedDownStore } from "./turned-down"
 
 /**
@@ -91,6 +92,8 @@ export type ProposeFor = {
   /** The project's goals, as its store listed them. */
   readonly goals: readonly Goal[]
   readonly proposalGoals: Pick<ProposalGoalStore, "record">
+  /** Where a change the Gate makes outright keeps what it was made from, for its timeline. */
+  readonly made: Pick<MadeFromStore, "record">
   /** False for this deployment's own site, which serves the copy itself (0259). */
   readonly follows: boolean
   /** What decides the request; the path's interpreter then turns it into a change. */
@@ -176,6 +179,13 @@ export const proposeFor = async (given: ProposeFor): Promise<Result<Proposed, Pr
   if (!recorded.ok) return err({ code: "store", detail: recorded.error.detail })
 
   const outcome = await commitIntent(path, intent)
+  const made = madeFromOf(outcome, given.at.getTime())
+
+  /**
+   * After the change, and whatever it answers: the change is made either way,
+   * and its timeline says its goal was not recorded where this was not kept.
+   */
+  if (made !== undefined) await given.made.record(made)
 
   return ok({ kind: "proposed", request: brief.value.request, goal, outcome })
 }
