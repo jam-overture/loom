@@ -272,10 +272,10 @@ census above. The framework suite is untouched by this branch.
 
 | broken how | what went red |
 | --- | --- |
-| the published region edited away from the file | `your-model.ts is the published region` |
-| the server answering 200 for every case | both refusal cases, naming the code they got |
-| an `href` taken off one step | the link count, and the anchor sweep |
-| the hint sentence removed | `still tells a reader the steps can be pressed` |
+| one word of the published region edited in the file | `your-model.ts is the published region`, 1 of 13 |
+| the test server answering 200 for every case | both refusal cases, 2 of 13 |
+| the `href` taken off step three | the link count **and** the anchor sweep, 2 of 15 |
+| the hint sentence taken off the band | `still tells a reader the steps can be pressed`, 1 of 14 |
 
 All three marketing routes still report `ƒ` in `next build`, so
 [0331](0331-a-marketing-page-is-served-per-request-because-the-store-governs-it.md)
