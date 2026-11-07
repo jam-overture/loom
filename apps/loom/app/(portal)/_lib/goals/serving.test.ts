@@ -6,7 +6,7 @@ import { pageFixture } from "@/app/_lib/pages/fixtures"
 
 import { elementIdsOf, goalOn } from "../proposing/fixtures"
 import { goalIdSchema } from "./goal"
-import { goalForPage, proposalGoalOf, waitingByGoalOf } from "./serving"
+import { goalForPage, goalsOnPage, measuredOnFor, proposalGoalOf, waitingByGoalOf } from "./serving"
 
 const HOME = pageFixture("home", "Welcome home")
 const PRICING = treeIdSchema.parse("t_pricing")
@@ -60,6 +60,40 @@ describe("goalForPage", () => {
     expect(
       goalForPage([{ ...primary, nodeId: nodeIdSchema.parse("n_elsewhere") }], HOME)
     ).toBeUndefined()
+  })
+})
+
+describe("goalsOnPage", () => {
+  it("is every goal on the page, the primary first and then the oldest", () => {
+    expect(goalsOnPage([own, older, primary], HOME)).toEqual([primary, older, own])
+  })
+
+  it("leaves out a goal on other pages and one counting a part the page lacks", () => {
+    const elsewhere = { ...older, pages: [PRICING] }
+    const missing = { ...own, nodeId: nodeIdSchema.parse("n_elsewhere") }
+
+    expect(goalsOnPage([primary, elsewhere, missing], HOME)).toEqual([primary])
+  })
+})
+
+describe("measuredOnFor", () => {
+  it("is the goal the address names, where it is on the page", () => {
+    expect(measuredOnFor([primary, older, own], HOME, older.goalId)).toBe(older)
+  })
+
+  it("is the goal a change to the page serves when the address names none", () => {
+    expect(measuredOnFor([primary, older, own], HOME, undefined)).toBe(own)
+  })
+
+  it("is the goal a change to the page serves when the address names one not on the page", () => {
+    const elsewhere = { ...older, pages: [PRICING] }
+
+    expect(measuredOnFor([primary, elsewhere], HOME, elsewhere.goalId)).toBe(primary)
+    expect(measuredOnFor([primary], HOME, "g_unknown")).toBe(primary)
+  })
+
+  it("is nothing for a page no goal is on", () => {
+    expect(measuredOnFor([], HOME, primary.goalId)).toBeUndefined()
   })
 })
 

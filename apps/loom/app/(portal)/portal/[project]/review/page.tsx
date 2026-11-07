@@ -10,6 +10,7 @@ import { requireActor, requireRole } from "@/app/(portal)/_lib/auth/identity"
 import { goalsFor, proposalGoalsFor } from "@/app/(portal)/_lib/goals/stores"
 import { pageCopiesFor } from "@/app/(portal)/_lib/proposing/stores"
 import { pageNamesOf } from "@/app/(portal)/_lib/published-view"
+import { single } from "@/app/(portal)/_lib/query"
 import { queueRowOf } from "@/app/(portal)/_lib/queue"
 import {
   EVERY_CHANGE,
@@ -49,9 +50,6 @@ import { FilterChips } from "@/app/(portal)/_components/filter-chips"
  * read first. A change the store could not read is counted rather than
  * skipped, so the list never claims to be complete when it is not.
  */
-const single = (value: string | readonly string[] | undefined): string | undefined =>
-  typeof value === "string" ? value : undefined
-
 const ForReviewPage = async ({
   params,
   searchParams,
