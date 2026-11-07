@@ -135,6 +135,19 @@ describe("what the example offers", () => {
       "LOOM_PORTAL_EMAILS",
     ])
   })
+
+  /**
+   * The anchor is what this costs, and the mention it protects against is
+   * written as an assignment rather than as a bare name: the file's own
+   * paragraph about the commonest paste error quotes
+   * `DATABASE_URL=postgresql://…`. A reading that took a name from anywhere on
+   * a line would count a retired variable whose paragraph says it is gone.
+   */
+  it("does not take a name a comment writes as an assignment", () => {
+    const example = `# a line that reads LOOM_PORTAL_REVIEWERS=someone is the old way\nLOOM_PORTAL_EMAILS=\n`
+
+    expect(offered(example)).toEqual(["LOOM_PORTAL_EMAILS"])
+  })
 })
 
 describe("the guide's own table", () => {
