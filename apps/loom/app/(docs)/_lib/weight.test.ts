@@ -203,6 +203,49 @@ describe("what a page puts in front of a reader", () => {
     })
 
     /**
+     * **Heaviest first, as the order rather than as a word in a sentence.**
+     *
+     * The clause says *heaviest first* and a mutation that dropped the sort
+     * left every assertion green: the three modules it named were simply the
+     * first three the package declares, which on `signals` is
+     * `signals/action-change` rather than the one carrying 18,574 bytes. A run
+     * reading that fault would cut the wrong three modules first.
+     *
+     * Asserted as the order being non-increasing over the real site, and as
+     * the head being the maximum — the second is not implied by the first for
+     * a list the mutation left in declaration order, because such a list can
+     * be non-increasing by luck over the two the clause prints.
+     */
+    it("reports a page's modules heaviest first", () => {
+      for (const entry of apiReference.entries) {
+        const groups = groupWeightsOn(entry.slug)
+        const codes = groups.map((group) => group.code)
+
+        expect(codes, entry.slug).toEqual([...codes].sort((one, other) => other - one))
+        expect(groups[0]?.code, entry.slug).toBe(Math.max(...codes))
+      }
+    })
+
+    /**
+     * **A cut is one address per module, derived rather than counted.**
+     *
+     * The mutation this is written against replaced `addresses` with the
+     * literal `60`, which is the true answer for `signals` and the false one
+     * for every other door — and the suite was green, because every assertion
+     * about a cut was about the page the cap is going to fire on. A figure
+     * beside a derivation is a claim about the derivation, and a claim can lie;
+     * what kills it is asking every door at once.
+     */
+    it("gives a cut one address per module, on every door", () => {
+      for (const entry of apiReference.entries) {
+        const cut = pageCutOf(entry.slug)
+
+        expect(cut?.addresses, entry.slug).toBe(groupWeightsOn(entry.slug).length)
+        expect(cutContentsRows(entry.slug, groupWeightsOn(entry.slug)).length, entry.slug).toBe(cut?.addresses)
+      }
+    })
+
+    /**
      * A cut's price is in rows the contents file would really publish.
      *
      * `cutContentsRows` builds `TravellingEntry`, which is the shape
