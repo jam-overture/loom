@@ -20,6 +20,7 @@ import {
 import { rowSecurityOn } from "../testing/row-security.js"
 
 import { describeWindowApplyContract } from "./applied-window.contract.js"
+import { describeActedHourContract } from "./acted.contract.js"
 import { describeArrivalHourContract } from "./arrivals.contract.js"
 import { describeCorrelatedDeliveryContract } from "./correlated.contract.js"
 import { describeKeptDeliveryContract } from "./kept.contract.js"
@@ -71,6 +72,10 @@ describeArrivalHourContract("postgresReaderTallyStore", async () =>
   postgresReaderTallyStore(await freshDatabase())
 )
 
+describeActedHourContract("postgresReaderTallyStore", async () =>
+  postgresReaderTallyStore(await freshDatabase())
+)
+
 const tally = (overrides: Partial<ReaderTally> = {}): ReaderTally => ({
   treeId: TREE,
   revision: 1,
@@ -99,6 +104,7 @@ describe("the reader signal tables — Postgres specifics", () => {
     expect(await rowSecurityOn(db, "loom_reader_regions")).toBe(true)
     expect(await rowSecurityOn(db, "loom_reader_page_views")).toBe(true)
     expect(await rowSecurityOn(db, "loom_reader_arrivals")).toBe(true)
+    expect(await rowSecurityOn(db, "loom_reader_acted_hours")).toBe(true)
   })
 
   it("runs its migration twice without complaining", async () => {

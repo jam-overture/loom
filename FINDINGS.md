@@ -386,6 +386,19 @@ right rather than a reason not to look.
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom daily build`
 (`apps/loom/vitest.config.ts` and the application suite's discipline) ·
+**Status:** **closed by `framework-86-what-a-lane-may-not-do`**, which took
+recommendation 1 and recommendation 2 both. The sweep is
+`tools/sources/mocks.ts` and it lives in this lane rather than in a route group,
+so no other lane's file is edited by it — which is the cross-lane objection
+answered rather than worked around. It reads `codeOnly` first, so
+`(marketing)/_lib/serving.test.ts`' docblock, which prints two `vi.mock(…)`
+calls in the table of what it measured, is invisible to it; that is asserted
+rather than exempted. Recommendation 3 stays rejected for the reason given here.
+Measured on that branch: zero `vi.mock` in 586 `*.test.ts`, one file using the
+allowed `vi.doMock` + `vi.resetModules()` pattern, and an assertion that the
+count of such files is not zero, so the allowance cannot quietly become a rule
+about nothing. Original status below.
+
 **Status:** open — **nothing is broken**; this is the general version of the
 entry above, and it is filed rather than fixed because a marketing file
 sweeping three other lanes' test files is the cross-lane shape
@@ -503,8 +516,29 @@ that file and the claim deserves its own diff.
 ## 2026-11-06 — a goal's figure for a range, and *By page*'s bars for one, need what readers did on a part counted by hour, and only page views are
 
 **Filed by:** `Loom portal` · **Owned by:** `Loom signals` (`src/signals/`,
-`apps/loom/app/_lib/reader-signals/`) · **Status:** open — **nothing is
-broken.** It is the input for the last of 8a in `docs/portal.md`.
+`apps/loom/app/_lib/reader-signals/`) · **Status:** **closed (evening) by
+`signals-77-what-readers-did-by-hour`**
+([0362](decisions/0362-what-readers-did-is-counted-under-the-hour-they-did-it-in-as-a-seventh-counter-the-fold-writes-for-the-three-delegated-kinds.md)):
+all three asks are there for the three delegated kinds, through the scoped tally
+handle, with one exclusion stated below. **Nothing is broken.** It is the input
+for the last of 8a in `docs/portal.md`.
+
+**What closed it, in the words the ask used.** (1) The tally counts by UTC hour
+over a stated range: `tallies.acted({ treeId?, nodeId?, audience?, revision?,
+from?, to? })`, per tree, **part** and kind, written by the fold. (2) The first
+hour counted, as `readReaderArrivals` says it — and narrowed by the part, so a
+goal says when *its* part was first acted in. (3) Through
+`readingsFor(application).tallies`, with the portal's bounded wrapper forwarding
+it inside the same read budget.
+
+**One exclusion, and it is deliberate:** the hourly rows hold `activations`,
+`opens`, `closes` and `completions` — the three delegated kinds — and **not**
+`viewed`, `dwelled`, `views`, `reached` or `engaged`. The distinct counters
+cannot be sliced by hour without inflating (distinctness does not add, and the
+honest hourly denominator is the door's own arrivals); a `dwelled` row per part
+per hour is about 6,000 rows an hour on one large page. So the drawer's bars for
+*presses, opens, shuttings and sends* are answerable for a range and the two
+attention kinds are not — see the entry below.
 
 The finding below this one is closed: page views are counted by hour (0356),
 and *Signals* now draws its range picker, page views in the range and the
@@ -53680,7 +53714,38 @@ reinterprets and these rows start answering.
 ## 2026-10-12 — running the formatter on this repository reformats whatever it is pointed at, because there is no formatter configuration and nothing in `verify` would catch it
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom daily build` (the repository's
-own tooling) · **Status:** open — **caught and reverted inside the run that
+own tooling) · **Status:** **closed by `framework-86-what-a-lane-may-not-do`**
+([0360](decisions/0360-the-style-of-this-repository-is-maintained-by-hand-and-what-is-checked-is-that-no-statement-ends-in-a-semicolon.md)),
+and **both of its options turned out to be needed, by different lanes, twenty
+days apart.**
+
+One correction to the premise, because it matters for what was built: *the
+question has no answer in the repository* was true when this was filed and is
+not now. `docs/routines.md` has carried the prose answer under **Standards**
+since 1 November (#742) — and that paragraph credits an **earlier** instance of
+the same mistake, `Loom marketing`'s on 23 September, which cost that run a full
+revert and the re-application of eight files' worth of edits. So this is the
+second of two instances three weeks apart, and the prose arrived twenty days
+after this one.
+
+What was missing was the half prose cannot do, and it is what shipped:
+`pnpm verify` was green on a wholly reformatted file, so both instances were
+caught by a person noticing that a semicolon count looked wrong.
+`tools/sources/semicolons.ts` now holds the one property a reformat cannot avoid
+changing — **no statement in this repository ends in a semicolon** — over every
+source under `src/`, `tools/` and `apps/loom/`. Measured when written: 1,920
+sources, zero, with two shapes exempt because they are the language rather than a
+style (a `for` header's clauses spread over lines, in `src/signals/broadcast.ts`,
+and `&hellip;` closing JSX text, four times in `(lessons)`). A run that formats
+a file now goes red on its own branch, naming the file.
+
+The option that was **not** taken is a `.prettierrc` plus `format:check`, and
+0360 records why: no formatter reproduces a hand-maintained style exactly, so
+adopting one is not a configuration change but one reformat of every file in the
+repository, landing as an unreviewable diff in a week when four surfaces merge
+against one gate. Original status below.
+
+**Status:** open — **caught and reverted inside the run that
 caused it**, and filed because the next lane to reach for a formatter will do
 the same thing
 
@@ -67361,3 +67426,124 @@ goes and the losing module is deleted in one commit by whichever lane owns it.
 read two ways will be read the cheaper way, by a routine with a morning's budget
 and a screen to ship. The fix is not more words in the finding — it is naming
 the module and the signature, which this one does.
+
+---
+## 2026-11-06 (evening) — the hourly counter holds what readers *did*, so the drawer's `viewed` and `dwelled` bars still cannot be drawn for a range
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom portal`
+(`apps/loom/app/(portal)/portal/[project]/signals/`) · **Status:** open — **one
+sentence on a screen, or one short ask back to this lane**; nothing is blocked
+and nothing is red
+
+[0362](decisions/0362-what-readers-did-is-counted-under-the-hour-they-did-it-in-as-a-seventh-counter-the-fold-writes-for-the-three-delegated-kinds.md)
+answers *a bar per kind of thing readers did for the range* for the three kinds
+that **are** things readers did: presses, opens and shuttings, and sends. The
+wireframe's drawer lists five bars, and the other two — `viewed` and `dwelled` —
+are things readers *saw*, which the hourly table deliberately does not hold:
+
+- slicing `reached` or `views` by hour inflates them, because they are distinct
+  counts of page views and a page view that crosses an hour is one view in each;
+- a `dwelled` row per part per hour is as numerous as the page is large — about
+  6,000 rows an hour for a 6,000-node page, 144,000 a day, per revision, in a
+  table nothing sweeps.
+
+**Two ways to draw the drawer, and the first is free.**
+
+1. **Draw the three bars for the range, and the two attention figures *since
+   counting began*, labelled as such** — the tallies already hold those and go
+   on answering after a delivery is swept. The sentence is the honest one and the
+   screen is one label away from it. **Recommended.**
+2. **Ask this lane for a page-grained hourly table** — one row per tree,
+   revision and hour, with the count of `viewed` signals and the dwell
+   milliseconds. It is cheap in rows (trees × revisions × hours) and it would
+   answer both bars over a range. It is not built, because it is a second grain
+   with a sum rule between two tables and nothing has asked a question it
+   answers: the drawer's words are *what readers did*, and page views by hour
+   already say how many readers were there. **Say so and it is a morning's
+   work.**
+
+**What not to do:** do not derive either figure from the kept deliveries over a
+range. That is the capped scan 0356 refused, and it answers only for the kept
+window.
+
+---
+## 2026-11-06 (evening) — a seventh counter means `boundedReaderTallyStore` forwards a fifth listing, and this lane wrote the line again
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom portal`
+(`apps/loom/app/_lib/app/bounded-store.ts`) · **Status:** open — **the line is
+already on `signals-77-what-readers-did-by-hour` and `pnpm verify` is green**;
+what is open is only whether the comment is worded the way that file wants
+
+`ReaderTallyStore` gained `acted` (0362), so the portal's bounded wrapper did not
+implement the interface and the app typecheck went red. One line, forwarding,
+inside the same read budget as the other four listings:
+
+```ts
+acted: (request) => readWithin(() => store.acted(request), unavailable, budgetMs),
+```
+
+**It is the sixth time a widened store interface has asked this of that file**
+and the second in two days — `arrivals` took the same line this morning. The
+gate is doing its job every time: a wrapper that silently did not forward a
+method would be a screen reading an unbounded store.
+
+**The second read here whose cost grows with what the caller asks for**, and it
+has one lever the arrivals read does not: a part. A goal's series names a
+`nodeId` and is served by `loom_reader_acted_part_idx`; a page's bars name a
+tree. The budget still bounds the wait and not the work, so this lane's
+2026-11-06 note stands — **if that file would rather cap the range than cap the
+clock, the cap belongs there**, and it would now cover two reads rather than one.
+
+---
+## 2026-11-06 (evening) — the hourly rate's numerator and denominator are counted at different moments, and the error is at a range's edges
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/acted.ts`) · **Status:** open — **a stated limit of
+[0362](decisions/0362-what-readers-did-is-counted-under-the-hour-they-did-it-in-as-a-seventh-counter-the-fold-writes-for-the-three-delegated-kinds.md)**;
+nothing is broken and nothing is asked of anybody today. Recorded so the next
+run does not read the missing per-hour rate as an oversight.
+
+`readReaderActedRate` divides what readers **did** in a range by the page views
+that **began** in it. Those are two different moments: a reader who arrived at
+10:59 and pressed at 11:01 is in the eleven o'clock numerator and the ten
+o'clock denominator. Over thirty days that is two page views' worth of a month;
+over one hour it is the whole of the figure.
+
+So the rate is taken **once, over the range**, and the hours are published as
+counts. A per-hour rate series would publish the error once per bucket, in the
+shape where *a press with no arrival* reads as an infinite rate rather than as a
+reader who came in before the hour — which is why the rate is `null` where the
+range held no page views, and why the counts sit beside it.
+
+**If a per-hour rate is ever wanted**, the honest shape is not a quotient per
+bucket but a **rolling denominator**: the page views of the hour and the hour
+before, which is where a page view that straddles the boundary actually was. It
+needs no new column — it is a different reading of the two tables — and the test
+to write first is that an hour whose arrivals are all in the previous hour
+reports a rate under 100 rather than none.
+
+---
+## 2026-11-06 (evening) — three hourly readings now share one dense-fill rule, which is extracted rather than respelled
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/arrivals.ts`) · **Status:** open — **a note for a future run, not
+a defect**; nothing is asked of anybody today
+
+`arrivalSeriesOf` and `actedSeriesOf` draw bars over a range, and the rule they
+share is not the arithmetic but the **honesty**: an hour with no row is a nought
+that is drawn, an hour before counting began is not drawn at all, and the hour in
+progress is marked rather than drawn as a fall. Three spellings of that would be
+three chances for one chart to claim a quiet week a deployment never had.
+
+It is one function now — `hourlySeriesOf` in `arrivals.ts`, taking the rows, the
+first hour counted, the range and which number on a row it is counting — and
+`arrivalSeriesOf` is a four-line dressing of it. `arrivals.test.ts` and the
+arrivals contract suite were the guard for the extraction and are unchanged.
+
+**Two things a future run should not do.** Do not move the range helpers out of
+`arrivals.ts` on tidiness grounds: `arrivalRangeOf` and `arrivalRangeBefore` are
+what make the two periods of a comparison the same length, and a second module
+re-exporting them would be two names for one guarantee. And do not generalise the
+*change* shape the same way — `ArrivalChange` and `ActedChange` differ in what
+each withholds and why, which `ratios.ts` says at length is the reading's own
+rule and not a helper's.

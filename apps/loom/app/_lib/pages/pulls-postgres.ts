@@ -1,4 +1,4 @@
-import { eq, max, min, sql } from "drizzle-orm"
+import { and, asc, eq, gte, max, min, sql } from "drizzle-orm"
 import { bigint, pgTable, primaryKey, text } from "drizzle-orm/pg-core"
 
 import { err, ok } from "@jam-overture/loom"
@@ -76,6 +76,22 @@ export const postgresSitePullStore = (db: LoomDatabase): SitePullStore => ({
         : ok({ first: Number(row.first), last: Number(row.last) })
     } catch (cause) {
       return err(failure(cause, `could not read when ${application} last pulled`))
+    }
+  },
+
+  firstTakenSince: async (application, since) => {
+    try {
+      const rows = await db
+        .select({ first: loomSitePulls.firstPulledAt })
+        .from(loomSitePulls)
+        .where(
+          and(eq(loomSitePulls.applicationId, application), gte(loomSitePulls.firstPulledAt, since))
+        )
+        .orderBy(asc(loomSitePulls.firstPulledAt))
+
+      return ok(rows.map((row) => Number(row.first)))
+    } catch (cause) {
+      return err(failure(cause, `could not read what ${application} took since ${since}`))
     }
   },
 })

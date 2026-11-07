@@ -7,8 +7,9 @@ import { mayAccept } from "@/app/(portal)/_lib/auth/roles"
 import { reportOf, type WriteReport } from "@/app/(portal)/_lib/outcome"
 import { pageOfCopy } from "@/app/(portal)/_lib/proposing/copies"
 import { holdStandingOf } from "@/app/(portal)/_lib/proposing/following"
+import { madeFromOf } from "@/app/(portal)/_lib/proposing/made-from"
 import { mayPropose, siteReport } from "@/app/(portal)/_lib/proposing/report"
-import { pageCopiesFor, turnedDownFor } from "@/app/(portal)/_lib/proposing/stores"
+import { madeFromFor, pageCopiesFor, turnedDownFor } from "@/app/(portal)/_lib/proposing/stores"
 import { reasonFrom } from "@/app/(portal)/_lib/proposing/turned-down"
 import { plainState } from "@/app/(portal)/_lib/vocabulary"
 import { beginWrite } from "@/app/(portal)/_lib/write"
@@ -19,6 +20,8 @@ import { siteFor } from "../_lib/owned-site"
 export type AnswerReport = {
   readonly refusal?: string
   readonly report?: WriteReport
+  /** Where an accepted change is followed to live and on to its result (0358). */
+  readonly followAt?: string
 }
 
 const ALREADY = plainState("already-answered")
@@ -35,6 +38,11 @@ const ALREADY = plainState("already-answered")
  * against the page as it now stands: an answer is permission to proceed, not
  * permission to skip the check. A change that no longer fits the version the
  * site serves cannot be said yes to (0340): its copy is not the page anymore.
+ *
+ * A *yes* that makes the change keeps what it was made from (its intent and
+ * stake), which the page's record does not, so its timeline leads with the
+ * goal it serves. The change is made whether or not that is kept, as a *no* is
+ * turned down whether or not it is remembered.
  *
  * A *no* is remembered, with the reason when one was given, so the AI weighs
  * its next proposal for the page against it (0341). The change is turned down
@@ -111,5 +119,13 @@ export const answerAction = async (
 
   await write.finish()
 
-  return { report: siteReport(reportOf(outcome, write.weighedAgainst), application) }
+  const made = madeFromOf(outcome, Date.now())
+
+  if (made !== undefined) await madeFromFor(application).record(made)
+
+  const report = siteReport(reportOf(outcome, write.weighedAgainst), application)
+
+  return report.tone === "applied"
+    ? { report, followAt: `/portal/${site.projectId}/review/accepted/${proposalId.data}` }
+    : { report }
 }

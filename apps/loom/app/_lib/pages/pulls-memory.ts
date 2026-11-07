@@ -32,5 +32,15 @@ export const memorySitePullStore = (): SitePullStore => {
 
     span: (application) =>
       Promise.resolve(ok(joined([...(held.get(application)?.values() ?? [])]))),
+
+    firstTakenSince: (application, since) =>
+      Promise.resolve(
+        ok(
+          [...(held.get(application)?.values() ?? [])]
+            .map((span) => span.first)
+            .filter((first) => first >= since)
+            .sort((left, right) => left - right)
+        )
+      ),
   }
 }

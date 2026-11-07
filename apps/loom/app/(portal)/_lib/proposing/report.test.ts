@@ -46,8 +46,8 @@ describe("siteReport", () => {
     detail: "d",
   } as const
 
-  it("says a customer's site keeps serving what it published", () => {
-    expect(siteReport(applied, SHOP).meaning).toMatch(/keeps serving what it published/u)
+  it("says a customer's site serves the change from its next pull (0358)", () => {
+    expect(siteReport(applied, SHOP).meaning).toMatch(/serves it from its next pull/u)
   })
 
   it("says this deployment's own site serves the copy, so the change is live", () => {
