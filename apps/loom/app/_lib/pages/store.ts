@@ -6,7 +6,11 @@ import { describeApplicationStoreError, type ApplicationId } from "@jam-overture
 
 import { portalDatabase } from "@/app/(portal)/_lib/database"
 import { followSite } from "@/app/(portal)/_lib/proposing/follow-site"
+import { livePages } from "@/app/(portal)/_lib/proposing/live"
+import { followsItsSite, pageCopiesFor } from "@/app/(portal)/_lib/proposing/stores"
+import { governedPagesFor } from "@/app/(portal)/_lib/write"
 import { appApplications } from "@/app/_lib/app/store"
+import { appIngestKeys } from "@/app/_lib/reader-signals/key-store"
 
 import type { PublishKeyStore } from "./publish-keys"
 import { memoryPublishKeyStore } from "./publish-keys-memory"
@@ -14,6 +18,7 @@ import { postgresPublishKeyStore } from "./publish-keys-postgres"
 import type { PublishedPageStore } from "./published"
 import { memoryPublishedPageStore } from "./published-memory"
 import { postgresPublishedPageStore } from "./published-postgres"
+import type { ReadDoor } from "./live"
 import type { PublishDoor } from "./receive"
 
 /**
@@ -58,22 +63,56 @@ export const appPublishKeys: PublishKeyStore = held.keys
 export const publishedPagesFor = (application: ApplicationId): PublishedPageStore =>
   held.pagesFor(application)
 
+/** The application a key named, for both doors to ask whether it is still open. */
+const applicationOf: PublishDoor["applicationOf"] = async (application) => {
+  const found = await appApplications.get(application)
+
+  if (found.ok) return ok(found.value)
+
+  /** A key naming an application that is not there names nobody. */
+  return found.error.code === "not-found"
+    ? ok(null)
+    : err({ detail: describeApplicationStoreError(found.error) })
+}
+
 export const appPublishDoor: PublishDoor = {
   keys: appPublishKeys,
-  applicationOf: async (application) => {
-    const found = await appApplications.get(application)
-
-    if (found.ok) return ok(found.value)
-
-    /** A key naming an application that is not there names nobody. */
-    return found.error.code === "not-found"
-      ? ok(null)
-      : err({ detail: describeApplicationStoreError(found.error) })
-  },
+  applicationOf,
   pagesFor: publishedPagesFor,
   /** After the build is answered, inside the same invocation, so the platform does not cut it off. */
   kept: (application, trees) => {
     after(() => followSite(application, trees))
   },
   now: () => Date.now(),
+}
+
+/**
+ * The read door's stores (0358 clause 3): the project's key, what its site
+ * published, and the copies Loom's accepted changes are on, read with the
+ * screens' budget, since a pull is a read and must answer even when a store is
+ * slow.
+ */
+export const appReadDoor: ReadDoor = {
+  keys: appIngestKeys,
+  applicationOf,
+  livePagesOf: async (application) => {
+    const [published, copies] = await Promise.all([
+      publishedPagesFor(application).list(),
+      pageCopiesFor(application).list(),
+    ])
+
+    if (!published.ok) return err({ detail: published.error.detail })
+    if (!copies.ok) return err({ detail: copies.error.detail })
+
+    const live = await livePages(
+      {
+        trees: governedPagesFor(application),
+        copies: copies.value,
+        follows: followsItsSite(application),
+      },
+      published.value.map((page) => page.tree)
+    )
+
+    return live.ok ? live : err({ detail: live.error.detail })
+  },
 }

@@ -56,7 +56,8 @@ const answer = (status: number, detail: string, headers: Record<string, string> 
 const unauthorised = (detail: string): Response =>
   answer(401, detail, { "www-authenticate": 'Bearer realm="loom pages"' })
 
-const bearerOf = (request: Request): string | null => {
+/** The key a request sends as `Authorization: Bearer …`, the one way both page doors take a key. */
+export const bearerOf = (request: Request): string | null => {
   const header = request.headers.get("authorization")
   const match = header === null ? null : /^Bearer\s+(\S+)$/i.exec(header.trim())
 
