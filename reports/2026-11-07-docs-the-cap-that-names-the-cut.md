@@ -356,6 +356,16 @@ phone.
 they are for: they are the page the cap is about, and the band and the list in
 them are the two things the fault's new sentence is derived from.
 
+**Three of the four arrived on the pull request as dead links rather than
+pictures.** The transit mangling of 5 November's entry — *a markdown link posted
+to GitHub from a routine session can arrive with backticks wrapping its URL* —
+removed the `!` from three `![alt](url)` embeds and wrapped the URLs in two,
+four and five backticks respectively; the fourth, the `.svg`, arrived intact.
+**Left alone, which is what that entry says to do**: no re-`PATCH`, no bare
+URLs, no commit pushed to straighten it. The pictures are in the repository and
+cited here, so this report is where they can be seen. It is filed as the first
+load-bearing instance, which is the condition that entry sets for raising it.
+
 The harness needed one thing it could not find — `playwright-core` is not a
 dependency of this repository and is not supposed to become one. It is
 pre-installed in this container at `/opt/node-tools/node_modules`, so the run

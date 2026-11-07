@@ -8,6 +8,117 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-11-07 (evening) — the transit mangling has hit something load-bearing: it ate the `!` off three image embeds, and the backtick count escalated across one body
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom daily build` (run mechanics; it
+owns the 5 November entry this extends) · **Status:** open — **the remedy is
+still to stop rather than to fix**, and this run followed it. What is new is
+that the 5 November entry's own trigger for raising it with the maintainer has
+now been met.
+
+The 5 November entry closes: *"Worth raising only if it ever mangles something
+load-bearing — a URL inside a code fence a reader is meant to copy, or a
+`decisions/` link in a record. So far it has only ever hit prose links, where
+the cost is one ugly line."*
+
+**It has now hit an image embed.** #801's body was composed with four pictures
+as `![alt](url)`. Three arrived as **links rather than images**, with the `!`
+removed and the URL wrapped:
+
+| in the body as composed | as it arrived |
+| --- | --- |
+| `![…](…wide-head.webp)` | ``[…](``…wide-head.webp``)`` — 2 backticks each side |
+| `![…](…wide-modules.webp)` | 4 backticks each side |
+| `![…](…phone-modules.webp)` | 5 backticks each side |
+| `![…](….svg)` | **intact, `!` and all** |
+
+**Two things here that the earlier entry does not have.**
+
+1. **The `!` is removed, not just wrapped.** That is the difference between an
+   ugly line and a missing picture. A routine brief that requires a screenshot
+   on the pull request is not satisfied by a dead link, so this is the first
+   instance with a cost beyond cosmetics.
+2. **The backtick count escalates down the body** — two, then four, then five
+   — which the earlier entry's single-link examples could not show. Whatever
+   does this is accumulating something as it goes rather than applying a fixed
+   substitution, and the fourth embed escaping entirely says it is not simply
+   per-image.
+
+**Observation and not a measurement:** the three mangled are `.webp` and the
+survivor is `.svg`. One body is one sample and the file type may be
+coincidence; it is recorded because it is cheap to check next time and would
+narrow the cause if it held.
+
+**What this run did, which is what the 5 November entry says to do.** Nothing to
+the body: **no re-`PATCH`, no rewriting the embeds as bare URLs, and no commit
+pushed to straighten them.** Re-posting is measured as futile in that entry and
+a push re-runs the merge gate for four surfaces. The pictures themselves are in
+the repository, cited by the report and checked by `reports:check`, so a reader
+reaches them through the report; and the fourth embed — the one carrying the two
+caps, which is the one worth seeing — renders.
+
+**This commit records rather than repairs**, which is the distinction the
+earlier entry's prohibition turns on: it forbids pushing *to fix the
+backticks*, and a finding is how the next run finds out it is not their doing.
+
+**For the maintainer**, and only when something else brings you here: the path
+between a routine session and the GitHub API is now known to remove a character
+rather than only add two, and that is a question nobody inside the repository
+can ask.
+
+---
+## 2026-11-07 (evening) — six wakes in two minutes and nineteen seconds on one pull request, five of them one bot editing one comment, from a subscription the session did not ask for
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom daily build` (run mechanics; it
+owns the 3 November entry this measures) · **Status:** open — **the cost is the
+finding.** Nothing was armed and the subscription was cancelled.
+
+The 3 November entry says *declining to subscribe does not prevent the
+subscription, and the wake that creates it asks the session to arm a check-in
+chain.* It is right, and here is what it costs, counted.
+
+#801 was opened at 14:12:16Z. By 14:14:34Z this session had **six queued
+wakes**:
+
+| wake | what it was |
+| --- | --- |
+| 1 | `subscription.created` — **this session never called `subscribe_pr_activity`** |
+| 2 | `vercel[bot]` posts its deployment comment |
+| 3, 5, 6 | `vercel[bot]` **edits that same comment**, three times, as the build goes Building → Ready |
+| 4 | `check_suite.completed`, reporting nothing failed |
+
+**Five of the six are one bot keeping one comment up to date**, and the sixth
+says everything is fine. Not one of them needed a session.
+
+**And the first one asks for a check-in chain** — *"keep one safety-net self
+check-in… the first about 50 minutes after the last activity, later ones about
+4 hours apart."* That is the shape `docs/routines.md` records as having cost a
+week's allowance on 9 August, and this lane's brief forbids it in two
+sentences: *"Never schedule a follow-up or a self-check-in. Run, report,
+exit."*
+
+**What this run did.** Read all six, verified the pull request against primary
+sources once — `mergeable_state: clean`, one status, `success`, no review
+threads, nothing red and nothing conflicted — and then **called
+`unsubscribe_pr_activity`**, because a subscription whose purpose is to drive a
+check-in chain this lane may not arm is a subscription that can only generate
+noise. Nothing was armed. No comment was posted about any of the six.
+
+**Why unsubscribing is the right end of it rather than simply ignoring the
+wakes.** A wake is a cloud session. Left subscribed over a weekend with no
+maintainer, every base-branch push, every bot comment edit and every CI run on
+this branch spends one — for a pull request whose entire remaining content is
+*waiting for one word*. *Run, report, exit* has to include exit, and this is
+the call that implements it.
+
+**Recommendation, unchanged from 3 November and now with a number on it:** if
+the harness is going to subscribe a routine session regardless of whether it
+asked, the brief's rule and the harness's default are in direct conflict, and
+the maintainer is the only one who can settle which wins. Until then every
+routine of this lane will do what this one did — read, verify once, unsubscribe
+— which works and costs six sessions a pull request.
+
+---
 ## 2026-11-07 — the merge gate for four surfaces goes red about 13 November on a documentation cap, and the remedy that cap pre-agrees is measured as unaffordable
 
 **Filed by:** `Loom docs` · **Owned by:** `Loom docs`
