@@ -47,6 +47,16 @@ export default defineConfig({
      * spent: 175s of loading against 180s of testing. Those files are functions
      * of their arguments, so a warm module cache is scenery to them.
      *
+     * **A file that installs a module mock is the exception, and it is not a
+     * function of its arguments.** `vi.mock` is hoisted and replaces a module
+     * as it is evaluated, so a module an earlier file in this worker already
+     * loaded is not replaced: the mock works, or does not, according to which
+     * files the suite put in the worker with it — which means the failure
+     * arrives when an unrelated lane's merge reshuffles them, on `main` rather
+     * than on any branch. Use `vi.doMock` after `vi.resetModules()` and import
+     * again, as `(portal)/_lib/write.test.ts` does.
+     * `tools/sources/mocks.ts` sweeps for both and explains the hazard in full.
+     *
      * Two kinds of file keep a worker each, on the threads pool. A rendering
      * file, because Testing Library's `screen` is bound to the document of the
      * first file that imported it, and a document left over from another file
