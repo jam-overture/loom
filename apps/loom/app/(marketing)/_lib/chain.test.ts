@@ -216,7 +216,7 @@ describe("every rung is the way to the band that shows it", () => {
       if (route === undefined) throw new Error(`loom: the chain points at ${path}, which is not a page of this site`)
 
       const markup = renderToStaticMarkup(
-        renderTree(await pageTreeFor(route, { theme: DEFAULT_THEME }), { origin: ORIGIN }).element
+        renderTree(pageTreeFor(route, { theme: DEFAULT_THEME }), { origin: ORIGIN }).element
       )
 
       for (const { shown } of linked.filter((rung) => rung.shown?.path === path)) {

@@ -322,26 +322,24 @@ export const RESERVED_VOCABULARY: readonly string[] = [
  * cannot sit here going on exempting nothing.
  */
 /**
- * The headline, and it is his of 24 October.
+ * The headline, and it is his: *Make your web page dynamic with AI and Loom*.
  *
- * Three were put to him and he took this one: *"I like the second headline.
- * Simplest but gets to the point."* `docs/positioning.md` records the exchange
- * and marks it settled.
+ * **Restored on 7 November, at his instruction, and settled.** He wrote it on
+ * 27 September. On 24 October three alternatives were put to him on #704 and
+ * this lane took his reply as a choice of *A web page that rearranges itself
+ * around the people using it*, recorded that as settled, and swapped his line
+ * out. On 7 November he wrote *"It should say Make your web page dynamic with
+ * AI and Loom"*, and asked why he had to keep repeating it. The 24 October
+ * reading was wrong, and every run that read the note calling it settled
+ * carried it forward.
  *
- * **It replaces a line of his own**, which is the first time an entry of
- * `MAINTAINERS_OWN` has come off rather than been added to. *Make your web page
- * dynamic with AI and Loom* was his of 27 September and sat here from the day
- * the list was written. The list holds his lines verbatim, so a line he has
- * moved on from leaves with the page rather than staying here as a sentence
- * nobody renders. The old one survives in `reports/` and in the record of the
- * conversation; nothing about it was edited.
- *
- * Exported rather than written into the hero because the page and this list are
- * the two readers of it, and a literal spelled in both places is a literal that
- * gets changed in one of them. The test below only proves the entries are still
- * rendered; it cannot prove they were not both rewritten together.
+ * **No run changes this line.** A headline is his to write; a run that thinks
+ * it should change says so in a report and leaves the literal alone.
+ * `headline.test.ts` pins it word for word, against a literal of its own
+ * rather than this constant, so the two have to be changed together and on
+ * purpose.
  */
-export const HEADLINE = "A web page that rearranges itself around the people using it"
+export const HEADLINE = "Make your web page dynamic with AI and Loom"
 
 export const MAINTAINERS_OWN: readonly string[] = [
   HEADLINE,
@@ -350,10 +348,7 @@ export const MAINTAINERS_OWN: readonly string[] = [
    * to use* are his, and so is the closing triad; `pages/home.ts` has the whole
    * of why each was added.
    *
-   * **It survives the headline swap**, and that was checked rather than
-   * assumed. `docs/positioning.md` settles the headline and nothing else about
-   * this band, and his paragraph is the build case rather than the governance
-   * one: it is about what a page becomes, which is what the new headline says.
+   * It stood under both headlines, and it is his whatever sits above it.
    */
   "AI already writes the components, but would you trust AI to dynamically change your web page? What your page evolves to is yet to be built. Loom and AI are how your page evolves together.",
   /**

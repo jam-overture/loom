@@ -258,7 +258,7 @@ describe("the four steps as four places to go", () => {
       }
 
       const markup = renderToStaticMarkup(
-        renderTree(await pageTreeFor(route, { theme: "minimal" }), {
+        renderTree(pageTreeFor(route, { theme: "minimal" }), {
           origin: "https://loom.example",
         }).element
       )

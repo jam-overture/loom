@@ -51,9 +51,9 @@ import {
  * vocabulary arrives whether anybody chose it or not. A register test that
  * cannot see the machinery is a register test that passes for the wrong reason.
  */
-const pageWords = async (route: SiteRoute): Promise<string> =>
+const pageWords = (route: SiteRoute): string =>
   withoutPackageNames(
-    wordsOf((await pageTreeFor(route, { theme: DEFAULT_THEME })).root)
+    wordsOf(pageTreeFor(route, { theme: DEFAULT_THEME }).root)
   )
 
 /**
@@ -108,7 +108,7 @@ describe("the front door", () => {
   let words = ""
 
   beforeAll(async () => {
-    words = await pageWords(HOME)
+    words = pageWords(HOME)
   })
 
   /**
@@ -218,7 +218,7 @@ describe("every page of this site", () => {
   it.each(
     SITE_ROUTES.flatMap((route) => RESERVED_VOCABULARY.map((term) => [route, term] as const))
   )("$0.path never says %s", async (route, term) => {
-    expect({ route: route.path, term, uses: uses(await pageWords(route), term) }).toEqual({
+    expect({ route: route.path, term, uses: uses(pageWords(route), term) }).toEqual({
       route: route.path,
       term,
       uses: false,
@@ -294,7 +294,7 @@ const BRITISH = new RegExp(
 
 describe("the spelling a reader meets", () => {
   it.each(SITE_ROUTES)("$path is written in US English", async (route) => {
-    const found = [...(await pageWords(route)).matchAll(BRITISH)].map((match) => match[0])
+    const found = [...pageWords(route).matchAll(BRITISH)].map((match) => match[0])
 
     expect({ route: route.path, british: [...new Set(found)] }).toEqual({
       route: route.path,
@@ -346,7 +346,7 @@ const PRICED = new RegExp(
 
 describe("what the site says about what it costs", () => {
   it.each(SITE_ROUTES)("$path names no price and no plan", async (route) => {
-    const found = [...(await pageWords(route)).matchAll(PRICED)].map((match) => match[0])
+    const found = [...pageWords(route).matchAll(PRICED)].map((match) => match[0])
 
     expect({ route: route.path, priced: [...new Set(found)] }).toEqual({
       route: route.path,
@@ -472,7 +472,7 @@ describe("every string a reader reads", () => {
   let pages: readonly ServedPage[] = []
 
   beforeAll(async () => {
-    pages = await servedPages()
+    pages = servedPages()
     read = readOf(pages)
   })
 
@@ -669,7 +669,7 @@ describe("the panels that print source", () => {
   let pages: readonly ServedPage[] = []
 
   beforeAll(async () => {
-    pages = await servedPages()
+    pages = servedPages()
   })
 
   const panelText = (): readonly string[] =>

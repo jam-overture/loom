@@ -70,7 +70,7 @@ const opening = (node: ElementNode): string => {
 const eyebrowOf = (band: ElementNode): string =>
   typeof band.props["eyebrow"] === "string" ? band.props["eyebrow"] : "(no eyebrow)"
 
-const served = async (route: SiteRoute): Promise<LoomTree> =>
+const served = (route: SiteRoute): LoomTree =>
   pageTreeFor(route, { theme: DEFAULT_THEME })
 
 describe("a band of nothing but paragraphs faces its heading", () => {
@@ -83,7 +83,7 @@ describe("a band of nothing but paragraphs faces its heading", () => {
      * an index into a tree tells them nothing.
      */
     it("leaves no prose-only band with its heading stacked above it", async () => {
-      const stacked = bandsOf(await served(route))
+      const stacked = bandsOf(served(route))
         .filter((band) => rendersOnly(band, ["loom.heading", "loom.prose"]))
         .filter((band) => elementsOfType(band, "loom.split").length === 0)
         .map(eyebrowOf)
@@ -96,7 +96,7 @@ describe("a band of nothing but paragraphs faces its heading", () => {
      * band could satisfy it by dropping its heading altogether.
      */
     it("keeps the heading and the answer in opposite regions of the split", async () => {
-      const facing = bandsOf(await served(route)).filter(
+      const facing = bandsOf(served(route)).filter(
         (band) => elementsOfType(band, "loom.split").length > 0
       )
 
@@ -124,7 +124,7 @@ describe("a band of nothing but paragraphs faces its heading", () => {
      * is already measured; this holds the site to it.
      */
     it("lets the column measure the paragraphs inside it", async () => {
-      const asking = bandsOf(await served(route))
+      const asking = bandsOf(served(route))
         .filter((band) => elementsOfType(band, "loom.split").length > 0)
         .flatMap((band) => elementsOfType(band, "loom.prose"))
         .filter((node) => node.props["measured"] === true)

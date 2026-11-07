@@ -2,7 +2,7 @@ import type { LoomTree, TreeId } from "@jam-overture/loom"
 
 import { absent } from "@/app/_lib/app/bounded-store"
 
-import { appStoreForWriting, siteStore } from "@/app/_lib/app/store"
+import { appStoreForWriting } from "@/app/_lib/app/store"
 
 import { SITE_PAGES, treeFor } from "./builders"
 import { SITE_ROUTES, type SiteRoute } from "./site"
@@ -20,9 +20,25 @@ import { SITE_ROUTES, type SiteRoute } from "./site"
  * ([0259](../../../../../decisions/0259-a-surface-the-portal-governs-renders-from-the-store-and-a-page-built-at-render-time-is-not-one.md)
  * condition 1).
  *
- * Now the builders are a **seed** and the store is what gets served.
+ * Now the builders are a **seed**: the rows are what the portal governs, and
+ * what a proposal is held against.
  *
- * ## The one rule, and it is the whole of the risk
+ * ## What changed on 7 November
+ *
+ * **The rows stopped being what a reader is served**
+ * ([0363](../../../../../decisions/0363-the-marketing-site-is-served-from-its-code-and-a-stored-row-is-not-a-second-version-of-it.md)).
+ * `render.ts` read them from 12 October and fell back to the builder whenever
+ * the store took longer than 1.5 seconds, which a cold connection always does.
+ * Seeding never overwrites, so the row was the page as it stood on the first
+ * `db:push` and the builder was the page as it stands now, and a reader got
+ * one or the other by timing. The maintainer watched the front door change
+ * headline twice in a minute with nothing merged between.
+ *
+ * A reader is served the builder's page, and an accepted change reaches them
+ * through the live-page pull ([0361](../../../../../decisions/0361-the-site-pulls-into-its-own-process-and-a-host-wires-the-live-page-in-two-calls.md))
+ * rather than through these rows.
+ *
+ * ## The one rule for seeding
  *
  * **Seeding never overwrites.** A page in the store has been through whatever
  * has happened to it since — a change somebody accepted in the portal, an
@@ -30,18 +46,11 @@ import { SITE_ROUTES, type SiteRoute } from "./site"
  * at all. So this creates a page that is absent and leaves alone a page that is
  * present, and there is no path through this module that writes over one.
  *
- * It follows that **editing a builder stops changing the site** once that page
- * exists. That is the trade 0259 names and the maintainer took: a page is a
- * thing you govern rather than code you edit, and the way to change it is to
- * ask for a change.
- *
- * **There is no way back from that today**, and it is worth saying plainly
- * rather than implying otherwise: `TreeStore` is `create`, `head`, `revisions`,
- * `list` and `append`. Nothing deletes. So a deployment that decides it wants
- * the authored page back cannot drop the row and re-seed — it can only append
- * its way there, or go to the database by hand. Filed for `Loom framework`
- * rather than worked around here, because a store contract is not this lane's
- * to extend.
+ * **There is no way to refresh a row today**, and it is worth saying plainly:
+ * `TreeStore` is `create`, `head`, `revisions`, `list` and `append`. Nothing
+ * deletes. A row seeded from an older builder stays as it was seeded. Filed
+ * for `Loom framework` rather than worked around here, because a store
+ * contract is not this lane's to extend.
  *
  * ## The ids are the builders' own
  *
@@ -158,41 +167,4 @@ export const seedSitePages = async (): Promise<void> => {
 
     await appStoreForWriting.create(tree)
   }
-}
-
-/**
- * The stored page, or nothing.
- *
- * **Nothing is a working answer**, not a failure: a store that has not been
- * seeded yet, or one that cannot be read, leaves the caller to build the page
- * from code — which is what this site did for its whole life until today. A
- * site that will not serve because a database is down would be a worse product
- * than one that serves the authored page, and the portal is where somebody
- * finds out the store is unreachable.
- */
-export const storedPageFor = async (route: SiteRoute): Promise<LoomTree | undefined> => {
-  const treeId = storedIdFor(route)
-
-  if (treeId === undefined) return undefined
-
-  /**
-   * `siteStore` reads within a budget, which is what makes the fallback below
-   * reachable at all. It was only ever reached when the store *refused*: a
-   * store that does not answer returns no `Result`, so the authored page — the
-   * thing 0262 promises a reader when the control plane is unreachable — was
-   * itself unreachable, and this site served a 504 instead.
-   *
-   * The budget moved from here to the handle on 13 October, so that the
-   * eighteen portal screens that never had one got it too.
-   * `_lib/app/bounded-store.ts` has the argument; what this line cares about is
-   * that a slow store now answers `unavailable`, which is a refusal, which is a
-   * page.
-   *
-   * **This is now the only query a marketing request makes.** It used to be the
-   * fourth: the three seeding reads went first, each answering *already there*,
-   * on a pool of one connection where every query waits for the last.
-   */
-  const head = await siteStore.head(treeId)
-
-  return head.ok ? head.value : undefined
 }
