@@ -17,7 +17,9 @@ import {
   ACCEPTED_PAGE_SIZE,
   acceptedChangesOf,
   acceptedPage,
+  boundsAround,
   boundsOf,
+  changedAtOf,
   goalNameOf,
   liveAtOf,
   reachOf,
@@ -499,5 +501,31 @@ describe("sentencesOf", () => {
 
   it("keeps the id of a part nothing names, which is all there is to call it", () => {
     expect(sentencesOf(change, new Map())[0]).toContain("n_banner")
+  })
+})
+
+describe("changedAtOf and boundsAround", () => {
+  const [newer, older] = acceptedChangesOf(PAGE, [
+    first([entry(PAGE, 1, "p_old", AT), entry(PAGE, 2, "p_new", AT + 60 * MINUTE)]),
+  ])
+
+  if (newer === undefined || older === undefined) throw new Error("expected two changes")
+
+  it("finds every time the page changed for its readers, and only this page's", () => {
+    const reach = pulling([AT + MINUTE])
+    const elsewhere = { ...older, pageId: treeIdSchema.parse("t_about") }
+
+    expect(changedAtOf(PAGE, [newer, older, elsewhere], [AT + 5 * MINUTE], reach)).toEqual([
+      AT + 5 * MINUTE,
+      AT + MINUTE,
+    ])
+  })
+
+  it("bounds a moment by the changes either side, never by one at the moment itself", () => {
+    expect(boundsAround(AT, [AT - MINUTE, AT, AT + MINUTE, AT - 2 * MINUTE])).toEqual({
+      previous: AT - MINUTE,
+      next: AT + MINUTE,
+    })
+    expect(boundsAround(AT, [AT])).toEqual({})
   })
 })
