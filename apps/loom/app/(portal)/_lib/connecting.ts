@@ -82,3 +82,13 @@ export const publishCommandFor = (origin: string): string =>
   -H "authorization: Bearer $LOOM_PUBLISH_KEY" \\
   -H "content-type: application/json" \\
   --data @snapshot.json`
+
+/**
+ * What a site's server asks the read door (0358 clause 3), for the technical
+ * record: the request the pull client makes, and one a person can run to see
+ * what their site would be handed. The key is the public one, so it is
+ * spelled out, as in the snippet.
+ */
+export const pullCommandFor = (origin: string, key: IngestKey): string =>
+  `curl --fail-with-body "${pagesAddress(origin)}/live" \\
+  -H "authorization: Bearer ${key}"`

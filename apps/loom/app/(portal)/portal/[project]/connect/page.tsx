@@ -11,20 +11,23 @@ import { mayAdminister } from "@/app/(portal)/_lib/auth/roles"
 import {
   acceptedFrom,
   publishCommandFor,
+  pullCommandFor,
   signalAddress,
   snippetFor,
 } from "@/app/(portal)/_lib/connecting"
+import { pullingOf } from "@/app/(portal)/_lib/pulling"
 import { plainMoment } from "@/app/(portal)/_lib/when"
 import { portalApplications, portalProjects } from "@/app/(portal)/_lib/store"
 import { PORTAL_READ_BUDGET_MS } from "@/app/_lib/app/bounded"
 import { readWithin, unavailable } from "@/app/_lib/app/bounded-store"
 import { soleApplicationOf } from "@/app/_lib/app/sole-application"
-import { appPublishKeys } from "@/app/_lib/pages/store"
+import { appPublishKeys, appSitePulls } from "@/app/_lib/pages/store"
 import { appIngestKeys } from "@/app/_lib/reader-signals/key-store"
 
 import { CopyButton } from "./_components/copy-button"
 import { KeyControls } from "./_components/key-controls"
 import { PublishKeyControls } from "./_components/publish-key-controls"
+import { PullingSection } from "./_components/pulling-section"
 
 /**
  * *Connect your site*: a project's key, the snippet that carries it, and where
@@ -48,6 +51,12 @@ import { PublishKeyControls } from "./_components/publish-key-controls"
  * **Publishing pages** (0312) is the last section, and unlike the ingest key
  * the publish key is a secret: it is shown once, to the owner who made it,
  * and the screen says only *when* the current one was made.
+ *
+ * **Whether the site pulls** (0358) closes the screen: until a site's server
+ * takes its live pages, *Accept* changes Loom's copy and no reader sees it, and
+ * a person accepting a change is owed that sentence before they press it. A
+ * record that cannot be read says so in that section alone, because it is a
+ * table a deployment may not have pushed yet and the key above still works.
  *
  * The address is the deployment's as this request reached it, not
  * `siteOrigin()`: it is where the person reading this is talking to the
@@ -86,9 +95,9 @@ const ConnectPage = async ({ params }: { params: Promise<{ project: string }> })
 
   const application = applications.ok ? soleApplicationOf(applications.value, projectId) : undefined
 
-  const [held, publishing] =
+  const [held, publishing, pulls] =
     application === undefined
-      ? [undefined, undefined]
+      ? [undefined, undefined, undefined]
       : await Promise.all([
           readWithin(
             () => appIngestKeys.keyOf(application.applicationId),
@@ -97,6 +106,11 @@ const ConnectPage = async ({ params }: { params: Promise<{ project: string }> })
           ),
           readWithin(
             () => appPublishKeys.mintedAt(application.applicationId),
+            unavailable,
+            PORTAL_READ_BUDGET_MS
+          ),
+          readWithin(
+            () => appSitePulls.span(application.applicationId),
             unavailable,
             PORTAL_READ_BUDGET_MS
           ),
@@ -164,6 +178,8 @@ const ConnectPage = async ({ params }: { params: Promise<{ project: string }> })
     const snippet = snippetFor(signalAddress(origin, key))
     const publishCommand = publishCommandFor(origin)
     const mintedAt = publishing?.ok === true ? publishing.value : null
+    const pulling =
+      pulls === undefined ? undefined : pullingOf(application.applicationId, pulls, Date.now())
 
     return (
       <div className="flex max-w-3xl flex-col gap-4">
@@ -236,6 +252,10 @@ const ConnectPage = async ({ params }: { params: Promise<{ project: string }> })
           </p>
           {owner && <PublishKeyControls projectId={projectId} held={mintedAt !== null} />}
         </section>
+
+        {pulling !== undefined && (
+          <PullingSection pulling={pulling} command={pullCommandFor(origin, key)} />
+        )}
       </div>
     )
   })()

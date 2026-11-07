@@ -1,5 +1,6 @@
 "use client"
 
+import Link from "next/link"
 import { useActionState } from "react"
 import { useFormStatus } from "react-dom"
 
@@ -54,6 +55,11 @@ export const AnswerControls = ({
       <div className={`flex flex-col gap-1 rounded-md p-3 ${toneClasses(answer.report.tone)}`}>
         <span className="text-sm font-medium">{answer.report.headline}</span>
         <span className="text-xs">{answer.report.meaning}</span>
+        {answer.followAt === undefined ? null : (
+          <Link href={answer.followAt} className="self-start text-xs">
+            Follow it to live
+          </Link>
+        )}
       </div>
     )
   }

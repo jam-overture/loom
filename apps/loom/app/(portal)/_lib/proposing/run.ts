@@ -13,7 +13,7 @@ import type { WeighedAgainst } from "../outcome"
 import { portalRegistry } from "../registry"
 import { beginWrite } from "../write"
 import { proposeFor, type ProposeError, type Proposed } from "./propose"
-import { followsItsSite, pageCopiesFor, turnedDownFor } from "./stores"
+import { followsItsSite, madeFromFor, pageCopiesFor, turnedDownFor } from "./stores"
 import { sweep, type SweepReport } from "./sweep"
 
 /**
@@ -57,6 +57,7 @@ export const runOnPage = async ({
     turnedDown: turnedDownFor(application),
     goals: goals.value,
     proposalGoals: proposalGoalsFor(application),
+    made: madeFromFor(application),
     follows: followsItsSite(application),
     client: model.client,
     sources: { tallies: readingsFor(application).tallies },

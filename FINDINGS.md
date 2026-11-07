@@ -8,6 +8,65 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-11-07 — an accepted change is live only once a site pulls it, and the pull is framework code nobody has written
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom daily build` (`src/`, the
+part a customer's server runs) · **Status:** open — **nothing is broken.**
+Until it exists, every customer project is *connected for observation*
+(0275 clause 1): *Accept* changes Loom's copy of the page and no reader sees
+it.
+
+[0358](decisions/0358-an-accepted-change-goes-live-from-the-portal-and-the-site-pulls-it-with-no-pull-request.md)
+makes *Accept* the last human step: the customer's server pulls the project's
+live pages from Loom on a short interval and serves them from its own process.
+The portal's half is on `main` with this entry: `GET /api/pages/live`
+(`apps/loom/app/_lib/pages/live.ts`). The half that runs in the customer's
+server is framework code, and 0358 says so: *"The pull in the customer's app is
+framework code (`src/`), not the portal's."* The portal does not edit `src/`.
+
+### What the door answers
+
+- `GET /api/pages/live` with `Authorization: Bearer lk_…`, the project's key,
+  the same one its pages already post signals with (0298). **Nothing else:** a
+  request with any query is refused with 400, so a pull cannot name a reader,
+  an audience or a page view (0262).
+- `200` with `{ "pages": [ …LoomTree ] }`, one per page the site published, by
+  page id, each under the page's own id: the published tree with the accepted
+  changes on it, or the published tree where nothing was accepted.
+- An `ETag` on every answer; `If-None-Match` with it answers `304` and no body.
+  `cache-control: private, no-cache`.
+- `401` for no key, a key it never issued or has replaced, or a publish key
+  (`lp_…`); `403` for a closed project; `503` when a store cannot be read. It
+  never answers a partial site: a page it cannot read fails the whole answer.
+
+### What the client must do, and nothing more
+
+1. **Pull from the server, on an interval, never per request.** A minute is a
+   reasonable default and should be configurable; no reader's request ever
+   waits on Loom.
+2. **Send the last `ETag`** and keep what it holds on `304`.
+3. **Parse every tree before using any** (`parseTree`), and keep the last set
+   whole if one fails, as `/api/pages` refuses a snapshot with one bad tree.
+4. **A failed pull costs freshness, never the page** (0358 clause 4): on a
+   network error, a timeout or any status but `200`/`304`, keep the last pages;
+   with none, render the page as built. A page the answer does not name renders
+   as built. Tested against a pull made to fail, as 0262 clause 2 is.
+5. **Select per audience in the process** (0263), against pages it already
+   holds; the request carries no audience.
+
+### What the portal does next, so the client need not
+
+Record when a project last pulled (a table, at the door), and show it on the
+screen that follows an accepted change, with *connected for observation* until
+the first pull. The client needs to send nothing for that beyond the request
+above.
+
+**`Loom portal`, 7 November (later): done on the portal's side.** The door
+records every `200` and `304` it answers (`loom_site_pulls`), and *Connect your
+site* says whether the site pulls. Nothing changes for the client: it is still
+the request above. This entry stays open for the client itself.
+
+---
 ## 2026-11-06 — the cap that stops this site having another page moves when another lane publishes an import, and it has four imports of room
 
 **Filed by:** `Loom docs` · **Owned by:** `Loom docs`
