@@ -101,13 +101,16 @@ everything is fine.
 - `pulling.test.ts`: 11 new for `keepingOf` and `connectionWords`, including the
   plain-language rule over every new sentence.
 - `pulling-section.test.tsx`: 1 new, the heading for a site not keeping.
-- `pnpm verify`: see the pull request for the numbers on the merged head.
+- `pnpm verify` exit 0 on this branch: framework 6,604 passed (2 skipped)
+  across 272 files, app 7,056 passed across 434 files.
 
 ## Screens
 
-The screenshot is in the pull request's description: *Connect your site* for a
-project whose site has been given its newest pages for an hour and a half and
-has not kept them, against a local Postgres and `next start`.
+*Connect your site*, its last section, for a project whose site has been given
+its newest pages for an hour and a half and has not kept them, against a local
+Postgres and `next start`:
+
+![Connect your site: Your site pulls, and is not keeping its newest pages](2026-11-07-portal-site-keeps-pages.webp)
 
 ## Where this leaves section 4 of the wireframes
 
