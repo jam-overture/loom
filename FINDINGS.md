@@ -8,6 +8,65 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-11-07 — an accepted change is live only once a site pulls it, and the pull is framework code nobody has written
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom daily build` (`src/`, the
+part a customer's server runs) · **Status:** open — **nothing is broken.**
+Until it exists, every customer project is *connected for observation*
+(0275 clause 1): *Accept* changes Loom's copy of the page and no reader sees
+it.
+
+[0358](decisions/0358-an-accepted-change-goes-live-from-the-portal-and-the-site-pulls-it-with-no-pull-request.md)
+makes *Accept* the last human step: the customer's server pulls the project's
+live pages from Loom on a short interval and serves them from its own process.
+The portal's half is on `main` with this entry: `GET /api/pages/live`
+(`apps/loom/app/_lib/pages/live.ts`). The half that runs in the customer's
+server is framework code, and 0358 says so: *"The pull in the customer's app is
+framework code (`src/`), not the portal's."* The portal does not edit `src/`.
+
+### What the door answers
+
+- `GET /api/pages/live` with `Authorization: Bearer lk_…`, the project's key,
+  the same one its pages already post signals with (0298). **Nothing else:** a
+  request with any query is refused with 400, so a pull cannot name a reader,
+  an audience or a page view (0262).
+- `200` with `{ "pages": [ …LoomTree ] }`, one per page the site published, by
+  page id, each under the page's own id: the published tree with the accepted
+  changes on it, or the published tree where nothing was accepted.
+- An `ETag` on every answer; `If-None-Match` with it answers `304` and no body.
+  `cache-control: private, no-cache`.
+- `401` for no key, a key it never issued or has replaced, or a publish key
+  (`lp_…`); `403` for a closed project; `503` when a store cannot be read. It
+  never answers a partial site: a page it cannot read fails the whole answer.
+
+### What the client must do, and nothing more
+
+1. **Pull from the server, on an interval, never per request.** A minute is a
+   reasonable default and should be configurable; no reader's request ever
+   waits on Loom.
+2. **Send the last `ETag`** and keep what it holds on `304`.
+3. **Parse every tree before using any** (`parseTree`), and keep the last set
+   whole if one fails, as `/api/pages` refuses a snapshot with one bad tree.
+4. **A failed pull costs freshness, never the page** (0358 clause 4): on a
+   network error, a timeout or any status but `200`/`304`, keep the last pages;
+   with none, render the page as built. A page the answer does not name renders
+   as built. Tested against a pull made to fail, as 0262 clause 2 is.
+5. **Select per audience in the process** (0263), against pages it already
+   holds; the request carries no audience.
+
+### What the portal does next, so the client need not
+
+Record when a project last pulled (a table, at the door), and show it on the
+screen that follows an accepted change, with *connected for observation* until
+the first pull. The client needs to send nothing for that beyond the request
+above.
+
+**`Loom portal`, 7 November (later): done on the portal's side.** The door
+records every `200` and `304` it answers (`loom_site_pulls`), and *Connect your
+site* says whether the site pulls. Nothing changes for the client: it is still
+the request above. This entry stays open for the client itself.
+
+---
 ## 2026-11-06 — the cap that stops this site having another page moves when another lane publishes an import, and it has four imports of room
 
 **Filed by:** `Loom docs` · **Owned by:** `Loom docs`
@@ -227,6 +286,19 @@ right rather than a reason not to look.
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom daily build`
 (`apps/loom/vitest.config.ts` and the application suite's discipline) ·
+**Status:** **closed by `framework-86-what-a-lane-may-not-do`**, which took
+recommendation 1 and recommendation 2 both. The sweep is
+`tools/sources/mocks.ts` and it lives in this lane rather than in a route group,
+so no other lane's file is edited by it — which is the cross-lane objection
+answered rather than worked around. It reads `codeOnly` first, so
+`(marketing)/_lib/serving.test.ts`' docblock, which prints two `vi.mock(…)`
+calls in the table of what it measured, is invisible to it; that is asserted
+rather than exempted. Recommendation 3 stays rejected for the reason given here.
+Measured on that branch: zero `vi.mock` in 586 `*.test.ts`, one file using the
+allowed `vi.doMock` + `vi.resetModules()` pattern, and an assertion that the
+count of such files is not zero, so the allowance cannot quietly become a rule
+about nothing. Original status below.
+
 **Status:** open — **nothing is broken**; this is the general version of the
 entry above, and it is filed rather than fixed because a marketing file
 sweeping three other lanes' test files is the cross-lane shape
@@ -53530,7 +53602,38 @@ reinterprets and these rows start answering.
 ## 2026-10-12 — running the formatter on this repository reformats whatever it is pointed at, because there is no formatter configuration and nothing in `verify` would catch it
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom daily build` (the repository's
-own tooling) · **Status:** open — **caught and reverted inside the run that
+own tooling) · **Status:** **closed by `framework-86-what-a-lane-may-not-do`**
+([0360](decisions/0360-the-style-of-this-repository-is-maintained-by-hand-and-what-is-checked-is-that-no-statement-ends-in-a-semicolon.md)),
+and **both of its options turned out to be needed, by different lanes, twenty
+days apart.**
+
+One correction to the premise, because it matters for what was built: *the
+question has no answer in the repository* was true when this was filed and is
+not now. `docs/routines.md` has carried the prose answer under **Standards**
+since 1 November (#742) — and that paragraph credits an **earlier** instance of
+the same mistake, `Loom marketing`'s on 23 September, which cost that run a full
+revert and the re-application of eight files' worth of edits. So this is the
+second of two instances three weeks apart, and the prose arrived twenty days
+after this one.
+
+What was missing was the half prose cannot do, and it is what shipped:
+`pnpm verify` was green on a wholly reformatted file, so both instances were
+caught by a person noticing that a semicolon count looked wrong.
+`tools/sources/semicolons.ts` now holds the one property a reformat cannot avoid
+changing — **no statement in this repository ends in a semicolon** — over every
+source under `src/`, `tools/` and `apps/loom/`. Measured when written: 1,920
+sources, zero, with two shapes exempt because they are the language rather than a
+style (a `for` header's clauses spread over lines, in `src/signals/broadcast.ts`,
+and `&hellip;` closing JSX text, four times in `(lessons)`). A run that formats
+a file now goes red on its own branch, naming the file.
+
+The option that was **not** taken is a `.prettierrc` plus `format:check`, and
+0360 records why: no formatter reproduces a hand-maintained style exactly, so
+adopting one is not a configuration change but one reformat of every file in the
+repository, landing as an unreviewable diff in a week when four surfaces merge
+against one gate. Original status below.
+
+**Status:** open — **caught and reverted inside the run that
 caused it**, and filed because the next lane to reach for a formatter will do
 the same thing
 

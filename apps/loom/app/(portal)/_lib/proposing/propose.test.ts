@@ -28,6 +28,7 @@ import type { ProposalGoalStore } from "../goals/serving"
 import { elementIdsOf, goalOn, NOTHING_DECLARED, readersOn } from "./fixtures"
 import { memoryPageCopyStore } from "./copies-memory"
 import { holdStandingOf } from "./following"
+import { memoryMadeFromStore } from "./made-from-memory"
 import { intentFor, PROPOSER, proposeFor, type ProposeFor } from "./propose"
 import { memoryTurnedDownStore } from "./turned-down-memory"
 
@@ -94,6 +95,7 @@ const given = (path: WritePath, overrides: Partial<ProposeFor> = {}): ProposeFor
   turnedDown: memoryTurnedDownStore(),
   goals: [GOAL],
   proposalGoals: memoryProposalGoalStore(),
+  made: memoryMadeFromStore(),
   follows: true,
   client: scriptedModelClient(CHANGE),
   sources: readersOn(PUBLISHED, 100, 50),
@@ -290,6 +292,42 @@ describe("proposeFor", () => {
         )
       )
     )
+  })
+
+  it("keeps what a change the Gate made outright was made from, and nothing for one it held", async () => {
+    const made = memoryMadeFromStore()
+    const run = await proposeFor(given(pathFor(), { made }))
+
+    if (!run.ok || run.value.kind !== "proposed" || run.value.outcome.kind !== "committed") {
+      throw new Error("expected a change made outright")
+    }
+
+    const { proposal, disposition } = run.value.outcome
+
+    expect(await made.forProposals([proposal.proposalId])).toEqual(
+      ok(
+        new Map([
+          [
+            proposal.proposalId,
+            {
+              proposalId: proposal.proposalId,
+              intentId: proposal.intentId,
+              stakes: disposition.stakes,
+              at: AT.getTime(),
+            },
+          ],
+        ])
+      )
+    )
+
+    const heldMade = memoryMadeFromStore()
+    const held = await proposeFor(given(pathFor(0.5), { made: heldMade }))
+
+    if (!held.ok || held.value.kind !== "proposed" || held.value.outcome.kind !== "held") {
+      throw new Error("expected a held change")
+    }
+
+    expect(await heldMade.forProposals([held.value.outcome.held.proposalId])).toEqual(ok(new Map()))
   })
 
   it("asks no model for a page no goal is on", async () => {

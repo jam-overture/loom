@@ -747,6 +747,19 @@ reproduce the existing formatting either, so there is no options string that
 would. Filed by `Loom marketing` on 23 September after it cost that run a full
 revert and a re-application of eight files' worth of edits.
 
+**This paragraph is now checked, because the thing it describes happened twice
+before it was written.** `Loom signals` reached for prettier on 12 October,
+nineteen days after the marketing instance and twenty days before this answer
+reached this file, and both were caught by a person noticing that a semicolon
+count looked wrong rather than by anything in `pnpm verify`.
+[0360](../decisions/0360-the-style-of-this-repository-is-maintained-by-hand-and-what-is-checked-is-that-no-statement-ends-in-a-semicolon.md)
+records the convention and holds its one mechanical consequence: **no statement
+in this repository ends in a semicolon**, swept over every source under `src/`,
+`tools/` and `apps/loom/` by `tools/sources/semicolons.ts`. So a run that
+formats a file goes red on its own branch, naming the file. A formatter is not
+forbidden by the check so much as made visible by it, and adopting one
+supersedes that record rather than working around the sweep.
+
 ## The voice a visitor reads
 
 **For every surface a stranger reads — the marketing site above all.** The
