@@ -93,7 +93,16 @@ the project's own hourly counters through the bounded store.
   the verdict with both sides and the test, a short side said, *Not measured*,
   figures unreadable, and `liveAtOf`/`boundsOf` (its own change aside, previous
   and next from changes and copies).
-- `pnpm verify`: see the pull request; the numbers are in its description.
+- `pnpm verify` exit 0 on this branch: framework 6,604 passed (2 skipped) across
+  271 files, app 6,995 passed across 431 files.
+- By hand, against a local Postgres and `next start`, seeded with 36 days of
+  hourly page views and presses on one page: a change accepted 20 days ago and
+  one accepted 3 days ago; the screenshots below.
+
+## Screens
+
+![A change whose 14 days have ended: Result: Helped, both sides and the test](2026-11-07-portal-change-result-helped.webp)
+![A change still measuring: the figures so far, and when the verdict comes](2026-11-07-portal-change-result-measuring.webp)
 
 ## Where this leaves section 5 of the wireframes
 
