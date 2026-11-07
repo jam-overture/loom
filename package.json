@@ -72,6 +72,10 @@
       "types": "./dist/store/postgres.d.ts",
       "default": "./dist/store/postgres.js"
     },
+    "./live": {
+      "types": "./dist/live/index.d.ts",
+      "default": "./dist/live/index.js"
+    },
     "./signals": {
       "types": "./dist/signals/index.d.ts",
       "default": "./dist/signals/index.js"
@@ -214,6 +218,10 @@
       "./postgres": {
         "types": "./dist/store/postgres.d.ts",
         "default": "./dist/store/postgres.js"
+      },
+      "./live": {
+        "types": "./dist/live/index.d.ts",
+        "default": "./dist/live/index.js"
       },
       "./signals": {
         "types": "./dist/signals/index.d.ts",
