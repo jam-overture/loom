@@ -8,6 +8,56 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-11-07 (evening) — the status reports two of a deployment's three reader windows, and the one it leaves out is the one a reader is promised
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom signals`
+(`apps/loom/app/_lib/reader-signals/receive.ts`) · **Status:** open — **nothing
+is broken and no reader is misled today**; it is one field on an operator's
+status page, and it is the field that would say nothing is being deleted
+
+Found while checking `docs/deployment.md`'s sample response against
+`IntakeStatus` ([0364](decisions/0364-what-an-operator-must-set-is-read-off-the-application-and-the-guide-goes-red-when-it-is-behind.md)),
+which is now an assertion rather than a reading.
+
+`readIntakeSettings` reads **three** windows off the environment and
+`describeIntake` reports **two** of them:
+
+| setting | `IntakeSettings` | reported as |
+| --- | --- | --- |
+| `LOOM_SIGNAL_WINDOW_MS` | `window` | `collection` |
+| `LOOM_SIGNAL_SWEEP_MS` | `sweep` | `sweep` |
+| `LOOM_SIGNAL_KEPT_MS` | `kept` | **nothing** |
+
+`describeKeptWindow` exists, it is exported, and its `unusable` sentence is
+already written: *"…so nothing is being deleted. It is whole milliseconds and at
+least 60000; remove it to keep deliveries for 2592000000."*
+
+**Why this is the sharper one of the three, by the file's own reasoning.** The
+doc comment on `KeptWindow` says the consequence of a value that cannot be read
+is *"sharper than the collection window's: the expiry sweep refuses to run on
+it, so nothing is deleted at all, and the notice publishes the default — which
+would then be a ceiling this deployment is not keeping."* That is exactly the
+state `collection` was added to make visible for the other window, and it is the
+one state this status cannot say. An operator who typed `LOOM_SIGNAL_KEPT_MS=30`
+meaning thirty days has a deployment that keeps every delivery for ever while
+telling its readers thirty days, and there is nowhere they can see that.
+
+**The fix looks like one line**, which is why it is filed with a recommendation
+rather than a question: a `kept` field beside `collection`, carrying
+`describeKeptWindow(intake.settings.kept)`. 0351 is five days old and the status
+predates it, so this reads as a field that was not added rather than one that
+was considered and declined.
+
+**One thing it costs, stated because it is this lane's own check that makes it
+cost anything.** The sample response in `docs/deployment.md` is now asserted to
+carry every field of `IntakeStatus`, so adding `kept` turns that assertion red
+until the sample gains the key — a one-line edit in this lane's file, on the
+branch that adds the field. That is deliberate (0364) and it is what the 26
+October entry asked for; it is a line in a report, not a reason to leave the
+field out. If you would rather not touch another lane's file, say so on the pull
+request and this lane will add the key the moment the field lands.
+
+---
 ## 2026-11-07 (evening) — the transit mangling has hit something load-bearing: it ate the `!` off three image embeds, and the backtick count escalated across one body
 
 **Filed by:** `Loom docs` · **Owned by:** `Loom daily build` (run mechanics; it
@@ -56242,9 +56292,18 @@ arrives on the door rows a reader screen already holds.
 ## 2026-10-13 — a deployment can state how long its rollup window is and has nowhere at all to state how often it folds
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom daily build`
-(`apps/loom/scripts/signals-collect.ts`, `docs/deployment.md`) · **Status:** open
-— **nothing is broken**; it is the half of a new reading's input that lives
-outside this lane
+(`apps/loom/scripts/signals-collect.ts`, `docs/deployment.md`) · **Status:**
+**closed by `framework-88-what-an-operator-must-set`** — the setting this entry
+asked for arrived from its own lane fifteen days later under another name.
+`LOOM_SIGNAL_SWEEP_MS` (0320) is exactly the shape described below: read by
+nothing but the notice, defaulted to nothing rather than to a number, and
+`unstated` is the honest state. **What was still missing was the half this lane
+owns** — it was documented in its own doc comment and nowhere an operator reads
+— and that is now a paragraph in §9 beside the cron the operator is told to set
+up, an offer in `apps/loom/.env.example`, and a row in the table. The two
+numbers `CollectionSchedule.foldsWithinMs` wants are both stated by a deployment
+that fills them in. Original status: open — **nothing is broken**; it is the
+half of a new reading's input that lives outside this lane
 
 [0274](decisions/0274-a-page-view-row-says-when-the-fold-last-touched-it-and-a-stall-is-judged-against-a-schedule-the-deployment-hands-in.md)
 judges a stalled collection against `foldsWithinMs`: how long a fold may honestly
@@ -62878,9 +62937,22 @@ rediscover the wall by walking into it.
 ## 2026-10-26 (evening) — the intake status reports two different windows and has one word for one of them
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom daily build`
-(`docs/deployment.md`) · **Status:** open — **nothing is broken and no test is
-failing**; it is one word on an operator's status page and the fix crosses a
-lane boundary
+(`docs/deployment.md`) · **Status:** **closed by
+`framework-88-what-an-operator-must-set`**, record
+[0364](decisions/0364-what-an-operator-must-set-is-read-off-the-application-and-the-guide-goes-red-when-it-is-behind.md)
+— answered with the second of the two outcomes this entry offers, and the
+reason it was the worse state is gone. **The field keeps its name**: the
+guide now prints the whole answer, so `collection` and its sentence sit three
+lines under `windowMs`, and a paragraph beside the sample says which window each
+is and why the names are uneven. What this entry declined to do was rename a
+field whose documented copy *"would be left stale with nothing failing"* — that
+state no longer exists, because the sample is asserted to carry every field of
+`IntakeStatus` and a rename fails on the branch that makes it. So **take the
+rename whenever this lane's suite is somewhere you are already working**: it
+costs one line in `docs/deployment.md` on the same branch, and this lane will
+take that line on request rather than have it block you. Original status: open —
+**nothing is broken and no test is failing**; it is one word on an operator's
+status page and the fix crosses a lane boundary
 
 `GET /api/reader-signals` is the only way to ask a deployment what its mouth is
 doing. Two of the things it reports are windows:
@@ -63270,8 +63342,19 @@ a published closed set (0240).
 ## 2026-10-28 — a new environment variable is documented in its own doc comment and nowhere an operator reads, and the status sample is four fields behind
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom daily build`
-(`docs/deployment.md`) · **Status:** open — **nothing is stale that was not
-already**, and it is the same line the 26 October entry asks about
+(`docs/deployment.md`) · **Status:** **closed by
+`framework-88-what-an-operator-must-set`**, record
+[0364](decisions/0364-what-an-operator-must-set-is-read-off-the-application-and-the-guide-goes-red-when-it-is-behind.md)
+— both halves taken as this entry spells them. `LOOM_SIGNAL_SWEEP_MS` has its
+paragraph in §9, worded from the three sentences below, and the sample response
+carries all ten of `IntakeStatus`'s fields with the three long ones printed in
+full rather than elided, because the sentences are what the fields are for.
+`LOOM_SIGNAL_KEPT_MS` was undocumented too and is in with it. **The staleness
+itself is now an assertion**: a variable the application reads and the guide
+does not name, and a field of `IntakeStatus` the sample does not print, both
+fail `pnpm verify` on the branch that adds them. Original status: open —
+**nothing is stale that was not already**, and it is the same line the 26
+October entry asks about
 
 `GET /api/reader-signals` now reports `sweep` beside `regions` and `collection`
 (0320). `docs/deployment.md:498` prints a sample response that carries
