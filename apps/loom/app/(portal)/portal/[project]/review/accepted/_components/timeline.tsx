@@ -1,5 +1,6 @@
 import Link from "next/link"
 
+import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"
 import type { StepState, TimelineStep } from "@/app/(portal)/_lib/going-live"
 import { plainMoment } from "@/app/(portal)/_lib/when"
 
@@ -56,6 +57,15 @@ export const Timeline = ({
                 {line}
               </p>
             ))}
+            {step.detail === undefined ? null : (
+              <TechnicalDetail summary="How the verdict was reached">
+                {step.detail.map((line) => (
+                  <p key={line} className="m-0">
+                    {line}
+                  </p>
+                ))}
+              </TechnicalDetail>
+            )}
             {step.connect === true ? (
               <Link href={`/portal/${projectId}/connect`} className="text-ink text-xs">
                 Connect your site

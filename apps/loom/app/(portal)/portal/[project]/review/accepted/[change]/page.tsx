@@ -10,6 +10,7 @@ import { StateNotice } from "@/app/(portal)/_components/state-notice"
 import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"
 import { requireActor, requireRole } from "@/app/(portal)/_lib/auth/identity"
 import {
+  goalNameOf,
   sentencesOf,
   servedNoteOf,
   servedOf,
@@ -19,13 +20,15 @@ import {
 import { plainDay } from "@/app/(portal)/_lib/when"
 
 import { Timeline } from "../_components/timeline"
+import { readMeasurement } from "../_lib/measurement"
 import { readAccepted } from "../_lib/reading"
 
 /**
  * One accepted change, from *Accept* to its result (unit 8, 0358;
  * `docs/portal-wireframes.md` section 4): *Accepted*, then *Live* on the
  * site's first pull after it, then *Measuring* on its goal over the agreed
- * window, then *Result*. A change that came off the page ends where it came
+ * window, then *Result*: before and after on the goal and a plain verdict, by
+ * the rules the maintainer settled (8c, `_lib/measuring.ts`). A change that came off the page ends where it came
  * off: no longer fitting the site's newer version, or undone.
  *
  * Until the site pulls, *Live* says the project is connected for observation
@@ -85,13 +88,14 @@ const ChangeScreen = async ({
   const served = servedOf(change.proposalId, reading.origins)
   const note = servedNoteOf(served)
   const stake = stakeWordsOf(served)
+  const measurement = await readMeasurement(reading, change, served)
 
   return (
     <Screen>
       <div className="flex flex-col gap-2">
         {back}
         {served.kind === "recorded" ? (
-          <GoalChip goal={served.goal} />
+          <GoalChip goal={goalNameOf(served)} />
         ) : (
           <p className="text-ink-muted m-0 text-xs">{note}</p>
         )}
@@ -111,7 +115,10 @@ const ChangeScreen = async ({
       </div>
 
       <section className="border-edge-subtle bg-surface-base flex flex-col gap-3 rounded-lg border p-4">
-        <Timeline steps={timelineOf(change, reading.reach, now, served)} projectId={projectId} />
+        <Timeline
+          steps={timelineOf(change, reading.reach, now, served, measurement)}
+          projectId={projectId}
+        />
         <TechnicalDetail summary="The change as Loom keeps it">
           <pre className="m-0 overflow-x-auto font-mono text-[11px] leading-relaxed">
             {JSON.stringify(change.accepted, null, 2)}

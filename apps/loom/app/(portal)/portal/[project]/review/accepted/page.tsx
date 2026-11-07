@@ -9,6 +9,7 @@ import { StateNotice } from "@/app/(portal)/_components/state-notice"
 import { requireActor, requireRole } from "@/app/(portal)/_lib/auth/identity"
 import {
   acceptedPage,
+  goalNameOf,
   sentencesOf,
   servedOf,
   statusOf,
@@ -109,7 +110,7 @@ const AcceptedPage = async ({
               href={`${here}/${change.proposalId}`}
               className="border-edge-subtle bg-surface-base hover:bg-surface-hover flex flex-col gap-1.5 rounded-lg border p-4 no-underline"
             >
-              {served.kind === "recorded" && <GoalChip goal={served.goal} />}
+              {served.kind === "recorded" && <GoalChip goal={goalNameOf(served)} />}
               <div className="flex flex-wrap items-baseline justify-between gap-2">
                 <span className="text-ink-muted text-xs">
                   {reading.pages.get(change.pageId) ?? change.pageId}
