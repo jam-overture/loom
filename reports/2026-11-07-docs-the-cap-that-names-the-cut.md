@@ -301,23 +301,35 @@ rather than about all eighteen doors.
 
 ### The gate
 
-**Still running as this commit was made**, and the numbers below are filled in
-by the commit that follows rather than guessed here. `pnpm install && pnpm
-verify`, with the status written to a file as the last thing on its line and
-read in a separate command.
+`pnpm install && pnpm verify` — **`EXIT=0`**, read out of a file written as the
+last thing on its line and read in a separate command. **The harness's own
+completion notice also said exit code 0 and that is not why this says green**;
+the file is. (The fourth-instance rule in `docs/routines.md`; the notice
+happened to agree this time.)
 
-*(gate numbers pending — see the commit that follows this one)*
+| | measured | tests |
+| --- | --- | --- |
+| framework | 265 files | **6,436** |
+| application | 429 files | **6,957** |
+| of which `(docs)` | 144 files | **2,250** |
+
+**13,393 pass in total. Nothing failed, nothing was skipped, and no test was
+weakened.**
 
 **+15 tests, all of them this lane's**, all fifteen in
-`_lib/weight.test.ts`, which went from 15 to 30. No pre-existing assertion
+`_lib/weight.test.ts`, which went from 15 to 30. The `(docs)` baseline was
+**2,235 across the same 144 files**, so the route group's total is that plus the
+same fifteen, and the framework is untouched by this branch — derived rather
+than separately measured, which is said here rather than left to be assumed. No pre-existing assertion
 changed its claim and none was removed — this branch adds a reading beside the
 one that was there and extends one sentence, so the three tests that already
 held `weightFaults` still hold exactly what they held.
 
 - `findings:check`: **1,456 findings, 0 malformed**
-- `reports:check`: **2,125 visuals, 148.7MB, none over 1.1MB** (414 cited by no
+- `reports:check`: **2,128 visuals, 148.8MB, none over 1.1MB** (413 cited by no
   file, all pre-existing — this run's four are cited by this report)
-- `prerender:check`: *pending with the gate*
+- `prerender:check`: **138 prerendered pages**, 2,071 text junctions, 0 run
+  together; 3 metadata conventions, 0 unserved
 
 ### The caps, before and after
 
