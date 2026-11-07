@@ -298,7 +298,14 @@ run:
 ## The preview
 
 *Taken from the `vercel[bot]` comment after the pull request was opened, not
-composed from the branch name — see the pull request body.*
+composed from the branch name.*
+
+https://loom-git-framework-88-what-a-b0b6ff-jpizzolato36-6341s-projects.vercel.app
+
+It read **Building** when that comment was last seen from this session, so that
+is Vercel naming the URL rather than this run having watched it go green — and
+nothing here was fetched from it either way, because `*.vercel.app` is denied by
+this environment's egress policy (the open finding of 12 October).
 
 **There is nothing on it to look at, and that is not a gap.** This branch
 changes one repository document, one example file, and a check in `tools/`. It
