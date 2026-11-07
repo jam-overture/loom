@@ -19,6 +19,8 @@ import { siteFor } from "../_lib/owned-site"
 export type AnswerReport = {
   readonly refusal?: string
   readonly report?: WriteReport
+  /** Where an accepted change is followed to live and on to its result (0358). */
+  readonly followAt?: string
 }
 
 const ALREADY = plainState("already-answered")
@@ -111,5 +113,9 @@ export const answerAction = async (
 
   await write.finish()
 
-  return { report: siteReport(reportOf(outcome, write.weighedAgainst), application) }
+  const report = siteReport(reportOf(outcome, write.weighedAgainst), application)
+
+  return report.tone === "applied"
+    ? { report, followAt: `/portal/${site.projectId}/review/accepted/${proposalId.data}` }
+    : { report }
 }

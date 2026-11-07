@@ -50,16 +50,16 @@ export const passedSentence = (passed: Passed): string => {
 
 /**
  * What a change to a page's copy means for the site, in place of the portal's
- * general sentence, which speaks of screens this portal no longer has. Only
- * this deployment's own site serves its copy (0259); every other site keeps
- * serving what it published (0329 clause 7).
+ * general sentence, which speaks of screens this portal no longer has. This
+ * deployment's own site serves its copy as it draws it (0259); every other
+ * site serves it from its next pull of its live pages (0358 clause 3).
  */
 const siteMeaning = (tone: OutcomeTone, servesCopy: boolean): string | undefined => {
   switch (tone) {
     case "applied":
       return servesCopy
         ? "Loom's copy of this page has the change, and this deployment's own site serves that copy, so it is live."
-        : "Loom's copy of this page has the change. Your site keeps serving what it published."
+        : "Loom's copy of this page has the change, and your site serves it from its next pull of its pages."
     case "awaiting":
       return "It is under For review until an approver or owner who may accept it says yes or no."
     default:
