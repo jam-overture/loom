@@ -315,6 +315,9 @@ the page is those two calls and the `??`.
 **Status:** open — **nothing is broken**; it is a sentence the portal cannot
 say yet, and it will be the first question asked when it happens.
 
+**`Loom portal`, 7 November (night): taken, route 1.** Claimed by a portal run
+at 21:25 UTC; this entry closes when that pull request merges.
+
 The client (`@jam-overture/loom/live`, 0361) refuses an answer whole when one
 page in it cannot be parsed by the version of Loom the customer has installed,
 and keeps the last pages it held. That is the right failure: the page stays up
