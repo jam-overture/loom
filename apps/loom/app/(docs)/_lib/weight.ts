@@ -1,7 +1,8 @@
-import { apiReference } from "./api/reference"
+import { apiEntryAt, apiReference } from "./api/reference"
 import { fencesOnPage } from "./fences/extract"
 import { DOCS_LANDING_SLUG, docsHref, docsSections } from "./nav"
 import { generatedPageWords } from "./search/generated"
+import type { TravellingEntry } from "./search/model"
 import { readPageProse } from "./search/prose"
 
 /**
@@ -218,6 +219,171 @@ export const DOCS_PAGE_CAPS: PageCaps = {
 }
 
 /**
+ * What one module of a reference page weighs.
+ *
+ * **The plain version.** A reference page is a stack of modules — *Window*,
+ * *Health*, *Funnel* — each with a heading and the names that module publishes
+ * under it. The page's weight is the sum of those stacks, and when a page is
+ * too heavy the question is not *how heavy* but *which of them*.
+ *
+ * It exists because the cap above has one remedy and that remedy is a cut: the
+ * modules are the line the page grows on, so they are the line it comes apart
+ * on. A fault that gives a total tells a reader a page is too big. A fault
+ * that gives the modules tells them where the knife goes.
+ */
+export type GroupWeight = {
+  /** The declaring module, as the reference reads it off the package: `signals/window`. */
+  readonly module: string
+  /** The heading the page gives it. */
+  readonly title: string
+  readonly symbols: number
+  /** Bytes of signature and summary, which is what a module contributes to a page. */
+  readonly code: number
+}
+
+/**
+ * The modules a generated page is made of, heaviest first.
+ *
+ * Empty for the section's landing page, which has no modules, and for an
+ * address the reference does not serve — the same answer in both cases and
+ * deliberately so: neither is a page with modules, and a caller that needed to
+ * tell them apart would be asking this function a question about routing.
+ */
+export const groupWeightsOn = (pageSlug: string): readonly GroupWeight[] => {
+  const entry = apiEntryAt(pageSlug)
+
+  if (entry === undefined) return []
+
+  return entry.groups
+    .map((group) => ({
+      module: group.module,
+      title: group.title,
+      symbols: group.symbols.length,
+      code: group.symbols.reduce((total, symbol) => total + bytes(symbol.signature) + bytes(symbol.summary), 0),
+    }))
+    .sort((one, other) => other.code - one.code)
+}
+
+/**
+ * The address a module would have, if the page it is on were cut up.
+ *
+ * **The whole module path, not its last segment.** `@jam-overture/loom/store`
+ * publishes `store/store`, `project/store` and `application/store`, so the
+ * obvious implementation — take the leaf — gives one door three addresses
+ * called `store` and silently loses two of them. The test that holds this
+ * asserts the addresses of a cut are distinct, which is the assertion that
+ * kills the leaf.
+ *
+ * It is the same rule `apiGroupAnchor` uses for the anchor a reader lands on
+ * today, minus the prefix an `id` needs: a module is spelled with its slashes
+ * flattened, because that is the only spelling that is unique per door.
+ */
+export const cutAddressFor = (module: string): string => module.replace(/\//g, "-")
+
+/**
+ * What cutting a generated page along its modules would cost, and where.
+ *
+ * **The plain version, because this is the number nobody would guess.** The
+ * remedy for a page over its cap is to cut it into its modules, one address
+ * each. Those addresses are not free: every page on this site has a row in the
+ * **table of contents**, the one file in the search index a reader sits in
+ * front of and waits for, and a cut puts one more row in it per module. Sixty
+ * modules is sixty rows.
+ *
+ * So the price of the remedy is paid in a different file from the one the cap
+ * is about, by the same lane, out of a budget this module does not hold. A run
+ * that trips the cap and reads only the cap will attempt the cut, and find out
+ * half a day later.
+ *
+ * **The rows are the real rows, not an estimate of them.** They are built as
+ * `TravellingEntry` — the shape `searchContents` actually publishes — and
+ * measured as the JSON that shape travels as. A second idea of what a row
+ * costs would be a second idea to keep true, and it would be wrong in the
+ * direction that makes a cut look cheap.
+ */
+export type PageCut = {
+  /** The page the cut is of. */
+  readonly href: string
+  /** One address per module, which is what the cut is. */
+  readonly addresses: number
+  /** Bytes the cut adds to the table of contents, as the rows it would add. */
+  readonly contents: number
+  /** The modules carrying the most, which is what a cut moves first. */
+  readonly heaviest: readonly GroupWeight[]
+}
+
+/** How many of a cut's modules a fault names: enough to see the shape, few enough to read. */
+const NAMED_IN_A_FAULT = 3
+
+/**
+ * The rows a cut would add to the table of contents.
+ *
+ * Pure over the groups and the door, so a test can state a page rather than
+ * arrange for one — the rule the rest of this module and `plain.ts` already
+ * follow.
+ */
+export const cutContentsRows = (
+  pageSlug: string,
+  groups: readonly GroupWeight[],
+  summaries: ReadonlyMap<string, string> = new Map()
+): readonly TravellingEntry[] =>
+  groups.map((group) => {
+    const summary = summaries.get(group.module) ?? ""
+
+    return {
+      href: `${docsHref("api-reference", pageSlug)}/${cutAddressFor(group.module)}`,
+      title: group.title,
+      context: "API reference",
+      kind: "page" as const,
+      ...(summary === "" ? {} : { summary }),
+      family: "imports",
+    }
+  })
+
+/**
+ * What a cut of one generated page would be, measured.
+ *
+ * `undefined` where the address has no modules to cut along, which is the
+ * landing page and anything the reference does not serve. A fault about such a
+ * page says nothing about a cut rather than offering one of nought addresses.
+ */
+export const pageCutOf = (pageSlug: string): PageCut | undefined => {
+  const entry = apiEntryAt(pageSlug)
+  const groups = groupWeightsOn(pageSlug)
+
+  if (entry === undefined || groups.length === 0) return undefined
+
+  const summaries = new Map(entry.groups.map((group) => [group.module, group.summary] as const))
+
+  return {
+    href: docsHref("api-reference", pageSlug),
+    addresses: groups.length,
+    contents: bytes(JSON.stringify(cutContentsRows(pageSlug, groups, summaries))),
+    heaviest: groups.slice(0, NAMED_IN_A_FAULT),
+  }
+}
+
+/**
+ * The cut clause of a fault: the remedy, and what it costs somewhere else.
+ *
+ * Separated from `weightFaults` so that the sentence can be held on its own,
+ * and because a page with no cut has to produce no clause rather than an empty
+ * one — a trailing *and cutting it* with nothing after it is the shape a
+ * mutation would otherwise leave behind.
+ */
+export const cutClause = (cut: PageCut | undefined): string => {
+  if (cut === undefined) return ""
+
+  const named = cut.heaviest.map((group) => `${group.module} (${group.code})`).join(", ")
+
+  return (
+    `; cutting it along its modules is ${cut.addresses} more addresses` +
+    ` and ${cut.contents} bytes of rows in the table of contents every reader waits for` +
+    `, heaviest first: ${named}`
+  )
+}
+
+/**
  * Every page over its cap, as a sentence somebody can act on.
  *
  * A list rather than a throw, and pure over its two arguments, for the reason
@@ -227,14 +393,23 @@ export const DOCS_PAGE_CAPS: PageCaps = {
  * to do.
  *
  * **The fault names which half is big**, because the two are fixed in different
- * places and by different people. Prose is edited in the page's own MDX by
+ * places and by different people.
+ *
+ * **And for a generated page it names the cut**, which is the one remedy its
+ * cap has, together with what that remedy costs in the table of contents —
+ * `pageCutOf` carries that argument. It arrives as a third parameter with a
+ * default rather than being read inside, so this stays pure over what it is
+ * given: a reader held only against the real package is a reader whose
+ * sentence is whatever today's package happens to publish, which is the
+ * property the two arguments above already protect. Prose is edited in the page's own MDX by
  * whoever is writing here. Code on a generated page is a published signature,
  * and the only thing this surface can do about it is stop putting five hundred
  * of them on one address.
  */
 export const weightFaults = (
   pages: readonly PageWeight[] = docsPageWeights(),
-  caps: PageCaps = DOCS_PAGE_CAPS
+  caps: PageCaps = DOCS_PAGE_CAPS,
+  cutFor: (pageSlug: string) => PageCut | undefined = pageCutOf
 ): readonly string[] =>
   pages
     .filter((page) => page.total > (page.from === "written" ? caps.written : caps.generated))
@@ -245,7 +420,13 @@ export const weightFaults = (
           ? `${page.code} of it is ${page.parts} ${page.from === "written" ? "fenced blocks" : "published signatures"}`
           : `${page.prose} of it is prose`
 
-      return `${page.href} renders ${page.total} bytes against a cap of ${cap}, and ${half}`
+      /* A written page is long because somebody wrote it long, and the remedy
+         is theirs and obvious. A generated page is long because a package
+         published into it, and its remedy is a cut whose price is in another
+         file — so only that kind of fault carries the clause. */
+      const cut = page.from === "generated" ? cutClause(cutFor(page.href.split("/").at(-1) ?? "")) : ""
+
+      return `${page.href} renders ${page.total} bytes against a cap of ${cap}, and ${half}${cut}`
     })
 
 export type DocsTextTotals = {
