@@ -457,11 +457,11 @@ either: a notice that fires twice instead of twelve times is a notice working.
 *Taken from the `vercel[bot]` comment after the pull request was opened, not
 composed from the branch name.*
 
-PREVIEW_URL
+https://loom-git-docs-81-the-first-p-e93799-jpizzolato36-6341s-projects.vercel.app
 
 The page the pictures are of:
 
-- PREVIEW_URL/docs/api-reference/signals
+- https://loom-git-docs-81-the-first-p-e93799-jpizzolato36-6341s-projects.vercel.app/docs/api-reference/signals
 
 Every picture above was taken against a build in this container, not fetched
 from the preview: `*.vercel.app` is denied by the environment's egress policy,

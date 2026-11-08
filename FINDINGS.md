@@ -67936,7 +67936,7 @@ rule and not a helper's.
 ## 2026-11-08 — the gate that was four days from red is six weeks from it, and the cap's remedy was never the one that would have paid
 
 **Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** **closed by
-#TBD** for the deadline, and the entries of 7 November it answers are annotated
+#820** for the deadline, and the entries of 7 November it answers are annotated
 below rather than reopened
 
 `pnpm verify` is the merge gate for four surfaces and the heaviest generated
