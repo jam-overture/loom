@@ -1,0 +1,30 @@
+{
+  "baseUrl": "http://localhost:3000",
+  "outDir": "reports",
+  "shots": [
+    {
+      "path": "/?theme=minimal",
+      "out": "2026-11-08-marketing-the-ground-alone-minimal.webp",
+      "viewport": "wide",
+      "waitFor": "h1"
+    },
+    {
+      "path": "/?theme=editorial",
+      "out": "2026-11-08-marketing-the-ground-alone-editorial.webp",
+      "viewport": "wide",
+      "waitFor": "h1"
+    },
+    {
+      "path": "/?theme=bold",
+      "out": "2026-11-08-marketing-the-ground-alone-bold.webp",
+      "viewport": "wide",
+      "waitFor": "h1"
+    },
+    {
+      "path": "/?theme=bold",
+      "out": "2026-11-08-marketing-the-ground-alone-phone.webp",
+      "viewport": "phone",
+      "waitFor": "h1"
+    }
+  ]
+}

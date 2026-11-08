@@ -1,7 +1,8 @@
 import { readFileSync } from "node:fs"
 import { fileURLToPath } from "node:url"
 
-import { themeGround, themeStyle } from "@jam-overture/loom/react"
+import { type ResolvedTheme } from "@jam-overture/loom"
+import { themeGround, themeGroundCss, themeStyle } from "@jam-overture/loom/react"
 import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it } from "vitest"
 
@@ -41,6 +42,19 @@ import {
  * is React's behaviour in a document this route group does not render —
  * measured by hand off the production build and recorded in the report, which
  * is the same split `BrowserBar` was built under.
+ *
+ * ## What changed on 8 November, and it is one of the four
+ *
+ * The rule is `themeGroundCss(theme)` and no longer `themeDocumentCss(theme)`
+ * ([0337](../../../../../decisions/0337-a-host-whose-page-is-already-a-tree-is-handed-the-ground-alone.md)),
+ * so the second of the four readings is **inverted**: the document used to
+ * carry the same variables the page's root mounts and is now held to carrying
+ * none of them, with a second case holding that the page's root still carries
+ * all of them. The three ground assertions are untouched, which is the property
+ * worth having — the scrollbar, the canvas and the form control read
+ * `color-scheme`, `background-color` and `color`, and every one of those is
+ * still checked against the registry, against the page and against the strip
+ * above it.
  */
 
 const ORIGIN = "https://loom.example"
@@ -66,7 +80,7 @@ const ruleFor = (route: SiteRoute, theme: SiteThemeName): string =>
 /**
  * The CSS the element went out carrying.
  *
- * Read out of the markup rather than by calling `themeDocumentCss` a second
+ * Read out of the markup rather than by calling the published recipe a second
  * time, because a test that computed the expected text the way the component
  * does would pass on any palette and prove only that one function is
  * deterministic. That is the shape this lane filed on 8 October about a test
@@ -78,6 +92,44 @@ const cssIn = (markup: string): string | undefined =>
 /** One declaration's value out of a rule, by property name. */
 const declared = (css: string, property: string): string | undefined =>
   new RegExp(`(?:^|[;{\\s])${property}:\\s*([^;\\n]+)`).exec(css)?.[1]?.trim()
+
+/**
+ * The declarations the tree's own root carries, read off the served markup.
+ *
+ * Found by the variable rather than by a selector, because the root primitive's
+ * element has no attribute this lane may rely on and
+ * [the 4 November finding](../../../../../FINDINGS.md) is about four places in
+ * this repository hard-coding one that the broadcaster does not publish.
+ *
+ * **Entities are decoded, and that is not a detail.** `themeStyle` hands back
+ * `Impact, "Haettenschweiler", …` and React writes `&quot;` for each quote, so
+ * a comparison against the raw markup fails on exactly the four font stacks and
+ * passes on the other forty-eight — which is a check that would have reported
+ * the type half of a palette missing from the tree as a palette that is there.
+ */
+const treeRootStyle = (markup: string): Readonly<Record<string, string>> => {
+  const attribute = /style="([^"]*--loom-bg-canvas[^"]*)"/.exec(markup)?.[1]
+  if (attribute === undefined) throw new Error("loom: no element of this page mounts the palette")
+
+  const text = attribute
+    .replaceAll("&quot;", '"')
+    .replaceAll("&#x27;", "'")
+    .replaceAll("&#39;", "'")
+    .replaceAll("&lt;", "<")
+    .replaceAll("&gt;", ">")
+    .replaceAll("&amp;", "&")
+
+  return Object.fromEntries(
+    text
+      .split(";")
+      .filter((declaration) => declaration.includes(":"))
+      .map((declaration) => {
+        const at = declaration.indexOf(":")
+
+        return [declaration.slice(0, at).trim(), declaration.slice(at + 1).trim()]
+      })
+  )
+}
 
 /** What the registry says the palette is, with nothing in between. */
 const resolve = (theme: SiteThemeName) => {
@@ -179,24 +231,74 @@ describe("the rule the document is given", () => {
   })
 
   /**
-   * The ramps, which are the one place two defaults have to keep agreeing.
+   * **The inverse of what stood here until 8 November, and it is the change.**
    *
-   * `themeDocumentCss` mounts `fluid` ramps unless told otherwise and
-   * `renderTree` asks for the same, because a render only mounts `fixed` ramps
-   * for a caller that wants literals and nothing on this surface does (0283).
-   * The two are separate defaults in separate modules, so a change to either
-   * would leave the document carrying one set of lengths and the tree another
-   * — invisible, because the variables the document's copy holds are read by
-   * nothing inside the tree. This is what would say so.
+   * This case used to read *mounts the variables the tree mounts*, and it
+   * passed: the document carried every `--loom-*` the root primitive carried,
+   * and the two agreed because `themeDocumentCss` and `renderTree` both default
+   * their ramps to `fluid`. Two readings of one palette agreeing is a fact, and
+   * it was the wrong fact to hold — the agreement was between a mounting and a
+   * **copy of that mounting**, in the one place no primitive looks, because a
+   * primitive reads the nearest declaration and the nearest one is the tree's
+   * own ([0337](../../../../../decisions/0337-a-host-whose-page-is-already-a-tree-is-handed-the-ground-alone.md)).
+   *
+   * So what is held now is that there is nothing to agree about. The rule on
+   * the document declares **no variable at all** — and the case below holds the
+   * other end, that the tree still declares all of them, because a change that
+   * silenced both would satisfy this one on its own and serve an unpainted
+   * page.
+   *
+   * The two ramp defaults no longer have to keep agreeing, and that is a
+   * property rather than a check removed: there is no second set of lengths in
+   * the document to drift from the tree's.
    */
-  it.each(SITE_THEME_NAMES)("on %s, mounts the variables the tree mounts", (theme) => {
+  it.each(SITE_THEME_NAMES)("on %s, declares no variable of the palette's", (theme) => {
     const css = cssIn(ruleFor(SITE_ROUTES[0]!, theme))!
     const mounted = themeStyle(resolve(theme)) as Readonly<Record<string, string>>
 
-    for (const [name, value] of Object.entries(mounted)) {
+    expect(css).not.toMatch(/--loom-/)
+
+    for (const name of Object.keys(mounted)) {
       if (!name.startsWith("--")) continue
-      expect(declared(css, name)).toBe(String(value))
+      expect(declared(css, name)).toBeUndefined()
     }
+  })
+
+  /**
+   * The other end of it, and the reason the case above cannot stand alone.
+   *
+   * *The document declares no variables* is also true of a page that declares
+   * them nowhere, which is a site with no colour on it. What makes the removal
+   * safe is that the variables are **already** on the element the tree renders,
+   * so this reads them off the served markup rather than off the palette — the
+   * same independent half the ground assertions take.
+   */
+  it.each(SITE_THEME_NAMES)("on %s, leaves every one of them on the tree's own root", (theme) => {
+    const mountedOnTree = treeRootStyle(renderToStaticMarkup(rendered(SITE_ROUTES[0]!, theme).element))
+    const mounted = themeStyle(resolve(theme)) as Readonly<Record<string, string>>
+    const names = Object.keys(mounted).filter((name) => name.startsWith("--"))
+
+    expect(names.length).toBeGreaterThan(0)
+
+    for (const name of names) {
+      expect(mountedOnTree[name]).toBe(String(mounted[name]))
+    }
+  })
+
+  /**
+   * What the rule is instead, said as a count rather than as a string.
+   *
+   * Three declarations and no more, which is what `themeGround` returns and the
+   * whole of what a document needs from a palette it cannot otherwise reach.
+   * Asserting the text would be asserting the palette's colours a fourth time;
+   * asserting the shape is what says a variable has not crept back in beside
+   * them.
+   */
+  it.each(SITE_THEME_NAMES)("on %s, is the three declarations and nothing else", (theme) => {
+    const css = cssIn(ruleFor(SITE_ROUTES[0]!, theme))!
+    const properties = [...css.matchAll(/^\s*([a-z-]+):/gm)].map((match) => match[1])
+
+    expect(properties.sort()).toEqual(["background-color", "color", "color-scheme"])
   })
 })
 
@@ -240,6 +342,34 @@ describe("when there is no palette to report", () => {
    */
   it("emits nothing at all rather than a guess", () => {
     expect(renderToStaticMarkup(<DocumentTheme theme={undefined} />)).toBe("")
+  })
+
+  /**
+   * **The second state, which is new on 8 November and is the one the swap
+   * brought with it.**
+   *
+   * `themeDocumentCss` always returned a rule, so *no theme* was the only way
+   * this component could have nothing to say. `themeGroundCss` has a second:
+   * it hands back `undefined` for a palette whose body-copy pair cannot be
+   * read, mirroring `themeGround` for its reason — the variables were the half
+   * a host cannot write for itself and are gone from here, so what is left
+   * would be an empty block.
+   *
+   * No registered palette reaches it, which is why the theme is built by hand
+   * the way `src/render/document-theme.test.ts` builds its own. That is the
+   * point of the case: the branch is unreachable from this site today and is
+   * one palette away from being reached, and a component that rendered
+   * `:root {}` into the head would do it silently.
+   */
+  it("emits nothing for a palette with no ground either", () => {
+    const resolved = resolve(DEFAULT_THEME)
+    const groundless: ResolvedTheme = {
+      ...resolved,
+      palette: { ...resolved.palette, slots: {} },
+    }
+
+    expect(themeGroundCss(groundless)).toBeUndefined()
+    expect(renderToStaticMarkup(<DocumentTheme theme={groundless} />)).toBe("")
   })
 })
 
@@ -290,7 +420,7 @@ describe("every page of this site", () => {
     const source = sourceOf(route)
 
     expect(source).toContain("const rendered = await renderSitePage(")
-    expect(source).not.toMatch(/DocumentTheme[^/]*themeDocumentCss/)
+    expect(source).not.toMatch(/DocumentTheme[^/]*theme(?:Document|Ground)Css/)
   })
 })
 
@@ -321,9 +451,18 @@ describe("the component's own source", () => {
     expect(code).not.toContain("color-scheme")
   })
 
-  it("reads the rule through the published recipe", () => {
+  /**
+   * The published half, and **which** half.
+   *
+   * `themeDocumentCss` is still published and is still right for the
+   * application shell, which has no tree and needs the variables. On this
+   * surface it is the wrong one of the two, and the name is cheap to check
+   * where the reasoning for preferring it is thirty lines long (0337).
+   */
+  it("reads the ground through the published recipe, and not the whole theme", () => {
     expect(code).toContain('from "@jam-overture/loom/react"')
-    expect(code).toContain("themeDocumentCss(theme)")
+    expect(code).toContain("themeGroundCss(theme)")
+    expect(code).not.toContain("themeDocumentCss")
   })
 
   /**
