@@ -7,7 +7,7 @@
 **Target:** [`docs/portal-wireframes.md`](../docs/portal-wireframes.md) *5 ·
 Pages · History*, the version cards
 
-Claimed by a portal run at 2026-11-08 13:38 UTC (#819).
+Claimed by a portal run at 2026-11-08 13:20 UTC (#819).
 
 ## Why this, and why now
 
@@ -40,6 +40,11 @@ revert plan) are all on `main`.
   *Version N: reverted version M*, with what it put back under it. A revert
   offers no revert of its own, and the card says why if one is asked for:
   having the change back is Loom proposing it again.
+- **The line under a version says who asked for a revert.** A revert the rules
+  let through reads *Revert, asked for by <who> and made within the project's
+  rules*; one someone said yes to, *Revert, accepted by <who>*. Before this, a
+  change nobody answered could only read *made within the project's rules*,
+  which for a revert a person pressed would hide who pressed it.
 - **It never plans from the wrong start.** A revert is planned by replaying the
   page's current copy from the version the site published. Where the site has
   since published a newer version Loom has not followed yet, the card says to
@@ -63,8 +68,11 @@ revert plan) are all on `main`.
   undid, by the entry it names on its own copy.
 - `_lib/page-history.ts`: `versionWordsOf`, a card's heading and lines.
 - `pages/[tree]/actions.ts`: `revertAction` (the page is read from what the
-  site published, never from the form); `_components/revert-form.tsx`; the
-  card takes a `revert` slot.
+  site published, never from the form). Like *Accept* on *For review*, it does
+  not revalidate: the answer is shown on the card it was asked from, and a
+  revalidation re-rendered the history under it and took the answer away (the
+  screenshot run caught this). `_components/revert-form.tsx`; the card takes a
+  `revert` slot.
 
 ## Decisions taken, and why
 
@@ -88,9 +96,18 @@ revert plan) are all on `main`.
   over a later change is held, with its goal recorded; a change with no
   recorded goal is still reverted; a store that does not answer changes
   nothing.
-- `going-live.test.ts` +1, `page-history.test.ts` +3, `version-card.test.tsx`
+- `going-live.test.ts` +1, `page-history.test.ts` +4, `version-card.test.tsx`
   +1.
-- `pnpm verify`: see the pull request for the run's numbers.
+- `pnpm verify` exits 0: the framework's 6,604 tests (2 skipped) and the
+  app's 7,176.
+- Pressed for real against Postgres 16 with the screen built and served
+  (`next build` + `next start`): the button raised the revert, the Gate made
+  it, the card said so with its goal, and the history on the next visit led
+  with *Version 12: reverted version 11*.
+
+![The card before and after Propose reverting is pressed](2026-11-08-portal-propose-reverting-card.webp)
+
+![Page history after the revert](2026-11-08-portal-propose-reverting-wide.webp)
 
 ## Where the wireframe stands
 

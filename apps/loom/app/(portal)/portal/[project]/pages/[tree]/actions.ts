@@ -104,6 +104,11 @@ const NOT_REVERTED: Readonly<Record<NotReverted["kind"], string>> = {
  * revert is weighed by the Gate like any change a person asks for (0032):
  * within the project's rules it goes live on the site's next pull, otherwise
  * it waits under *For review*.
+ *
+ * Nothing is revalidated, as with an answer on *For review*: the result is
+ * shown on the card the revert was asked from, and a revalidation would
+ * re-render the history under it and take the card's answer away with it. The
+ * history is read per request, so the next visit shows the revert.
  */
 export const revertAction = async (
   _previous: RevertReport | null,
@@ -153,8 +158,6 @@ export const revertAction = async (
     ...siteReport(revertReportOf(outcome, write.weighedAgainst), application),
     ...(goal === undefined ? {} : { goal: goal.name }),
   }
-
-  revalidatePath(`/portal/${site.projectId}/pages/${page.tree.treeId}/history`)
 
   switch (outcome.kind) {
     case "committed":

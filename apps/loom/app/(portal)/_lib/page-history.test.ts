@@ -256,6 +256,33 @@ describe("originOf", () => {
     )
   })
 
+  it("names who asked for a revert the rules let through, and who accepted one they did not", () => {
+    const asked = {
+      ...newer,
+      undoes: older.proposalId,
+      accepted: {
+        ...newer.accepted,
+        provenance: {
+          ...newer.accepted.provenance,
+          origin: "user-instruction" as const,
+          actor: "ana@example.com",
+        },
+      },
+    }
+
+    expect(originOf({ kind: "loom", change: asked, liveAt: LIVE, at: LIVE })).toBe(
+      "Revert, asked for by ana@example.com and made within the project's rules · live 1 October 2026"
+    )
+    expect(
+      originOf({
+        kind: "loom",
+        change: { ...asked, accepted: { ...asked.accepted, answeredBy: "bo@example.com" } },
+        liveAt: LIVE,
+        at: LIVE,
+      })
+    ).toBe("Revert, accepted by bo@example.com · live 1 October 2026")
+  })
+
   it("calls the site's newer version its own edit", () => {
     expect(originOf({ kind: "site", at: AT })).toBe(
       "Your site's own edit · published 1 October 2026"

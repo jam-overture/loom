@@ -244,15 +244,24 @@ export const siteOutcomeOf = (figures: SiteFigures, now: number): Outcome => {
   }
 }
 
-/** Where a version came from, as the line under its heading says it. */
+/**
+ * Where a version came from, as the line under its heading says it: who said
+ * yes, or, for a change a person asked for that needed no yes, who asked.
+ */
 export const originOf = (version: Version): string => {
   if (version.kind === "site") return `Your site's own edit · published ${day(version.at)}`
 
-  const by = version.change.accepted.answeredBy
+  const { accepted, undoes } = version.change
+  const what = undoes === undefined ? "Loom change" : "Revert"
+  const by = accepted.answeredBy
+  const asker =
+    accepted.provenance.origin === "user-instruction" ? accepted.provenance.actor : undefined
   const made =
-    by === undefined
-      ? "Loom change, made within the project's rules"
-      : `Loom change, accepted by ${by}`
+    by !== undefined
+      ? `${what}, accepted by ${by}`
+      : asker !== undefined
+        ? `${what}, asked for by ${asker} and made within the project's rules`
+        : `${what}, made within the project's rules`
 
   return version.liveAt === undefined
     ? `${made} · accepted ${day(version.change.acceptedAt)}`
