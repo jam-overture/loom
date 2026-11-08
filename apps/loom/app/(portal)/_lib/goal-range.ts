@@ -1,11 +1,13 @@
 import {
+  actedCountOf,
   arrivalRangeBefore,
   type ArrivalRange,
   type StoredActed,
   type StoredArrivals,
 } from "@jam-overture/loom/signals"
 
-import type { Goal, PartsByPage } from "./goals/goal"
+import type { Goal, GoalKind, PartsByPage } from "./goals/goal"
+import type { PageTotal, PartTotal, RangeTotals } from "./goals/goal-preview"
 import { pagesCoveredBy, per100Of, readingSentence } from "./goals/goal-view"
 import { sideOf, type Side } from "./measuring"
 import {
@@ -111,6 +113,66 @@ export const goalRangeOf = (goal: Goal, range: ArrivalRange, read: GoalCounters)
     before: begins <= before.from ? sideOf(before, arrivals, acted, goal.kind) : undefined,
     clipped: begins > range.from,
   }
+}
+
+/** Each row's key once, in the order first met. */
+const keysOf = <Row>(rows: readonly Row[], keyOf: (row: Row) => string): readonly string[] => [
+  ...new Set(rows.map(keyOf)),
+]
+
+const partKeyOf = (row: Pick<PartTotal, "treeId" | "nodeId">): string =>
+  `${row.treeId} ${row.nodeId}`
+
+/**
+ * The project's counters over a range folded into totals by page and by part,
+ * from where counting began when that is inside it: what the *New goal*
+ * drawer previews any goal from (`goal-preview.ts`), so the browser is handed
+ * a total per page and per part rather than a row per hour.
+ */
+export const rangeTotalsOf = (
+  read: Omit<GoalCounters, "parts">,
+  range: ArrivalRange
+): RangeTotals => {
+  const begins = countingBeginsOf(read)
+
+  if (begins === undefined || begins >= range.to) return { kind: "uncounted" }
+
+  const from = Math.max(range.from, begins)
+  const within = (row: { readonly hour: number }): boolean =>
+    row.hour >= from && row.hour < range.to
+  const arrivals = read.arrivals.hours.filter(within)
+  const acted = read.acted.hours.filter(within)
+
+  const pages = keysOf(arrivals, (row) => row.treeId).map(
+    (treeId): PageTotal => ({
+      treeId,
+      views: arrivals
+        .filter((row) => row.treeId === treeId)
+        .reduce((sum, row) => sum + row.views, 0),
+    })
+  )
+  const parts = keysOf(acted, partKeyOf).flatMap((key): readonly PartTotal[] => {
+    const rows = acted.filter((row) => partKeyOf(row) === key)
+    const [first] = rows
+    const total = (kind: GoalKind): number =>
+      rows.reduce((sum, row) => sum + actedCountOf(row, kind), 0)
+
+    return first === undefined
+      ? []
+      : [
+          {
+            treeId: first.treeId,
+            nodeId: first.nodeId,
+            counts: {
+              activated: total("activated"),
+              completed: total("completed"),
+              disclosed: total("disclosed"),
+            },
+          },
+        ]
+  })
+
+  return { kind: "read", from, clipped: begins > range.from, pages, parts }
 }
 
 /** What *Signals* knows of the primary goal. */
