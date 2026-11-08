@@ -31,7 +31,8 @@ export const GET = async (
 ): Promise<Response> => {
   const actor = await currentActor()
 
-  if (actor === null) return Response.json(waitingCountBody(undefined), { status: 401, headers: FRESH })
+  if (actor === null)
+    return Response.json(waitingCountBody(undefined), { status: 401, headers: FRESH })
 
   const asked = projectIdSchema.safeParse((await params).project)
   const member = actorSchema.safeParse(actor)
@@ -42,7 +43,8 @@ export const GET = async (
 
   const role = await roleOf(member.data, asked.data)
 
-  if (role === null) return Response.json(waitingCountBody(undefined), { status: 404, headers: FRESH })
+  if (role === null)
+    return Response.json(waitingCountBody(undefined), { status: 404, headers: FRESH })
   if (role === undefined) {
     return Response.json(waitingCountBody(undefined), { status: 503, headers: FRESH })
   }

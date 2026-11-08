@@ -48,5 +48,4 @@ export const projectHome = (projectId: string): string => `/portal/${projectId}/
  * Where the rail asks how many changes wait for a person, read on every move
  * between a project's screens because the rail itself is not re-drawn by one.
  */
-export const waitingCountHref = (projectId: string): string =>
-  `/portal/${projectId}/review/waiting`
+export const waitingCountHref = (projectId: string): string => `/portal/${projectId}/review/waiting`

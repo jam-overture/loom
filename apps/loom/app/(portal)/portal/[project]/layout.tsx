@@ -36,10 +36,7 @@ const ProjectLayout = async ({
   return (
     <div className="flex w-full flex-col md:flex-row">
       <aside className="border-edge-subtle flex shrink-0 flex-col gap-4 border-b px-8 pt-6 pb-3 md:sticky md:top-14 md:h-[calc(100vh-3.5rem)] md:w-56 md:overflow-y-auto md:border-r md:border-b-0 md:px-3">
-        <Link
-          href="/portal"
-          className="text-ink-muted px-3 text-sm no-underline hover:underline"
-        >
+        <Link href="/portal" className="text-ink-muted px-3 text-sm no-underline hover:underline">
           ← {screenName("/portal")}
         </Link>
         <ProjectRail projectId={asked.data} />
