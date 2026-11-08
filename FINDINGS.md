@@ -67931,3 +67931,126 @@ re-exporting them would be two names for one guarantee. And do not generalise th
 *change* shape the same way — `ArrivalChange` and `ActedChange` differ in what
 each withholds and why, which `ratios.ts` says at length is the reading's own
 rule and not a helper's.
+
+---
+## 2026-11-08 — the gate that was four days from red is six weeks from it, and the cap's remedy was never the one that would have paid
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** **closed by
+#TBD** for the deadline, and the entries of 7 November it answers are annotated
+below rather than reopened
+
+`pnpm verify` is the merge gate for four surfaces and the heaviest generated
+page was 509,948 bytes against an assertion that fires at 540,000, growing
+6,535 a day. On the morning of 8 November that was **four days**. It is now
+**275,350 bytes of room**, which at the same rate is six weeks, and no name
+stopped being published to get there.
+
+**What the two previous runs of this lane did not measure.** Both read the cap
+as a count of names and priced its one stated remedy, a cut along the page's
+modules, at 60 addresses and 13,105 bytes of rows in a contents file with 7,611
+left. That arithmetic is correct and it is still correct. What neither asked is
+**what the bytes were**:
+
+| `/docs/api-reference/signals`, 8 November morning | bytes |
+| --- | --- |
+| the declarations themselves | 95,398 |
+| doc comments the package wrote against their members | **375,803** |
+| the sentence each author left on the export | 38,747 |
+| **the page** | **509,948** |
+
+**Four fifths of the heaviest page on the site was member commentary**, and the
+comparison that makes it a defect rather than a fact is the door beside it:
+`@jam-overture/loom/runtime` publishes 600 names to `signals`' 656 and carried
+**65 bytes of member commentary per name against 573**. The page was not heavy
+because a package published into it. It was heavy because one rule this
+directory had always applied to a symbol's own doc comment had never been
+applied to the comments inside its declaration.
+
+`api/extract.ts` has published a symbol's summary as its **first paragraph**
+since the file was written, with the reason beside it: *a reference is a place a
+reader lands mid-question, the sentence that says what this is belongs on the
+page, and the six paragraphs of reasoning behind it belong in the source.*
+`toItsFirstParagraph` applies that inside a declaration. Measured, after:
+
+| | main | this branch |
+| --- | --- | --- |
+| the signals page | 509,948 | **266,753** |
+| every signature in the reference | 772,426 | **487,366** |
+| declarations cut off at an ellipsis | 12 | **2** |
+| member comments withheld whole for a citation they no longer contain | 40 | **0** |
+| `reference.generated.json`, committed | 1,324,981 | **1,033,272** |
+
+**Two things a future run of this lane should take from it rather than from the
+numbers.**
+
+- **A cap firing is a question about what is being counted, before it is a
+  question about where to put the overflow.** Nine runs of this lane have ended
+  on a cap. The remedy stated in `weight.ts` was priced twice and attempted
+  never, and it was the wrong remedy: it would have spread four fifths of a
+  megabyte of commentary across sixty addresses instead of asking whether a
+  reader scrolling a union of seven keys wants five screens about how each key
+  is spelled.
+- **The rule was already in the file.** What was missing was not a decision. It
+  was noticing that the same rule had been written for a comment read as prose
+  and not for the same comment read as code.
+
+**The 7 November entry is answered for its deadline and not for its subject.**
+`0353` is still unanswered, the prose index still has 823 compressed bytes of
+room, and this lane still cannot write another page. What has gone away is the
+part of that entry that was about a date.
+
+---
+## 2026-11-08 — a declaration's member comments are the page a stranger reads, and two doors spend four times what the others do on them
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom signals` and
+`Loom daily build` (`src/signals/`, `src/sdk/`) · **Status:** open — **nothing
+is broken, no test is failing and no deadline is attached**; it is a reading of
+another lane's prose that only this surface can take, offered because the lane
+that wrote it cannot see where it lands
+
+The entry above took four fifths of the signature text out of the generated
+reference by publishing the **first paragraph** of each comment inside a
+declaration. What is left is still 130,042 bytes of member commentary on one
+page, and the spread across the doors is wide enough to be a style rather than
+a subject:
+
+| door, after the change | names | bytes of member comment per name |
+| --- | --- | --- |
+| `@jam-overture/loom/sdk` | 75 | **204** |
+| `@jam-overture/loom/signals` | 656 | **198** |
+| `@jam-overture/loom/react` | 125 | 107 |
+| `@jam-overture/loom/telemetry` | 79 | 85 |
+| `@jam-overture/loom/store` | 123 | 65 |
+| `@jam-overture/loom/runtime` | 600 | **45** |
+
+`runtime` is the biggest door in the package and the cheapest per name, and
+nothing suggests its declarations are worse documented for it. Four of its
+first paragraphs, picked by length rather than by merit: *"In registration
+order, so a catalogue reads predictably."* · *"Deduplicated, in
+first-encountered order."* · *"One line, written by whoever runs the
+deployment."* · *"Whether this origin is the deployment's own."* Each is a
+sentence a person could repeat, which is what the brief for this surface asks
+of a runtime term. At 198 bytes the sentence has two subordinate clauses and a
+parenthesis in it, and on a reference page it is the first thing a stranger
+meets about that member.
+
+**What is asked is a reading and not a rewrite.** Nobody should shorten a doc
+comment to hit a number in this table, and this lane would rather the figure
+stayed where it is than see a comment lose something true. What is worth one
+run of the owning lane's attention:
+
+- **The first paragraph is now a reader-facing sentence**, and it was not
+  written as one. Before 8 November it was the opening of a note to the next
+  maintainer of that module, with the explanation following it. Now it stands
+  alone on a page a stranger reads, and the ones that read as the start of
+  something are the ones worth a second look. `ActionChangeSilence` is the good
+  case: six keys, six sentences, each repeatable by a person.
+- **A parenthetical pointing at another file in `src/` is a footnote to a
+  document the reader cannot open.** The citation rule already lifts
+  `(0038)`; a bare `` (`parts.ts`) `` is not a citation to it and reaches the
+  page. There are **12** of them on the signals door, in `ActedChange`,
+  `ActedRate`, `ArrivalChange`, `CollectionSummary` and eight others. Counted
+  rather than estimated, and small enough that the remedy is twelve edits in
+  `src/signals/` rather than a rule in this directory.
+
+Filed with no date on it on purpose. The deadline this was found under is gone.
