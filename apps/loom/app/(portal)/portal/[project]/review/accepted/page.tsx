@@ -18,6 +18,7 @@ import {
 import { plainMoment } from "@/app/(portal)/_lib/when"
 
 import { readAccepted } from "@/app/(portal)/_lib/accepted/reading"
+import { single } from "@/app/(portal)/_lib/query"
 
 /**
  * *Accepted*: every change accepted on the project's pages, newest first, each
@@ -35,9 +36,6 @@ const STATUS_INK: Readonly<Record<StepState, string>> = {
   upcoming: "text-ink-secondary",
   ended: "text-refuse-ink",
 }
-
-const single = (value: string | readonly string[] | undefined): string | undefined =>
-  typeof value === "string" ? value : undefined
 
 const AcceptedPage = async ({
   params,

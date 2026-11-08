@@ -5,7 +5,15 @@ import type { StoredRevision } from "@jam-overture/loom/store"
 
 import { acceptedChangesOf, type AcceptedChange, type Ending, type Reach } from "./going-live"
 import { MEASURING_MS, windowsOf, type Measurement, type Side } from "./measuring"
-import { historyOf, keyOf, loomOutcomeOf, originOf, siteOutcomeOf } from "./page-history"
+import {
+  historyOf,
+  keyOf,
+  loomOutcomeOf,
+  marksOf,
+  originOf,
+  siteOutcomeOf,
+  versionWordsOf,
+} from "./page-history"
 import { firstCopyOf } from "./proposing/copies"
 
 const PAGE = treeIdSchema.parse("t_home")
@@ -95,6 +103,25 @@ describe("historyOf", () => {
     const history = historyOf(PAGE, [older], [AT], { kind: "own-site" })
 
     expect(history.versions.map(keyOf)).toEqual(["p_old", `site-${AT}`])
+  })
+})
+
+describe("marksOf", () => {
+  it("marks each live change and each of the site's versions, oldest first", () => {
+    const reach = pulling([AT + HOUR, AT + 3 * DAY + HOUR])
+    const history = historyOf(PAGE, [newer, older], [AT + 2 * DAY], reach)
+
+    expect(marksOf(history.versions)).toEqual([
+      { at: AT + HOUR, origin: "loom", label: "Version 1" },
+      { at: AT + 2 * DAY, origin: "site", label: "Your site's version" },
+      { at: AT + 3 * DAY + HOUR, origin: "loom", label: "Version 2" },
+    ])
+  })
+
+  it("leaves out a change that came off before any reader had it", () => {
+    const dropped = ended(newer, { kind: "dropped", at: AT + 4 * DAY })
+
+    expect(marksOf(historyOf(PAGE, [dropped], [], pulling([])).versions)).toEqual([])
   })
 })
 
@@ -229,9 +256,60 @@ describe("originOf", () => {
     )
   })
 
+  it("names who asked for a revert the rules let through, and who accepted one they did not", () => {
+    const asked = {
+      ...newer,
+      undoes: older.proposalId,
+      accepted: {
+        ...newer.accepted,
+        provenance: {
+          ...newer.accepted.provenance,
+          origin: "user-instruction" as const,
+          actor: "ana@example.com",
+        },
+      },
+    }
+
+    expect(originOf({ kind: "loom", change: asked, liveAt: LIVE, at: LIVE })).toBe(
+      "Revert, asked for by ana@example.com and made within the project's rules · live 1 October 2026"
+    )
+    expect(
+      originOf({
+        kind: "loom",
+        change: { ...asked, accepted: { ...asked.accepted, answeredBy: "bo@example.com" } },
+        liveAt: LIVE,
+        at: LIVE,
+      })
+    ).toBe("Revert, accepted by bo@example.com · live 1 October 2026")
+  })
+
   it("calls the site's newer version its own edit", () => {
     expect(originOf({ kind: "site", at: AT })).toBe(
       "Your site's own edit · published 1 October 2026"
     )
+  })
+})
+
+describe("versionWordsOf", () => {
+  it("leads a change with the first thing it did, the rest under it", () => {
+    expect(
+      versionWordsOf(older, [newer, older], ["Took the banner off.", "Nothing else."])
+    ).toEqual({
+      heading: "Version 1: Took the banner off.",
+      lines: ["Nothing else."],
+    })
+  })
+
+  it("names a change it has no sentence for plainly", () => {
+    expect(versionWordsOf(older, [older], []).heading).toBe("Version 1: A change Loom made")
+  })
+
+  it("names a revert by the version it reverted, with what it put back under it", () => {
+    const revert = { ...newer, undoes: older.proposalId }
+
+    expect(versionWordsOf(revert, [revert, older], ["Put the banner back."])).toEqual({
+      heading: "Version 2: reverted version 1",
+      lines: ["Put the banner back."],
+    })
   })
 })

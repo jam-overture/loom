@@ -13,16 +13,34 @@ import { partsOf } from "./goal-view"
  * page cannot move a count of something the page does not have.
  */
 
-/** The goal a change to this page serves, or `undefined` for a page no goal is on. Pure. */
-export const goalForPage = (goals: readonly Goal[], page: LoomTree): Goal | undefined => {
+/** Every goal on this page, the primary first and then the oldest. Pure. */
+export const goalsOnPage = (goals: readonly Goal[], page: LoomTree): readonly Goal[] => {
   const parts = new Set<string>(partsOf(page).map((part) => part.nodeId))
-  const on = primaryFirst(goals).filter(
+
+  return primaryFirst(goals).filter(
     (goal) => (goal.pages === null || goal.pages.includes(page.treeId)) && parts.has(goal.nodeId)
   )
+}
+
+/** The goal a change to this page serves, or `undefined` for a page no goal is on. Pure. */
+export const goalForPage = (goals: readonly Goal[], page: LoomTree): Goal | undefined => {
+  const on = goalsOnPage(goals, page)
 
   /** A page's own goal names it; otherwise the primary, then the oldest, as `primaryFirst` orders them. */
   return on.find((goal) => goal.pages !== null) ?? on[0]
 }
+
+/**
+ * The goal a page's history is measured on (its *Measured on* picker): the
+ * one the address names, where it is on the page, and otherwise the goal a
+ * change to the page serves. Pure.
+ */
+export const measuredOnFor = (
+  goals: readonly Goal[],
+  page: LoomTree,
+  asked: string | undefined
+): Goal | undefined =>
+  goalsOnPage(goals, page).find((goal) => goal.goalId === asked) ?? goalForPage(goals, page)
 
 /**
  * The goal a proposal was raised for, as it was then: kept by the intent the

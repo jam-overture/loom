@@ -1,6 +1,7 @@
 import { NAMESPACED_ID_PATTERN, NODE_ID_PATTERN, TREE_ID_PATTERN } from "../grammar.js"
 import type { NodeId, TreeId } from "../ids.js"
 import type { PrimitiveType } from "../primitive-type.js"
+import { addressedRootIn } from "../render/addressed.js"
 import { DISCLOSED_ATTRIBUTE } from "../render/disclosed.js"
 import {
   LOOM_NODE_ATTRIBUTE,
@@ -13,7 +14,7 @@ import { err, ok, type Result } from "../result.js"
 import { createSignalLedger, type SignalAddress } from "./ledger.js"
 import { READER_SIGNAL_KINDS } from "./kinds.js"
 import { READABLE_VIEWPORT_FRACTION, READABLE_VISIBLE_FRACTION } from "./readable.js"
-import type { ReaderSignal, ReaderSignalBatch, ReaderSignalKind } from "./signal.js"
+import type { ReaderSignal, ReaderSignalBatch, ReaderSignalKind, ViewKey } from "./signal.js"
 import { mintViewKey, type RandomBytes } from "./view.js"
 
 /**
@@ -54,11 +55,15 @@ import { mintViewKey, type RandomBytes } from "./view.js"
  * **It keeps up with a page that changes.** Nodes that arrive after it started
  * are watched and nodes that leave stop counting, so a band behind a Suspense
  * boundary, a list that grows, and every region a proposal has just changed are
- * measured like the rest. What it does *not* follow is the page becoming a
- * different page: the tree and revision are read once, off the root, and every
- * batch is filed under them. **A new root, or a new revision in the same root,
- * is a new broadcast** — `stop()` the old one and start another, or a
- * client-side navigation files its signals under the revision it left.
+ * measured like the rest.
+ *
+ * **And with a page that becomes a different page, when it is handed the
+ * document.** The tree and revision are read once off a root element, so a
+ * broadcast pointed at an element goes on filing every batch under them — which
+ * is a client-side navigation's signals filed against the page it left. Pointed
+ * at a `Document` it follows the addressed page instead: a new identity ends one
+ * page view and opens another, with its own view key and its own arrival, and
+ * the same revision rendered again continues the one it was already observing.
  */
 
 /** The DOM event a batch is dispatched as, on the root element. It bubbles. */
@@ -197,6 +202,44 @@ export type ReaderSignalBroadcastError = {
 const DEFAULT_FLUSH_MS = 5000
 
 /**
+ * One page view, as a value a broadcast reads rather than state it owns.
+ *
+ * A key alone was enough while a broadcast and a page view were the same thing:
+ * one minted a key, sent `first: true` on its opening delivery, and the two
+ * ended together. A broadcast handed a `Document` follows the page instead, so
+ * **one page view can be observed through two root elements** — a host that
+ * tears down the element it rendered into and renders the same revision again
+ * has not sent a reader to a second page.
+ *
+ * So the page view is lifted out of the broadcast observing it. The key is
+ * minted once per page view and `opened` says whether the opening delivery has
+ * gone, which is the pair an intake needs to count an arrival exactly once
+ * (0214). A second broadcast handed the same value carries the same key and
+ * sends no second opening; one handed a fresh value is a second page view, and
+ * that is the whole of the decision about when a navigation counts as one.
+ *
+ * **Not exported, from here or from `view.ts`.** A host has nothing to do with
+ * it — it passes a root or a document and the page views follow from that — and
+ * `@jam-overture/loom/signals` re-exports everything `view.ts` holds, so putting
+ * it there would publish a mutable value to every caller of the heavy door to
+ * serve one caller of the light one.
+ *
+ * **`opened` is mutable, and is the only mutable field this entry point
+ * exports** — nothing, since it exports none of this. A page view is a thing
+ * that happens over time rather than a fact about a tree, and the alternative is
+ * a broadcast reaching back into its caller to report that it has delivered,
+ * which is the same state with a callback wrapped round it.
+ */
+type PageView = {
+  readonly key: ViewKey
+  /** Whether the opening delivery of this page view has gone. */
+  opened: boolean
+}
+
+/** A page view nothing has been delivered for yet. */
+const beginPageView = (random: RandomBytes | undefined): PageView => ({ key: mintViewKey(random), opened: false })
+
+/**
  * On screen means a reader could be reading it: at least
  * {@link READABLE_VISIBLE_FRACTION} of the element is visible, **or** it fills
  * at least {@link READABLE_VIEWPORT_FRACTION} of the viewport.
@@ -303,7 +346,8 @@ const deliverSafely = (send: ReaderSignalOptions["send"], batch: ReaderSignalBat
 }
 
 /**
- * Start broadcasting reader signals from the page under `root`.
+ * Start broadcasting reader signals from the page under `root`, as part of
+ * `of`.
  *
  * Returns an error rather than broadcasting nothing when the page is not
  * addressed, because a silent broadcaster on an unaddressed page is exactly the
@@ -311,13 +355,13 @@ const deliverSafely = (send: ReaderSignalOptions["send"], batch: ReaderSignalBat
  *
  * Nodes added under `root` afterwards are picked up and nodes removed stop
  * counting. The tree and revision are not: they are read once, here, and a page
- * that becomes a different page — a client-side navigation, a re-render at a new
- * revision into the same root — needs `stop()` and a new broadcast, or its
- * signals are filed under the revision it left.
+ * that becomes a different page needs another of these — which is what
+ * {@link followAddressedPage} does for a host that hands over a `Document`.
  */
-export const broadcastReaderSignals = (
+const broadcastFromRoot = (
   root: Element,
-  options: ReaderSignalOptions = {}
+  options: ReaderSignalOptions,
+  of: PageView
 ): Result<ReaderSignalBroadcast, ReaderSignalBroadcastError> => {
   const page = pageOf(root)
   if (!page.ok) return page
@@ -325,27 +369,6 @@ export const broadcastReaderSignals = (
   const now = options.now ?? Date.now
   const wants = selectionOf(options.kinds, options.types)
   const document = root.ownerDocument
-
-  /**
-   * Minted once, here, and carried by every batch this broadcast sends — which
-   * is what makes the batches of one page view correlatable and two page views
-   * not (0146). A new broadcast is a new view, including the second one a
-   * client-side navigation needs, so the key cannot outlive the page it
-   * describes even by accident.
-   */
-  const view = mintViewKey(options.random)
-
-
-  /**
-   * Whether the opening delivery of this page view has gone.
-   *
-   * One batch of a view carries `first` and the rest do not, which is how an
-   * intake counts a reader arriving exactly once — without it, the only
-   * countable unit is the delivery, and a reader who stays ten minutes is a
-   * hundred of them. A new broadcast mints a new view key and gets a new
-   * opening, which is what a client-side navigation needs.
-   */
-  let opened = false
 
   const ledger = createSignalLedger(document.visibilityState === "hidden")
   let stopped = false
@@ -392,12 +415,12 @@ export const broadcastReaderSignals = (
       treeId: page.value.treeId,
       revision: page.value.revision,
       sentAt: now(),
-      view,
-      ...(opened ? {} : { first: true as const }),
+      view: of.key,
+      ...(of.opened ? {} : { first: true as const }),
       signals,
     }
 
-    opened = true
+    of.opened = true
 
     root.dispatchEvent(new CustomEvent(READER_SIGNALS_EVENT, { detail: batch, bubbles: true }))
     deliverSafely(options.send, batch)
@@ -642,3 +665,197 @@ export const broadcastReaderSignals = (
 
   return ok({ flush, stop })
 }
+
+/**
+ * The tree and revision an element says it is, as one comparable value.
+ *
+ * Read off the attributes rather than off {@link pageOf}, because what this
+ * compares is *whether the page changed* and not whether it is addressed well
+ * enough to broadcast: a root whose revision goes from `4` to something that is
+ * not a number has become a different page and has stopped being a page this
+ * can report on, and those are two answers rather than one.
+ */
+const identityOf = (root: Element): string =>
+  `${root.getAttribute(LOOM_TREE_ATTRIBUTE)} ${root.getAttribute(LOOM_REVISION_ATTRIBUTE)}`
+
+/** What a broadcast is observing, while it is observing it. */
+type Observing = {
+  readonly root: Element
+  readonly identity: string
+  readonly of: PageView
+  readonly broadcast: ReaderSignalBroadcast
+}
+
+/**
+ * Broadcast from whatever addressed page the document holds, and keep
+ * broadcasting from it when the host replaces it.
+ *
+ * ## Why this exists
+ *
+ * A broadcast reads its tree and revision once, off the root it was handed, and
+ * files every batch under them. That is right, and it is why the documented
+ * remedy for a page becoming a different page has been *stop and start another*
+ * — which asks a host to notice a client-side navigation and do something about
+ * it. **A host that does not is the common case, and what it gets is not
+ * missing data but wrong data**: a reader navigates from the pricing page to the
+ * sign-up page, and every signal from the second page is filed against the
+ * first page's nodes under the first page's revision. Nothing says so, at either
+ * end — the node ids are real and the batch parses.
+ *
+ * It is also an undercount at the door. One batch of a page view carries
+ * `first`, which is how an arrival is counted exactly once, so a reader who
+ * visits four pages in an app that never restarts its broadcast arrives once.
+ * Page views by the hour they began in (0356) read that marker, and so does
+ * every figure taken at the door's scale.
+ *
+ * ## What it follows, and what it does not
+ *
+ * The page's **identity** — its tree and its revision — and not the element
+ * carrying it. Three things follow from that, and together they are the
+ * counting rule:
+ *
+ * - **A re-render is not a navigation.** Nodes arriving, leaving and changing
+ *   under the root are what the broadcast already watches; this notices them,
+ *   finds the page unchanged, and does nothing. A page a proposal has just
+ *   rewritten is one page view, as it was before.
+ * - **A new identity is a new page view.** A root replaced by a different
+ *   tree's, or the same root re-rendered at a new revision, ends the page view
+ *   — the old broadcast is stopped, which delivers what it gathered under the
+ *   revision it gathered it on — and begins a fresh one, with a fresh view key
+ *   and a fresh opening. Nothing correlates the two, which is rule 2 of
+ *   `docs/signals.md` holding rather than being argued about: two page views of
+ *   two pages are two keys and the reader behind them is not a column anywhere.
+ * - **The same identity rendered again is the same page view.** A host that
+ *   unmounts the element it rendered into and renders the same revision again
+ *   has not sent a reader anywhere, so the second broadcast is handed the page
+ *   view the first one was observing: same key, no second opening, no second
+ *   arrival. This is the case that would double-count, and it is the reason the
+ *   page view is a value rather than a broadcast's own state.
+ *
+ * An unaddressed document is refused here exactly as an unaddressed element is
+ * refused by a broadcast, and for the same reason. A page that *becomes*
+ * unaddressed — the root goes and nothing replaces it — is not a failure: the
+ * broadcast is stopped, what it gathered is delivered, and the page view is
+ * held in case the same revision comes back.
+ *
+ * ## What it costs
+ *
+ * One `MutationObserver` on the document, watching for children and for the two
+ * attributes that spell a page's identity. Its callback compares three values
+ * it already holds and returns, so the cost of a page that churns is three
+ * reads per batch of mutations; the one `querySelector` it can run happens only
+ * when the page it was observing is no longer the page in the document. The
+ * broadcast itself is unchanged and runs its own observers as it always has.
+ */
+const followAddressedPage = (
+  page: Document,
+  options: ReaderSignalOptions
+): Result<ReaderSignalBroadcast, ReaderSignalBroadcastError> => {
+  const found = addressedRootIn(page)
+
+  if (found === undefined) {
+    return err({
+      code: "unaddressed",
+      detail: `no element in this document carries ${LOOM_TREE_ATTRIBUTE}; render the page with addressed: true`,
+    })
+  }
+
+  const first = beginPageView(options.random)
+  const opening = broadcastFromRoot(found, options, first)
+
+  /**
+   * The opening failure is the host's to see, so it is returned. The same
+   * failure later is a page this cannot report on rather than a call that went
+   * wrong — a root whose revision attribute stops being a number is a page
+   * nothing broadcasts from, and the host is not making a call to learn it, so
+   * `settled` leaves it unobserved and waits for the next thing to happen.
+   */
+  if (!opening.ok) return opening
+
+  let observing: Observing | undefined = {
+    root: found,
+    identity: identityOf(found),
+    of: first,
+    broadcast: opening.value,
+  }
+
+  /** The page view the last broadcast was observing, while its page may come back. */
+  let ended: { readonly identity: string; readonly of: PageView } | undefined
+
+  let stopped = false
+
+  /** Whether the broadcast is still observing the page the document holds. */
+  const standing = (): boolean =>
+    observing !== undefined && observing.root.isConnected && identityOf(observing.root) === observing.identity
+
+  const settled = (): void => {
+    if (stopped || standing()) return
+
+    if (observing !== undefined) {
+      observing.broadcast.stop()
+      ended = { identity: observing.identity, of: observing.of }
+      observing = undefined
+    }
+
+    const root = addressedRootIn(page)
+    if (root === undefined) return
+
+    const identity = identityOf(root)
+    const of = ended !== undefined && ended.identity === identity ? ended.of : beginPageView(options.random)
+
+    const started = broadcastFromRoot(root, options, of)
+    if (!started.ok) return
+
+    observing = { root, identity: identityOf(root), of, broadcast: started.value }
+    ended = undefined
+  }
+
+  const pages = new MutationObserver(settled)
+
+  pages.observe(page, {
+    childList: true,
+    subtree: true,
+    attributes: true,
+    attributeFilter: [LOOM_TREE_ATTRIBUTE, LOOM_REVISION_ATTRIBUTE],
+  })
+
+  return ok({
+    flush: () => observing?.broadcast.flush(),
+    stop: () => {
+      stopped = true
+      pages.disconnect()
+      observing?.broadcast.stop()
+      observing = undefined
+    },
+  })
+}
+
+/** A document rather than an element, by node type — which is a number every realm agrees on (0354). */
+const isDocument = (scope: Element | Document): scope is Document => scope.nodeType === 9
+
+/**
+ * Start broadcasting reader signals from a rendered Loom page.
+ *
+ * Hand it the **root element** of the page and it broadcasts from that element:
+ * nodes arriving and leaving under it are followed, and the tree and revision
+ * are read once, so a page that becomes a different page needs `stop()` and
+ * another call or its signals are filed under the revision it left.
+ *
+ * Hand it the **document** and it finds the addressed page itself and follows
+ * it: a client-side navigation ends one page view and begins another, with its
+ * own view key and its own arrival, and the same revision rendered again
+ * continues the page view it was already observing
+ * ({@link followAddressedPage}). This is the argument to pass in an application
+ * that routes on the client, which is most of them.
+ *
+ * Either way it returns an error rather than broadcasting nothing when there is
+ * no addressed page to broadcast from, because a silent broadcaster is exactly
+ * the misconfiguration nobody would notice.
+ */
+export const broadcastReaderSignals = (
+  scope: Element | Document,
+  options: ReaderSignalOptions = {}
+): Result<ReaderSignalBroadcast, ReaderSignalBroadcastError> =>
+  isDocument(scope)
+    ? followAddressedPage(scope, options)
+    : broadcastFromRoot(scope, options, beginPageView(options.random))

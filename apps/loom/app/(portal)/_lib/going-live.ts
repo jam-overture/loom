@@ -1,6 +1,7 @@
 import type { IntentId, ProposalId, StakeLevel, TreeId } from "@jam-overture/loom"
 import type { StoredRevision } from "@jam-overture/loom/store"
 
+import type { GoalId } from "./goals/goal"
 import type { ProposalGoal } from "./goals/serving"
 import {
   isShort,
@@ -58,6 +59,8 @@ export type AcceptedChange = {
   readonly accepted: StoredRevision
   readonly acceptedAt: number
   readonly ending: Ending
+  /** The change this one undid, for a revert (0032): the entry on its own copy it names. */
+  readonly undoes?: ProposalId
 }
 
 type Appearance = { readonly revision: StoredRevision; readonly index: number }
@@ -94,18 +97,28 @@ export const acceptedChangesOf = (
     record.revisions.map((revision) => ({ revision, index }))
   )
   const first = new Map(
-    [...appearances].reverse().map((seen) => [seen.revision.proposalId, seen.revision] as const)
+    [...appearances].reverse().map((seen) => [seen.revision.proposalId, seen] as const)
   )
   const last = new Map(appearances.map((seen) => [seen.revision.proposalId, seen.index] as const))
+  const undoneBy = (seen: Appearance): ProposalId | undefined =>
+    records[seen.index]?.revisions.find(
+      (revision) => revision.revision === seen.revision.provenance.undoes
+    )?.proposalId
 
   return [...first.values()]
-    .map((accepted) => ({
-      proposalId: accepted.proposalId,
-      pageId,
-      accepted,
-      acceptedAt: Date.parse(accepted.appliedAt),
-      ending: endingOf(records, accepted.proposalId, last.get(accepted.proposalId) ?? 0),
-    }))
+    .map((seen): AcceptedChange => {
+      const accepted = seen.revision
+      const undoes = undoneBy(seen)
+
+      return {
+        proposalId: accepted.proposalId,
+        pageId,
+        accepted,
+        acceptedAt: Date.parse(accepted.appliedAt),
+        ending: endingOf(records, accepted.proposalId, last.get(accepted.proposalId) ?? 0),
+        ...(undoes === undefined ? {} : { undoes }),
+      }
+    })
     .sort(newestFirst)
 }
 
@@ -528,6 +541,34 @@ export const servedNoteOf = (served: Served): string | undefined => {
     case "unreadable":
       return "The goal this change served could not be read. If this stays, this deployment may not have the table that records it yet."
   }
+}
+
+/**
+ * How many of the accepted changes for each goal went live, for *changes for
+ * it* on *Goals* (`docs/portal-wireframes.md` section 3: *2 waiting · 3
+ * shipped*). A change counts once a reader could have been given it, and
+ * stays counted if it is later undone or no longer fits the site's newer
+ * version: it shipped. A change no goal was recorded for counts towards none.
+ *
+ * `undefined` where it cannot be said: when the site's pulls or the goals the
+ * changes served could not be read, a count would be short rather than true.
+ * Pure.
+ */
+export const shippedByGoalOf = (
+  changes: readonly AcceptedChange[],
+  reach: Reach,
+  origins: Origins
+): ReadonlyMap<GoalId, number> | undefined => {
+  if (reach.kind === "unreadable" || origins.kind === "unreadable") return undefined
+
+  return changes.reduce((counts, change) => {
+    const served = servedOf(change.proposalId, origins)
+    const goalId = served.kind === "recorded" ? served.goal?.goalId : undefined
+
+    return goalId === undefined || liveAtOf(change, reach) === undefined
+      ? counts
+      : new Map(counts).set(goalId, (counts.get(goalId) ?? 0) + 1)
+  }, new Map<GoalId, number>())
 }
 
 /** How many accepted changes a page of the list shows, as every list in the portal does. */

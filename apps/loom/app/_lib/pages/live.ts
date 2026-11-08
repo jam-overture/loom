@@ -114,9 +114,11 @@ export const serveLivePages = async (request: Request, door: ReadDoor): Promise<
   const tag = await entityTagOf(body)
   const headers = { ...REVALIDATE, etag: tag }
 
-  door.pulled({ application: named.value, tag, at: door.now() })
+  const kept = matchesTag(request.headers.get("if-none-match"), tag)
 
-  return matchesTag(request.headers.get("if-none-match"), tag)
+  door.pulled({ application: named.value, tag, at: door.now(), kept })
+
+  return kept
     ? new Response(null, { status: 304, headers })
     : new Response(body, {
         status: 200,
