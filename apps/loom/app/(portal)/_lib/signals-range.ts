@@ -47,6 +47,9 @@ const SPANS: Readonly<Record<SignalsRange, string>> = {
 
 export const rangeLabel = (range: SignalsRange): string => LABELS[range]
 
+/** The period of the same length before a range, as a sentence names it. */
+export const periodBefore = (range: SignalsRange): string => SPANS[range]
+
 /** The range an address names, and the default for none or for anything else. */
 export const rangeOf = (asked: string | undefined): SignalsRange =>
   SIGNALS_RANGES.find((range) => range === asked) ?? DEFAULT_RANGE
@@ -67,7 +70,7 @@ const count = (value: number): string => value.toLocaleString("en-GB")
 const isoOf = (instant: number): string => new Date(instant).toISOString()
 
 /** *Up 12%*, *Down 40%*, *No change*: the movement, rounded to a whole percent. */
-const movementOf = (was: number, now: number): string => {
+export const movementOf = (was: number, now: number): string => {
   const percent = Math.round(((now - was) / was) * 100)
 
   return percent === 0 ? "No change" : percent > 0 ? `Up ${percent}%` : `Down ${-percent}%`

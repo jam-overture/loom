@@ -4,6 +4,7 @@ import type { ReactNode } from "react"
 import { Screen } from "@/app/(portal)/_components/screen"
 import { FilterChips } from "@/app/(portal)/_components/filter-chips"
 import { StateNotice } from "@/app/(portal)/_components/state-notice"
+import { goalFigureOf } from "@/app/(portal)/_lib/goal-range"
 import {
   rangeChartOf,
   rangeFigureOf,
@@ -20,9 +21,10 @@ import type { SignalsReading } from "../_lib/reading"
 import { RangeChart } from "./range-chart"
 
 /**
- * What both *Signals* tabs share: the heading, the range picker, the three
- * figures, page views by hour, what was turned away, and the two tabs
- * (`docs/portal-wireframes.md`, *1 · Signals*).
+ * What both *Signals* tabs share: the heading, the range picker, the figures
+ * (the primary goal's among them once the project has one), page views by
+ * hour, what was turned away, and the two tabs (`docs/portal-wireframes.md`,
+ * *1 · Signals*).
  *
  * The tab's own list is handed in and drawn only once something has arrived:
  * a store that did not answer, a project with no single site, and a project
@@ -67,10 +69,14 @@ const TurnedAwayList = ({ turnedAway }: { turnedAway: TurnedAway | undefined }) 
 
 const Figures = ({ reading }: { reading: Extract<SignalsReading, { state: "read" }> }) => {
   const { arrivals, turnedAway } = reading
+  const goal = goalFigureOf(reading.goal, reading.range)
 
   return (
-    <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+    <div
+      className={`grid grid-cols-1 gap-3 ${goal === undefined ? "md:grid-cols-3" : "md:grid-cols-2 xl:grid-cols-4"}`}
+    >
       <Figure {...rangeFigureOf(reading.hourly, reading.range, arrivals.opened)} />
+      {goal === undefined ? null : <Figure {...goal} />}
       <Figure
         label={arrivals.latest?.kind === "counted" ? "Last counted" : "Last arrival"}
         value={arrivals.latest === undefined ? "Nothing yet" : plainMoment(arrivals.latest.at)}

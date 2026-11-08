@@ -6,6 +6,10 @@ import {
 import type { Application, Project, ProjectId } from "@jam-overture/loom/store"
 
 import { arrivalsOf, type Arrivals } from "@/app/(portal)/_lib/arrivals"
+import { goalRangeOf, goalSpanOf, type PrimaryGoalReading } from "@/app/(portal)/_lib/goal-range"
+import { primaryOf, type Goal } from "@/app/(portal)/_lib/goals/goal"
+import { pageChoicesOf, partsByPageOf } from "@/app/(portal)/_lib/goals/goal-view"
+import { goalsFor } from "@/app/(portal)/_lib/goals/stores"
 import { arrivalRangeFor, type SignalsRange } from "@/app/(portal)/_lib/signals-range"
 import { portalApplications, portalProjects } from "@/app/(portal)/_lib/store"
 import { turnedAwayOf, type TurnedAway } from "@/app/(portal)/_lib/turned-away"
@@ -40,6 +44,11 @@ import { readingsFor, type Readings } from "@/app/_lib/reader-signals/intake"
  * whose database predates the hourly counter shows the total it always showed
  * and says the hours could not be read.
  *
+ * **The primary goal's figure for the range** (0350, 0362) is read the same
+ * way, after the goals and the published pages it needs: a project without a
+ * goal draws no figure, and goals or counters that do not answer cost that
+ * figure alone.
+ *
  * The journal is read on the portal's budget here rather than in `intake.ts`,
  * because the door writes through the same handles and a write cut off by a
  * screen's budget would lose a reader's batch.
@@ -60,7 +69,51 @@ export type SignalsReading =
       /** `undefined` where the refusals could not be read, which is said rather than drawn as a nought. */
       readonly turnedAway: TurnedAway | undefined
       readonly published: readonly PublishedPage[]
+      readonly goal: PrimaryGoalReading
     }
+
+type Tallies = ReturnType<typeof boundedReaderTallyStore>
+
+/**
+ * The primary goal over the range and the period before it: the project's
+ * page views by page, what readers did to the goal's part on every page, and
+ * when the project first counted anything readers did, in one read of each.
+ */
+const readPrimaryGoal = async (
+  tallies: Tallies,
+  /** `undefined` where the goals could not be read. */
+  goals: readonly Goal[] | undefined,
+  published: readonly PublishedPage[],
+  range: SignalsRange,
+  now: number
+): Promise<PrimaryGoalReading> => {
+  if (goals === undefined) return { kind: "unreadable" }
+
+  const goal = primaryOf(goals)
+
+  if (goal === undefined) return { kind: "none" }
+
+  const asked = arrivalRangeFor(range, now)
+  const span = goalSpanOf(asked)
+  const [arrivals, acted, anything] = await Promise.all([
+    tallies.arrivals(span),
+    tallies.acted({ nodeId: goal.nodeId, ...span }),
+    tallies.acted({ from: span.from, to: span.from }),
+  ])
+
+  if (!arrivals.ok || !acted.ok || !anything.ok) return { kind: "unreadable" }
+
+  return {
+    kind: "read",
+    goal,
+    range: goalRangeOf(goal, asked, {
+      arrivals: arrivals.value,
+      acted: acted.value,
+      actedBegins: anything.value.begins,
+      parts: partsByPageOf(pageChoicesOf(published)),
+    }),
+  }
+}
 
 export const readSignals = async (
   projectId: ProjectId,
@@ -83,7 +136,7 @@ export const readSignals = async (
   const readings = readingsFor(application.applicationId)
   const tallies = boundedReaderTallyStore(readings.tallies)
 
-  const [pageViews, newest, hourly, refusals, published] = await Promise.all([
+  const [pageViews, newest, hourly, refusals, published, goals] = await Promise.all([
     tallies.pageViews(),
     boundedReaderSignalJournal(readings.journal).read({ direction: "older", limit: 1 }),
     readReaderArrivals(tallies, { range: arrivalRangeFor(range, now), now }),
@@ -93,9 +146,16 @@ export const readSignals = async (
       unavailable,
       PORTAL_READ_BUDGET_MS
     ),
+    readWithin(
+      () => goalsFor(application.applicationId).list(),
+      unavailable,
+      PORTAL_READ_BUDGET_MS
+    ),
   ])
 
   if (!pageViews.ok || !newest.ok) return { state: "failed", project: project.value }
+
+  const pages = published.ok ? published.value : []
 
   return {
     state: "read",
@@ -107,6 +167,7 @@ export const readSignals = async (
     range,
     hourly: hourly.ok ? hourly.value : undefined,
     turnedAway: refusals.ok ? turnedAwayOf(refusals.value) : undefined,
-    published: published.ok ? published.value : [],
+    published: pages,
+    goal: await readPrimaryGoal(tallies, goals.ok ? goals.value : undefined, pages, range, now),
   }
 }

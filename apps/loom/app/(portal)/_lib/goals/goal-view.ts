@@ -86,15 +86,15 @@ export type GoalCounts = {
  * longer publishes had it. Page views of a page without the part would be
  * readers who could never have done it, and would sink the rate for nothing.
  */
-const pagesCoveredBy = (goal: Goal, readings: GoalCounts): ReadonlySet<string> =>
+export const pagesCoveredBy = (
+  goal: Goal,
+  parts: PartsByPage,
+  counted: readonly { readonly treeId: string; readonly nodeId: string }[]
+): ReadonlySet<string> =>
   new Set<string>(
     goal.pages ?? [
-      ...[...readings.parts.entries()]
-        .filter(([, parts]) => parts.has(goal.nodeId))
-        .map(([treeId]) => treeId),
-      ...readings.tallies
-        .filter((tally) => tally.nodeId === goal.nodeId)
-        .map((tally) => tally.treeId),
+      ...[...parts.entries()].filter(([, has]) => has.has(goal.nodeId)).map(([treeId]) => treeId),
+      ...counted.filter((row) => row.nodeId === goal.nodeId).map((row) => row.treeId),
     ]
   )
 
@@ -107,7 +107,7 @@ export const goalReadingsByPage = (
   goal: Goal,
   readings: GoalCounts
 ): ReadonlyMap<string, GoalReading> => {
-  const covered = pagesCoveredBy(goal, readings)
+  const covered = pagesCoveredBy(goal, readings.parts, readings.tallies)
   const onPart = readings.tallies.filter(
     (tally) => tally.nodeId === goal.nodeId && covered.has(tally.treeId)
   )
