@@ -315,10 +315,14 @@ const toItsFirstParagraph = (comment: string): string => {
   /** A line's text, with the delimiter or the margin asterisk off the front. */
   const text = (line: string): string => line.replace(/^\s*\*?/, "").trim()
 
-  /* A comment written on one line has no paragraph to be the first of. */
-  if (lines.length < 3) return comment
-
-  const blank = lines.findIndex((line, index) => index > 0 && text(line) === "")
+  /* The opening line can never read as blank, whatever it is indented by:
+     `text` takes one asterisk off the front and `/**` leaves `/**` behind. So
+     the first blank line this finds is always one inside the block, with no
+     index guard to say so, and a comment written on one line has no blank line
+     in it at all and leaves by the guard below. Both of those were written as
+     guards first and both were dead: a mutation of either changed no outcome
+     on any input, which is how they were found. */
+  const blank = lines.findIndex((line) => text(line) === "")
 
   /* One paragraph already, or a block whose first paragraph is itself empty —
      neither is a comment this has anything to take off. */

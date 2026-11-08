@@ -826,6 +826,43 @@ describe("a doc comment a stranger has to read", () => {
     expect(readerFacingSignature(signature)).toBe(signature)
   })
 
+  /**
+   * **A one-paragraph comment whose text ends on the closing line.** The
+   * closing line is the last line either way, so an implementation that
+   * dropped it and closed the block itself would be byte-identical on every
+   * comment that closes on a line of its own, and would lose a word here.
+   */
+  it("leaves a one-paragraph comment that ends on its closing line", () => {
+    const signature = [
+      "type Reading = {",
+      "    /**",
+      "     * What the window counted, over the stretch it was asked for. */",
+      "    readonly counted: number;",
+      "}",
+    ].join("\n")
+
+    expect(readerFacingSignature(signature)).toBe(signature)
+  })
+
+  /**
+   * A block whose first paragraph is itself empty. There is no first paragraph
+   * to keep, so the comment is left as the package wrote it rather than
+   * published as an empty pair of delimiters.
+   */
+  it("leaves a comment whose first line after the delimiter is blank", () => {
+    const signature = [
+      "type Reading = {",
+      "    /**",
+      "     *",
+      "     * What the window counted.",
+      "     */",
+      "    readonly counted: number;",
+      "}",
+    ].join("\n")
+
+    expect(readerFacingSignature(signature)).toBe(signature)
+  })
+
   it("leaves a comment written on one line", () => {
     const signature = ["type Reading = {", "    /** What the window counted. */", "    readonly counted: number;", "}"].join(
       "\n"
