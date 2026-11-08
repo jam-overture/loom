@@ -14,6 +14,8 @@ import {
 } from "@/app/(portal)/_lib/accepted/measurement"
 import { readAccepted, type AcceptedReading } from "@/app/(portal)/_lib/accepted/reading"
 import { requireActor, requireRole } from "@/app/(portal)/_lib/auth/identity"
+import { mayPropose } from "@/app/(portal)/_lib/proposing/report"
+import { mayRevert } from "@/app/(portal)/_lib/proposing/revert"
 import type { Goal } from "@/app/(portal)/_lib/goals/goal"
 import {
   boundsAround,
@@ -31,6 +33,7 @@ import {
   marksOf,
   originOf,
   siteOutcomeOf,
+  versionWordsOf,
   type Mark,
   type SiteFigures,
   type Version,
@@ -42,6 +45,7 @@ import { publishedPagesFor } from "@/app/_lib/pages/store"
 
 import { DailyChart } from "../_components/daily-chart"
 import { PageTabs } from "../_components/page-tabs"
+import { RevertForm } from "../_components/revert-form"
 import { VersionCard } from "../_components/version-card"
 
 type Read = Extract<AcceptedReading, { readonly kind: "read" }>
@@ -61,7 +65,9 @@ type Read = Extract<AcceptedReading, { readonly kind: "read" }>
  * maintainer's rules of 5 November (14 days a side, 1,000 page views a side,
  * a two-proportion test at 95%). The site's own edit shows its before and
  * after on the page's goal for context and says it is not a Loom change. A
- * change accepted and not yet taken by the site sits on top, dashed.
+ * change accepted and not yet taken by the site sits on top, dashed. A Loom
+ * change still on the page offers *Propose reverting* to a person who may
+ * propose a change, and a revert is named by the version it reverted.
  *
  * A store that does not answer says so, and counters that do not answer cost
  * only the figures on the card they were for.
@@ -216,6 +222,7 @@ const Card = async ({
   projectId,
   now,
   dashed,
+  reverts,
 }: {
   reading: Read
   version: Version
@@ -223,6 +230,8 @@ const Card = async ({
   projectId: string
   now: number
   dashed: boolean
+  /** Whether the person may raise a revert: a role that may propose a change. */
+  reverts: boolean
 }) => {
   if (version.kind === "site") {
     return (
@@ -238,11 +247,15 @@ const Card = async ({
 
   const { change } = version
   const served = servedOf(change.proposalId, reading.origins)
-  const [heading = "A change Loom made", ...lines] = sentencesOf(change, reading.parts)
+  const { heading, lines } = versionWordsOf(
+    change,
+    reading.changes,
+    sentencesOf(change, reading.parts)
+  )
 
   return (
     <VersionCard
-      heading={`Version ${change.accepted.revision}: ${heading}`}
+      heading={heading}
       lines={lines}
       origin={originOf(version)}
       {...(served.kind === "recorded" ? { goal: goalNameOf(served) } : {})}
@@ -254,6 +267,17 @@ const Card = async ({
       )}
       timeline={`/portal/${projectId}/review/accepted/${change.proposalId}`}
       dashed={dashed}
+      {...(reverts && mayRevert(change)
+        ? {
+            revert: (
+              <RevertForm
+                projectId={projectId}
+                treeId={change.pageId}
+                proposalId={change.proposalId}
+              />
+            ),
+          }
+        : {})}
     />
   )
 }
@@ -277,7 +301,7 @@ const HistoryScreen = async ({
 
   /** Signed in first, with this address to come back to — the Connect screen's reason. */
   await requireActor(`/portal/${projectId}/pages/${pageId}/history`)
-  await requireRole(projectId)
+  const role = await requireRole(projectId)
 
   const now = Date.now()
   const reading = await readAccepted(projectId, now)
@@ -358,6 +382,7 @@ const HistoryScreen = async ({
               projectId={projectId}
               now={now}
               dashed={dashed}
+              reverts={mayPropose(role)}
             />
           ))}
         </ol>

@@ -155,6 +155,21 @@ describe("acceptedChangesOf", () => {
 
     expect(undone?.ending).toEqual({ kind: "undone", at: AT + MINUTE })
   })
+
+  it("names the change a revert undid, by the entry on its own copy, and nothing for any other", () => {
+    const changes = acceptedChangesOf(PAGE, [
+      first([entry(PAGE, 1, "p_done", AT)]),
+      record(SECOND_COPY, AT + 30 * MINUTE, [
+        entry(SECOND_COPY, 4, "p_done", AT + 30 * MINUTE),
+        entry(SECOND_COPY, 5, "p_undo", AT + 40 * MINUTE, { undoes: 4 }),
+      ]),
+    ])
+
+    expect(changes.map((change) => [change.proposalId, change.undoes])).toEqual([
+      ["p_undo", "p_done"],
+      ["p_done", undefined],
+    ])
+  })
 })
 
 describe("reachOf", () => {
