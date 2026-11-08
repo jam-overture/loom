@@ -2729,7 +2729,7 @@
               "name": "channelsOf",
               "kind": "function",
               "signature": "const channelsOf: (colour: string) => readonly [number, number, number] | undefined",
-              "summary": "The colour as three 0–255 channels, or nothing when it is a form this cannot measure."
+              "summary": "A colour's three 0–255 channels, unrounded, or nothing when the form cannot be measured."
             },
             {
               "name": "relativeLuminance",
