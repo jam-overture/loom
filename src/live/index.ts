@@ -10,8 +10,12 @@
  * Three properties hold by construction rather than by care, and each has a
  * test that would fail if it stopped:
  *
- * - **Loom is never in the render path** (0262). The pull runs beside requests,
- *   on a timer, and no reader's request waits on it.
+ * - **Loom is in the render path once per server, and only until it answers**
+ *   (0262, 0364). The first reader on a new server waits for the first pull,
+ *   so they get the live page rather than one that changes on their next
+ *   request; a failed pull ends the wait at once and a silent Loom ends it after
+ *   `DEFAULT_FIRST_WAIT_MS`. Every pull after that runs beside requests, on a
+ *   timer, and no reader waits on it.
  * - **Loom never learns who a reader is.** The request carries the project's
  *   key and the tag of what is held, and nothing else; selection for an
  *   audience (0263) happens afterwards, here, against pages already held.
@@ -29,7 +33,7 @@
  * })
  *
  * // wherever a page is rendered, with the tree the site was built with
- * const tree = livePageOf(live.held(), builtTree.treeId) ?? builtTree
+ * const tree = livePageOf(await live.ready(), builtTree.treeId) ?? builtTree
  * ```
  */
 
@@ -53,6 +57,7 @@ export {
   type SitePullOutcome,
 } from "./pull.js"
 export {
+  DEFAULT_FIRST_WAIT_MS,
   DEFAULT_PULL_INTERVAL_MS,
   startPullingLivePages,
   type LivePullLoop,
