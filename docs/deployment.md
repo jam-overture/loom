@@ -167,7 +167,7 @@ itself, in the format a machine reads as fact, as this product.
 
 ## Environment
 
-`apps/loom/.env.example` is the full list with the commentary. Eighteen
+`apps/loom/.env.example` is the full list with the commentary. Nineteen
 variables, **one** of which is required:
 
 | Variable                         | Required | Notes                                   |
@@ -176,6 +176,7 @@ variables, **one** of which is required:
 | `LOOM_ANTHROPIC_API_KEY`         | no       | The demo's and the docs' model. Falls back to `ANTHROPIC_API_KEY`. Projects use their own key |
 | `CRON_SECRET`                    | for proposals | Lets Vercel's daily schedule start Loom's proposals. See [The site's own pages](#10-the-sites-own-pages--publish-them-to-see-them-by-name) |
 | `DATABASE_URL`                   | no       | Absent means memory — see below         |
+| `LOOM_PUBLISH_KEY`               | no       | Publishes the site's pages at the end of each production build. See [The site's own pages](#10-the-sites-own-pages--publish-them-to-see-them-by-name) |
 | `LOOM_PORTAL_TRUSTED_PROXY_HOPS` | no       | Proxies in front. 1 unless you added one |
 | `LOOM_SITE_ORIGIN`               | in production | The domain, pinned. See [The domain](#the-domain-and-going-public) |
 | `LOOM_SITE_PROJECT`              | no       | The project the site's readers are counted under. Unset is the deployment's own. See [Reader signals](#8-reader-signals--nothing-arrives-until-you-open-the-door) |
@@ -194,9 +195,7 @@ variables, **one** of which is required:
 **Four more names appear in this application's code and none of them are
 yours.** `POSTGRES_URL` is the second name a platform's Postgres integration
 sets, read only when `DATABASE_URL` is unset; `VERCEL_URL`, `VERCEL_ENV` and
-`NODE_ENV` are written by the platform and the build. `LOOM_PUBLISH_KEY` is a setting and is
-deliberately not in the list above: it is shown once and used once, on the line
-that runs `pages:publish`.
+`NODE_ENV` are written by the platform and the build.
 
 **This table is checked against the application**
 ([0367](../decisions/0367-what-an-operator-must-set-is-read-off-the-application-and-the-guide-goes-red-when-it-is-behind.md)).
@@ -764,19 +763,30 @@ what its site published to `/api/pages`
 ([0312](../decisions/0312-a-site-hands-loom-a-snapshot-of-its-pages-with-a-secret-key-and-loom-never-runs-its-code.md)).
 Until something is published, *Signals* shows each page by its id.
 
-This deployment's own site publishes the same way a customer's build would.
-On the *Connect your site* screen of the project the site counts under (the
-one `LOOM_SITE_PROJECT` names, from step 8), an owner presses *Make a publish
-key*. The key is shown once, so copy it then. Then, from `apps/loom`:
+This deployment's own site publishes the same way a customer's build would,
+and it does so on every production deploy. On the *Connect your site* screen of
+the project the site counts under (the one `LOOM_SITE_PROJECT` names, from
+step 8), an owner presses *Make a publish key*. The key is shown once, so copy
+it then, and add it to the project's production environment as
+`LOOM_PUBLISH_KEY`.
+
+From then on `pnpm build` ends by sending every page the site's code authors to
+the deployment at `LOOM_SITE_ORIGIN`
+([0369](../decisions/0369-the-sites-build-publishes-its-pages-and-a-refusal-never-stops-a-deploy.md)),
+and the build log carries one line saying what happened: `loom: published 12
+pages`, or why nothing was. A preview build, a build with no key and a build
+with no pinned domain publish nothing and say so. **A refusal never fails the
+build**: the deploy goes on and the line says *warning*, so look for it if the
+*Pages* tab is behind the site.
+
+To publish by hand, from `apps/loom`:
 
 ```bash
 LOOM_PUBLISH_KEY=lp_… pnpm pages:publish https://www.loomjs.org
 ```
 
-It sends every page the site's code authors, and prints the deployment's
-answer, such as `loom: published 3 pages`, or why they were refused. Run it again
-whenever a page is added or its heading changes. A page left out of a later
-run keeps its last version rather than disappearing.
+A page left out of a later run keeps its last version rather than
+disappearing.
 
 The key is a secret, unlike the ingest key: anybody holding it can change what
 the portal believes your pages are. It is read from the environment so it

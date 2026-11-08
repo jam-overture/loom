@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "next dev",
-    "build": "pnpm --filter @jam-overture/loom build && next build",
+    "build": "pnpm --filter @jam-overture/loom build && next build && tsx scripts/pages-publish-on-deploy.ts",
     "start": "next start",
     "typecheck": "pnpm --filter @jam-overture/loom build && tsc --noEmit",
     "test": "vitest run",

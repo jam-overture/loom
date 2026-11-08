@@ -100,11 +100,12 @@ export type NotSetByAnOperator = {
 }
 
 /**
- * The six reads that are not settings.
+ * The five reads that are not settings.
  *
- * Three are the platform's, two are second names for a variable that is in the
- * example under its first, and one is a key handed to a script on the line that
- * runs it. Everything else the application reads is something somebody has to
+ * Three are the platform's and two are second names for a variable that is in
+ * the example under its first. `LOOM_PUBLISH_KEY` was a sixth until 8 November,
+ * when the build began publishing the site's pages (0369) and it became a
+ * setting a deployment holds. Everything else the application reads is something somebody has to
  * decide, so it belongs in the file the guide calls the full list.
  */
 export const NOT_SET_BY_AN_OPERATOR: readonly NotSetByAnOperator[] = [
@@ -118,10 +119,6 @@ export const NOT_SET_BY_AN_OPERATOR: readonly NotSetByAnOperator[] = [
   {
     name: "POSTGRES_URL",
     why: "the second name a platform's Postgres integration sets; DATABASE_URL is the first",
-  },
-  {
-    name: "LOOM_PUBLISH_KEY",
-    why: "shown once and used once, on the line that runs pages:publish rather than from a file",
   },
 ]
 
