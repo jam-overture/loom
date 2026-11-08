@@ -8,7 +8,7 @@
       "files": 100,
       "narrower": [],
       "standing": {
-        "packageNames": 1993,
+        "packageNames": 1994,
         "otherDoors": 18,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -2729,7 +2729,7 @@
               "name": "channelsOf",
               "kind": "function",
               "signature": "const channelsOf: (colour: string) => readonly [number, number, number] | undefined",
-              "summary": "The colour as three 0–255 channels, or nothing when it is a form this cannot measure."
+              "summary": "A colour's three 0–255 channels, unrounded, or nothing when the form cannot be measured."
             },
             {
               "name": "relativeLuminance",
@@ -4252,7 +4252,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 1993,
+        "packageNames": 1994,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -4296,7 +4296,7 @@
       "files": 63,
       "narrower": [],
       "standing": {
-        "packageNames": 1993,
+        "packageNames": 1994,
         "otherDoors": 18,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -5255,7 +5255,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 1993,
+        "packageNames": 1994,
         "otherDoors": 18,
         "doorsSharingNothing": 17,
         "widest": false,
@@ -5330,7 +5330,7 @@
       "files": 220,
       "narrower": [],
       "standing": {
-        "packageNames": 1993,
+        "packageNames": 1994,
         "otherDoors": 18,
         "doorsSharingNothing": 17,
         "widest": false,
@@ -5800,7 +5800,7 @@
       "files": 81,
       "narrower": [],
       "standing": {
-        "packageNames": 1993,
+        "packageNames": 1994,
         "otherDoors": 18,
         "doorsSharingNothing": 17,
         "widest": false,
@@ -6888,7 +6888,7 @@
       "files": 38,
       "narrower": [],
       "standing": {
-        "packageNames": 1993,
+        "packageNames": 1994,
         "otherDoors": 18,
         "doorsSharingNothing": 17,
         "widest": false,
@@ -7465,7 +7465,7 @@
       "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 1993,
+        "packageNames": 1994,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -7668,7 +7668,7 @@
       "files": 42,
       "narrower": [],
       "standing": {
-        "packageNames": 1993,
+        "packageNames": 1994,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -8578,7 +8578,7 @@
       "files": 61,
       "narrower": [],
       "standing": {
-        "packageNames": 1993,
+        "packageNames": 1994,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -8957,7 +8957,7 @@
       "files": 41,
       "narrower": [],
       "standing": {
-        "packageNames": 1993,
+        "packageNames": 1994,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -9175,7 +9175,7 @@
       "files": 14,
       "narrower": [],
       "standing": {
-        "packageNames": 1993,
+        "packageNames": 1994,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -9299,6 +9299,12 @@
               "summary": "A minute, which is a change live within a minute of somebody accepting it."
             },
             {
+              "name": "DEFAULT_FIRST_WAIT_MS",
+              "kind": "value",
+              "signature": "const DEFAULT_FIRST_WAIT_MS = 5000",
+              "summary": "How long a render waits for a new server's first answer, when Loom says nothing at all."
+            },
+            {
               "name": "PullSchedule",
               "kind": "type",
               "signature": "type PullSchedule = (run: () => void, afterMs: number) => () => void;",
@@ -9307,13 +9313,13 @@
             {
               "name": "StartPullingOptions",
               "kind": "type",
-              "signature": "type StartPullingOptions = PullLivePagesOptions & {\n    /** How long between pulls. `DEFAULT_PULL_INTERVAL_MS` when unset. */\n    readonly intervalMs?: number;\n    /**\n     * Told of every outcome, after what is held has moved.\n     *\n     * This is where a deployment logs a failed pull, and the only way it learns\n     * of one: nothing here writes to a console, because a library that logs on\n     * its host's behalf logs in the wrong format and at the wrong level.\n     */\n    readonly onOutcome?: (outcome: SitePullOutcome, held: LivePages) => void;\n    readonly now?: () => number;\n    readonly schedule?: PullSchedule;\n};",
+              "signature": "type StartPullingOptions = PullLivePagesOptions & {\n    /** How long between pulls. `DEFAULT_PULL_INTERVAL_MS` when unset. */\n    readonly intervalMs?: number;\n    /** How long `ready()` waits on a silent Loom. `DEFAULT_FIRST_WAIT_MS` when unset. */\n    readonly firstWaitMs?: number;\n    /**\n     * Told of every outcome, after what is held has moved.\n     *\n     * This is where a deployment logs a failed pull, and the only way it learns\n     * of one: nothing here writes to a console, because a library that logs on\n     * its host's behalf logs in the wrong format and at the wrong level.\n     */\n    readonly onOutcome?: (outcome: SitePullOutcome, held: LivePages) => void;\n    readonly now?: () => number;\n    readonly schedule?: PullSchedule;\n};",
               "summary": ""
             },
             {
               "name": "LivePullLoop",
               "kind": "type",
-              "signature": "type LivePullLoop = {\n    readonly held: () => LivePages;\n    readonly pullNow: () => Promise<SitePullOutcome>;\n    readonly stop: () => void;\n};",
+              "signature": "type LivePullLoop = {\n    readonly ready: () => Promise<LivePages>;\n    readonly held: () => LivePages;\n    readonly pullNow: () => Promise<SitePullOutcome>;\n    readonly stop: () => void;\n};",
               "summary": "A running pull: what it holds, a way to pull out of turn, and a way to stop."
             },
             {
@@ -9331,7 +9337,7 @@
       "slug": "signals",
       "types": "./dist/signals/index.d.ts",
       "requires": [],
-      "files": 82,
+      "files": 83,
       "narrower": [
         {
           "specifier": "@jam-overture/loom/signals/broadcast",
@@ -9340,11 +9346,11 @@
             "zod"
           ],
           "shared": 15,
-          "files": 10
+          "files": 11
         }
       ],
       "standing": {
-        "packageNames": 1993,
+        "packageNames": 1994,
         "otherDoors": 18,
         "doorsSharingNothing": 16,
         "widest": true,
@@ -10116,8 +10122,8 @@
             {
               "name": "broadcastReaderSignals",
               "kind": "function",
-              "signature": "const broadcastReaderSignals: (root: Element, options?: ReaderSignalOptions) => Result<ReaderSignalBroadcast, ReaderSignalBroadcastError>",
-              "summary": "Start broadcasting reader signals from the page under `root`."
+              "signature": "const broadcastReaderSignals: (scope: Element | Document, options?: ReaderSignalOptions) => Result<ReaderSignalBroadcast, ReaderSignalBroadcastError>",
+              "summary": "Start broadcasting reader signals from a rendered Loom page."
             }
           ]
         },
@@ -13831,10 +13837,10 @@
       "slug": "signals-broadcast",
       "types": "./dist/signals/broadcast.d.ts",
       "requires": [],
-      "files": 10,
+      "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 1993,
+        "packageNames": 1994,
         "otherDoors": 18,
         "doorsSharingNothing": 17,
         "widest": false,
@@ -13904,8 +13910,8 @@
             {
               "name": "broadcastReaderSignals",
               "kind": "function",
-              "signature": "const broadcastReaderSignals: (root: Element, options?: ReaderSignalOptions) => Result<ReaderSignalBroadcast, ReaderSignalBroadcastError>",
-              "summary": "Start broadcasting reader signals from the page under `root`."
+              "signature": "const broadcastReaderSignals: (scope: Element | Document, options?: ReaderSignalOptions) => Result<ReaderSignalBroadcast, ReaderSignalBroadcastError>",
+              "summary": "Start broadcasting reader signals from a rendered Loom page."
             }
           ]
         },
@@ -13969,7 +13975,7 @@
       "files": 21,
       "narrower": [],
       "standing": {
-        "packageNames": 1993,
+        "packageNames": 1994,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -14031,7 +14037,7 @@
       "files": 65,
       "narrower": [],
       "standing": {
-        "packageNames": 1993,
+        "packageNames": 1994,
         "otherDoors": 18,
         "doorsSharingNothing": 17,
         "widest": false,
@@ -14605,7 +14611,7 @@
       "files": 43,
       "narrower": [],
       "standing": {
-        "packageNames": 1993,
+        "packageNames": 1994,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -14675,7 +14681,7 @@
       "files": 100,
       "narrower": [],
       "standing": {
-        "packageNames": 1993,
+        "packageNames": 1994,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -15097,7 +15103,7 @@
       "files": 79,
       "narrower": [],
       "standing": {
-        "packageNames": 1993,
+        "packageNames": 1994,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
