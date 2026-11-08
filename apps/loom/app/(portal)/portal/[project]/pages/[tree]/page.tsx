@@ -15,6 +15,7 @@ import { currentCopyOf } from "@/app/(portal)/_lib/proposing/copies"
 import { mayPropose } from "@/app/(portal)/_lib/proposing/report"
 import { pageCopiesFor } from "@/app/(portal)/_lib/proposing/stores"
 import { publishedRowOf } from "@/app/(portal)/_lib/published-view"
+import { readWaitingOn } from "@/app/(portal)/_lib/review-reading"
 import { portalApplications, portalProjects } from "@/app/(portal)/_lib/store"
 import { governedPagesFor } from "@/app/(portal)/_lib/write"
 import { PORTAL_READ_BUDGET_MS } from "@/app/_lib/app/bounded"
@@ -24,6 +25,7 @@ import { modelKeyOf } from "@/app/_lib/models/store"
 import { publishedPagesFor } from "@/app/_lib/pages/store"
 
 import { LookForm } from "./_components/look-form"
+import { PageHeading } from "./_components/page-heading"
 import { PageTabs } from "./_components/page-tabs"
 
 /**
@@ -91,9 +93,9 @@ const PageScreen = async ({ params }: { params: Promise<{ project: string; tree:
 
   const application = applications.ok ? soleApplicationOf(applications.value, projectId) : undefined
 
-  const [published, copy, key] =
+  const [published, copy, key, waiting] =
     application === undefined
-      ? [undefined, undefined, undefined]
+      ? [undefined, undefined, undefined, undefined]
       : await Promise.all([
           readWithin(
             () => publishedPagesFor(application.applicationId).list(),
@@ -102,6 +104,7 @@ const PageScreen = async ({ params }: { params: Promise<{ project: string; tree:
           ),
           currentCopyFor(application.applicationId, treeId.data),
           modelKeyOf(application.applicationId),
+          readWaitingOn(application.applicationId, treeId.data),
         ])
 
   if (
@@ -176,20 +179,13 @@ const PageScreen = async ({ params }: { params: Promise<{ project: string; tree:
 
   return (
     <Screen>
-      <div className="flex flex-col gap-2">
-        <Link
-          href={`/portal/${projectId}/pages`}
-          className="text-ink-muted self-start text-xs no-underline hover:underline"
-        >
-          ← Pages
-        </Link>
-        <h1 className={row.derived ? "text-2xl tracking-tight" : "text-ink-muted text-2xl italic"}>
-          {row.name}
-        </h1>
-        <p className="text-ink-muted font-mono text-xs">{row.treeId}</p>
-      </div>
+      <PageHeading
+        projectId={projectId}
+        pageId={row.treeId}
+        name={row.derived ? row.name : undefined}
+      />
 
-      <PageTabs projectId={projectId} treeId={row.treeId} current="page" />
+      <PageTabs projectId={projectId} treeId={row.treeId} current="page" waiting={waiting} />
 
       <section className="border-edge-subtle bg-surface-base flex flex-col gap-1.5 rounded-lg border p-4">
         <p className="text-xs">

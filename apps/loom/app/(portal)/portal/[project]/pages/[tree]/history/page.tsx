@@ -43,12 +43,14 @@ import {
   type Version,
 } from "@/app/(portal)/_lib/page-history"
 import { single, type Query } from "@/app/(portal)/_lib/query"
+import { readWaitingOn } from "@/app/(portal)/_lib/review-reading"
 import { PORTAL_READ_BUDGET_MS } from "@/app/_lib/app/bounded"
 import { readWithin, unavailable } from "@/app/_lib/app/bounded-store"
 import { publishedPagesFor } from "@/app/_lib/pages/store"
 
 import { ComparePanel } from "../_components/compare-panel"
 import { DailyChart } from "../_components/daily-chart"
+import { PageHeading } from "../_components/page-heading"
 import { PageTabs } from "../_components/page-tabs"
 import { RevertForm } from "../_components/revert-form"
 import { VersionCard } from "../_components/version-card"
@@ -396,7 +398,10 @@ const HistoryScreen = async ({
   )
   const on = single(query.on)
   const comparing = single(query.compare)
-  const measuredOn = await readMeasuredOn(reading, pageId, on)
+  const [measuredOn, waiting] = await Promise.all([
+    readMeasuredOn(reading, pageId, on),
+    readWaitingOn(reading.application, pageId),
+  ])
   const figuresAt = siteFiguresOf(reading, pageId, measuredOn)
   const listed = [
     ...history.pending.map((version) => ({ version, dashed: true })),
@@ -412,24 +417,9 @@ const HistoryScreen = async ({
 
   return (
     <Screen>
-      <div className="flex flex-col gap-2">
-        <Link
-          href={`/portal/${projectId}/pages`}
-          className="text-ink-muted self-start text-xs no-underline hover:underline"
-        >
-          ← Pages
-        </Link>
-        <h1
-          className={
-            name === undefined ? "text-ink-muted text-2xl italic" : "text-2xl tracking-tight"
-          }
-        >
-          {name ?? pageId}
-        </h1>
-        <p className="text-ink-muted font-mono text-xs">{pageId}</p>
-      </div>
+      <PageHeading projectId={projectId} pageId={pageId} name={name} />
 
-      <PageTabs projectId={projectId} treeId={pageId} current="history" />
+      <PageTabs projectId={projectId} treeId={pageId} current="history" waiting={waiting} />
 
       <Trend
         reading={reading}
