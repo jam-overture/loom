@@ -1,8 +1,7 @@
-import { appIngestKeys } from "@/app/_lib/reader-signals/key-store"
 import type { IngestKeyStore } from "@/app/_lib/reader-signals/keys"
 import { INTAKE_KEY, readIntakeSwitch } from "@/app/_lib/reader-signals/settings"
 
-import { siteSignalUrl } from "./key"
+import { siteIngestKeys, siteSignalUrl } from "./key"
 
 /**
  * Whether this deployment counts the people reading this site.
@@ -86,7 +85,7 @@ import { siteSignalUrl } from "./key"
  */
 export const readerSignalUrl = async (
   env: Record<string, string | undefined> = process.env,
-  keys: IngestKeyStore = appIngestKeys
+  keys: Pick<IngestKeyStore, "keyOf"> = siteIngestKeys
 ): Promise<string | null> =>
   readIntakeSwitch(env[INTAKE_KEY]).state === "on" ? siteSignalUrl(keys, env) : null
 
@@ -102,5 +101,5 @@ export const readerSignalUrl = async (
  */
 export const readersCountedHere = async (
   env: Record<string, string | undefined> = process.env,
-  keys: IngestKeyStore = appIngestKeys
+  keys: Pick<IngestKeyStore, "keyOf"> = siteIngestKeys
 ): Promise<boolean> => (await readerSignalUrl(env, keys)) !== null
