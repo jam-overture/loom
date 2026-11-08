@@ -1,7 +1,7 @@
 # A tree's depth no longer bounds a read of it
 
 **`Loom daily build`, 8 November 2026, evening run.**
-Branch `framework-tree-walks-iterative`. Record
+Branch `framework-tree-walks-iterative`, #829. Record
 [0370](../decisions/0370-every-read-of-a-tree-carries-an-explicit-stack-because-a-page-s-depth-is-data.md),
 `Accepted`. `pnpm verify` **EXIT=0**, read out of the file.
 

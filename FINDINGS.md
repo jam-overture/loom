@@ -68629,8 +68629,8 @@ answer is settled: read once, unsubscribe, arm nothing.
 ## 2026-11-08 — `outlineTree` is quadratic in depth and throws above about two thousand, which bounds both joins of a window to a tree
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom daily build`
-(`src/tree/outline.ts`) · **Status:** closed by
-`framework-tree-walks-iterative` — fixed as the entry recommends, an explicit
+(`src/tree/outline.ts`) · **Status:** closed by #829
+(`framework-tree-walks-iterative`) — fixed as the entry recommends, an explicit
 stack in place of the recursion, and in `src/tree/navigation.ts` as well as in
 `outline.ts` because `walkTree` had the identical defect and six readers.
 `outlineTree` on a chain of 1,000 went 20.0 ms to 0.8 ms; a chain of 500,000
@@ -68776,7 +68776,7 @@ reading. The fix is small; what it needs is to be the unit.
 near it**; filed with the numbers while they were in hand, and it is this lane's
 own next unit rather than anyone's blocker
 
-Found while closing the `outlineTree` entry above. Every read of a tree is now
+Found while closing the `outlineTree` entry above (#829). Every read of a tree is now
 linear in nodes and bounded by the heap (0370). `replaceNode` is not, and it is
 the shallower of the two bounds:
 
