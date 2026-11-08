@@ -7,6 +7,7 @@ import type { LoomTree } from "../tree/tree.js"
 import { livePageOf } from "./pages.js"
 import type { PullFetch, SitePullOutcome } from "./pull.js"
 import {
+  DEFAULT_FIRST_WAIT_MS,
   DEFAULT_PULL_INTERVAL_MS,
   startPullingLivePages,
   type PullSchedule,
@@ -247,6 +248,151 @@ describe("the loop that keeps a server current", () => {
     await live.pullNow()
 
     expect(live.held().pulledAt).toBe(1_700_000_000_000)
+
+    live.stop()
+  })
+})
+
+/**
+ * A clock that keeps every booking with its delay, so a test can fire the
+ * first-load bound without firing the next pull, or the other way round.
+ */
+const dial = (): {
+  schedule: PullSchedule
+  fire: (afterMs: number) => Promise<void>
+  pending: (afterMs: number) => number
+} => {
+  const bookings: { run: () => void; afterMs: number; live: boolean }[] = []
+
+  return {
+    schedule: (run, afterMs) => {
+      const booking = { run, afterMs, live: true }
+
+      bookings.push(booking)
+
+      return () => {
+        booking.live = false
+      }
+    },
+    fire: async (afterMs) => {
+      for (const booking of bookings.filter((b) => b.live && b.afterMs === afterMs)) {
+        booking.live = false
+        booking.run()
+      }
+
+      await Promise.resolve()
+      await Promise.resolve()
+    },
+    pending: (afterMs) => bookings.filter((b) => b.live && b.afterMs === afterMs).length,
+  }
+}
+
+/**
+ * The first render on a new server (0364): it waits for the first answer, so a
+ * reader is not shown the page as built and then the live one on their next
+ * request. A refusal ends the wait at once; only a silent Loom is waited out.
+ */
+describe("a new server's first render", () => {
+  const WAIT = 5_000
+  const INTERVAL = 60_000
+
+  it("waits five seconds at most for a Loom that says nothing", () => {
+    expect(DEFAULT_FIRST_WAIT_MS).toBe(5_000)
+  })
+
+  it("waits for the first answer and is handed the live page", async () => {
+    let answer: ((response: Response) => void) | undefined
+    const clock = dial()
+    const live = pulling(
+      () =>
+        new Promise<Response>((resolve) => {
+          answer = resolve
+        }),
+      { schedule: clock.schedule, firstWaitMs: WAIT, intervalMs: INTERVAL }
+    )
+
+    let handed: ReturnType<typeof live.held> | undefined
+    const rendering = live.ready().then((held) => {
+      handed = held
+    })
+
+    await Promise.resolve()
+
+    expect(handed).toBeUndefined()
+
+    answer?.(answersPages([page], '"one"'))
+    await rendering
+
+    expect(handed === undefined ? undefined : livePageOf(handed, page.treeId)).toEqual(page)
+
+    live.stop()
+  })
+
+  it("does not wait out the bound when Loom refuses, and serves the page as built", async () => {
+    const clock = dial()
+    const live = pulling(() => Promise.reject(new Error("connection refused")), {
+      schedule: clock.schedule,
+      firstWaitMs: WAIT,
+      intervalMs: INTERVAL,
+    })
+
+    const held = await live.ready()
+
+    expect({ page: livePageOf(held, page.treeId), failures: held.failures }).toEqual({
+      page: undefined,
+      failures: 1,
+    })
+    expect(clock.pending(WAIT)).toBe(0)
+
+    live.stop()
+  })
+
+  it("gives up on a silent Loom after the bound, and holds the page once it answers", async () => {
+    let answer: ((response: Response) => void) | undefined
+    const clock = dial()
+    const live = pulling(
+      () =>
+        new Promise<Response>((resolve) => {
+          answer = resolve
+        }),
+      { schedule: clock.schedule, firstWaitMs: WAIT, intervalMs: INTERVAL }
+    )
+
+    const rendering = live.ready()
+
+    await clock.fire(WAIT)
+
+    expect(livePageOf(await rendering, page.treeId)).toBeUndefined()
+
+    answer?.(answersPages([page], '"one"'))
+    await live.pullNow()
+
+    expect(livePageOf(live.held(), page.treeId)).toEqual(page)
+
+    live.stop()
+  })
+
+  it("never waits again once the first pull has settled", async () => {
+    const answers: ((response: Response) => void)[] = []
+    const clock = dial()
+    const live = pulling(
+      () =>
+        new Promise<Response>((resolve) => {
+          answers.push(resolve)
+        }),
+      { schedule: clock.schedule, firstWaitMs: WAIT, intervalMs: INTERVAL }
+    )
+
+    const first = live.ready()
+
+    answers[0]?.(answersPages([page], '"one"'))
+    await first
+
+    /* The next pull is in flight and has not answered; a render does not wait for it. */
+    await clock.fire(INTERVAL)
+
+    expect(answers).toHaveLength(2)
+    expect(livePageOf(await live.ready(), page.treeId)).toEqual(page)
 
     live.stop()
   })
