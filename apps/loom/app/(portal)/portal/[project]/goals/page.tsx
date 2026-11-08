@@ -22,7 +22,13 @@ import { shippedByGoalOf } from "@/app/(portal)/_lib/going-live"
 import { waitingByGoalOf } from "@/app/(portal)/_lib/goals/serving"
 import { goalsFor, proposalGoalsFor } from "@/app/(portal)/_lib/goals/stores"
 import { readGoalCounters } from "@/app/(portal)/_lib/goal-counters"
-import { goalRangeOf, goalRangeWordsOf, goalSpanOf } from "@/app/(portal)/_lib/goal-range"
+import {
+  goalRangeOf,
+  goalRangeWordsOf,
+  goalSpanOf,
+  rangeTotalsOf,
+} from "@/app/(portal)/_lib/goal-range"
+import type { RangeTotals } from "@/app/(portal)/_lib/goals/goal-preview"
 import {
   arrivalRangeFor,
   type RangeFigure,
@@ -64,6 +70,10 @@ import { GoalForm } from "./_components/goal-form"
  * goal, in the words *Signals* uses for the primary goal's figure. Counters
  * that do not answer cost that figure alone; what each goal counted since
  * counting began stays beneath it.
+ *
+ * **The *New goal* drawer previews** what the goal being made would have
+ * counted over the same 7 days, from those counters folded into totals by page
+ * and part, worked out in the browser as the owner picks.
  */
 
 /** The range *Goals* measures each goal over: the wireframe's *7-day rate with its trend*. */
@@ -235,10 +245,12 @@ const NewGoalDrawer = ({
   projectId,
   pages,
   first,
+  totals,
 }: {
   projectId: string
   pages: readonly PageChoice[]
   first: boolean
+  totals: RangeTotals
 }) => (
   <aside
     aria-label="New goal"
@@ -268,7 +280,7 @@ const NewGoalDrawer = ({
           A goal is built on a part of a page, so your site publishes its pages first.
         </StateNotice>
       ) : (
-        <GoalForm projectId={projectId} pages={pages} first={first} />
+        <GoalForm projectId={projectId} pages={pages} first={first} totals={totals} />
       )}
     </div>
   </aside>
@@ -426,7 +438,12 @@ const GoalsPage = async ({
           )}
         </div>
         {adding && (
-          <NewGoalDrawer projectId={projectId} pages={pages} first={goals.value.length === 0} />
+          <NewGoalDrawer
+            projectId={projectId}
+            pages={pages}
+            first={goals.value.length === 0}
+            totals={hourly === undefined ? { kind: "unreadable" } : rangeTotalsOf(hourly, week)}
+          />
         )}
       </div>
     )

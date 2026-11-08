@@ -2,7 +2,7 @@
 
 **`Loom signals`, 8 November 2026, morning run.**
 Branch `signals-79-what-readers-did-inside-a-part`. Record
-[0365](../decisions/0365-what-readers-did-inside-a-part-is-derived-from-the-tree-and-the-sum-is-exact-because-occurrences-add.md),
+[0368](../decisions/0368-what-readers-did-inside-a-part-is-derived-from-the-tree-and-the-sum-is-exact-because-occurrences-add.md),
 `Accepted`. `pnpm verify` **EXIT=0**.
 
 ## What this run completed
@@ -120,7 +120,7 @@ another lane's file and it is the honest resolution either way round.
 
 ## Records added
 
-**0365**, `Accepted` — *what readers did inside a part is derived from the tree,
+**0368**, `Accepted` — *what readers did inside a part is derived from the tree,
 and the sum is exact because occurrences add*. It contradicts no accepted record
 and touches neither the tree schema nor the delta model, so it is not
 architectural. Five clauses: nothing added to payload, table or browser; the sum
@@ -128,10 +128,12 @@ is exact and is the one counter here a nesting sum may be taken over; it answers
 for batches with no `within`; the containment is the nearest addressed ancestor
 and not the tree parent; one revision, and audiences add.
 
-**Numbered 0365 rather than 0364.** 0363 is the highest on `main`, and 0364 is
-claimed by **two** open branches (#806 and #808), so taking the next number free
-on `main` would mean `Loom merge` renumbering three records rather than two.
-This is the precedent #802 set last night for the same situation.
+**Written as 0365 rather than 0364, and renumbered to 0368 at merge.** 0363 was
+the highest on `main`, and 0364 was claimed by **two** open branches (#806 and
+#808), so taking the next number free on `main` would have meant `Loom merge`
+renumbering three records rather than two. This is the precedent #802 set the
+night before for the same situation. `0365` was in turn claimed by #815, which
+landed first, so `Loom merge` renumbered this record to **0368** on 8 November.
 
 ## Real test numbers
 

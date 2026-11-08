@@ -8,6 +8,187 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-11-08 — lesson 21 taught a limit that is gone, and the half of it worth keeping is the half about which direction an error runs in
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom lessons` (`lessons/`) ·
+**Status:** open — **the lesson is green and true as of this branch**; what is
+filed is the deeper pass, which is the owner's call and not a run's.
+
+[0365](decisions/0365-a-colour-is-measurable-when-its-channels-are-arithmetic-and-opaque.md)
+made `hsl()` and `rgb()` measurable. `21-appearance.md` taught the opposite, in
+prose and in a running exercise, and **Exercise F's whole point was the
+phenomenon that has now gone**: one slot rewritten in `hsl()` moved five
+pairings — two of them real painted failures — into `unmeasured`, so *a host
+could have made two real failures disappear by rewriting one colour in a
+different notation.*
+
+**That point is intact and the numbers are unchanged**, because the framework
+lane moved the fixture rather than the lesson: `house-hsl`'s `fg-muted` is now
+`rebeccapurple` and the palette is `house-named`. A named colour is still
+declined, so the audit still answers **21 / 6 / 5** — the same three numbers the
+exercise asks a reader to predict, and the paragraph under it survives with one
+clause changed.
+
+**What the framework lane edited, and said so loudly:** the `fg-muted` fixture
+and its id, the stated output of two lines, the three-reasons section, one
+clause in the paragraph under Exercise F, and review question 6. That is a
+cross-lane diff in `lessons/`, taken because the alternative was either a **red
+merge gate for four surfaces** or a lesson printing output that contradicts its
+own next paragraph.
+
+**What is left for you, and it is the interesting part.** The three-reasons
+section now says the `hsl()` argument was retired *by measuring the risk away*
+rather than by deciding it was acceptable — the parser agrees with Chromium on
+1,034 of 1,034 colours. That is a better lesson than the one it replaced and it
+is written as a correction rather than as the point. **A course on a runtime that
+has a worked example of an argument being retired by evidence should probably
+teach that on purpose**, and where it goes — here, or in whichever lesson owns
+*how do you know this is right* — is yours.
+
+Two smaller things in the same file: the review schedule may want a note that
+lesson 21's answer to question 6 changed, and `lessons/reports/2026-09-09-appearance.md`
+states the old 21/6/5 derivation with `hsl()` as its cause. **The report was left
+alone deliberately** — it is a record of what was true on 9 September and
+rewriting history in a report is not a correction.
+
+---
+## 2026-11-08 — the theming page's prose now overstates the silence: four passages argue a limit that three-quarters of has gone
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/`) · **Status:** open — **nothing is broken and nothing
+went red on the page**; this is prose that has become wrong, filed the run that
+made it wrong.
+
+[0365](decisions/0365-a-colour-is-measurable-when-its-channels-are-arithmetic-and-opaque.md)
+widened `channelsOf`: `hsl()`, `rgb()` and a **fully opaque** alpha are now
+measured, and a named colour is the one form left that is not. So
+`declinedForms` has gone from four entries to one.
+
+**The module needed no edit, and that is this lane's doing rather than luck.**
+`scheme.ts` says of that very figure:
+
+> Read off the table rather than counted by hand, for the reason every number on
+> this site is: *the day `channelsOf` learns to read `rgb()`, the sentence naming
+> this figure is right without being edited.*
+
+That is exactly what happened. The table, the row count and the component all
+re-derived themselves, and `palette-scheme.test.tsx` passed untouched.
+
+**One assertion was typed and went red**, and the framework lane corrected that
+one line with a comment naming 0365 — the 5 November precedent for a single
+number outside a lane. It is `scheme.test.ts`'s *declines four of the six*,
+now *declines the one form that is vocabulary rather than arithmetic*.
+
+**What is left is prose, and it is yours.** Four passages and three names:
+
+| where | what it now says that is wrong |
+| --- | --- |
+| `theming/page.mdx` — under `<ColourForms />` | *"Reading `hsl()` means writing a parser, and a parser that is subtly wrong…"* — the argument for a limit that is gone. 0365 answers it against Chromium over 1,034 colours. |
+| the same, two bullets down | *"**Write your palette's colors as hex** and you get an answer"* — still true, no longer the only way, and no longer advice |
+| the same bullet | *"a palette written in `hsl()` silently gets the mark for a white page"* — it no longer does |
+| the warning callout | *"Those same **four** spellings cost you the same silence elsewhere"* — one spelling, and `auditPalette` now measures the other three |
+| `### When there is no color to give` | *"the same **four** spellings that cost you `paletteScheme`"* |
+| `scheme.ts`, two doc comments | *"**Four** of these register cleanly and answer `undefined`"*, and *"four of them do not give it"* |
+| `scheme.test.ts:147`, a test name | *"offers both hex forms and **the four the measure declines**"* — the assertion under it is about the six labels and still passes |
+| `FORMS`, the row labelled *hex with an alpha* | the value is `#111827ff`, which is **opaque**, so the row now measures. The row that demonstrates an alpha being declined would need an alpha below `ff`. |
+
+**Left alone deliberately, all of it.** A migration of another lane's argument
+is not a one-number correction, and rewriting the case a page makes is the
+owner's call — the more so here, because the page gets *better*: the limit it
+warns about is three-quarters smaller, and the one row still answering
+`undefined` has a stated reason a reader can act on.
+
+**The byte cost is nil either way.** 0365 adds no exported name, so every
+generated reference page is byte-for-byte unchanged — which is worth knowing in
+the week the generated-page cap is days from firing. Shortening this prose would
+*spend less*, not more.
+
+---
+## 2026-11-08 — the named-colour table is the one form left unmeasured, and the cost of owning it has never been measured
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build`
+(`src/theme/`) · **Status:** open — **an open question with a measurable answer,
+not a defect.** Deliberately not taken in the run that could have taken it.
+
+[0365](decisions/0365-a-colour-is-measurable-when-its-channels-are-arithmetic-and-opaque.md)
+draws its line at **arithmetic rather than vocabulary**: every form whose
+channels can be computed from the string is read, and a named colour is declined
+because it needs a fixed table of 148 CSS entries this module would then own,
+keep and ship.
+
+That line is defensible in one sentence, which is most of why it was chosen. But
+the cost it rests on is **asserted and not measured**, and two things undercut
+it:
+
+- **The transcription risk is removable.** The argument against a hand-typed
+  table is 0076's *subtly wrong* argument, and it does not apply to a table
+  **generated from a browser**. Chromium is in this container; 0365's own
+  verification already read 1,034 colours out of it. A generated table would be
+  no more hand-maintained than `reference.generated.json` is.
+- **Nothing is weighed.** `src/theme/contrast.ts` is not on any browser-weight
+  path — `browser-weight.test.ts` guards `src/signals/broadcast.ts` alone — so
+  the 148 entries may cost a *reader* nothing at all. Nobody has checked.
+
+**What would settle it:** the table's bytes, minified and gzipped, and whether
+anything a browser downloads reaches this module. Both are an hour's work and
+neither was done this run, because the unit in front of it was the one the
+4 October finding named and widening scope to the only form it could not have
+wanted would have made that unit unreviewable.
+
+**It is not blocking and no reader is harmed.** `transparent` and `currentcolor`
+are bare words `colourSchema` admits too, and both *should* decline — the first
+is an alpha of zero and the second is not a colour until a context says so — so
+a named-colour table does not empty the declined set either way.
+## 2026-11-07 (evening) — the status reports two of a deployment's three reader windows, and the one it leaves out is the one a reader is promised
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom signals`
+(`apps/loom/app/_lib/reader-signals/receive.ts`) · **Status:** open — **nothing
+is broken and no reader is misled today**; it is one field on an operator's
+status page, and it is the field that would say nothing is being deleted
+
+Found while checking `docs/deployment.md`'s sample response against
+`IntakeStatus` ([0367](decisions/0367-what-an-operator-must-set-is-read-off-the-application-and-the-guide-goes-red-when-it-is-behind.md)),
+which is now an assertion rather than a reading.
+
+`readIntakeSettings` reads **three** windows off the environment and
+`describeIntake` reports **two** of them:
+
+| setting | `IntakeSettings` | reported as |
+| --- | --- | --- |
+| `LOOM_SIGNAL_WINDOW_MS` | `window` | `collection` |
+| `LOOM_SIGNAL_SWEEP_MS` | `sweep` | `sweep` |
+| `LOOM_SIGNAL_KEPT_MS` | `kept` | **nothing** |
+
+`describeKeptWindow` exists, it is exported, and its `unusable` sentence is
+already written: *"…so nothing is being deleted. It is whole milliseconds and at
+least 60000; remove it to keep deliveries for 2592000000."*
+
+**Why this is the sharper one of the three, by the file's own reasoning.** The
+doc comment on `KeptWindow` says the consequence of a value that cannot be read
+is *"sharper than the collection window's: the expiry sweep refuses to run on
+it, so nothing is deleted at all, and the notice publishes the default — which
+would then be a ceiling this deployment is not keeping."* That is exactly the
+state `collection` was added to make visible for the other window, and it is the
+one state this status cannot say. An operator who typed `LOOM_SIGNAL_KEPT_MS=30`
+meaning thirty days has a deployment that keeps every delivery for ever while
+telling its readers thirty days, and there is nowhere they can see that.
+
+**The fix looks like one line**, which is why it is filed with a recommendation
+rather than a question: a `kept` field beside `collection`, carrying
+`describeKeptWindow(intake.settings.kept)`. 0351 is five days old and the status
+predates it, so this reads as a field that was not added rather than one that
+was considered and declined.
+
+**One thing it costs, stated because it is this lane's own check that makes it
+cost anything.** The sample response in `docs/deployment.md` is now asserted to
+carry every field of `IntakeStatus`, so adding `kept` turns that assertion red
+until the sample gains the key — a one-line edit in this lane's file, on the
+branch that adds the field. That is deliberate (0367) and it is what the 26
+October entry asked for; it is a line in a report, not a reason to leave the
+field out. If you would rather not touch another lane's file, say so on the pull
+request and this lane will add the key the moment the field lands.
+
+---
 ## 2026-11-07 (evening) — the transit mangling has hit something load-bearing: it ate the `!` off three image embeds, and the backtick count escalated across one body
 
 **Filed by:** `Loom docs` · **Owned by:** `Loom daily build` (run mechanics; it
@@ -1057,6 +1238,11 @@ churn.
 ## 2026-11-05 — a broadcast could find its own root now, and it would be the better API for the one caller that is a broadcast
 
 **Filed by:** `Loom framework` · **Owned by:** `Loom signals` (`src/signals/`) ·
+**Status:** **closed by `signals-78-a-broadcast-follows-the-page`**
+([0366](decisions/0366-a-broadcast-handed-a-document-follows-the-page-and-a-client-side-navigation-is-a-new-page-view.md))
+— taken, with the overload, and it turned out to be more than an ergonomic win:
+see the 7 November entry. Original status below.
+
 **Status:** open — **an offer, not a defect.** Nothing is blocked; the hosts that
 start a broadcast have a published way to find the root as of today.
 
@@ -49199,8 +49385,36 @@ between them will notice before anybody files it again.
 
 **Filed by:** `Loom docs` · **Owned by:** `Loom daily build` (`src/theme/`) ·
 **Extends:** the 20 August entry *a host's own palette is not held to the bar the
-starter palettes now clear* · **Status:** open — **a measurement and a new
-instance, explicitly not a request to build the diagnostic 0076 deferred.**
+starter palettes now clear* · **Status:** **closed, 8 November**, by
+`framework-89-a-palette-written-six-ways-is-measured` and
+[0365](decisions/0365-a-colour-is-measurable-when-its-channels-are-arithmetic-and-opaque.md)
+— **three of the four rows now measure**, and the fourth is declined on a stated
+ground rather than on cost.
+
+> **Closed by making the measurements work, not by building the diagnostic.**
+> This entry asked for nothing and was explicit that it was not requesting
+> 0076's deferred `RenderOutput` diagnostic. That is still not built and is
+> still deferred. What changed is the premise underneath it: `channelsOf` now
+> reads every form whose channels are arithmetic, so `hsl()`, `rgb()` and an
+> **opaque** alpha answer, and all four measurements this entry listed —
+> `paletteScheme`, `paletteScrim`, `slotChroma` and the contrast audit — return
+> together, because all four sit on that one function.
+>
+> The `26 unmeasured, 0 failures` this entry measured is now `0 unmeasured`, and
+> a test in `contrast.test.ts` holds it at that figure by name.
+>
+> **A named colour still answers `undefined`**, and 0365 declines it on the
+> ground that it is vocabulary rather than arithmetic — 148 entries of CSS
+> table this module would own and keep — rather than on the risk argument that
+> covered the other three. An alpha **below** opaque also still declines, and
+> 0076's third reason for that is upheld rather than routed around.
+>
+> The risk argument this entry inherited from 0076 — *a parser that is subtly
+> wrong reports a passing ratio for a failing pair* — was answered with
+> evidence rather than assurance: the parser agrees with **Chromium's own CSS
+> engine on 1,034 of 1,034 colours**, worst channel difference 0.5, and
+> measures **none** of the 30 malformed strings Chromium refuses. The run is in
+> the record; it is not a test, because `pnpm verify` must not need a browser.
 
 `colourSchema` accepts more than hex. `channelsOf` reads only three- and
 six-digit hex and answers `undefined` for everything else, each refusal argued
@@ -56249,9 +56463,18 @@ arrives on the door rows a reader screen already holds.
 ## 2026-10-13 — a deployment can state how long its rollup window is and has nowhere at all to state how often it folds
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom daily build`
-(`apps/loom/scripts/signals-collect.ts`, `docs/deployment.md`) · **Status:** open
-— **nothing is broken**; it is the half of a new reading's input that lives
-outside this lane
+(`apps/loom/scripts/signals-collect.ts`, `docs/deployment.md`) · **Status:**
+**closed by `framework-88-what-an-operator-must-set`** — the setting this entry
+asked for arrived from its own lane fifteen days later under another name.
+`LOOM_SIGNAL_SWEEP_MS` (0320) is exactly the shape described below: read by
+nothing but the notice, defaulted to nothing rather than to a number, and
+`unstated` is the honest state. **What was still missing was the half this lane
+owns** — it was documented in its own doc comment and nowhere an operator reads
+— and that is now a paragraph in §9 beside the cron the operator is told to set
+up, an offer in `apps/loom/.env.example`, and a row in the table. The two
+numbers `CollectionSchedule.foldsWithinMs` wants are both stated by a deployment
+that fills them in. Original status: open — **nothing is broken**; it is the
+half of a new reading's input that lives outside this lane
 
 [0274](decisions/0274-a-page-view-row-says-when-the-fold-last-touched-it-and-a-stall-is-judged-against-a-schedule-the-deployment-hands-in.md)
 judges a stalled collection against `foldsWithinMs`: how long a fold may honestly
@@ -62885,9 +63108,22 @@ rediscover the wall by walking into it.
 ## 2026-10-26 (evening) — the intake status reports two different windows and has one word for one of them
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom daily build`
-(`docs/deployment.md`) · **Status:** open — **nothing is broken and no test is
-failing**; it is one word on an operator's status page and the fix crosses a
-lane boundary
+(`docs/deployment.md`) · **Status:** **closed by
+`framework-88-what-an-operator-must-set`**, record
+[0367](decisions/0367-what-an-operator-must-set-is-read-off-the-application-and-the-guide-goes-red-when-it-is-behind.md)
+— answered with the second of the two outcomes this entry offers, and the
+reason it was the worse state is gone. **The field keeps its name**: the
+guide now prints the whole answer, so `collection` and its sentence sit three
+lines under `windowMs`, and a paragraph beside the sample says which window each
+is and why the names are uneven. What this entry declined to do was rename a
+field whose documented copy *"would be left stale with nothing failing"* — that
+state no longer exists, because the sample is asserted to carry every field of
+`IntakeStatus` and a rename fails on the branch that makes it. So **take the
+rename whenever this lane's suite is somewhere you are already working**: it
+costs one line in `docs/deployment.md` on the same branch, and this lane will
+take that line on request rather than have it block you. Original status: open —
+**nothing is broken and no test is failing**; it is one word on an operator's
+status page and the fix crosses a lane boundary
 
 `GET /api/reader-signals` is the only way to ask a deployment what its mouth is
 doing. Two of the things it reports are windows:
@@ -63277,8 +63513,19 @@ a published closed set (0240).
 ## 2026-10-28 — a new environment variable is documented in its own doc comment and nowhere an operator reads, and the status sample is four fields behind
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom daily build`
-(`docs/deployment.md`) · **Status:** open — **nothing is stale that was not
-already**, and it is the same line the 26 October entry asks about
+(`docs/deployment.md`) · **Status:** **closed by
+`framework-88-what-an-operator-must-set`**, record
+[0367](decisions/0367-what-an-operator-must-set-is-read-off-the-application-and-the-guide-goes-red-when-it-is-behind.md)
+— both halves taken as this entry spells them. `LOOM_SIGNAL_SWEEP_MS` has its
+paragraph in §9, worded from the three sentences below, and the sample response
+carries all ten of `IntakeStatus`'s fields with the three long ones printed in
+full rather than elided, because the sentences are what the fields are for.
+`LOOM_SIGNAL_KEPT_MS` was undocumented too and is in with it. **The staleness
+itself is now an assertion**: a variable the application reads and the guide
+does not name, and a field of `IntakeStatus` the sample does not print, both
+fail `pnpm verify` on the branch that adds them. Original status: open —
+**nothing is stale that was not already**, and it is the same line the 26
+October entry asks about
 
 `GET /api/reader-signals` now reports `sweep` beside `regions` and `collection`
 (0320). `docs/deployment.md:498` prints a sample response that carries
@@ -66924,7 +67171,13 @@ scheduling call and it is raised on the pull request rather than taken.
 ## 2026-11-04 (evening) — a finding addressed to `Loom framework` over `src/signals/` is addressed to a lane that does not own the directory
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom signals`
-(`src/signals/broadcast.ts`) · **Status:** **open** — a re-addressing, not a new
+(`src/signals/broadcast.ts`) · **Status:** **closed by
+`signals-78-a-broadcast-follows-the-page`**
+([0366](decisions/0366-a-broadcast-handed-a-document-follows-the-page-and-a-client-side-navigation-is-a-new-page-view.md))
+— the re-addressing was right and this lane has acted on it. Original status
+below.
+
+**Status:** **open** — a re-addressing, not a new
 defect; the defect is this morning's entry and is unchanged
 
 This morning `Loom marketing` filed *the broadcaster takes the page's root
@@ -67707,6 +67960,158 @@ and a screen to ship. The fix is not more words in the finding — it is naming
 the module and the signature, which this one does.
 
 ---
+## 2026-11-07 — a broadcast handed the document follows the page, so both offers of 4 and 5 November are taken
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals` (`src/signals/broadcast.ts`) ·
+**Status:** **closed on filing by `signals-78-a-broadcast-follows-the-page`**
+([0366](decisions/0366-a-broadcast-handed-a-document-follows-the-page-and-a-client-side-navigation-is-a-new-page-view.md)),
+closing `Loom framework`'s 5 November entry *a broadcast could find its own root
+now* and `Loom daily build`'s 4 November (evening) re-addressing of
+`Loom marketing`'s entry to this lane.
+
+`broadcastReaderSignals` now takes an `Element` **or** a `Document`. The element
+form is byte-for-byte the behaviour it always had. The document form finds the
+addressed page with `addressedRootIn` — which is why this was cheap, and the
+reason 0354 earns its keep — and then follows the page's identity.
+
+**The offers were right about the API and understated the defect.** Both framed
+it as a host losing one conditional. What it actually fixes is that a host which
+did not act on the module's *stop and start another* sentence filed every signal
+after a client-side navigation **against the page the reader left** — a wrong
+number, not a missing one, with the node ids real and the batch parsing — and
+counted the reader as arriving once however many pages they read, which is the
+marker page views by hour (0356) and every door-scaled figure are taken from.
+
+**The two cases that would have double-counted are the tests to keep.** A
+re-render is not a navigation, so every band a proposal rewrites leaves the page
+view alone; and the same revision rendered again into a new element is the
+**same** page view, which is why the page view is now a value handed to a
+broadcast rather than state a broadcast owns.
+
+**It costs 1,030 bytes.** 6,513 minified and 2,986 gzipped become 7,543 and
+3,361 — 15.8%, paid by every page that asks for signals whichever argument it
+passes. A second entry point would have held rule 4 exactly and is rejected in
+the record's alternatives.
+
+---
+## 2026-11-07 — the lines a customer pastes are three lines now, and the ones on `main` misattribute after a client-side navigation
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom portal`
+(`apps/loom/app/(portal)/_lib/connecting.ts`) · **Status:** open — **one line,
+and it is the highest-leverage adoption of
+[0366](decisions/0366-a-broadcast-handed-a-document-follows-the-page-and-a-client-side-navigation-is-a-new-page-view.md)
+because it is the snippet a stranger copies**
+
+`snippetFor` generates the two calls a customer pastes into the page rendering
+their tree. On `main` it is seven lines: a `querySelector`, a null guard, and the
+broadcast. With the document form it is three, and the guard goes with them —
+`broadcastReaderSignals` refuses a document holding no addressed page and
+returns the same `unaddressed` code, so the snippet cannot throw on a page with
+no tree, which is what the guard was for.
+
+```js
+import { broadcastReaderSignals, deliverReaderSignals } from "@jam-overture/loom/signals/broadcast"
+
+broadcastReaderSignals(document, { send: deliverReaderSignals({ url: "…" }) })
+```
+
+**Why it is worth doing promptly rather than tidily.** Every customer who pastes
+today's snippet into an application that routes on the client gets signals filed
+against the page the reader left, and arrives once per session rather than once
+per page. Nothing in the portal's own screens can tell — the data looks whole.
+`connecting.test.ts` asserts the snippet's first line, so the test moves with it.
+
+The deployment's own `pages:publish` route and the three client components in
+`(docs)` and `(marketing)` are the same one-line change and are filed separately
+below; this one is different in kind because it is the code Loom hands to
+somebody else.
+
+---
+## 2026-11-07 — three client components in this repository start a broadcast on an element, and each is its own lane's one-line change
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/_components/reader-signals-live.tsx`,
+`apps/loom/app/(docs)/_lib/fences/compiled/the-runtime--what-your-readers-do.tsx`)
+and `Loom marketing` (`apps/loom/app/(marketing)/_components/count-readers.tsx`)
+· **Status:** open — **nothing is broken in any of the three**, and this is an
+adoption rather than a defect
+
+[0366](decisions/0366-a-broadcast-handed-a-document-follows-the-page-and-a-client-side-navigation-is-a-new-page-view.md)
+gives `broadcastReaderSignals` a document form that follows the page across a
+client-side navigation. All three of these broadcast from an element they hold —
+and **all three are right to**: each renders a tree into a frame or a panel on a
+page that holds other things, which is exactly what the element form is for. A
+document form would find the first addressed tree in the whole page, which on a
+docs page with two live panels is the wrong one.
+
+**So this is filed for the prose rather than for the call.** What each of them
+*shows a reader* is how to start a broadcast, and the shape a reader should copy
+onto their own site is now the document form. `Loom docs` owns the sentence on
+*What your readers do*, which is where the new argument wants describing, and
+whether the compiled fence should demonstrate the element form with a line
+saying why is that lane's call.
+
+The two places that hard-code `"[data-loom-tree]"` can now drop the selector
+entirely rather than importing the constant — `addressedRootIn(frame.current)`
+for a scoped panel (0354), or `document` for a page served whole.
+
+---
+## 2026-11-07 — a deployment's figures move when a host adopts the document form, and no fault names it
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/health.ts`, `src/signals/change.ts`) · **Status:** open — **a
+boundary named at the moment it was created**; nothing is broken and nothing is
+asked of anybody today
+
+[0366](decisions/0366-a-broadcast-handed-a-document-follows-the-page-and-a-client-side-navigation-is-a-new-page-view.md)
+makes a client-side navigation a page view that is counted. On an application
+that routes on the client, adopting the document form therefore **raises
+arrivals and moves every figure taken at the door's scale** — not because a
+counter changed, but because what the page sends changed.
+
+Every before-and-after reading in this subsystem compares two windows of one
+collection and has a vocabulary for the ways that can be unsafe: two audiences
+(0294), a window that credits nobody (0331), a door that cannot be scaled
+(0250), a sender the door refuses (0347). **None of them is *the page started
+sending differently*, and none of them can be** — nothing in a batch says which
+argument the host passed, and nothing should: that is a fact about the host's
+code and not about the reader or the tree.
+
+**Recommendation: leave it, and do not invent a member for it.** The honest home
+for *collection changed here* is the deployment's own record of when it changed
+its snippet, which is outside this subsystem. The thing to watch for is a
+surface that publishes a sharp rise in arrivals as a change in reader behaviour
+during the week a customer adopts 0366; the sentence that fixes that is in the
+portal's release note, not in a silence vocabulary.
+
+---
+## 2026-11-07 — rule 4's size half is a test now, and the ceiling is the only place it is written down
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/browser-weight.test.ts`) · **Status:** **closed on filing by
+`signals-78-a-broadcast-follows-the-page`**, and filed because the shape is one
+this lane walked into on 2 November and has now paid for
+
+*Performance is not traded for measurement* had two halves and only one of them
+was enforced. The import graph has been walked since 0136 and fails on any
+package. **The size was a sentence in `docs/signals.md` and a figure in each
+report**, re-measured by whoever remembered — and on 2 November that figure was
+found to be a third out of date, which is the same failure 0218 recorded about
+an exported name: a browser cost that moves is invisible in a diff.
+
+`browser-weight.test.ts` now builds the entry point with `esbuild` (already a
+dev dependency, already how every report measured it by hand), gzips it, and
+holds it to **8,000 bytes minified and 3,600 gzipped**. Both, because they do not
+move together: the minified figure is what a browser parses and the gzipped one
+is what the network carries, and a paragraph of code shaped like its neighbours
+costs almost nothing over the wire and still has to be parsed.
+
+**What a future run should not do to it.** Do not pin it to the figure of the
+day — the ceiling exists so that spending bytes is a line somebody wrote with
+the number in it, and an exact-match assertion would fail on an esbuild patch
+bump and teach the next run to loosen rather than to think. Do not raise it
+without putting the new figure in the comment's history, which is now three
+entries long: 4.8 KB at 0136, 6,513 for most of October, 7,543 at 0366.
 ## 2026-11-07 — a source panel a phone cuts in half has no rest state saying so, and `wrap: false` is the reason it cannot be fixed in copy
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom primitives`
@@ -67984,7 +68389,7 @@ out of `ReaderTally` rows, which keep no time (rule 5). On a screen with a range
 picker on it, those two figures are the only ones that are not of the range: a
 button pressed hard in September still leads the list in November.
 
-[0365](decisions/0365-what-readers-did-inside-a-part-is-derived-from-the-tree-and-the-sum-is-exact-because-occurrences-add.md)
+[0368](decisions/0368-what-readers-did-inside-a-part-is-derived-from-the-tree-and-the-sum-is-exact-because-occurrences-add.md)
 answers it off the hourly counter. `insideReadingOf(tree, acted, declarations,
 range)` then `actedMostIn(reading, "activated", 3)` is the list, for the range,
 with each part's role (0114) and the words it says itself (0122) already on it —
@@ -68002,7 +68407,7 @@ is worth a swap rather than a note:
   drawer can draw where on the page the acting happened rather than a flat list.
 
 **What it costs you:** the reading pins **one revision**, because a node's
-ancestry is a fact about one revision (0365 clause 5). `readReaderActed` adds
+ancestry is a fact about one revision (0368 clause 5). `readReaderActed` adds
 every revision by default, which is what a goal wants (0350) and is not
 available here. A page whose live version changed inside the range is therefore
 two readings, or one reading of the live revision with the earlier presses
@@ -68019,7 +68424,7 @@ is of the range the picker is set to.
 **Status:** open — **the generator said so on this branch and `pnpm verify` is
 green**; what is open is whether that page wants a paragraph
 
-`docs:api` reported, on regenerating the reference for 0365:
+`docs:api` reported, on regenerating the reference for 0368:
 
 ```
 @jam-overture/loom/signals — ActedCounts, InsidePart, InsideReading,
@@ -68054,7 +68459,7 @@ field would hang a band off a node it has no row for.
 `insideReadingOf` does not have the defect: its `withinId` is the nearest
 **addressed** ancestor, which is what `within` means (0167) and what the subtree
 sums are taken over, and `inside.test.ts` asserts it against a fixture with a
-slot between a band and the row inside it (0365 clause 4).
+slot between a band and the row inside it (0368 clause 4).
 
 **Why it is not fixed here.** Changing `parentId`'s meaning is a change to a
 published field that three readings and the `(docs)` reference carry, and the

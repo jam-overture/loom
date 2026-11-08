@@ -1,0 +1,21 @@
+{
+  "baseUrl": "http://localhost:3000",
+  "outDir": "reports",
+  "shots": [
+    {
+      "path": "/docs/building-with-loom/theming",
+      "out": "2026-11-08-framework-a-palette-written-six-ways-wide-forms",
+      "viewport": "wide",
+      "waitFor": "[data-colour-forms]",
+      "clip": "[data-colour-forms]",
+      "measure": ["[data-form-answer=\"hsl()\"]", "[data-form-answer=\"a named color\"]"]
+    },
+    {
+      "path": "/docs/building-with-loom/theming",
+      "out": "2026-11-08-framework-a-palette-written-six-ways-phone-forms",
+      "viewport": "phone",
+      "waitFor": "[data-colour-forms]",
+      "clip": "[data-colour-forms]"
+    }
+  ]
+}

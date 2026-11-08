@@ -11,6 +11,7 @@ import {
   primaryOf,
   goalTypedOf,
   readGoalForm,
+  readGoalTarget,
   type Goal,
   type GoalTyped,
 } from "./goal"
@@ -48,6 +49,22 @@ describe("goalTypedOf", () => {
       where: "some",
       pages: ["t_home", "t_pricing"],
       primary: true,
+    })
+  })
+})
+
+describe("readGoalTarget", () => {
+  it("reads what a goal counts and where without a name, for the preview", () => {
+    expect(readGoalTarget(form({ name: "" }), PARTS)).toEqual({
+      ok: true,
+      value: { kind: "activated", nodeId: "n_start", pages: null },
+    })
+  })
+
+  it("refuses a target with no part, and says nothing about the name", () => {
+    expect(readGoalTarget(form({ name: "", part: "" }), PARTS)).toEqual({
+      ok: false,
+      error: [{ field: "part", detail: "Choose the part of the page it counts." }],
     })
   })
 })

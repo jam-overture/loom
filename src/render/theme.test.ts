@@ -329,7 +329,7 @@ describe("themeGround", () => {
           ...editorialPalette,
           id: "unreadable",
           slots: Object.fromEntries(
-            Object.keys(editorialPalette.slots).map((slot) => [slot, "hsl(210 30% 40%)"])
+            Object.keys(editorialPalette.slots).map((slot) => [slot, "rebeccapurple"])
           ),
         }),
       ],
@@ -340,7 +340,7 @@ describe("themeGround", () => {
 
     const ground = themeGround(hsl.value)
 
-    expect(ground).toEqual({ backgroundColor: "hsl(210 30% 40%)", color: "hsl(210 30% 40%)" })
+    expect(ground).toEqual({ backgroundColor: "rebeccapurple", color: "rebeccapurple" })
     expect("colorScheme" in (ground ?? {})).toBe(false)
   })
 })

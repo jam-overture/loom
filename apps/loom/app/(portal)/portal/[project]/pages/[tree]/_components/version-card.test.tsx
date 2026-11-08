@@ -29,12 +29,16 @@ describe("a version on a page's History", () => {
           goal="Start pressed"
           outcome={HELPED}
           timeline="/portal/prj_a/review/accepted/p_1"
+          compare="/portal/prj_a/pages/t_home/history?compare=p_1"
           dashed={false}
         />
       </ul>
     )
 
     expect(screen.getByText("Helped")).toBeDefined()
+    expect(screen.getByRole("link", { name: "Compare" }).getAttribute("href")).toBe(
+      "/portal/prj_a/pages/t_home/history?compare=p_1"
+    )
     expect(screen.getByText("Goal: Start pressed")).toBeDefined()
     expect(screen.getByRole("link", { name: "Follow it from Accept" }).getAttribute("href")).toBe(
       "/portal/prj_a/review/accepted/p_1"
@@ -78,5 +82,36 @@ describe("a version on a page's History", () => {
 
     expect(screen.getByRole("listitem").className).toContain("border-dashed")
     expect(screen.getByText("No goal named")).toBeDefined()
+  })
+
+  it("carries Propose reverting where it is given one, and nothing where it is not", () => {
+    const { rerender } = render(
+      <ul>
+        <VersionCard
+          heading="Version 3: Removes the banner."
+          lines={[]}
+          origin="Loom change, accepted by ana@example.com · live 1 October 2026"
+          outcome={HELPED}
+          dashed={false}
+          revert={<button type="button">Propose reverting</button>}
+        />
+      </ul>
+    )
+
+    expect(screen.getByRole("button", { name: "Propose reverting" })).toBeDefined()
+
+    rerender(
+      <ul>
+        <VersionCard
+          heading="Version 3: Removes the banner."
+          lines={[]}
+          origin="Loom change, accepted by ana@example.com · live 1 October 2026"
+          outcome={HELPED}
+          dashed={false}
+        />
+      </ul>
+    )
+
+    expect(screen.queryByRole("button", { name: "Propose reverting" })).toBeNull()
   })
 })

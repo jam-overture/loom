@@ -4,7 +4,13 @@ import { nodeIdSchema, primitiveTypeSchema, treeIdSchema } from "@jam-overture/l
 import { arrivalRangeOf, type StoredActed, type StoredArrivals } from "@jam-overture/loom/signals"
 import { DEFAULT_AUDIENCE_ID } from "@jam-overture/loom/store"
 
-import { goalFigureOf, goalRangeOf, goalSpanOf, type GoalCounters } from "./goal-range"
+import {
+  goalFigureOf,
+  goalRangeOf,
+  goalSpanOf,
+  rangeTotalsOf,
+  type GoalCounters,
+} from "./goal-range"
 import { goalIdSchema, type Goal } from "./goals/goal"
 
 const HOUR = 3_600_000
@@ -233,5 +239,70 @@ describe("goalFigureOf", () => {
       value: "Not counted yet",
     })
     expect(goalFigureOf({ kind: "unreadable" }, "7d")).toMatchObject({ value: "Not available" })
+  })
+})
+
+describe("rangeTotalsOf", () => {
+  it("folds the range's hours into a total per page and per part, each kind apart", () => {
+    const totals = rangeTotalsOf(
+      counters({
+        arrivals: arrivals([
+          [HOME, RANGE.from, 200],
+          [HOME, RANGE.from + HOUR, 50],
+          [PRICING, RANGE.from, 30],
+          [HOME, BEFORE, 100],
+        ]),
+        acted: {
+          hours: [
+            ...acted([
+              [HOME, RANGE.from, 6],
+              [HOME, RANGE.from + HOUR, 1],
+              [HOME, BEFORE, 9],
+            ]).hours,
+            ...acted([[PRICING, RANGE.from, 2]], OTHER).hours.map((row) => ({ ...row, opens: 4 })),
+          ],
+        },
+      }),
+      RANGE
+    )
+
+    expect(totals).toEqual({
+      kind: "read",
+      from: RANGE.from,
+      clipped: false,
+      pages: [
+        { treeId: HOME, views: 250 },
+        { treeId: PRICING, views: 30 },
+      ],
+      parts: [
+        { treeId: HOME, nodeId: START, counts: { activated: 7, completed: 0, disclosed: 0 } },
+        { treeId: PRICING, nodeId: OTHER, counts: { activated: 2, completed: 0, disclosed: 4 } },
+      ],
+    })
+  })
+
+  it("starts where counting began inside the range, and says so", () => {
+    const begins = RANGE.from + 4 * HOUR
+
+    expect(
+      rangeTotalsOf(
+        counters({
+          arrivals: arrivals(
+            [
+              [HOME, RANGE.from, 200],
+              [HOME, begins, 40],
+            ],
+            begins
+          ),
+        }),
+        RANGE
+      )
+    ).toMatchObject({ from: begins, clipped: true, pages: [{ treeId: HOME, views: 40 }] })
+  })
+
+  it("is uncounted where nothing was counted by the hour before the range ended", () => {
+    expect(
+      rangeTotalsOf(counters({ arrivals: arrivals([], null), actedBegins: undefined }), RANGE)
+    ).toEqual({ kind: "uncounted" })
   })
 })

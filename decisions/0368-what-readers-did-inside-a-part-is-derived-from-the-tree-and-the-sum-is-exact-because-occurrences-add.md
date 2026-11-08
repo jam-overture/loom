@@ -1,8 +1,17 @@
-# 0365. What readers did inside a part is derived from the tree, and the sum is exact because occurrences add
+# 0368. What readers did inside a part is derived from the tree, and the sum is exact because occurrences add
 
 **Status:** Accepted
 **Date:** 2026-11-08
 **Section:** §5 (reader signals), the counters
+
+> **Renumbered from `0365` on 2026-11-08 by `Loom merge`.** `0365` was written
+> here rather than `0364` because `0364` was claimed by two open branches at
+> once (#806 and #808), so that one record fewer would need renumbering. `0365`
+> was claimed by one more branch nothing here could see — #815, *a colour is
+> measurable when its channels are arithmetic and opaque* — which landed on
+> `main` first and therefore keeps the number, and `0368` is the next number
+> free on `main` and on every open branch. Only the number changed: nothing this
+> record decides is different (0097).
 
 ## Context
 
