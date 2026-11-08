@@ -64,6 +64,13 @@ describe("reviewHrefOf", () => {
     )
   })
 
+  it("names the change whose drawer is open, after the filter", () => {
+    expect(reviewHrefOf("prj_1", EVERY_CHANGE, "p_one")).toBe("/portal/prj_1/review?change=p_one")
+    expect(reviewHrefOf("prj_1", { goal: "none", standing: null }, "p_one")).toBe(
+      "/portal/prj_1/review?goal=none&change=p_one"
+    )
+  })
+
   it("round-trips through reviewFilterOf", () => {
     const filter = { goal: trial.goalId, standing: "current" as const }
     const query = new URL(reviewHrefOf("prj_1", filter), "https://loom.test").searchParams

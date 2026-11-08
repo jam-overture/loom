@@ -25,9 +25,11 @@ const ROW: QueueRow = {
   standingSentence: null,
 }
 
+const OPEN = "/portal/prj_a/review?change=p_one"
+
 describe("a change waiting for review", () => {
   it("leads with its goal, names its page and offers Accept and Turn down", () => {
-    render(<ReviewCard row={ROW} projectId="prj_a" goalsRead />)
+    render(<ReviewCard row={ROW} projectId="prj_a" goalsRead open={OPEN} />)
 
     expect(screen.getByText("Goal: Sign-ups")).toBeDefined()
     expect(screen.getByRole("link", { name: "Welcome" }).getAttribute("href")).toBe(
@@ -37,11 +39,22 @@ describe("a change waiting for review", () => {
     expect(screen.getByRole("button", { name: "Turn down" })).toBeDefined()
   })
 
+  it("opens its drawer from the change itself", () => {
+    render(<ReviewCard row={ROW} projectId="prj_a" goalsRead open={OPEN} />)
+
+    expect(
+      screen
+        .getByRole("link", { name: "“Move the sign-up button above the fold”" })
+        .getAttribute("href")
+    ).toBe(OPEN)
+  })
+
   it("offers no Accept on a change that conflicts with the site's newer version", () => {
     render(
       <ReviewCard
         row={{ ...ROW, standing: "conflicts", standingSentence: "It no longer fits." }}
         projectId="prj_a"
+        open={OPEN}
         goalsRead
       />
     )
@@ -51,14 +64,16 @@ describe("a change waiting for review", () => {
   })
 
   it("says who can answer where the person looking may not", () => {
-    render(<ReviewCard row={{ ...ROW, waitsOn: "owner" }} projectId="prj_a" goalsRead />)
+    render(
+      <ReviewCard row={{ ...ROW, waitsOn: "owner" }} projectId="prj_a" goalsRead open={OPEN} />
+    )
 
     expect(screen.getByText("Waiting on an owner.")).toBeDefined()
     expect(screen.queryByRole("button")).toBeNull()
   })
 
   it("draws no goal chip where which goal each change serves could not be read", () => {
-    render(<ReviewCard row={ROW} projectId="prj_a" goalsRead={false} />)
+    render(<ReviewCard row={ROW} projectId="prj_a" goalsRead={false} open={OPEN} />)
 
     expect(screen.queryByText("Goal: Sign-ups")).toBeNull()
   })

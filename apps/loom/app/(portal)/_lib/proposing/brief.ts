@@ -111,6 +111,31 @@ export const requestOf = (change: string, evidence: string, again?: string): str
     : `${request.slice(0, MAX_REQUEST_LENGTH - 1)}…`
 }
 
+/** A request read back into what `requestOf` joined, for whoever answers it. */
+export type RequestParts = {
+  readonly change: string
+  /** The figure argued for it; `null` where the request carries none, as a person's does. */
+  readonly why: string | null
+  /** Why a change turned down before is back (0341); `null` where it was not turned down. */
+  readonly again: string | null
+}
+
+const JOINED =
+  /^(?<change>.+?) \(Why: (?<why>.+?)\)(?: \(Turned down before\. Proposed again because: (?<again>.+)\))?$/su
+
+/**
+ * The parts of a request as `requestOf` wrote it. A request it did not write,
+ * or one cut to length, is all change and no figure, so nothing is invented
+ * from a part of a sentence. Pure.
+ */
+export const requestPartsOf = (request: string): RequestParts => {
+  const groups = JOINED.exec(request)?.groups
+
+  return groups?.change === undefined || groups.why === undefined
+    ? { change: request, why: null, again: null }
+    : { change: groups.change, why: groups.why, again: groups.again ?? null }
+}
+
 /** The model's reply, read. Pure. */
 export const briefFrom = (text: string): Result<Brief, BriefError> => {
   const parsed = (() => {

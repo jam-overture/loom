@@ -1,12 +1,19 @@
 import Link from "next/link"
 import { notFound } from "next/navigation"
 
-import { projectIdSchema } from "@jam-overture/loom/store"
+import { treeIdSchema } from "@jam-overture/loom"
+import { projectIdSchema, type ApplicationId } from "@jam-overture/loom/store"
+import type { HeldProposal } from "@jam-overture/loom/write"
 
 import { FilterChips } from "@/app/(portal)/_components/filter-chips"
 import { Screen } from "@/app/(portal)/_components/screen"
 import { StateNotice } from "@/app/(portal)/_components/state-notice"
 import { requireActor, requireRole } from "@/app/(portal)/_lib/auth/identity"
+import { roleThatCanAccept } from "@/app/(portal)/_lib/auth/roles"
+import { drawHeld } from "@/app/(portal)/_lib/held-change"
+import { requestPartsOf } from "@/app/(portal)/_lib/proposing/brief"
+import { turnedDownFor } from "@/app/(portal)/_lib/proposing/stores"
+import type { TurnedDown } from "@/app/(portal)/_lib/proposing/turned-down"
 import { single, type Query } from "@/app/(portal)/_lib/query"
 import {
   EVERY_CHANGE,
@@ -17,8 +24,71 @@ import {
   standingChoicesOf,
 } from "@/app/(portal)/_lib/review-filter"
 import { readReview } from "@/app/(portal)/_lib/review-reading"
+import type { QueueRow } from "@/app/(portal)/_lib/queue"
+import { governedPagesFor } from "@/app/(portal)/_lib/write"
+import { PORTAL_READ_BUDGET_MS } from "@/app/_lib/app/bounded"
+import { readWithin, unavailable } from "@/app/_lib/app/bounded-store"
 
+import { ChangeDrawer } from "./_components/change-drawer"
 import { ReviewCard, ReviewGaps } from "./_components/review-card"
+
+/**
+ * The last change turned down on a page, read only for a change that says it
+ * was turned down before (0341); `null` where there is none or it could not
+ * be read, which costs that line alone.
+ */
+const lastTurnedDownOn = async (
+  application: ApplicationId,
+  pageId: string
+): Promise<TurnedDown | null> => {
+  const page = treeIdSchema.safeParse(pageId)
+
+  if (!page.success) return null
+
+  const read = await readWithin(
+    () => turnedDownFor(application).forPage(page.data, 1),
+    unavailable,
+    PORTAL_READ_BUDGET_MS
+  )
+
+  return read.ok ? (read.value[0] ?? null) : null
+}
+
+/** The drawer for one waiting change: the page before and after it, read when it opens. */
+const OpenChange = async ({
+  application,
+  row,
+  held,
+  goalsRead,
+  projectId,
+  close,
+}: {
+  readonly application: ApplicationId
+  readonly row: QueueRow
+  readonly held: HeldProposal
+  readonly goalsRead: boolean
+  readonly projectId: string
+  readonly close: string
+}) => {
+  const parts = requestPartsOf(row.asked)
+  const [drawn, lastTurnedDown] = await Promise.all([
+    drawHeld(governedPagesFor(application), held, row.standing),
+    parts.again === null ? null : lastTurnedDownOn(application, row.pageId),
+  ])
+
+  return (
+    <ChangeDrawer
+      row={row}
+      parts={parts}
+      drawn={drawn}
+      lastTurnedDown={lastTurnedDown}
+      acceptedBy={roleThatCanAccept(held.disposition.stakes)}
+      goalsRead={goalsRead}
+      projectId={projectId}
+      close={close}
+    />
+  )
+}
 
 /**
  * *For review* (formerly *Waiting*): the changes proposed for this project's pages that the Gate
@@ -32,6 +102,11 @@ import { ReviewCard, ReviewGaps } from "./_components/review-card"
  * standing chips (`?goal=`, `?standing=`) narrow the list, each choice with its
  * count; the goal picker is left out where which goal a change serves, or the
  * goals themselves, cannot be read, rather than offering goals it cannot place.
+ *
+ * A change opens a drawer beside the list (`?change=`, every filter kept):
+ * the page before and after it as two outlines, why Loom proposes it, what it
+ * expects and what is at stake, with the answers (`docs/portal-wireframes.md`,
+ * *2 · For review*). A change no longer waiting says so in its place.
  *
  * *Accepted*, linked under the heading, follows each change said yes to on to
  * live and its result (0358).
@@ -60,6 +135,7 @@ const ForReviewPage = async ({
 
   const reading = await readReview(projectId, await requireRole(projectId))
   const filter = reviewFilterOf({ goal: single(query.goal), standing: single(query.standing) })
+  const opened = single(query.change)
 
   const body = (() => {
     if (reading.kind === "unavailable") {
@@ -79,7 +155,7 @@ const ForReviewPage = async ({
       )
     }
 
-    const { rows, unreadable, goalsRead, goals } = reading
+    const { rows, held, unreadable, goalsRead, goals } = reading
 
     if (rows.length === 0 && unreadable === 0) {
       return (
@@ -98,9 +174,12 @@ const ForReviewPage = async ({
     }
 
     const shown = filteredRows(rows, filter)
+    const close = reviewHrefOf(projectId, filter)
+    const openRow = opened === undefined ? undefined : rows.find((row) => row.proposalId === opened)
+    const openHeld = opened === undefined ? undefined : held.get(opened)
 
-    return (
-      <div className="flex flex-col gap-3">
+    const list = (
+      <div className="flex min-w-0 flex-1 flex-col gap-3">
         <ReviewGaps unreadable={unreadable} goalsRead={goalsRead} />
         {goalsRead && goals !== undefined ? (
           <FilterChips label="Goal" choices={goalChoicesOf(rows, goals, filter, projectId)} />
@@ -125,8 +204,41 @@ const ForReviewPage = async ({
               row={row}
               projectId={projectId}
               goalsRead={goalsRead}
+              open={reviewHrefOf(projectId, filter, row.proposalId)}
             />
           ))
+        )}
+      </div>
+    )
+
+    if (opened === undefined) return list
+
+    return (
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
+        {list}
+        {openRow === undefined || openHeld === undefined ? (
+          <aside className="w-full shrink-0 self-start lg:w-[480px]">
+            <StateNotice
+              tone="empty"
+              title="This change is no longer waiting"
+              action={
+                <Link href={`/portal/${projectId}/review/accepted`} className="text-ink underline">
+                  Accepted
+                </Link>
+              }
+            >
+              It was answered, or never waited here. A change said yes to is on Accepted.
+            </StateNotice>
+          </aside>
+        ) : (
+          <OpenChange
+            application={reading.application}
+            row={openRow}
+            held={openHeld}
+            goalsRead={goalsRead}
+            projectId={projectId}
+            close={close}
+          />
         )}
       </div>
     )
