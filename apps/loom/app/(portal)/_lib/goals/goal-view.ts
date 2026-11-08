@@ -70,6 +70,10 @@ export const pageChoicesOf = (published: readonly PublishedPage[]): readonly Pag
         left.treeId.localeCompare(right.treeId)
     )
 
+/** A page as *New goal* lists it: by its heading, else by its id. */
+export const pageLabelOf = (page: Pick<PageChoice, "name" | "treeId">): string =>
+  page.name ?? page.treeId
+
 /** Which parts each published page has, for `readGoalForm` to check a choice against. */
 export const partsByPageOf = (pages: readonly PageChoice[]): PartsByPage =>
   new Map(pages.map((page) => [page.treeId, new Set(page.parts.map((part) => part.nodeId))]))
@@ -192,3 +196,17 @@ export const whereSentence = (goal: Goal, pages: readonly PageChoice[]): string 
 
   return names.join(", ")
 }
+
+/**
+ * The page *New goal*'s outline draws: the one the owner chose, else the first
+ * that has the part already picked, else the first page. `undefined` with no
+ * pages published.
+ */
+export const outlinePageOf = (
+  pages: readonly PageChoice[],
+  chosen: string | undefined,
+  picked: string
+): PageChoice | undefined =>
+  pages.find((page) => page.treeId === chosen) ??
+  pages.find((page) => page.parts.some((part) => part.nodeId === picked)) ??
+  pages[0]

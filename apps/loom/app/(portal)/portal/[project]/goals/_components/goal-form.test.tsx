@@ -12,12 +12,15 @@ const pages: readonly PageChoice[] = [
   {
     treeId: "t_home",
     name: "Welcome home",
-    parts: [{ nodeId: "n_start", name: "the button “Start”" }],
+    parts: [
+      { nodeId: "n_hero", name: "the card “Welcome home”", depth: 0 },
+      { nodeId: "n_start", name: "the button “Start”", depth: 1 },
+    ],
   },
   {
     treeId: "t_bare",
     name: undefined,
-    parts: [{ nodeId: "n_form", name: "the form" }],
+    parts: [{ nodeId: "n_form", name: "the form", depth: 0 }],
   },
 ]
 
@@ -96,5 +99,47 @@ describe("New goal", () => {
     expect(band.textContent).toBe(
       "Over the last 7 days it would have counted 4 forms sent in 50 page views, 8 per 100."
     )
+  })
+
+  it("draws the page's outline and picks the part pressed on it, outlined, for the list and the band", () => {
+    render(<GoalForm projectId="prj_a" pages={pages} first={false} totals={totals} />)
+
+    const outline = screen.getByRole("list", { name: "The parts of Welcome home" })
+    const start = within(outline).getByRole("button", { name: /the button “Start”/u })
+
+    expect(start.parentElement?.style.marginLeft).toBe("0.75rem")
+    expect(start.getAttribute("aria-pressed")).toBe("false")
+
+    fireEvent.click(start)
+
+    expect(start.getAttribute("aria-pressed")).toBe("true")
+    expect((screen.getByRole("combobox", { name: "The part" }) as HTMLSelectElement).value).toBe(
+      "n_start"
+    )
+    expect(screen.getByRole("status", { name: "Last 7 days" }).textContent).toBe(
+      "Over the last 7 days it would have counted 9 presses in 300 page views, 3 per 100."
+    )
+  })
+
+  it("opens the outline on the page of the part chosen from the list, and draws another on asking", () => {
+    render(<GoalForm projectId="prj_a" pages={pages} first={false} totals={totals} />)
+
+    fireEvent.change(screen.getByRole("combobox", { name: "The part" }), {
+      target: { value: "n_form" },
+    })
+
+    const outline = screen.getByRole("list", { name: "The parts of t_bare" })
+
+    expect(
+      within(outline)
+        .getByRole("button", { name: /the form/u })
+        .getAttribute("aria-pressed")
+    ).toBe("true")
+
+    fireEvent.change(screen.getByRole("combobox", { name: "Page" }), {
+      target: { value: "t_home" },
+    })
+
+    expect(screen.getByRole("list", { name: "The parts of Welcome home" })).toBeTruthy()
   })
 })

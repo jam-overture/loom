@@ -17,6 +17,7 @@ import {
   countsWhen,
   goalReadingOf,
   goalReadingsByPage,
+  outlinePageOf,
   pageChoicesOf,
   partsByPageOf,
   partsOf,
@@ -96,6 +97,15 @@ describe("partsOf", () => {
       ["the button “Start”", 1],
       ["the text “Footnote”", 0],
     ])
+  })
+})
+
+describe("outlinePageOf", () => {
+  it("draws the page chosen, else the first with the part picked, else the first", () => {
+    expect(outlinePageOf(pages, HOME.treeId, pricingHeading)?.treeId).toBe(HOME.treeId)
+    expect(outlinePageOf(pages, undefined, homeHeading)?.treeId).toBe(HOME.treeId)
+    expect(outlinePageOf(pages, "t_gone", "")?.treeId).toBe(PRICING.treeId)
+    expect(outlinePageOf([], undefined, "")).toBeUndefined()
   })
 })
 
