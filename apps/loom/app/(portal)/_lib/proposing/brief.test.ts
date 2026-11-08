@@ -13,6 +13,7 @@ import {
   goalText,
   MAX_REQUEST_LENGTH,
   requestOf,
+  requestPartsOf,
 } from "./brief"
 import { readEvidence } from "./evidence"
 import { elementIdsOf, goalOn, NOTHING_DECLARED, readersOn } from "./fixtures"
@@ -76,6 +77,37 @@ describe("requestOf", () => {
 
     expect(request).toHaveLength(MAX_REQUEST_LENGTH)
     expect(request.endsWith("…")).toBe(true)
+  })
+})
+
+describe("requestPartsOf", () => {
+  it("reads back the change and the figure requestOf joined", () => {
+    expect(requestPartsOf(requestOf("Move n_cta up", "60% leave before n_cta"))).toEqual({
+      change: "Move n_cta up",
+      why: "60% leave before n_cta",
+      again: null,
+    })
+  })
+
+  it("reads back why a change turned down before is proposed again", () => {
+    expect(
+      requestPartsOf(requestOf("Move n_cta up", "60% leave (most) early", "Twice the readers now"))
+    ).toEqual({
+      change: "Move n_cta up",
+      why: "60% leave (most) early",
+      again: "Twice the readers now",
+    })
+  })
+
+  it("keeps a request it did not write, or one cut short, as the change alone", () => {
+    const cut = requestOf("x".repeat(MAX_REQUEST_LENGTH), "because")
+
+    expect(requestPartsOf("Make the heading shorter")).toEqual({
+      change: "Make the heading shorter",
+      why: null,
+      again: null,
+    })
+    expect(requestPartsOf(cut)).toEqual({ change: cut, why: null, again: null })
   })
 })
 

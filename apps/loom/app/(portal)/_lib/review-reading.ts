@@ -1,5 +1,6 @@
 import type { TreeId } from "@jam-overture/loom"
 import type { ApplicationId, ProjectId } from "@jam-overture/loom/store"
+import type { HeldProposal } from "@jam-overture/loom/write"
 
 import type { Role } from "./auth/roles"
 import { waitingByPage } from "./by-page"
@@ -34,6 +35,8 @@ export type ReviewReading =
       readonly projectName: string
       /** Every change waiting, oldest first, as the store lists them. */
       readonly rows: readonly QueueRow[]
+      /** Each change waiting, by its proposal id, for the drawer that opens one. */
+      readonly held: ReadonlyMap<string, HeldProposal>
       /** How many waiting changes could not be read, so a list never claims to be whole. */
       readonly unreadable: number
       /** Whether the goal each change serves was read; where not, no row has one. */
@@ -87,6 +90,7 @@ export const readReview = async (projectId: ProjectId, role: Role): Promise<Revi
         goals: served.ok ? served.value : new Map(),
       })
     ),
+    held: new Map(held.map((change) => [change.proposalId, change])),
     unreadable: unreadable.length,
     goalsRead: served.ok,
     goals: goals.ok ? goals.value : undefined,

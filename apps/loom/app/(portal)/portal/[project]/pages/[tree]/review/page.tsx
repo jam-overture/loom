@@ -7,6 +7,7 @@ import { projectIdSchema } from "@jam-overture/loom/store"
 import { Screen } from "@/app/(portal)/_components/screen"
 import { StateNotice } from "@/app/(portal)/_components/state-notice"
 import { requireActor, requireRole } from "@/app/(portal)/_lib/auth/identity"
+import { EVERY_CHANGE, reviewHrefOf } from "@/app/(portal)/_lib/review-filter"
 import { readReview } from "@/app/(portal)/_lib/review-reading"
 
 import { ReviewCard, ReviewGaps } from "../../../review/_components/review-card"
@@ -87,6 +88,7 @@ const PageReviewScreen = async ({
                 row={row}
                 projectId={projectId}
                 goalsRead={reading.goalsRead}
+                open={reviewHrefOf(projectId, EVERY_CHANGE, row.proposalId)}
               />
             ))}
             <p className="text-ink-muted m-0 text-xs">
