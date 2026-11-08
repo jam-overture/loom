@@ -9,6 +9,7 @@ import {
 
 import { SITE_READ_BUDGET_MS } from "@/app/_lib/app/bounded"
 import { readWithin, unavailable } from "@/app/_lib/app/bounded-store"
+import { rememberedFor } from "@/app/_lib/app/remembered"
 import { soleApplicationOf } from "@/app/_lib/app/sole-application"
 import { appApplications } from "@/app/_lib/app/store"
 import { appIngestKeys } from "@/app/_lib/reader-signals/key-store"
@@ -22,6 +23,35 @@ import { INGEST_KEY_PARAMETER, type IngestKeyStore } from "@/app/_lib/reader-sig
  * set this goes on counting them.
  */
 export const SITE_PROJECT_KEY = "LOOM_SITE_PROJECT"
+
+/**
+ * How long this process keeps the answer to *which key does this site count
+ * under*, as of 8 November.
+ *
+ * It was read from the database on every page this site served, and twice on
+ * some, which put one or two round trips in front of every reader. A key
+ * changes when somebody replaces it on *Connect your site*; a minute is how
+ * long that takes to reach the site, which is also how often the site pulls
+ * its live pages.
+ */
+export const SITE_KEY_REMEMBERED_MS = 60_000
+
+/** The key store and the application listing as this site reads them: remembered. */
+export const siteIngestKeys: Pick<IngestKeyStore, "keyOf"> = {
+  keyOf: rememberedFor(
+    SITE_KEY_REMEMBERED_MS,
+    (application) => appIngestKeys.keyOf(application),
+    String
+  ),
+}
+
+const siteApplications: Pick<ApplicationStore, "list"> = {
+  list: rememberedFor(
+    SITE_KEY_REMEMBERED_MS,
+    (listing) => appApplications.list(listing),
+    (listing) => JSON.stringify(listing)
+  ),
+}
 
 /**
  * The application the site posts as, or `null` when the setting names nothing
@@ -95,9 +125,9 @@ const siteApplication = async (
  * count*.
  */
 export const siteSignalUrl = async (
-  keys: IngestKeyStore = appIngestKeys,
+  keys: Pick<IngestKeyStore, "keyOf"> = siteIngestKeys,
   env: Record<string, string | undefined> = process.env,
-  applications: Pick<ApplicationStore, "list"> = appApplications
+  applications: Pick<ApplicationStore, "list"> = siteApplications
 ): Promise<string | null> => {
   const application = await siteApplication(env, applications)
 

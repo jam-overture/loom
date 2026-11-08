@@ -61,8 +61,8 @@ export const portalApplicationsForWriting = appApplicationsForWriting
  * process and budgeted at two seconds. On a warm instance that is free. On this
  * deployment it was neither.
  *
- * The pool is `max: 1`, so every query on an instance is one round trip after
- * the last. Seeding is six of them — the demonstration page, the site's three,
+ * The pool was `max: 1` until 8 November, so every query on an instance was one
+ * round trip after the last. Seeding is six of them — the demonstration page, the site's three,
  * the default project, the default application — and on a deployment that was
  * seeded weeks ago **all six answer "already there"**. Six round trips to learn
  * nothing, before the screen's own reads can start, on a connection that is
@@ -124,8 +124,8 @@ export const seedDeployment = async (): Promise<void> => {
  *
  * **A failing INSERT is not free.** It takes a lock on the conflicting key
  * until its transaction ends, so concurrent instances inserting the same six
- * keys queue behind each other — and with `max: 1` on the pool, everything else
- * that instance wanted queues behind that. A `SELECT` on a primary key takes no
+ * keys queue behind each other — and with `max: 1` on the pool, as it was then,
+ * everything else that instance wanted queued behind that. A `SELECT` on a primary key takes no
  * lock and answers in a millisecond.
  *
  * The write is still guarded by the constraint, so two instances that both find
