@@ -41,7 +41,9 @@ describe("Compare on a page's history", () => {
     expect(within(before).getByText("taken off")).toBeDefined()
     expect(within(before).queryByText("added")).toBeNull()
     expect(within(after).getByText("added")).toBeDefined()
-    expect(within(after).getByText("the text “Free trial”").getAttribute("title")).toBe("n_offer")
+    expect(
+      within(after).getByText("the text “Free trial”").closest("li")?.getAttribute("title")
+    ).toBe("n_offer")
   })
 
   it("closes back to the history and links to the change's timeline", () => {

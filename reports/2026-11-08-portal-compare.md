@@ -94,6 +94,16 @@ last published, and the runtime's `treesAt`) are all on `main`.
 - Portal suite: 119 files, 2,152 tests before this run's last additions; full
   `pnpm verify` figures are in the pull request.
 
+## Seen working
+
+Built and served against Postgres 16 (`next build` + `next start`), with two
+changes accepted on the deployment's own home page: an added line of prose,
+then a button moved up and a paragraph taken off. *Compare* on the second
+draws the button red and dashed where it was and green where it went, the
+paragraph red and dashed on *Before*, and folds the other 120-odd parts.
+
+![Page history with Compare open on version 2](2026-11-08-portal-compare-wide.webp)
+
 ## Where the wireframe stands
 
 *5 · Pages · History* now has the chart, *Measured on*, one card per version

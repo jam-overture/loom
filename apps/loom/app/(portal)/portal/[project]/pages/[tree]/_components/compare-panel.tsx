@@ -12,12 +12,12 @@ const MARKED: Readonly<Record<Mark, { readonly box: string; readonly word: strin
   changed: { box: "bg-applied text-applied-ink border-applied-ink border-2", word: "changed" },
   moved: { box: "border-applied-ink border-2", word: "moved" },
   removed: {
-    box: "bg-refuse text-refuse-ink border-refuse-ink border-2 border-dashed",
+    box: "bg-rejected text-rejected-ink border-rejected-ink border-2 border-dashed",
     word: "taken off",
   },
 }
 
-const MOVED_FROM = "border-refuse-ink border-2 border-dashed"
+const MOVED_FROM = "border-rejected-ink border-2 border-dashed"
 
 const indent = (depth: number) => ({ marginLeft: `${Math.min(depth, DEEPEST_DRAWN) * 0.5}rem` })
 
@@ -61,12 +61,12 @@ const Outline = ({
             <li
               key={row.nodeId}
               style={indent(row.depth)}
-              className={`min-w-0 truncate rounded px-1.5 py-0.5 text-xs ${box}`}
+              className={`flex min-w-0 items-baseline gap-1.5 rounded px-1.5 py-0.5 text-xs ${box}`}
               title={row.nodeId}
             >
-              {row.name}
+              <span className="min-w-0 truncate">{row.name}</span>
               {row.mark === undefined ? null : (
-                <span className="ml-1.5 text-[11px] italic">{MARKED[row.mark].word}</span>
+                <span className="shrink-0 text-[11px] italic">{MARKED[row.mark].word}</span>
               )}
             </li>
           )
