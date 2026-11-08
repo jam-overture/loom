@@ -35,6 +35,11 @@ export interface TurnedDownStore {
     pageId: TreeId,
     limit: number
   ) => Promise<Result<readonly TurnedDown[], TurnedDownStoreError>>
+  /** Every page's turned down at or after `at`, newest first, at most `limit`. */
+  readonly since: (
+    at: number,
+    limit: number
+  ) => Promise<Result<readonly TurnedDown[], TurnedDownStoreError>>
 }
 
 /** The order `forPage` promises, for every implementation to share. */

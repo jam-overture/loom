@@ -24,6 +24,7 @@ import {
   standingChoicesOf,
 } from "@/app/(portal)/_lib/review-filter"
 import { readReview } from "@/app/(portal)/_lib/review-reading"
+import { readTurnedDownCount } from "@/app/(portal)/_lib/turned-down-reading"
 import type { QueueRow } from "@/app/(portal)/_lib/queue"
 import { governedPagesFor } from "@/app/(portal)/_lib/write"
 import { PORTAL_READ_BUDGET_MS } from "@/app/_lib/app/bounded"
@@ -31,6 +32,7 @@ import { readWithin, unavailable } from "@/app/_lib/app/bounded-store"
 
 import { ChangeDrawer } from "./_components/change-drawer"
 import { ReviewCard, ReviewGaps } from "./_components/review-card"
+import { TurnedDownLine } from "./_components/turned-down-line"
 
 /**
  * The last change turned down on a page, read only for a change that says it
@@ -109,7 +111,9 @@ const OpenChange = async ({
  * *2 · For review*). A change no longer waiting says so in its place.
  *
  * *Accepted*, linked under the heading, follows each change said yes to on to
- * live and its result (0358).
+ * live and its result (0358). *Turned down recently*, under the list, counts
+ * the changes said no to in the last thirty days and leads to them (0341);
+ * it is left out where they could not be read.
  *
  * Oldest first, as the store lists them, so whatever has waited longest is
  * read first. A change the store could not read is counted rather than
@@ -134,6 +138,8 @@ const ForReviewPage = async ({
   await requireActor(`/portal/${projectId}/review`)
 
   const reading = await readReview(projectId, await requireRole(projectId))
+  const turnedDown =
+    reading.kind === "read" ? await readTurnedDownCount(reading.application, Date.now()) : undefined
   const filter = reviewFilterOf({ goal: single(query.goal), standing: single(query.standing) })
   const opened = single(query.change)
 
@@ -258,6 +264,10 @@ const ForReviewPage = async ({
       </div>
 
       {body}
+
+      {turnedDown === undefined ? null : (
+        <TurnedDownLine count={turnedDown} projectId={projectId} />
+      )}
     </Screen>
   )
 }

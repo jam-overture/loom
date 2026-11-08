@@ -14,9 +14,7 @@ import {
 import type { StoredRevision } from "@jam-overture/loom/store"
 
 import {
-  ACCEPTED_PAGE_SIZE,
   acceptedChangesOf,
-  acceptedPage,
   boundsAround,
   boundsOf,
   changedAtOf,
@@ -553,33 +551,6 @@ describe("statusOf", () => {
     expect(statusOf(standing, { kind: "own-site" }).title).toBe("Live")
     expect(statusOf(standing, pulling([])).title).toBe("Waiting for your site to pull")
     expect(statusOf(dropped, pulling([])).title).toBe("No longer fits the site's newer version")
-  })
-})
-
-describe("acceptedPage", () => {
-  const many = acceptedChangesOf(PAGE, [
-    first(
-      Array.from({ length: ACCEPTED_PAGE_SIZE + 3 }, (_, index) =>
-        entry(PAGE, index + 1, `p_${String(index).padStart(3, "0")}`, AT + index * MINUTE)
-      )
-    ),
-  ])
-
-  it("shows the newest fifty, and carries on from the last of them", () => {
-    const newest = acceptedPage(many, undefined)
-
-    expect(newest.rows).toHaveLength(ACCEPTED_PAGE_SIZE)
-    expect(newest.rows[0]?.proposalId).toBe("p_052")
-    expect(newest.older).toBe(newest.rows.at(-1)?.proposalId)
-
-    const older = acceptedPage(many, newest.older)
-
-    expect(older.rows.map((change) => change.proposalId)).toEqual(["p_002", "p_001", "p_000"])
-    expect(older.older).toBeUndefined()
-  })
-
-  it("starts from the newest for a change it does not hold", () => {
-    expect(acceptedPage(many, "p_unknown").rows[0]?.proposalId).toBe("p_052")
   })
 })
 
