@@ -24,6 +24,22 @@ const recordOf = async (
   return err({ code: "unavailable", detail: `could not read the changes on ${copy.copyId}` })
 }
 
+/** Every copy's record of one page, oldest copy first; all or nothing. */
+export const recordsOfPage = async (
+  trees: Pick<TreeStore, "revisions">,
+  copies: readonly PageCopy[],
+  pageId: TreeId
+): Promise<Result<readonly CopyRecord[], AcceptedReadError>> => {
+  const records = await Promise.all(
+    copiesOfPage(copies, pageId).map((copy) => recordOf(trees, copy))
+  )
+  const failed = records.find((record) => !record.ok)
+
+  if (failed !== undefined && !failed.ok) return failed
+
+  return ok(records.flatMap((record) => (record.ok ? [record.value] : [])))
+}
+
 /**
  * Every change accepted on a project's pages, newest first, read from each
  * copy each page has had (`going-live.ts` says why every copy). All or
@@ -38,19 +54,9 @@ export const acceptedOnPages = async (
   const pages = [...new Set([...pageIds, ...copies.map((copy) => copy.pageId)])]
   const read = await Promise.all(
     pages.map(async (pageId) => {
-      const records = await Promise.all(
-        copiesOfPage(copies, pageId).map((copy) => recordOf(trees, copy))
-      )
-      const failed = records.find((record) => !record.ok)
+      const records = await recordsOfPage(trees, copies, pageId)
 
-      if (failed !== undefined && !failed.ok) return failed
-
-      return ok(
-        acceptedChangesOf(
-          pageId,
-          records.flatMap((record) => (record.ok ? [record.value] : []))
-        )
-      )
+      return records.ok ? ok(acceptedChangesOf(pageId, records.value)) : records
     })
   )
   const failed = read.find((page) => !page.ok)

@@ -258,3 +258,28 @@ export const originOf = (version: Version): string => {
     ? `${made} · accepted ${day(version.change.acceptedAt)}`
     : `${made} · live ${day(version.liveAt)}`
 }
+
+/**
+ * A Loom change's heading and the lines under it. A revert is named by the
+ * version it reverted, with what it put back under it; any other change by the
+ * first sentence of what it did. Pure.
+ */
+export const versionWordsOf = (
+  change: AcceptedChange,
+  changes: readonly AcceptedChange[],
+  sentences: readonly string[]
+): { readonly heading: string; readonly lines: readonly string[] } => {
+  const version = `Version ${change.accepted.revision}`
+  const undone = changes.find((other) => other.proposalId === change.undoes)
+
+  if (undone !== undefined) {
+    return {
+      heading: `${version}: reverted version ${undone.accepted.revision}`,
+      lines: sentences,
+    }
+  }
+
+  const [first = "A change Loom made", ...lines] = sentences
+
+  return { heading: `${version}: ${first}`, lines }
+}

@@ -5,7 +5,15 @@ import type { StoredRevision } from "@jam-overture/loom/store"
 
 import { acceptedChangesOf, type AcceptedChange, type Ending, type Reach } from "./going-live"
 import { MEASURING_MS, windowsOf, type Measurement, type Side } from "./measuring"
-import { historyOf, keyOf, loomOutcomeOf, marksOf, originOf, siteOutcomeOf } from "./page-history"
+import {
+  historyOf,
+  keyOf,
+  loomOutcomeOf,
+  marksOf,
+  originOf,
+  siteOutcomeOf,
+  versionWordsOf,
+} from "./page-history"
 import { firstCopyOf } from "./proposing/copies"
 
 const PAGE = treeIdSchema.parse("t_home")
@@ -252,5 +260,29 @@ describe("originOf", () => {
     expect(originOf({ kind: "site", at: AT })).toBe(
       "Your site's own edit · published 1 October 2026"
     )
+  })
+})
+
+describe("versionWordsOf", () => {
+  it("leads a change with the first thing it did, the rest under it", () => {
+    expect(
+      versionWordsOf(older, [newer, older], ["Took the banner off.", "Nothing else."])
+    ).toEqual({
+      heading: "Version 1: Took the banner off.",
+      lines: ["Nothing else."],
+    })
+  })
+
+  it("names a change it has no sentence for plainly", () => {
+    expect(versionWordsOf(older, [older], []).heading).toBe("Version 1: A change Loom made")
+  })
+
+  it("names a revert by the version it reverted, with what it put back under it", () => {
+    const revert = { ...newer, undoes: older.proposalId }
+
+    expect(versionWordsOf(revert, [revert, older], ["Put the banner back."])).toEqual({
+      heading: "Version 2: reverted version 1",
+      lines: ["Put the banner back."],
+    })
   })
 })

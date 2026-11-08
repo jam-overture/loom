@@ -1,4 +1,5 @@
 import Link from "next/link"
+import type { ReactNode } from "react"
 
 import { GoalChip } from "@/app/(portal)/_components/goal-chip"
 import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"
@@ -13,7 +14,8 @@ const TONE: Readonly<Record<Outcome["tone"], string>> = {
 /**
  * One version of a page on its *History* tab: what changed, where it came
  * from, and what it did to the goal. A Loom change carries the goal it served
- * and links to its timeline from *Accept*; one not live yet is dashed.
+ * and links to its timeline from *Accept*; one not live yet is dashed. A Loom
+ * change still on the page offers *Propose reverting*.
  */
 export const VersionCard = ({
   heading,
@@ -23,6 +25,7 @@ export const VersionCard = ({
   outcome,
   timeline,
   dashed,
+  revert,
 }: {
   readonly heading: string
   readonly lines: readonly string[]
@@ -32,6 +35,8 @@ export const VersionCard = ({
   readonly outcome: Outcome
   readonly timeline?: string
   readonly dashed: boolean
+  /** *Propose reverting*, for a Loom change on the live page and a person who may raise it. */
+  readonly revert?: ReactNode
 }) => (
   <li
     className={`bg-surface-base flex flex-col gap-2 rounded-lg border p-4 ${
@@ -72,5 +77,6 @@ export const VersionCard = ({
         Follow it from Accept
       </Link>
     )}
+    {revert}
   </li>
 )
