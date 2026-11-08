@@ -244,17 +244,51 @@ export const siteOutcomeOf = (figures: SiteFigures, now: number): Outcome => {
   }
 }
 
-/** Where a version came from, as the line under its heading says it. */
+/**
+ * Where a version came from, as the line under its heading says it: who said
+ * yes, or, for a change a person asked for that needed no yes, who asked.
+ */
 export const originOf = (version: Version): string => {
   if (version.kind === "site") return `Your site's own edit · published ${day(version.at)}`
 
-  const by = version.change.accepted.answeredBy
+  const { accepted, undoes } = version.change
+  const what = undoes === undefined ? "Loom change" : "Revert"
+  const by = accepted.answeredBy
+  const asker =
+    accepted.provenance.origin === "user-instruction" ? accepted.provenance.actor : undefined
   const made =
-    by === undefined
-      ? "Loom change, made within the project's rules"
-      : `Loom change, accepted by ${by}`
+    by !== undefined
+      ? `${what}, accepted by ${by}`
+      : asker !== undefined
+        ? `${what}, asked for by ${asker} and made within the project's rules`
+        : `${what}, made within the project's rules`
 
   return version.liveAt === undefined
     ? `${made} · accepted ${day(version.change.acceptedAt)}`
     : `${made} · live ${day(version.liveAt)}`
+}
+
+/**
+ * A Loom change's heading and the lines under it. A revert is named by the
+ * version it reverted, with what it put back under it; any other change by the
+ * first sentence of what it did. Pure.
+ */
+export const versionWordsOf = (
+  change: AcceptedChange,
+  changes: readonly AcceptedChange[],
+  sentences: readonly string[]
+): { readonly heading: string; readonly lines: readonly string[] } => {
+  const version = `Version ${change.accepted.revision}`
+  const undone = changes.find((other) => other.proposalId === change.undoes)
+
+  if (undone !== undefined) {
+    return {
+      heading: `${version}: reverted version ${undone.accepted.revision}`,
+      lines: sentences,
+    }
+  }
+
+  const [first = "A change Loom made", ...lines] = sentences
+
+  return { heading: `${version}: ${first}`, lines }
 }

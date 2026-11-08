@@ -1,6 +1,6 @@
 "use client"
 
-import { useActionState, useMemo, useState, type FormEvent } from "react"
+import { useActionState, useMemo, useRef, useState, type FormEvent } from "react"
 
 import { Field, Submit } from "@/app/(portal)/_components/form"
 import {
@@ -13,10 +13,11 @@ import {
   type PartsByPage,
 } from "@/app/(portal)/_lib/goals/goal"
 import { previewWordsOf, type RangeTotals } from "@/app/(portal)/_lib/goals/goal-preview"
-import { partsByPageOf, type PageChoice } from "@/app/(portal)/_lib/goals/goal-view"
+import { pageLabelOf, partsByPageOf, type PageChoice } from "@/app/(portal)/_lib/goals/goal-view"
 import { GOAL_KIND_WORDS } from "@/app/(portal)/_lib/vocabulary"
 
 import { addGoalAction, type GoalReport } from "../actions"
+import { PageOutline } from "./page-outline"
 
 const Fault = ({ report, field }: { report: GoalReport | null; field: GoalField }) => {
   const fault = report?.faults.find((each) => each.field === field)
@@ -27,8 +28,6 @@ const Fault = ({ report, field }: { report: GoalReport | null; field: GoalField 
     </span>
   )
 }
-
-const pageLabel = (page: PageChoice): string => page.name ?? page.treeId
 
 /** The target typed so far, or `undefined` while it lacks a part or its pages. */
 const targetOf = (typed: GoalTyped | undefined, parts: PartsByPage) => {
@@ -85,13 +84,23 @@ const GoalFields = ({
 }) => {
   const typed = report?.typed
   const parts = useMemo(() => partsByPageOf(pages), [pages])
-  /** What is typed now, for the band; the fields themselves stay the form's own. */
+  const form = useRef<HTMLFormElement>(null)
+  /** What is typed now, for the band; the other fields stay the form's own. */
   const [current, setCurrent] = useState<GoalTyped | undefined>(typed)
+  /** The part, held here because the list and the outline both pick it. */
+  const [part, setPart] = useState(typed?.part ?? "")
+  /** The part last chosen from the list, which the outline opens on the page of. */
+  const [listed, setListed] = useState(part)
   const changed = (event: FormEvent<HTMLFormElement>) =>
     setCurrent(goalTypedOf(new FormData(event.currentTarget)))
+  const picked = (nodeId: string) => {
+    setPart(nodeId)
+    if (form.current !== null)
+      setCurrent({ ...goalTypedOf(new FormData(form.current)), part: nodeId })
+  }
 
   return (
-    <form action={action} onChange={changed} className="flex flex-col gap-4">
+    <form ref={form} action={action} onChange={changed} className="flex flex-col gap-4">
       <input type="hidden" name="projectId" value={projectId} />
 
       <Field
@@ -131,14 +140,18 @@ const GoalFields = ({
           id="goal-part"
           name="part"
           required
-          defaultValue={typed?.part ?? ""}
+          value={part}
+          onChange={(event) => {
+            setPart(event.target.value)
+            setListed(event.target.value)
+          }}
           className="border-edge bg-surface-base rounded-md border px-2.5 py-1.5 text-sm"
         >
           <option value="" disabled>
             Choose a part of a page
           </option>
           {pages.map((page) => (
-            <optgroup key={page.treeId} label={pageLabel(page)}>
+            <optgroup key={page.treeId} label={pageLabelOf(page)}>
               {page.parts.map((part) => (
                 <option key={`${page.treeId}-${part.nodeId}`} value={part.nodeId}>
                   {part.name} ({part.nodeId})
@@ -147,6 +160,7 @@ const GoalFields = ({
             </optgroup>
           ))}
         </select>
+        <PageOutline key={listed} pages={pages} picked={part} onPick={picked} />
         <Fault report={report} field="part" />
       </div>
 
@@ -169,7 +183,7 @@ const GoalFields = ({
                 value={page.treeId}
                 defaultChecked={typed?.pages.includes(page.treeId) === true}
               />
-              {pageLabel(page)}
+              {pageLabelOf(page)}
             </label>
           ))}
         </div>
@@ -208,7 +222,8 @@ const GoalFields = ({
  * counted over the last 7 days, and whether it becomes primary.
  *
  * The part is picked from what the site published, page by page, by the name
- * a person recognises with its id beside it. The first goal is primary whatever
+ * a person recognises with its id beside it, from the list or on an outline of
+ * the page. The first goal is primary whatever
  * the box says, which the box's hint says.
  */
 export const GoalForm = ({

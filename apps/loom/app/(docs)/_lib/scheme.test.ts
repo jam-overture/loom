@@ -215,8 +215,24 @@ describe("the spellings a palette may be written in", () => {
     expect(paletteSchema.safeParse(nonsense).success).toBe(false)
   })
 
-  it("declines four of the six", () => {
-    expect(declinedForms.map((form) => form.label)).toEqual(["hsl()", "rgb()", "a named color", "hex with an alpha"])
+  /**
+   * **One number outside this lane, corrected by the framework lane under
+   * [0365](../../../../../decisions/0365-a-colour-is-measurable-when-its-channels-are-arithmetic-and-opaque.md).**
+   *
+   * `channelsOf` now reads `hsl()`, `rgb()` and an opaque alpha, so three of
+   * the four rows this asserted have moved from declined to measured —
+   * `#111827ff` among them, because `ff` composites to exactly `#111827`.
+   * A named colour is the one form still declined, and 0365 declines it on the
+   * ground that it is vocabulary rather than arithmetic.
+   *
+   * The module needed no edit: `declinedForms` is derived, exactly as its own
+   * comment anticipated — *"the day `channelsOf` learns to read `rgb()`, the
+   * sentence naming this figure is right without being edited."* Only this
+   * expectation was typed, and the prose on the page around the table is filed
+   * for `Loom docs` in `FINDINGS.md`.
+   */
+  it("declines the one form that is vocabulary rather than arithmetic", () => {
+    expect(declinedForms.map((form) => form.label)).toEqual(["a named color"])
   })
 })
 

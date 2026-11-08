@@ -213,20 +213,213 @@ const channel = (value: number): number => {
 }
 
 /**
- * The colour as three 0–255 channels, or nothing when it is a form this cannot
- * measure.
+ * The alpha at which a colour composites to exactly itself.
  *
- * `colourSchema` accepts more than hex — `rgb()`, `hsl()`, a named colour, and
- * eight-digit hex with an alpha. Only three- and six-digit hex are measured
- * here, and the rest answer `undefined` rather than a guess:
+ * The whole of what an alpha costs this module: at `1` there is nothing behind
+ * the colour to mix in, so the pair's contrast is a property of the pair. Below
+ * it, it is not, and no parser can recover what was never stated.
+ */
+const OPAQUE = 1
+
+/** The one set of colour functions `colourSchema` admits. */
+const COLOUR_CALL = /^(rgba?|hsla?)\(([^()]*)\)$/i
+
+/** A CSS `<number>`, or nothing. Rejects `none`, `1px` and the empty string. */
+const numberOf = (text: string): number | undefined => {
+  if (!/^[+-]?(?:\d+\.?\d*|\.\d+)(?:e[+-]?\d+)?$/i.test(text)) return undefined
+
+  const value = Number(text)
+
+  return Number.isFinite(value) ? value : undefined
+}
+
+/** A CSS `<percentage>` as its own number, so `50%` is `50`. */
+const percentageOf = (text: string): number | undefined =>
+  text.endsWith("%") ? numberOf(text.slice(0, -1)) : undefined
+
+const clampTo = (high: number, value: number): number => Math.min(high, Math.max(0, value))
+
+/**
+ * How much of a degree each `<angle>` unit is worth.
  *
- * - a named colour needs the CSS colour table, which is 148 entries of vocabulary
- *   this module would then own
- * - `hsl()` and modern `rgb()` syntax are a parser, and a parser that is subtly
- *   wrong reports a passing ratio for a failing pair, which is worse than
- *   reporting nothing
- * - an alpha composites against whatever is behind it, so its contrast is not a
- *   property of the two slots at all
+ * All four of CSS's units rather than `deg` alone: a host writing `turn` is
+ * writing legal CSS that a browser paints correctly, and a measurement that
+ * declined it would be declining arithmetic it has in front of it.
+ */
+const DEGREES_PER_UNIT: Readonly<Record<string, number>> = {
+  deg: 1,
+  grad: 360 / 400,
+  rad: 180 / Math.PI,
+  turn: 360,
+}
+
+const ANGLE = /^([+-]?(?:\d+\.?\d*|\.\d+)(?:e[+-]?\d+)?)(deg|grad|rad|turn)?$/i
+
+/** A hue in degrees, unwrapped. A bare number is degrees, as CSS says. */
+const degreesOf = (text: string): number | undefined => {
+  const angle = ANGLE.exec(text)
+  if (angle === null) return undefined
+
+  const [, value = "", unit] = angle
+  const magnitude = numberOf(value)
+  const perUnit = unit === undefined ? 1 : DEGREES_PER_UNIT[unit.toLowerCase()]
+
+  return magnitude === undefined || perUnit === undefined ? undefined : magnitude * perUnit
+}
+
+/**
+ * The alpha a colour carries, as 0–1. Absent is `1`; unreadable is `undefined`.
+ *
+ * The two outcomes are kept apart deliberately. An absent alpha is an opaque
+ * colour and measurable; an alpha nobody can parse means the string is not the
+ * colour it appears to be, and guessing it opaque would measure a colour the
+ * host did not write.
+ */
+const alphaOf = (text: string | undefined): number | undefined => {
+  if (text === undefined) return OPAQUE
+
+  const percentage = percentageOf(text)
+  if (percentage !== undefined) return clampTo(1, percentage / 100)
+
+  const number = numberOf(text)
+
+  return number === undefined ? undefined : clampTo(1, number)
+}
+
+/** A colour function's three components, and its alpha if it stated one. */
+type ColourArguments = {
+  readonly components: readonly string[]
+  readonly alpha: string | undefined
+}
+
+/**
+ * The arguments of `rgb()` or `hsl()`, in either syntax CSS publishes.
+ *
+ * Commas are the legacy form and take their alpha as a fourth argument; spaces
+ * are the modern form and take it after a solidus. The two are not mixable, and
+ * a string that mixes them is refused rather than half-read — `rgb(1, 2 3)` is
+ * not a colour, and the one thing worse than declining it is averaging it.
+ *
+ * **Nothing here checks for the mix**, and a planted mutation is why the check
+ * is not here: a comma-split part carrying a space fails `numberOf` and
+ * `percentageOf` downstream anyway, so a guard against it changed no outcome on
+ * any input. Chromium refuses the same strings, which is how each one is known
+ * to be refused rather than assumed.
+ */
+const argumentsOf = (body: string): ColourArguments | undefined => {
+  const trimmed = body.trim()
+  if (trimmed === "") return undefined
+
+  if (trimmed.includes(",")) {
+    if (trimmed.includes("/")) return undefined
+
+    const parts = trimmed.split(",").map((part) => part.trim())
+
+    if (parts.length === 3) return { components: parts, alpha: undefined }
+
+    return parts.length === 4 ? { components: parts.slice(0, 3), alpha: parts[3] } : undefined
+  }
+
+  const [stated = "", alpha, ...extra] = trimmed.split("/").map((part) => part.trim())
+  if (extra.length > 0 || alpha === "") return undefined
+
+  const components = stated.split(/\s+/)
+
+  return components.length === 3 ? { components, alpha } : undefined
+}
+
+/** One `rgb()` component: a number out of 255, or a percentage of it. */
+const rgbChannel = (text: string): number | undefined => {
+  const percentage = percentageOf(text)
+  if (percentage !== undefined) return clampTo(255, (percentage / 100) * 255)
+
+  const number = numberOf(text)
+
+  return number === undefined ? undefined : clampTo(255, number)
+}
+
+const rgbChannelsOf = (components: readonly string[]): readonly [number, number, number] | undefined => {
+  const [r, g, b] = components.map(rgbChannel)
+
+  return r === undefined || g === undefined || b === undefined ? undefined : [r, g, b]
+}
+
+/**
+ * `hsl()` to sRGB, by CSS Color 4's own reference arithmetic.
+ *
+ * Written as the specification writes it rather than as the shorter form with
+ * two branches, because this is the function the 20 August argument against
+ * reading `hsl()` was about — *a parser that is subtly wrong reports a passing
+ * ratio for a failing pair* — and a reader checking that claim should be able to
+ * lay this beside the specification line for line.
+ */
+const hslChannelsOf = (components: readonly string[]): readonly [number, number, number] | undefined => {
+  const [hue = "", saturation = "", lightness = ""] = components
+
+  const degrees = degreesOf(hue)
+  const s = percentageOf(saturation) ?? numberOf(saturation)
+  const l = percentageOf(lightness) ?? numberOf(lightness)
+  if (degrees === undefined || s === undefined || l === undefined) return undefined
+
+  const h = ((degrees % 360) + 360) % 360
+  const saturated = clampTo(1, s / 100)
+  const light = clampTo(1, l / 100)
+
+  const amount = saturated * Math.min(light, 1 - light)
+  const channelAt = (offset: number): number => {
+    const k = (offset + h / 30) % 12
+
+    return (light - amount * Math.max(-1, Math.min(k - 3, 9 - k, 1))) * 255
+  }
+
+  return [channelAt(0), channelAt(8), channelAt(4)]
+}
+
+/**
+ * Hex of three, four, six or eight digits, declining an alpha below opaque.
+ *
+ * Five and seven digits are refused. `colourSchema`'s pattern admits them —
+ * `#[0-9a-fA-F]{3,8}` — and no browser does, so a palette carrying one is a
+ * typo that renders as nothing and must not be measured as though it rendered.
+ */
+const hexChannelsOf = (colour: string): readonly [number, number, number] | undefined => {
+  const digits = /^#([0-9a-fA-F]+)$/.exec(colour)?.[1]
+  if (digits === undefined) return undefined
+
+  const pairs =
+    digits.length === 3 || digits.length === 4
+      ? [...digits].map((digit) => `${digit}${digit}`)
+      : digits.length === 6 || digits.length === 8
+        ? Array.from({ length: digits.length / 2 }, (_, at) => digits.slice(at * 2, at * 2 + 2))
+        : undefined
+  if (pairs === undefined) return undefined
+
+  const [r, g, b, alpha] = pairs.map((pair) => Number.parseInt(pair, 16))
+  if (r === undefined || g === undefined || b === undefined) return undefined
+
+  return alpha !== undefined && alpha !== 255 ? undefined : [r, g, b]
+}
+
+/**
+ * A colour's three 0–255 channels, unrounded, or nothing when the form cannot
+ * be measured.
+ *
+ * `colourSchema` accepts four shapes: hex of three to eight digits, `rgb()`,
+ * `hsl()`, and a bare word naming a CSS colour. Of those, **every form whose
+ * channels are arithmetic is read here**, and two are declined (0365):
+ *
+ * - **a named colour is vocabulary, not arithmetic.** It needs the CSS colour
+ *   table — 148 entries this module would then own and keep — and no amount of
+ *   care with the other forms supplies it.
+ * - **an alpha below 1 composites against whatever is behind it**, so its
+ *   contrast is not a property of the two slots at all. A *fully opaque* alpha
+ *   is a different case and is read: `#111827ff` composites to exactly
+ *   `#111827`, so declining it reported nothing about a colour that was never
+ *   in doubt.
+ *
+ * Channels are left unrounded. A browser quantises `hsl()` to eight bits per
+ * channel on its way into a pixel; nothing here draws anything, so rounding to
+ * match it would discard precision to imitate a step this never takes.
  *
  * Answering "I could not measure this" is the same move `not-probeable` makes in
  * the conformance probe: a check that cannot answer says so, rather than passing.
@@ -236,15 +429,17 @@ const channel = (value: number): number => {
  * parsers would be two answers to "is this measurable".
  */
 export const channelsOf = (colour: string): readonly [number, number, number] | undefined => {
-  const hex = /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.exec(colour)?.[1]
-  if (hex === undefined) return undefined
+  const call = COLOUR_CALL.exec(colour.trim())
+  if (call === null) return hexChannelsOf(colour.trim())
 
-  const pairs =
-    hex.length === 3 ? [...hex].map((digit) => `${digit}${digit}`) : [0, 2, 4].map((at) => hex.slice(at, at + 2))
+  const [, name = "", body = ""] = call
+  const parts = argumentsOf(body)
+  if (parts === undefined) return undefined
 
-  const [r, g, b] = pairs.map((pair) => Number.parseInt(pair, 16))
+  const alpha = alphaOf(parts.alpha)
+  if (alpha === undefined || alpha < OPAQUE) return undefined
 
-  return r === undefined || g === undefined || b === undefined ? undefined : [r, g, b]
+  return name.toLowerCase().startsWith("rgb") ? rgbChannelsOf(parts.components) : hslChannelsOf(parts.components)
 }
 
 const luminance = ([r, g, b]: readonly [number, number, number]): number =>

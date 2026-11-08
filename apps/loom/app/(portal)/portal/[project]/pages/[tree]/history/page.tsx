@@ -13,7 +13,12 @@ import {
   readSides,
 } from "@/app/(portal)/_lib/accepted/measurement"
 import { readAccepted, type AcceptedReading } from "@/app/(portal)/_lib/accepted/reading"
+import { compareChange, type Compared } from "@/app/(portal)/_lib/compare-reading"
 import { requireActor, requireRole } from "@/app/(portal)/_lib/auth/identity"
+import { mayPropose } from "@/app/(portal)/_lib/proposing/report"
+import { mayRevert } from "@/app/(portal)/_lib/proposing/revert"
+import { pageCopiesFor } from "@/app/(portal)/_lib/proposing/stores"
+import { governedPagesFor } from "@/app/(portal)/_lib/write"
 import type { Goal } from "@/app/(portal)/_lib/goals/goal"
 import {
   boundsAround,
@@ -31,6 +36,8 @@ import {
   marksOf,
   originOf,
   siteOutcomeOf,
+  versionWordsOf,
+  type LoomVersion,
   type Mark,
   type SiteFigures,
   type Version,
@@ -40,8 +47,10 @@ import { PORTAL_READ_BUDGET_MS } from "@/app/_lib/app/bounded"
 import { readWithin, unavailable } from "@/app/_lib/app/bounded-store"
 import { publishedPagesFor } from "@/app/_lib/pages/store"
 
+import { ComparePanel } from "../_components/compare-panel"
 import { DailyChart } from "../_components/daily-chart"
 import { PageTabs } from "../_components/page-tabs"
+import { RevertForm } from "../_components/revert-form"
 import { VersionCard } from "../_components/version-card"
 
 type Read = Extract<AcceptedReading, { readonly kind: "read" }>
@@ -61,7 +70,15 @@ type Read = Extract<AcceptedReading, { readonly kind: "read" }>
  * maintainer's rules of 5 November (14 days a side, 1,000 page views a side,
  * a two-proportion test at 95%). The site's own edit shows its before and
  * after on the page's goal for context and says it is not a Loom change. A
- * change accepted and not yet taken by the site sits on top, dashed.
+ * change accepted and not yet taken by the site sits on top, dashed. A Loom
+ * change still on the page offers *Propose reverting* to a person who may
+ * propose a change, and a revert is named by the version it reverted.
+ *
+ * Every Loom change offers *Compare*, which opens a drawer on it (`?compare=`
+ * and its proposal id): the page just before the change and just after it,
+ * side by side as two outlines (`_lib/compare-reading.ts` says when it can be
+ * rebuilt). The site's own versions offer none, since Loom keeps only the
+ * newest version the site published and not the one before it.
  *
  * A store that does not answer says so, and counters that do not answer cost
  * only the figures on the card they were for.
@@ -139,11 +156,61 @@ const siteFiguresOf =
     }
   }
 
-/** The history measured on `goal`, the address left bare for the goal it starts on. */
-const historyAddress = (projectId: string, pageId: TreeId, goal: Goal, serving: Goal): string =>
-  `/portal/${projectId}/pages/${pageId}/history${
-    goal.goalId === serving.goalId ? "" : `?on=${goal.goalId}`
-  }`
+/** What the history's address holds: the goal it is measured on, and the change the drawer is open on. */
+type HistoryChoices = { readonly on?: string | undefined; readonly compare?: string | undefined }
+
+/** The history with these choices, the address left bare where none is made. */
+const historyHref = (projectId: string, pageId: TreeId, choices: HistoryChoices): string => {
+  const query = new URLSearchParams(
+    Object.entries(choices).flatMap(([key, value]) => (value === undefined ? [] : [[key, value]]))
+  ).toString()
+
+  return `/portal/${projectId}/pages/${pageId}/history${query === "" ? "" : `?${query}`}`
+}
+
+/** The history measured on `goal`, `on` left out for the goal it starts on; the drawer stays open. */
+const historyAddress = (
+  projectId: string,
+  pageId: TreeId,
+  goal: Goal,
+  serving: Goal,
+  compare: string | undefined
+): string =>
+  historyHref(projectId, pageId, {
+    on: goal.goalId === serving.goalId ? undefined : goal.goalId,
+    compare,
+  })
+
+/** The page before one Loom change and after it, read only once its drawer is open. */
+const readCompared = async (
+  reading: Read,
+  pageId: TreeId,
+  version: LoomVersion
+): Promise<Compared> => {
+  const [copies, published] = await Promise.all([
+    readWithin(() => pageCopiesFor(reading.application).list(), unavailable, PORTAL_READ_BUDGET_MS),
+    readWithin(
+      () => publishedPagesFor(reading.application).list(),
+      unavailable,
+      PORTAL_READ_BUDGET_MS
+    ),
+  ])
+
+  if (!copies.ok || !published.ok) return { kind: "unreadable" }
+
+  const page = published.value.find((held) => held.tree.treeId === pageId)
+
+  return page === undefined
+    ? { kind: "not-drawn", why: "site-moved" }
+    : compareChange(
+        {
+          trees: governedPagesFor(reading.application),
+          copies: copies.value,
+          published: page.tree,
+        },
+        version.change.proposalId
+      )
+}
 
 /** The *Measured on* picker and the chart under it, or what stands in their place. */
 const Trend = async ({
@@ -153,6 +220,7 @@ const Trend = async ({
   measuredOn,
   marks,
   now,
+  compare,
 }: {
   reading: Read
   projectId: string
@@ -160,6 +228,8 @@ const Trend = async ({
   measuredOn: MeasuredOn
   marks: readonly Mark[]
   now: number
+  /** The change the drawer is open on, kept when another goal is picked. */
+  compare: string | undefined
 }) => {
   if (measuredOn.kind === "unreadable") {
     return (
@@ -189,7 +259,7 @@ const Trend = async ({
         label="Measured on"
         choices={on.map((goal) => ({
           label: goal.name,
-          href: historyAddress(projectId, pageId, goal, serving),
+          href: historyAddress(projectId, pageId, goal, serving, compare),
           selected: goal.goalId === picked.goalId,
         }))}
       />
@@ -216,6 +286,8 @@ const Card = async ({
   projectId,
   now,
   dashed,
+  reverts,
+  compare,
 }: {
   reading: Read
   version: Version
@@ -223,6 +295,10 @@ const Card = async ({
   projectId: string
   now: number
   dashed: boolean
+  /** Where *Compare* opens the drawer on this change. */
+  compare: string
+  /** Whether the person may raise a revert: a role that may propose a change. */
+  reverts: boolean
 }) => {
   if (version.kind === "site") {
     return (
@@ -238,11 +314,15 @@ const Card = async ({
 
   const { change } = version
   const served = servedOf(change.proposalId, reading.origins)
-  const [heading = "A change Loom made", ...lines] = sentencesOf(change, reading.parts)
+  const { heading, lines } = versionWordsOf(
+    change,
+    reading.changes,
+    sentencesOf(change, reading.parts)
+  )
 
   return (
     <VersionCard
-      heading={`Version ${change.accepted.revision}: ${heading}`}
+      heading={heading}
       lines={lines}
       origin={originOf(version)}
       {...(served.kind === "recorded" ? { goal: goalNameOf(served) } : {})}
@@ -253,7 +333,19 @@ const Card = async ({
         now
       )}
       timeline={`/portal/${projectId}/review/accepted/${change.proposalId}`}
+      compare={compare}
       dashed={dashed}
+      {...(reverts && mayRevert(change)
+        ? {
+            revert: (
+              <RevertForm
+                projectId={projectId}
+                treeId={change.pageId}
+                proposalId={change.proposalId}
+              />
+            ),
+          }
+        : {})}
     />
   )
 }
@@ -277,7 +369,7 @@ const HistoryScreen = async ({
 
   /** Signed in first, with this address to come back to — the Connect screen's reason. */
   await requireActor(`/portal/${projectId}/pages/${pageId}/history`)
-  await requireRole(projectId)
+  const role = await requireRole(projectId)
 
   const now = Date.now()
   const reading = await readAccepted(projectId, now)
@@ -302,8 +394,21 @@ const HistoryScreen = async ({
     reading.copyStarts.get(pageId) ?? [],
     reading.reach
   )
-  const measuredOn = await readMeasuredOn(reading, pageId, single(query.on))
+  const on = single(query.on)
+  const comparing = single(query.compare)
+  const measuredOn = await readMeasuredOn(reading, pageId, on)
   const figuresAt = siteFiguresOf(reading, pageId, measuredOn)
+  const listed = [
+    ...history.pending.map((version) => ({ version, dashed: true })),
+    ...history.versions.map((version) => ({ version, dashed: false })),
+  ]
+  const opened = listed
+    .map(({ version }) => version)
+    .find(
+      (version): version is LoomVersion =>
+        version.kind === "loom" && version.change.proposalId === comparing
+    )
+  const compared = opened === undefined ? undefined : await readCompared(reading, pageId, opened)
 
   return (
     <Screen>
@@ -333,9 +438,10 @@ const HistoryScreen = async ({
         measuredOn={measuredOn}
         marks={marksOf(history.versions)}
         now={now}
+        compare={opened?.change.proposalId}
       />
 
-      {history.pending.length === 0 && history.versions.length === 0 ? (
+      {listed.length === 0 ? (
         <StateNotice
           tone="empty"
           title="Nothing has changed on this page yet"
@@ -345,22 +451,37 @@ const HistoryScreen = async ({
           a newer version of it.
         </StateNotice>
       ) : (
-        <ol className="m-0 flex list-none flex-col gap-3 p-0">
-          {[
-            ...history.pending.map((version) => ({ version, dashed: true })),
-            ...history.versions.map((version) => ({ version, dashed: false })),
-          ].map(({ version, dashed }) => (
-            <Card
-              key={keyOf(version)}
-              reading={reading}
-              version={version}
-              figuresAt={figuresAt}
-              projectId={projectId}
-              now={now}
-              dashed={dashed}
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
+          <ol className="m-0 flex min-w-0 flex-1 list-none flex-col gap-3 p-0">
+            {listed.map(({ version, dashed }) => (
+              <Card
+                key={keyOf(version)}
+                reading={reading}
+                version={version}
+                figuresAt={figuresAt}
+                projectId={projectId}
+                now={now}
+                dashed={dashed}
+                reverts={mayPropose(role)}
+                compare={historyHref(projectId, pageId, { on, compare: keyOf(version) })}
+              />
+            ))}
+          </ol>
+          {opened === undefined || compared === undefined ? null : (
+            <ComparePanel
+              heading={
+                versionWordsOf(
+                  opened.change,
+                  reading.changes,
+                  sentencesOf(opened.change, reading.parts)
+                ).heading
+              }
+              compared={compared}
+              close={historyHref(projectId, pageId, { on })}
+              timeline={`/portal/${projectId}/review/accepted/${opened.change.proposalId}`}
             />
-          ))}
-        </ol>
+          )}
+        </div>
       )}
     </Screen>
   )

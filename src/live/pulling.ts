@@ -8,12 +8,18 @@
  * override: the two functions a host calls are reading what is held and
  * stopping.
  *
- * **No reader ever waits on it.** The loop runs beside the render path, the
- * first pull is made at once rather than after an interval, and the next is
- * scheduled only when the last has settled — so a slow Loom stretches the
- * interval instead of stacking requests behind it. A render reads whatever is
- * held at the moment it asks, which before the first answer is nothing, and
- * nothing means the page as built.
+ * **A reader waits on it once per server, and only for the first answer**
+ * ([0364](../../decisions/0364-a-new-server-waits-for-its-first-pull-before-it-serves-and-never-waits-again.md)).
+ * The first pull is made at once rather than after an interval, and a render
+ * that asks `ready()` before it has settled waits for it — so the first reader
+ * on a new server gets the live page rather than the page as built and then a
+ * different one on the next request. A pull that fails answers at once, and
+ * the wait gives up after `DEFAULT_FIRST_WAIT_MS` only when Loom says nothing
+ * at all; either way the page as built is served and the pull carries on.
+ *
+ * After the first answer nothing waits again: the next pull is scheduled only
+ * when the last has settled, so a slow Loom stretches the interval instead of
+ * stacking requests behind it, and a render reads whatever is held.
  */
 
 import { ceilingOf } from "../deadline.js"
@@ -23,6 +29,17 @@ import { pullLivePages, withPullOutcome, type PullLivePagesOptions, type SitePul
 
 /** A minute, which is a change live within a minute of somebody accepting it. */
 export const DEFAULT_PULL_INTERVAL_MS = 60_000
+
+/**
+ * How long a render waits for a new server's first answer, when Loom says
+ * nothing at all.
+ *
+ * It is not a guess at how long Loom takes: a refusal or a failed connection
+ * ends the wait at once. It is the bound on a hang, which nothing else can tell
+ * apart from slowness, and it is set long enough that only a Loom that is down
+ * reaches it. The portal waits as long for its own store.
+ */
+export const DEFAULT_FIRST_WAIT_MS = 5_000
 
 /**
  * How the loop waits, as a function, so a test can drive it without a clock.
@@ -48,6 +65,8 @@ const scheduleWithTimeout: PullSchedule = (run, afterMs) => {
 export type StartPullingOptions = PullLivePagesOptions & {
   /** How long between pulls. `DEFAULT_PULL_INTERVAL_MS` when unset. */
   readonly intervalMs?: number
+  /** How long `ready()` waits on a silent Loom. `DEFAULT_FIRST_WAIT_MS` when unset. */
+  readonly firstWaitMs?: number
   /**
    * Told of every outcome, after what is held has moved.
    *
@@ -63,10 +82,16 @@ export type StartPullingOptions = PullLivePagesOptions & {
 /**
  * A running pull: what it holds, a way to pull out of turn, and a way to stop.
  *
+ * `ready` is what a render awaits. It answers what is held once the first
+ * pull has settled, or once a silent Loom has had `firstWaitMs`, and at once
+ * every time after that. `held` answers without waiting, for a caller that
+ * would rather have the page as built than wait at all.
+ *
  * `pullNow` answers the pull already in flight rather than starting a second,
  * so a host that pulls on a deploy hook cannot double the load on the door.
  */
 export type LivePullLoop = {
+  readonly ready: () => Promise<LivePages>
   readonly held: () => LivePages
   readonly pullNow: () => Promise<SitePullOutcome>
   readonly stop: () => void
@@ -74,6 +99,7 @@ export type LivePullLoop = {
 
 export const startPullingLivePages = (options: StartPullingOptions): LivePullLoop => {
   const interval = ceilingOf(options.intervalMs, DEFAULT_PULL_INTERVAL_MS)
+  const firstWait = ceilingOf(options.firstWaitMs, DEFAULT_FIRST_WAIT_MS)
   const schedule = options.schedule ?? scheduleWithTimeout
   const now = options.now ?? Date.now
 
@@ -81,6 +107,7 @@ export const startPullingLivePages = (options: StartPullingOptions): LivePullLoo
   let inFlight: Promise<SitePullOutcome> | undefined
   let cancel: (() => void) | undefined
   let stopped = false
+  let waited: Promise<void> | undefined
 
   const announce = (outcome: SitePullOutcome): void => {
     try {
@@ -114,15 +141,34 @@ export const startPullingLivePages = (options: StartPullingOptions): LivePullLoo
     return running
   }
 
-  const loop = (): void => {
-    void pull().finally(() => {
-      if (!stopped) cancel = schedule(loop, interval)
+  const loop = (): Promise<SitePullOutcome> => {
+    const running = pull()
+
+    void running.finally(() => {
+      if (!stopped) cancel = schedule(() => void loop(), interval)
     })
+
+    return running
   }
 
-  loop()
+  const first = loop()
+
+  /*
+   * Started by the first render that asks rather than at boot, so the bound is
+   * on how long a reader waits and not on how long the process has been up.
+   */
+  const firstSettled = (): Promise<void> =>
+    (waited ??= new Promise<void>((resolve) => {
+      const giveUp = schedule(resolve, firstWait)
+
+      void first.finally(() => {
+        giveUp()
+        resolve()
+      })
+    }))
 
   return {
+    ready: () => firstSettled().then(() => held),
     held: () => held,
     pullNow: pull,
     stop: () => {
