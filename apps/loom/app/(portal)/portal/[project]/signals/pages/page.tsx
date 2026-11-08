@@ -22,7 +22,7 @@ import { boundedReaderTallyStore, readWithin, unavailable } from "@/app/_lib/app
 
 import { byPageHref, ByPageTable, PageDrawerPanel } from "../_components/by-page"
 import { drawsTab, SignalsFrame } from "../_components/signals-frame"
-import { readSignals } from "../_lib/reading"
+import { readPageHourly, readSignals } from "../_lib/reading"
 
 /**
  * *Signals · By page* (8a of `docs/portal.md`): one row per page, newest
@@ -34,7 +34,9 @@ import { readSignals } from "../_lib/reading"
  * it has not published is shown by the id its renderer gave it. The changes
  * waiting are a figure the list can do without, so a failure to read them
  * costs the badge alone. The goals likewise cost the primary goal's column
- * alone, and the drawer says they could not be read.
+ * alone, and the drawer says they could not be read. The drawer reads the
+ * page's hourly counters over the range only once it is open, and counters
+ * that do not answer cost its range figures alone.
  */
 
 const ByPageScreen = async ({
@@ -58,7 +60,8 @@ const ByPageScreen = async ({
   const range = rangeOf(single(query.range))
   const from = single(query.from)
   const opening = single(query.page)
-  const reading = await readSignals(projectId, range, Date.now())
+  const now = Date.now()
+  const reading = await readSignals(projectId, range, now)
   const rangeHref = (next: SignalsRange) =>
     byPageHref({ base, from, range: next }, { from, page: opening })
 
@@ -100,6 +103,10 @@ const ByPageScreen = async ({
   })
   const address = { base, from, range }
   const opened = openRowOf(rows, opening)
+  const hourly =
+    opened === undefined
+      ? undefined
+      : await readPageHourly(reading.readings, opened.treeId, range, now)
 
   return (
     <SignalsFrame reading={reading} projectId={projectId} tab="pages" rangeHref={rangeHref}>
@@ -113,9 +120,9 @@ const ByPageScreen = async ({
             open={opened?.treeId}
             primaryGoal={goals.ok ? primaryOf(goals.value)?.name : undefined}
           />
-          {opened === undefined ? null : (
+          {opened === undefined || hourly === undefined ? null : (
             <PageDrawerPanel
-              drawer={pageDrawerOf(opened, readings)}
+              drawer={pageDrawerOf(opened, readings, hourly)}
               address={address}
               projectId={projectId}
             />
