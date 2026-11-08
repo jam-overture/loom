@@ -27,6 +27,7 @@ import {
   statusOf,
   servedNoteOf,
   servedOf,
+  shippedByGoalOf,
   stakeWordsOf,
   timelineOf,
   type AcceptedChange,
@@ -444,6 +445,88 @@ describe("servedOf", () => {
 
     expect(served).toEqual({ kind: "unreadable" })
     expect(servedNoteOf(served)).toContain("could not be read")
+  })
+})
+
+describe("shippedByGoalOf", () => {
+  const START = goalIdSchema.parse(`g_${"1".padStart(32, "0")}`)
+  const SIGN_UP = goalIdSchema.parse(`g_${"2".padStart(32, "0")}`)
+  const goal = (goalId: typeof START, intent: string): ProposalGoal => ({
+    intentId: intentIdSchema.parse(intent),
+    goalId,
+    name: goalId === START ? "Start presses" : "Sign-ups",
+    kind: "activated",
+    nodeId: nodeIdSchema.parse("n_start"),
+    at: AT,
+  })
+  const madeFrom = (proposal: string, intent: string) =>
+    [
+      proposalIdSchema.parse(proposal),
+      {
+        proposalId: proposalIdSchema.parse(proposal),
+        intentId: intentIdSchema.parse(intent),
+        stakes: "low" as const,
+        at: AT,
+      },
+    ] as const
+  const origins: Origins = {
+    kind: "read",
+    made: new Map([
+      madeFrom("p_1", "i_1"),
+      madeFrom("p_2", "i_2"),
+      madeFrom("p_3", "i_3"),
+      madeFrom("p_4", "i_4"),
+    ]),
+    goals: new Map([
+      [intentIdSchema.parse("i_1"), goal(START, "i_1")],
+      [intentIdSchema.parse("i_2"), goal(START, "i_2")],
+      [intentIdSchema.parse("i_3"), goal(SIGN_UP, "i_3")],
+    ]),
+  }
+  const changes = acceptedChangesOf(PAGE, [
+    first([
+      entry(PAGE, 1, "p_1", AT),
+      entry(PAGE, 2, "p_3", AT + MINUTE),
+      entry(PAGE, 3, "p_4", AT + 2 * MINUTE),
+      entry(PAGE, 4, "p_2", AT + 60 * MINUTE),
+    ]),
+  ])
+
+  it("counts, for each goal, the changes for it a reader could have been given", () => {
+    const shipped = shippedByGoalOf(changes, pulling([AT + 30 * MINUTE]), origins)
+
+    expect(shipped).toEqual(
+      new Map([
+        [START, 1],
+        [SIGN_UP, 1],
+      ])
+    )
+  })
+
+  it("counts every change at once on this deployment's own site, and none where the site does not pull", () => {
+    expect(shippedByGoalOf(changes, { kind: "own-site" }, origins)).toEqual(
+      new Map([
+        [START, 2],
+        [SIGN_UP, 1],
+      ])
+    )
+    expect(shippedByGoalOf(changes, { kind: "never" }, origins)).toEqual(new Map())
+  })
+
+  it("keeps a change counted once it went live, even after it is undone", () => {
+    const undone = acceptedChangesOf(PAGE, [
+      first([entry(PAGE, 1, "p_1", AT), entry(PAGE, 2, "p_x", AT + 60 * MINUTE, { undoes: 1 })]),
+    ])
+
+    expect(shippedByGoalOf(undone, pulling([AT + MINUTE]), origins)?.get(START)).toBe(1)
+    expect(
+      shippedByGoalOf(undone, pulling([AT + 61 * MINUTE]), origins)?.get(START)
+    ).toBeUndefined()
+  })
+
+  it("says nothing rather than a short count where the pulls or the goals cannot be read", () => {
+    expect(shippedByGoalOf(changes, { kind: "unreadable" }, origins)).toBeUndefined()
+    expect(shippedByGoalOf(changes, { kind: "own-site" }, { kind: "unreadable" })).toBeUndefined()
   })
 })
 
