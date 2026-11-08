@@ -800,7 +800,12 @@ once a day it reads what readers did on each page and, when the figures
 support one, raises a change. A change it may not make alone waits on the
 project's *For review* tab for an approver or owner. An approver or owner can also
 press *Look now* on a page. A change is made to Loom's copy of the page, and
-your site keeps serving what it published. When you publish a newer version of
+an accepted one usually reaches readers on this site within a minute: the production
+server pulls the project's live pages from its own domain with the project's
+public key and serves each page as Loom has it, or as built when Loom has no
+version of it
+([0370](../decisions/0370-loomjs-org-serves-its-live-pages-and-pulls-them-like-a-customers-site.md)).
+A preview serves what its code builds. When you publish a newer version of
 a page, a change still waiting on it is checked against the new version and
 marked *stale* or *conflicts*
 ([0340](../decisions/0340-a-pages-copy-starts-again-from-a-newer-published-version-and-a-waiting-change-is-checked-against-it.md)),
