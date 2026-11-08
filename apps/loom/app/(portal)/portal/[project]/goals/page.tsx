@@ -5,6 +5,7 @@ import { projectIdSchema } from "@jam-overture/loom/store"
 
 import { Screen } from "@/app/(portal)/_components/screen"
 import { StateNotice } from "@/app/(portal)/_components/state-notice"
+import { readAccepted } from "@/app/(portal)/_lib/accepted/reading"
 import { requireActor, requireRole } from "@/app/(portal)/_lib/auth/identity"
 import { mayAdminister } from "@/app/(portal)/_lib/auth/roles"
 import type { Goal, GoalId } from "@/app/(portal)/_lib/goals/goal"
@@ -17,6 +18,7 @@ import {
   whereSentence,
   type PageChoice,
 } from "@/app/(portal)/_lib/goals/goal-view"
+import { shippedByGoalOf } from "@/app/(portal)/_lib/going-live"
 import { waitingByGoalOf } from "@/app/(portal)/_lib/goals/serving"
 import { goalsFor, proposalGoalsFor } from "@/app/(portal)/_lib/goals/stores"
 import { readGoalCounters } from "@/app/(portal)/_lib/goal-counters"
@@ -50,7 +52,11 @@ import { GoalForm } from "./_components/goal-form"
  * an owner adds one in; everybody else reads the list.
  *
  * **Changes for it** counts the changes waiting on *For review* that were
- * raised for each goal (0352), and links to them there.
+ * raised for each goal (0352), and links to them there, then how many of the
+ * changes accepted for it went live (unit 8, 0358): given to the site's
+ * readers, at once on this deployment's own site and otherwise on the site's
+ * first pull after *Accept*. Either count that cannot be read says so, and the
+ * other stands.
  *
  * **The last 7 days** are each goal's rate over the last 168 hours on the
  * pages it covers, with its change on the 7 days before, from the hourly
@@ -58,8 +64,6 @@ import { GoalForm } from "./_components/goal-form"
  * goal, in the words *Signals* uses for the primary goal's figure. Counters
  * that do not answer cost that figure alone; what each goal counted since
  * counting began stays beneath it.
- *
- * **What it does not say yet:** how many changes for a goal were shipped.
  */
 
 /** The range *Goals* measures each goal over: the wireframe's *7-day rate with its trend*. */
@@ -73,6 +77,8 @@ type Readings = {
   readonly week: (goal: Goal) => Omit<RangeFigure, "label"> | undefined
   /** Changes waiting for each goal, `undefined` where they could not be read. */
   readonly waiting: ReadonlyMap<GoalId, number> | undefined
+  /** Accepted changes for each goal that went live, `undefined` where they could not be read. */
+  readonly shipped: ReadonlyMap<GoalId, number> | undefined
 }
 
 const ChangesFor = ({
@@ -84,19 +90,33 @@ const ChangesFor = ({
   readings: Readings
   projectId: string
 }) => {
-  if (readings.waiting === undefined) return <>Cannot be read just now.</>
+  const waiting = readings.waiting?.get(goal.goalId) ?? 0
+  const shipped = readings.shipped?.get(goal.goalId) ?? 0
 
-  const count = readings.waiting.get(goal.goalId) ?? 0
-
-  return count === 0 ? (
-    <>None waiting</>
-  ) : (
-    <Link
-      href={reviewHrefOf(projectId, { ...EVERY_CHANGE, goal: goal.goalId })}
-      className="text-ink"
-    >
-      {count} waiting
-    </Link>
+  return (
+    <>
+      <span className="block">
+        {readings.waiting === undefined ? (
+          <>Waiting cannot be read just now</>
+        ) : waiting === 0 ? (
+          <>None waiting</>
+        ) : (
+          <Link
+            href={reviewHrefOf(projectId, { ...EVERY_CHANGE, goal: goal.goalId })}
+            className="text-ink"
+          >
+            {waiting} waiting
+          </Link>
+        )}
+      </span>
+      <span className="block">
+        {readings.shipped === undefined ? (
+          <>Shipped cannot be read just now</>
+        ) : (
+          <>{shipped} shipped</>
+        )}
+      </span>
+    </>
   )
 }
 
@@ -281,11 +301,12 @@ const GoalsPage = async ({
   const application = applications.ok ? soleApplicationOf(applications.value, projectId) : undefined
   const signals = application === undefined ? undefined : readingsFor(application.applicationId)
 
-  const week = arrivalRangeFor(GOALS_RANGE, Date.now())
+  const now = Date.now()
+  const week = arrivalRangeFor(GOALS_RANGE, now)
 
-  const [goals, published, pageViews, tallies, held, hourly] =
+  const [goals, published, pageViews, tallies, held, hourly, accepted] =
     application === undefined || signals === undefined
-      ? [undefined, undefined, undefined, undefined, undefined, undefined]
+      ? [undefined, undefined, undefined, undefined, undefined, undefined, undefined]
       : await Promise.all([
           readWithin(
             () => goalsFor(application.applicationId).list(),
@@ -301,6 +322,7 @@ const GoalsPage = async ({
           boundedReaderTallyStore(signals.tallies).tallies(),
           holdsFor(application.applicationId).waiting(),
           readGoalCounters(boundedReaderTallyStore(signals.tallies), goalSpanOf(week)),
+          readAccepted(projectId, now),
         ])
 
   const waitingIntents =
@@ -377,6 +399,10 @@ const GoalsPage = async ({
         waitingIntents !== undefined && served?.ok === true
           ? waitingByGoalOf(waitingIntents, served.value)
           : undefined,
+      shipped:
+        accepted?.kind === "read"
+          ? shippedByGoalOf(accepted.changes, accepted.reach, accepted.origins)
+          : undefined,
     }
 
     return (
@@ -386,10 +412,18 @@ const GoalsPage = async ({
           <p className="text-ink-muted m-0 text-xs">
             Each rate is per 100 page views on the pages the goal covers, over the last 7 days
             against the 7 days before, and since this project&rsquo;s pages were first counted,
-            across every version. Loom proposes each change toward one goal, and the changes counted
-            here are those waiting for review; how many went live follows once an accepted change
-            goes live on your site.
+            across every version. Loom proposes each change toward one goal: the changes counted
+            here are those waiting for review, and those accepted that went live on your site.
           </p>
+          {accepted?.kind === "read" && accepted.reach.kind === "never" && (
+            <p className="text-ink-muted m-0 text-xs">
+              Your site is not pulling its pages yet, so no accepted change has reached its readers.{" "}
+              <Link href={`/portal/${projectId}/connect`} className="text-ink underline">
+                Connect your site
+              </Link>{" "}
+              says how.
+            </p>
+          )}
         </div>
         {adding && (
           <NewGoalDrawer projectId={projectId} pages={pages} first={goals.value.length === 0} />
