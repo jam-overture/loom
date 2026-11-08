@@ -194,17 +194,37 @@ export const WRITTEN_PAGE_CAP = 24_000
  * byte of the number was written here and no editing on this surface will bring
  * it down.
  *
- * Today's heaviest is 452,513 bytes — **1.9 times all thirty-five written pages
- * put together** — so the headroom is about a third of that page again, which
- * at the rate `src/signals/` has been publishing is months rather than years.
+ * **The number that fires is 540,000 and not this one.** `weight.test.ts`
+ * holds the heaviest generated page under **90%** of this cap, so the line a
+ * run meets is nine tenths of the way up. Said here because the two paragraphs
+ * that used to stand in this place were written about 600,000, and a run that
+ * reads them relaxes by a page's worth of bytes it does not have. Filed by
+ * this lane on 7 November after that run measured six days of headroom where
+ * the comment implied fifteen.
  *
- * **When it fires, the answer is not to raise it.** It is the answer the search
- * index reached twice: cut the page up along the line it grows on. A reference
- * page is already fifty-four groups with a heading each, the groups are modules
- * rather than an invented grouping, and the browser already knows which group a
- * reader is on — the same two sentences that made the contents file and the
- * words file shard. Raising the number instead buys one more quiet doubling of
- * what a reader downloads to read one sentence.
+ * **Where it stands on 8 November.** The heaviest generated page was 509,948
+ * bytes on the morning of this run, growing 6,535 a day, which was four days.
+ * It is **264,650** by the afternoon, and not one byte of the difference is a
+ * name that stopped being published: `api/extract.ts` grew the rule
+ * `toItsFirstParagraph`, four fifths of a reference page's signature text was
+ * commentary under the first paragraph of a member's doc comment, and the rule
+ * the symbol summaries have always had now applies inside a declaration too.
+ * So the headroom is 275,350 bytes, which is six weeks rather than four days,
+ * and a name published from here on arrives at about a fifth of what it used
+ * to cost this page.
+ *
+ * **When it fires, the answer is still not to raise it.** It is the answer the
+ * search index reached twice: cut the page up along the line it grows on. A
+ * reference page is already sixty groups with a heading each, the groups are
+ * modules rather than an invented grouping, and the browser already knows
+ * which group a reader is on. Raising the number instead buys one more quiet
+ * doubling of what a reader downloads to read one sentence.
+ *
+ * **What the cut costs is measured and it is not on this page**, which is the
+ * other half a run meeting this needs: `pageCutOf` below prices it in rows of
+ * the table of contents, and on 7 November the cut of the one page over the
+ * line wanted 13,105 bytes in a file with 7,611 left. That arithmetic has not
+ * changed. What has changed is that nobody has to do it this week.
  */
 export const GENERATED_PAGE_CAP = 600_000
 

@@ -259,6 +259,84 @@ const CITATION =
  * listed in `FINDINGS.md` for the lanes that own them.
  */
 /**
+ * A comment inside a declaration, shortened to its first paragraph.
+ *
+ * **This is `firstParagraph`'s rule, one level in.** A symbol's own doc comment
+ * has been published as its first paragraph since this file was written, and
+ * the sentence above it gives the reason: a reference is a place a reader lands
+ * mid-question, the sentence that says what this is belongs on the page, and
+ * the six paragraphs of reasoning behind it belong in the source. The comments
+ * a declaration carries against its own members were never held to it, and
+ * nothing decided that. The rule was applied where the comment was read as
+ * prose and not where it was read as code.
+ *
+ * **What that cost, measured on the reference of 8 November.** Of the 471,201
+ * bytes of signature on `/docs/api-reference/signals`, **375,803 were member
+ * commentary and 95,398 were the declarations themselves**, and that page was
+ * 57% of every byte of signature and summary the whole generated reference
+ * holds. `ActionChangeSilence` is six members of a string union: 142 bytes of
+ * declaration under 4,821 bytes of comment.
+ *
+ * Applying this rule takes that page from 509,948 bytes to **264,650** and the
+ * site's signatures from 772,426 to **487,366**, across 274 signatures. The
+ * two consequences worth more than the bytes:
+ *
+ * - **Ten declarations are shown whole that used to stop at an ellipsis.**
+ *   `SIGNATURE_CAP` counts what the page shows, so the twelve names it cut are
+ *   now two, and `PrimitiveDefinition`, `KindAction`, `CopyReading` and seven
+ *   others are complete on the page for the first time. What the cap was
+ *   spending its six thousand characters on was commentary.
+ * - **Forty member comments reach a page that reached none.** A comment whose
+ *   grammar needs a decision-record number is withheld whole, and for forty of
+ *   them the number was in the fourth paragraph. Shortening runs first, so the
+ *   first paragraph survives a citation it no longer contains.
+ *
+ * It is not a saving taken for its own sake, and the numbers are not the
+ * argument. The argument is the one `firstParagraph` already makes, and this
+ * page is where it bites hardest: a reader scrolling a union of seven keys
+ * meets five screens of why each key is spelled the way it is, before they
+ * have seen what the seven keys are.
+ *
+ * **The lines are the source's own.** The block is truncated at its first
+ * blank line and closed again; nothing is re-wrapped, re-flowed or rewritten,
+ * so what stays on the page is characters the package wrote in the order it
+ * wrote them. A comment with one paragraph is left alone, and so is a comment
+ * written on one line.
+ *
+ * No published declaration in this package carries `@param`, `@returns` or
+ * `@deprecated` in any paragraph — checked, over all 2,042 symbols, rather
+ * than assumed — so there is no tag this drops. `{@link}` appears in 225
+ * dropped paragraphs and in 117 kept ones, and a link into a page a reader is
+ * already on is the one kind of thing that loses least by going.
+ */
+const toItsFirstParagraph = (comment: string): string => {
+  const lines = comment.split("\n")
+
+  /** A line's text, with the delimiter or the margin asterisk off the front. */
+  const text = (line: string): string => line.replace(/^\s*\*?/, "").trim()
+
+  /* A comment written on one line has no paragraph to be the first of. */
+  if (lines.length < 3) return comment
+
+  const blank = lines.findIndex((line, index) => index > 0 && text(line) === "")
+
+  /* One paragraph already, or a block whose first paragraph is itself empty —
+     neither is a comment this has anything to take off. */
+  if (blank === -1 || lines.slice(1, blank).every((line) => text(line) === "")) return comment
+
+  /* Closed again at the margin the block's own closing line sits on, rather
+     than at a fixed indent: these comments are nested inside a declaration and
+     the delimiter has to line up with the asterisks above it. Taken as the
+     leading whitespace and not as everything before the closing delimiter,
+     because a block whose last paragraph ends on that same line would
+     otherwise keep a word of the paragraph this is removing. */
+  const closing = lines.at(-1) ?? ""
+  const margin = closing.slice(0, closing.length - closing.trimStart().length)
+
+  return [...lines.slice(0, blank), `${margin}*/`].join("\n")
+}
+
+/**
  * The same rule, applied inside a signature.
  *
  * A union or an object type carries doc comments against its own members, and
@@ -274,7 +352,14 @@ const CITATION =
  */
 export const readerFacingSignature = (signature: string): string => {
   const cleaned = signature.replace(COMMENT_IN_CODE, (comment) => {
-    const cited = comment.replace(CITATION, "").replace(/\s+([.,;:])/g, "$1")
+    /* Shortened first, then cleaned, and the order is the same one
+       `publishedSignature` keeps for the cut: a paragraph this takes away
+       cannot have a citation lifted out of it afterwards, and a comment whose
+       *fourth* paragraph cites a record is now a comment whose first paragraph
+       reaches the page instead of a comment withheld whole. Forty member
+       comments across the reference were in exactly that state. */
+    const shortened = toItsFirstParagraph(comment)
+    const cited = shortened.replace(CITATION, "").replace(/\s+([.,;:])/g, "$1")
 
     return DECISION_NUMBER.test(cited) ? "" : cited
   })

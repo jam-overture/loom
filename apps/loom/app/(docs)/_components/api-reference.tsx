@@ -770,7 +770,8 @@ export const ApiEntryReference = ({
         {entry.groups.length === 1 ? "module" : "modules"}. Generated from{" "}
         <code className="code-chip font-mono text-xs">{entry.types}</code>, which is the declaration
         file this package publishes for{" "}
-        <code className="code-chip font-mono text-xs">{entry.specifier}</code>.
+        <code className="code-chip font-mono text-xs">{entry.specifier}</code>. Each comment inside
+        a declaration is shown as its first paragraph. The whole of it is in that file.
       </p>
 
       <BeforeItWillRun entry={entry} />
