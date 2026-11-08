@@ -13,10 +13,12 @@ import {
   arrivalRangeFor,
   changeSentence,
   DEFAULT_RANGE,
+  LEAST_SCALE,
   rangeChartOf,
   rangeFigureOf,
   rangeOf,
   rangeParam,
+  scaleOf,
 } from "./signals-range"
 
 const HOUR = 3_600_000
@@ -127,7 +129,7 @@ describe("page views in the range", () => {
 describe("the chart of page views by hour", () => {
   const day = arrivalRangeFor("24h", NOW)
 
-  it("draws one bar an hour against the tallest, the hour in progress marked", () => {
+  it("draws one bar an hour on a rounded scale, the hour in progress marked", () => {
     const chart = rangeChartOf(
       readingOf(
         stored(
@@ -142,12 +144,16 @@ describe("the chart of page views by hour", () => {
       "24h"
     )
 
+    expect(chart.slots).toBe(24)
     expect(chart.bars).toHaveLength(24)
+    expect(chart.uncounted).toBe(0)
     expect(chart.tallest).toBe(8)
-    expect(chart.bars[0]).toMatchObject({ views: 8, height: 1, whole: true })
+    expect(chart.scale).toBe(10)
+    expect(chart.bars[0]).toMatchObject({ slot: 0, views: 8, height: 0.8, whole: true })
     expect(chart.bars.at(-1)).toMatchObject({
+      slot: 23,
       views: 2,
-      height: 0.25,
+      height: 0.2,
       whole: false,
       title: "6 November 2026 at 15:00 UTC: 2 page views, so far",
     })
@@ -160,20 +166,59 @@ describe("the chart of page views by hour", () => {
     )
   })
 
-  it("starts where counting by hour began, and says so", () => {
+  it("keeps the whole range when counting began inside it, shading the hours before", () => {
     const begins = THIS_HOUR - 2 * HOUR
     const chart = rangeChartOf(readingOf(stored([[THIS_HOUR, 1]], begins), day).series, "24h")
 
-    expect(chart.bars).toHaveLength(3)
+    expect(chart.slots).toBe(24)
+    expect(chart.uncounted).toBe(21)
+    expect(chart.bars.map((bar) => bar.slot)).toEqual([21, 22, 23])
+    expect(chart.starts).toBe("5 November 2026 at 16:00 UTC")
+    expect(chart.ends).toBe("6 November 2026 at 15:00 UTC")
     expect(chart.note).toBe(
-      "Page views are counted by hour from 6 November 2026 at 13:00 UTC, so the chart starts there."
+      "Page views are counted by hour from 6 November 2026 at 13:00 UTC. The shaded hours before that were not counted."
     )
+  })
+
+  it("does not let one page view fill the chart", () => {
+    const chart = rangeChartOf(
+      readingOf(stored([[THIS_HOUR, 1]], day.from), day).series,
+      "24h"
+    )
+
+    expect(chart.scale).toBe(5)
+    expect(chart.bars.at(-1)?.height).toBe(0.2)
+  })
+
+  it("places a week's first day of counting at the right-hand end, not across the week", () => {
+    const week = arrivalRangeFor("7d", NOW)
+    const begins = THIS_HOUR - 19 * HOUR
+    const chart = rangeChartOf(
+      readingOf(
+        stored(
+          [
+            [begins, 3],
+            [THIS_HOUR, 1],
+          ],
+          begins
+        ),
+        week
+      ).series,
+      "7d"
+    )
+
+    expect(chart.slots).toBe(168)
+    expect(chart.uncounted).toBe(148)
+    expect(chart.bars).toHaveLength(20)
+    expect(chart.bars[0]?.slot).toBe(148)
+    expect(chart.scale).toBe(5)
   })
 
   it("draws no bar where nothing has been counted by hour, and says so", () => {
     const chart = rangeChartOf(readingOf(stored([]), day).series, "24h")
 
     expect(chart.bars).toEqual([])
+    expect(chart.ticks).toEqual([])
     expect(chart.starts).toBeUndefined()
     expect(chart.note).toBe("No page view has been counted by hour yet.")
   })
@@ -185,5 +230,57 @@ describe("the chart of page views by hour", () => {
     expect(chart.bars).toHaveLength(168)
     expect(chart.starts).toBe("30 October 2026")
     expect(chart.ends).toBe("6 November 2026")
+  })
+})
+
+describe("the marks under the chart", () => {
+  it("marks a day every six hours, with the date at midnight", () => {
+    const day = arrivalRangeFor("24h", NOW)
+    const chart = rangeChartOf(readingOf(stored([], day.from - HOUR), day).series, "24h")
+
+    expect(chart.ticks).toEqual([
+      { slot: 2, label: "18:00" },
+      { slot: 8, label: "6 Nov" },
+      { slot: 14, label: "06:00" },
+      { slot: 20, label: "12:00" },
+    ])
+  })
+
+  it("marks a week at each midnight, leaving room at the right-hand edge", () => {
+    const week = arrivalRangeFor("7d", NOW)
+    const chart = rangeChartOf(readingOf(stored([], week.from - HOUR), week).series, "7d")
+
+    expect(chart.ticks.map((tick) => tick.label)).toEqual([
+      "31 Oct",
+      "1 Nov",
+      "2 Nov",
+      "3 Nov",
+      "4 Nov",
+      "5 Nov",
+    ])
+    expect(chart.ticks.every((tick) => tick.slot / chart.slots <= 0.9)).toBe(true)
+  })
+
+  it("marks thirty days at each Monday", () => {
+    const month = arrivalRangeFor("30d", NOW)
+    const chart = rangeChartOf(readingOf(stored([], month.from - HOUR), month).series, "30d")
+
+    expect(chart.ticks.map((tick) => tick.label)).toEqual(["12 Oct", "19 Oct", "26 Oct", "2 Nov"])
+  })
+})
+
+describe("the scale", () => {
+  it("rounds the tallest hour up to 1, 2 or 5 times a power of ten", () => {
+    expect(scaleOf(6)).toBe(10)
+    expect(scaleOf(12)).toBe(20)
+    expect(scaleOf(41)).toBe(50)
+    expect(scaleOf(100)).toBe(100)
+    expect(scaleOf(1_001)).toBe(2_000)
+  })
+
+  it("never stands for fewer than five", () => {
+    expect(scaleOf(0)).toBe(LEAST_SCALE)
+    expect(scaleOf(1)).toBe(5)
+    expect(scaleOf(5)).toBe(5)
   })
 })
