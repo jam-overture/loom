@@ -496,8 +496,18 @@ curl https://your-deployment/api/reader-signals
 
 ```json
 { "intake": "on", "durable": true, "maxBytes": 65536, "deliveries": 120,
-  "windowMs": 60000, "subjects": 3, "detail": "reader signals are being collected" }
+  "windowMs": 60000, "subjects": 3, "detail": "reader signals are being collected",
+  "regions": "where readers are is read from x-vercel-ip-country; a bucket is reported once it holds 25 views",
+  "collection": "a delivery is counted into the totals once it is 3600000ms old; set LOOM_SIGNAL_WINDOW_MS to change it",
+  "kept": "a counted delivery is kept for 2592000000ms from when it arrived, and then deleted; set LOOM_SIGNAL_KEPT_MS to change it",
+  "sweep": "how often the sweep runs is not stated, so readers are told only when a delivery ripens; set LOOM_SIGNAL_SWEEP_MS to how often your cron runs to publish a ceiling" }
 ```
+
+The last four are the three windows this deployment's collection runs on and
+the floor its region counts are kept to. `collection` is the age a delivery is
+counted at, `kept` the age it is deleted at — **the window your readers are
+promised** — and `sweep` what you have stated about how often the sweep runs,
+which nothing in the application can discover for itself.
 
 `durable: false` means `DATABASE_URL` is unset, so batches are being kept in the
 instance's memory — fine for `pnpm dev`, and on serverless it means the collector

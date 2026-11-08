@@ -67931,3 +67931,134 @@ re-exporting them would be two names for one guarantee. And do not generalise th
 *change* shape the same way — `ArrivalChange` and `ActedChange` differ in what
 each withholds and why, which `ratios.ts` says at length is the reading's own
 rule and not a helper's.
+
+---
+## 2026-11-08 — `outlineTree` is quadratic in depth and throws above about two thousand, which bounds both joins of a window to a tree
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom daily build`
+(`src/tree/outline.ts`) · **Status:** open — **nothing is red and no real page
+is near it**; filed with the numbers because two readings in this lane are
+linear only up to this
+
+`outlineTree` walks the tree with a recursive generator and `yield*`. A
+delegated yield passes each value back up through every delegating frame, so a
+node at depth *d* costs *d*, and the walk costs the **sum of the depths** rather
+than the number of nodes. On a chain:
+
+| depth | per node | total |
+| --- | --- | --- |
+| 1,000 | 37.4 µs | 37.4 ms |
+| 2,000 | 68.0 µs | 136.0 ms |
+| 4,000 | — | `RangeError: Maximum call stack size exceeded` |
+| 8,000 | — | same |
+
+Per-node cost doubles when depth doubles, which is the signature, and above
+about two thousand the recursion does not return at all.
+
+**Nothing is broken today.** A real page is wide and shallow — the 6,000-node
+page rule 4 is written against is a few tens deep — and at those depths the
+constant is invisible. What it bounds is the claim two modules in this lane now
+make: `pageReadingOf` and `insideReadingOf` are each linear in the parts, and
+both begin by calling this. Neither can be made linear in a page's depth from
+inside this lane, and `insideReadingOf`'s own accumulation is deliberately one
+pass down and one pass back up so that it is not the thing that fails first.
+
+**What would fix it**, if it is ever worth fixing: an explicit stack in place of
+the recursion, yielding from one frame. It changes no output — `outline.test.ts`
+is the guard — and it would make the walk linear in nodes and bounded in memory
+rather than in stack. The deepest-tree test to write first is a chain of ten
+thousand, which today throws.
+
+**Measured** on this session's container with `tsx`, one run per size, on
+`signals-79-what-readers-did-inside-a-part`.
+
+---
+## 2026-11-08 — the hourly counter is joined to the tree now, so the *three parts pressed most* can read a range instead of all time
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom portal`
+(`apps/loom/app/(portal)/_lib/by-page.ts`) · **Status:** open — **one read
+swapped for another; nothing is broken and nothing is blocked**
+
+`by-page.ts` builds *the part pressed most* and *the three parts pressed most*
+out of `ReaderTally` rows, which keep no time (rule 5). On a screen with a range
+picker on it, those two figures are the only ones that are not of the range: a
+button pressed hard in September still leads the list in November.
+
+[0365](decisions/0365-what-readers-did-inside-a-part-is-derived-from-the-tree-and-the-sum-is-exact-because-occurrences-add.md)
+answers it off the hourly counter. `insideReadingOf(tree, acted, declarations,
+range)` then `actedMostIn(reading, "activated", 3)` is the list, for the range,
+with each part's role (0114) and the words it says itself (0122) already on it —
+so *Buy now* rather than `n_42`, which `by-page.ts` currently joins by hand.
+
+**Two things it gives you that the tally cannot**, and they are the reason this
+is worth a swap rather than a note:
+
+- **What readers did *inside* a band**, as an exact count over the range. The
+  drawer's band for a page can say *forty presses in the pricing band, nine of
+  them on Buy now*, which no counter could answer before: `engaged` is a
+  distinct count of page views and does not add, and the hourly rows name only
+  the part each signal named.
+- **The whole page in reading order**, with each part's containing part, so the
+  drawer can draw where on the page the acting happened rather than a flat list.
+
+**What it costs you:** the reading pins **one revision**, because a node's
+ancestry is a fact about one revision (0365 clause 5). `readReaderActed` adds
+every revision by default, which is what a goal wants (0350) and is not
+available here. A page whose live version changed inside the range is therefore
+two readings, or one reading of the live revision with the earlier presses
+reported as `foreign`.
+
+**Not urgent.** The all-time figure is right about what it says; what it is not
+is of the range the picker is set to.
+
+---
+## 2026-11-08 — seven new names are published on `@jam-overture/loom/signals` and the page that explains that door says nothing about them
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/docs/the-runtime/what-your-readers-do/page.mdx`) ·
+**Status:** open — **the generator said so on this branch and `pnpm verify` is
+green**; what is open is whether that page wants a paragraph
+
+`docs:api` reported, on regenerating the reference for 0365:
+
+```
+@jam-overture/loom/signals — ActedCounts, InsidePart, InsideReading,
+  actedMostIn, beneathOf, insideReadingOf, insideShareIn
+```
+
+The sentence worth writing, if that page wants one: **a published page's
+counters name a node, and the tree the server already holds says what that node
+sits inside** — so *what did readers press* and *what was it inside* are one
+reading, derived rather than collected, with nothing added to what a reader's
+browser sends. It is the clearest example on that door of this subsystem's whole
+argument, which is why it is filed rather than left for the generator to repeat.
+
+**This lane did not write it**, for 5 November's reason: that page is `(docs)`'
+and a run that edits prose on another lane's surface is a conflict waiting for
+whoever is drafting it.
+
+---
+## 2026-11-08 — `PartReading.parentId` can name a node that is in no part's list, because a slot is a node with children
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/parts.ts`) · **Status:** open — **a latent wrong answer, not a
+live one**; nothing on a screen reads the field today
+
+`pageReadingOf` carries `parentId` straight off the outline entry, which is the
+**tree** parent. A slot is a node with children and is never a part — only an
+element carries the identity attributes a broadcaster reads — so an element
+handed into a slot has a slot's id as its `parentId`, and that id appears
+nowhere in `PageReading.parts`. A surface drawing the page's shape from the
+field would hang a band off a node it has no row for.
+
+`insideReadingOf` does not have the defect: its `withinId` is the nearest
+**addressed** ancestor, which is what `within` means (0167) and what the subtree
+sums are taken over, and `inside.test.ts` asserts it against a fixture with a
+slot between a band and the row inside it (0365 clause 4).
+
+**Why it is not fixed here.** Changing `parentId`'s meaning is a change to a
+published field that three readings and the `(docs)` reference carry, and the
+honest version is either a second field (`withinId`, as `inside.ts` has) or a
+renaming with a record. Neither belongs in a run whose unit is a different
+reading. The fix is small; what it needs is to be the unit.
+

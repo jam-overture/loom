@@ -111,25 +111,37 @@ export const isActedKind = (kind: string): kind is ActedKind =>
   (ACTED_KINDS as readonly string[]).includes(kind)
 
 /**
- * What readers did to one part of one revision, in one hour.
+ * What readers did, as four numbers, with nothing saying what they did it to.
  *
  * The four counters are the tally's four occurrence counters that come from the
  * three delegated kinds. `opens` and `closes` are both `disclosed` and are kept
  * apart for the reason the tally keeps them apart: a goal counts openings
  * (0350), and a surface drawing *what readers did* may want to say that a
  * disclosure was opened nine times and shut eight.
+ *
+ * **All four are occurrences, which is the property every sum over them
+ * rests on.** A reader who presses twice is two; two readers who press once
+ * each are two; and neither figure is a count of readers, so rows may be added
+ * across hours, parts, revisions and audiences without the distinctness trap
+ * the tally's `views`, `reached` and `engaged` carry (0147, 0284). Separated
+ * from the key for exactly that reason: a subtree's total
+ * ([`inside.ts`](inside.ts)) is these four numbers and no key at all.
  */
-export type ActedHourCount = {
+export type ActedCounts = {
+  readonly activations: number
+  readonly opens: number
+  readonly closes: number
+  readonly completions: number
+}
+
+/** What readers did to one part of one revision, in one hour. */
+export type ActedHourCount = ActedCounts & {
   readonly treeId: TreeId
   readonly revision: number
   readonly nodeId: NodeId
   readonly type: PrimitiveType
   /** The hour it happened in, as the instant that hour began (UTC). */
   readonly hour: number
-  readonly activations: number
-  readonly opens: number
-  readonly closes: number
-  readonly completions: number
 }
 
 /** An hour's row as the store keeps it. See `StoredTally.audienceId` (0284). */
@@ -144,15 +156,18 @@ export type StoredActedHour = ActedHourCount & {
  * `disclosed` is openings, which is the same choice the portal's goal figure
  * makes (0350 clause 4) — published here so the rule is spelled once, in the
  * lane that owns the counters, rather than in each surface that reads them.
+ *
+ * It takes the counters rather than a row, so the one spelling serves a stored
+ * hour and a sum of them alike.
  */
-export const actedCountOf = (row: ActedHourCount, kind: ActedKind): number => {
+export const actedCountOf = (counts: ActedCounts, kind: ActedKind): number => {
   switch (kind) {
     case "activated":
-      return row.activations
+      return counts.activations
     case "disclosed":
-      return row.opens
+      return counts.opens
     case "completed":
-      return row.completions
+      return counts.completions
   }
 }
 
