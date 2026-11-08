@@ -571,27 +571,6 @@ export const shippedByGoalOf = (
   }, new Map<GoalId, number>())
 }
 
-/** How many accepted changes a page of the list shows, as every list in the portal does. */
-export const ACCEPTED_PAGE_SIZE = 50
-
-/**
- * One page of the list, newest first: the changes after `before` (the last
- * one the previous page showed), and the change to carry on from when there
- * are older ones. A `before` the list does not hold starts from the newest.
- */
-export const acceptedPage = (
-  changes: readonly AcceptedChange[],
-  before: string | undefined
-): { readonly rows: readonly AcceptedChange[]; readonly older: ProposalId | undefined } => {
-  const start = changes.findIndex((change) => change.proposalId === before) + 1
-  const rows = changes.slice(start, start + ACCEPTED_PAGE_SIZE)
-
-  return {
-    rows,
-    older: changes.length > start + ACCEPTED_PAGE_SIZE ? rows.at(-1)?.proposalId : undefined,
-  }
-}
-
 /**
  * A sentence as a person reads it: a named part by its name alone, its id kept
  * for the change as Loom keeps it, one click down. A part nothing names keeps

@@ -29,7 +29,7 @@ its unit serves.
 | --- | --- | --- | --- |
 | 1 | Readers act: views, dwells, presses, opens, completions arrive with the project key | Signals | built (tallies, buffer, by page) |
 | 2 | A goal says which signals count | Goals | built (goals kept and measured, 0350; proposals aim at them, 0352) |
-| 3 | Loom proposes one change toward a goal | For review | partly (each proposal names its goal, 0352; the goal picker and the drawer with before and after are built; no predicted effect yet) |
+| 3 | Loom proposes one change toward a goal | For review | partly (each proposal names its goal, 0352; the goal picker, the drawer with before and after, and *Turned down recently* are built; no predicted effect yet) |
 | 4 | A person accepts or turns it down | For review | partly (the queue exists, as *Waiting*) |
 | 5 | An accepted change goes live on the site, with no pull request (0358) | Unit 8 | built (read door, replay, whether the site pulls, *Accepted* and the timeline from *Accept*; the goal chip on it still owed) |
 | 6 | The next version is measured against the last, on its goal | Pages · History | new |
