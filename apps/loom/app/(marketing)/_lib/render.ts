@@ -2,6 +2,7 @@ import type { LoomTree } from "@jam-overture/loom"
 import { renderLoomTree, type RenderOutput } from "@jam-overture/loom/react"
 
 import { siteFrameOrigins } from "./frames"
+import { liveTreeOf, type SiteLive } from "./live"
 import { readersCountedHere } from "./readers/counting"
 import { siteRegistry, siteThemes } from "./registry"
 import { treeFor, type SitePageContext } from "./builders"
@@ -46,7 +47,8 @@ export type { PageBuilder, SitePageContext } from "./builders"
 export { SITE_PAGES, treeFor } from "./builders"
 
 /**
- * The page a reader is served: the one its builder authors, and nothing else.
+ * The page as its code authors it, and nothing else: what a reader is served
+ * when Loom has no live version of it (`servedTreeFor` below).
  *
  * **As of 7 November the store is not read on this path**
  * ([0363](../../../../../decisions/0363-the-marketing-site-is-served-from-its-code-and-a-stored-row-is-not-a-second-version-of-it.md)).
@@ -59,14 +61,31 @@ export { SITE_PAGES, treeFor } from "./builders"
  *
  * A change accepted in the portal reaches readers through the live-page pull
  * ([0361](../../../../../decisions/0361-the-site-pulls-into-its-own-process-and-a-host-wires-the-live-page-in-two-calls.md)),
- * layered over this tree with the built page as its fallback, so the page
- * served without it is this one by construction rather than by timing.
+ * layered over this tree by `servedTreeFor` with the built page as its
+ * fallback, so the page served without it is this one by construction rather
+ * than by timing.
  *
  * `asRequested` puts the reader's palette back on the root and on the site's
  * own links, which is the whole of what a request decides here.
  */
 export const pageTreeFor = (route: SiteRoute, context: SitePageContext): LoomTree =>
   asRequested(treeFor(route, context), { theme: context.theme })
+
+/**
+ * The page a reader is served, with what was accepted on it in the portal
+ * ([0370](../../../../../decisions/0370-loomjs-org-serves-its-live-pages-and-pulls-them-like-a-customers-site.md)).
+ *
+ * `pageTreeFor` with one step between the builder and the palette: the built
+ * page is swapped for Loom's live version of it when this deployment pulls and
+ * Loom has one, and is served as built otherwise. The palette goes on after,
+ * so an accepted change is served in whichever palette the reader asked for.
+ */
+export const servedTreeFor = async (
+  route: SiteRoute,
+  context: SitePageContext,
+  live?: SiteLive
+): Promise<LoomTree> =>
+  asRequested(await liveTreeOf(treeFor(route, context), live), { theme: context.theme })
 
 /**
  * A page, rendered.
@@ -167,10 +186,16 @@ export const renderTree = (page: LoomTree, options: SiteRenderOptions = {}): Ren
 export const renderSitePage = async (
   route: SiteRoute,
   context: SitePageContext,
-  options: SiteRenderOptions = {}
-): Promise<RenderOutput> =>
-  renderTree(pageTreeFor(route, context), {
-    addressed: options.addressed ?? (await readersCountedHere()),
+  options: SiteRenderOptions = {},
+  live?: SiteLive
+): Promise<RenderOutput> => {
+  const [page, addressed] = await Promise.all([
+    servedTreeFor(route, context, live),
+    options.addressed ?? readersCountedHere(),
+  ])
+
+  return renderTree(page, {
+    addressed,
     /**
      * Omitted rather than passed as `undefined`, so a caller that does not know
      * which host it is answering on gets `renderTree`'s own fallback to the
@@ -179,3 +204,4 @@ export const renderSitePage = async (
      */
     ...(options.origin === undefined ? {} : { origin: options.origin }),
   })
+}

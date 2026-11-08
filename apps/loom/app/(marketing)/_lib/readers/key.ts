@@ -13,7 +13,11 @@ import { rememberedFor } from "@/app/_lib/app/remembered"
 import { soleApplicationOf } from "@/app/_lib/app/sole-application"
 import { appApplications } from "@/app/_lib/app/store"
 import { appIngestKeys } from "@/app/_lib/reader-signals/key-store"
-import { INGEST_KEY_PARAMETER, type IngestKeyStore } from "@/app/_lib/reader-signals/keys"
+import {
+  INGEST_KEY_PARAMETER,
+  type IngestKey,
+  type IngestKeyStore,
+} from "@/app/_lib/reader-signals/keys"
 
 /**
  * Which project this site's readers are counted under: the variable's name.
@@ -129,13 +133,29 @@ export const siteSignalUrl = async (
   env: Record<string, string | undefined> = process.env,
   applications: Pick<ApplicationStore, "list"> = siteApplications
 ): Promise<string | null> => {
+  const key = await siteKey(keys, env, applications)
+
+  return key === null ? null : `${DEFAULT_READER_SIGNAL_PATH}?${INGEST_KEY_PARAMETER}=${key}`
+}
+
+/**
+ * The public key of the project this site counts under, or `null` when it has
+ * none or the store did not answer within the site's budget.
+ *
+ * The same key does both of the things a customer's site does with its key:
+ * its pages post their readers' signals with it, and its server pulls the
+ * project's live pages with it (`../live.ts`).
+ */
+export const siteKey = async (
+  keys: Pick<IngestKeyStore, "keyOf"> = siteIngestKeys,
+  env: Record<string, string | undefined> = process.env,
+  applications: Pick<ApplicationStore, "list"> = siteApplications
+): Promise<IngestKey | null> => {
   const application = await siteApplication(env, applications)
 
   if (application === null) return null
 
   const held = await readWithin(() => keys.keyOf(application), unavailable, SITE_READ_BUDGET_MS)
 
-  if (!held.ok || held.value === null) return null
-
-  return `${DEFAULT_READER_SIGNAL_PATH}?${INGEST_KEY_PARAMETER}=${held.value}`
+  return held.ok ? held.value : null
 }
