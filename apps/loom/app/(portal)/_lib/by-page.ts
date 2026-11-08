@@ -5,6 +5,7 @@ import type { HeldProposal } from "@jam-overture/loom/write"
 
 import type { PublishedPage } from "@/app/_lib/pages/published"
 
+import { goalRangeOf, type GoalRange } from "./goal-range"
 import { primaryFirst, type Goal, type GoalKind } from "./goals/goal"
 import {
   goalReadingsByPage,
@@ -14,6 +15,7 @@ import {
   type GoalReading,
 } from "./goals/goal-view"
 import { pageNameOf } from "./page-name"
+import { pageRangeOf, type KindCounts, type PageHourly } from "./page-range"
 import { namesInTree, type PartName } from "./part-name"
 import { pageOfCopy, type PageCopy } from "./proposing/copies"
 import { SIGNAL_KINDS } from "./vocabulary"
@@ -23,12 +25,13 @@ import { SIGNAL_KINDS } from "./vocabulary"
  * tallies this deployment already keeps, and the drawer that opens on one of
  * them.
  *
- * Every figure here is a durable counter (`docs/signals.md` rule 5), added up
- * across every version and audience since the page was first counted. None of
- * them has a time range, because the tallies keep none; the screen says *since
- * counting began* rather than drawing a range picker it cannot honour. The
- * range arrives with the events kept for 30 days, which is the *Events* tab's
- * data and not this one's.
+ * The list's figures are durable counters (`docs/signals.md` rule 5), added up
+ * across every version and audience since the page was first counted, because
+ * the tallies keep no time. **The drawer reads the range** the screen is read
+ * over as well, from the hourly counters (0356, 0362, `page-range.ts`): what
+ * readers did on the page and each goal's rate with its change on the period
+ * before. Time on a part is not counted by the hour, so it stays since
+ * counting began, and so do the figures beside every range, said as such.
  *
  * **Goals are measured here exactly as on *Goals*** (0350), one page at a
  * time: a goal's rate on a page is its count on the page over that page's
@@ -90,14 +93,31 @@ export type KindBar = {
 /** The part readers kept on screen longest, on average over the page views that reached it. */
 export type LongestLooked = NamedPart & { readonly seconds: number }
 
+/** A goal on the page with its figure for the range, `undefined` where the hourly counters did not answer. */
+export type GoalInDrawer = GoalOnPage & { readonly range: GoalRange | undefined }
+
+/** The bars for the range, or why there are none. */
+export type RangeBars =
+  | { readonly kind: "unreadable" }
+  | { readonly kind: "uncounted" }
+  | {
+      readonly kind: "read"
+      readonly bars: readonly KindBar[]
+      /** Where counting began inside the range, `undefined` where it began before. */
+      readonly countedFrom: number | undefined
+    }
+
 export type PageDrawer = {
   readonly row: ByPageRow
+  /** What readers did over the range, from the hourly counters. */
+  readonly range: RangeBars
+  /** What readers did since the page was first counted, from the tallies. */
   readonly bars: readonly KindBar[]
   /** The three parts pressed most, most first. Empty where nothing was pressed. */
   readonly pressed: readonly PressedPart[]
   readonly longest: LongestLooked | undefined
   /** Every goal covering the page, the primary first; `undefined` where goals could not be read. */
-  readonly goals: readonly GoalOnPage[] | undefined
+  readonly goals: readonly GoalInDrawer[] | undefined
 }
 
 export type ByPageReadings = {
@@ -310,9 +330,39 @@ export const byPageListOf = (
   }
 }
 
+/** One bar per kind that counts things readers did, each against the longest. */
+const barsOf = (counts: KindCounts): readonly KindBar[] => {
+  const words = [
+    { word: SIGNAL_KINDS.viewed, count: counts.viewed },
+    { word: SIGNAL_KINDS.activated, count: counts.activated },
+    { word: SIGNAL_KINDS.disclosed, count: counts.disclosed },
+    { word: SIGNAL_KINDS.completed, count: counts.completed },
+  ]
+  const longestBar = Math.max(...words.map(({ count }) => count))
+
+  return words.map(({ word, count }) => ({
+    ...word,
+    count,
+    share: longestBar === 0 ? 0 : count / longestBar,
+  }))
+}
+
+const rangeBarsOf = (hourly: PageHourly): RangeBars => {
+  const range = pageRangeOf(hourly)
+
+  return range.kind === "read"
+    ? {
+        kind: "read",
+        bars: barsOf(range.counts),
+        countedFrom: range.clipped ? range.from : undefined,
+      }
+    : range
+}
+
 /**
- * The drawer for one page: what readers did on it, the parts they pressed
- * most and the part they kept on screen longest.
+ * The drawer for one page: what readers did on it over the range and since it
+ * was first counted, the parts they pressed most and the part they kept on
+ * screen longest.
  *
  * The bars are the kinds that count things readers did, each in its own
  * unit (page views, presses, sections opened or closed, forms sent), so
@@ -321,10 +371,16 @@ export const byPageListOf = (
  * average over the page views that reached it, because a total would favour
  * whatever sits at the top of every page.
  *
- * Below them, every goal that covers the page with its rate here, the primary
- * first, since counting began like everything else on this tab.
+ * Below them, every goal that covers the page, the primary first, with its
+ * rate here over the range and the period before (on this page alone, so a
+ * goal on several pages reads as it does on this one), and since counting
+ * began.
  */
-export const pageDrawerOf = (row: ByPageRow, readings: PageDrawerReadings): PageDrawer => {
+export const pageDrawerOf = (
+  row: ByPageRow,
+  readings: PageDrawerReadings,
+  hourly: PageHourly
+): PageDrawer => {
   const { tallies, published, goals } = readings
   const own = tallies.filter((tally) => tally.treeId === row.treeId)
   const tree = published.find((page) => page.tree.treeId === row.treeId)?.tree
@@ -332,17 +388,6 @@ export const pageDrawerOf = (row: ByPageRow, readings: PageDrawerReadings): Page
   const parts = partsOf(own)
   const sum = (count: (tally: StoredTally) => number) =>
     own.reduce((total, tally) => total + count(tally), 0)
-
-  const counts = [
-    { word: SIGNAL_KINDS.viewed, count: row.opened },
-    { word: SIGNAL_KINDS.activated, count: sum((tally) => tally.activations) },
-    {
-      word: SIGNAL_KINDS.disclosed,
-      count: sum((tally) => tally.opens + tally.closes),
-    },
-    { word: SIGNAL_KINDS.completed, count: sum((tally) => tally.completions) },
-  ]
-  const longestBar = Math.max(...counts.map(({ count }) => count))
 
   const longest = [...parts.entries()]
     .filter(([, totals]) => totals.reached > 0 && totals.dwellMs > 0)
@@ -352,13 +397,24 @@ export const pageDrawerOf = (row: ByPageRow, readings: PageDrawerReadings): Page
     }))
     .sort((a, b) => b.seconds - a.seconds || a.nodeId.localeCompare(b.nodeId))[0]
 
+  const pageParts = partsByPageOf(pageChoicesOf(published))
+  const goalRangeFor = (goalId: string): GoalRange | undefined => {
+    const goal = goals?.find((each) => each.goalId === goalId)
+
+    return goal === undefined || hourly.kind === "unreadable"
+      ? undefined
+      : goalRangeOf(goal, hourly.range, { ...hourly.counters, parts: pageParts })
+  }
+
   return {
     row,
-    bars: counts.map(({ word, count }) => ({
-      ...word,
-      count,
-      share: longestBar === 0 ? 0 : count / longestBar,
-    })),
+    range: rangeBarsOf(hourly),
+    bars: barsOf({
+      viewed: row.opened,
+      activated: sum((tally) => tally.activations),
+      disclosed: sum((tally) => tally.opens + tally.closes),
+      completed: sum((tally) => tally.completions),
+    }),
     pressed: pressedParts(parts, named).slice(0, 3),
     longest:
       longest === undefined
@@ -367,7 +423,16 @@ export const pageDrawerOf = (row: ByPageRow, readings: PageDrawerReadings): Page
             ...named(longest.nodeId),
             seconds: Math.round(longest.seconds * 10) / 10,
           },
-    goals: goals === undefined ? undefined : goalsByPageOf(goals, readings)(row.treeId),
+    goals:
+      goals === undefined
+        ? undefined
+        : goalsByPageOf(
+            goals,
+            readings
+          )(row.treeId).map((goal) => ({
+            ...goal,
+            range: goalRangeFor(goal.goalId),
+          })),
   }
 }
 

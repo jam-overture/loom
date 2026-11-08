@@ -1,4 +1,4 @@
-import { walkTree, type LoomTree } from "@jam-overture/loom"
+import { childrenOf, type LoomNode, type LoomTree } from "@jam-overture/loom"
 import type { StoredPageViews, StoredTally } from "@jam-overture/loom/signals"
 
 import type { PublishedPage } from "@/app/_lib/pages/published"
@@ -18,8 +18,13 @@ import type { Goal, GoalKind, PartsByPage } from "./goal"
  * the page views it happened in, which the tallies hold exactly.
  */
 
-/** One part a goal may be built on, named as a person reads it. */
-export type PartChoice = PartName
+/**
+ * One part a goal may be built on, named as a person reads it, and how many
+ * parts it sits inside: 0 for a part directly on the page. The depth is what
+ * lets *New goal* draw the page's outline to pick the part on, from the same
+ * list it offers by name.
+ */
+export type PartChoice = PartName & { readonly depth: number }
 
 /** One published page and the parts on it a goal may name. */
 export type PageChoice = {
@@ -30,13 +35,22 @@ export type PageChoice = {
 }
 
 /**
- * The parts of a page a reader can do something to: its elements, which are
- * what a signal is filed against. Text and slots are inside one, never it.
+ * The parts inside `node`, in the order the page reads, each `depth` parts
+ * deep or deeper. A slot is not a part, so what it holds sits at its depth.
  */
-export const partsOf = (tree: LoomTree): readonly PartChoice[] =>
-  Array.from(walkTree(tree.root))
-    .filter((node) => node.kind === "element" && node.id !== tree.root.id)
-    .map(partNameOf)
+const partsWithin = (node: LoomNode, depth: number): readonly PartChoice[] =>
+  childrenOf(node).flatMap((child) =>
+    child.kind === "element"
+      ? [{ ...partNameOf(child), depth }, ...partsWithin(child, depth + 1)]
+      : partsWithin(child, depth)
+  )
+
+/**
+ * The parts of a page a reader can do something to, in the order the page
+ * reads: its elements, which are what a signal is filed against. Text and
+ * slots are inside one, never it, and the page itself is not a part of itself.
+ */
+export const partsOf = (tree: LoomTree): readonly PartChoice[] => partsWithin(tree.root, 0)
 
 /** Every published page with its parts, by its name and then its id. */
 export const pageChoicesOf = (published: readonly PublishedPage[]): readonly PageChoice[] =>
@@ -55,6 +69,10 @@ export const pageChoicesOf = (published: readonly PublishedPage[]): readonly Pag
         (left.name ?? left.treeId).localeCompare(right.name ?? right.treeId) ||
         left.treeId.localeCompare(right.treeId)
     )
+
+/** A page as *New goal* lists it: by its heading, else by its id. */
+export const pageLabelOf = (page: Pick<PageChoice, "name" | "treeId">): string =>
+  page.name ?? page.treeId
 
 /** Which parts each published page has, for `readGoalForm` to check a choice against. */
 export const partsByPageOf = (pages: readonly PageChoice[]): PartsByPage =>
@@ -86,15 +104,15 @@ export type GoalCounts = {
  * longer publishes had it. Page views of a page without the part would be
  * readers who could never have done it, and would sink the rate for nothing.
  */
-const pagesCoveredBy = (goal: Goal, readings: GoalCounts): ReadonlySet<string> =>
+export const pagesCoveredBy = (
+  goal: Pick<Goal, "nodeId" | "pages">,
+  parts: PartsByPage,
+  counted: readonly { readonly treeId: string; readonly nodeId: string }[]
+): ReadonlySet<string> =>
   new Set<string>(
     goal.pages ?? [
-      ...[...readings.parts.entries()]
-        .filter(([, parts]) => parts.has(goal.nodeId))
-        .map(([treeId]) => treeId),
-      ...readings.tallies
-        .filter((tally) => tally.nodeId === goal.nodeId)
-        .map((tally) => tally.treeId),
+      ...[...parts.entries()].filter(([, has]) => has.has(goal.nodeId)).map(([treeId]) => treeId),
+      ...counted.filter((row) => row.nodeId === goal.nodeId).map((row) => row.treeId),
     ]
   )
 
@@ -107,7 +125,7 @@ export const goalReadingsByPage = (
   goal: Goal,
   readings: GoalCounts
 ): ReadonlyMap<string, GoalReading> => {
-  const covered = pagesCoveredBy(goal, readings)
+  const covered = pagesCoveredBy(goal, readings.parts, readings.tallies)
   const onPart = readings.tallies.filter(
     (tally) => tally.nodeId === goal.nodeId && covered.has(tally.treeId)
   )
@@ -178,3 +196,17 @@ export const whereSentence = (goal: Goal, pages: readonly PageChoice[]): string 
 
   return names.join(", ")
 }
+
+/**
+ * The page *New goal*'s outline draws: the one the owner chose, else the first
+ * that has the part already picked, else the first page. `undefined` with no
+ * pages published.
+ */
+export const outlinePageOf = (
+  pages: readonly PageChoice[],
+  chosen: string | undefined,
+  picked: string
+): PageChoice | undefined =>
+  pages.find((page) => page.treeId === chosen) ??
+  pages.find((page) => page.parts.some((part) => part.nodeId === picked)) ??
+  pages[0]

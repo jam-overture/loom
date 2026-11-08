@@ -1,9 +1,11 @@
 import { render, screen } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
 
+import { nodeIdSchema } from "@jam-overture/loom"
 import type { ArrivalReading } from "@jam-overture/loom/signals"
 import type { Application, Project } from "@jam-overture/loom/store"
 
+import { goalIdSchema } from "@/app/(portal)/_lib/goals/goal"
 import type { SignalsRange } from "@/app/(portal)/_lib/signals-range"
 
 import type { Readings } from "@/app/_lib/reader-signals/intake"
@@ -57,6 +59,7 @@ const read = (
   published: [],
   range: "24h",
   hourly,
+  goal: { kind: "none" },
   ...overrides,
 })
 
@@ -158,5 +161,67 @@ describe("the Signals frame", () => {
     expect(screen.getByText("12")).toBeTruthy()
     expect(screen.getByText(/Page views by hour could not be read/)).toBeTruthy()
     expect(screen.queryByRole("img")).toBeNull()
+  })
+
+  it("puts the primary goal's figure for the range beside page views, once there is one", () => {
+    render(
+      <SignalsFrame
+        reading={read("arrived", {
+          goal: {
+            kind: "read",
+            goal: {
+              goalId: goalIdSchema.parse(`g_${"0".repeat(32)}`),
+              name: "Starts a trial",
+              kind: "activated",
+              nodeId: nodeIdSchema.parse("n_start"),
+              pages: null,
+              primarySince: 1,
+              createdAt: 1,
+              createdBy: null,
+            },
+            range: {
+              kind: "read",
+              current: { range: { from: START, to: START + 2 * HOUR }, views: 40, count: 2 },
+              before: undefined,
+              clipped: false,
+            },
+          },
+        })}
+        projectId="prj_a"
+        tab="events"
+        rangeHref={rangeHref}
+      >
+        <p>the list</p>
+      </SignalsFrame>
+    )
+
+    expect(screen.getByText("Primary goal, last 24 hours")).toBeTruthy()
+    expect(screen.getByText("5 per 100")).toBeTruthy()
+    expect(screen.getByText(/^Starts a trial: 2 presses in 40 page views/)).toBeTruthy()
+  })
+
+  it("draws no goal figure for a project without a goal, and says one that could not be read", () => {
+    const { unmount } = render(
+      <SignalsFrame reading={read("arrived")} projectId="prj_a" tab="events" rangeHref={rangeHref}>
+        <p>the list</p>
+      </SignalsFrame>
+    )
+
+    expect(screen.queryByText(/Primary goal/)).toBeNull()
+    unmount()
+
+    render(
+      <SignalsFrame
+        reading={read("arrived", { goal: { kind: "unreadable" } })}
+        projectId="prj_a"
+        tab="events"
+        rangeHref={rangeHref}
+      >
+        <p>the list</p>
+      </SignalsFrame>
+    )
+
+    expect(screen.getByText("Primary goal")).toBeTruthy()
+    expect(screen.getByText(/The primary goal's figures could not be read/)).toBeTruthy()
   })
 })

@@ -5,6 +5,7 @@ import { projectIdSchema } from "@jam-overture/loom/store"
 
 import { Screen } from "@/app/(portal)/_components/screen"
 import { StateNotice } from "@/app/(portal)/_components/state-notice"
+import { readAccepted } from "@/app/(portal)/_lib/accepted/reading"
 import { requireActor, requireRole } from "@/app/(portal)/_lib/auth/identity"
 import { mayAdminister } from "@/app/(portal)/_lib/auth/roles"
 import type { Goal, GoalId } from "@/app/(portal)/_lib/goals/goal"
@@ -17,8 +18,22 @@ import {
   whereSentence,
   type PageChoice,
 } from "@/app/(portal)/_lib/goals/goal-view"
+import { shippedByGoalOf } from "@/app/(portal)/_lib/going-live"
 import { waitingByGoalOf } from "@/app/(portal)/_lib/goals/serving"
 import { goalsFor, proposalGoalsFor } from "@/app/(portal)/_lib/goals/stores"
+import { readGoalCounters } from "@/app/(portal)/_lib/goal-counters"
+import {
+  goalRangeOf,
+  goalRangeWordsOf,
+  goalSpanOf,
+  rangeTotalsOf,
+} from "@/app/(portal)/_lib/goal-range"
+import type { RangeTotals } from "@/app/(portal)/_lib/goals/goal-preview"
+import {
+  arrivalRangeFor,
+  type RangeFigure,
+  type SignalsRange,
+} from "@/app/(portal)/_lib/signals-range"
 import { EVERY_CHANGE, reviewHrefOf } from "@/app/(portal)/_lib/review-filter"
 import { portalApplications, portalProjects } from "@/app/(portal)/_lib/store"
 import { plainMoment } from "@/app/(portal)/_lib/when"
@@ -43,21 +58,37 @@ import { GoalForm } from "./_components/goal-form"
  * an owner adds one in; everybody else reads the list.
  *
  * **Changes for it** counts the changes waiting on *For review* that were
- * raised for each goal (0352), and links to them there.
+ * raised for each goal (0352), and links to them there, then how many of the
+ * changes accepted for it went live (unit 8, 0358): given to the site's
+ * readers, at once on this deployment's own site and otherwise on the site's
+ * first pull after *Accept*. Either count that cannot be read says so, and the
+ * other stands.
  *
- * **What it does not say yet**, because the data is not there: a 7-day rate
- * and its trend (the tallies keep no time; 0349's kept events will), and how
- * many changes for a goal were shipped, which waits for an accepted change to
- * go live on the site (unit 8, 0358). The screen says the
- * second in a sentence rather than drawing a figure it cannot count.
+ * **The last 7 days** are each goal's rate over the last 168 hours on the
+ * pages it covers, with its change on the 7 days before, from the hourly
+ * counters (page views, 0356; what readers did, 0362) read once for every
+ * goal, in the words *Signals* uses for the primary goal's figure. Counters
+ * that do not answer cost that figure alone; what each goal counted since
+ * counting began stays beneath it.
+ *
+ * **The *New goal* drawer previews** what the goal being made would have
+ * counted over the same 7 days, from those counters folded into totals by page
+ * and part, worked out in the browser as the owner picks.
  */
+
+/** The range *Goals* measures each goal over: the wireframe's *7-day rate with its trend*. */
+const GOALS_RANGE: SignalsRange = "7d"
 
 type Readings = {
   readonly goals: readonly Goal[]
   readonly pages: readonly PageChoice[]
   readonly reading: (goal: Goal) => string
+  /** The goal over the last 7 days, `undefined` where the hourly counters could not be read. */
+  readonly week: (goal: Goal) => Omit<RangeFigure, "label"> | undefined
   /** Changes waiting for each goal, `undefined` where they could not be read. */
   readonly waiting: ReadonlyMap<GoalId, number> | undefined
+  /** Accepted changes for each goal that went live, `undefined` where they could not be read. */
+  readonly shipped: ReadonlyMap<GoalId, number> | undefined
 }
 
 const ChangesFor = ({
@@ -69,19 +100,58 @@ const ChangesFor = ({
   readings: Readings
   projectId: string
 }) => {
-  if (readings.waiting === undefined) return <>Cannot be read just now.</>
+  const waiting = readings.waiting?.get(goal.goalId) ?? 0
+  const shipped = readings.shipped?.get(goal.goalId) ?? 0
 
-  const count = readings.waiting.get(goal.goalId) ?? 0
+  return (
+    <>
+      <span className="block">
+        {readings.waiting === undefined ? (
+          <>Waiting cannot be read just now</>
+        ) : waiting === 0 ? (
+          <>None waiting</>
+        ) : (
+          <Link
+            href={reviewHrefOf(projectId, { ...EVERY_CHANGE, goal: goal.goalId })}
+            className="text-ink"
+          >
+            {waiting} waiting
+          </Link>
+        )}
+      </span>
+      <span className="block">
+        {readings.shipped === undefined ? (
+          <>Shipped cannot be read just now</>
+        ) : (
+          <>{shipped} shipped</>
+        )}
+      </span>
+    </>
+  )
+}
 
-  return count === 0 ? (
-    <>None waiting</>
+/** The goal's rate over the last 7 days and its trend, and what it counted since counting began beneath. */
+const LastSevenDays = ({ goal, readings }: { goal: Goal; readings: Readings }) => {
+  const week = readings.week(goal)
+  const since = (
+    <span className="text-ink-muted block text-[11px]">
+      Since counting began: {readings.reading(goal)}
+    </span>
+  )
+
+  return week === undefined ? (
+    <>
+      <span className="text-ink-muted block text-xs">
+        The last 7 days could not be read just now.
+      </span>
+      {since}
+    </>
   ) : (
-    <Link
-      href={reviewHrefOf(projectId, { ...EVERY_CHANGE, goal: goal.goalId })}
-      className="text-ink"
-    >
-      {count} waiting
-    </Link>
+    <>
+      <span className="block text-sm">{week.value}</span>
+      <span className="block text-xs">{week.note}</span>
+      {since}
+    </>
   )
 }
 
@@ -113,7 +183,9 @@ const GoalRow = ({
       <span className="text-ink-muted block font-mono text-[11px]">{goal.nodeId}</span>
     </td>
     <td className="py-2 pr-3 text-xs">{whereSentence(goal, readings.pages)}</td>
-    <td className="py-2 pr-3 text-xs">{readings.reading(goal)}</td>
+    <td className="py-2 pr-3">
+      <LastSevenDays goal={goal} readings={readings} />
+    </td>
     <td className="py-2 pr-3 text-xs">
       <ChangesFor goal={goal} readings={readings} projectId={projectId} />
     </td>
@@ -150,7 +222,7 @@ const GoalList = ({
           <th className="py-1.5 font-normal">Goal</th>
           <th className="py-1.5 font-normal">What counts</th>
           <th className="py-1.5 font-normal">Where</th>
-          <th className="py-1.5 font-normal">Since counting began</th>
+          <th className="py-1.5 font-normal">Last 7 days</th>
           <th className="py-1.5 font-normal">Changes for it</th>
           {owner && <th className="py-1.5 font-normal" />}
         </tr>
@@ -173,10 +245,12 @@ const NewGoalDrawer = ({
   projectId,
   pages,
   first,
+  totals,
 }: {
   projectId: string
   pages: readonly PageChoice[]
   first: boolean
+  totals: RangeTotals
 }) => (
   <aside
     aria-label="New goal"
@@ -206,7 +280,7 @@ const NewGoalDrawer = ({
           A goal is built on a part of a page, so your site publishes its pages first.
         </StateNotice>
       ) : (
-        <GoalForm projectId={projectId} pages={pages} first={first} />
+        <GoalForm projectId={projectId} pages={pages} first={first} totals={totals} />
       )}
     </div>
   </aside>
@@ -239,9 +313,12 @@ const GoalsPage = async ({
   const application = applications.ok ? soleApplicationOf(applications.value, projectId) : undefined
   const signals = application === undefined ? undefined : readingsFor(application.applicationId)
 
-  const [goals, published, pageViews, tallies, held] =
+  const now = Date.now()
+  const week = arrivalRangeFor(GOALS_RANGE, now)
+
+  const [goals, published, pageViews, tallies, held, hourly, accepted] =
     application === undefined || signals === undefined
-      ? [undefined, undefined, undefined, undefined, undefined]
+      ? [undefined, undefined, undefined, undefined, undefined, undefined, undefined]
       : await Promise.all([
           readWithin(
             () => goalsFor(application.applicationId).list(),
@@ -256,6 +333,8 @@ const GoalsPage = async ({
           boundedReaderTallyStore(signals.tallies).pageViews(),
           boundedReaderTallyStore(signals.tallies).tallies(),
           holdsFor(application.applicationId).waiting(),
+          readGoalCounters(boundedReaderTallyStore(signals.tallies), goalSpanOf(week)),
+          readAccepted(projectId, now),
         ])
 
   const waitingIntents =
@@ -302,25 +381,39 @@ const GoalsPage = async ({
     }
 
     const pages = published?.ok === true ? pageChoicesOf(published.value) : []
+    const parts = partsByPageOf(pages)
     const counted =
       pageViews?.ok === true && tallies?.ok === true
         ? {
             pageViews: pageViews.value,
             tallies: tallies.value,
-            parts: partsByPageOf(pages),
+            parts,
           }
         : undefined
 
     const readings: Readings = {
       goals: goals.value,
       pages,
+      week: (goal) =>
+        hourly === undefined
+          ? undefined
+          : goalRangeWordsOf(
+              goal,
+              goalRangeOf(goal, week, { ...hourly, parts }),
+              GOALS_RANGE,
+              "covered"
+            ),
       reading: (goal) =>
         counted === undefined
-          ? "The signals could not be read just now."
+          ? "could not be read just now."
           : readingSentence(goal.kind, goalReadingOf(goal, counted)),
       waiting:
         waitingIntents !== undefined && served?.ok === true
           ? waitingByGoalOf(waitingIntents, served.value)
+          : undefined,
+      shipped:
+        accepted?.kind === "read"
+          ? shippedByGoalOf(accepted.changes, accepted.reach, accepted.origins)
           : undefined,
     }
 
@@ -329,14 +422,28 @@ const GoalsPage = async ({
         <div className="flex min-w-0 flex-1 flex-col gap-3">
           <GoalList readings={readings} projectId={projectId} owner={owner} />
           <p className="text-ink-muted m-0 text-xs">
-            Each figure counts what readers did since this project&rsquo;s pages were first counted,
-            across every version. Loom proposes each change toward one goal, and the changes counted
-            here are those waiting for review; how many went live follows once an accepted change
-            goes live on your site.
+            Each rate is per 100 page views on the pages the goal covers, over the last 7 days
+            against the 7 days before, and since this project&rsquo;s pages were first counted,
+            across every version. Loom proposes each change toward one goal: the changes counted
+            here are those waiting for review, and those accepted that went live on your site.
           </p>
+          {accepted?.kind === "read" && accepted.reach.kind === "never" && (
+            <p className="text-ink-muted m-0 text-xs">
+              Your site is not pulling its pages yet, so no accepted change has reached its readers.{" "}
+              <Link href={`/portal/${projectId}/connect`} className="text-ink underline">
+                Connect your site
+              </Link>{" "}
+              says how.
+            </p>
+          )}
         </div>
         {adding && (
-          <NewGoalDrawer projectId={projectId} pages={pages} first={goals.value.length === 0} />
+          <NewGoalDrawer
+            projectId={projectId}
+            pages={pages}
+            first={goals.value.length === 0}
+            totals={hourly === undefined ? { kind: "unreadable" } : rangeTotalsOf(hourly, week)}
+          />
         )}
       </div>
     )

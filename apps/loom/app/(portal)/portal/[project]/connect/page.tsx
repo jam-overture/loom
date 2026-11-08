@@ -15,7 +15,7 @@ import {
   signalAddress,
   snippetFor,
 } from "@/app/(portal)/_lib/connecting"
-import { pullingOf } from "@/app/(portal)/_lib/pulling"
+import { keepingOf, pullingOf } from "@/app/(portal)/_lib/pulling"
 import { plainMoment } from "@/app/(portal)/_lib/when"
 import { portalApplications, portalProjects } from "@/app/(portal)/_lib/store"
 import { PORTAL_READ_BUDGET_MS } from "@/app/_lib/app/bounded"
@@ -55,8 +55,10 @@ import { PullingSection } from "./_components/pulling-section"
  * **Whether the site pulls** (0358) closes the screen: until a site's server
  * takes its live pages, *Accept* changes Loom's copy and no reader sees it, and
  * a person accepting a change is owed that sentence before they press it. A
- * record that cannot be read says so in that section alone, because it is a
- * table a deployment may not have pushed yet and the key above still works.
+ * site that pulls and does not keep the newest pages it is given is owed the
+ * same sentence, so the section says that too. A record that cannot be read
+ * says so in that section alone, because it is a table a deployment may not
+ * have pushed yet and the key above still works.
  *
  * The address is the deployment's as this request reached it, not
  * `siteOrigin()`: it is where the person reading this is talking to the
@@ -95,9 +97,9 @@ const ConnectPage = async ({ params }: { params: Promise<{ project: string }> })
 
   const application = applications.ok ? soleApplicationOf(applications.value, projectId) : undefined
 
-  const [held, publishing, pulls] =
+  const [held, publishing, pulls, newest] =
     application === undefined
-      ? [undefined, undefined, undefined]
+      ? [undefined, undefined, undefined, undefined]
       : await Promise.all([
           readWithin(
             () => appIngestKeys.keyOf(application.applicationId),
@@ -111,6 +113,11 @@ const ConnectPage = async ({ params }: { params: Promise<{ project: string }> })
           ),
           readWithin(
             () => appSitePulls.span(application.applicationId),
+            unavailable,
+            PORTAL_READ_BUDGET_MS
+          ),
+          readWithin(
+            () => appSitePulls.newest(application.applicationId),
             unavailable,
             PORTAL_READ_BUDGET_MS
           ),
@@ -253,8 +260,12 @@ const ConnectPage = async ({ params }: { params: Promise<{ project: string }> })
           {owner && <PublishKeyControls projectId={projectId} held={mintedAt !== null} />}
         </section>
 
-        {pulling !== undefined && (
-          <PullingSection pulling={pulling} command={pullCommandFor(origin, key)} />
+        {pulling !== undefined && newest !== undefined && (
+          <PullingSection
+            pulling={pulling}
+            keeping={keepingOf(newest)}
+            command={pullCommandFor(origin, key)}
+          />
         )}
       </div>
     )
