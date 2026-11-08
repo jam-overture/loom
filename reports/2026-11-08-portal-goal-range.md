@@ -74,3 +74,5 @@ did, counted by hour), and that finding was closed by
   (0362 holds activations, opens, closes and completions by hour; *viewed* and
   *dwelled* are deliberately not hourly, so those two bars stay since counting
   began). That is the next portal piece in the order.
+
+![Signals with the primary goal figure, last 24 hours, seeded locally](2026-11-08-portal-goal-range-wide.webp)
