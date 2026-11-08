@@ -1,6 +1,13 @@
 import { describe, expect, it } from "vitest"
 
-import { nodeIdSchema } from "@jam-overture/loom"
+import {
+  buildElement,
+  buildSlot,
+  buildText,
+  createTree,
+  nodeIdSchema,
+  sequentialIdFactory,
+} from "@jam-overture/loom"
 
 import { pageFixture } from "@/app/_lib/pages/fixtures"
 
@@ -11,8 +18,9 @@ import {
   goalReadingOf,
   goalReadingsByPage,
   pageChoicesOf,
-  per100Of,
   partsByPageOf,
+  partsOf,
+  per100Of,
   readingSentence,
   whereSentence,
 } from "./goal-view"
@@ -57,6 +65,37 @@ describe("pageChoicesOf", () => {
 
   it("knows which parts each page has", () => {
     expect(partsByPageOf(pages).get(HOME.treeId)?.has(homeHeading)).toBe(true)
+  })
+})
+
+describe("partsOf", () => {
+  it("lists a page's parts in reading order, each with how many parts it sits inside", () => {
+    const ids = sequentialIdFactory("nest")
+    const tree = createTree(
+      buildElement(ids, {
+        type: "loom.stack",
+        children: [
+          buildElement(ids, {
+            type: "loom.card",
+            children: [
+              buildElement(ids, { type: "loom.heading", children: [buildText(ids, "Plans")] }),
+              buildSlot(ids, "actions", [
+                buildElement(ids, { type: "loom.button", children: [buildText(ids, "Start")] }),
+              ]),
+            ],
+          }),
+          buildElement(ids, { type: "loom.text", children: [buildText(ids, "Footnote")] }),
+        ],
+      }),
+      ids
+    )
+
+    expect(partsOf(tree).map((part) => [part.name, part.depth])).toEqual([
+      ["the card “Plans”", 0],
+      ["the heading “Plans”", 1],
+      ["the button “Start”", 1],
+      ["the text “Footnote”", 0],
+    ])
   })
 })
 
