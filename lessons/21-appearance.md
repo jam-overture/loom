@@ -463,29 +463,38 @@ failures are carried in the open.
 ### A check that cannot answer says so
 
 `colourSchema` accepts more than hex: `rgb()`, `hsl()`, a named colour,
-eight-digit hex with an alpha. The contrast module measures three- and six-digit
-hex and answers `undefined` for everything else, and an unmeasurable pairing goes
-into its own list — neither a pass nor a failure.
+eight-digit hex with an alpha. The contrast module measures everything whose
+channels are **arithmetic** and answers `undefined` for the rest, and an
+unmeasurable pairing goes into its own list — neither a pass nor a failure.
 
-The reasons for declining are worth reading as three different reasons rather
-than one:
+The reasons for declining were worth reading as three different reasons rather
+than one, and the history of them is the lesson:
 
 - a **named colour** needs the CSS colour table, which is 148 entries of
-  vocabulary this module would then own;
-- **`hsl()` and modern `rgb()`** are a parser, and *a parser that is subtly wrong
-  reports a passing ratio for a failing pair*, which is worse than reporting
-  nothing;
-- an **alpha** composites against whatever is behind it, so its contrast is not a
-  property of the two slots at all.
+  vocabulary this module would then own — **still declined**;
+- an **alpha** below opaque composites against whatever is behind it, so its
+  contrast is not a property of the two slots at all — **still declined**. A
+  *fully opaque* alpha is read, because `#1b1f24ff` composites to exactly
+  `#1b1f24`;
+- **`hsl()` and modern `rgb()`** were a parser, and *a parser that is subtly
+  wrong reports a passing ratio for a failing pair*, which is worse than
+  reporting nothing. **These are now read**
+  ([0365](../decisions/0365-a-colour-is-measurable-when-its-channels-are-arithmetic-and-opaque.md)),
+  and the way that argument was retired is the part to carry forward: not by
+  deciding the risk was acceptable, but by **measuring it away** — the parser
+  agrees with Chromium's own CSS engine on 1,034 of 1,034 colours, and measures
+  none of the 30 malformed strings Chromium refuses.
 
-Only the third is a fact about colour. The first is about scope and the second is
-about which direction an error runs in — and the second is the one to carry
-forward, because "it might be wrong" is a bad reason to omit a check and "it
-would be wrong in the direction of reassurance" is a very good one.
+The second is a fact about colour and the first is about scope, so both survive
+anything. The third was about which direction an error runs in — and *that* is
+still the sentence to carry forward, because "it might be wrong" is a bad reason
+to omit a check and "it would be wrong in the direction of reassurance" is a very
+good one. It is also a reason that **evidence can answer and an opinion cannot**,
+which is why this one moved and the other two did not.
 
 Separate lists rather than counting unmeasured as failures, for the reason
 `notProbeable` is separate in the registry audit: a host that wants the guarantee
-asserts both empty, and a host whose palette is written in `hsl()` can tell
+asserts both empty, and a host whose palette names a colour in words can tell
 *unreadable* from *unmeasurable*.
 
 ### And then the half that was missing for months
@@ -1069,20 +1078,20 @@ describe("F", () => {
 
     const inHsl = paletteSchema.parse({
       ...houseStyle,
-      id: "house-hsl",
-      slots: { ...houseStyle.slots, "fg-muted": "hsl(210 12% 60%)" },
+      id: "house-named",
+      slots: { ...houseStyle.slots, "fg-muted": "rebeccapurple" },
     })
     const audit = auditPalette(inHsl)
     console.log(
-      `  house-hsl: measured=${audit.measured.length} painted=${audit.failures.length} unmeasured=${audit.unmeasured.length}`
+      `  house-named: measured=${audit.measured.length} painted=${audit.failures.length} unmeasured=${audit.unmeasured.length}`
     )
   })
 })
 ```
 
 Predict: the three shipped palettes' painted counts, and then the last line —
-`house-hsl` differs from `house` in exactly one slot, so predict all three of its
-numbers against `house`'s 26 / 8.
+`house-named` differs from `house` in exactly one slot, so predict all three of
+its numbers against `house`'s 26 / 8.
 
 The output:
 
@@ -1095,10 +1104,10 @@ The output:
              fg-subtle on accent-subtle: 3.76:1 — loom.perk note inside an accent section
   the bar: 4.5
   #1b1f24            on #ffffff -> 16.56:1
-  hsl(210 20% 12%)   on #ffffff -> not measured
+  hsl(210 20% 12%)   on #ffffff -> 16.69:1
   rebeccapurple      on #ffffff -> not measured
   #1b1f2480          on #ffffff -> not measured
-  house-hsl: measured=21 painted=6 unmeasured=5
+  house-named: measured=21 painted=6 unmeasured=5
 ```
 
 `plum` and `carbon` ship with composed failures at 4.43 and 4.42 against a bar of
@@ -1108,10 +1117,13 @@ asserted" costs and what it buys: the number is small, the fix is contested — 
 the panel or move the ink — and the alternative was an audit that stayed quiet
 about pairings it would have failed.
 
-The bottom half is the more useful half to have run. One slot written in `hsl()`
-takes five pairings out of the measured set, and **two of them were painted
-failures**: `house` had eight painted failures and `house-hsl` has six, with five
-pairings moved into `unmeasured`. Nothing got better. If unmeasured had been folded into
+The bottom half is the more useful half to have run. Note first that
+`hsl(210 20% 12%)` **now measures** and the two below it do not — a named colour
+is vocabulary rather than arithmetic, and `80` is an alpha that composites
+against whatever is behind it. One slot written in a form the measure still
+declines takes five pairings out of the measured set, and **two of them were
+painted failures**: `house` had eight painted failures and `house-named` has six,
+with five pairings moved into `unmeasured`. Nothing got better. If unmeasured had been folded into
 "pass", a host could have made two real failures disappear by rewriting one
 colour in a different notation — which is exactly why it is a third answer.
 
@@ -1275,7 +1287,7 @@ answer, then check.**
    by what each one lets you conclude about a deployment that ships the palette.
    Then say what rule stops the composed list becoming the place inconvenient
    failures are filed.
-6. A palette written in `hsl()` produces `unmeasured` pairings rather than
+6. A palette naming a colour in words produces `unmeasured` pairings rather than
    failures or passes. Give the reason it is a third answer, then say what a host
    that wants the guarantee has to assert, and then name the other place in this
    course where a check answers "I could not tell you" as a first-class result.

@@ -162,7 +162,7 @@ describe("themeDocumentCss", () => {
           ...editorialPalette,
           id: "unreadable",
           slots: Object.fromEntries(
-            Object.keys(editorialPalette.slots).map((slot) => [slot, "hsl(210 30% 40%)"])
+            Object.keys(editorialPalette.slots).map((slot) => [slot, "rebeccapurple"])
           ),
         }),
       ],
@@ -174,7 +174,7 @@ describe("themeDocumentCss", () => {
     const css = themeDocumentCss(unreadable.value)
 
     expect(css).not.toContain("color-scheme")
-    expect(css).toContain("  background-color: hsl(210 30% 40%);")
+    expect(css).toContain("  background-color: rebeccapurple;")
     expect(propertiesOf(css).length).toBeGreaterThan(2)
   })
 })

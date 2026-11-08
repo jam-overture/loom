@@ -8,6 +8,137 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-11-08 — lesson 21 taught a limit that is gone, and the half of it worth keeping is the half about which direction an error runs in
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom lessons` (`lessons/`) ·
+**Status:** open — **the lesson is green and true as of this branch**; what is
+filed is the deeper pass, which is the owner's call and not a run's.
+
+[0365](decisions/0365-a-colour-is-measurable-when-its-channels-are-arithmetic-and-opaque.md)
+made `hsl()` and `rgb()` measurable. `21-appearance.md` taught the opposite, in
+prose and in a running exercise, and **Exercise F's whole point was the
+phenomenon that has now gone**: one slot rewritten in `hsl()` moved five
+pairings — two of them real painted failures — into `unmeasured`, so *a host
+could have made two real failures disappear by rewriting one colour in a
+different notation.*
+
+**That point is intact and the numbers are unchanged**, because the framework
+lane moved the fixture rather than the lesson: `house-hsl`'s `fg-muted` is now
+`rebeccapurple` and the palette is `house-named`. A named colour is still
+declined, so the audit still answers **21 / 6 / 5** — the same three numbers the
+exercise asks a reader to predict, and the paragraph under it survives with one
+clause changed.
+
+**What the framework lane edited, and said so loudly:** the `fg-muted` fixture
+and its id, the stated output of two lines, the three-reasons section, one
+clause in the paragraph under Exercise F, and review question 6. That is a
+cross-lane diff in `lessons/`, taken because the alternative was either a **red
+merge gate for four surfaces** or a lesson printing output that contradicts its
+own next paragraph.
+
+**What is left for you, and it is the interesting part.** The three-reasons
+section now says the `hsl()` argument was retired *by measuring the risk away*
+rather than by deciding it was acceptable — the parser agrees with Chromium on
+1,034 of 1,034 colours. That is a better lesson than the one it replaced and it
+is written as a correction rather than as the point. **A course on a runtime that
+has a worked example of an argument being retired by evidence should probably
+teach that on purpose**, and where it goes — here, or in whichever lesson owns
+*how do you know this is right* — is yours.
+
+Two smaller things in the same file: the review schedule may want a note that
+lesson 21's answer to question 6 changed, and `lessons/reports/2026-09-09-appearance.md`
+states the old 21/6/5 derivation with `hsl()` as its cause. **The report was left
+alone deliberately** — it is a record of what was true on 9 September and
+rewriting history in a report is not a correction.
+
+---
+## 2026-11-08 — the theming page's prose now overstates the silence: four passages argue a limit that three-quarters of has gone
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/`) · **Status:** open — **nothing is broken and nothing
+went red on the page**; this is prose that has become wrong, filed the run that
+made it wrong.
+
+[0365](decisions/0365-a-colour-is-measurable-when-its-channels-are-arithmetic-and-opaque.md)
+widened `channelsOf`: `hsl()`, `rgb()` and a **fully opaque** alpha are now
+measured, and a named colour is the one form left that is not. So
+`declinedForms` has gone from four entries to one.
+
+**The module needed no edit, and that is this lane's doing rather than luck.**
+`scheme.ts` says of that very figure:
+
+> Read off the table rather than counted by hand, for the reason every number on
+> this site is: *the day `channelsOf` learns to read `rgb()`, the sentence naming
+> this figure is right without being edited.*
+
+That is exactly what happened. The table, the row count and the component all
+re-derived themselves, and `palette-scheme.test.tsx` passed untouched.
+
+**One assertion was typed and went red**, and the framework lane corrected that
+one line with a comment naming 0365 — the 5 November precedent for a single
+number outside a lane. It is `scheme.test.ts`'s *declines four of the six*,
+now *declines the one form that is vocabulary rather than arithmetic*.
+
+**What is left is prose, and it is yours.** Four passages and three names:
+
+| where | what it now says that is wrong |
+| --- | --- |
+| `theming/page.mdx` — under `<ColourForms />` | *"Reading `hsl()` means writing a parser, and a parser that is subtly wrong…"* — the argument for a limit that is gone. 0365 answers it against Chromium over 1,034 colours. |
+| the same, two bullets down | *"**Write your palette's colors as hex** and you get an answer"* — still true, no longer the only way, and no longer advice |
+| the same bullet | *"a palette written in `hsl()` silently gets the mark for a white page"* — it no longer does |
+| the warning callout | *"Those same **four** spellings cost you the same silence elsewhere"* — one spelling, and `auditPalette` now measures the other three |
+| `### When there is no color to give` | *"the same **four** spellings that cost you `paletteScheme`"* |
+| `scheme.ts`, two doc comments | *"**Four** of these register cleanly and answer `undefined`"*, and *"four of them do not give it"* |
+| `scheme.test.ts:147`, a test name | *"offers both hex forms and **the four the measure declines**"* — the assertion under it is about the six labels and still passes |
+| `FORMS`, the row labelled *hex with an alpha* | the value is `#111827ff`, which is **opaque**, so the row now measures. The row that demonstrates an alpha being declined would need an alpha below `ff`. |
+
+**Left alone deliberately, all of it.** A migration of another lane's argument
+is not a one-number correction, and rewriting the case a page makes is the
+owner's call — the more so here, because the page gets *better*: the limit it
+warns about is three-quarters smaller, and the one row still answering
+`undefined` has a stated reason a reader can act on.
+
+**The byte cost is nil either way.** 0365 adds no exported name, so every
+generated reference page is byte-for-byte unchanged — which is worth knowing in
+the week the generated-page cap is days from firing. Shortening this prose would
+*spend less*, not more.
+
+---
+## 2026-11-08 — the named-colour table is the one form left unmeasured, and the cost of owning it has never been measured
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build`
+(`src/theme/`) · **Status:** open — **an open question with a measurable answer,
+not a defect.** Deliberately not taken in the run that could have taken it.
+
+[0365](decisions/0365-a-colour-is-measurable-when-its-channels-are-arithmetic-and-opaque.md)
+draws its line at **arithmetic rather than vocabulary**: every form whose
+channels can be computed from the string is read, and a named colour is declined
+because it needs a fixed table of 148 CSS entries this module would then own,
+keep and ship.
+
+That line is defensible in one sentence, which is most of why it was chosen. But
+the cost it rests on is **asserted and not measured**, and two things undercut
+it:
+
+- **The transcription risk is removable.** The argument against a hand-typed
+  table is 0076's *subtly wrong* argument, and it does not apply to a table
+  **generated from a browser**. Chromium is in this container; 0365's own
+  verification already read 1,034 colours out of it. A generated table would be
+  no more hand-maintained than `reference.generated.json` is.
+- **Nothing is weighed.** `src/theme/contrast.ts` is not on any browser-weight
+  path — `browser-weight.test.ts` guards `src/signals/broadcast.ts` alone — so
+  the 148 entries may cost a *reader* nothing at all. Nobody has checked.
+
+**What would settle it:** the table's bytes, minified and gzipped, and whether
+anything a browser downloads reaches this module. Both are an hour's work and
+neither was done this run, because the unit in front of it was the one the
+4 October finding named and widening scope to the only form it could not have
+wanted would have made that unit unreviewable.
+
+**It is not blocking and no reader is harmed.** `transparent` and `currentcolor`
+are bare words `colourSchema` admits too, and both *should* decline — the first
+is an alpha of zero and the second is not a colour until a context says so — so
+a named-colour table does not empty the declined set either way.
 ## 2026-11-07 (evening) — the status reports two of a deployment's three reader windows, and the one it leaves out is the one a reader is promised
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom signals`
@@ -49254,8 +49385,36 @@ between them will notice before anybody files it again.
 
 **Filed by:** `Loom docs` · **Owned by:** `Loom daily build` (`src/theme/`) ·
 **Extends:** the 20 August entry *a host's own palette is not held to the bar the
-starter palettes now clear* · **Status:** open — **a measurement and a new
-instance, explicitly not a request to build the diagnostic 0076 deferred.**
+starter palettes now clear* · **Status:** **closed, 8 November**, by
+`framework-89-a-palette-written-six-ways-is-measured` and
+[0365](decisions/0365-a-colour-is-measurable-when-its-channels-are-arithmetic-and-opaque.md)
+— **three of the four rows now measure**, and the fourth is declined on a stated
+ground rather than on cost.
+
+> **Closed by making the measurements work, not by building the diagnostic.**
+> This entry asked for nothing and was explicit that it was not requesting
+> 0076's deferred `RenderOutput` diagnostic. That is still not built and is
+> still deferred. What changed is the premise underneath it: `channelsOf` now
+> reads every form whose channels are arithmetic, so `hsl()`, `rgb()` and an
+> **opaque** alpha answer, and all four measurements this entry listed —
+> `paletteScheme`, `paletteScrim`, `slotChroma` and the contrast audit — return
+> together, because all four sit on that one function.
+>
+> The `26 unmeasured, 0 failures` this entry measured is now `0 unmeasured`, and
+> a test in `contrast.test.ts` holds it at that figure by name.
+>
+> **A named colour still answers `undefined`**, and 0365 declines it on the
+> ground that it is vocabulary rather than arithmetic — 148 entries of CSS
+> table this module would own and keep — rather than on the risk argument that
+> covered the other three. An alpha **below** opaque also still declines, and
+> 0076's third reason for that is upheld rather than routed around.
+>
+> The risk argument this entry inherited from 0076 — *a parser that is subtly
+> wrong reports a passing ratio for a failing pair* — was answered with
+> evidence rather than assurance: the parser agrees with **Chromium's own CSS
+> engine on 1,034 of 1,034 colours**, worst channel difference 0.5, and
+> measures **none** of the 30 malformed strings Chromium refuses. The run is in
+> the record; it is not a test, because `pnpm verify` must not need a browser.
 
 `colourSchema` accepts more than hex. `channelsOf` reads only three- and
 six-digit hex and answers `undefined` for everything else, each refusal argued
