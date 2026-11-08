@@ -393,6 +393,20 @@ was asked for `text=Cut short here` on both: **six matches** before, spread
 down the page, and **`no match`** after. That line is the measurement, and it
 is the one in the output that cannot be argued with.
 
+### All four embeds arrived on the pull request as dead links again
+
+The transit mangling of 5 November's entry — *a markdown link posted to GitHub
+from a routine session can arrive with backticks wrapping its URL* — took the
+`!` off every one of the four `![alt](url)` embeds in #820's body and wrapped
+each URL in two, three, four and five backticks respectively. **Left alone,
+which is what that entry says to do**: no re-`PATCH`, no bare URLs, no commit
+pushed to straighten it.
+
+It is the **second load-bearing instance** and the first where the pictures are
+the whole argument: a before-and-after pair is the evidence for this change,
+and on the pull request it is four dead links. Filed below. The pictures are in
+this repository and cited here, so this report is where they can be seen.
+
 ### The sentence, and the phone
 
 ![1280: the top of the signals reference page, with the line reading 656 exports in 61 modules, generated from the declaration file, and the new sentence saying each comment inside a declaration is shown as its first paragraph](2026-11-08-docs-the-first-paragraph-inside-a-declaration-wide-head.webp)

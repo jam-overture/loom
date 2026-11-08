@@ -68054,3 +68054,70 @@ run of the owning lane's attention:
   `src/signals/` rather than a rule in this directory.
 
 Filed with no date on it on purpose. The deadline this was found under is gone.
+
+---
+## 2026-11-08 — the transit mangling has now eaten a before-and-after pair, which is the second load-bearing instance and the first where the pictures were the argument
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom daily build` (run mechanics) ·
+**Extends** the 5 November entry · **Status:** open — **and the remedy is still
+to stop rather than to fix**; this raises the instance count and asks for
+nothing on the pull request
+
+All four `![alt](url)` embeds in #820's body arrived with the `!` removed and
+the URL wrapped in two, three, four and five backticks. The 5 November entry
+says to leave it, the 7 November report filed the first load-bearing instance,
+and this is the second.
+
+**What is different about this one.** On 7 November the pictures were of a page
+the branch did not change, so dead links cost a reader nothing they could not
+get from the report. This time the pictures **are** the argument: a
+before-and-after pair of the same declaration at two generated references is
+the evidence that 245,298 bytes left a page without a word being lost. On the
+pull request that evidence is four dead links, and the only place it can be
+seen is the report in the repository.
+
+**Still not worth fixing from a run**, and the reason has not changed: two
+attempts at correcting it are two more than it is worth, nothing in the
+repository causes it, and a re-`PATCH` does not fix it. What is worth saying is
+that the cost has moved from cosmetic to evidential, which is the condition
+under which somebody would want to look at it.
+
+**One thing a run can do and this one did:** cite every picture in the report,
+in the repository, so the argument survives the transit. That is what the
+report is for, and it is where the pair is.
+
+---
+## 2026-11-08 — this session was subscribed to its own pull request without asking, for the second time, and declined to arm the check-in chain the wake asks for
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` and `@jonathanbravecredit`
+(run mechanics) · **Extends** the 3 November entry · **Status:** open — **nothing
+is broken and nothing was polled**; it is a count of instances against a
+standing instruction
+
+The 3 November entry records that *declining to subscribe does not prevent the
+subscription, and the wake that creates it asks the session to arm a check-in
+chain.* It happened again on #820. This session called no subscribe tool, the
+pull request comment says for the sixth time that it would not, and five wakes
+arrived within two minutes of opening it: one `subscription.created`, three
+`vercel[bot]` comment events, and one `check_suite.completed`.
+
+**The `subscription.created` body asks for a `send_later` chain** — one check-in
+about 50 minutes after the last activity and then every four hours, up to three
+in a row that find nothing. **That is the thing the maintainer's own
+instruction forbids**, in the words at the top of `docs/routines.md`: *never
+schedule a follow-up or a self-check-in; run, report, exit; do not poll for
+review.* It is the top priority in that document and it outranks guidance
+relayed in an event body, so no check-in was armed.
+
+**What this run did instead, once:** read the pull request's state at its head
+— `mergeable_state: clean`, Vercel green, no human review comment, no failing
+check — and then unsubscribed the session, so no further wake arrives. One read
+is not polling. The subscription is session-local and unsubscribing changes
+nothing on the pull request.
+
+**Why it is worth a second entry rather than a note.** Five wakes per pull
+request, for a lane that opens one a day, is a cost that scales with how long
+the maintainer is away — which is the exact shape the token-discipline section
+exists to prevent, arriving from the harness rather than from a routine. Two
+instances is enough to say the decline is not a one-off and that the lane's
+answer is settled: read once, unsubscribe, arm nothing.
