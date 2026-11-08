@@ -7,6 +7,12 @@ Branch `framework-tree-walks-iterative`, #829. Record
 
 ![Before and after, on a chain](2026-11-08-tree-walks-iterative.svg)
 
+Preview:
+https://loom-git-framework-tree-walk-600a93-jpizzolato36-6341s-projects.vercel.app
+Nothing on it looks different, and nothing should: every output of every
+function this branch touches is unchanged. The chart above is the measurement,
+and it is the only thing here there is anything to look at.
+
 ## What this run completed
 
 `Loom signals` filed a finding this morning saying that `outlineTree` is
@@ -154,6 +160,11 @@ depth bound the parser has. Not measured, because nothing here depends on it.
 `pnpm install && pnpm verify` — **EXIT=0**, read out of `verify.exit` in its
 own command. The harness's own completion notice for the gate also said exit
 code 0, and that is not the evidence; the file is.
+
+The gate ran over the source, the tests and the record. This report and the two
+`FINDINGS.md` edits were written after it, so `pnpm reports:check` and
+`pnpm findings:check` — the two gate steps that read them — were run again
+afterwards and both passed. No source or test file changed after the gate.
 
 | | framework | application | total |
 | --- | --- | --- | --- |
