@@ -34,7 +34,7 @@ const unmeasurable = (): Palette =>
     ...editorialPalette,
     id: "unmeasurable",
     slots: Object.fromEntries(
-      Object.keys(editorialPalette.slots).map((slot) => [slot, "hsl(210 30% 40%)"])
+      Object.keys(editorialPalette.slots).map((slot) => [slot, "rebeccapurple"])
     ),
   })
 
@@ -56,8 +56,8 @@ describe("slotChroma", () => {
   })
 
   it("declines a colour it cannot parse rather than guessing at it", () => {
-    expect(slotChroma("hsl(210 30% 40%)")).toBeUndefined()
     expect(slotChroma("rebeccapurple")).toBeUndefined()
+    expect(slotChroma("#11223344")).toBeUndefined()
   })
 
   /**
@@ -241,6 +241,6 @@ describe("the variables a stylesheet gets", () => {
 
     expect(variables["--loom-scrim"]).toBeUndefined()
     expect(variables["--loom-accent-strong-chroma"]).toBeUndefined()
-    expect(variables["--loom-bg-canvas"]).toBe("hsl(210 30% 40%)")
+    expect(variables["--loom-bg-canvas"]).toBe("rebeccapurple")
   })
 })

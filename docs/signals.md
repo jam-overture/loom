@@ -32,9 +32,11 @@ the portal every day.
 | Content | **none** — no text, no URLs, no typed values, nothing about the reader |
 | Configuration | the host's argument, never a prop in the tree |
 | Default | off; an unaddressed render is byte-identical |
-| Browser cost | **6.4 KB** minified, 2.9 KB gzipped, measured again 6 November and unmoved; `src/signals/browser-weight.test.ts` fails if an import reaches a package |
+| Browser cost | **7,543 bytes** minified, 3,361 gzipped, measured 7 November; `src/signals/browser-weight.test.ts` fails if an import reaches a package, and now also if the bundle passes 8,000 minified or 3,600 gzipped |
+| What a broadcast follows | the page, when it is handed the `Document` ([0366](../decisions/0366-a-broadcast-handed-a-document-follows-the-page-and-a-client-side-navigation-is-a-new-page-view.md)) — a client-side navigation ends one page view and opens another with its own arrival, a re-render leaves the page view alone, and the same revision rendered again continues it; handed an `Element` it reads that element's tree and revision once, as it always has |
 | How long a delivery lives | two windows since 5 November: counted once it is ripe, **kept for 30 days by default** and then deleted ([0349](../decisions/0349-a-projects-reader-events-are-kept-thirty-days-by-default-and-the-tallies-stay-the-durable-record.md), [0351](../decisions/0351-a-counted-delivery-is-kept-for-a-stated-window-rather-than-deleted-by-the-fold.md)) — and nothing deletes a delivery no fold has counted, so a deployment whose collection stopped keeps rather than loses them |
 | What an operator can look at, delivery by delivery | one row per signal the deployment still keeps, newest first, in exact pages, with the rest of one page view beside any of them ([0355](../decisions/0355-the-events-a-screen-lists-are-one-row-per-signal-and-one-page-view-is-read-on-a-key-the-caller-already-holds.md)) — the handle the *Events* tab is drawn from, which counts nothing, names no page and cannot be asked which page views exist |
+| What readers did inside a part | every addressed node of one revision, with what readers did **to** it and what they did **inside** it over a range ([0368](../decisions/0368-what-readers-did-inside-a-part-is-derived-from-the-tree-and-the-sum-is-exact-because-occurrences-add.md)) — derived from the tree rather than from the payload, so *forty presses in the pricing band last Tuesday* costs no byte anywhere, and exact because one signal wrote one row on one node |
 | When readers arrived | page views counted under the hour they began in as well as in total ([0356](../decisions/0356-page-views-are-counted-under-the-hour-they-began-in-as-a-sixth-counter-written-at-the-door.md)), written at the door in the same transaction as the total — so a chart by hour sums to the count drawn beside it, and a reading over a range says where its data starts |
 | Which page a change helped and which it hurt | every page's sharpest movement in each direction, at the later window's door scale ([0291](../decisions/0291-a-deployments-change-is-two-orders-at-the-doors-scale-because-a-page-has-no-net-movement.md)), as two orders rather than one — because a page the change both helped and hurt has no net |
 | What a change did to the funnel | the rate bracketed by each window's own ceiling, with a counterfactual saying which half moved ([0288](../decisions/0288-a-change-to-a-funnel-is-two-shares-that-factor-and-a-difference-of-two-floors-is-a-bracket.md)), so a rollup window a deployment shortened cannot read as a collapse |
@@ -128,6 +130,15 @@ call inside a pull request.
    ledger is linear, not quadratic — it was quadratic once, and a 6,000-node page
    took 314 ms. Anything added stays behind both.
 
+   **The size half is a test as of 7 November, and it had to become one.** It
+   was this sentence and a figure in each report, re-measured by whoever
+   remembered — and on 2 November that figure was found to be a third out of
+   date. `browser-weight.test.ts` now builds and gzips the bundle and holds it to
+   8,000 bytes minified and 3,600 gzipped, so a step up in what every reader
+   downloads is a line somebody had to write, with the number in it, in the diff
+   that spends it. §78 spent 1,030 of those bytes on purpose and says why
+   ([0366](../decisions/0366-a-broadcast-handed-a-document-follows-the-page-and-a-client-side-navigation-is-a-new-page-view.md)).
+
    One limit found in it on 2 October, measured and recorded in
    [0218](../decisions/0218-what-a-counter-means-is-published-and-the-browser-pays-for-the-number-and-not-its-name.md):
    **a name the browser entry point *exports* survives minification.** Two
@@ -199,6 +210,12 @@ left on the old root reports nothing more, and nothing says so.
 addressed elements — the broadcaster already runs one for disclosures at
 `broadcast.ts:336` — and a sentence in the module documentation that a new root
 or revision is a new broadcast. Closes the open finding of 12 September.
+
+**The sentence was not enough, and §78 replaced it on 7 November.** A host that
+did not act on it filed every signal after a client-side navigation under the
+page the reader left, which is a wrong number rather than a missing one. A
+broadcast handed the `Document` now follows the page itself
+([0366](../decisions/0366-a-broadcast-handed-a-document-follows-the-page-and-a-client-side-navigation-is-a-new-page-view.md)).
 
 ### 2. `completed`, the kind that closes a funnel · `Loom signals` · **done, 1 October**
 
@@ -4902,6 +4919,134 @@ bytes as §76.
 whether the drawer wants `viewed` and `dwelled` bars over a range too, which
 would be a second, page-grained table and is a question about the screen rather
 than about the counter.
+### 78. A client-side navigation is a new page view · `Loom signals` · **done, 7 November**
+
+§1 taught the broadcaster to keep up with a page that changes under it, and left
+the page *becoming a different page* as a sentence in the module documentation:
+`stop()` the old broadcast and start another. **That sentence asks a host to
+notice a client-side navigation, and a host that does not get wrong data rather
+than missing data** — a reader moves from the pricing page to the sign-up page,
+the broadcaster is still holding the pricing page's detached root, and every
+signal after the navigation is filed against the pricing page's revision.
+Nothing says so at either end: the node ids are real, the batch parses, the fold
+counts it, and the portal draws it on the wrong page.
+
+It is also an undercount in the counter the newest readings are built on. One
+batch of a page view carries `first`, which is how an arrival is counted exactly
+once (0214), so a reader who visits four pages without the broadcast restarting
+arrives **once** — and page views by hour (0356), the region map and every
+figure at the door's scale read that marker.
+
+**Done**
+([0366](../decisions/0366-a-broadcast-handed-a-document-follows-the-page-and-a-client-side-navigation-is-a-new-page-view.md)):
+`broadcastReaderSignals` takes an `Element` **or** a `Document`.
+
+- **An element behaves exactly as it did.** That element is the root, its tree
+  and revision are read once, and a page that becomes a different page needs
+  another call. No existing caller changes.
+- **A document is followed.** The addressed page is found with `addressedRootIn`
+  — published on the light side of the split on 5 November (0354), which is what
+  made this cheap — and a `MutationObserver` on the document watches children
+  and the two attributes that spell a page's identity.
+- **Three clauses are the counting rule.** A re-render is not a navigation, so
+  every band a proposal rewrites leaves the page view alone. A new identity is a
+  new page view, with its own key and its own opening, and what the old
+  broadcast gathered is delivered under the revision it gathered it on. The same
+  identity rendered again is the **same** page view — a host that unmounts the
+  element it rendered into and renders the same revision again has sent the
+  reader nowhere, so the page view is a value handed to each broadcast rather
+  than state a broadcast owns.
+- **Rule 2 is not stretched.** Two pages one reader saw are two keys, random per
+  page view, derived from nothing about the reader, and nothing anywhere can tell
+  that one reader saw both.
+
+**This is the first unit in a long time that a browser pays for, and it is the
+largest step this entry point has taken since it was split out:** 6,513 bytes
+minified and 2,986 gzipped become **7,543 and 3,361** — 1,030 bytes, 15.8%, paid
+by every page that asks for signals whichever argument it passes. The import
+graph is unchanged and still reaches no package. A second entry point would have
+held rule 4 exactly and was rejected in the record: one door that is right with
+the argument most hosts already hold beats two doors and a paragraph about which
+is safe.
+
+**The same unit makes rule 4's second half a test.** `browser-weight.test.ts`
+now builds and gzips the bundle and holds it to 8,000 bytes minified and 3,600
+gzipped, so a step up in what every reader downloads is a line somebody had to
+write with the number in it.
+
+**What is left and is filed:** five callers in this repository still pass an
+element, which is each lane's one-line change — the one that matters is
+`snippetFor`, the lines a *customer* pastes, which becomes three lines with no
+null guard; and a deployment's figures move when a host adopts the document form,
+because what was collected changed rather than how it is counted, and the fault
+vocabulary has no member for that.
+
+### 79. What readers did inside a part · `Loom signals` · **done, 8 November**
+
+> Numbered 79 because §78 is claimed by the open #802 (*a broadcast handed the
+> document follows the page*). Nothing here depends on it and the two touch no
+> file in common but this one.
+
+§77 put a clock on the three kinds a reader aimed at something to cause, and
+wrote a row for the node each signal **named**. Nothing wrote a row for an
+ancestor of it, and nothing was going to: ancestry on the wire is what
+[0167](../decisions/0167-a-delegated-signal-names-the-regions-it-happened-inside.md)
+refused, and the one counter the fold spends `within` on is `engaged` — a
+*distinct count of page views* on each ancestor, which does not add and keeps no
+time.
+
+So the question every screen eventually asks was unanswerable from a store
+holding every press and every band: **a reader pressed something; what was it
+inside?**
+
+**Done**
+([0368](../decisions/0368-what-readers-did-inside-a-part-is-derived-from-the-tree-and-the-sum-is-exact-because-occurrences-add.md)),
+as a read-time join and no new storage, payload or browser byte.
+
+- **The containment is derived from the tree.** Every row names a tree, a
+  revision and a node; the tree the counters name says what that node sits
+  inside; a sum over a subtree is the answer. `insideReadingOf` returns every
+  addressed node in reading order with what readers did **to** it and what they
+  did **inside** it, plus its depth, its containing part, the parts in its
+  subtree, its role (0114) and the words it says itself (0122).
+- **The sum is exact, which is why it is publishable.** One signal wrote one row
+  on one node, so a subtree's total counts each action once at whatever depth it
+  happened. The invariant — a part's total is its own count plus the totals of
+  the parts immediately inside it — is asserted over **every** part of a fixture
+  page, and `ActedCounts` is split out of the stored row so the types say these
+  four numbers are occurrences with no reader in them. It is the one counter
+  here a nesting sum may be taken over; adding `engaged` up a tree would count
+  one press once per ancestor and look right.
+- **It answers for batches that carried no `within` at all**, because it never
+  reads the field — which is every batch synthesised on a server or replayed
+  from a fixture.
+- **The containment is the nearest *addressed* ancestor and not the tree
+  parent.** A slot is a node with children and is never a part, so slots are
+  passed through.
+- **One revision, and audiences add.** Ancestry is a fact about one revision, so
+  rows of another are dropped and counted — the band a button sat in last week
+  may not be the band it sits in now. Audiences are summed and published as a
+  census (0297), because occurrences add where distinct page views do not.
+- **Three questions a caller can phrase**: the parts readers acted on most in a
+  range by what they did to the part itself; the share of the page's acting that
+  happened inside one part; and what happened inside a part but not to it. The
+  first orders by a part's own count and never by its inside total, because an
+  ancestor's is never below its descendant's.
+
+**Nothing reaches a reader's browser.** `broadcast.ts` and its import graph are
+untouched.
+
+**Also in this step, from a finding `Loom framework` filed against this lane:**
+`GET /api/reader-signals` reported two of a deployment's three reader windows
+and left out `kept` — the one a reader is actually promised, and the one whose
+unreadable value stops the expiry sweep while refusing nothing. It is a field
+now, with the three windows held apart by a test.
+
+**What is left and is filed:** the screens are the portal's to draw — the *By
+page* drawer's *three parts pressed most* reads the all-time tallies and can now
+read the range; and `outlineTree` is quadratic in depth and throws above about
+2,000, which bounds this reading and `parts.ts` identically and belongs to the
+lane that owns `src/tree/`.
 
 ## Still not in scope
 

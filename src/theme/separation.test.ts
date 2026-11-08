@@ -61,7 +61,19 @@ describe("colourDifference", () => {
   })
 
   it("declines to measure a colour it would have to guess at", () => {
-    for (const colour of ["rgb(10, 10, 10)", "hsl(200 50% 40%)", "rebeccapurple", "#11223344"]) {
+    for (const colour of [
+      "rebeccapurple",
+      "transparent",
+      "currentcolor",
+      "#11223344",
+      "#1234",
+      "rgba(10, 10, 10, 0.5)",
+      "hsl(200 50% 40% / 0.5)",
+      "#12345",
+      "rgb(1, 2 3)",
+      "hsl(none 30% 11%)",
+      "not a colour at all",
+    ]) {
       expect(colourDifference(colour, "#ffffff"), colour).toBeUndefined()
     }
   })
@@ -224,7 +236,7 @@ describe("auditSeparation", () => {
   })
 
   it("tells a peer it could not measure from one that collapsed", () => {
-    const audit = auditSeparation(withSlots({ "fg-muted": "hsl(0 0% 45%)" }))
+    const audit = auditSeparation(withSlots({ "fg-muted": "rebeccapurple" }))
 
     expect(audit.unmeasured.map((entry) => entry.pairing.second)).toEqual(["fg-muted", "fg-subtle"])
     expect(describeSeparationAudit(audit)).toContain("could not be measured")
@@ -336,7 +348,7 @@ describe("auditMarkGroundings", () => {
    * read: a defence that cannot be measured is not counted as one.
    */
   it("counts a colour it cannot measure as a line it cannot find", () => {
-    const marks = auditMarkGroundings(withSlots({ "border-default": "rgb(200, 200, 200)" }))
+    const marks = auditMarkGroundings(withSlots({ "border-default": "rebeccapurple" }))
 
     expect(marks.invisible.map((entry) => entry.grounding.mark)).toEqual([
       "border-default",
