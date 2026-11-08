@@ -51,7 +51,7 @@ free.
   on a pulling site; everything at once on the own site and nothing where the
   site never pulled; an undone change counted only if a pull took it first;
   `undefined` for unreadable pulls or goals).
-- `pnpm verify` on the branch: 440 test files, 7,138 tests passed, exit 0.
+- `pnpm verify` on the branch with `main` merged in: the app's 440 test files, 7,138 tests passed; the framework's 6,604 passed, 2 skipped; exit 0.
 
 ## Screen
 
