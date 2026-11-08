@@ -199,7 +199,7 @@ deliberately not in the list above: it is shown once and used once, on the line
 that runs `pages:publish`.
 
 **This table is checked against the application**
-([0364](../decisions/0364-what-an-operator-must-set-is-read-off-the-application-and-the-guide-goes-red-when-it-is-behind.md)).
+([0367](../decisions/0367-what-an-operator-must-set-is-read-off-the-application-and-the-guide-goes-red-when-it-is-behind.md)).
 A variable the code reads and this file does not name fails `pnpm verify` on the
 branch that adds it, which is why six settings that were documented nowhere are
 in the rows above.
@@ -536,7 +536,7 @@ curl https://your-deployment/api/reader-signals
 ```
 
 **Every field of that answer is listed above, and a check holds it so**
-([0364](../decisions/0364-what-an-operator-must-set-is-read-off-the-application-and-the-guide-goes-red-when-it-is-behind.md)).
+([0367](../decisions/0367-what-an-operator-must-set-is-read-off-the-application-and-the-guide-goes-red-when-it-is-behind.md)).
 It had been three fields short for a fortnight and four short for a week, which
 matters because an operator reading this is counting fields against what their
 own deployment answered.

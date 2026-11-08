@@ -1,13 +1,20 @@
-# 0364. What an operator must set is read off the application, and the guide goes red when it is behind
+# 0367. What an operator must set is read off the application, and the guide goes red when it is behind
 
 **Status:** Accepted
 **Date:** 2026-11-07
 **Section:** §1 (process), §5 (deployment)
 
-> **Why this number.** `0363` was the highest on `main` at `b0db23c`, which this
-> branch is cut from. `0353` is claimed by the open #778 and `0361` by the open
-> #802 — which clashes with the `0361` already on `main`, and is `Loom merge`'s
-> to renumber rather than this branch's. `0364` was free on all three.
+> **Renumbered from `0364` on 2026-11-08 by `Loom merge`.** `0364` was free on
+> `main` and on every open branch when this record was written, and it was
+> claimed by one other unmerged branch that nothing here could see — #806, *a new
+> server waits for its first pull before it serves, and never waits again* —
+> which landed on `main` first and therefore keeps the number. `0367` is the next
+> number free on `main` and on every open branch. Only the number changed:
+> nothing this record decides is different (0097).
+>
+> The note this replaced recorded the original choice: `0363` was the highest on
+> `main` at `b0db23c`, which this branch is cut from, `0353` was claimed by the
+> open #778 and `0361` by the open #802, and `0364` was free on all three.
 >
 > **Why `Accepted`.** It adds one check over a file this lane owns and changes no
 > behaviour: nothing in `src/`, no route, no dependency, no build step. It is

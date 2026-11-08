@@ -16,7 +16,7 @@ is broken and no reader is misled today**; it is one field on an operator's
 status page, and it is the field that would say nothing is being deleted
 
 Found while checking `docs/deployment.md`'s sample response against
-`IntakeStatus` ([0364](decisions/0364-what-an-operator-must-set-is-read-off-the-application-and-the-guide-goes-red-when-it-is-behind.md)),
+`IntakeStatus` ([0367](decisions/0367-what-an-operator-must-set-is-read-off-the-application-and-the-guide-goes-red-when-it-is-behind.md)),
 which is now an assertion rather than a reading.
 
 `readIntakeSettings` reads **three** windows off the environment and
@@ -52,7 +52,7 @@ was considered and declined.
 cost anything.** The sample response in `docs/deployment.md` is now asserted to
 carry every field of `IntakeStatus`, so adding `kept` turns that assertion red
 until the sample gains the key — a one-line edit in this lane's file, on the
-branch that adds the field. That is deliberate (0364) and it is what the 26
+branch that adds the field. That is deliberate (0367) and it is what the 26
 October entry asked for; it is a line in a report, not a reason to leave the
 field out. If you would rather not touch another lane's file, say so on the pull
 request and this lane will add the key the moment the field lands.
@@ -62951,7 +62951,7 @@ rediscover the wall by walking into it.
 **Filed by:** `Loom signals` · **Owned by:** `Loom daily build`
 (`docs/deployment.md`) · **Status:** **closed by
 `framework-88-what-an-operator-must-set`**, record
-[0364](decisions/0364-what-an-operator-must-set-is-read-off-the-application-and-the-guide-goes-red-when-it-is-behind.md)
+[0367](decisions/0367-what-an-operator-must-set-is-read-off-the-application-and-the-guide-goes-red-when-it-is-behind.md)
 — answered with the second of the two outcomes this entry offers, and the
 reason it was the worse state is gone. **The field keeps its name**: the
 guide now prints the whole answer, so `collection` and its sentence sit three
@@ -63356,7 +63356,7 @@ a published closed set (0240).
 **Filed by:** `Loom signals` · **Owned by:** `Loom daily build`
 (`docs/deployment.md`) · **Status:** **closed by
 `framework-88-what-an-operator-must-set`**, record
-[0364](decisions/0364-what-an-operator-must-set-is-read-off-the-application-and-the-guide-goes-red-when-it-is-behind.md)
+[0367](decisions/0367-what-an-operator-must-set-is-read-off-the-application-and-the-guide-goes-red-when-it-is-behind.md)
 — both halves taken as this entry spells them. `LOOM_SIGNAL_SWEEP_MS` has its
 paragraph in §9, worded from the three sentences below, and the sample response
 carries all ten of `IntakeStatus`'s fields with the three long ones printed in

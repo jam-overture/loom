@@ -140,10 +140,12 @@ the git sweep's argvs written as literals.
 
 ## Records
 
-- **Added: 0364**, `Accepted`. Why that number: `0363` is the highest on `main`
-  at `b0db23c`; `0353` is claimed by the open #778 and `0361` by the open #802.
-  `0364` was free on all three. `pnpm decisions:index` run; the index has no
-  hole it did not already have.
+- **Added: 0367**, `Accepted`. Why that number: it was written as `0364` —
+  `0363` was the highest on `main` at `b0db23c`, `0353` was claimed by the open
+  #778 and `0361` by the open #802, and `0364` was free on all three. `0364` was
+  also claimed by the unmerged #806, which landed first, so `Loom merge`
+  renumbered this record to **0367** on 8 November. `pnpm decisions:index` run;
+  the index has no hole it did not already have.
 - **Superseded: none.** Nothing here touches the tree schema, the delta model or
   an `Accepted` clause. Nothing is `ARCHITECTURAL`.
 
