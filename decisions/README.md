@@ -449,5 +449,10 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0357](0357-a-primitive-declares-the-shape-of-answer-it-reads-and-the-rows-inside-it-stay-its-own.md) | A primitive declares the shape of answer it reads, and the rows inside it stay its own | Accepted | §4e |
 | [0358](0358-an-accepted-change-goes-live-from-the-portal-and-the-site-pulls-it-with-no-pull-request.md) | An accepted change goes live from the portal, and the site pulls it with no pull request | Accepted — partially supersedes 0275 and 0340 | §1, §5 (portal), the connection plane |
 | [0359](0359-an-audience-rule-is-a-conjunction-of-scalar-clauses-and-a-composed-page-is-a-projection-of-a-revision.md) | An audience rule is a conjunction of scalar clauses, and a composed page is a projection of a revision | Accepted | §1, §3 |
-| 0360 | *No record on this branch* | — | — |
-| [0361](0361-a-broadcast-handed-a-document-follows-the-page-and-a-client-side-navigation-is-a-new-page-view.md) | A broadcast handed a document follows the page, and a client-side navigation is a new page view | Accepted | §4c (reader signals) |
+| [0360](0360-the-style-of-this-repository-is-maintained-by-hand-and-what-is-checked-is-that-no-statement-ends-in-a-semicolon.md) | The style of this repository is maintained by hand, and what is checked is that no statement ends in a semicolon | Accepted | §1 (process) |
+| [0361](0361-the-site-pulls-into-its-own-process-and-a-host-wires-the-live-page-in-two-calls.md) | The site pulls into its own process, and a host wires the live page in two calls | Accepted | §1, §5 (portal), the connection plane |
+| [0362](0362-what-readers-did-is-counted-under-the-hour-they-did-it-in-as-a-seventh-counter-the-fold-writes-for-the-three-delegated-kinds.md) | What readers did is counted under the hour they did it in, as a seventh counter the fold writes for the three delegated kinds | Accepted | §5 (reader signals), the counters |
+| [0363](0363-the-marketing-site-is-served-from-its-code-and-a-stored-row-is-not-a-second-version-of-it.md) | The marketing site is served from its code, and a stored row is not a second version of it | Accepted | §5 (portal), the marketing surface |
+| 0364 | *No record on this branch* | — | — |
+| 0365 | *No record on this branch* | — | — |
+| [0366](0366-a-broadcast-handed-a-document-follows-the-page-and-a-client-side-navigation-is-a-new-page-view.md) | A broadcast handed a document follows the page, and a client-side navigation is a new page view | Accepted | §4c (reader signals) |
