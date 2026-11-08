@@ -8,7 +8,7 @@
       "files": 100,
       "narrower": [],
       "standing": {
-        "packageNames": 1987,
+        "packageNames": 1994,
         "otherDoors": 18,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -4252,7 +4252,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 1987,
+        "packageNames": 1994,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -4296,7 +4296,7 @@
       "files": 63,
       "narrower": [],
       "standing": {
-        "packageNames": 1987,
+        "packageNames": 1994,
         "otherDoors": 18,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -5255,7 +5255,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 1987,
+        "packageNames": 1994,
         "otherDoors": 18,
         "doorsSharingNothing": 17,
         "widest": false,
@@ -5330,7 +5330,7 @@
       "files": 220,
       "narrower": [],
       "standing": {
-        "packageNames": 1987,
+        "packageNames": 1994,
         "otherDoors": 18,
         "doorsSharingNothing": 17,
         "widest": false,
@@ -5800,7 +5800,7 @@
       "files": 81,
       "narrower": [],
       "standing": {
-        "packageNames": 1987,
+        "packageNames": 1994,
         "otherDoors": 18,
         "doorsSharingNothing": 17,
         "widest": false,
@@ -6888,7 +6888,7 @@
       "files": 38,
       "narrower": [],
       "standing": {
-        "packageNames": 1987,
+        "packageNames": 1994,
         "otherDoors": 18,
         "doorsSharingNothing": 17,
         "widest": false,
@@ -7465,7 +7465,7 @@
       "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 1987,
+        "packageNames": 1994,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -7668,7 +7668,7 @@
       "files": 42,
       "narrower": [],
       "standing": {
-        "packageNames": 1987,
+        "packageNames": 1994,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -8578,7 +8578,7 @@
       "files": 61,
       "narrower": [],
       "standing": {
-        "packageNames": 1987,
+        "packageNames": 1994,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -8957,7 +8957,7 @@
       "files": 41,
       "narrower": [],
       "standing": {
-        "packageNames": 1987,
+        "packageNames": 1994,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -9175,7 +9175,7 @@
       "files": 14,
       "narrower": [],
       "standing": {
-        "packageNames": 1987,
+        "packageNames": 1994,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -9337,7 +9337,7 @@
       "slug": "signals",
       "types": "./dist/signals/index.d.ts",
       "requires": [],
-      "files": 81,
+      "files": 83,
       "narrower": [
         {
           "specifier": "@jam-overture/loom/signals/broadcast",
@@ -9350,7 +9350,7 @@
         }
       ],
       "standing": {
-        "packageNames": 1987,
+        "packageNames": 1994,
         "otherDoors": 18,
         "doorsSharingNothing": 16,
         "widest": true,
@@ -9399,9 +9399,15 @@
               "summary": "Whether a signal kind is one this counter holds."
             },
             {
+              "name": "ActedCounts",
+              "kind": "type",
+              "signature": "type ActedCounts = {\n    readonly activations: number;\n    readonly opens: number;\n    readonly closes: number;\n    readonly completions: number;\n};",
+              "summary": "What readers did, as four numbers, with nothing saying what they did it to."
+            },
+            {
               "name": "ActedHourCount",
               "kind": "type",
-              "signature": "type ActedHourCount = {\n    readonly treeId: TreeId;\n    readonly revision: number;\n    readonly nodeId: NodeId;\n    readonly type: PrimitiveType;\n    /** The hour it happened in, as the instant that hour began (UTC). */\n    readonly hour: number;\n    readonly activations: number;\n    readonly opens: number;\n    readonly closes: number;\n    readonly completions: number;\n};",
+              "signature": "type ActedHourCount = ActedCounts & {\n    readonly treeId: TreeId;\n    readonly revision: number;\n    readonly nodeId: NodeId;\n    readonly type: PrimitiveType;\n    /** The hour it happened in, as the instant that hour began (UTC). */\n    readonly hour: number;\n};",
               "summary": "What readers did to one part of one revision, in one hour."
             },
             {
@@ -9413,7 +9419,7 @@
             {
               "name": "actedCountOf",
               "kind": "function",
-              "signature": "const actedCountOf: (row: ActedHourCount, kind: ActedKind) => number",
+              "signature": "const actedCountOf: (counts: ActedCounts, kind: ActedKind) => number",
               "summary": "The counter a kind is counted in."
             },
             {
@@ -11376,6 +11382,49 @@
           ]
         },
         {
+          "module": "signals/inside",
+          "title": "Inside",
+          "summary": "**What readers did inside each part of a page, over a range.**",
+          "symbols": [
+            {
+              "name": "InsidePart",
+              "kind": "type",
+              "signature": "type InsidePart = {\n    readonly nodeId: NodeId;\n    readonly type: PrimitiveType;\n    /** What part it plays, or `null` where its type declared none. */\n    readonly role: PrimitiveRole | null;\n    /** Depth in the tree, counting every node; 0 at the root. */\n    readonly depth: number;\n    /**\n     * The nearest **addressed** ancestor, which is what `within` names,\n     * and `null` at the outermost part.\n     *\n     * Not the tree parent. A slot is a node with children and is never a part —\n     * no signal can name one, because only an element carries the identity\n     * attributes a broadcaster reads — so the part immediately containing an\n     * element is the nearest *element* above it, with any slots between them\n     * passed through. A reading keyed on the tree parent would hang a band off a\n     * node that appears nowhere in its own list.\n     */\n    readonly withinId: NodeId | null;\n    /** What readers did to this part itself, in the range. */\n    readonly own: ActedCounts;\n    /**\n     * What readers did to this part and to every part inside it, in the range.\n     *\n     * Each action is in exactly one part's `own` and in the `inside` of each of\n     * that part's ancestors, so this adds **down** a tree and never across one:\n     * two siblings' `inside` may be added, a part's and its child's may not.\n     */\n    readonly inside: ActedCounts;\n    /** Addressed nodes in its subtree, itself included — so 1 for a part with no parts in it. */\n    readonly parts: number;\n    /**\n     * The words this part says itself: its declared copy props, and the text\n     * handed to it directly or through a slot.\n     *\n     * Its own, never its subtree's, exactly as `PartReading.copy` is and by the\n     * same function — so *a reader pressed `Get started`* is a sentence a surface\n     * can write, and a caller adding two parts' words together reads no headline\n     * twice.\n     */\n    readonly copy: NodeCopy;\n};",
+              "summary": "One part of the page, what readers did to it, and what they did inside it."
+            },
+            {
+              "name": "InsideReading",
+              "kind": "type",
+              "signature": "type InsideReading = {\n    readonly treeId: TreeId;\n    readonly revision: number;\n    readonly range: ArrivalRange;\n    /** Every addressed node, in reading order, so a row is always preceded by the row it is inside. */\n    readonly parts: readonly InsidePart[];\n    /**\n     * Everything readers did on this page in the range.\n     *\n     * The sum of every part's `own`. A tree's root is always an element\n     * (`tree.ts`), so this is also the root's own `inside` — and it is computed\n     * the other way deliberately: the two routes to one number share no\n     * arithmetic, so a test that holds them equal is a check on the accumulation\n     * that the accumulation cannot pass by being consistently wrong.\n     */\n    readonly total: ActedCounts;\n    /**\n     * Every audience whose rows were summed into this reading.\n     *\n     * A census rather than a refusal: the figures here are occurrences, so\n     * two forms of a page add honestly, and what a caller needs is to know that\n     * two were added. More than one member means this answer is about a page\n     * served in two forms; narrow the read if that is not what was wanted.\n     */\n    readonly audiences: readonly AudienceId[];\n    /** Rows summed into the reading. */\n    readonly counted: number;\n    /**\n     * Rows filed under another tree or another revision, and ignored.\n     *\n     * `parts.ts`' reason, sharpened by the ancestry: a node's place in the page\n     * is a fact about one revision, so a row from another one would be credited\n     * to whatever happens to contain that node now.\n     */\n    readonly foreign: number;\n    /**\n     * Rows of this tree and revision whose hour falls outside the range, and\n     * ignored.\n     *\n     * Ignored rather than refused, because a wider read is the ordinary way a\n     * caller gets a range and the period before it from one call\n     * (`actedSeriesOf`). Counted separately from `foreign` so *you passed last\n     * month's rows* and *you passed another page's* are two different sentences.\n     */\n    readonly outside: number;\n    /**\n     * Nodes named by a row this revision does not contain.\n     *\n     * The alarm `parts.ts` carries, and it matters more here: an orphaned row is\n     * an action that happened on the page and is in **no** part's `inside`, so\n     * the totals under-report by exactly what this names. A non-empty list says\n     * the tree and the rows do not belong together.\n     */\n    readonly orphaned: readonly NodeId[];\n    /**\n     * The first hour this scope ever counted an action in, carried through from\n     * the store.\n     *\n     * Absent means nothing has ever been counted here, which is a different\n     * sentence from *nobody did anything inside anything in the range you asked\n     * about*.\n     */\n    readonly begins?: number;\n};",
+              "summary": "What a range of the hourly counter says about the shape of one revision of one page."
+            },
+            {
+              "name": "insideReadingOf",
+              "kind": "function",
+              "signature": "const insideReadingOf: (tree: LoomTree, stored: StoredActed, declarations: PartDeclarations, range: ArrivalRange) => InsideReading",
+              "summary": "Join a range of the hourly counter to the tree and registry it was filed against, and read it as the page's own shape."
+            },
+            {
+              "name": "actedMostIn",
+              "kind": "function",
+              "signature": "const actedMostIn: (reading: InsideReading, kind: ActedKind, limit?: number) => readonly InsidePart[]",
+              "summary": "The parts readers acted on most in the range, most first."
+            },
+            {
+              "name": "insideShareIn",
+              "kind": "function",
+              "signature": "const insideShareIn: (reading: InsideReading, part: InsidePart, kind: ActedKind) => number | null",
+              "summary": "The share of everything readers did on the page, in one kind, that happened inside one part — between 0 and 1."
+            },
+            {
+              "name": "beneathOf",
+              "kind": "function",
+              "signature": "const beneathOf: (part: InsidePart, kind: ActedKind) => number",
+              "summary": "What readers did inside a part but not to the part itself."
+            }
+          ]
+        },
+        {
           "module": "signals/intake",
           "title": "Intake",
           "summary": "Who may post a batch, and how often.",
@@ -11433,6 +11482,19 @@
               "kind": "function",
               "signature": "const createIntakeGate: (policy?: IntakePolicy) => IntakeGate",
               "summary": "The counter that `admit` decides against."
+            }
+          ]
+        },
+        {
+          "module": "signals/join",
+          "title": "Join",
+          "summary": "The two rules both joins of a window to a tree have to get the same answer to, spelled once.",
+          "symbols": [
+            {
+              "name": "RoleDeclarations",
+              "kind": "type",
+              "signature": "type RoleDeclarations = {\n    readonly typesWithRole: (role: PrimitiveRole) => readonly PrimitiveType[];\n};",
+              "summary": "Which types declared each role, as a registry answers it."
             }
           ]
         },
@@ -12541,12 +12603,6 @@
               "kind": "function",
               "signature": "const describePartStanding: (standing: PartStanding) => string",
               "summary": "One line per standing, for a surface putting the reading in front of a person."
-            },
-            {
-              "name": "RoleDeclarations",
-              "kind": "type",
-              "signature": "type RoleDeclarations = {\n    readonly typesWithRole: (role: PrimitiveRole) => readonly PrimitiveType[];\n};",
-              "summary": "Which types declared each role, as a registry answers it."
             },
             {
               "name": "PartDeclarations",
@@ -13784,7 +13840,7 @@
       "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 1987,
+        "packageNames": 1994,
         "otherDoors": 18,
         "doorsSharingNothing": 17,
         "widest": false,
@@ -13919,7 +13975,7 @@
       "files": 21,
       "narrower": [],
       "standing": {
-        "packageNames": 1987,
+        "packageNames": 1994,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -13981,7 +14037,7 @@
       "files": 65,
       "narrower": [],
       "standing": {
-        "packageNames": 1987,
+        "packageNames": 1994,
         "otherDoors": 18,
         "doorsSharingNothing": 17,
         "widest": false,
@@ -14555,7 +14611,7 @@
       "files": 43,
       "narrower": [],
       "standing": {
-        "packageNames": 1987,
+        "packageNames": 1994,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -14625,7 +14681,7 @@
       "files": 100,
       "narrower": [],
       "standing": {
-        "packageNames": 1987,
+        "packageNames": 1994,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -15047,7 +15103,7 @@
       "files": 79,
       "narrower": [],
       "standing": {
-        "packageNames": 1987,
+        "packageNames": 1994,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,

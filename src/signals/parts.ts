@@ -3,12 +3,12 @@ import { everyMemberOf } from "../closed-set.js"
 import type { NodeId, TreeId } from "../ids.js"
 import type { PrimitiveType } from "../primitive-type.js"
 import { PRIMITIVE_ROLES, type PrimitiveRole } from "../role.js"
-import { copyIn, type CopyDeclarations, type NodeCopy } from "../sdk/copy.js"
-import type { ElementNode, LoomNode } from "../tree/node.js"
+import type { CopyDeclarations, NodeCopy } from "../sdk/copy.js"
 import { outlineTree } from "../tree/outline.js"
 import type { LoomTree } from "../tree/tree.js"
 
 import { audienceScopeOf, audiencesIn, type MaybeAudienceScoped } from "./audiences.js"
+import { ownCopy, type RoleDeclarations, rolesByType } from "./join.js"
 import type { ReaderTally } from "./rollup.js"
 
 /**
@@ -155,19 +155,7 @@ export const describePartStanding = (standing: PartStanding): string => {
   }
 }
 
-/**
- * Which types declared each role, as a registry answers it.
- *
- * The same shape as `CopyDeclarations` and for the same reason (0122): a
- * registry built by the SDK satisfies it, and so does a two-line double in a
- * test. The inverse — a type's role — is what this module needs and is not what
- * 0114 exposes, because a role is a question asked of the vocabulary rather than
- * of a component. The vocabulary is closed and exported, so the inversion is a
- * walk of `PRIMITIVE_ROLES` rather than a method on the registry.
- */
-export type RoleDeclarations = {
-  readonly typesWithRole: (role: PrimitiveRole) => readonly PrimitiveType[]
-}
+export type { RoleDeclarations } from "./join.js"
 
 /** Everything the join asks of a deployment. A `PrimitiveRegistry` satisfies it. */
 export type PartDeclarations = CopyDeclarations & RoleDeclarations
@@ -346,69 +334,6 @@ const NO_STANDINGS: Readonly<Record<PartStanding, number>> = Object.freeze({
   skipped: 0,
   unknown: 0,
 })
-
-/**
- * A type's role, inverted from the vocabulary once per reading.
- *
- * Linear in the vocabulary rather than per part: the alternative is asking
- * `typesWithRole` for every part, which is a registry call and a list scan per
- * node on a page that may have thousands.
- */
-const rolesByType = (declarations: RoleDeclarations): ReadonlyMap<PrimitiveType, PrimitiveRole> => {
-  const byType = new Map<PrimitiveType, PrimitiveRole>()
-
-  for (const role of PRIMITIVE_ROLES) {
-    for (const type of declarations.typesWithRole(role)) {
-      /**
-       * First declaration wins, and it cannot legitimately happen twice: a
-       * definition carries one `role`. A registry that answered the same type
-       * for two roles is wrong about something this reading cannot fix, and
-       * picking the earlier keeps the answer stable rather than dependent on
-       * the vocabulary's order.
-       */
-      if (!byType.has(type)) byType.set(type, role)
-    }
-  }
-
-  return byType
-}
-
-/**
- * The children that are not parts in their own right, which is what a node
- * contributes itself.
- *
- * Text is kept and an element is dropped, because every element is a part of
- * this reading and would otherwise be counted at two depths. **A slot is kept
- * and pruned the same way**, because a slot is not an element and so is never a
- * part: text handed into one belongs to the nearest element above it, and a slot
- * treated as an element would lose those words to a node this reading never
- * reports. The words of a page are partitioned across its parts exactly once,
- * and that sentence is only true with this clause in it.
- */
-const ownChildren = (children: readonly LoomNode[]): readonly LoomNode[] =>
-  children.flatMap<LoomNode>((child) => {
-    switch (child.kind) {
-      case "element":
-        return []
-      case "text":
-        return [child]
-      case "slot":
-        return [{ ...child, children: ownChildren(child.children) }]
-    }
-  })
-
-/**
- * What a part says on its own, read with `copyIn` against a node stripped of
- * everything that is a part in its own right.
- *
- * `copyIn` walks a subtree, which is right for its callers and wrong here — a
- * root would carry every word on the page and so would every band on the way
- * down. Rather than reimplement its rules about blank strings, non-string values
- * and what counts as declared, this hands it the node with only the children
- * that are nobody else's, which is exactly the part's own contribution.
- */
-const ownCopy = (node: ElementNode, declarations: CopyDeclarations): NodeCopy =>
-  copyIn({ ...node, children: ownChildren(node.children) }, declarations)
 
 const standingOf = (counters: ReaderTally | undefined, views: number): PartStanding => {
   if (counters !== undefined && counters.reached > 0) return "read"

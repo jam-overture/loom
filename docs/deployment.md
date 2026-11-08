@@ -531,6 +531,7 @@ curl https://your-deployment/api/reader-signals
   "detail": "reader signals are being collected",
   "regions": "where readers are is read from x-vercel-ip-country; a bucket is reported once it holds 25 views",
   "collection": "a delivery is counted into the totals once it is 3600000ms old; set LOOM_SIGNAL_WINDOW_MS to change it",
+  "kept": "a counted delivery is kept for 2592000000ms from when it arrived, and then deleted; set LOOM_SIGNAL_KEPT_MS to change it",
   "sweep": "how often the sweep runs is not stated, so readers are told only when a delivery ripens; set LOOM_SIGNAL_SWEEP_MS to how often your cron runs to publish a ceiling"
 }
 ```
@@ -541,11 +542,16 @@ It had been three fields short for a fortnight and four short for a week, which
 matters because an operator reading this is counting fields against what their
 own deployment answered.
 
-**The last three are sentences and not numbers**, because each is a setting
+**The last four are sentences and not numbers**, because each is a setting
 whose answer is *what this deployment is doing about readers* rather than a
 limit. They are the only way to find out from outside that a value was refused:
 a window that cannot be read stops the sweep and admits every batch regardless,
-and a region floor below 25 is raised rather than honoured.
+and a region floor below 25 is raised rather than honoured. Three of them are
+the windows this deployment's collection runs on and the fourth is the floor its
+region counts are kept to: `collection` is the age a delivery is counted at,
+`kept` the age it is deleted at — **the window your readers are promised** — and
+`sweep` what you have stated about how often the sweep runs, which nothing in
+the application can discover for itself.
 
 **`windowMs` is the rate limit's window and `collection` is the sweep's.** Two
 windows, and the field names say so unevenly for one reason: `windowMs` is this
