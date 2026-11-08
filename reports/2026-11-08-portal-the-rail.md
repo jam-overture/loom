@@ -39,8 +39,9 @@ the frame first; none did, so it lands on its own.
   guarded as a screen is: signed in and a member of the project; one answer
   (404) for *not yours* and *no such project*; no count where the store could
   not say what the person may see; `Cache-Control: no-store`.
-  `portal/[project]/review/waiting/route.ts`, `_lib/waiting-count.ts` (the
-  body and its schema), `readWaitingCount` in `_lib/review-reading.ts`.
+  `portal/[project]/review/waiting/route.ts` wires the real session and
+  store into `answerWaitingCount` (`_lib/waiting-count.ts`, with the body and
+  its schema); `readWaitingCount` is in `_lib/review-reading.ts`.
 
 No table, no column, no environment variable, no `pnpm db:push`.
 
@@ -60,14 +61,14 @@ No table, no column, no environment variable, no `pnpm db:push`.
 
 - `_lib/project-tabs.test.ts`: 6 (order, groups, which tab counts, the count's
   address, the landing tab, one tab lit per screen).
-- `_lib/waiting-count.test.ts`: 3 (round trip, no count is not nought,
-  anything else is no count).
+- `_lib/waiting-count.test.ts`: 8. The body (round trip, no count is not
+  nought, anything else is no count) and the guarded answer, given its
+  sources rather than mocking modules: a member gets the count and it is never
+  kept; unread is `null`; signed out reads nothing; not theirs and no such
+  project are one 404; a role store that does not answer reads nothing.
 - `portal/[project]/_components/project-rail.test.tsx`: 4 (labels in order and
   the current one marked, the count, no count at nought or unread, asked again
   on a move).
-- `portal/[project]/review/waiting/route.test.ts`: 5 (member gets the count,
-  never kept; unread is null; signed out reads nothing; not theirs and no such
-  project are one 404; an unanswering role store reads nothing).
 
 `pnpm verify` result is in the pull request.
 
