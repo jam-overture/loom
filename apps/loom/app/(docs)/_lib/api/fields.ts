@@ -131,12 +131,16 @@ const HOLDS_NAMES: ReadonlySet<string> = new Set(["type", "interface", "class"])
  * The declarations a reader is only shown part of, so the gap is a number.
  *
  * `SIGNATURE_CAP` cuts a declaration that ran past 6,000 characters, and the
- * names below the cut are not in this file to be read. Published types are
- * cut — eleven of them on 2 November, hiding **514 lines that are not on the
- * page**, of which `RenderDiagnostic` alone is 162. Whatever those lines
- * declare is outside what this check can see, which is a limit worth a number
- * rather than a sentence: a name this module has never heard of is a name it
- * will not flag.
+ * names below the cut are not in this file to be read. Whatever those lines
+ * declare is outside what this check can see: a name this module has never
+ * heard of is a name it will not flag.
+ *
+ * **The limit is real and it is now small.** Eleven published types were cut
+ * on 2 November, hiding 514 lines; on 8 November it is **one**, hiding 80, and
+ * `RenderDiagnostic` is it. The cap counts what the page shows, and
+ * `toItsFirstParagraph` took four fifths of what it was counting out of the
+ * reference, so ten of the eleven are now published whole. The figure is here
+ * and dated rather than asserted, for the reason the tests below give.
  */
 export const cutDeclarations: readonly { readonly name: string; readonly hidden: number }[] =
   apiEntries.flatMap((entry) =>

@@ -183,18 +183,47 @@ describe("the names a published type declares inside itself", () => {
    * because another lane published a long type — the shape `search/build.ts`
    * and `weight.ts` both name as the mistake to avoid (*"this lane's number
    * about somebody else's growth"*). What this lane can honestly claim is that
-   * the limit is **real and not small**; the exact figure belongs in a report,
-   * where it is dated.
+   * the limit is **real**; the figure belongs in a report, where it is dated.
+   *
+   * **The floor was five and is one, and the reason is in this directory.**
+   * `toItsFirstParagraph` took four fifths of the signature text out of the
+   * reference on 8 November, the cap counts what the page shows, and ten of
+   * the eleven cut types are published whole as a result. So the number this
+   * floor stood under fell by its own lane's doing rather than by another's,
+   * which is the one direction a floor may be lowered in.
+   *
+   * **The second case was a second floor on the same number and is now a claim
+   * about this module's own rule**, which is the better thing to have been
+   * holding all along: `cutDeclarations` is the cut declarations that *hold
+   * names*, and a cut `value` is not one of them.
    */
   describe("the declarations it is only shown part of", () => {
     it("finds cut declarations, each hiding lines this module cannot read", () => {
-      expect(cutDeclarations.length).toBeGreaterThan(5)
+      expect(cutDeclarations.length).toBeGreaterThanOrEqual(1)
       expect(cutDeclarations.map(({ name }) => name)).toContain("RenderDiagnostic")
       expect(cutDeclarations.every(({ hidden }) => hidden > 0)).toBe(true)
     })
 
-    it("hides enough lines to be worth saying out loud", () => {
-      expect(cutDeclarations.reduce((total, { hidden }) => total + hidden, 0)).toBeGreaterThan(400)
+    /**
+     * A cut `value` declares no vocabulary, so the gap it leaves is not a gap
+     * in what this module can see. `LIBRARY_CLASS` is the live one: it is cut,
+     * it hides more lines than every cut type put together, and it is a string
+     * constant whose insides are contents rather than names.
+     */
+    it("leaves out a cut declaration that holds no names", () => {
+      const cut = apiEntries.flatMap((entry) =>
+        entry.groups.flatMap((group) => group.symbols.filter((symbol) => symbol.cut !== undefined))
+      )
+
+      const held = new Set(cutDeclarations.map(({ name }) => name))
+
+      expect(cut.map((symbol) => symbol.name)).toContain("LIBRARY_CLASS")
+
+      for (const symbol of cut) {
+        expect(held.has(symbol.name), `${symbol.name} (${symbol.kind})`).toBe(
+          symbol.kind === "type" || symbol.kind === "interface" || symbol.kind === "class"
+        )
+      }
     })
   })
 })

@@ -75,6 +75,24 @@ describe("an entry point's reference", () => {
     expect(screen.getByText("./dist/render/index.d.ts")).toBeTruthy()
   })
 
+  /**
+   * The one sentence that says a signature on this page is not the whole of
+   * what the package wrote against its members.
+   *
+   * It is here rather than under each block because 274 of the 2,042 published
+   * signatures are shortened and a caption on each of them would be 274
+   * captions. It names the declaration file the paragraph above already names,
+   * which is where the whole of every comment is, and a reader has that file
+   * in their own `node_modules`.
+   */
+  it("says that a comment inside a declaration is shown as its first paragraph", () => {
+    render(<ApiEntryReference entry={entry} prose={noProse} />)
+
+    expect(
+      screen.getByText(/Each comment inside a declaration is shown as its first paragraph/)
+    ).toBeTruthy()
+  })
+
   it("links to every module on the page, with a count", () => {
     render(<ApiEntryReference entry={entry} prose={noProse} />)
 

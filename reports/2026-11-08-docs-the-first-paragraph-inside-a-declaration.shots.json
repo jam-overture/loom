@@ -1,0 +1,33 @@
+{
+  "baseUrl": "http://localhost:3000",
+  "outDir": "reports",
+  "shots": [
+    {
+      "path": "/docs/api-reference/signals",
+      "out": "2026-11-08-docs-the-first-paragraph-inside-a-declaration-wide-head",
+      "viewport": "wide",
+      "waitFor": "h1",
+      "measure": ["text=Each comment inside a declaration is shown as its first paragraph."]
+    },
+    {
+      "path": "/docs/api-reference/signals#s-ActionChangeSilence",
+      "out": "2026-11-08-docs-the-first-paragraph-inside-a-declaration-wide-union",
+      "viewport": "wide",
+      "waitFor": "#s-ActionChangeSilence",
+      "measure": ["#s-ActionChangeSilence", "#s-ActionChangeSilence pre"]
+    },
+    {
+      "path": "/docs/api-reference/signals#s-KindAction",
+      "out": "2026-11-08-docs-the-first-paragraph-inside-a-declaration-wide-whole",
+      "viewport": "wide",
+      "waitFor": "#s-KindAction",
+      "measure": ["#s-KindAction pre", "text=Cut short here"]
+    },
+    {
+      "path": "/docs/api-reference/signals#s-ActionChangeSilence",
+      "out": "2026-11-08-docs-the-first-paragraph-inside-a-declaration-phone-union",
+      "viewport": "phone",
+      "waitFor": "#s-ActionChangeSilence"
+    }
+  ]
+}
