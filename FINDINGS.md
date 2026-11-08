@@ -8,6 +8,91 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-11-08 — `pnpm weigh` reported a 78-byte rule as 33,150 bytes repeated, because for a short text the landmark it counts by can be an ordinary CSS property name
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom daily build`
+(`tools/weigh/repetition.ts`) · **Status:** open — **the number is wrong in the
+direction the module promises it cannot be.** Nothing is blocked; this lane read
+the count, disbelieved it, counted by hand and reported the hand count.
+
+`repetition.ts` counts copies of a text by its **landmark**: the longest
+escape-safe token the text contains exactly once, which is the right instrument
+and is why `weigh` can see a flight payload at all. The docblock states the
+premise the count rests on:
+
+> *"Longest rather than first, because length is what makes a coincidental match
+> in unrelated markup implausible"*
+
+**A CSS property name falsifies it.** The rule this lane shipped today is three
+declarations:
+
+```css
+:root {
+  background-color: #0a0a0a;
+  color: #f5f5f5;
+  color-scheme: dark;
+}
+```
+
+Its longest escape-safe token appearing exactly once in it is
+`background-color`, at **16 characters** — twice `LANDMARK_FLOOR` and long
+enough to be implausible by the premise above. It appears **426 times** in
+`/?theme=bold`, because the library stylesheet is 47,981 bytes of CSS.
+
+So `pnpm weigh` printed, on the production build of 8 November:
+
+```
+style  78 bytes  carried 426 times  at least 33,150 bytes repeated (1% of the document)
+```
+
+The document contains the rule **twice** — once as the hoisted `<style>` and
+once in the flight payload — counted with `grep -o loom-marketing-document`,
+which is the `href` React dedupes it under and appears once per copy. Two copies
+of 78 bytes is 156 bytes, of which 78 are repeated. The reading over-reports the
+repetition by **425×**.
+
+**This is not the estimate being loose, which the module is careful about.** The
+saving is reported as `(copies - 1) × the text's own length` and 0347 records
+that it is *"provably under the truth, because escaping only grows a copy."*
+That proof is about the **size** of a copy and assumes the **count** is right.
+When the landmark is not unique to the text, the count is unbounded and the
+figure is unbounded with it.
+
+### It is in every reading of a short style, and this run has the pair
+
+The pre-change reading of the same page shows the same mechanism being right by
+luck. `themeDocumentCss`'s 1,976-byte rule was reported as *carried 4 times*,
+and the document held **two** copies of it. The other two occurrences of its
+landmark — a font name out of the palette's `--loom-heading-family` — were the
+tree's own inline mounting of the same palette and its payload copy. That is a
+true reading of a real duplicate, arrived at for the wrong reason: nothing in
+the count distinguishes *this text twice over* from *this text's landmark in
+somebody else's markup.*
+
+Short styles are where this bites, and a surface that has taken 0334's line has
+one on every page.
+
+### What would answer it, and this lane has no opinion on which
+
+Three shapes, cheapest first, and the choice is the owning lane's:
+
+1. **Reject the landmark when it also occurs outside the text's own copies.** A
+   landmark whose count cannot be divided into whole copies of the text is a
+   landmark, not a count — `describeUnmeasured` already exists for *this cannot
+   be measured*, which is the honest answer here and is better than a number.
+2. **Require the landmark to be absent from the rest of the document**, computed
+   once per document rather than once per style. More precise, and it costs a
+   second pass over a 2.8MB string per candidate token.
+3. **Raise `LANDMARK_FLOOR`.** It would not have caught this one: the floor is 8
+   and the offending token is 16. A floor that excluded `background-color` would
+   exclude most of what short rules contain, and a rule with no landmark is
+   already handled.
+
+**Worth saying about the floor's own docblock**, because it is the sentence that
+would have predicted this: it reasons from `.loom` appearing *"in a stylesheet a
+hundred times"* and concludes that rarity comes from length. Against a document
+that is mostly CSS, the tokens that are both long and common are exactly the CSS
+property names — which is the one corpus this tool is always pointed at.
 ## 2026-11-08 — lesson 21 taught a limit that is gone, and the half of it worth keeping is the half about which direction an error runs in
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom lessons` (`lessons/`) ·
@@ -65855,11 +65940,16 @@ outside the lane and neither has been costed.
 ## 2026-11-02 — `themeDocumentCss` hands back the whole theme, so a surface whose every pixel is already a tree mounts its variables twice
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom daily build`
-(`src/render/document-theme.ts`) · **Status:** **the framework half is closed by
-`framework-78-the-dress-a-boundary-fetches`**, 2 November, recorded as
+(`src/render/document-theme.ts`) · **Status:** **closed.** The framework half
+closed on 2 November by `framework-78-the-dress-a-boundary-fetches`, recorded as
 [0337](decisions/0337-a-host-whose-page-is-already-a-tree-is-handed-the-ground-alone.md);
-**open for `Loom marketing`**, whose half is one line and is nothing anybody is
-blocked on
+**this lane's half closed on 8 November by `marketing-31-the-ground-alone`**,
+which took the line below unchanged. `(docs)` and `(lessons)` each still have
+the same line available and neither is blocked on it — the `(docs)` row of the
+1 November entry says why that surface may not want it. Measured on taking it:
+the rule on `/?theme=bold` goes from 1,976 bytes to 78, the served document from
+2,871,274 to 2,867,327, and six screenshots across the three palettes are
+byte-identical to the same shots off the build before the change
 
 `themeGroundCss(theme)` ships from `@jam-overture/loom/react` beside
 `themeDocumentCss`, returning the same `:root` rule with the ground alone. Both

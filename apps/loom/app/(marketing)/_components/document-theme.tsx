@@ -1,4 +1,4 @@
-import { type RenderOutput, themeDocumentCss } from "@jam-overture/loom/react"
+import { type RenderOutput, themeGroundCss } from "@jam-overture/loom/react"
 
 /**
  * The furniture around the page, told which way round the palette is.
@@ -36,11 +36,52 @@ import { type RenderOutput, themeDocumentCss } from "@jam-overture/loom/react"
  * change that looked available in `src/primitives/` would have closed the
  * finding, passed every test, and fixed nothing.
  *
- * A host is handed `themeDocumentCss(theme)` instead — the rule for its own
- * `:root`, which **is** the document element. That is the same bargain
- * `themeGround` already makes for a host's frame and `BrowserBar` beside this
- * file already takes: the parts of a page Loom does not draw are answered by
- * handing the host the palette's own answer, never by guessing at one.
+ * A host is handed the palette's own rule for its own `:root`, which **is** the
+ * document element. That is the same bargain `themeGround` already makes for a
+ * host's frame and `BrowserBar` beside this file already takes: the parts of a
+ * page Loom does not draw are answered by handing the host the palette's own
+ * answer, never by guessing at one.
+ *
+ * ## Which half of that rule, which is this file's one argument
+ *
+ * There are two published spellings and they are written for two different
+ * hosts. `themeDocumentCss(theme)` returns every `--loom-*` variable **and**
+ * the ground; `themeGroundCss(theme)` returns the ground alone. This file took
+ * the first from 2 November until today and the second is the right one, which
+ * is [0337](../../../../../decisions/0337-a-host-whose-page-is-already-a-tree-is-handed-the-ground-alone.md)
+ * and was this lane's own finding of 2 November.
+ *
+ * The difference is what the host already has. The application shell has no
+ * tree: it draws its own markup, mounts nothing, and needs the variables as
+ * much as the ground — `SHELL_ROOT_CSS` is `themeDocumentCss(shellTheme)` and
+ * should stay that. **A surface is the other host and it is not the same
+ * host.** Every pixel of this one is a tree, so the root primitive has already
+ * mounted every one of the palette's variables — 52 of them, or 53 under
+ * `minimal` — on the element it renders, and the copy on `:root`
+ * is read by nothing inside the page: a primitive reads the nearest declaration
+ * and the nearest one is the tree's own. What the document actually needs is
+ * the three declarations no tree can reach — `background-color`, `color` and
+ * `color-scheme`, on the element the scrollbar and the overscroll canvas belong
+ * to — and that is what this now asks for.
+ *
+ * **Measured rather than reasoned**, on the production build of 8 November,
+ * with the whole rule and then with the ground alone:
+ *
+ * | palette | `themeDocumentCss` | `themeGroundCss` |
+ * | --- | --- | --- |
+ * | `minimal` | 2,255 B, 53 variables | 79 B, none |
+ * | `editorial` | 1,969 B, 52 variables | 79 B, none |
+ * | `bold` | 1,976 B, 52 variables | 78 B, none |
+ *
+ * It is **not** taken for the saving, and the report says so with the
+ * arithmetic: two copies of 1,898 bytes against a response of 2.87MB is a
+ * fifteenth of one percent. It is taken because the variables were a second
+ * copy of a mounting that had already happened, in the one place nothing looks,
+ * and because the alternative this lane considered first — writing the three
+ * declarations here by hand — would have kept a copy of a decision the palette
+ * owns somewhere the palette cannot reach, which is the hazard 0197 and 0334
+ * both exist to refuse. The answer was for the framework to publish the half,
+ * and it has.
  *
  * ## Why the page and not the layout, which is the whole of why this is a file
  *
@@ -59,31 +100,17 @@ import { type RenderOutput, themeDocumentCss } from "@jam-overture/loom/react"
  * work and no test can see that it only happens to, which is the trap 0334
  * records and the reason this is a `<style>` and not an attribute.
  *
- * The application shell wrote this rule by hand before the framework published
- * it, and `SHELL_ROOT_CSS` is `themeDocumentCss(shellTheme)` today with
- * byte-identical output. This is the same element it renders, with the palette
- * coming off a request rather than off a constant.
+ * ## Two states that are one state, and that is the reason for the body below
  *
- * ## The ramp, which is the one argument this file has to make
- *
- * `themeDocumentCss` mounts its ramps `fluid` by default and `renderTree` asks
- * for the same, because a render only mounts `fixed` ramps when a caller wants
- * literals instead of variables and nothing on this surface does. So the
- * variables on `:root` and the variables the root primitive mounts are the same
- * strings, and `document-theme.test.ts` holds that rather than trusting that two
- * defaults will go on agreeing.
- *
- * ## What it costs, said here because this lane is the one reporting weight
- *
- * The rule is the whole theme and not the three declarations the furniture
- * reads, so a surface whose every pixel is already a tree mounts its variables
- * twice — once here on the document and once on the tree's root. Measured at
- * about 2KB of the response, which is a fraction of a percent of a page this
- * lane measured at 2,418KB on 1 November. It is taken as published rather than
- * trimmed by hand: a hand-written rule carrying three of the declarations would
- * be a copy of a decision the palette owns, kept somewhere the palette cannot
- * reach, which is the hazard 0197 and 0334 both exist to refuse. The duplicate
- * half is filed for the lane that owns the function.
+ * This emitted nothing for a tree that names no theme, because there is no
+ * fallback theme by design (0049). It now emits nothing for a second reason as
+ * well: `themeGroundCss` hands back `undefined` for a palette whose body-copy
+ * pair cannot be read, mirroring `themeGround`, because here there is no other
+ * half and a rule would be an empty block. Every registered palette resolves
+ * both ends, so no page of this site reaches it — and *nothing to say* is a
+ * state this answers rather than one it guesses at, which is why the rule is
+ * computed once and the component branches on the rule rather than on the
+ * theme.
  */
 
 /**
@@ -109,11 +136,14 @@ export type DocumentThemeProps = {
   readonly theme: RenderOutput["theme"]
 }
 
-export const DocumentTheme = ({ theme }: DocumentThemeProps) =>
-  theme === undefined ? null : (
+export const DocumentTheme = ({ theme }: DocumentThemeProps) => {
+  const ground = theme === undefined ? undefined : themeGroundCss(theme)
+
+  return ground === undefined ? null : (
     <style
       href={DOCUMENT_THEME_HREF}
       precedence="default"
-      dangerouslySetInnerHTML={{ __html: themeDocumentCss(theme) }}
+      dangerouslySetInnerHTML={{ __html: ground }}
     />
   )
+}
