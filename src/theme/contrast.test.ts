@@ -2,9 +2,11 @@ import { describe, expect, it } from "vitest"
 
 import {
   auditPalette,
+  channelsOf,
   contrastRatio,
   describePaletteAudit,
   PALETTE_TEXT_PAIRINGS,
+  relativeLuminance,
   TEXT_CONTRAST_MINIMUM,
 } from "./contrast.js"
 import { minimalPalette, STARTER_PALETTES } from "./library.js"
@@ -29,12 +31,25 @@ describe("contrastRatio", () => {
   })
 
   /**
-   * The colour schema accepts more than hex, and every other form is answered
-   * with `undefined` rather than a guess — see the note in `contrast.ts`. A
-   * check that cannot measure something says so; it does not pass it.
+   * What is left after 0365: a named colour, which is vocabulary rather than
+   * arithmetic, and anything carrying an alpha below opaque, whose contrast is
+   * not a property of the pair at all. Plus the strings that are not colours.
+   * A check that cannot measure something says so; it does not pass it.
    */
   it("declines to measure a colour it would have to guess at", () => {
-    for (const colour of ["rgb(10, 10, 10)", "hsl(200 50% 40%)", "rebeccapurple", "#11223344"]) {
+    for (const colour of [
+      "rebeccapurple",
+      "transparent",
+      "currentcolor",
+      "#11223344",
+      "#1234",
+      "rgba(10, 10, 10, 0.5)",
+      "hsl(200 50% 40% / 0.5)",
+      "#12345",
+      "rgb(1, 2 3)",
+      "hsl(none 30% 11%)",
+      "not a colour at all",
+    ]) {
       expect(contrastRatio(colour, "#ffffff"), colour).toBeUndefined()
     }
   })
@@ -161,7 +176,7 @@ describe("auditPalette", () => {
   })
 
   it("tells a pairing it could not measure from one that failed", () => {
-    const audit = auditPalette(withSlots({ "fg-muted": "hsl(0 0% 45%)" }))
+    const audit = auditPalette(withSlots({ "fg-muted": "rebeccapurple" }))
 
     expect(audit.failures).toEqual([])
     expect(audit.composedFailures).toEqual([])
@@ -176,7 +191,7 @@ describe("auditPalette", () => {
   })
 
   it("measures every pairing exactly once, whatever the outcome", () => {
-    const audit = auditPalette(withSlots({ "fg-muted": "hsl(0 0% 45%)", "fg-subtle": "#e8e8e8" }))
+    const audit = auditPalette(withSlots({ "fg-muted": "rebeccapurple", "fg-subtle": "#e8e8e8" }))
 
     expect(audit.measured.length + audit.unmeasured.length).toBe(PALETTE_TEXT_PAIRINGS.length)
   })
@@ -204,5 +219,182 @@ describe("auditPalette", () => {
     const pairs = PALETTE_TEXT_PAIRINGS.map((pairing) => `${pairing.foreground}|${pairing.background}`)
 
     expect(pairs).toHaveLength(new Set(pairs).size)
+  })
+})
+
+/**
+ * The spellings `colourSchema` admits, and what each one now measures (0365).
+ *
+ * The table these are drawn from is the 4 October finding's: one dark canvas
+ * under one light ink, written six ways, of which four used to lose every
+ * measurement Loom makes. The claim under test is not *the parser works* — it
+ * is that **which way round a pair is does not depend on how it was spelled**,
+ * which is the property a host loses when a form is declined.
+ *
+ * Every expectation here is a fixed number, so the suite needs no browser.
+ * The arithmetic was separately checked against Chromium's own CSS engine over
+ * 1,034 colours; what that run established and why it is not a test is in the
+ * record and in `reports/2026-11-08-framework-a-palette-written-six-ways.md`.
+ */
+describe("channelsOf, over the forms a palette may be written in", () => {
+  /** The pair from the finding's table, in all six spellings. */
+  const DARK_CANVAS = ["#111827", "#123", "hsl(220 30% 11%)", "rgb(17 24 39)", "#111827ff", "rgb(17, 24, 39)"]
+
+  it("reads hex of three, four, six and eight digits, the alpha forms when they are opaque", () => {
+    expect(channelsOf("#111827")).toEqual([17, 24, 39])
+    expect(channelsOf("#123")).toEqual([17, 34, 51])
+    expect(channelsOf("#111827ff")).toEqual([17, 24, 39])
+    expect(channelsOf("#123f")).toEqual([17, 34, 51])
+  })
+
+  /**
+   * The case that made declining every alpha too broad a rule: `ff` composites
+   * to exactly the colour under it, so there was never anything to guess at.
+   */
+  it("reads an opaque alpha as the colour it composites to, in every notation", () => {
+    for (const opaque of ["#111827ff", "#111827FF", "rgba(17, 24, 39, 1)", "rgb(17 24 39 / 1)", "rgb(17 24 39 / 100%)"]) {
+      expect(channelsOf(opaque), opaque).toEqual([17, 24, 39])
+    }
+  })
+
+  it("declines an alpha below opaque, however it is written", () => {
+    for (const translucent of ["#11223344", "#1234", "rgba(17, 24, 39, 0.5)", "rgb(17 24 39 / 50%)", "hsl(220 30% 11% / 0.3)", "hsla(220, 30%, 11%, 0)"]) {
+      expect(channelsOf(translucent), translucent).toBeUndefined()
+    }
+  })
+
+  it("reads rgb() in both of CSS's syntaxes, as numbers or as percentages", () => {
+    expect(channelsOf("rgb(17 24 39)")).toEqual([17, 24, 39])
+    expect(channelsOf("rgb(17, 24, 39)")).toEqual([17, 24, 39])
+    expect(channelsOf("RGB(17 24 39)")).toEqual([17, 24, 39])
+
+    const [r, g, b] = channelsOf("rgb(0% 50% 100%)") ?? []
+    expect(r).toBeCloseTo(0, 10)
+    expect(g).toBeCloseTo(127.5, 10)
+    expect(b).toBeCloseTo(255, 10)
+  })
+
+  /** CSS clamps rather than refusing, and so does this. */
+  it("clamps an rgb() component outside the range instead of declining it", () => {
+    expect(channelsOf("rgb(300 -20 40)")).toEqual([255, 0, 40])
+    expect(channelsOf("rgb(-5% 120% 50%)")?.slice(0, 2)).toEqual([0, 255])
+  })
+
+  it("reads hsl() in both syntaxes, and in all four of CSS's angle units", () => {
+    const expected = channelsOf("hsl(220 30% 11%)")
+
+    expect(expected?.map((value) => Math.round(value))).toEqual([20, 25, 36])
+    for (const same of ["hsl(220, 30%, 11%)", "hsl(220deg 30% 11%)", "hsla(220, 30%, 11%, 1)", "HSL(220 30% 11%)"]) {
+      expect(channelsOf(same), same).toEqual(expected)
+    }
+    for (const unit of ["hsl(0.6111111111111111turn 30% 11%)", "hsl(244.44444444444446grad 30% 11%)"]) {
+      const channels = channelsOf(unit)
+      expect(channels, unit).toBeDefined()
+      channels?.forEach((value, at) => expect(value, `${unit} channel ${at}`).toBeCloseTo(expected?.[at] ?? 0, 6))
+    }
+  })
+
+  /**
+   * The six rows of the finding's table, which is the whole point of the unit:
+   * a pair's direction is a fact about the colours and not about the notation.
+   */
+  it("answers the same dark canvas however the host spelled it", () => {
+    const luminances = DARK_CANVAS.map((colour) => relativeLuminance(colour))
+
+    for (const [at, luminance] of luminances.entries()) {
+      expect(luminance, DARK_CANVAS[at]).toBeDefined()
+      expect(luminance, DARK_CANVAS[at]).toBeLessThan(0.05)
+    }
+  })
+
+  it("wraps a hue the long way round and the negative way, as CSS does", () => {
+    const base = channelsOf("hsl(40 50% 50%)")
+
+    for (const same of ["hsl(400 50% 50%)", "hsl(-320 50% 50%)", "hsl(760 50% 50%)"]) {
+      channelsOf(same)?.forEach((value, at) => expect(value, same).toBeCloseTo(base?.[at] ?? 0, 9))
+    }
+  })
+
+  it("reads a grey written as hsl() as having no colour in it", () => {
+    const [r, g, b] = channelsOf("hsl(220 0% 45%)") ?? []
+
+    expect(r).toBeCloseTo(g ?? 0, 10)
+    expect(g).toBeCloseTo(b ?? 0, 10)
+  })
+
+  /**
+   * A named colour is the one form left that is **vocabulary rather than
+   * arithmetic**, and 0365 declines it on that ground rather than on risk.
+   * Asserted so that the day the table arrives, this is the test that says so.
+   */
+  it("declines a named colour, which is the table this module does not own", () => {
+    for (const named of ["midnightblue", "whitesmoke", "rebeccapurple", "white", "transparent", "currentcolor"]) {
+      expect(channelsOf(named), named).toBeUndefined()
+    }
+  })
+
+  /**
+   * Five and seven digits are what `colourSchema`'s own `{3,8}` lets through
+   * and no browser accepts. Measuring one would be measuring a colour that
+   * renders as nothing.
+   */
+  it("declines a hex length no browser accepts, which the schema still admits", () => {
+    for (const illegal of ["#12345", "#1234567"]) {
+      expect(
+        paletteSchema.safeParse({ ...minimalPalette, slots: { ...minimalPalette.slots, "bg-canvas": illegal } }).success,
+        illegal
+      ).toBe(true)
+      expect(channelsOf(illegal), illegal).toBeUndefined()
+    }
+  })
+
+  /** Shorter than the schema's own floor, so these never reach a palette. */
+  it("declines a hex too short for the schema to admit at all", () => {
+    for (const short of ["#1", "#12", "#"]) {
+      expect(channelsOf(short), short).toBeUndefined()
+    }
+  })
+
+  it("refuses a string that mixes the two syntaxes rather than half-reading it", () => {
+    for (const mixed of ["rgb(1, 2 3)", "rgb(1 2, 3)", "rgba(1, 2, 3, 1, 4)", "rgb(1 2 3 4)", "rgb(1 2 3 / / 1)"]) {
+      expect(channelsOf(mixed), mixed).toBeUndefined()
+    }
+  })
+
+  it("declines a component that is not a number, including CSS's own none", () => {
+    for (const unreadable of ["rgb(none 2 3)", "hsl(none 30% 11%)", "rgb(a b c)", "rgb(1px 2 3)", "hsl(220 30px 11%)", "rgb()", "rgb(1 2)"]) {
+      expect(channelsOf(unreadable), unreadable).toBeUndefined()
+    }
+  })
+
+  it("declines a colour space the schema would not have admitted anyway", () => {
+    for (const other of ["oklch(50% 0.1 200)", "lab(50% 20 30)", "color(srgb 1 0 0)", "not a colour at all", ""]) {
+      expect(channelsOf(other), other).toBeUndefined()
+    }
+  })
+
+  /**
+   * The audit is where a host meets this, and the 4 October finding measured
+   * the loss there: a palette whose every slot is `hsl()` came back
+   * `26 unmeasured, 0 failures` — a palette that had quietly lost every number.
+   */
+  it("measures a palette written entirely in hsl(), where it used to report every pairing unmeasured", () => {
+    const inHsl = paletteSchema.parse({
+      ...minimalPalette,
+      id: "in-hsl",
+      slots: Object.fromEntries(
+        Object.entries(minimalPalette.slots).map(([slot, colour]) => {
+          const channels = channelsOf(colour as string) ?? [0, 0, 0]
+
+          return [slot, `rgb(${channels.map((value) => Math.round(value)).join(" ")})`]
+        })
+      ),
+    })
+
+    const audit = auditPalette(inHsl)
+
+    expect(audit.unmeasured).toEqual([])
+    expect(audit.measured.length).toBe(PALETTE_TEXT_PAIRINGS.length)
+    expect(audit.failures).toEqual([])
   })
 })
