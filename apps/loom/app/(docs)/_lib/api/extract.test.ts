@@ -831,12 +831,18 @@ describe("a doc comment a stranger has to read", () => {
    * closing line is the last line either way, so an implementation that
    * dropped it and closed the block itself would be byte-identical on every
    * comment that closes on a line of its own, and would lose a word here.
+   *
+   * It runs to **three** lines on purpose. Written as two, the slice that
+   * looks at the paragraph is empty, `every` is vacuously true, and the case
+   * passes against an implementation with no `-1` guard at all. Found by a
+   * mutation surviving a first version of this test.
    */
   it("leaves a one-paragraph comment that ends on its closing line", () => {
     const signature = [
       "type Reading = {",
       "    /**",
-      "     * What the window counted, over the stretch it was asked for. */",
+      "     * What the window counted, over the half-open stretch of receipt",
+      "     * times the handle was asked for. */",
       "    readonly counted: number;",
       "}",
     ].join("\n")
