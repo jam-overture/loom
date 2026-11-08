@@ -9331,7 +9331,7 @@
       "slug": "signals",
       "types": "./dist/signals/index.d.ts",
       "requires": [],
-      "files": 80,
+      "files": 81,
       "narrower": [
         {
           "specifier": "@jam-overture/loom/signals/broadcast",
@@ -9340,7 +9340,7 @@
             "zod"
           ],
           "shared": 15,
-          "files": 10
+          "files": 11
         }
       ],
       "standing": {
@@ -10110,8 +10110,8 @@
             {
               "name": "broadcastReaderSignals",
               "kind": "function",
-              "signature": "const broadcastReaderSignals: (root: Element, options?: ReaderSignalOptions) => Result<ReaderSignalBroadcast, ReaderSignalBroadcastError>",
-              "summary": "Start broadcasting reader signals from the page under `root`."
+              "signature": "const broadcastReaderSignals: (scope: Element | Document, options?: ReaderSignalOptions) => Result<ReaderSignalBroadcast, ReaderSignalBroadcastError>",
+              "summary": "Start broadcasting reader signals from a rendered Loom page."
             }
           ]
         },
@@ -13775,7 +13775,7 @@
       "slug": "signals-broadcast",
       "types": "./dist/signals/broadcast.d.ts",
       "requires": [],
-      "files": 10,
+      "files": 11,
       "narrower": [],
       "standing": {
         "packageNames": 1986,
@@ -13848,8 +13848,8 @@
             {
               "name": "broadcastReaderSignals",
               "kind": "function",
-              "signature": "const broadcastReaderSignals: (root: Element, options?: ReaderSignalOptions) => Result<ReaderSignalBroadcast, ReaderSignalBroadcastError>",
-              "summary": "Start broadcasting reader signals from the page under `root`."
+              "signature": "const broadcastReaderSignals: (scope: Element | Document, options?: ReaderSignalOptions) => Result<ReaderSignalBroadcast, ReaderSignalBroadcastError>",
+              "summary": "Start broadcasting reader signals from a rendered Loom page."
             }
           ]
         },

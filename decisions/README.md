@@ -453,3 +453,6 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0361](0361-the-site-pulls-into-its-own-process-and-a-host-wires-the-live-page-in-two-calls.md) | The site pulls into its own process, and a host wires the live page in two calls | Accepted | §1, §5 (portal), the connection plane |
 | [0362](0362-what-readers-did-is-counted-under-the-hour-they-did-it-in-as-a-seventh-counter-the-fold-writes-for-the-three-delegated-kinds.md) | What readers did is counted under the hour they did it in, as a seventh counter the fold writes for the three delegated kinds | Accepted | §5 (reader signals), the counters |
 | [0363](0363-the-marketing-site-is-served-from-its-code-and-a-stored-row-is-not-a-second-version-of-it.md) | The marketing site is served from its code, and a stored row is not a second version of it | Accepted | §5 (portal), the marketing surface |
+| 0364 | *No record on this branch* | — | — |
+| 0365 | *No record on this branch* | — | — |
+| [0366](0366-a-broadcast-handed-a-document-follows-the-page-and-a-client-side-navigation-is-a-new-page-view.md) | A broadcast handed a document follows the page, and a client-side navigation is a new page view | Accepted | §4c (reader signals) |
