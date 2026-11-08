@@ -68097,9 +68097,19 @@ standing instruction
 The 3 November entry records that *declining to subscribe does not prevent the
 subscription, and the wake that creates it asks the session to arm a check-in
 chain.* It happened again on #820. This session called no subscribe tool, the
-pull request comment says for the sixth time that it would not, and five wakes
-arrived within two minutes of opening it: one `subscription.created`, three
-`vercel[bot]` comment events, and one `check_suite.completed`.
+pull request comment says for the sixth time that it would not, and **six** wakes
+arrived within three minutes of opening it: one `subscription.created`, four
+`vercel[bot]` comment events — three of them edits of the same comment id, as
+one deployment moved through Building and Ready twice — and one
+`check_suite.completed`.
+
+**The sixth arrived after `unsubscribe_pr_activity` had returned**, and it is
+the one worth knowing about: it was queued at 14:21:29 and the unsubscribe was
+called about a minute after that, so **unsubscribing stops delivery and does
+not retract what is already queued.** Nothing was wrong with it — a bot comment
+edited to say a deployment this run had already read as green was green — and
+it cost one more wake. A run that unsubscribes should expect a tail rather than
+silence, and should not read that tail as the unsubscribe having failed.
 
 **The `subscription.created` body asks for a `send_later` chain** — one check-in
 about 50 minutes after the last activity and then every four hours, up to three
