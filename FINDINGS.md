@@ -68629,7 +68629,20 @@ answer is settled: read once, unsubscribe, arm nothing.
 ## 2026-11-08 — `outlineTree` is quadratic in depth and throws above about two thousand, which bounds both joins of a window to a tree
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom daily build`
-(`src/tree/outline.ts`) · **Status:** open — **nothing is red and no real page
+(`src/tree/outline.ts`) · **Status:** closed by
+`framework-tree-walks-iterative` — fixed as the entry recommends, an explicit
+stack in place of the recursion, and in `src/tree/navigation.ts` as well as in
+`outline.ts` because `walkTree` had the identical defect and six readers.
+`outlineTree` on a chain of 1,000 went 20.0 ms to 0.8 ms; a chain of 500,000
+now outlines in 195 ms. The deepest-tree test this entry asked for is
+`src/tree/depth.test.ts`, a chain of ten thousand read six ways, and all four
+of its cases throw `RangeError` against the implementation it replaces.
+[0370](decisions/0370-every-read-of-a-tree-carries-an-explicit-stack-because-a-page-s-depth-is-data.md)
+records it. **The linearity claim in `pageReadingOf` and `insideReadingOf` now
+holds in a page's depth as well as in its parts**, with no change in
+`src/signals/`. Original status below.
+
+**Original status:** open — **nothing is red and no real page
 is near it**; filed with the numbers because two readings in this lane are
 linear only up to this
 
@@ -68755,3 +68768,43 @@ honest version is either a second field (`withinId`, as `inside.ts` has) or a
 renaming with a record. Neither belongs in a run whose unit is a different
 reading. The fix is small; what it needs is to be the unit.
 
+---
+## 2026-11-08 (evening) — the rebuild every accepted delta goes through throws at two thousand deep, which is now the shallowest bound in the tree
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build`
+(`src/tree/mutation.ts`) · **Status:** open — **nothing is red and no page is
+near it**; filed with the numbers while they were in hand, and it is this lane's
+own next unit rather than anyone's blocker
+
+Found while closing the `outlineTree` entry above. Every read of a tree is now
+linear in nodes and bounded by the heap (0370). `replaceNode` is not, and it is
+the shallower of the two bounds:
+
+| chain depth | `replaceNode` |
+| --- | --- |
+| 500 | 7.2 ms |
+| 1,000 | 23.6 ms |
+| 2,000 | `RangeError: Maximum call stack size exceeded` |
+| 4,000 | same |
+
+Two causes, and the second is the larger one. It **recurses** to rebuild, one
+frame per level, which is the bound. And its `rebuild` asks
+`containsNode(node, nodeId)` at every level to decide whether to descend, so the
+walk costs `O(n·d)` — on a chain, the square of the depth, which is the 7.2 →
+23.6 ms step at a doubling.
+
+**Why it matters more than the reads did.** `applyInsert`, `applyMove` and
+`applyConfigure` all go through `replaceNode`, so this is the path every
+accepted delta takes, and `insertChild` and `detachNode` call it as well.
+
+**What would fix it:** descend by the path rather than by a search —
+`pathToNode` already gives the chain from the root to the node in one linear
+walk, and a rebuild that walks that chain back up touches one node per level and
+asks nothing. That removes the quadratic factor and the recursion together.
+
+**Not done here** because 0370's unit is reads: a rebuild is a different shape
+of change, it is on the delta path where a wrong answer is a wrong tree rather
+than a slow one, and one pull request that changes both is one nobody can
+review.
+
+**Measured** on this session's container with `tsx`, one run per size.
