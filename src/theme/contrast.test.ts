@@ -315,6 +315,59 @@ describe("channelsOf, over the forms a palette may be written in", () => {
     }
   })
 
+  /**
+   * The light end, which four planted mutations needed and none of the dark
+   * rows could catch: `hsl()`'s ramp folds its saturation at the midpoint, so a
+   * lightness of 11% exercises one side of `Math.min(l, 1 - l)` and nothing
+   * above 50% exercises the other. The ink from the finding's own table is a
+   * 95% lightness, so the pair it is half of was testing half the arithmetic.
+   *
+   * The expected values are Chromium's, for `hsl(220 30% 95%)`,
+   * `hsl(220 25% 95%)` and `hsl(220 30% 75%)` respectively.
+   */
+  it("reads a lightness above the midpoint, which is the other half of the hsl ramp", () => {
+    const rounded = (colour: string): readonly number[] =>
+      (channelsOf(colour) ?? []).map((value) => Math.round(value))
+
+    expect(rounded("hsl(220 30% 95%)")).toEqual([238, 241, 246])
+    expect(rounded("hsl(220 25% 95%)")).toEqual([239, 241, 245])
+    expect(rounded("hsl(220 30% 75%)")).toEqual([172, 185, 210])
+  })
+
+  /** 220 degrees in radians, which is the unit the other two tests left out. */
+  it("reads a hue in radians", () => {
+    const channels = channelsOf("hsl(3.839724354387525rad 30% 11%)")
+
+    channels?.forEach((value, at) => expect(value).toBeCloseTo(channelsOf("hsl(220 30% 11%)")?.[at] ?? 0, 6))
+    expect((channelsOf("hsl(1.2217304763960306rad 30% 11%)") ?? []).map((value) => Math.round(value))).toEqual([34, 36, 20])
+  })
+
+  /**
+   * An alpha nobody can parse is not an opaque colour. Taking it for one would
+   * measure a colour the host did not write, which a planted mutation did.
+   */
+  it("declines a colour whose alpha cannot be read at all", () => {
+    for (const unreadable of ["rgba(17, 24, 39, abc)", "rgb(17 24 39 / abc)", "hsl(220 30% 11% / abc)"]) {
+      expect(channelsOf(unreadable), unreadable).toBeUndefined()
+    }
+  })
+
+  /**
+   * `Number` reads more than CSS does — a hex literal, a padded string, the
+   * word `Infinity` — so the component pattern is narrower than `Number` on
+   * purpose. Chromium refuses all three.
+   */
+  it("declines a component JavaScript would read as a number and CSS would not", () => {
+    for (const notCss of ["rgb(0x10 2 3)", "hsl(0x10 30% 11%)", "rgb(Infinity 2 3)", "rgb(1, 2 3, 4)", "hsl(220, 30% 11%, 1)", "rgb(1,,3)"]) {
+      expect(channelsOf(notCss), notCss).toBeUndefined()
+    }
+  })
+
+  /** CSS does allow scientific notation, and so does this. */
+  it("reads a component in scientific notation, which CSS permits", () => {
+    expect(channelsOf("rgb(1e2 2 3)")).toEqual([100, 2, 3])
+  })
+
   it("reads a grey written as hsl() as having no colour in it", () => {
     const [r, g, b] = channelsOf("hsl(220 0% 45%)") ?? []
 

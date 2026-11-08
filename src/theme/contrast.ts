@@ -299,6 +299,12 @@ type ColourArguments = {
  * are the modern form and take it after a solidus. The two are not mixable, and
  * a string that mixes them is refused rather than half-read — `rgb(1, 2 3)` is
  * not a colour, and the one thing worse than declining it is averaging it.
+ *
+ * **Nothing here checks for the mix**, and a planted mutation is why the check
+ * is not here: a comma-split part carrying a space fails `numberOf` and
+ * `percentageOf` downstream anyway, so a guard against it changed no outcome on
+ * any input. Chromium refuses the same strings, which is how each one is known
+ * to be refused rather than assumed.
  */
 const argumentsOf = (body: string): ColourArguments | undefined => {
   const trimmed = body.trim()
@@ -308,7 +314,6 @@ const argumentsOf = (body: string): ColourArguments | undefined => {
     if (trimmed.includes("/")) return undefined
 
     const parts = trimmed.split(",").map((part) => part.trim())
-    if (parts.some((part) => part === "" || /\s/.test(part))) return undefined
 
     if (parts.length === 3) return { components: parts, alpha: undefined }
 
