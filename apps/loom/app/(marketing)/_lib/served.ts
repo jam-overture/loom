@@ -50,7 +50,7 @@ import { DEFAULT_THEME, SITE_ROUTES, sitePath, type SiteRoute } from "./site"
  * So the dimension doubled every sweep over a tree that could not differ, and
  * it was measured rather than argued before it came out: 150 states built in
  * 518ms, and **150 of the 150 had a byte-identical twin in the other
- * deployment.** `servedPages()` is awaited eight times across six test files,
+ * deployment.** `servedPages()` is called eight times across six test files,
  * so that was roughly 600 page builds per suite run producing a tree the same
  * run already held, and the mechanism page's share of them ran the whole
  * request sequence twice each.
@@ -132,20 +132,13 @@ export const ORIGIN_FOR_TESTS = "https://loom.example"
  * test, so `servedPages` is useless on its own: what makes it a check is a
  * caller saying how many states it expected to look at.
  */
-export const servedPages = async (): Promise<readonly ServedPage[]> => {
-  const pages: ServedPage[] = []
-
-  for (const route of SITE_ROUTES) {
-    pages.push({
-      route,
-      state: NO_REQUEST,
-      address: addressOf(route),
-      tree: await pageTreeFor(route, { theme: DEFAULT_THEME }),
-    })
-  }
-
-  return pages
-}
+export const servedPages = (): readonly ServedPage[] =>
+  SITE_ROUTES.map((route) => ({
+    route,
+    state: NO_REQUEST,
+    address: addressOf(route),
+    tree: pageTreeFor(route, { theme: DEFAULT_THEME }),
+  }))
 
 /** How many states the sweep above covers, stated so a caller can check it. */
 export const SERVED_STATE_COUNT = SITE_ROUTES.length

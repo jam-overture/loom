@@ -154,7 +154,7 @@ describe("a documentation page this site names", () => {
 let pages: readonly ServedPage[] = []
 
 beforeAll(async () => {
-  pages = await servedPages()
+  pages = servedPages()
 })
 
 describe("the sweep these rules are read off", () => {

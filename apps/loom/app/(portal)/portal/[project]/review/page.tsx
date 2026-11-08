@@ -10,6 +10,7 @@ import { requireActor, requireRole } from "@/app/(portal)/_lib/auth/identity"
 import { goalsFor, proposalGoalsFor } from "@/app/(portal)/_lib/goals/stores"
 import { pageCopiesFor } from "@/app/(portal)/_lib/proposing/stores"
 import { pageNamesOf } from "@/app/(portal)/_lib/published-view"
+import { single } from "@/app/(portal)/_lib/query"
 import { queueRowOf } from "@/app/(portal)/_lib/queue"
 import {
   EVERY_CHANGE,
@@ -42,13 +43,13 @@ import { FilterChips } from "@/app/(portal)/_components/filter-chips"
  * count; the goal picker is left out where which goal a change serves, or the
  * goals themselves, cannot be read, rather than offering goals it cannot place.
  *
+ * *Accepted*, linked under the heading, follows each change said yes to on to
+ * live and its result (0358).
+ *
  * Oldest first, as the store lists them, so whatever has waited longest is
  * read first. A change the store could not read is counted rather than
  * skipped, so the list never claims to be complete when it is not.
  */
-const single = (value: string | readonly string[] | undefined): string | undefined =>
-  typeof value === "string" ? value : undefined
-
 const ForReviewPage = async ({
   params,
   searchParams,
@@ -247,6 +248,12 @@ const ForReviewPage = async ({
       <div className="flex flex-col gap-2">
         <h1 className="text-2xl tracking-tight">For review</h1>
         {project.ok && <p className="text-ink-muted text-sm">{project.value.name}</p>}
+        <Link
+          href={`/portal/${projectId}/review/accepted`}
+          className="text-ink self-start text-xs no-underline hover:underline"
+        >
+          Accepted: where each change you said yes to has got to
+        </Link>
       </div>
 
       {body}

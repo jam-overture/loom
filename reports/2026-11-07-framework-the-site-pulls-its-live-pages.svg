@@ -1,0 +1,116 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 560" width="900" height="560" font-family="Geist, ui-sans-serif, system-ui, sans-serif">
+  <style>
+    .t { fill: #18181b; }
+    .m { fill: #52525b; }
+    .box { fill: #fafafa; stroke: #d4d4d8; }
+    .loom { fill: #f5f3ff; stroke: #c4b5fd; }
+    .site { fill: #f0fdf4; stroke: #86efac; }
+    .bad { fill: #fef2f2; stroke: #fca5a5; }
+    .okt { fill: #166534; }
+    .badt { fill: #991b1b; }
+    .loomt { fill: #6d28d9; }
+    .line { stroke: #a1a1aa; fill: none; }
+    .flow { stroke: #52525b; fill: none; }
+    text { font-size: 13px; }
+    .h { font-size: 15px; font-weight: 700; }
+    .k { font-size: 10.5px; letter-spacing: .07em; font-weight: 700; }
+    .mono { font-size: 11.5px; font-family: "Geist Mono", ui-monospace, monospace; }
+    .sm { font-size: 11.5px; }
+    @media (prefers-color-scheme: dark) {
+      .t { fill: #fafafa } .m { fill: #a1a1aa }
+      .box { fill: #1c1c1f; stroke: #3f3f46 }
+      .loom { fill: #17132b; stroke: #6d28d9 }
+      .site { fill: #0d2017; stroke: #15803d }
+      .bad { fill: #220f0f; stroke: #b91c1c }
+      .okt { fill: #4ade80 } .badt { fill: #f87171 } .loomt { fill: #a78bfa }
+      .line { stroke: #52525b } .flow { stroke: #a1a1aa }
+    }
+  </style>
+
+  <text class="h t" x="0" y="14">An accepted change reaches a reader, and nothing on the reader's path waits for Loom</text>
+  <text class="m sm" x="0" y="33">0358 clause 3 and 4, as the two calls a host writes. Dashed is the only line that leaves the customer's process.</text>
+
+  <!-- Loom side -->
+  <rect class="loom" x="0" y="54" width="272" height="168" rx="8"/>
+  <text class="k loomt" x="16" y="78">LOOM, HOSTED</text>
+  <text class="t" x="16" y="102">Somebody presses Accept</text>
+  <text class="m sm" x="16" y="122">The change goes onto Loom's copy</text>
+  <text class="m sm" x="16" y="138">of the page. No pull request.</text>
+  <rect class="box" x="16" y="152" width="240" height="38" rx="5"/>
+  <text class="mono t" x="28" y="176">GET /api/pages/live</text>
+  <text class="m sm" x="16" y="208">asked every minute, by the server</text>
+
+  <!-- the request -->
+  <path class="flow" stroke-dasharray="5 4" d="M272 142 H 348" marker-end="url(#a)"/>
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0 0 L10 5 L0 10 z" fill="#52525b"/>
+    </marker>
+  </defs>
+
+  <rect class="box" x="0" y="242" width="272" height="112" rx="6"/>
+  <text class="k m" x="16" y="266">WHAT THE REQUEST CARRIES</text>
+  <text class="mono t" x="16" y="290">Authorization: Bearer lk_…</text>
+  <text class="mono t" x="16" y="310">If-None-Match: "…"</text>
+  <text class="sm badt" x="16" y="334">…and no query at all: no reader,</text>
+  <text class="sm badt" x="16" y="350">no audience, no page view.</text>
+
+  <!-- customer's process -->
+  <rect class="site" x="356" y="54" width="544" height="300" rx="8"/>
+  <text class="k okt" x="376" y="78">THE CUSTOMER'S SERVER — ONE PROCESS</text>
+
+  <rect class="box" x="376" y="94" width="232" height="96" rx="6"/>
+  <text class="h t" x="392" y="118">startPullingLivePages</text>
+  <text class="m sm" x="392" y="138">Once, at startup. Pulls at once,</text>
+  <text class="m sm" x="392" y="154">then books the next when the</text>
+  <text class="m sm" x="392" y="170">last settles. Never two at once.</text>
+
+  <path class="flow" d="M608 142 H 652" marker-end="url(#a)"/>
+
+  <rect class="box" x="652" y="94" width="228" height="96" rx="6"/>
+  <text class="h t" x="668" y="118">held()</text>
+  <text class="m sm" x="668" y="138">The pages, by page id, with</text>
+  <text class="m sm" x="668" y="154">the tag that names exactly</text>
+  <text class="m sm" x="668" y="170">them. A value, never edited.</text>
+
+  <path class="flow" d="M766 190 V 228" marker-end="url(#a)"/>
+
+  <rect class="box" x="376" y="228" width="504" height="104" rx="6"/>
+  <text class="k m" x="392" y="252">WHERE A PAGE IS RENDERED — THE WHOLE OF THE INTEGRATION</text>
+  <text class="mono t" x="392" y="278">livePageOf(live.held(), builtTree.treeId) ?? builtTree</text>
+  <text class="m sm" x="392" y="302">The ?? is the fallback, entire. A server that has never pulled, a pull that</text>
+  <text class="m sm" x="392" y="318">failed, and a page the answer did not name are one case and one answer.</text>
+
+  <!-- what each outcome does -->
+  <text class="h t" x="0" y="396">What each answer does to what the server holds</text>
+
+  <rect class="site" x="0" y="412" width="212" height="128" rx="6"/>
+  <text class="k okt" x="16" y="436">200, EVERY TREE READ</text>
+  <text class="t" x="16" y="460">Takes the new pages</text>
+  <text class="m sm" x="16" y="482">and the tag with them,</text>
+  <text class="m sm" x="16" y="498">so If-None-Match always</text>
+  <text class="m sm" x="16" y="514">describes what is held.</text>
+
+  <rect class="box" x="228" y="412" width="212" height="128" rx="6"/>
+  <text class="k m" x="244" y="436">304</text>
+  <text class="t" x="244" y="460">Keeps everything</text>
+  <text class="m sm" x="244" y="482">and moves one number:</text>
+  <text class="m sm" x="244" y="498">when the door last</text>
+  <text class="m sm" x="244" y="514">answered.</text>
+
+  <rect class="bad" x="456" y="412" width="212" height="128" rx="6"/>
+  <text class="k badt" x="472" y="436">401 · 403 · 503 · ANY OTHER</text>
+  <text class="t" x="472" y="460">Keeps every page</text>
+  <text class="m sm" x="472" y="482">and counts a failure.</text>
+  <text class="m sm" x="472" y="498">Unreachable, slow and</text>
+  <text class="m sm" x="472" y="514">misconfigured alike.</text>
+
+  <rect class="bad" x="684" y="412" width="216" height="128" rx="6"/>
+  <text class="k badt" x="700" y="436">200, ONE TREE UNREADABLE</text>
+  <text class="t" x="700" y="460">Refused whole</text>
+  <text class="m sm" x="700" y="482">The last set is kept</text>
+  <text class="m sm" x="700" y="498">entire; a page twice in</text>
+  <text class="m sm" x="700" y="514">one answer, likewise.</text>
+
+  <text class="m sm" x="0" y="556">Freshness is the only thing a failure costs. There is no path on which a reader is shown nothing.</text>
+</svg>

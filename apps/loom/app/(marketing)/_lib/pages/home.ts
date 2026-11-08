@@ -9,7 +9,7 @@ import {
 } from "@jam-overture/loom"
 import { THEME_PROP_KEY } from "@jam-overture/loom/react"
 
-import { BAND, WHY_USE_IT_ANCHOR } from "../bands"
+import { ALLOWED_ANCHOR, BAND, WHY_USE_IT_ANCHOR } from "../bands"
 import {
   siteFooter,
   siteHeader,
@@ -120,30 +120,11 @@ const hero = (ids: IdFactory): LoomNode =>
     children: [
       buildSlot(ids, "heading", [
         /**
-         * **The headline, and it is the maintainer's of 24 October.**
-         *
-         * Three were put to him on #704 and he took this one: *"I like the
-         * second headline. Simplest but gets to the point."*
-         * `docs/positioning.md` records it as settled. The literal is
-         * `HEADLINE` in `copy.ts`, beside the list of his lines, because the
-         * page and that list are its two readers.
-         *
-         * **It replaces a headline of his own**, *Make your web page dynamic
-         * with AI and Loom*, which he wrote on 27 September and which sat here
-         * for four weeks. That one was the only part of the page arguing a
-         * build case while everything under it argued governance, and this
-         * lane carried the tension as a standing question in six reports rather
-         * than resolving it by editing his sentence. His answers of 24 October
-         * resolved it the other way: the build case is the pitch and the
-         * governance is under the hood, so the headline that was out of step
-         * with the page is now the one the page is being rebuilt around.
-         *
-         * **What it claims is small and that is why it works.** It says what a
-         * reader gets rather than what the product is, it names no mechanism,
-         * and it survives the headline rule in `voice.test.ts` without
-         * punctuation tricks: no trailing clause, no inversion, nothing a
-         * person would not say out loud. The band directly under it is the
-         * chain, which is where the claim gets earned.
+         * **The headline is the maintainer's, and no run changes it.** The
+         * literal is `HEADLINE` in `copy.ts`, which has its history: written
+         * by him on 27 September, swapped out on 24 October on a misreading,
+         * restored at his instruction on 7 November. `headline.test.ts` pins
+         * it word for word.
          */
         /**
          * **`align` is set here because the hero's own `align` does not reach
@@ -589,6 +570,22 @@ type UsingItStep = {
   readonly title: string
   readonly body: string
   readonly state: "done" | "current"
+  /**
+   * The band of `/why-use-it` where a reader can watch this step being true.
+   *
+   * **Every step has one as of today**, and the third is why this field
+   * exists. Three of these four steps already had a band and a reader had no
+   * way to find it: the step made a claim about what the step costs and the
+   * evidence sat on another page under a different heading. The third had no
+   * band at all, which is the half of this that was work rather than a link
+   * (`connected.ts`).
+   *
+   * It is the argument `chain.ts` makes about the six links, applied to the
+   * four steps, and `using-it.test.ts` holds it the same way: the press lands
+   * on a band that declares the anchor, read off the markup rather than off the
+   * tree that built it.
+   */
+  readonly shownAt: string
 }
 
 const USING_IT: readonly UsingItStep[] = [
@@ -597,24 +594,28 @@ const USING_IT: readonly UsingItStep[] = [
     title: "Build your components",
     body: "Use whatever framework you already use. Loom does not write code into your page, and it does not ask you to rebuild anything.",
     state: "done",
+    shownAt: WHY_USE_IT_ANCHOR.staysYours,
   },
   {
     marker: "2",
     title: "Register them with Loom",
     body: "Tell Loom which of your components the AI is allowed to use. That is all the setup there is.",
     state: "done",
+    shownAt: WHY_USE_IT_ANCHOR.whatYouWrite,
   },
   {
     marker: "3",
     title: "Hook up your preferred AI model",
     body: "Loom is AI model agnostic. Pick the model you already use, or bring your own. Loom sends it what your users are doing, and it suggests changes from there.",
     state: "done",
+    shownAt: WHY_USE_IT_ANCHOR.connected,
   },
   {
     marker: "4",
     title: "Adapt your page within your rules",
     body: "Define your acceptance policy up front, so an AI model can only make changes you already approved. Anything else gets rejected, and Loom tells you why.",
     state: "current",
+    shownAt: ALLOWED_ANCHOR,
   },
 ]
 
@@ -682,6 +683,26 @@ const usingIt = (ids: IdFactory): LoomNode =>
         "You keep your framework and your components. Loom provides the oversight and governance.",
         { size: "lead", measured: true }
       ),
+      /**
+       * **The same scaffolding sentence the chain band carries, for the same
+       * reason**, and it comes off when the same finding is met.
+       *
+       * A `loom.milestone` with an `href` renders `.loom-underline`, whose rest
+       * state is `background-size: 0% 2px`, so a step that is a link is
+       * pixel-identical to one that is not until a pointer touches it. On a
+       * phone nothing ever does. That is filed for `Loom primitives` and the
+       * composition says in words what the library cannot say in paint.
+       *
+       * **It says *any* where the chain's says *a*, and the difference is
+       * load-bearing.** The chain's last rung has nowhere to go, so a universal
+       * would be a promise that band breaks once. All four of these steps land
+       * somewhere, `using-it.test.ts` holds that they do, and the day one stops
+       * this sentence is the thing that goes red.
+       */
+      prose(ids, "Press any step to see that part of it on this site.", {
+        size: "small",
+        tone: "muted",
+      }),
       buildElement(ids, {
         type: "loom.milestone-row",
         props: { rail: "line", density: "loose" },
@@ -693,6 +714,7 @@ const usingIt = (ids: IdFactory): LoomNode =>
               title: step.title,
               body: step.body,
               state: step.state,
+              href: `${sitePath(WHY_USE_IT.path)}#${step.shownAt}`,
             },
           })
         ),

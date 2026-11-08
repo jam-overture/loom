@@ -33,7 +33,7 @@ the portal every day.
 | Configuration | the host's argument, never a prop in the tree |
 | Default | off; an unaddressed render is byte-identical |
 | Browser cost | **7,543 bytes** minified, 3,361 gzipped, measured 7 November; `src/signals/browser-weight.test.ts` fails if an import reaches a package, and now also if the bundle passes 8,000 minified or 3,600 gzipped |
-| What a broadcast follows | the page, when it is handed the `Document` ([0361](../decisions/0361-a-broadcast-handed-a-document-follows-the-page-and-a-client-side-navigation-is-a-new-page-view.md)) — a client-side navigation ends one page view and opens another with its own arrival, a re-render leaves the page view alone, and the same revision rendered again continues it; handed an `Element` it reads that element's tree and revision once, as it always has |
+| What a broadcast follows | the page, when it is handed the `Document` ([0366](../decisions/0366-a-broadcast-handed-a-document-follows-the-page-and-a-client-side-navigation-is-a-new-page-view.md)) — a client-side navigation ends one page view and opens another with its own arrival, a re-render leaves the page view alone, and the same revision rendered again continues it; handed an `Element` it reads that element's tree and revision once, as it always has |
 | How long a delivery lives | two windows since 5 November: counted once it is ripe, **kept for 30 days by default** and then deleted ([0349](../decisions/0349-a-projects-reader-events-are-kept-thirty-days-by-default-and-the-tallies-stay-the-durable-record.md), [0351](../decisions/0351-a-counted-delivery-is-kept-for-a-stated-window-rather-than-deleted-by-the-fold.md)) — and nothing deletes a delivery no fold has counted, so a deployment whose collection stopped keeps rather than loses them |
 | What an operator can look at, delivery by delivery | one row per signal the deployment still keeps, newest first, in exact pages, with the rest of one page view beside any of them ([0355](../decisions/0355-the-events-a-screen-lists-are-one-row-per-signal-and-one-page-view-is-read-on-a-key-the-caller-already-holds.md)) — the handle the *Events* tab is drawn from, which counts nothing, names no page and cannot be asked which page views exist |
 | When readers arrived | page views counted under the hour they began in as well as in total ([0356](../decisions/0356-page-views-are-counted-under-the-hour-they-began-in-as-a-sixth-counter-written-at-the-door.md)), written at the door in the same transaction as the total — so a chart by hour sums to the count drawn beside it, and a reading over a range says where its data starts |
@@ -136,7 +136,7 @@ call inside a pull request.
    8,000 bytes minified and 3,600 gzipped, so a step up in what every reader
    downloads is a line somebody had to write, with the number in it, in the diff
    that spends it. §78 spent 1,030 of those bytes on purpose and says why
-   ([0361](../decisions/0361-a-broadcast-handed-a-document-follows-the-page-and-a-client-side-navigation-is-a-new-page-view.md)).
+   ([0366](../decisions/0366-a-broadcast-handed-a-document-follows-the-page-and-a-client-side-navigation-is-a-new-page-view.md)).
 
    One limit found in it on 2 October, measured and recorded in
    [0218](../decisions/0218-what-a-counter-means-is-published-and-the-browser-pays-for-the-number-and-not-its-name.md):
@@ -214,7 +214,7 @@ or revision is a new broadcast. Closes the open finding of 12 September.
 did not act on it filed every signal after a client-side navigation under the
 page the reader left, which is a wrong number rather than a missing one. A
 broadcast handed the `Document` now follows the page itself
-([0361](../decisions/0361-a-broadcast-handed-a-document-follows-the-page-and-a-client-side-navigation-is-a-new-page-view.md)).
+([0366](../decisions/0366-a-broadcast-handed-a-document-follows-the-page-and-a-client-side-navigation-is-a-new-page-view.md)).
 
 ### 2. `completed`, the kind that closes a funnel · `Loom signals` · **done, 1 October**
 
@@ -4853,6 +4853,71 @@ kind, and the one new table is one no browser can see.
 reading does not compose into `windowAssemblyOf` — a window is a set of counters
 and this is a stretch of time, so a caller reads it directly.
 
+### 77. What readers did, by the hour they did it in · `Loom signals` · **done, 6 November**
+
+§76 put a clock on one counter and `Loom portal` drew the range picker off it
+the same morning (#791) — then filed, in the same breath, the three things on
+`portal-wireframes.md` *1 · Signals* that read a range and still could not: the
+**primary goal's figure for the range** with the change on the period before,
+the *By page* drawer's **bar per kind of thing readers did for the range**, and
+**each goal's trend**. A goal is a kind on a part (0350) and the tallies that
+count those keep no time.
+
+**Done**
+([0362](../decisions/0362-what-readers-did-is-counted-under-the-hour-they-did-it-in-as-a-seventh-counter-the-fold-writes-for-the-three-delegated-kinds.md)),
+as a seventh counter written by the fold.
+
+- **It holds the three delegated kinds and no others.** `activated`,
+  `disclosed` and `completed` are the kinds a reader *aimed at something* to
+  cause (0167) — already a named set, and exactly 0350's three goal kinds. No
+  new vocabulary and no new payload: rule 6's five kinds are untouched.
+- **The distinct counters are not sliced by hour, and that is the design
+  rather than a gap.** `views`, `reached` and `engaged` count distinct page
+  views and distinctness does not add, so an hourly table of them would publish
+  a denominator that inflates with the slicing. **The honest hourly denominator
+  already exists**: page views that began in the hour, counted once, at the door
+  (0214, 0356). The rate 0350 defines is this counter over that one.
+- **`dwellMs` is not sliced either, and the number is the argument.** A
+  `dwelled` signal is observed for every part that comes into view, so an hourly
+  dwell row per part is about 6,000 rows an hour for one large page — 144,000 a
+  day, per revision, in a durable table nothing sweeps. The three kinds kept
+  here are **bounded by what readers did**: a reader who presses one button on
+  that same page writes one row.
+- **The fold writes it, from the same pass as the tallies, in the same
+  transaction.** Not a second walk: the fold refuses a batch it has already
+  folded (0314), that refusal is one judgement per batch, and a second pass
+  grouping by hour would make it twice — so a repeat landing either side of an
+  hour boundary would be refused by one pass and counted by the other, and the
+  hours would stop summing to the tally they slice, permanently (0158). The sum
+  is asserted three times: in the fold, across two collection runs, and in the
+  contract suite both stores are run against.
+- **The hour is `receivedAt`, never `sentAt`** — a sender's clock is a number a
+  page said, and a chart drawn from it is one a page could move bars on (0355).
+  A batch with no receive instant is counted into the tallies and into no hour,
+  and the fold reports how many as `undated`, as it already reports the batches
+  that carried no view key.
+- **The read answers the range and the beginning, and the part narrows both.**
+  A goal made this afternoon on a part nobody pressed until this afternoon has
+  been measurable since this afternoon; a beginning taken over the deployment
+  would draw a year of noughts behind it.
+- **The rate is taken once over the range and never per hour.** The denominator
+  counts page views that *began* in the range and the numerator what readers
+  *did* in it, so a reader who arrived at 10:59 and pressed at 11:01 is in one
+  hour's numerator and another's denominator. That error sits at a range's two
+  edges — two page views' worth of a month, and the whole of an hour — so the
+  hours are published as counts, which add honestly, and the quotient is taken
+  once. It is withheld where the range held no page views, including the case
+  worth naming: presses and no arrivals, where every reader came in before the
+  range began.
+
+**Nothing reaches a reader's browser.** `broadcast.ts` and its import graph are
+untouched and the bundle measures 6,513 bytes minified, 2,980 gzipped — the same
+bytes as §76.
+
+**What is left and is filed:** the three screens are the portal's to draw; and
+whether the drawer wants `viewed` and `dwelled` bars over a range too, which
+would be a second, page-grained table and is a question about the screen rather
+than about the counter.
 ### 78. A client-side navigation is a new page view · `Loom signals` · **done, 7 November**
 
 §1 taught the broadcaster to keep up with a page that changes under it, and left
@@ -4872,7 +4937,7 @@ arrives **once** — and page views by hour (0356), the region map and every
 figure at the door's scale read that marker.
 
 **Done**
-([0361](../decisions/0361-a-broadcast-handed-a-document-follows-the-page-and-a-client-side-navigation-is-a-new-page-view.md)):
+([0366](../decisions/0366-a-broadcast-handed-a-document-follows-the-page-and-a-client-side-navigation-is-a-new-page-view.md)):
 `broadcastReaderSignals` takes an `Element` **or** a `Document`.
 
 - **An element behaves exactly as it did.** That element is the root, its tree

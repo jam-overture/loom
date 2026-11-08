@@ -1,7 +1,13 @@
 import { describe, expect, it } from "vitest"
 
-import type { TreeId } from "@jam-overture/loom"
-import type { StoredPageViews } from "@jam-overture/loom/signals"
+import { primitiveTypeSchema, type NodeId, type TreeId } from "@jam-overture/loom"
+import {
+  arrivalRangeOf,
+  type StoredActed,
+  type StoredArrivals,
+  type StoredPageViews,
+} from "@jam-overture/loom/signals"
+import { DEFAULT_AUDIENCE_ID } from "@jam-overture/loom/store"
 import type { HeldProposal } from "@jam-overture/loom/write"
 
 import { pageFixture } from "@/app/_lib/pages/fixtures"
@@ -17,6 +23,7 @@ import {
   type ByPageRow,
 } from "./by-page"
 import { goalIdSchema, type Goal } from "./goals/goal"
+import type { PageHourly } from "./page-range"
 import { elementIdsOf, tallyOf } from "./proposing/fixtures"
 
 const home = pageFixture("home", "Welcome", 3)
@@ -39,6 +46,50 @@ const views = (
     audienceId,
     updatedAt,
   }) as StoredPageViews
+
+const UNREAD: PageHourly = { kind: "unreadable" }
+
+const HOUR = 3_600_000
+const NOW = Date.UTC(2026, 10, 8, 12, 30)
+const RANGE = arrivalRangeOf(NOW, 24)
+const BEFORE = RANGE.from - 24 * HOUR
+
+/** One page's hourly counters: page views by hour, and presses and sends on one part by hour. */
+const hourlyOn = (
+  tree: { readonly treeId: TreeId; readonly revision: number },
+  node: NodeId,
+  views: readonly (readonly [hour: number, views: number])[],
+  acted: readonly (readonly [hour: number, presses: number, sends: number])[]
+): PageHourly => {
+  const arrivals: StoredArrivals = {
+    hours: views.map(([hour, count]) => ({
+      treeId: tree.treeId,
+      revision: tree.revision,
+      hour,
+      views: count,
+      audienceId: DEFAULT_AUDIENCE_ID,
+      updatedAt: new Date(hour).toISOString(),
+    })),
+    begins: BEFORE,
+  }
+  const did: StoredActed = {
+    hours: acted.map(([hour, activations, completions]) => ({
+      treeId: tree.treeId,
+      revision: tree.revision,
+      nodeId: node,
+      type: primitiveTypeSchema.parse("loom.heading"),
+      hour,
+      activations,
+      opens: 1,
+      closes: 0,
+      completions,
+      audienceId: DEFAULT_AUDIENCE_ID,
+      updatedAt: new Date(hour).toISOString(),
+    })),
+  }
+
+  return { kind: "read", range: RANGE, counters: { arrivals, acted: did, actedBegins: BEFORE } }
+}
 
 const nothingElse = {
   tallies: [],
@@ -253,19 +304,23 @@ describe("the drawer for one page", () => {
   })
 
   it("draws a bar for each kind of thing readers did, against the longest", () => {
-    const drawer = pageDrawerOf(row, {
-      pageViews: [],
-      tallies: [
-        tallyOf(home, heading, {
-          activations: 5,
-          opens: 1,
-          closes: 1,
-          completions: 0,
-        }),
-      ],
-      published: [{ tree: home, receivedAt: 0 }],
-      goals: undefined,
-    })
+    const drawer = pageDrawerOf(
+      row,
+      {
+        pageViews: [],
+        tallies: [
+          tallyOf(home, heading, {
+            activations: 5,
+            opens: 1,
+            closes: 1,
+            completions: 0,
+          }),
+        ],
+        published: [{ tree: home, receivedAt: 0 }],
+        goals: undefined,
+      },
+      UNREAD
+    )
 
     expect(drawer.bars.map(({ technical, count, share }) => [technical, count, share])).toEqual([
       ["viewed", 10, 1],
@@ -275,21 +330,78 @@ describe("the drawer for one page", () => {
     ])
   })
 
+  it("draws the range from the page's hourly counters, apart from since it was first counted", () => {
+    const drawer = pageDrawerOf(
+      row,
+      { pageViews: [], tallies: [], published: [], goals: undefined },
+      hourlyOn(
+        home,
+        heading,
+        [
+          [RANGE.from, 40],
+          [BEFORE, 900],
+        ],
+        [
+          [RANGE.from + HOUR, 8, 2],
+          [BEFORE + HOUR, 50, 50],
+        ]
+      )
+    )
+
+    if (drawer.range.kind !== "read") throw new Error("the hours were read")
+
+    expect(
+      drawer.range.bars.map(({ technical, count, share }) => [technical, count, share])
+    ).toEqual([
+      ["viewed", 40, 1],
+      ["activated", 8, 0.2],
+      ["disclosed", 1, 0.025],
+      ["completed", 2, 0.05],
+    ])
+    expect(drawer.range.countedFrom).toBeUndefined()
+    expect(drawer.bars[0]?.count).toBe(10)
+  })
+
+  it("says where counting by the hour began inside the range, and when it has not begun or was not read", () => {
+    const begun = hourlyOn(home, heading, [[RANGE.from + 2 * HOUR, 5]], [])
+
+    if (begun.kind !== "read") throw new Error("a reading")
+
+    const later = (begins: number | undefined): PageHourly => ({
+      ...begun,
+      counters: { ...begun.counters, actedBegins: begins },
+    })
+    const drawn = (hourly: PageHourly) =>
+      pageDrawerOf(row, { pageViews: [], tallies: [], published: [], goals: undefined }, hourly)
+        .range
+
+    expect(drawn(later(RANGE.from + 2 * HOUR))).toMatchObject({
+      kind: "read",
+      countedFrom: RANGE.from + 2 * HOUR,
+    })
+    expect(drawn(later(RANGE.to))).toEqual({ kind: "uncounted" })
+    expect(drawn(UNREAD)).toEqual({ kind: "unreadable" })
+  })
+
   it("names the parts pressed most, at most three, and the one kept on screen longest", () => {
     const [root] = elementIdsOf(home)
 
     if (root === undefined) throw new Error("the fixture has a root")
 
-    const drawer = pageDrawerOf(row, {
-      pageViews: [],
-      tallies: [
-        tallyOf(home, heading, { activations: 2, reached: 4, dwellMs: 6_000 }),
-        tallyOf(home, root, { activations: 7, reached: 10, dwellMs: 9_000 }),
-        tallyOf({ ...home, revision: 2 }, heading, { activations: 1 }),
-      ],
-      published: [{ tree: home, receivedAt: 0 }],
-      goals: undefined,
-    })
+    const drawer = pageDrawerOf(
+      row,
+      {
+        pageViews: [],
+        tallies: [
+          tallyOf(home, heading, { activations: 2, reached: 4, dwellMs: 6_000 }),
+          tallyOf(home, root, { activations: 7, reached: 10, dwellMs: 9_000 }),
+          tallyOf({ ...home, revision: 2 }, heading, { activations: 1 }),
+        ],
+        published: [{ tree: home, receivedAt: 0 }],
+        goals: undefined,
+      },
+      UNREAD
+    )
 
     expect(drawer.pressed.map((part) => [part.nodeId, part.presses])).toEqual([
       [root, 7],
@@ -305,7 +417,8 @@ describe("the drawer for one page", () => {
   it("draws empty bars and names no part for a page readers only opened", () => {
     const quiet = pageDrawerOf(
       { ...row, opened: 0 },
-      { pageViews: [], tallies: [], published: [], goals: undefined }
+      { pageViews: [], tallies: [], published: [], goals: undefined },
+      UNREAD
     )
 
     expect(quiet.bars.every((bar) => bar.share === 0)).toBe(true)
@@ -379,7 +492,7 @@ describe("goals, measured one page at a time", () => {
 
       if (row === undefined) throw new Error(`${treeId} was counted`)
 
-      return pageDrawerOf(row, { ...readings, goals }).goals
+      return pageDrawerOf(row, { ...readings, goals }, UNREAD).goals
     }
 
     expect(drawerOn(home.treeId)?.map((each) => [each.name, each.primary, each.reading])).toEqual([
@@ -396,7 +509,51 @@ describe("goals, measured one page at a time", () => {
 
     if (row === undefined) throw new Error("home was counted")
 
-    expect(pageDrawerOf(row, { ...readings, goals: undefined }).goals).toBeUndefined()
-    expect(pageDrawerOf(row, { ...readings, goals: [] }).goals).toEqual([])
+    expect(pageDrawerOf(row, { ...readings, goals: undefined }, UNREAD).goals).toBeUndefined()
+    expect(pageDrawerOf(row, { ...readings, goals: [] }, UNREAD).goals).toEqual([])
+  })
+
+  it("measures each goal in the drawer over the range on this page alone, with the period before", () => {
+    const row = rowsFor(goals).get(home.treeId)
+
+    if (row === undefined) throw new Error("home was counted")
+
+    const drawn = pageDrawerOf(
+      row,
+      { ...readings, goals },
+      hourlyOn(
+        home,
+        heading,
+        [
+          [RANGE.from, 100],
+          [BEFORE, 100],
+        ],
+        [
+          [RANGE.from + HOUR, 3, 1],
+          [BEFORE + HOUR, 2, 0],
+        ]
+      )
+    ).goals
+
+    expect(
+      drawn?.map((each) => [
+        each.name,
+        each.range?.kind === "read" ? [each.range.current.count, each.range.current.views] : null,
+        each.range?.kind === "read" ? [each.range.before?.count, each.range.before?.views] : null,
+      ])
+    ).toEqual([
+      ["Goal a", [3, 100], [2, 100]],
+      ["Goal b", [1, 100], [0, 100]],
+    ])
+  })
+
+  it("leaves each goal's range unread where the page's hours were not read", () => {
+    const row = rowsFor(goals).get(home.treeId)
+
+    if (row === undefined) throw new Error("home was counted")
+
+    expect(
+      pageDrawerOf(row, { ...readings, goals }, UNREAD).goals?.map((each) => each.range)
+    ).toEqual([undefined, undefined])
   })
 })

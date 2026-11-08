@@ -18,6 +18,13 @@ export type SitePull = {
   /** The entity tag the door answered with, `200` and `304` alike. */
   readonly tag: string
   readonly at: number
+  /**
+   * Whether the site named this answer as the pages it already holds: its
+   * `If-None-Match` matched, so it was answered `304`. A site keeps an answer's
+   * tag only with the pages it names, so this is the one sign, from outside,
+   * that it kept them rather than refusing them.
+   */
+  readonly kept: boolean
 }
 
 /** The first and the most recent pull a project's site made, in epoch milliseconds. */
@@ -26,13 +33,52 @@ export type PullSpan = {
   readonly last: number
 }
 
+/**
+ * The newest answer a project's site was given, and whether it kept it.
+ *
+ * A site whose installed Loom cannot read an answer refuses it whole and goes
+ * on asking for the pages it held, under their older tag, so the door answers
+ * it the newest pages on every pull and is never told it holds them. From the
+ * rows that is an answer taken again and again and never named back.
+ */
+export type NewestAnswer = {
+  /** When the site was first and last answered with the newest pages, in epoch milliseconds. */
+  readonly first: number
+  readonly last: number
+  /** The site has named the newest pages back as the ones it holds. */
+  readonly kept: boolean
+  /** The site has named some answer back, so it is one that says what it holds. */
+  readonly anyKept: boolean
+}
+
 export type SitePullStoreError = { readonly code: "unavailable"; readonly detail: string }
 
 export interface SitePullStore {
-  /** Idempotent, and in any order: a tag keeps the earliest and latest moment it was taken. */
+  /**
+   * Idempotent, and in any order: a tag keeps the earliest and latest moment it
+   * was taken, and once kept it stays kept.
+   */
   readonly record: (pull: SitePull) => Promise<Result<void, SitePullStoreError>>
   /** `null` for a project whose site has never pulled. */
   readonly span: (
     application: ApplicationId
   ) => Promise<Result<PullSpan | null, SitePullStoreError>>
+  /**
+   * When each answer the site took was first taken, for the answers first taken
+   * at or after `since`, earliest first.
+   *
+   * Accepting a change changes the live pages and so their entity tag, so the
+   * first of these at or after the moment a change was accepted is when the
+   * site first took the pages that change made: the *Live* step of the
+   * timeline from *Accept*. An answer first taken before `since` and again
+   * after it is pages from before, so it is not listed.
+   */
+  readonly firstTakenSince: (
+    application: ApplicationId,
+    since: number
+  ) => Promise<Result<readonly number[], SitePullStoreError>>
+  /** `null` for a project whose site has never pulled. */
+  readonly newest: (
+    application: ApplicationId
+  ) => Promise<Result<NewestAnswer | null, SitePullStoreError>>
 }

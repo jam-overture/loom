@@ -193,7 +193,19 @@ delete them, and that reading was wrong. Nothing is deleted.
 
 **2. The front door is rewritten first.** *"Front door first."*
 
-## The headline, which is settled
+## The headline, which is settled — corrected 7 November
+
+> **7 November, the maintainer:** *"It should say Make your web page dynamic
+> with AI and Loom."* He asked why he had to keep repeating it.
+>
+> **The headline is _Make your web page dynamic with AI and Loom_.** The
+> reading below of his 24 October reply was wrong. It is kept, by this file's
+> rule, so a run can see what was believed and when, but it is **not** the
+> settled headline and no run acts on it. The literal lives in `copy.ts` as
+> `HEADLINE`, and `headline.test.ts` pins it word for word. A run that thinks the
+> headline should change says so in a report and leaves it alone.
+
+### What was believed on 24 October (superseded)
 
 Three were proposed and he took the second:
 

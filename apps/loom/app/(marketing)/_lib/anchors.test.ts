@@ -50,7 +50,7 @@ const STATES: readonly (readonly [string, SiteRoute])[] = SITE_ROUTES.map((route
   route,
 ])
 
-const pageFor = async (route: SiteRoute): Promise<LoomTree> => pageTreeFor(route, { theme: "minimal" })
+const pageFor = (route: SiteRoute): LoomTree => pageTreeFor(route, { theme: "minimal" })
 
 const markupFor = (page: LoomTree): string =>
   renderToStaticMarkup(renderTree(page, { origin: ORIGIN }).element)
@@ -150,7 +150,7 @@ const crossPageFragments = (
 
 describe("the anchors this site links to", () => {
   it.each(STATES)("%s renders every anchor it declares as an id", async (_name, route) => {
-    const page = await pageFor(route)
+    const page = pageFor(route)
     const markup = markupFor(page)
 
     for (const anchor of anchorsIn(page)) {
@@ -171,7 +171,7 @@ describe("the anchors this site links to", () => {
    * against a fragment nobody declared.
    */
   it.each(STATES)("%s can reach every fragment it points at", async (_name, route) => {
-    const page = await pageFor(route)
+    const page = pageFor(route)
     const declared = anchorsIn(page)
 
     for (const fragment of samePageFragmentsIn(page, route)) {
@@ -187,7 +187,7 @@ describe("the anchors this site links to", () => {
    * browser met first, which is a page-order dependency nobody writes down.
    */
   it.each(STATES)("%s answers to each of its anchors once", async (_name, route) => {
-    const declared = anchorsIn(await pageFor(route))
+    const declared = anchorsIn(pageFor(route))
 
     expect(declared).toEqual([...new Set(declared)])
   })
@@ -197,14 +197,14 @@ describe("the anchors this site links to", () => {
    * carries why it exists and why it is not the chain's business.
    */
   it.each(STATES)("%s reaches every band it points at on another page", async (_name, route) => {
-    const aimed = crossPageFragments(await pageFor(route), route)
+    const aimed = crossPageFragments(pageFor(route), route)
 
     for (const [path, fragment] of aimed) {
       const target = SITE_ROUTES.find((candidate) => candidate.path === path)
 
       if (target === undefined) throw new Error(`loom: ${route.path} points at ${path}, which is not a page of this site`)
 
-      const declared = anchorsIn(await pageFor(target))
+      const declared = anchorsIn(pageFor(target))
 
       expect({ from: route.path, path, fragment, declared: declared.includes(fragment) }).toEqual({
         from: route.path,
@@ -228,9 +228,7 @@ describe("the anchors this site links to", () => {
    * property this site has or wants.
    */
   it("has cross-page fragments to read", async () => {
-    const aimed = await Promise.all(
-      STATES.map(async ([, route]) => crossPageFragments(await pageFor(route), route))
-    )
+    const aimed = STATES.map(([, route]) => crossPageFragments(pageFor(route), route))
 
     expect(aimed.flat().length).toBeGreaterThanOrEqual(SITE_PATHS.length - 1)
   })
@@ -244,7 +242,7 @@ describe("the anchors this site links to", () => {
   it.each(Object.entries(ANCHOR) as readonly (readonly [string, string])[])(
     "%s is on the front door",
     async (_band, anchor) => {
-      const declared = anchorsIn(await pageFor(HOME))
+      const declared = anchorsIn(pageFor(HOME))
 
       expect({ anchor, onThePage: declared.includes(anchor) }).toEqual({ anchor, onThePage: true })
     }

@@ -1,0 +1,27 @@
+{
+  "baseUrl": "http://localhost:3000",
+  "outDir": "reports",
+  "shots": [
+    {
+      "path": "/docs/api-reference/signals",
+      "out": "2026-11-07-docs-the-cap-that-names-the-cut-wide-head",
+      "viewport": "wide",
+      "waitFor": "h1",
+      "measure": ["text=629 exports, in 60 modules."]
+    },
+    {
+      "path": "/docs/api-reference/signals",
+      "out": "2026-11-07-docs-the-cap-that-names-the-cut-wide-modules",
+      "viewport": "wide",
+      "waitFor": "h1",
+      "clip": "nav[aria-label=\"On this page\"]"
+    },
+    {
+      "path": "/docs/api-reference/signals",
+      "out": "2026-11-07-docs-the-cap-that-names-the-cut-phone-modules",
+      "viewport": "phone",
+      "waitFor": "h1",
+      "do": [{ "scrollTo": "nav[aria-label=\"On this page\"]" }]
+    }
+  ]
+}

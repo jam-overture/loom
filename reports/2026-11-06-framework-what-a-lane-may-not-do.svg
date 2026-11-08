@@ -1,0 +1,115 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 620" width="880" height="620" font-family="Geist, ui-sans-serif, system-ui, sans-serif">
+  <style>
+    .bg { fill: #ffffff; }
+    .t { fill: #18181b; }
+    .m { fill: #52525b; }
+    .ok { fill: #dcfce7; stroke: #16a34a; }
+    .bad { fill: #fee2e2; stroke: #dc2626; }
+    .new { fill: #fef9c3; stroke: #ca8a04; }
+    .box { fill: #f4f4f5; stroke: #d4d4d8; }
+    .okt { fill: #166534; }
+    .badt { fill: #991b1b; }
+    .newt { fill: #854d0e; }
+    .wire { stroke: #a1a1aa; fill: none; }
+    .wirebad { stroke: #dc2626; fill: none; }
+    .rule { stroke: #d4d4d8; fill: none; }
+    text { font-size: 13px; }
+    .h { font-size: 16px; font-weight: 700; }
+    .sh { font-size: 13px; font-weight: 700; }
+    .k { font-size: 11px; letter-spacing: .06em; font-weight: 700; }
+    .mono { font-size: 11.5px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .tiny { font-size: 10.5px; }
+    @media (prefers-color-scheme: dark) {
+      .bg { fill: #09090b }
+      .t { fill: #fafafa } .m { fill: #a1a1aa }
+      .ok { fill: #14532d; stroke: #4ade80 }
+      .bad { fill: #7f1d1d; stroke: #f87171 }
+      .new { fill: #713f12; stroke: #facc15 }
+      .box { fill: #27272a; stroke: #52525b }
+      .okt { fill: #4ade80 } .badt { fill: #f87171 } .newt { fill: #facc15 }
+      .wire { stroke: #71717a } .wirebad { stroke: #f87171 }
+      .rule { stroke: #3f3f46 }
+    }
+  </style>
+  <rect class="bg" x="0" y="0" width="880" height="620"/>
+
+  <text class="h t" x="24" y="30">Two conventions that lived only in prose, and where each one&#8217;s failure arrived</text>
+  <text class="m" x="24" y="50">Both findings are closed by one branch. Neither convention changed; what changed is who notices when it is broken.</text>
+
+  <line class="rule" x1="24" y1="68" x2="856" y2="68"/>
+  <text class="k badt" x="24" y="88">UNTIL THIS BRANCH &#8212; THE GATE READS NEITHER</text>
+
+  <!-- row 1: the mock -->
+  <text class="sh t" x="24" y="116">A module mock in a shared worker</text>
+  <text class="m tiny" x="24" y="132">filed by Loom marketing, 6 November</text>
+  <rect class="ok" x="24" y="144" width="150" height="40" rx="5"/>
+  <text class="okt sh" x="99" y="162" text-anchor="middle">branch green</text>
+  <text class="okt tiny" x="99" y="176" text-anchor="middle">the mock worked here</text>
+  <path class="wire" d="M178 164 H 214" marker-end="url(#a)"/>
+  <rect class="box" x="218" y="144" width="150" height="40" rx="5"/>
+  <text class="t sh" x="293" y="162" text-anchor="middle">another lane merges</text>
+  <text class="m tiny" x="293" y="176" text-anchor="middle">the workers are reshuffled</text>
+  <path class="wirebad" d="M372 164 H 408" marker-end="url(#b)"/>
+  <rect class="bad" x="412" y="144" width="150" height="40" rx="5"/>
+  <text class="badt sh" x="487" y="162" text-anchor="middle">main red</text>
+  <text class="badt tiny" x="487" y="176" text-anchor="middle">12 of 12 cases fail</text>
+  <text class="m" x="578" y="160">No branch was ever wrong, so review</text>
+  <text class="m" x="578" y="177">could not have caught it.</text>
+
+  <!-- row 2: the formatter -->
+  <text class="sh t" x="24" y="222">A formatter run on a repository that configures none</text>
+  <text class="m tiny" x="24" y="238">filed by Loom signals, 12 October &#183; and by Loom marketing, 23 September</text>
+  <rect class="ok" x="24" y="250" width="150" height="40" rx="5"/>
+  <text class="okt sh" x="99" y="268" text-anchor="middle">branch green</text>
+  <text class="okt tiny" x="99" y="282" text-anchor="middle">verify reads no style</text>
+  <path class="wire" d="M178 270 H 214" marker-end="url(#a)"/>
+  <rect class="new" x="218" y="250" width="344" height="40" rx="5"/>
+  <text class="newt sh" x="390" y="268" text-anchor="middle">a 150-line change arrives as a whole-file diff</text>
+  <text class="newt tiny" x="390" y="282" text-anchor="middle">every line of a 640-line module and its 700-line suite</text>
+  <text class="m" x="578" y="266">Caught both times by a person noticing</text>
+  <text class="m" x="578" y="283">a semicolon count looked wrong.</text>
+
+  <line class="rule" x1="24" y1="318" x2="856" y2="318"/>
+  <text class="k okt" x="24" y="338">AFTER &#8212; ONE SCANNER, TWO SWEEPS, IN tools/sources/</text>
+
+  <!-- the scanner -->
+  <rect class="box" x="24" y="352" width="538" height="74" rx="5"/>
+  <text class="t sh" x="40" y="372">codeOnly &#8212; what a check is allowed to read</text>
+  <text class="m tiny" x="40" y="388">Comment bodies, string and template contents and regex bodies are blanked; every position is kept.</text>
+  <text class="mono m" x="40" y="408">/** | `vi.mock("next/headers", &#8230;)` | 12 of 12 fail |  */</text>
+  <text class="mono okt" x="40" y="421">&#8594; blanked, so the file that worked the hazard out is not reported for it</text>
+  <text class="m tiny" x="578" y="372">Blanking can only hide a construct,</text>
+  <text class="m tiny" x="578" y="387">never invent one &#8212; so a mis-read makes</text>
+  <text class="m tiny" x="578" y="402">a check pass, not fail. Every one of the</text>
+  <text class="m tiny" x="578" y="417">1,920 sources lexes to the end, asserted.</text>
+
+  <!-- row 3 -->
+  <rect class="bad" x="24" y="444" width="270" height="52" rx="5"/>
+  <text class="badt sh" x="40" y="464">mocks.ts &#8212; branch red</text>
+  <text class="badt tiny" x="40" y="480">vi.mock is hoisted; use vi.doMock after</text>
+  <text class="badt tiny" x="40" y="491">vi.resetModules() and import again</text>
+  <rect class="bad" x="306" y="444" width="256" height="52" rx="5"/>
+  <text class="badt sh" x="322" y="464">semicolons.ts &#8212; branch red</text>
+  <text class="mono badt" x="322" y="482">src/signals/silences.ts:412:</text>
+  <text class="mono badt" x="322" y="494">  const next = read(window);</text>
+  <text class="m" x="578" y="464">The red now lands on the branch that</text>
+  <text class="m" x="578" y="481">caused it, naming the file and the line.</text>
+  <text class="m" x="578" y="498">A formatter is made visible, not banned.</text>
+
+  <line class="rule" x1="24" y1="524" x2="856" y2="524"/>
+  <text class="k m" x="24" y="546">SWEPT ON THIS BRANCH</text>
+  <text class="t" x="24" y="572">586 test files &#183; 0 hoisted mocks</text>
+  <text class="t" x="258" y="572">1,920 sources &#183; 0 statement semicolons</text>
+  <text class="t" x="552" y="572">42 new tests &#183; 0 exemption lists</text>
+  <text class="m tiny" x="24" y="592">Two shapes are exempt because they are the language rather than a style: a for header&#8217;s clauses spread over lines, and &amp;hellip; closing JSX text.</text>
+  <text class="m tiny" x="24" y="607">0360 records the convention. Adopting a formatter supersedes it, because the first run of one is a diff over every file in the repository.</text>
+
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#a1a1aa"/>
+    </marker>
+    <marker id="b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#dc2626"/>
+    </marker>
+  </defs>
+</svg>

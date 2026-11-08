@@ -79,7 +79,7 @@ describe("a phrase inside a sentence", () => {
   let pages: readonly ServedPage[] = []
 
   beforeAll(async () => {
-    pages = await servedPages()
+    pages = servedPages()
   })
 
   /**

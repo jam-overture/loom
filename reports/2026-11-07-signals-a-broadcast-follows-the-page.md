@@ -2,7 +2,7 @@
 
 **Lane:** `Loom signals` · **Date:** 7 November 2026 (morning run) ·
 **Branch:** `signals-78-a-broadcast-follows-the-page` ·
-**Record:** [0361](../decisions/0361-a-broadcast-handed-a-document-follows-the-page-and-a-client-side-navigation-is-a-new-page-view.md) ·
+**Record:** [0366](../decisions/0366-a-broadcast-handed-a-document-follows-the-page-and-a-client-side-navigation-is-a-new-page-view.md) ·
 **Plan:** [§78](../docs/signals.md)
 
 ## What I completed
@@ -143,11 +143,12 @@ permanent and invisible:
 
 ## Records added
 
-- **0361** — accepted. It contradicts no accepted record and touches neither the
-  tree schema nor the delta model, so it is not architectural. It is numbered
-  0361 rather than 0360 because 0360 is claimed by two open branches — #794
-  (this lane's own, from last night) and #793 — so `Loom merge` renumbers one
-  record rather than two.
+- **0366** — accepted. It contradicts no accepted record and touches neither the
+  tree schema nor the delta model, so it is not architectural. It was written as
+  0361 rather than 0360 because 0360 was claimed by two open branches — #794
+  (this lane's own, from last night) and #793 — so `Loom merge` would renumber
+  one record rather than two. `0361` was then taken on `main` by #798, and
+  `Loom merge` renumbered this record to **0366** on 8 November.
 
 ## Findings filed and closed
 

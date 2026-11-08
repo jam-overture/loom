@@ -155,8 +155,23 @@ describe("serveLivePages", () => {
     await serveLivePages(pull(`Bearer ${key}`, { ifNoneMatch: tag }), door)
 
     expect(pulls).toEqual([
-      { application: SITE.applicationId, tag, at: AT },
-      { application: SITE.applicationId, tag, at: AT },
+      { application: SITE.applicationId, tag, at: AT, kept: false },
+      { application: SITE.applicationId, tag, at: AT, kept: true },
+    ])
+  })
+
+  it("tells of an answer not kept when the site goes on naming the pages it held before", async () => {
+    const { door, key, pulls } = await fixtureOf()
+    const { door: changed } = await fixtureOf({ pages: [HOME] })
+    const older = (await serveLivePages(pull(`Bearer ${key}`), door)).headers.get("etag") ?? ""
+    const changedDoor = { ...changed, keys: door.keys, pulled: door.pulled }
+
+    const newest = await serveLivePages(pull(`Bearer ${key}`, { ifNoneMatch: older }), changedDoor)
+    await serveLivePages(pull(`Bearer ${key}`, { ifNoneMatch: older }), changedDoor)
+
+    expect(pulls.slice(1).map(({ tag, kept }) => ({ tag, kept }))).toEqual([
+      { tag: newest.headers.get("etag"), kept: false },
+      { tag: newest.headers.get("etag"), kept: false },
     ])
   })
 

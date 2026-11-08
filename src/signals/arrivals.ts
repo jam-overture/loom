@@ -291,20 +291,66 @@ export const arrivalSeriesOf = (
   range: ArrivalRange,
   options: ArrivalSeriesOptions = {}
 ): ArrivalSeries => {
-  const begins = stored.begins
+  const filled = hourlySeriesOf(stored.hours, stored.begins, range, (row) => row.views, options)
+
+  return {
+    range,
+    hours: filled.hours.map(({ hour, count, whole }) => ({ hour, views: count, whole })),
+    views: filled.total,
+    ...(stored.begins === undefined ? {} : { begins: stored.begins }),
+    clipped: filled.clipped,
+  }
+}
+
+/** One bucket of a dense hourly series, before a reading names what it counted. */
+export type HourlyBucket = {
+  readonly hour: number
+  readonly count: number
+  readonly whole: boolean
+}
+
+/** A dense series and what it adds up to, which is what a reading dresses. */
+export type HourlyFill = {
+  readonly hours: readonly HourlyBucket[]
+  readonly total: number
+  readonly clipped: boolean
+}
+
+/**
+ * The rule every hourly series in this subsystem follows, spelled once.
+ *
+ * Three readings now draw bars over a range — page views by hour (0356), and
+ * what readers did by hour (`acted.ts`), in a series and in a comparison — and
+ * the rule they share is not the arithmetic but the **honesty**: an hour with
+ * no row is a nought that is drawn, an hour before counting began is not drawn
+ * at all, and the hour in progress is marked rather than drawn as a fall. Three
+ * spellings of that would be three chances for one chart to claim a quiet week
+ * the deployment never had.
+ *
+ * It is exported rather than private because `acted.ts` is a module and not a
+ * function in this one. A reading hands over its rows, the first hour its scope
+ * ever counted, the range, and which number on a row it is counting.
+ */
+export const hourlySeriesOf = <Row extends { readonly hour: number }>(
+  rows: readonly Row[],
+  begins: number | undefined,
+  range: ArrivalRange,
+  count: (row: Row) => number,
+  options: ArrivalSeriesOptions = {}
+): HourlyFill => {
   const clipped = begins !== undefined && begins > range.from
   const first = Math.max(firstHourOf(range.from), begins ?? 0)
   const last = hourAt(range.to - 1)
 
   const counted = new Map<number, number>()
 
-  for (const row of stored.hours) {
+  for (const row of rows) {
     if (row.hour < range.from || row.hour >= range.to) continue
 
-    counted.set(row.hour, (counted.get(row.hour) ?? 0) + row.views)
+    counted.set(row.hour, (counted.get(row.hour) ?? 0) + count(row))
   }
 
-  const hours: ArrivalHour[] = []
+  const hours: HourlyBucket[] = []
 
   if (begins !== undefined) {
     for (let hour = first; hour <= last; hour += ARRIVAL_HOUR_MS) {
@@ -312,17 +358,15 @@ export const arrivalSeriesOf = (
 
       hours.push({
         hour,
-        views: counted.get(hour) ?? 0,
+        count: counted.get(hour) ?? 0,
         whole: ends <= range.to && (options.now === undefined || options.now >= ends),
       })
     }
   }
 
   return {
-    range,
     hours,
-    views: hours.reduce((total, hour) => total + hour.views, 0),
-    ...(begins === undefined ? {} : { begins }),
+    total: hours.reduce((sum, hour) => sum + hour.count, 0),
     clipped,
   }
 }
@@ -416,6 +460,23 @@ export type ArrivalReadingRequest = {
   readonly now?: number
 }
 
+/**
+ * The one method of the counter handle a reading of this needs.
+ *
+ * Named rather than written inline so that a reading joining two counters —
+ * what readers did, over the page views they did it in (`acted.ts`) — can ask
+ * for both halves without respelling either.
+ */
+export type ArrivalCounterHandle = {
+  readonly arrivals: (request?: {
+    readonly treeId?: TreeId
+    readonly audience?: AudienceId
+    readonly revision?: number
+    readonly from?: number
+    readonly to?: number
+  }) => Promise<Result<StoredArrivals, ReaderSignalStoreError>>
+}
+
 /** The chart and the two figures above it, from one read. */
 export type ArrivalReading = {
   readonly series: ArrivalSeries
@@ -439,15 +500,7 @@ export type ArrivalReading = {
  * counter it was not asked about.
  */
 export const readReaderArrivals = async (
-  store: {
-    readonly arrivals: (request?: {
-      readonly treeId?: TreeId
-      readonly audience?: AudienceId
-      readonly revision?: number
-      readonly from?: number
-      readonly to?: number
-    }) => Promise<Result<StoredArrivals, ReaderSignalStoreError>>
-  },
+  store: ArrivalCounterHandle,
   request: ArrivalReadingRequest
 ): Promise<Result<ArrivalReading, ReaderSignalStoreError>> => {
   const { range, now, ...narrowing } = request

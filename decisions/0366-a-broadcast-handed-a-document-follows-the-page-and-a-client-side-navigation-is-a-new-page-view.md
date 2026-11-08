@@ -1,15 +1,21 @@
-# 0361. A broadcast handed a document follows the page, and a client-side navigation is a new page view
+# 0366. A broadcast handed a document follows the page, and a client-side navigation is a new page view
 
 **Status:** Accepted
 **Date:** 2026-11-07
 **Section:** §4c (reader signals)
 
-> **Numbered 0361 rather than 0360**, which is the next number free on `main`
-> and is claimed by **two** open branches — `signals-77-what-readers-did-by-hour`
-> (#794, this lane's own) and `framework-86-what-a-lane-may-not-do` (#793).
-> Taken deliberately so that `Loom merge` renumbers one record rather than two,
-> under the rule that a clash is renumbered when the pull request is merged
-> (0097).
+> **Renumbered from `0361` on 2026-11-08 by `Loom merge`.** This record was
+> written as `0361` on 7 November, deliberately stepping over `0360` because two
+> open branches claimed that number. `0361` was meanwhile taken on `main` by a
+> different record — *the site pulls into its own process, and a host wires the
+> live page in two calls* (#798) — which keeps the number as the one already
+> there, and `0366` is the next number free on `main` and on every open branch.
+> Only the number changed: nothing this record decides is different (0097).
+>
+> The note this replaced recorded the original choice: `0360` was claimed by
+> both `signals-77-what-readers-did-by-hour` (#794, this lane's own) and
+> `framework-86-what-a-lane-may-not-do` (#793), and `0361` was taken so that one
+> record rather than two would need renumbering.
 
 ## Context
 

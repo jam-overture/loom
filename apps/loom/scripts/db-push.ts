@@ -32,6 +32,7 @@ import { ensureModelKeysSchema } from "../app/_lib/models/model-keys-postgres"
 import { ensureReaderRefusalsSchema } from "../app/_lib/reader-signals/refusals-postgres"
 import { ensurePageCopiesSchema } from "../app/(portal)/_lib/proposing/copies-postgres"
 import { ensureTurnedDownSchema } from "../app/(portal)/_lib/proposing/turned-down-postgres"
+import { ensureMadeChangesSchema } from "../app/(portal)/_lib/proposing/made-from-postgres"
 import { ensureGoalsSchema } from "../app/(portal)/_lib/goals/goals-postgres"
 import { ensureProposalGoalsSchema } from "../app/(portal)/_lib/goals/proposal-goals-postgres"
 import { resolveConnectionString } from "../app/_lib/app/connection"
@@ -185,9 +186,18 @@ try {
    * When each project's site took its live pages from the read door (0358).
    * A deployment that has not run this still answers every pull; it keeps no
    * record of them, and *Connect your site* says it cannot tell whether the
-   * site pulls.
+   * site pulls. One pushed before the table's `kept` column still records
+   * every pull, and *Connect your site* says it cannot tell whether the site
+   * keeps the newest pages it is given.
    */
   await ensureSitePullsSchema(db)
+  /**
+   * What each change made on a page's copy was made from: its intent, which
+   * names the goal it served, and its stake. A deployment that has not run
+   * this still makes every change; an accepted change's timeline says its goal
+   * could not be read, and nothing made meanwhile is recorded.
+   */
+  await ensureMadeChangesSchema(db)
   /**
    * Last, because it is the only data statement here and every column it writes
    * to has to exist first. It carries rows written before 12 October from
@@ -218,7 +228,8 @@ try {
       "loom_applications, loom_reader_signals, loom_reader_tallies, loom_reader_funnels, " +
       "loom_signin_attempts, loom_portal_accounts, loom_portal_memberships, loom_ingest_keys, " +
       "loom_reader_refusals, loom_publish_keys, loom_published_pages, loom_model_keys, " +
-      "loom_page_copies, loom_turned_down, loom_goals, loom_proposal_goals and loom_site_pulls " +
+      "loom_page_copies, loom_turned_down, loom_goals, loom_proposal_goals, loom_site_pulls and " +
+      "loom_made_changes " +
       "are present, and this deployment's pages are in them"
   )
 } finally {

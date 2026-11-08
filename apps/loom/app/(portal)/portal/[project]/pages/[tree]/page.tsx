@@ -24,15 +24,15 @@ import { modelKeyOf } from "@/app/_lib/models/store"
 import { publishedPagesFor } from "@/app/_lib/pages/store"
 
 import { LookForm } from "./_components/look-form"
+import { PageTabs } from "./_components/page-tabs"
 
 /**
  * One published page, and what Loom proposes for it (0329).
  *
  * It says two versions because there are two: the one the site last
  * published, and the one Loom's copy of the page has reached through the
- * changes proposed for it. They start equal and part when a change is made,
- * and until unit 8 has the site pull Loom's copy (0358), the site keeps
- * serving the published one.
+ * changes accepted on it. They start equal and part when a change is made,
+ * and the site serves Loom's copy from its next pull (0358).
  *
  * Loom looks at every page once a day by itself. *Look now* is offered only
  * where it can run: to a role that could accept a change, on an open project
@@ -42,7 +42,8 @@ import { LookForm } from "./_components/look-form"
 /**
  * Where Loom's copy stands against what the site published. This
  * deployment's own site serves its copy (0259), so there a change is live;
- * every other site keeps serving what it published (0329 clause 7).
+ * every other site serves the copy from its next pull (0358 clause 3), which
+ * *Accepted* follows change by change.
  */
 const copyStanding = (copied: number | undefined, published: number, servesCopy: boolean) => {
   if (copied === undefined) return "Loom has not proposed anything for this page yet."
@@ -50,7 +51,7 @@ const copyStanding = (copied: number | undefined, published: number, servesCopy:
 
   return servesCopy
     ? `Changes Loom proposed have taken it to version ${copied}, and this deployment's own site serves that version.`
-    : `Changes Loom proposed have taken its copy to version ${copied}. Your site still serves the published one.`
+    : `Changes accepted have taken its copy to version ${copied}, which your site serves from its next pull.`
 }
 
 /**
@@ -187,6 +188,8 @@ const PageScreen = async ({ params }: { params: Promise<{ project: string; tree:
         </h1>
         <p className="text-ink-muted font-mono text-xs">{row.treeId}</p>
       </div>
+
+      <PageTabs projectId={projectId} treeId={row.treeId} current="page" />
 
       <section className="border-edge-subtle bg-surface-base flex flex-col gap-1.5 rounded-lg border p-4">
         <p className="text-xs">

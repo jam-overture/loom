@@ -455,7 +455,7 @@ describe("which door a reader should have gone through instead", () => {
         slug: "signals-broadcast",
         avoids: ["zod"],
         shared: 15,
-        /** 11 since 0361: the broadcaster reads `addressedRootIn` to find a page in a document. */
+        /** 11 since 0366: the broadcaster reads `addressedRootIn` to find a page in a document. */
         files: 11,
       },
     ])
@@ -531,14 +531,14 @@ describe("how much of the package is behind one door", () => {
   })
 
   /**
-   * The belief this band exists to correct, stated as a number. Fifteen of
-   * the seventeen other doors publish not one name the root door publishes, so a
+   * The belief this band exists to correct, stated as a number. Sixteen of
+   * the eighteen other doors publish not one name the root door publishes, so a
    * reader who reads `@jam-overture/loom` as the door with everything behind it is
    * wrong about almost the whole package.
    */
-  it("finds that fifteen of the other seventeen doors share nothing with the root door", () => {
-    expect(apiEntryAt("runtime")?.standing.doorsSharingNothing).toBe(15)
-    expect(apiEntryAt("runtime")?.standing.otherDoors).toBe(17)
+  it("finds that sixteen of the other eighteen doors share nothing with the root door", () => {
+    expect(apiEntryAt("runtime")?.standing.doorsSharingNothing).toBe(16)
+    expect(apiEntryAt("runtime")?.standing.otherDoors).toBe(18)
   })
 
   it("counts a shared name once, so the package publishes fewer names than its doors do slots", () => {

@@ -303,9 +303,9 @@ export const examplePage = (ids: IdFactory): LoomNode =>
  *
  * ## What it is for
  *
- * The headline of this site is the maintainer's of 24 October — *a web page
- * that rearranges itself around the people using it* — and until today
- * **nothing a visitor could look at showed one doing it.** The band above
+ * The site's claim is a web page that rearranges itself around the people
+ * using it, and until this band **nothing a visitor could look at showed one
+ * doing it.** The band above
  * shows a page built out of the starter set and that page is fixed. The
  * demonstration on `/how-it-works` is Loom rearranging Loom, which is the
  * strongest thing this project has and is also the one page a stranger has no

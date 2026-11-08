@@ -1,5 +1,5 @@
-import { eq, max, min, sql } from "drizzle-orm"
-import { bigint, pgTable, primaryKey, text } from "drizzle-orm/pg-core"
+import { and, asc, desc, eq, gte, max, min, sql } from "drizzle-orm"
+import { bigint, boolean, pgTable, primaryKey, text } from "drizzle-orm/pg-core"
 
 import { err, ok } from "@jam-overture/loom"
 import type { LoomDatabase } from "@jam-overture/loom/postgres"
@@ -14,6 +14,8 @@ export const loomSitePulls = pgTable(
     tag: text("tag").notNull(),
     firstPulledAt: bigint("first_pulled_at", { mode: "number" }).notNull(),
     lastPulledAt: bigint("last_pulled_at", { mode: "number" }).notNull(),
+    /** The site has named this answer back as the pages it holds (`304`). */
+    kept: boolean("kept").notNull().default(false),
   },
   (table) => [primaryKey({ columns: [table.applicationId, table.tag] })]
 )
@@ -27,6 +29,12 @@ export const SITE_PULLS_DDL: readonly string[] = [
     PRIMARY KEY (application_id, tag)
   )`,
   `ALTER TABLE loom_site_pulls ENABLE ROW LEVEL SECURITY`,
+  /**
+   * Added after the table went live, so a deployment that pushed it before
+   * gains the column. Rows from before it say *not kept*, which is never read
+   * as a refusal: that takes a site that has kept some answer since.
+   */
+  `ALTER TABLE loom_site_pulls ADD COLUMN IF NOT EXISTS kept boolean NOT NULL DEFAULT false`,
 ]
 
 export const ensureSitePullsSchema = async (db: LoomDatabase): Promise<void> => {
@@ -41,18 +49,29 @@ const failure = (cause: unknown, detail: string): SitePullStoreError => ({
 })
 
 export const postgresSitePullStore = (db: LoomDatabase): SitePullStore => ({
-  record: async ({ application, tag, at }) => {
+  /**
+   * Two statements, and the first names its columns by hand, because the
+   * second writes a column added after the table went live: until
+   * `pnpm db:push` adds it, the pull is still recorded and only *kept* is
+   * lost, and the next pull says it again. (The query builder would write
+   * `kept` into the insert as `default`, and fail on a table without it.)
+   */
+  record: async ({ application, tag, at, kept }) => {
     try {
-      await db
-        .insert(loomSitePulls)
-        .values({ applicationId: application, tag, firstPulledAt: at, lastPulledAt: at })
-        .onConflictDoUpdate({
-          target: [loomSitePulls.applicationId, loomSitePulls.tag],
-          set: {
-            firstPulledAt: sql`LEAST(${loomSitePulls.firstPulledAt}, excluded.first_pulled_at)`,
-            lastPulledAt: sql`GREATEST(${loomSitePulls.lastPulledAt}, excluded.last_pulled_at)`,
-          },
-        })
+      await db.execute(sql`
+        INSERT INTO loom_site_pulls (application_id, tag, first_pulled_at, last_pulled_at)
+        VALUES (${application}, ${tag}, ${at}, ${at})
+        ON CONFLICT (application_id, tag) DO UPDATE SET
+          first_pulled_at = LEAST(loom_site_pulls.first_pulled_at, excluded.first_pulled_at),
+          last_pulled_at = GREATEST(loom_site_pulls.last_pulled_at, excluded.last_pulled_at)
+      `)
+
+      if (kept) {
+        await db
+          .update(loomSitePulls)
+          .set({ kept: true })
+          .where(and(eq(loomSitePulls.applicationId, application), eq(loomSitePulls.tag, tag)))
+      }
 
       return ok(undefined)
     } catch (cause) {
@@ -76,6 +95,56 @@ export const postgresSitePullStore = (db: LoomDatabase): SitePullStore => ({
         : ok({ first: Number(row.first), last: Number(row.last) })
     } catch (cause) {
       return err(failure(cause, `could not read when ${application} last pulled`))
+    }
+  },
+
+  firstTakenSince: async (application, since) => {
+    try {
+      const rows = await db
+        .select({ first: loomSitePulls.firstPulledAt })
+        .from(loomSitePulls)
+        .where(
+          and(eq(loomSitePulls.applicationId, application), gte(loomSitePulls.firstPulledAt, since))
+        )
+        .orderBy(asc(loomSitePulls.firstPulledAt))
+
+      return ok(rows.map((row) => Number(row.first)))
+    } catch (cause) {
+      return err(failure(cause, `could not read what ${application} took since ${since}`))
+    }
+  },
+
+  newest: async (application) => {
+    try {
+      const mine = eq(loomSitePulls.applicationId, application)
+      const [[newest], [any]] = await Promise.all([
+        db
+          .select({
+            first: loomSitePulls.firstPulledAt,
+            last: loomSitePulls.lastPulledAt,
+            kept: loomSitePulls.kept,
+          })
+          .from(loomSitePulls)
+          .where(mine)
+          .orderBy(desc(loomSitePulls.firstPulledAt), desc(loomSitePulls.tag))
+          .limit(1),
+        db
+          .select({ tag: loomSitePulls.tag })
+          .from(loomSitePulls)
+          .where(and(mine, eq(loomSitePulls.kept, true)))
+          .limit(1),
+      ])
+
+      return newest === undefined
+        ? ok(null)
+        : ok({
+            first: Number(newest.first),
+            last: Number(newest.last),
+            kept: newest.kept,
+            anyKept: any !== undefined,
+          })
+    } catch (cause) {
+      return err(failure(cause, `could not read whether ${application} keeps its newest pages`))
     }
   },
 })

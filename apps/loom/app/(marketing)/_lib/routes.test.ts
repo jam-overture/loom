@@ -113,7 +113,7 @@ describe("the addresses this site points at", () => {
   let destinations: readonly Destination[] = []
 
   beforeAll(async () => {
-    pages = await servedPages()
+    pages = servedPages()
     destinations = [
       ...new Map(
         pages.flatMap((page) =>
