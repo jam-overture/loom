@@ -87,7 +87,7 @@ export type GoalCounts = {
  * readers who could never have done it, and would sink the rate for nothing.
  */
 export const pagesCoveredBy = (
-  goal: Goal,
+  goal: Pick<Goal, "nodeId" | "pages">,
   parts: PartsByPage,
   counted: readonly { readonly treeId: string; readonly nodeId: string }[]
 ): ReadonlySet<string> =>

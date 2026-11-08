@@ -1,11 +1,19 @@
 "use client"
 
-import { useActionState } from "react"
+import { useActionState, useMemo, useState, type FormEvent } from "react"
 
 import { Field, Submit } from "@/app/(portal)/_components/form"
-import type { GoalField } from "@/app/(portal)/_lib/goals/goal"
-import { GOAL_KINDS, MAX_GOAL_NAME_LENGTH } from "@/app/(portal)/_lib/goals/goal"
-import type { PageChoice } from "@/app/(portal)/_lib/goals/goal-view"
+import {
+  GOAL_KINDS,
+  goalTypedOf,
+  MAX_GOAL_NAME_LENGTH,
+  readGoalTarget,
+  type GoalField,
+  type GoalTyped,
+  type PartsByPage,
+} from "@/app/(portal)/_lib/goals/goal"
+import { previewWordsOf, type RangeTotals } from "@/app/(portal)/_lib/goals/goal-preview"
+import { partsByPageOf, type PageChoice } from "@/app/(portal)/_lib/goals/goal-view"
 import { GOAL_KIND_WORDS } from "@/app/(portal)/_lib/vocabulary"
 
 import { addGoalAction, type GoalReport } from "../actions"
@@ -22,34 +30,68 @@ const Fault = ({ report, field }: { report: GoalReport | null; field: GoalField 
 
 const pageLabel = (page: PageChoice): string => page.name ?? page.treeId
 
+/** The target typed so far, or `undefined` while it lacks a part or its pages. */
+const targetOf = (typed: GoalTyped | undefined, parts: PartsByPage) => {
+  const read = typed === undefined ? undefined : readGoalTarget(typed, parts)
+
+  return read?.ok === true ? read.value : undefined
+}
+
 /**
- * *New goal*, in the drawer (0350): a name, what a reader does, the part they
- * do it to, on all pages or on chosen ones, and whether it becomes primary.
- *
- * The part is picked from what the site published, page by page, by the name
- * a person recognises with its id beside it. The first goal is primary whatever
- * the box says, which the box's hint says.
+ * The wireframe's green band: what the goal would have counted over the last 7
+ * days, worked out here as the kind, part and pages change, from the totals
+ * the screen read once.
  */
-export const GoalForm = ({
+const PreviewBand = ({
+  typed,
+  parts,
+  totals,
+}: {
+  typed: GoalTyped | undefined
+  parts: PartsByPage
+  totals: RangeTotals
+}) => {
+  const preview = previewWordsOf(targetOf(typed, parts), totals, parts)
+
+  return (
+    <p
+      role="status"
+      aria-label="Last 7 days"
+      className={
+        preview.tone === "counted"
+          ? "bg-applied text-applied-ink border-applied-ink m-0 rounded-md border px-3 py-2 text-xs"
+          : "border-edge-subtle text-ink-muted m-0 rounded-md border px-3 py-2 text-xs"
+      }
+    >
+      {preview.sentence}
+    </p>
+  )
+}
+
+const GoalFields = ({
   projectId,
   pages,
   first,
+  totals,
+  report,
+  action,
 }: {
   projectId: string
   pages: readonly PageChoice[]
-  /** No goal is kept yet, so this one will be primary. */
   first: boolean
+  totals: RangeTotals
+  report: GoalReport | null
+  action: (form: FormData) => void
 }) => {
-  const [report, action] = useActionState<GoalReport | null, FormData>(addGoalAction, null)
   const typed = report?.typed
+  const parts = useMemo(() => partsByPageOf(pages), [pages])
+  /** What is typed now, for the band; the fields themselves stay the form's own. */
+  const [current, setCurrent] = useState<GoalTyped | undefined>(typed)
+  const changed = (event: FormEvent<HTMLFormElement>) =>
+    setCurrent(goalTypedOf(new FormData(event.currentTarget)))
 
-  /**
-   * Keyed by what was typed, so a refused form is drawn afresh with it as the
-   * defaults: React resets a form once its action settles, and without the
-   * key it would reset to the defaults it was first drawn with.
-   */
   return (
-    <form key={JSON.stringify(typed ?? null)} action={action} className="flex flex-col gap-4">
+    <form action={action} onChange={changed} className="flex flex-col gap-4">
       <input type="hidden" name="projectId" value={projectId} />
 
       <Field
@@ -134,6 +176,8 @@ export const GoalForm = ({
         <Fault report={report} field="pages" />
       </fieldset>
 
+      <PreviewBand typed={current} parts={parts} totals={totals} />
+
       <label className="flex items-start gap-2 text-sm">
         <input
           type="checkbox"
@@ -155,5 +199,48 @@ export const GoalForm = ({
 
       <Submit label="Save goal" pendingLabel="Saving…" />
     </form>
+  )
+}
+
+/**
+ * *New goal*, in the drawer (0350): a name, what a reader does, the part they
+ * do it to, on all pages or on chosen ones, a band saying what it would have
+ * counted over the last 7 days, and whether it becomes primary.
+ *
+ * The part is picked from what the site published, page by page, by the name
+ * a person recognises with its id beside it. The first goal is primary whatever
+ * the box says, which the box's hint says.
+ */
+export const GoalForm = ({
+  projectId,
+  pages,
+  first,
+  totals,
+}: {
+  projectId: string
+  pages: readonly PageChoice[]
+  /** No goal is kept yet, so this one will be primary. */
+  first: boolean
+  /** The project's counters over the last 7 days, which the band previews the goal from. */
+  totals: RangeTotals
+}) => {
+  const [report, action] = useActionState<GoalReport | null, FormData>(addGoalAction, null)
+  const typed = report?.typed
+
+  /**
+   * Keyed by what was typed, so a refused form is drawn afresh with it as the
+   * defaults: React resets a form once its action settles, and without the
+   * key it would reset to the defaults it was first drawn with.
+   */
+  return (
+    <GoalFields
+      key={JSON.stringify(typed ?? null)}
+      projectId={projectId}
+      pages={pages}
+      first={first}
+      totals={totals}
+      report={report}
+      action={action}
+    />
   )
 }

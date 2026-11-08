@@ -150,18 +150,21 @@ export const goalTypedOf = (form: FormData): GoalTyped => ({
   primary: form.get("primary") === "on",
 })
 
+/** What a goal counts and where: the part of *New goal* a preview can be drawn from before it has a name. */
+export type GoalTarget = Pick<GoalAsked, "kind" | "nodeId" | "pages">
+
 /**
- * The *New goal* form, read against what the site published. Pure.
+ * What a reader does, the part and the pages, read against what the site
+ * published. Pure.
  *
  * A part must be on a page the goal covers, because a goal on a part no
  * covered page has would count nothing for ever and say nothing about why.
  * Every fault is reported at once, under the field it belongs to.
  */
-export const readGoalForm = (
-  form: GoalTyped,
+export const readGoalTarget = (
+  form: Omit<GoalTyped, "name" | "primary">,
   published: PartsByPage
-): Result<GoalAsked, readonly GoalFault[]> => {
-  const { name } = form
+): Result<GoalTarget, readonly GoalFault[]> => {
   const kind = goalKindSchema.safeParse(form.kind)
   const part = nodeIdSchema.safeParse(form.part)
   const some = form.where === "some"
@@ -174,14 +177,6 @@ export const readGoalForm = (
   const covered = pages ?? [...published.keys()]
 
   const faults: readonly (GoalFault | undefined)[] = [
-    name === ""
-      ? { field: "name", detail: "Give the goal a name." }
-      : name.length > MAX_GOAL_NAME_LENGTH
-        ? {
-            field: "name",
-            detail: `Keep the name to ${MAX_GOAL_NAME_LENGTH} characters.`,
-          }
-        : undefined,
     kind.success ? undefined : { field: "kind", detail: "Choose what a reader does." },
     some && chosen.length === 0
       ? {
@@ -202,14 +197,29 @@ export const readGoalForm = (
 
   if (found.length > 0 || !kind.success || !part.success) return { ok: false, error: found }
 
-  return {
-    ok: true,
-    value: {
-      name,
-      kind: kind.data,
-      nodeId: part.data,
-      pages,
-      primary: form.primary,
-    },
-  }
+  return { ok: true, value: { kind: kind.data, nodeId: part.data, pages } }
+}
+
+const nameFaultOf = (name: string): readonly GoalFault[] =>
+  name === ""
+    ? [{ field: "name", detail: "Give the goal a name." }]
+    : name.length > MAX_GOAL_NAME_LENGTH
+      ? [{ field: "name", detail: `Keep the name to ${MAX_GOAL_NAME_LENGTH} characters.` }]
+      : []
+
+/**
+ * The *New goal* form, read against what the site published: a name, and the
+ * target `readGoalTarget` reads. Pure. Every fault is reported at once.
+ */
+export const readGoalForm = (
+  form: GoalTyped,
+  published: PartsByPage
+): Result<GoalAsked, readonly GoalFault[]> => {
+  const named = nameFaultOf(form.name)
+  const target = readGoalTarget(form, published)
+
+  if (!target.ok) return { ok: false, error: [...named, ...target.error] }
+  if (named.length > 0) return { ok: false, error: named }
+
+  return { ok: true, value: { name: form.name, ...target.value, primary: form.primary } }
 }
