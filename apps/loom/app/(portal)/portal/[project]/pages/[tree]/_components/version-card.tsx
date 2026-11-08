@@ -15,7 +15,8 @@ const TONE: Readonly<Record<Outcome["tone"], string>> = {
  * One version of a page on its *History* tab: what changed, where it came
  * from, and what it did to the goal. A Loom change carries the goal it served
  * and links to its timeline from *Accept*; one not live yet is dashed. A Loom
- * change still on the page offers *Propose reverting*.
+ * change offers *Compare*, the page before it and after it, and one still on
+ * the page offers *Propose reverting*.
  */
 export const VersionCard = ({
   heading,
@@ -24,6 +25,7 @@ export const VersionCard = ({
   goal,
   outcome,
   timeline,
+  compare,
   dashed,
   revert,
 }: {
@@ -34,6 +36,8 @@ export const VersionCard = ({
   readonly goal?: string | null
   readonly outcome: Outcome
   readonly timeline?: string
+  /** Where *Compare* opens the drawer on this version, every other choice on the screen kept. */
+  readonly compare?: string
   readonly dashed: boolean
   /** *Propose reverting*, for a Loom change on the live page and a person who may raise it. */
   readonly revert?: ReactNode
@@ -72,10 +76,19 @@ export const VersionCard = ({
         ))}
       </TechnicalDetail>
     )}
-    {timeline === undefined ? null : (
-      <Link href={timeline} className="text-ink self-start text-xs">
-        Follow it from Accept
-      </Link>
+    {timeline === undefined && compare === undefined ? null : (
+      <div className="flex gap-4 text-xs">
+        {compare === undefined ? null : (
+          <Link href={compare} className="text-ink" scroll={false}>
+            Compare
+          </Link>
+        )}
+        {timeline === undefined ? null : (
+          <Link href={timeline} className="text-ink">
+            Follow it from Accept
+          </Link>
+        )}
+      </div>
     )}
     {revert}
   </li>

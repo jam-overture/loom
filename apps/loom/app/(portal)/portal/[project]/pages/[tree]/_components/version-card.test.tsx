@@ -29,12 +29,16 @@ describe("a version on a page's History", () => {
           goal="Start pressed"
           outcome={HELPED}
           timeline="/portal/prj_a/review/accepted/p_1"
+          compare="/portal/prj_a/pages/t_home/history?compare=p_1"
           dashed={false}
         />
       </ul>
     )
 
     expect(screen.getByText("Helped")).toBeDefined()
+    expect(screen.getByRole("link", { name: "Compare" }).getAttribute("href")).toBe(
+      "/portal/prj_a/pages/t_home/history?compare=p_1"
+    )
     expect(screen.getByText("Goal: Start pressed")).toBeDefined()
     expect(screen.getByRole("link", { name: "Follow it from Accept" }).getAttribute("href")).toBe(
       "/portal/prj_a/review/accepted/p_1"
