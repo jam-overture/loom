@@ -117,3 +117,24 @@ export const readWaitingOn = async (
     ? (waitingByPage(waiting.value.held, copies.value).get(pageId) ?? 0)
     : undefined
 }
+
+/**
+ * How many changes wait for a person in a project, for the count beside
+ * *For review* on the rail: every change *For review* lists, and the ones it
+ * says could not be read, since those wait too. `undefined` where the project's
+ * site or its waiting changes could not be read, so the rail never says nought
+ * for a list it could not read.
+ */
+export const readWaitingCount = async (projectId: ProjectId): Promise<number | undefined> => {
+  const applications = await portalApplications.list({ closed: "all" })
+
+  if (!applications.ok) return undefined
+
+  const application = soleApplicationOf(applications.value, projectId)?.applicationId
+
+  if (application === undefined) return undefined
+
+  const waiting = await holdsFor(application).waiting()
+
+  return waiting.ok ? waiting.value.held.length + waiting.value.unreadable.length : undefined
+}
