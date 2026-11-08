@@ -68,8 +68,17 @@ export const goalSpanOf = (range: ArrivalRange): ArrivalRange => ({
   to: range.to,
 })
 
-const latestOf = (instants: readonly (number | undefined)[]): number | undefined => {
-  const known = instants.flatMap((at) => (at === undefined ? [] : [at]))
+/**
+ * The first hour counting is read from: the later of the first page view and
+ * the first thing readers did that were counted by the hour, or whichever of
+ * the two has counted anything. `undefined` where neither has.
+ */
+export const countingBeginsOf = (
+  read: Pick<GoalCounters, "arrivals" | "actedBegins">
+): number | undefined => {
+  const known = [read.arrivals.begins, read.actedBegins].flatMap((at) =>
+    at === undefined ? [] : [at]
+  )
 
   return known.length === 0 ? undefined : Math.max(...known)
 }
@@ -80,7 +89,7 @@ const latestOf = (instants: readonly (number | undefined)[]): number | undefined
  * never have done it (`goal-view.ts`).
  */
 export const goalRangeOf = (goal: Goal, range: ArrivalRange, read: GoalCounters): GoalRange => {
-  const begins = latestOf([read.arrivals.begins, read.actedBegins])
+  const begins = countingBeginsOf(read)
 
   if (begins === undefined || begins >= range.to) return { kind: "uncounted" }
 
@@ -117,12 +126,29 @@ const rateOf = (side: Side): string | undefined =>
 
 const number = (value: number): string => value.toLocaleString("en-GB")
 
+/**
+ * Where a goal is measured: across every page it covers (*Signals*' figure),
+ * or on the one page a drawer is open on (*By page*), which is said in the
+ * words so a figure never claims more pages than it counted.
+ */
+export type GoalScope = "covered" | "page"
+
+const PLACES: Readonly<Record<GoalScope, string>> = {
+  covered: "on the pages it covers",
+  page: "on this page",
+}
+
 /** The rate in the range against the period before it, in the words `changeSentence` uses for page views. */
-const comparisonOf = (current: Side, before: Side | undefined, range: SignalsRange): string => {
+const comparisonOf = (
+  current: Side,
+  before: Side | undefined,
+  range: SignalsRange,
+  scope: GoalScope
+): string => {
   const period = periodBefore(range)
 
   if (before === undefined) return `Nothing to compare with: ${period} were not counted.`
-  if (before.views === 0) return `No page views on its pages in ${period}.`
+  if (before.views === 0) return `No page views ${PLACES[scope]} in ${period}.`
   if (before.count === 0) {
     return current.count === 0
       ? `None in ${period} either.`
@@ -133,21 +159,44 @@ const comparisonOf = (current: Side, before: Side | undefined, range: SignalsRan
 }
 
 const sentencesOf = (
-  goal: Goal,
+  goal: Pick<Goal, "name" | "kind">,
   reading: Extract<GoalRange, { kind: "read" }>,
-  range: SignalsRange
+  range: SignalsRange,
+  scope: GoalScope
 ) => {
   const { current } = reading
   const counted =
     current.views === 0
-      ? `${goal.name}: no page views on the pages it covers.`
+      ? `${goal.name}: no page views ${PLACES[scope]}.`
       : `${goal.name}: ${readingSentence(goal.kind, { count: current.count, pageViews: current.views })}`
-  const compared = current.views === 0 ? [] : [comparisonOf(current, reading.before, range)]
+  const compared = current.views === 0 ? [] : [comparisonOf(current, reading.before, range, scope)]
   const clipped = reading.clipped
     ? [`Counted by the hour from ${plainMoment(new Date(current.range.from).toISOString())}.`]
     : []
 
   return [counted, ...compared, ...clipped].join(" ")
+}
+
+/** A goal's figure for a range and the sentences under it, wherever it is drawn. */
+export const goalRangeWordsOf = (
+  goal: Pick<Goal, "name" | "kind">,
+  counted: GoalRange,
+  range: SignalsRange,
+  scope: GoalScope
+): Omit<RangeFigure, "label"> => {
+  if (counted.kind === "uncounted") {
+    return {
+      value: "Not counted yet",
+      note: `${goal.name}: nothing has been counted by the hour yet.`,
+    }
+  }
+
+  const rate = rateOf(counted.current)
+
+  return {
+    value: rate === undefined ? "No page views" : `${rate} per 100`,
+    note: sentencesOf(goal, counted, range, scope),
+  }
 }
 
 /**
@@ -170,24 +219,7 @@ export const goalFigureOf = (
         value: "Not available",
         note: "The primary goal's figures could not be read. Try again in a moment.",
       }
-    case "read": {
-      const { goal, range: counted } = reading
-
-      if (counted.kind === "uncounted") {
-        return {
-          label,
-          value: "Not counted yet",
-          note: `${goal.name}: nothing has been counted by the hour yet.`,
-        }
-      }
-
-      const rate = rateOf(counted.current)
-
-      return {
-        label,
-        value: rate === undefined ? "No page views" : `${rate} per 100`,
-        note: sentencesOf(goal, counted, range),
-      }
-    }
+    case "read":
+      return { label, ...goalRangeWordsOf(reading.goal, reading.range, range, "covered") }
   }
 }

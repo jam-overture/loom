@@ -3,12 +3,14 @@ import {
   type ArrivalReading,
   type StoredPageViews,
 } from "@jam-overture/loom/signals"
+import { treeIdSchema } from "@jam-overture/loom"
 import type { Application, Project, ProjectId } from "@jam-overture/loom/store"
 
 import { arrivalsOf, type Arrivals } from "@/app/(portal)/_lib/arrivals"
 import { goalRangeOf, goalSpanOf, type PrimaryGoalReading } from "@/app/(portal)/_lib/goal-range"
 import { primaryOf, type Goal } from "@/app/(portal)/_lib/goals/goal"
 import { pageChoicesOf, partsByPageOf } from "@/app/(portal)/_lib/goals/goal-view"
+import type { PageHourly } from "@/app/(portal)/_lib/page-range"
 import { goalsFor } from "@/app/(portal)/_lib/goals/stores"
 import { arrivalRangeFor, type SignalsRange } from "@/app/(portal)/_lib/signals-range"
 import { portalApplications, portalProjects } from "@/app/(portal)/_lib/store"
@@ -75,6 +77,12 @@ export type SignalsReading =
 type Tallies = ReturnType<typeof boundedReaderTallyStore>
 
 /**
+ * When the project first counted anything readers did, on any part: a read of
+ * one empty instant, whose answer carries the first hour whatever was asked.
+ */
+const actedBeginsOf = (tallies: Tallies, at: number) => tallies.acted({ from: at, to: at })
+
+/**
  * The primary goal over the range and the period before it: the project's
  * page views by page, what readers did to the goal's part on every page, and
  * when the project first counted anything readers did, in one read of each.
@@ -95,13 +103,13 @@ const readPrimaryGoal = async (
 
   const asked = arrivalRangeFor(range, now)
   const span = goalSpanOf(asked)
-  const [arrivals, acted, anything] = await Promise.all([
+  const [arrivals, acted, actedBegins] = await Promise.all([
     tallies.arrivals(span),
     tallies.acted({ nodeId: goal.nodeId, ...span }),
-    tallies.acted({ from: span.from, to: span.from }),
+    actedBeginsOf(tallies, span.from),
   ])
 
-  if (!arrivals.ok || !acted.ok || !anything.ok) return { kind: "unreadable" }
+  if (!arrivals.ok || !acted.ok || !actedBegins.ok) return { kind: "unreadable" }
 
   return {
     kind: "read",
@@ -109,7 +117,7 @@ const readPrimaryGoal = async (
     range: goalRangeOf(goal, asked, {
       arrivals: arrivals.value,
       acted: acted.value,
-      actedBegins: anything.value.begins,
+      actedBegins: actedBegins.value.begins,
       parts: partsByPageOf(pageChoicesOf(published)),
     }),
   }
@@ -170,4 +178,44 @@ export const readSignals = async (
     published: pages,
     goal: await readPrimaryGoal(tallies, goals.ok ? goals.value : undefined, pages, range, now),
   }
+}
+
+/**
+ * One page's hourly counters over the range and the period before it, for the
+ * drawer on *By page*: its page views, what readers did to any part of it, and
+ * when the project first counted anything readers did. Read only when a
+ * drawer is open, and a figure the drawer can do without: counters that do
+ * not answer, or a page id they could not be asked about, cost the range's
+ * figures alone.
+ */
+export const readPageHourly = async (
+  readings: Readings,
+  page: string,
+  range: SignalsRange,
+  now: number
+): Promise<PageHourly> => {
+  const treeId = treeIdSchema.safeParse(page)
+
+  if (!treeId.success) return { kind: "unreadable" }
+
+  const tallies = boundedReaderTallyStore(readings.tallies)
+  const asked = arrivalRangeFor(range, now)
+  const span = goalSpanOf(asked)
+  const [arrivals, acted, actedBegins] = await Promise.all([
+    tallies.arrivals({ treeId: treeId.data, ...span }),
+    tallies.acted({ treeId: treeId.data, ...span }),
+    actedBeginsOf(tallies, span.from),
+  ])
+
+  return arrivals.ok && acted.ok && actedBegins.ok
+    ? {
+        kind: "read",
+        range: asked,
+        counters: {
+          arrivals: arrivals.value,
+          acted: acted.value,
+          actedBegins: actedBegins.value.begins,
+        },
+      }
+    : { kind: "unreadable" }
 }

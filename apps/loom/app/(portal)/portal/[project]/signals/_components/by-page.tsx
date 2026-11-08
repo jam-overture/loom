@@ -1,9 +1,18 @@
 import Link from "next/link"
 
 import { GoalChip } from "@/app/(portal)/_components/goal-chip"
-import type { ByPageList, GoalOnPage, NamedPart, PageDrawer } from "@/app/(portal)/_lib/by-page"
+import type {
+  ByPageList,
+  GoalInDrawer,
+  GoalOnPage,
+  KindBar,
+  NamedPart,
+  PageDrawer,
+  RangeBars,
+} from "@/app/(portal)/_lib/by-page"
+import { goalRangeWordsOf } from "@/app/(portal)/_lib/goal-range"
 import { per100Of, readingSentence } from "@/app/(portal)/_lib/goals/goal-view"
-import { rangeParam, type SignalsRange } from "@/app/(portal)/_lib/signals-range"
+import { rangeLabel, rangeParam, type SignalsRange } from "@/app/(portal)/_lib/signals-range"
 import { plainMoment } from "@/app/(portal)/_lib/when"
 
 /**
@@ -176,13 +185,45 @@ export const ByPageTable = ({
 
 const seconds = (value: number): string => (value === 1 ? "1 second" : `${value} seconds`)
 
+const lower = (range: SignalsRange): string => rangeLabel(range).toLocaleLowerCase("en-GB")
+
+/** One goal's rate on this page over the range and its change, and since counting began beneath. */
+const GoalFigures = ({ goal, range }: { goal: GoalInDrawer; range: SignalsRange }) => {
+  const since = readingSentence(goal.kind, goal.reading)
+
+  if (goal.range === undefined) {
+    return (
+      <>
+        <span className="text-ink-muted text-xs">
+          Its figures for the {lower(range)} could not be read just now.
+        </span>
+        <span className="text-xs">Since counting began: {since}</span>
+      </>
+    )
+  }
+
+  const words = goalRangeWordsOf(goal, goal.range, range, "page")
+
+  return (
+    <>
+      <span className="text-sm">
+        {words.value} <span className="text-ink-muted text-[11px]">{lower(range)}</span>
+      </span>
+      <span className="text-xs">{words.note}</span>
+      <span className="text-ink-muted text-[11px]">Since counting began: {since}</span>
+    </>
+  )
+}
+
 /** Every goal covering the page, the primary first, each with what it counted here. */
 const GoalsOnPage = ({
   goals,
   projectId,
+  range,
 }: {
-  goals: readonly GoalOnPage[] | undefined
+  goals: readonly GoalInDrawer[] | undefined
   projectId: string
+  range: SignalsRange
 }) => (
   <section className="flex flex-col gap-2">
     <h3 className="text-xs font-medium">Goals on this page</h3>
@@ -196,20 +237,93 @@ const GoalsOnPage = ({
         </Link>
       </p>
     ) : (
-      <ul className="m-0 flex list-none flex-col gap-2 p-0">
+      <ul className="m-0 flex list-none flex-col gap-3 p-0">
         {goals.map((goal) => (
           <li key={goal.goalId} className="flex flex-col gap-1">
             <span className="flex flex-wrap items-center gap-2">
               <GoalChip goal={goal.name} />
               {goal.primary && <span className="text-ink-muted text-[11px]">Primary</span>}
             </span>
-            <span className="text-xs">{readingSentence(goal.kind, goal.reading)}</span>
+            <GoalFigures goal={goal} range={range} />
           </li>
         ))}
       </ul>
     )}
   </section>
 )
+
+const KindBars = ({ bars }: { bars: readonly KindBar[] }) => (
+  <ul className="m-0 flex list-none flex-col gap-2 p-0">
+    {bars.map((bar) => (
+      <li key={bar.technical} className="flex flex-col gap-1" title={bar.meaning}>
+        <span className="flex justify-between text-xs">
+          <span>{bar.label}</span>
+          <span>{count(bar.count)}</span>
+        </span>
+        <span className="bg-surface-hover block h-1.5 rounded">
+          <span
+            className="bg-ink block h-1.5 rounded"
+            style={{ width: `${Math.round(bar.share * 100)}%` }}
+          />
+        </span>
+      </li>
+    ))}
+  </ul>
+)
+
+/** Why the bars are since the page was first counted rather than for the range, or where the range's start. */
+const rangeNoteOf = (range: RangeBars): string | undefined => {
+  switch (range.kind) {
+    case "unreadable":
+      return "This page's figures by the hour could not be read just now, so these are since it was first counted."
+    case "uncounted":
+      return "Nothing has been counted by the hour on this page yet, so these are since it was first counted."
+    case "read":
+      return range.countedFrom === undefined
+        ? undefined
+        : `Counted by the hour from ${plainMoment(new Date(range.countedFrom).toISOString())}, so these start there.`
+  }
+}
+
+/**
+ * What readers did: the bars for the range where the hourly counters answer,
+ * with the bars since the page was first counted one click away; the bars
+ * since it was first counted, and why, where they do not.
+ */
+const WhatReadersDid = ({ drawer, range }: { drawer: PageDrawer; range: SignalsRange }) => {
+  const note = rangeNoteOf(drawer.range)
+
+  return (
+    <section className="flex flex-col gap-2">
+      <h3 className="text-xs font-medium">
+        What readers did
+        {drawer.range.kind === "read" ? `, ${lower(range)}` : ", since this page was first counted"}
+      </h3>
+      {note === undefined ? null : <p className="text-ink-muted text-[11px]">{note}</p>}
+      {drawer.range.kind === "read" ? (
+        <>
+          <KindBars bars={drawer.range.bars} />
+          <details className="text-xs">
+            <summary className="text-ink-muted cursor-pointer text-[11px]">
+              Since this page was first counted, across every version
+            </summary>
+            <div className="pt-2">
+              <KindBars bars={drawer.bars} />
+            </div>
+          </details>
+        </>
+      ) : (
+        <KindBars bars={drawer.bars} />
+      )}
+      {drawer.longest === undefined ? null : (
+        <p className="text-xs">
+          Readers kept <PartLabel part={drawer.longest} /> on screen longest, for{" "}
+          {seconds(drawer.longest.seconds)} on average, since this page was first counted.
+        </p>
+      )}
+    </section>
+  )
+}
 
 const waitingSentence = (waiting: number): string =>
   waiting === 1
@@ -243,34 +357,7 @@ export const PageDrawerPanel = ({
     </div>
 
     <div className="flex flex-col gap-5 px-4 py-3">
-      <section className="flex flex-col gap-2">
-        <h3 className="text-xs font-medium">What readers did</h3>
-        <p className="text-ink-muted text-[11px]">
-          Since this page was first counted, across every version.
-        </p>
-        <ul className="m-0 flex list-none flex-col gap-2 p-0">
-          {drawer.bars.map((bar) => (
-            <li key={bar.technical} className="flex flex-col gap-1" title={bar.meaning}>
-              <span className="flex justify-between text-xs">
-                <span>{bar.label}</span>
-                <span>{count(bar.count)}</span>
-              </span>
-              <span className="bg-surface-hover block h-1.5 rounded">
-                <span
-                  className="bg-ink block h-1.5 rounded"
-                  style={{ width: `${Math.round(bar.share * 100)}%` }}
-                />
-              </span>
-            </li>
-          ))}
-        </ul>
-        {drawer.longest === undefined ? null : (
-          <p className="text-xs">
-            Readers kept <PartLabel part={drawer.longest} /> on screen longest, for{" "}
-            {seconds(drawer.longest.seconds)} on average.
-          </p>
-        )}
-      </section>
+      <WhatReadersDid drawer={drawer} range={address.range} />
 
       <section className="flex flex-col gap-2">
         <h3 className="text-xs font-medium">Pressed most</h3>
@@ -290,7 +377,7 @@ export const PageDrawerPanel = ({
         )}
       </section>
 
-      <GoalsOnPage goals={drawer.goals} projectId={projectId} />
+      <GoalsOnPage goals={drawer.goals} projectId={projectId} range={address.range} />
 
       {drawer.row.waiting === undefined || drawer.row.waiting === 0 ? null : (
         <Link
@@ -305,7 +392,13 @@ export const PageDrawerPanel = ({
         <Link href={`/portal/${projectId}/pages/${drawer.row.treeId}`} className="text-ink">
           Open the page
         </Link>
-        <Link href={`/portal/${projectId}/signals?on=${drawer.row.treeId}`} className="text-ink">
+        <Link
+          href={byPageHref(
+            { ...address, base: `/portal/${projectId}/signals` },
+            { on: drawer.row.treeId }
+          )}
+          className="text-ink"
+        >
           Events on this page
         </Link>
       </div>

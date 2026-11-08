@@ -5,7 +5,9 @@ import {
   byPageListOf,
   cursorOf,
   type ByPageRow,
+  type GoalInDrawer,
   type GoalOnPage,
+  type KindBar,
   type PageDrawer,
 } from "@/app/(portal)/_lib/by-page"
 
@@ -144,17 +146,17 @@ describe("By page", () => {
 })
 
 describe("the drawer for one page", () => {
+  const bar = (label: string, count: number): KindBar => ({
+    label,
+    meaning: "",
+    technical: label,
+    count,
+    share: 1,
+  })
   const drawer: PageDrawer = {
     row: row("t_home", { name: "Welcome", waiting: 1 }),
-    bars: [
-      {
-        label: "Opened the page",
-        meaning: "",
-        technical: "viewed",
-        count: 10,
-        share: 1,
-      },
-    ],
+    range: { kind: "unreadable" },
+    bars: [bar("Opened the page", 10)],
     pressed: [{ nodeId: "n_cta", name: "the button “Start”", presses: 1 }],
     longest: { nodeId: "n_intro", name: undefined, seconds: 4.5 },
     goals: [],
@@ -168,29 +170,121 @@ describe("the drawer for one page", () => {
     expect(within(panel).getByText("Opened the page")).toBeTruthy()
     expect(within(panel).getByText("1 press")).toBeTruthy()
     expect(panel.textContent).toContain(
-      "Readers kept n_intro on screen longest, for 4.5 seconds on average."
+      "Readers kept n_intro on screen longest, for 4.5 seconds on average, since this page was first counted."
     )
   })
 
-  it("names each goal covering the page with what it counted here, the primary marked", () => {
+  const section = () => {
+    const heading = screen.getByRole("heading", { name: /What readers did/ })
+
+    if (heading.parentElement === null) throw new Error("the section holds its heading")
+
+    return { heading, body: heading.parentElement }
+  }
+
+  it("draws what readers did over the range, with since the page was first counted one click away", () => {
+    render(
+      <PageDrawerPanel
+        drawer={{
+          ...drawer,
+          range: { kind: "read", bars: [bar("Pressed something", 4)], countedFrom: undefined },
+        }}
+        address={{ ...address, range: "7d" }}
+        projectId="prj_a"
+      />
+    )
+
+    const { heading, body } = section()
+
+    expect(heading.textContent).toBe("What readers did, last 7 days")
+    expect(within(body).getByText("4")).toBeTruthy()
+    expect(
+      within(body).getByText("Since this page was first counted, across every version")
+    ).toBeTruthy()
+    expect(within(body).getByText("10")).toBeTruthy()
+  })
+
+  it("says where counting by the hour began when it began inside the range", () => {
+    render(
+      <PageDrawerPanel
+        drawer={{
+          ...drawer,
+          range: {
+            kind: "read",
+            bars: [bar("Pressed something", 4)],
+            countedFrom: Date.UTC(2026, 10, 8, 9),
+          },
+        }}
+        address={address}
+        projectId="prj_a"
+      />
+    )
+
+    expect(section().body.textContent).toMatch(
+      /Counted by the hour from .+, so these start there\./
+    )
+  })
+
+  it("falls back to since the page was first counted, and says why, where the hours give nothing", () => {
+    const { unmount } = render(
+      <PageDrawerPanel drawer={drawer} address={address} projectId="prj_a" />
+    )
+
+    expect(section().heading.textContent).toBe(
+      "What readers did, since this page was first counted"
+    )
+    expect(
+      screen.getByText(
+        "This page's figures by the hour could not be read just now, so these are since it was first counted."
+      )
+    ).toBeTruthy()
+
+    unmount()
+    render(
+      <PageDrawerPanel
+        drawer={{ ...drawer, range: { kind: "uncounted" } }}
+        address={address}
+        projectId="prj_a"
+      />
+    )
+
+    expect(
+      screen.getByText(
+        "Nothing has been counted by the hour on this page yet, so these are since it was first counted."
+      )
+    ).toBeTruthy()
+  })
+
+  const HOUR = 3_600_000
+  const FROM = Date.UTC(2026, 10, 7, 12)
+  const signUps: GoalInDrawer = {
+    goalId: "g_a",
+    name: "Sign-ups",
+    kind: "activated",
+    primary: true,
+    reading: { count: 7, pageViews: 200 },
+    range: {
+      kind: "read",
+      current: { range: { from: FROM, to: FROM + 24 * HOUR }, views: 100, count: 3 },
+      before: { range: { from: FROM - 24 * HOUR, to: FROM }, views: 100, count: 2 },
+      clipped: false,
+    },
+  }
+
+  it("names each goal covering the page with its rate here over the range and since counting began, the primary marked", () => {
     render(
       <PageDrawerPanel
         drawer={{
           ...drawer,
           goals: [
-            {
-              goalId: "g_a",
-              name: "Sign-ups",
-              kind: "activated",
-              primary: true,
-              reading: { count: 7, pageViews: 200 },
-            },
+            signUps,
             {
               goalId: "g_b",
               name: "Contact",
               kind: "completed",
               primary: false,
               reading: { count: 1, pageViews: 200 },
+              range: undefined,
             },
           ],
         }}
@@ -205,8 +299,46 @@ describe("the drawer for one page", () => {
 
     expect(within(goals).getByText("Goal: Sign-ups")).toBeTruthy()
     expect(within(goals).getAllByText("Primary")).toHaveLength(1)
-    expect(within(goals).getByText("7 presses in 200 page views, 3.5 per 100.")).toBeTruthy()
-    expect(within(goals).getByText("1 form sent in 200 page views, 0.5 per 100.")).toBeTruthy()
+    expect(within(goals).getByText("3 per 100")).toBeTruthy()
+    expect(
+      within(goals).getByText(
+        "Sign-ups: 3 presses in 100 page views, 3 per 100. Up 50% on the 24 hours before (2 per 100)."
+      )
+    ).toBeTruthy()
+    expect(
+      within(goals).getByText("Since counting began: 7 presses in 200 page views, 3.5 per 100.")
+    ).toBeTruthy()
+    expect(
+      within(goals).getByText("Its figures for the last 24 hours could not be read just now.")
+    ).toBeTruthy()
+    expect(
+      within(goals).getByText("Since counting began: 1 form sent in 200 page views, 0.5 per 100.")
+    ).toBeTruthy()
+  })
+
+  it("says a goal had no page views on this page, not on the pages it covers", () => {
+    render(
+      <PageDrawerPanel
+        drawer={{
+          ...drawer,
+          goals: [
+            {
+              ...signUps,
+              range: {
+                kind: "read",
+                current: { range: { from: FROM, to: FROM + 24 * HOUR }, views: 0, count: 0 },
+                before: undefined,
+                clipped: false,
+              },
+            },
+          ],
+        }}
+        address={address}
+        projectId="prj_a"
+      />
+    )
+
+    expect(screen.getByText("Sign-ups: no page views on this page.")).toBeTruthy()
   })
 
   it("says plainly when no goal covers the page, and when goals could not be read", () => {
@@ -232,7 +364,9 @@ describe("the drawer for one page", () => {
   })
 
   it("links to what waits for the page, to the page and its events, and closes back to the list", () => {
-    render(<PageDrawerPanel drawer={drawer} address={address} projectId="prj_a" />)
+    render(
+      <PageDrawerPanel drawer={drawer} address={{ ...address, range: "30d" }} projectId="prj_a" />
+    )
 
     expect(
       screen
@@ -243,10 +377,10 @@ describe("the drawer for one page", () => {
       "/portal/prj_a/pages/t_home"
     )
     expect(screen.getByRole("link", { name: "Events on this page" }).getAttribute("href")).toBe(
-      "/portal/prj_a/signals?on=t_home"
+      "/portal/prj_a/signals?on=t_home&range=30d"
     )
     expect(screen.getByRole("link", { name: "Close" }).getAttribute("href")).toBe(
-      "/portal/prj_a/signals/pages"
+      "/portal/prj_a/signals/pages?range=30d"
     )
   })
 })

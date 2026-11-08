@@ -213,7 +213,7 @@ describe("goalFigureOf", () => {
 
   it("keeps a period before with no page views or no presses apart from a fall", () => {
     expect(figure({ arrivals: arrivals([[HOME, RANGE.from, 200]]) })?.note).toContain(
-      "No page views on its pages in the 24 hours before."
+      "No page views on the pages it covers in the 24 hours before."
     )
     expect(figure({ acted: acted([[HOME, RANGE.from, 6]]) })?.note).toContain(
       "None in the 24 hours before, in 100 page views."
