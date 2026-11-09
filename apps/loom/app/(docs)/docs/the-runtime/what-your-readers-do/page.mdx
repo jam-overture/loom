@@ -187,15 +187,15 @@ counted. A page taken down and put back at the same revision has sent the reader
 nowhere, so the reading already running simply carries on
 ([0366](/docs/architecture/decision-records)).
 
-A band that arrives late is picked up and watched like the rest of the page —
-streamed in behind a Suspense boundary, mounted by a client component, or
-rewritten by a change the Gate has just accepted. That last one is the
-measurement Loom exists to make, which makes it the worst one to have missed.
-
 That is the sentence worth having, because the alternative is silent. A
 broadcaster left watching the page a reader has walked away from does not stop
 reporting — it files everything the reader does next under the page they left,
 and nothing at either end says so.
+
+A band that arrives late is picked up and watched like the rest of the page —
+streamed in behind a Suspense boundary, mounted by a client component, or
+rewritten by a change the Gate has just accepted. That last one is the
+measurement Loom exists to make, which makes it the worst one to have missed.
 
 **Hand it an element instead when the tree is one panel among other things.**
 Then that element is the root, its tree and revision are read once, and a panel

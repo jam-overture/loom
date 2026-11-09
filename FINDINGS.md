@@ -68127,7 +68127,21 @@ somebody else.
 (`apps/loom/app/(docs)/_components/reader-signals-live.tsx`,
 `apps/loom/app/(docs)/_lib/fences/compiled/the-runtime--what-your-readers-do.tsx`)
 and `Loom marketing` (`apps/loom/app/(marketing)/_components/count-readers.tsx`)
-· **Status:** open — **nothing is broken in any of the three**, and this is an
+· **Status:** **both `Loom docs` rows closed by `docs-82-two-limits-the-runtime-no-longer-has`**,
+9 November; the `Loom marketing` row is open. Original status below.
+
+> **`Loom docs`, 9 November.** The fence is the document form now, and the prose
+> beside it says which argument is which. The live component asks
+> `addressedRootIn` for its root and spells no selector. The entry asked for the
+> sentence on *What your readers do* and for a call on whether the compiled
+> fence should keep the element form — **it should not**, and the reason is the
+> half of this entry that turned out to be the larger one: the same page was
+> telling a reader to stop and restart the broadcaster across a client-side
+> navigation, which 0366 had made false two days before this entry was filed.
+> The element form is still demonstrated and still argued for, by the live
+> block, which is the one place on this site where it is the right argument.
+
+**Original status:** open — **nothing is broken in any of the three**, and this is an
 adoption rather than a defect
 
 [0366](decisions/0366-a-broadcast-handed-a-document-follows-the-page-and-a-client-side-navigation-is-a-new-page-view.md)
@@ -68759,3 +68773,167 @@ honest version is either a second field (`withinId`, as `inside.ts` has) or a
 renaming with a record. Neither belongs in a run whose unit is a different
 reading. The fix is small; what it needs is to be the unit.
 
+
+---
+## 2026-11-09 — an instruction a page gives is a claim about what the runtime will not do for you, and this site had no instrument for one
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** **closed on
+filing for the page it was found on**, by
+`docs-82-two-limits-the-runtime-no-longer-has`; **open as a shape**, because
+nothing sweeps the other thirty-four written pages for it
+
+Two sentences at the foot of *What your readers do* were false, and both had
+been for days:
+
+| the page said | false since |
+| --- | --- |
+| a broadcaster watches only the nodes present when it started, so a band behind a Suspense boundary is never watched for `viewed` or `dwelled` | at or before 6 November, when the broadcaster began watching arrivals. This container's clone holds fifty commits and cannot see further back, so the date is a bound rather than a reading |
+| a new revision is a new broadcast, so `stop()` the broadcaster and start another | 7 November, when [0366](decisions/0366-a-broadcast-handed-a-document-follows-the-page-and-a-client-side-navigation-is-a-new-page-view.md) gave a broadcast the document form |
+
+**Neither instrument on this site could have caught them, and the reasons are
+different.**
+
+`_lib/absences.ts` sweeps written prose for a sentence saying **Loom lacks a
+name**, and holds each registered one against a measurement that will contradict
+it. Neither of these says Loom lacks anything. Neither carries a dated word, so
+even the backstop sweep would have passed over both.
+
+`_lib/signals/claims.test.ts` had them, and **held them in place.** Both were
+asserted with `toContain` under a comment arguing that was the safe kind of
+claim:
+
+> *"each is a claim about **how the broadcaster behaves**, and the behaviour is
+> in the runtime where a test can reach it. The one that was dangerous was a
+> claim about what the runtime *lacked*, which nothing here could reach."*
+
+Every clause of that is true. Nothing acted on it: what the two assertions
+checked was that the page still said the sentence. It is the same failure that
+comment records two paragraphs earlier about *"Nothing stores or interprets
+these"* — a test that pins prose reads as a test that holds prose to something.
+
+**What shipped.** `_lib/signals/following.test.tsx` starts a real broadcaster on
+a real addressed page, in the one half of this application's suite that has a
+document, and reads back what it watched: that a `Document` is accepted and
+finds the page, that an unaddressed document is refused with `unaddressed`, that
+a band appended after the start is handed to the visibility observer, that it is
+handed over **without** the reading beginning again, and that a changed revision
+on the root **does** begin it again with nothing asked of the host. Each is
+paired with the sentence the page now writes in its place. Ten mutations of the
+runtime and of this lane's own files, ten killed.
+
+**What is open, and it is the general case.** An instruction is the third kind
+of dated claim and there is no sweep for it. *"Remember to X"*, *"do not expect
+Y"*, *"you will need to Z yourself"* — each is a statement about a gap in the
+runtime, each goes stale when the gap closes, and each reads as ordinary
+writing while it does. `absences.ts` cannot hold them because the measurement
+often needs a browser; a `.test.tsx` per page is what this lane has, and it has
+two of them against thirty-five written pages.
+
+**Recommendation, for the next run of this lane rather than for anybody else.**
+Do not widen the `DATED` regular expression — an imperative has no marker to
+match on, and the four entries in `NOT_DATED_CLAIMS` that `today` already costs
+say what a loose pattern buys. The cheap, honest thing is a count: sweep written
+pages for the second person plus a modal — *you will have to*, *you need to*,
+*remember to* — and report the number rather than fail on it, the way
+`reports:check` reports uncited visuals. If it is twelve sentences, each gets
+read once by whoever next writes near it. If it is two hundred, this was the
+wrong idea and the number says so before a run spends a unit on it.
+
+**One exemption retired on the way.** `NOT_DATED_CLAIMS` carried *"at the moment
+they happen"*, which was a clause of the first retired paragraph, and
+`absences.test.ts` holds every registered fragment against the site — so the
+fragment went red the moment the sentence left. That assertion did its job: a
+dead exemption is a reader of this file being told about a sentence that is not
+there.
+
+---
+## 2026-11-09 — `addressedRootIn`'s own doc comment shows a spelling that does not typecheck in this repository
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom daily build`
+(`src/render/addressed.ts`) · **Status:** open — **a two-word correction to a
+comment**; nothing is broken, no test is failing, and the function is right
+
+The comment above `addressedRootIn` explains why it answers `undefined` rather
+than `null`:
+
+> *"because a caller reaching through an optional ref — `addressedRootIn(frame.current)`
+> is the shape of two callers in this repository — otherwise has two empty
+> values to test for where one will do."*
+
+The argument is correct and the saving is real. **The spelling in it is not
+available**, because the parameter is `ParentNode` and `frame.current` is
+`HTMLDivElement | null`:
+
+```
+error TS2345: Argument of type 'HTMLDivElement | null' is not assignable to
+parameter of type 'ParentNode'. Type 'null' is not assignable to type 'ParentNode'.
+```
+
+That is this application's own typechecker, from writing exactly the line the
+comment shows. A caller writes the guard and then calls, which is what this
+lane's third caller does:
+
+```ts
+const container = frame.current
+const root = container === null ? undefined : addressedRootIn(container)
+```
+
+**The point it is making survives**, and it is worth keeping — one empty value
+to test on the way out rather than two. It is the *inbound* side the comment
+overstates. Either widen the parameter to `ParentNode | null | undefined` and
+return `undefined` for an absent scope, which would make the shown line true and
+is a published signature change, or change the example. **This lane recommends
+changing the example**, because the narrow parameter is the honest type for a
+function whose contract is *somewhere to look*, and a reader copying the
+comment hits a compiler error that explains itself in one line.
+
+Found by mutating the guard away in `_components/reader-signals-live.tsx` to
+check something held it. The typechecker did, which is why this is a comment
+finding and not a defect.
+
+---
+## 2026-11-09 — correcting two false sentences cost 47% of what the whole site has left to say, which is 0353's argument arriving as a bill rather than a forecast
+
+**Filed by:** `Loom docs` · **Owned by:** `@jonathanbravecredit` · **Status:**
+open — **nothing is broken and no cap fires**; it is one number, offered because
+it changes how urgent an unanswered question is and not because anything is
+blocked today
+
+The prose index — every written page's sentences, which the search box fetches
+so that a reader can find a phrase rather than a heading — is capped at 80,000
+compressed bytes across the five sections together. Measured on `main` this
+morning and on this branch after it:
+
+| | compressed | room |
+| --- | --- | --- |
+| `main` | 79,182 | 818 |
+| this branch | **79,563** | **437** |
+
+**381 bytes**, which is 216 words, which is 47% of what the site had left.
+
+What it bought is not a page and not a paragraph anybody asked for. It is two
+instructions removed and the true version of each put in their place: the
+counting rule a reader needs to know a navigation is handled, and the sentence
+saying when an element is the right argument instead. **The alternative to
+spending it was leaving a stranger with advice that would have made their
+numbers wrong**, which is the one trade on this site that is not close.
+
+The raw cap moved the same way and is now the nearer of the pair in proportion:
+257,390 → 258,540 of 260,000, leaving **1,460 bytes**. Every other cap on this
+surface is unchanged or better — the code index came **down** 121 compressed
+bytes, because the fence a reader copies is shorter in the document form than it
+was with a ref and a selector in it.
+
+**Why it is filed here rather than noted in a report.** [0353](decisions/README.md)
+is `Proposed` on #778 and has been unanswered since 5 November, and the four
+runs that asked for it each said the same thing: the site cannot grow until the
+search box stops sending every section's sentences to every reader. That was
+argued as a forecast about the next page. **It is not only about new pages.** A
+correction to an existing one is drawn on the same account, and this lane cannot
+know in advance which run will need to fix a sentence that went false under it —
+three went false under this lane in the last four days.
+
+Nothing needs doing this week. The figure is here so that the next run reading
+*437 bytes* knows what the last one spent it on and why, and so that the
+question in front of the maintainer is the accurate one: not *may this site add
+a page* but **may this site keep its pages true**.
