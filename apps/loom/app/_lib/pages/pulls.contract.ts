@@ -81,35 +81,58 @@ export const describeSitePullStoreContract = (
     it("lists nothing taken since a moment for a site that never pulled", async () => {
       const store = await make()
 
-      expect(unwrap(await store.firstTakenSince(SHOP, AT))).toEqual([])
+      expect(unwrap(await store.takenSince(SHOP, AT))).toEqual({ answers: [], namesBack: false })
     })
 
-    it("lists the answers first taken at or after a moment, earliest first, not one taken again", async () => {
+    it("lists the answers first given at or after a moment, earliest first, not one given again", async () => {
       const store = await make()
 
       unwrap(await store.record(pull(AT + 120_000, '"c"')))
       unwrap(await store.record(pull(AT)))
       unwrap(await store.record(pull(AT + 60_000)))
       unwrap(await store.record(pull(AT + 90_000, '"b"')))
+      unwrap(await store.record(pull(AT + 150_000, '"c"')))
 
-      expect(unwrap(await store.firstTakenSince(SHOP, AT + 30_000))).toEqual([
-        AT + 90_000,
-        AT + 120_000,
-      ])
-      expect(unwrap(await store.firstTakenSince(SHOP, AT + 90_000))).toEqual([
-        AT + 90_000,
-        AT + 120_000,
-      ])
-      expect(unwrap(await store.firstTakenSince(SHOP, AT + 120_001))).toEqual([])
+      const b = { first: AT + 90_000, last: AT + 90_000, kept: false }
+      const c = { first: AT + 120_000, last: AT + 150_000, kept: false }
+
+      expect(unwrap(await store.takenSince(SHOP, AT + 30_000)).answers).toEqual([b, c])
+      expect(unwrap(await store.takenSince(SHOP, AT + 90_000)).answers).toEqual([b, c])
+      expect(unwrap(await store.takenSince(SHOP, AT + 120_001)).answers).toEqual([])
+    })
+
+    it("says which answers were named back, and whether any ever was, before the moment too", async () => {
+      const store = await make()
+
+      unwrap(await store.record(pull(AT)))
+      unwrap(await store.record(kept(AT + 60_000)))
+      unwrap(await store.record(pull(AT + 120_000, '"b"')))
+      unwrap(await store.record(pull(AT + 180_000, '"c"')))
+      unwrap(await store.record(kept(AT + 240_000, '"c"')))
+
+      expect(unwrap(await store.takenSince(SHOP, AT + 120_000))).toEqual({
+        answers: [
+          { first: AT + 120_000, last: AT + 120_000, kept: false },
+          { first: AT + 180_000, last: AT + 240_000, kept: true },
+        ],
+        namesBack: true,
+      })
+      expect(unwrap(await store.takenSince(SHOP, AT + 300_000))).toEqual({
+        answers: [],
+        namesBack: true,
+      })
     })
 
     it("lists one project's answers and never another's", async () => {
       const store = await make()
 
-      unwrap(await store.record(pull(AT, '"a"', BLOG)))
+      unwrap(await store.record(kept(AT, '"a"', BLOG)))
 
-      expect(unwrap(await store.firstTakenSince(SHOP, AT))).toEqual([])
-      expect(unwrap(await store.firstTakenSince(BLOG, AT))).toEqual([AT])
+      expect(unwrap(await store.takenSince(SHOP, AT))).toEqual({ answers: [], namesBack: false })
+      expect(unwrap(await store.takenSince(BLOG, AT))).toEqual({
+        answers: [{ first: AT, last: AT, kept: true }],
+        namesBack: true,
+      })
     })
 
     it("answers no newest answer for a site that never pulled", async () => {

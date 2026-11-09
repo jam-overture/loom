@@ -7,7 +7,7 @@ import { childrenOf, type LoomNode } from "./node.js"
  * structure that changes on every accepted delta.
  *
  * **Nothing here recurses into the tree**, which is a correctness requirement
- * rather than a preference (0370): a page's depth is data, so a walk that
+ * rather than a preference (0372): a page's depth is data, so a walk that
  * spends a call frame per level stops answering at a depth a tree is allowed to
  * reach. Every walk below carries an explicit stack and is linear in nodes.
  */

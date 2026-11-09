@@ -585,8 +585,12 @@ tag on every pull just as a healthy one is. What tells them apart is whether
 the site sent that tag back, so the door now records it (`kept`, `304`), and
 *Connect your site* says *Your site pulls, and is not keeping its newest
 pages* once a site that has named some answer back has been given the newest
-for ten minutes without naming it. The request is unchanged. **Still open on
-the timeline:** its *Live* step reads an answer given as an answer taken.
+for ten minutes without naming it. The request is unchanged. ~~**Still open on
+the timeline:** its *Live* step reads an answer given as an answer taken.~~
+**Closed on the timeline, 9 November:** for a site that names back what it
+holds, a change is live from the first answer since *Accept* the site named
+back, and an answer given for ten minutes and never named back says the site
+is not keeping it (`going-live.ts`, `SitePullStore.takenSince`).
 
 The client (`@jam-overture/loom/live`, 0361) refuses an answer whole when one
 page in it cannot be parsed by the version of Loom the customer has installed,
@@ -68637,7 +68641,7 @@ stack in place of the recursion, and in `src/tree/navigation.ts` as well as in
 now outlines in 195 ms. The deepest-tree test this entry asked for is
 `src/tree/depth.test.ts`, a chain of ten thousand read six ways, and all four
 of its cases throw `RangeError` against the implementation it replaces.
-[0370](decisions/0370-every-read-of-a-tree-carries-an-explicit-stack-because-a-page-s-depth-is-data.md)
+[0372](decisions/0372-every-read-of-a-tree-carries-an-explicit-stack-because-a-page-s-depth-is-data.md)
 records it. **The linearity claim in `pageReadingOf` and `insideReadingOf` now
 holds in a page's depth as well as in its parts**, with no change in
 `src/signals/`. Original status below.
@@ -68777,7 +68781,7 @@ near it**; filed with the numbers while they were in hand, and it is this lane's
 own next unit rather than anyone's blocker
 
 Found while closing the `outlineTree` entry above (#829). Every read of a tree is now
-linear in nodes and bounded by the heap (0370). `replaceNode` is not, and it is
+linear in nodes and bounded by the heap (0372). `replaceNode` is not, and it is
 the shallower of the two bounds:
 
 | chain depth | `replaceNode` |
@@ -68802,7 +68806,7 @@ accepted delta takes, and `insertChild` and `detachNode` call it as well.
 walk, and a rebuild that walks that chain back up touches one node per level and
 asks nothing. That removes the quadratic factor and the recursion together.
 
-**Not done here** because 0370's unit is reads: a rebuild is a different shape
+**Not done here** because 0372's unit is reads: a rebuild is a different shape
 of change, it is on the delta path where a wrong answer is a wrong tree rather
 than a slow one, and one pull request that changes both is one nobody can
 review.

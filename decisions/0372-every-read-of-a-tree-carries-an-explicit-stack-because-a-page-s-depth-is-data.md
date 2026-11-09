@@ -1,4 +1,4 @@
-# 0370. Every read of a tree carries an explicit stack, because a page's depth is data
+# 0372. Every read of a tree carries an explicit stack, because a page's depth is data
 
 **Status:** Accepted
 **Date:** 2026-11-08

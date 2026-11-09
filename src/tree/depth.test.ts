@@ -16,7 +16,7 @@ import { outlineTree } from "./outline.js"
 
 /**
  * A tree's depth is data, so every read of a tree has to answer at a depth a
- * tree is allowed to reach (0370). Until these existed every read here was a
+ * tree is allowed to reach (0372). Until these existed every read here was a
  * recursive generator, which threw `RangeError: Maximum call stack size
  * exceeded` somewhere between two and four thousand deep and cost the sum of
  * the depths rather than the number of nodes on the way up to it.

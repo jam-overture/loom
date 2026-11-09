@@ -17,7 +17,7 @@ import { childrenOf, type LoomNode } from "./node.js"
  * a position, not only a node.
  *
  * The walk carries an **explicit stack** and is not recursive, which is a
- * correctness requirement rather than a preference (0370). A recursive
+ * correctness requirement rather than a preference (0372). A recursive
  * generator delegating with `yield*` passes every value back up through each
  * delegating frame, so a node at depth *d* costs *d*, the walk costs the sum of
  * the depths rather than the number of nodes, and past about two thousand deep

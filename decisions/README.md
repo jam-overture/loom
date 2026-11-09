@@ -458,5 +458,7 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0366](0366-a-broadcast-handed-a-document-follows-the-page-and-a-client-side-navigation-is-a-new-page-view.md) | A broadcast handed a document follows the page, and a client-side navigation is a new page view | Accepted | §4c (reader signals) |
 | [0367](0367-what-an-operator-must-set-is-read-off-the-application-and-the-guide-goes-red-when-it-is-behind.md) | What an operator must set is read off the application, and the guide goes red when it is behind | Accepted | §1 (process), §5 (deployment) |
 | [0368](0368-what-readers-did-inside-a-part-is-derived-from-the-tree-and-the-sum-is-exact-because-occurrences-add.md) | What readers did inside a part is derived from the tree, and the sum is exact because occurrences add | Accepted | §5 (reader signals), the counters |
-| 0369 | *No record on this branch* | — | — |
-| [0370](0370-every-read-of-a-tree-carries-an-explicit-stack-because-a-page-s-depth-is-data.md) | Every read of a tree carries an explicit stack, because a page's depth is data | Accepted | §2, the tree |
+| [0369](0369-the-sites-build-publishes-its-pages-and-a-refusal-never-stops-a-deploy.md) | The site's build publishes its pages, and a refusal never stops a deploy | Accepted | §5 (portal), the connection plane |
+| [0370](0370-loomjs-org-serves-its-live-pages-and-pulls-them-like-a-customers-site.md) | loomjs.org serves its live pages, and pulls them like a customer's site | Accepted | §5 (portal), the connection plane |
+| 0371 | *No record on this branch* | — | — |
+| [0372](0372-every-read-of-a-tree-carries-an-explicit-stack-because-a-page-s-depth-is-data.md) | Every read of a tree carries an explicit stack, because a page's depth is data | Accepted | §2, the tree |

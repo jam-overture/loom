@@ -8,7 +8,6 @@ import { Screen } from "@/app/(portal)/_components/screen"
 import { StateNotice } from "@/app/(portal)/_components/state-notice"
 import { requireActor, requireRole } from "@/app/(portal)/_lib/auth/identity"
 import {
-  acceptedPage,
   goalNameOf,
   sentencesOf,
   servedOf,
@@ -18,6 +17,7 @@ import {
 import { plainMoment } from "@/app/(portal)/_lib/when"
 
 import { readAccepted } from "@/app/(portal)/_lib/accepted/reading"
+import { changesPage } from "@/app/(portal)/_lib/changes-page"
 import { single } from "@/app/(portal)/_lib/query"
 
 /**
@@ -93,7 +93,7 @@ const AcceptedPage = async ({
       )
     }
 
-    const page = acceptedPage(reading.changes, before)
+    const page = changesPage(reading.changes, before)
 
     return (
       <div className="flex flex-col gap-3">

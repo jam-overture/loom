@@ -22,5 +22,15 @@ export const memoryTurnedDownStore = (): TurnedDownStore => {
           )
         )
       ),
+
+    since: (at, limit) =>
+      Promise.resolve(
+        ok(
+          newestFirst([...held.values()].filter((entry) => entry.at >= at)).slice(
+            0,
+            Math.max(0, limit)
+          )
+        )
+      ),
   }
 }

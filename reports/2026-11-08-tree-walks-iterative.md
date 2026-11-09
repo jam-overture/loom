@@ -2,7 +2,7 @@
 
 **`Loom daily build`, 8 November 2026, evening run.**
 Branch `framework-tree-walks-iterative`, #829. Record
-[0370](../decisions/0370-every-read-of-a-tree-carries-an-explicit-stack-because-a-page-s-depth-is-data.md),
+[0372](../decisions/0372-every-read-of-a-tree-carries-an-explicit-stack-because-a-page-s-depth-is-data.md),
 `Accepted`. `pnpm verify` **EXIT=0**, read out of the file.
 
 ![Before and after, on a chain](2026-11-08-tree-walks-iterative.svg)
@@ -97,19 +97,23 @@ same depth bound by plain recursion and a test asserting a depth of ten thousand
 that skipped two functions in the module would be stating the opposite of what
 it looks like it states.
 
-**0370 was written rather than left as a line in this report.** The recursive
+**0372 was written rather than left as a line in this report.** The recursive
 spelling is the shorter and tidier of the two to read, so it is what a later run
 reaches for as a simplification. The record and the two module docblocks exist
 to make that a decision somebody has to overturn rather than a tidy.
 
-**The number is 0370 and not 0369.** 0369 is claimed by an open branch (#826)
-that has not merged; `pnpm decisions:index` says so.
+**The number is 0372, and it was 0370 when this was written.** 0369 was claimed
+by an open branch (#826) that had not merged, so this record was written as 0370
+— and #826 and #831 both landed overnight, #831 taking 0370 for *loomjs.org
+serves its live pages*. Renumbered on 9 November, by this lane rather than by
+`Loom merge`, to the next number no open branch claims: 0371 is taken by #834.
+Nothing the record decides changed.
 
 **`replaceNode` was left alone**, with numbers, as a finding. See below.
 
 ## Records
 
-- **[0370](../decisions/0370-every-read-of-a-tree-carries-an-explicit-stack-because-a-page-s-depth-is-data.md)**
+- **[0372](../decisions/0372-every-read-of-a-tree-carries-an-explicit-stack-because-a-page-s-depth-is-data.md)**
   — *Every read of a tree carries an explicit stack, because a page's depth is
   data.* `Accepted`. Nothing superseded.
 
@@ -147,7 +151,7 @@ somebody once meant to build. It is a real question about what `@jam-overture/lo
 is for, and a docblock is not where it gets answered. Nothing is blocked on it.
 
 **How deep is a tree allowed to be?** Nothing in the schema says, which is why
-this was an engine's stack size standing in for a decision. 0370 removes the
+this was an engine's stack size standing in for a decision. 0372 removes the
 accidental answer and deliberately does not write a deliberate one: a cap would
 be a migration for trees already stored. Worth an answer only if a real page
 ever approaches it, and none is within three orders of magnitude.

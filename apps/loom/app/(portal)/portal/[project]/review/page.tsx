@@ -12,6 +12,8 @@ import { requireActor, requireRole } from "@/app/(portal)/_lib/auth/identity"
 import { roleThatCanAccept } from "@/app/(portal)/_lib/auth/roles"
 import { drawHeld } from "@/app/(portal)/_lib/held-change"
 import { requestPartsOf } from "@/app/(portal)/_lib/proposing/brief"
+import { nextLookOf, type NextLook } from "@/app/(portal)/_lib/proposing/next-look"
+import { scheduleConfigured } from "@/app/(portal)/_lib/proposing/schedule"
 import { turnedDownFor } from "@/app/(portal)/_lib/proposing/stores"
 import type { TurnedDown } from "@/app/(portal)/_lib/proposing/turned-down"
 import { single, type Query } from "@/app/(portal)/_lib/query"
@@ -24,13 +26,17 @@ import {
   standingChoicesOf,
 } from "@/app/(portal)/_lib/review-filter"
 import { readReview } from "@/app/(portal)/_lib/review-reading"
+import { readTurnedDownCount } from "@/app/(portal)/_lib/turned-down-reading"
 import type { QueueRow } from "@/app/(portal)/_lib/queue"
 import { governedPagesFor } from "@/app/(portal)/_lib/write"
+import { modelKeyOf } from "@/app/_lib/models/store"
 import { PORTAL_READ_BUDGET_MS } from "@/app/_lib/app/bounded"
 import { readWithin, unavailable } from "@/app/_lib/app/bounded-store"
 
 import { ChangeDrawer } from "./_components/change-drawer"
+import { NextLookLine } from "./_components/next-look-line"
 import { ReviewCard, ReviewGaps } from "./_components/review-card"
+import { TurnedDownLine } from "./_components/turned-down-line"
 
 /**
  * The last change turned down on a page, read only for a change that says it
@@ -52,6 +58,21 @@ const lastTurnedDownOn = async (
   )
 
   return read.ok ? (read.value[0] ?? null) : null
+}
+
+/**
+ * When Loom next looks at the project's pages by itself, or why it will not;
+ * `undefined` where the project's key could not be read, which costs that line alone.
+ */
+const readNextLook = async (
+  application: ApplicationId,
+  now: number
+): Promise<NextLook | undefined> => {
+  const key = await modelKeyOf(application)
+
+  return key.ok
+    ? nextLookOf({ now, scheduled: scheduleConfigured(process.env.CRON_SECRET), key: key.value })
+    : undefined
 }
 
 /** The drawer for one waiting change: the page before and after it, read when it opens. */
@@ -108,8 +129,14 @@ const OpenChange = async ({
  * expects and what is at stake, with the answers (`docs/portal-wireframes.md`,
  * *2 · For review*). A change no longer waiting says so in its place.
  *
+ * Under the title, when Loom next looks at the pages by itself (the daily
+ * sweep, 0329) or why it will not: no schedule on this deployment, or no
+ * model key Loom can use for the project (0332).
+ *
  * *Accepted*, linked under the heading, follows each change said yes to on to
- * live and its result (0358).
+ * live and its result (0358). *Turned down recently*, under the list, counts
+ * the changes said no to in the last thirty days and leads to them (0341);
+ * it is left out where they could not be read.
  *
  * Oldest first, as the store lists them, so whatever has waited longest is
  * read first. A change the store could not read is counted rather than
@@ -134,6 +161,14 @@ const ForReviewPage = async ({
   await requireActor(`/portal/${projectId}/review`)
 
   const reading = await readReview(projectId, await requireRole(projectId))
+  const now = Date.now()
+  const [turnedDown, nextLook] =
+    reading.kind === "read"
+      ? await Promise.all([
+          readTurnedDownCount(reading.application, now),
+          readNextLook(reading.application, now),
+        ])
+      : [undefined, undefined]
   const filter = reviewFilterOf({ goal: single(query.goal), standing: single(query.standing) })
   const opened = single(query.change)
 
@@ -249,6 +284,9 @@ const ForReviewPage = async ({
       <div className="flex flex-col gap-2">
         <h1 className="text-2xl tracking-tight">For review</h1>
         {reading.kind === "read" && <p className="text-ink-muted text-sm">{reading.projectName}</p>}
+        {nextLook === undefined ? null : (
+          <NextLookLine look={nextLook} now={now} projectId={projectId} />
+        )}
         <Link
           href={`/portal/${projectId}/review/accepted`}
           className="text-ink self-start text-xs no-underline hover:underline"
@@ -258,6 +296,10 @@ const ForReviewPage = async ({
       </div>
 
       {body}
+
+      {turnedDown === undefined ? null : (
+        <TurnedDownLine count={turnedDown} projectId={projectId} />
+      )}
     </Screen>
   )
 }
