@@ -14,13 +14,17 @@ export const MINIMUM_CRON_SECRET_LENGTH = 16
 
 export type ScheduleCheck = "allowed" | "refused" | "unconfigured"
 
+/** Whether this deployment's scheduler can start a sweep at all: a secret long enough to check. */
+export const scheduleConfigured = (secret: string | undefined): boolean =>
+  (secret?.trim() ?? "").length >= MINIMUM_CRON_SECRET_LENGTH
+
 export const scheduleCheck = (
   authorization: string | null,
   secret: string | undefined
 ): ScheduleCheck => {
-  const expected = secret?.trim() ?? ""
+  if (!scheduleConfigured(secret)) return "unconfigured"
 
-  if (expected.length < MINIMUM_CRON_SECRET_LENGTH) return "unconfigured"
+  const expected = secret?.trim() ?? ""
 
   const given = Buffer.from(authorization ?? "")
   const wanted = Buffer.from(`Bearer ${expected}`)
