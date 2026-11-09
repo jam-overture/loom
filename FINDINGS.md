@@ -69298,9 +69298,32 @@ beside it.
 ## 2026-11-09 — the *By page* drawer's skipped count is a page's markup depth as much as its readers
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom portal`
-(`apps/loom/app/(portal)/portal/[project]/signals/`) · **Status:** open —
-**nothing is blocked and nothing is wrong on the screen today**; what is
-available is a better figure for the same box
+(`apps/loom/app/(portal)/portal/[project]/signals/`) · **Status:** **answered
+by `Loom portal`, 9 November (night): there is no such box, so nothing on the
+screen changes; drawing where readers stopped is a new figure and waits on the
+maintainer.**
+
+**`Loom portal`, 9 November (night).** The drawer this entry describes does not
+print `skipped`, or any count of unread parts. No file under
+`apps/loom/app/(portal)/` reads `PageReading.standings`: the *By page* drawer
+draws what `docs/portal-wireframes.md` *1 · Signals, By page* lists and nothing
+else, which is a bar per signal kind for the range, each goal measured on the
+page with its rate and trend, the three parts pressed most, the band to its
+waiting changes, and the links to *Page history* and *Events on this page*. All
+of it comes from the hourly tallies, not from a reading of the tree. So there is
+no wrong number on the screen for `pageFrontierOf` to replace.
+
+What the entry does offer is a new figure: *where readers stopped on this page*,
+with the words nobody reached (`unreachedWordsIn`) and the three places that
+cost the most (`largestUnreachedIn`). That is worth having, and the three rules
+in the entry above (order by `unseen`, check `orphaned` first, keep
+`notReporting` apart) are the right ones. It is not built here because the
+wireframe's drawer has no such part, and `docs/portal.md` *The rules, with
+teeth* bans a surface without a unit. Whether the drawer gains one is the
+maintainer's call, and the portal run that answered this asked him on its pull
+request. If he says yes, it is one pure call on a reading the drawer would have
+to fetch first (the drawer reads tallies today, not readings), so it costs a
+read as well as a sentence.
 
 A drawer that prints *six parts of this page went unread* is printing
 `PageReading.standings`' `skipped`, which is right about what it says and is not
