@@ -1,6 +1,7 @@
-import type { ProposalId, TreeId } from "@jam-overture/loom"
+import type { IntentId, ProposalId, TreeId } from "@jam-overture/loom"
 
 import { DAY_MS } from "./daily-rate"
+import type { ProposalGoal } from "./goals/serving"
 import { requestPartsOf } from "./proposing/brief"
 import type { TurnedDown } from "./proposing/turned-down"
 
@@ -34,6 +35,29 @@ export const recentCountOf = (entries: readonly TurnedDown[]): RecentCount => ({
 export const countWords = ({ count, more }: RecentCount): string =>
   more ? `${count} or more` : String(count)
 
+/**
+ * The goal a change turned down had served (0352), where it is known: its name,
+ * or `null` for a change raised before proposals named their goal. A change
+ * turned down before its intent was kept with it, or whose goal could not be
+ * read, is *not recorded*, and the list names no goal for it rather than guess.
+ */
+export type TurnedDownGoal =
+  | { readonly kind: "recorded"; readonly goal: string | null }
+  | { readonly kind: "not-recorded" }
+
+export const NOT_RECORDED: TurnedDownGoal = { kind: "not-recorded" }
+
+/** The goal each change turned down served, from the intent it was made from and the goal kept by that intent. Pure. */
+export const turnedDownGoalsOf =
+  (intents: ReadonlyMap<ProposalId, IntentId>, served: ReadonlyMap<IntentId, ProposalGoal>) =>
+  (proposalId: ProposalId): TurnedDownGoal => {
+    const intentId = intents.get(proposalId)
+
+    return intentId === undefined
+      ? NOT_RECORDED
+      : { kind: "recorded", goal: served.get(intentId)?.name ?? null }
+  }
+
 /** One change turned down, as the list says it. */
 export type TurnedDownRow = {
   readonly proposalId: ProposalId
@@ -48,11 +72,13 @@ export type TurnedDownRow = {
   readonly reason: string | null
   readonly by: string | null
   readonly at: number
+  readonly goal: TurnedDownGoal
 }
 
 export const turnedDownRowOf = (
   entry: TurnedDown,
-  names: ReadonlyMap<string, string>
+  names: ReadonlyMap<string, string>,
+  goal: TurnedDownGoal
 ): TurnedDownRow => {
   const parts = requestPartsOf(entry.request)
 
@@ -65,5 +91,6 @@ export const turnedDownRowOf = (
     reason: entry.reason,
     by: entry.by,
     at: entry.at,
+    goal,
   }
 }

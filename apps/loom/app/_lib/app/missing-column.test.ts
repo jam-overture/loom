@@ -7,7 +7,9 @@ describe("isMissingColumn", () => {
     expect(isMissingColumn({ code: "42703" })).toBe(true)
     expect(isMissingColumn(new Error("query failed", { cause: { code: "42703" } }))).toBe(true)
     expect(
-      isMissingColumn(new Error("outer", { cause: new Error("inner", { cause: { code: "42703" } }) }))
+      isMissingColumn(
+        new Error("outer", { cause: new Error("inner", { cause: { code: "42703" } }) })
+      )
     ).toBe(true)
   })
 

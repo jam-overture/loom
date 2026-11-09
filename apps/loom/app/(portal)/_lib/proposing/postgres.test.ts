@@ -122,9 +122,9 @@ describe("the turned-down changes on a table pushed before intents were kept", (
     await ensureTurnedDownSchema(db)
     await store.record({ ...change, proposalId: proposalIdSchema.parse("p_new") })
 
-    expect(
-      await store.intentsOf([turnedDown.proposalId, proposalIdSchema.parse("p_new")])
-    ).toEqual(ok(new Map([[proposalIdSchema.parse("p_new"), change.intentId]])))
+    expect(await store.intentsOf([turnedDown.proposalId, proposalIdSchema.parse("p_new")])).toEqual(
+      ok(new Map([[proposalIdSchema.parse("p_new"), change.intentId]]))
+    )
   })
 })
 

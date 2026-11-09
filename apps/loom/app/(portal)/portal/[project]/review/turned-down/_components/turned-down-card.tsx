@@ -1,10 +1,12 @@
 import Link from "next/link"
 
+import { GoalChip } from "@/app/(portal)/_components/goal-chip"
 import type { TurnedDownRow } from "@/app/(portal)/_lib/turned-down-list"
 import { plainMoment } from "@/app/(portal)/_lib/when"
 
 /**
- * One change a person turned down (0341): its page and when, the change as it
+ * One change a person turned down (0341), led by the goal it served where that
+ * is known, as every list of changes is (0352): its page and when, the change as it
  * was proposed with the figure Loom gave for it, and why it was turned down in
  * the words of whoever did. Loom weighs that reason the next time it proposes
  * for the page, so the card says so where none was given.
@@ -20,6 +22,7 @@ export const TurnedDownCard = ({
 
   return (
     <section className="border-edge-subtle bg-surface-base flex flex-col gap-1.5 rounded-lg border p-4">
+      {row.goal.kind === "recorded" && <GoalChip goal={row.goal.goal} />}
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <Link
           href={`/portal/${projectId}/pages/${row.pageId}`}
