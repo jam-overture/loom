@@ -8,6 +8,166 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-11-09 — a ready-made section cannot be shown on any page but the one it was dropped into, because it ships a live link and a developer tool's claims
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom primitives`
+(`src/primitives/compositions/`) · **Status:** open — **nothing is broken for a
+host and one band on this site is weaker than it should be.** The marketing
+site now says the ready-made sections exist; it cannot show one, and the two
+reasons are independent.
+
+`STARTER_COMPOSITIONS` is 67 designs across the 22 sections a landing page has,
+settled as a shape by
+[0120](decisions/0120-a-starting-composition-is-a-subtree-a-catalogue-hands-to-the-ordinary-seam.md)
+on 9 September, and until today no page, band or sentence of
+`app/(marketing)/` mentioned them.
+`_lib/ready.ts` is the band that does. **It names three figures and renders
+nothing**, and this entry is why — because the band that was set out to be
+built is a browser frame with a ready-made section composed inside it at the
+same moment as the rest of the page, the way `_lib/example.ts` renders the
+coffee page.
+
+### 1. Every section with a control ships a live same-origin path
+
+`heroBand` ships two actions whose paths are a sign-up page and a price list.
+`ctaBand`, `navBand`, `footerBand`, `bannerBand`, `pricingBand` and
+`changelogBand` are the same shape, and `contactDetailsBand` goes one further
+with a `mailto:` and a `tel:` of its own. The reasoning is recorded in
+`hero-band.ts` and it is right for the host it was written for:
+
+> *"A same-origin path is a destination on the site this band is dropped into
+> (0100, 0102), so the band arrives with no dependency on anything outside the
+> deployment. The alternative — a placeholder on someone else's domain — ships
+> a live link to a third party in a tree a page might publish before anyone
+> re-reads it."*
+
+**Both of the available spellings are wrong for a host that has not edited the
+band yet, and the one that was chosen is the better of the two.** A path on the
+host's own origin is a **dead button** until the host has that route, which on
+this surface is a gate failure rather than a soft defect: `routes.test.ts`'
+*sends nobody to an address this application does not serve* goes red on the
+first of them, and `_lib/example.ts` carries this lane's own argument for why —
+*"a button pointing anywhere real is a lie about the fictional product, and a
+reader who presses it and arrives in the documentation has been tricked by the
+one site that sells not being tricked."*
+
+Measured on `main` at `0689121`: **39 of the 67 designs carry at least one
+link**, and between them they name **43 distinct paths of the host's own** —
+`/start`, `/about`, `/billing`, `/careers`, `/sign-in`, `/shop` and the rest.
+Three of the 43 happen to be addresses this application serves (`/`, `/docs`,
+`/demo`); the other forty are not, and the gate names the first one it meets.
+
+**What would answer it, and this lane has no opinion on which.** Three shapes,
+in ascending order of what they ask of the library:
+
+| | what it does | what it costs |
+| --- | --- | --- |
+| a documented *href the host must set* | nothing changes in the tree; the catalogue says which props are placeholders | a host that forgets still ships a dead button |
+| a control with no destination | `loom.action` would need to render a disabled control, which it cannot today | a band that arrives inert reads as broken rather than as unfinished |
+| a fragment of the band's own id | lands the reader back where they are, which `routes.test.ts` separately refuses | nothing, on a host; still unshowable here |
+
+This lane's own need is narrower than any of them and is worth stating
+separately: **a way to build a section for display rather than for insertion**
+would answer it, because the thing a marketing page wants is the paint and not
+the destinations.
+
+### 2. The placeholder copy is a developer tool's, in this site's own register
+
+The fiction the catalogue is written in is a project-management tool called
+*Overture*, and its copy is excellent for the job it was written for. On
+**this** page it is unusable, because a visitor cannot tell whose claims they
+are reading:
+
+| the band | what it says |
+| --- | --- |
+| `heroBand` | *"Plan the work, review the change, and see what shipped"* |
+| `bentoBand` | *"Every change is a diff you can read"*, *"Undo is one operation"* |
+| `stepsBand` | *"Describe the change in a sentence"*, *"Approve what you meant"* |
+
+Three of those five sentences are claims **this site makes about Loom**, on a
+page whose whole job is making them. Two more sections assert things no page of
+this site may: `proofBand` names six customers and `metricsBand` prints an
+uptime figure.
+
+`proof-band.ts` has already reasoned to the edge of this — *"a real one here
+would be this library putting a false customer claim into a tree that a page
+may publish before anyone re-reads it"* — and the instance one step further on
+is a **host whose own product is a developer tool**, where the placeholder is
+indistinguishable from the real claim rather than merely untrue.
+
+**Not a request to rewrite the copy.** The fiction is the right one for the
+catalogue's main audience. What would answer it is a second register the
+catalogue can be asked for — demonstrably-placeholder copy, the way a type
+specimen uses a nonsense alphabet — or a statement in the catalogue that these
+trees are for insertion and not for display, which is this lane finding out by
+building it.
+
+### What shipped against it today
+
+The band says the three figures and names no section. It is in
+`marketing-32-the-sections-come-ready-made` with the measurement, and
+`ready.ts`' own note carries both halves of this entry so the next run that
+reaches for a frame finds the reason before it writes one.
+
+---
+## 2026-11-09 — the most useful thing the library knows about a page cannot be printed on this site, because one of the twenty-two sections is called *Pricing*
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing`, and **open as
+a question for the maintainer** · **Status:** open — **nothing is blocked**, a
+weaker band shipped today in place of a stronger one, and the remedy is one
+answer rather than any code.
+
+`PAGE_SEQUENCE` is the 22 sections a landing page is made of **in the order a
+page uses them**, and the library's own note says why that order is the part
+worth carrying:
+
+> *"The order is the whole of the extra information this carries, and it is the
+> part somebody who has not assembled a landing page before does not know."*
+
+`docs/positioning.md` names the reader as *"the casual web developer… junior
+level"*. The order of a landing page is exactly the thing that reader does not
+have, and a table of twenty-two rows — the section, and how many ready-made
+designs come for it — was the band this run set out to build. It was built, and
+it went red.
+
+**One of the twenty-two is labelled `Pricing`.** `voice.test.ts` sweeps every
+page of this site for a price or a plan and holds the maintainer's instruction
+of 27 September: *no reference to pricing should remain, we haven't figured
+that out yet.*
+
+### Three ways out, and two of them are wrong
+
+- **Exempt the rule.** Rejected. It is this lane deciding a word he took off
+  the site is allowed back in a table, and `docs/routines.md` keeps pricing
+  with him. A rule is not weakened to let a band land.
+- **Drop that one row.** Rejected. The table's whole value is being complete,
+  and a column that stops adding up to the figure in the sentence above it is
+  a worse defect than the missing band.
+- **Ship the figures and name no section.** Taken, and it is what is on
+  `/why-use-it#ready-made` today.
+
+### What would answer it
+
+**One of two sentences from the maintainer**, and either unblocks the table:
+
+1. *A section of a page called Pricing is not a price, print it* — in which
+   case `voice.test.ts`' sweep narrows to this site's **own** claims and the
+   exemption is derived from the library's labels rather than written here, so
+   it cannot quietly become a list of this lane's words.
+2. *Still no* — in which case this entry closes as answered and the band stays
+   as it is.
+
+**The recommendation is the first.** A row reading *Pricing · 3* in a table
+captioned *every section a landing page has* is the name of a part of a page,
+not a claim about what Loom costs — and the site has said *the framework is
+free, you pay for the portal* since 29 October, so the silence the September
+instruction asked for is already narrower than the rule.
+
+Worth one line either way, because this is the cheapest band on the site to
+finish: the data is already derived in `_lib/ready.ts` and the table is six
+lines of `nodes.ts` helpers.
+
+---
 ## 2026-11-08 — `pnpm weigh` reported a 78-byte rule as 33,150 bytes repeated, because for a short text the landmark it counts by can be an ordinary CSS property name
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom daily build`
