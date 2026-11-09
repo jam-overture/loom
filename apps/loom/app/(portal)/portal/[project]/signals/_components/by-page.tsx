@@ -370,17 +370,31 @@ export const PageDrawerPanel = ({
 
       {drawer.row.waiting === undefined || drawer.row.waiting === 0 ? null : (
         <Link
-          href={`/portal/${projectId}/review`}
+          href={`/portal/${projectId}/pages/${drawer.row.treeId}/review`}
           className="bg-awaiting text-awaiting-ink rounded px-3 py-2 text-xs no-underline"
         >
           {waitingSentence(drawer.row.waiting)}
         </Link>
       )}
 
-      <div className="flex gap-4 text-xs">
-        <Link href={`/portal/${projectId}/pages/${drawer.row.treeId}`} className="text-ink">
-          Open the page
-        </Link>
+      <div className="flex flex-wrap gap-4 text-xs">
+        {drawer.row.published ? (
+          <>
+            <Link href={`/portal/${projectId}/pages/${drawer.row.treeId}`} className="text-ink">
+              Open the page
+            </Link>
+            <Link
+              href={`/portal/${projectId}/pages/${drawer.row.treeId}/history`}
+              className="text-ink"
+            >
+              Page history
+            </Link>
+          </>
+        ) : (
+          <span className="text-ink-muted">
+            The site has not published this page, so it has no screens of its own yet.
+          </span>
+        )}
         <Link
           href={byPageHref(
             { ...address, base: `/portal/${projectId}/signals` },
