@@ -1,6 +1,7 @@
 import Link from "next/link"
 
 import { GoalChip } from "@/app/(portal)/_components/goal-chip"
+import { Pager } from "@/app/(portal)/_components/pager"
 import type {
   ByPageList,
   GoalInDrawer,
@@ -12,6 +13,7 @@ import type {
 } from "@/app/(portal)/_lib/by-page"
 import { goalRangeWordsOf } from "@/app/(portal)/_lib/goal-range"
 import { per100Of, readingSentence } from "@/app/(portal)/_lib/goals/goal-view"
+import { positionWords, spanLine, stretchWords } from "@/app/(portal)/_lib/list-span"
 import { rangeLabel, rangeParam, type SignalsRange } from "@/app/(portal)/_lib/signals-range"
 import { plainMoment } from "@/app/(portal)/_lib/when"
 
@@ -84,32 +86,6 @@ const GoalRate = ({ goal }: { goal: GoalOnPage | undefined }) => {
   )
 }
 
-const Pager = ({ list, address }: { list: ByPageList; address: ByPageAddress }) => (
-  <div className="text-ink-muted flex items-center justify-between gap-3 text-xs">
-    <span>
-      {list.first === list.last
-        ? `${count(list.first)} of ${count(list.total)}`
-        : `${count(list.first)}–${count(list.last)} of ${count(list.total)}`}
-    </span>
-    <span className="flex gap-3">
-      {list.newer === undefined && list.first <= 1 ? (
-        <span aria-disabled="true">Newer</span>
-      ) : (
-        <Link href={byPageHref(address, { from: list.newer })} className="text-ink">
-          Newer
-        </Link>
-      )}
-      {list.older === undefined ? (
-        <span aria-disabled="true">Older</span>
-      ) : (
-        <Link href={byPageHref(address, { from: list.older })} className="text-ink">
-          Older
-        </Link>
-      )}
-    </span>
-  </div>
-)
-
 /**
  * `primaryGoal` is the primary goal's name, and its column is drawn only when
  * there is one: a project with no goal has no rate to show, and a column of
@@ -120,11 +96,13 @@ export const ByPageTable = ({
   address,
   open,
   primaryGoal,
+  now,
 }: {
   list: ByPageList
   address: ByPageAddress
   open: string | undefined
   primaryGoal: string | undefined
+  now: number
 }) => (
   <div className="flex min-w-0 flex-1 flex-col gap-2">
     <table className="w-full text-left text-xs">
@@ -179,7 +157,20 @@ export const ByPageTable = ({
         ))}
       </tbody>
     </table>
-    <Pager list={list} address={address} />
+    <Pager
+      span={spanLine(
+        positionWords(list.first, list.last, { count: list.total, more: false }),
+        stretchWords(list.rows.at(-1)?.lastMoved, list.rows[0]?.lastMoved, now)
+      )}
+      back={{
+        label: "Newer",
+        href:
+          list.newer === undefined && list.first <= 1
+            ? undefined
+            : byPageHref(address, { from: list.newer }),
+      }}
+      older={list.older === undefined ? undefined : byPageHref(address, { from: list.older })}
+    />
   </div>
 )
 

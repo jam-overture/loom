@@ -25,6 +25,8 @@ const row = (treeId: string, overrides: Partial<ByPageRow> = {}): ByPageRow => (
   ...overrides,
 })
 
+const NOW = Date.parse("2026-11-05T15:00:00.000Z")
+
 const address = { base: "/portal/prj_a/signals/pages", from: undefined, range: "24h" as const }
 
 describe("By page", () => {
@@ -35,6 +37,7 @@ describe("By page", () => {
         address={address}
         open={undefined}
         primaryGoal={undefined}
+        now={NOW}
       />
     )
 
@@ -64,6 +67,7 @@ describe("By page", () => {
         address={address}
         open={undefined}
         primaryGoal={undefined}
+        now={NOW}
       />
     )
 
@@ -78,6 +82,7 @@ describe("By page", () => {
         address={address}
         open={undefined}
         primaryGoal={undefined}
+        now={NOW}
       />
     )
 
@@ -102,7 +107,13 @@ describe("By page", () => {
       undefined
     )
     const { unmount } = render(
-      <ByPageTable list={list} address={address} open={undefined} primaryGoal="Sign-ups" />
+      <ByPageTable
+        list={list}
+        address={address}
+        open={undefined}
+        primaryGoal="Sign-ups"
+        now={NOW}
+      />
     )
 
     expect(screen.getByRole("columnheader", { name: /Sign-ups/ }).textContent).toBe(
@@ -115,7 +126,15 @@ describe("By page", () => {
     expect(screen.getByText("Nothing counted")).toBeTruthy()
 
     unmount()
-    render(<ByPageTable list={list} address={address} open={undefined} primaryGoal={undefined} />)
+    render(
+      <ByPageTable
+        list={list}
+        address={address}
+        open={undefined}
+        primaryGoal={undefined}
+        now={NOW}
+      />
+    )
 
     expect(screen.queryByText("Not on this page")).toBeNull()
     expect(screen.getAllByRole("columnheader")).toHaveLength(5)
@@ -134,10 +153,11 @@ describe("By page", () => {
         address={address}
         open="t_00"
         primaryGoal={undefined}
+        now={NOW}
       />
     )
 
-    expect(screen.getByText("1–50 of 60")).toBeTruthy()
+    expect(screen.getByText("1–50 of 60 · 11:11 to 12:00 UTC today")).toBeTruthy()
     expect(screen.getByText("Newer").getAttribute("aria-disabled")).toBe("true")
     expect(screen.getByRole("link", { name: "Older" }).getAttribute("href")).toBe(
       `/portal/prj_a/signals/pages?from=${cursorOf(rows[50] as ByPageRow)}`
