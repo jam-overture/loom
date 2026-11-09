@@ -460,3 +460,5 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0368](0368-what-readers-did-inside-a-part-is-derived-from-the-tree-and-the-sum-is-exact-because-occurrences-add.md) | What readers did inside a part is derived from the tree, and the sum is exact because occurrences add | Accepted | §5 (reader signals), the counters |
 | [0369](0369-the-sites-build-publishes-its-pages-and-a-refusal-never-stops-a-deploy.md) | The site's build publishes its pages, and a refusal never stops a deploy | Accepted | §5 (portal), the connection plane |
 | [0370](0370-loomjs-org-serves-its-live-pages-and-pulls-them-like-a-customers-site.md) | loomjs.org serves its live pages, and pulls them like a customer's site | Accepted | §5 (portal), the connection plane |
+| 0371 | *No record on this branch* | — | — |
+| [0372](0372-a-pages-unread-parts-are-reported-as-the-places-its-reading-stopped-and-each-is-behind-exactly-one.md) | A page's unread parts are reported as the places its reading stopped, and each is behind exactly one | Accepted | §5 (reader signals), the counters |

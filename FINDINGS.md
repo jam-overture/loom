@@ -68759,3 +68759,131 @@ honest version is either a second field (`withinId`, as `inside.ts` has) or a
 renaming with a record. Neither belongs in a run whose unit is a different
 reading. The fix is small; what it needs is to be the unit.
 
+
+---
+## 2026-11-09 — `PartReading.withinId` is the containing part, and `parentId` keeps the meaning it always had
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/parts.ts`) · **Status:** **closed by
+`signals-80-where-a-reading-of-a-page-stopped`**
+([0372](decisions/0372-a-pages-unread-parts-are-reported-as-the-places-its-reading-stopped-and-each-is-behind-exactly-one.md)
+clause 1). **It closes this lane's own entry of 8 November — *`PartReading.parentId`
+can name a node that is in no part's list, because a slot is a node with
+children*.**
+
+That entry said the fix was small and what it needed was to be the unit. It is
+the first half of one: the frontier reading in the same branch groups a page's
+parts by what contains them, which is the reading the defect would have made
+wrong, so it had to land first.
+
+**The second field, which is what that entry recommended**, rather than a
+correction. `parentId` is published, three readings and the generated reference
+carry it, and it is the right answer to the question it asks — *where is this
+node in the tree*. Its documentation now says so, including that the answer can
+be a slot that appears in no part's list. `withinId` is the nearest **addressed**
+ancestor: the same field, by the same rule and now from the same shape of pass,
+as `InsidePart.withinId` (0368 clause 4).
+
+**Three tests, and the middle one is the finding itself**: a slot between a band
+and the row inside it is passed through; every `withinId` on such a page is an id
+the parts list has a row for, while a `parentId` on it is not; and the two fields
+agree on every part of a page with no slot in it.
+
+---
+## 2026-11-09 — the fix-list orders by a count that is forty times the size of the thing to fix, and now has a figure that is not
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/agenda.ts`) · **Status:** open — **nothing is broken and no
+deadline is attached**; the ordering is a judgement about a screen and belongs in
+a unit of its own
+
+`agenda.ts` already carries a paragraph about this count. A page whose counters
+name nodes its tree does not contain reads mostly `skipped` (0212), which
+manufactures the steepest fall in the deployment and puts a page that is fine at
+the head of the order — so the fix-list guards against the *orphaned* case
+already.
+
+**What it cannot guard against is the ordinary case.** `PageReading.standings`'
+`skipped` counts a band, the rows inside it, the cells inside those and every
+heading among them — one band nobody reached, counted once per node underneath
+it. Two pages with one unread band each are ordered by how deeply each band
+happens to nest, which is a fact about the markup and not about the readers.
+
+`pageFrontierOf` is the figure that is not: `PageFrontier.frontier` is the places
+the reading stopped, and `largestUnreachedIn` ranks them by the parts of the page
+one absence accounts for. A page with one unread band is **one** row with a cost
+beside it.
+
+**Three things a future run should hold.**
+
+1. **Order by `unseen`, never by `frontier.length`.** A page with forty unread
+   leaves at the top level has forty frontier parts and forty unread parts, and a
+   page with one unread band has one of the first and forty of the second. The
+   second is the page to go and look at, and the counts of frontier parts would
+   rank them the other way round.
+2. **`orphaned` still has to be checked first**, and it is carried through onto
+   the frontier for exactly that reason: a wrong tree-and-window pair reads as a
+   page readers stopped at the very top of, which is the most plausible-looking
+   output this reading has.
+3. **`notReporting` is a different list and wants a different sentence.** A part
+   that said nothing with a reader demonstrably below it is a primitive to fix in
+   the library, not a page to rewrite — the fault vocabulary has no member for it
+   and the fix-list would be the place to say so.
+
+---
+## 2026-11-09 — the *By page* drawer's skipped count is a page's markup depth as much as its readers
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom portal`
+(`apps/loom/app/(portal)/portal/[project]/signals/`) · **Status:** open —
+**nothing is blocked and nothing is wrong on the screen today**; what is
+available is a better figure for the same box
+
+A drawer that prints *six parts of this page went unread* is printing
+`PageReading.standings`' `skipped`, which is right about what it says and is not
+the number a reader of the screen will take from it. Six unread parts are usually
+one unread band with five parts inside it, and an operator reading six goes
+looking for six things.
+
+`pageFrontierOf(reading)` is one call on a reading the drawer already has — pure,
+no store, no second query — and gives:
+
+| | |
+| --- | --- |
+| `frontier` | the places the reading stopped, in reading order, each with the part it plays, the words nobody reached there, and how much of the page is behind it |
+| `largestUnreachedIn(frontier, 3)` | the three worth drawing, ordered by what each costs |
+| `passedOver` | parts a reader had on screen and went past the whole of — the one statement here about a reader rather than about an absence |
+| `notReporting` | parts that said nothing with a reader below them, which is a primitive to fix rather than a page |
+| `unseen` | the old count, unchanged, so nothing on the screen has to move at once |
+
+**What it costs you:** nothing of the reading's shape, and one sentence of
+copy — *where readers stopped* is not *parts nobody read*, and a box labelled the
+second showing the first would be the plainest kind of wrong. `unreachedWordsIn`
+is there if the drawer wants to show the words rather than count the parts, which
+is the version a non-technical operator can act on.
+
+---
+## 2026-11-09 — five new names on `@jam-overture/loom/signals`, and the sentence the page would want is short
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/docs/the-runtime/what-your-readers-do/page.mdx`) ·
+**Status:** open — **the generator said so and `pnpm verify` is green**; what is
+open is whether that page wants a paragraph
+
+`docs:api` reported, on regenerating the reference for 0372:
+
+```
+@jam-overture/loom/signals — PageFrontier, UnreachedPart, largestUnreachedIn,
+  pageFrontierOf, unreachedWordsIn
+```
+
+The sentence, if the page wants one: **a part nobody reached has no row, so the
+tree is what says it was there to be reached — and once the tree is in hand, forty
+unread parts are usually one unread band.** The reading names the places a page's
+reading stopped rather than every part behind them, and every unread part is
+behind exactly one of them, so *this is the one place to fix and it costs you
+nineteen parts of the page* is arithmetic rather than an estimate.
+
+**This lane did not write it**, for 5 November's reason: that page is `(docs)`'
+and a run that edits prose on another lane's surface is a conflict waiting for
+whoever is drafting it. It is the same page the entry of 8 November asks for seven
+names on, so one paragraph can answer both.

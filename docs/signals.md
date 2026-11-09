@@ -32,7 +32,7 @@ the portal every day.
 | Content | **none** — no text, no URLs, no typed values, nothing about the reader |
 | Configuration | the host's argument, never a prop in the tree |
 | Default | off; an unaddressed render is byte-identical |
-| Browser cost | **7,543 bytes** minified, 3,361 gzipped, measured 7 November; `src/signals/browser-weight.test.ts` fails if an import reaches a package, and now also if the bundle passes 8,000 minified or 3,600 gzipped |
+| Browser cost | **7,543 bytes** minified, **3,350 gzipped**, measured 9 November by the gate itself; `src/signals/browser-weight.test.ts` fails if an import reaches a package, and now also if the bundle passes 8,000 minified or 3,600 gzipped. The 3,361 this row carried from 7 November was the same bundle measured through `gzip -9` on the command line, which writes the file's name into the header — the gate's `gzipSync` is the figure to quote, because it is the one that can fail |
 | What a broadcast follows | the page, when it is handed the `Document` ([0366](../decisions/0366-a-broadcast-handed-a-document-follows-the-page-and-a-client-side-navigation-is-a-new-page-view.md)) — a client-side navigation ends one page view and opens another with its own arrival, a re-render leaves the page view alone, and the same revision rendered again continues it; handed an `Element` it reads that element's tree and revision once, as it always has |
 | How long a delivery lives | two windows since 5 November: counted once it is ripe, **kept for 30 days by default** and then deleted ([0349](../decisions/0349-a-projects-reader-events-are-kept-thirty-days-by-default-and-the-tallies-stay-the-durable-record.md), [0351](../decisions/0351-a-counted-delivery-is-kept-for-a-stated-window-rather-than-deleted-by-the-fold.md)) — and nothing deletes a delivery no fold has counted, so a deployment whose collection stopped keeps rather than loses them |
 | What an operator can look at, delivery by delivery | one row per signal the deployment still keeps, newest first, in exact pages, with the rest of one page view beside any of them ([0355](../decisions/0355-the-events-a-screen-lists-are-one-row-per-signal-and-one-page-view-is-read-on-a-key-the-caller-already-holds.md)) — the handle the *Events* tab is drawn from, which counts nothing, names no page and cannot be asked which page views exist |
@@ -5047,6 +5047,88 @@ page* drawer's *three parts pressed most* reads the all-time tallies and can now
 read the range; and `outlineTree` is quadratic in depth and throws above about
 2,000, which bounds this reading and `parts.ts` identically and belongs to the
 lane that owns `src/tree/`.
+
+### 80. Where a reading of a page stopped · `Loom signals` · **done, 9 November**
+
+§6 joined a window's tallies to the tree they were filed against
+([0212](../decisions/0212-what-a-reader-signal-means-is-joined-to-the-tree-when-it-is-read.md)),
+which is what makes silence a measurement: a part nobody reached has no row, and
+only the tree can say it was there to be reached. Every addressed node of a
+revision gets a standing — `read`, `skipped`, or `unknown` where nothing can be
+said — and *which parts of a page are read and which are scrolled past* has been
+answerable ever since.
+
+**Part by part is not how that answer is true.** A page whose pricing band never
+came into anybody's viewport has the band, the rows inside it, the cells inside
+those and every heading and price among them all reporting `skipped`. That is one
+fact about one band, restated once per node underneath it. `PageReading.standings`
+counts forty, and a screen drawn on that number says *forty parts of this page go
+unread* about a page with **one** place a reader stopped — the plausible-false
+number in its worst direction, because the figure is the right shape, it moves
+when the page changes, and it is forty times the size of the thing to fix. The
+fix-list already has a paragraph about this count manufacturing the steepest fall
+in a deployment (`agenda.ts`); what it did not have was a figure to use instead.
+
+**Done**
+([0372](../decisions/0372-a-pages-unread-parts-are-reported-as-the-places-its-reading-stopped-and-each-is-behind-exactly-one.md)),
+as a read-time derivation with nothing added to any payload, table or browser.
+
+- **A place the reading stopped is a part that reported nothing whose containing
+  part did not.** `pageFrontierOf` in `src/signals/frontier.ts` is a pure
+  function of a `PageReading` — no tree, no registry, no store, no clock — and
+  returns the frontier in reading order, each part carrying what it plays (0114),
+  the part it sits inside, how much of the page is behind it, and the words
+  nobody reached there (0122).
+- **Every unread part is behind exactly one of them.** The partition is on the
+  **nearest** frontier part, so the `unseen` figures add to `standings.skipped`
+  in every window and *this is the one place to fix and it costs you nineteen
+  parts of the page* is a sentence rather than an estimate. Asserted over six
+  windows of one fixture page rather than argued.
+- **The frontier nests only around a defect, and names it rather than
+  double-counting.** A part that reported nothing while a part inside it
+  reported reach was demonstrably on a reader's screen — a primitive not
+  spreading its identity attributes, which `sdk/conformance.ts` exists to catch.
+  It is published as `notReporting` and `reportedBelow`, and the
+  nearest-frontier rule is what keeps the arithmetic exact while it is true.
+- **A page nobody opened has no frontier.** A window with no views makes every
+  part `unknown`, so the reading is empty — which is the honest answer and not a
+  page read as stopped at the top. *A page with visits, every part of which went
+  unseen* is not a state counters can produce.
+- **`passedOver` is the one statement about a reader rather than about an
+  absence**: a part that was reached, holds parts, and whose every part went
+  unreached. Withheld where anything inside it is `unknown`, because *every part
+  of it* cannot be claimed about a part nothing can be spoken for.
+- **Nothing here is called a stop.** `progress.ts` already measures a fall
+  between two parts of one run and owns that word; this measures the other end of
+  the same page, where there is no ratio to take.
+
+**Also in this step, closing this lane's own finding of 8 November:**
+`PartReading.parentId` is the **tree** parent, and a slot is a node with children
+and is never a part, so an element handed into a slot had a `parentId` that
+appeared nowhere in `PageReading.parts`. `withinId` is a second field now — the
+nearest *addressed* ancestor, the same field by the same rule as
+`InsidePart.withinId` (0368 clause 4) — and `parentId` keeps its meaning, because
+it is published, three readings carry it, and it is the right answer to the
+question it asks. The frontier is built on `withinId`, which is why the fix had to
+land first.
+
+**Nothing reaches a reader's browser.** `broadcast.ts` and its import graph are
+untouched — no file in its import graph is in this branch — and the bundle
+measures **7,543 bytes minified and 3,350 gzipped**, which is what it measures on
+`main`.
+
+> The gzipped figure in the table at the top of this file read 3,361 until this
+> step. Nothing grew: `broadcast.ts` has not changed since §78, and the two
+> numbers are one bundle measured two ways — `gzip -9` on a named file writes
+> that name into the gzip header and the gate's `gzipSync` does not, which is
+> worth exactly the eleven bytes between them: a ten-character file name and its
+> terminator. The gate's number is the one quoted from here on, because it is
+> the one that can fail.
+
+**What is left and is filed:** the fix-list's ordering by what a stop costs, which
+is a judgement about a screen; the *By page* drawer's skipped count, which is the
+portal's to draw; and five new names on `@jam-overture/loom/signals` with no
+prose, which is `Loom docs`'.
 
 ## Still not in scope
 
