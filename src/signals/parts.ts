@@ -175,8 +175,29 @@ export type PartReading = {
   readonly role: PrimitiveRole | null
   /** 0 at the root. */
   readonly depth: number
-  /** null at the root. */
+  /**
+   * The **tree** parent, which may be a node that is in no part's list, and
+   * `null` at the root.
+   *
+   * A slot is a node with children and is never a part, so an element handed
+   * into a slot has a slot's id here — an id that appears nowhere in
+   * {@link PageReading.parts}. Kept because three readings and the published
+   * reference carry it and it is the right answer to the question it asks, which
+   * is *where is this node in the tree*. {@link PartReading.withinId} is the
+   * answer to the other one.
+   */
   readonly parentId: NodeId | null
+  /**
+   * The nearest **addressed** ancestor — the part this part sits inside — and
+   * `null` at the outermost part.
+   *
+   * What a surface drawing the page's shape must key on, and what `within`
+   * names on the wire (0167): slots between two elements are passed through, so
+   * every id here is one this list has a row for. The same field, by the same
+   * rule, as `InsidePart.withinId` (0368) — one page has one containment, and
+   * two readings of it must not disagree about what contains what.
+   */
+  readonly withinId: NodeId | null
   readonly standing: PartStanding
   /**
    * The counters, or `undefined` where no signal in the window named it.
@@ -474,31 +495,49 @@ export const pageReadingOf = (
   const views = [...byNode.values()].reduce((most, tally) => Math.max(most, tally.views), 0)
   const roles = rolesByType(declarations)
 
-  const parts = outlineTree(tree.root).flatMap((entry): readonly PartReading[] => {
+  /**
+   * The stack of elements still open at this point in the pre-order walk, whose
+   * top is the part the current node sits inside. Carried down the walk rather
+   * than looked up per part: a part's own ancestors are never re-walked, so the
+   * pass stays linear in the nodes whatever the shape of the page (rule 4). An
+   * entry whose depth is not below the top has closed it, which is the only
+   * comparison this needs.
+   */
+  const open: { readonly nodeId: NodeId; readonly depth: number }[] = []
+  const parts: PartReading[] = []
+
+  for (const entry of outlineTree(tree.root)) {
+    while (open.length > 0 && (open.at(-1)?.depth ?? 0) >= entry.depth) open.pop()
+
     const { node } = entry
     /**
      * Elements only, and that is the whole universe rather than a narrowing: a
      * text or slot node carries no identity attributes, so no signal can ever
      * name one. A text node's words are read as its parent's (`ownCopy`), so
      * nothing in the tree goes unaccounted for.
+     *
+     * A slot is passed over here and never pushed, which is what makes
+     * {@link PartReading.withinId} the nearest *addressed* ancestor rather than
+     * the tree parent.
      */
-    if (node.kind !== "element") return []
+    if (node.kind !== "element") continue
 
     const counters = byNode.get(node.id)
 
-    return [
-      {
-        nodeId: node.id,
-        type: node.type,
-        role: roles.get(node.type) ?? null,
-        depth: entry.depth,
-        parentId: entry.parentId,
-        standing: standingOf(counters, views),
-        counters,
-        copy: ownCopy(node, declarations),
-      },
-    ]
-  })
+    parts.push({
+      nodeId: node.id,
+      type: node.type,
+      role: roles.get(node.type) ?? null,
+      depth: entry.depth,
+      parentId: entry.parentId,
+      withinId: open.at(-1)?.nodeId ?? null,
+      standing: standingOf(counters, views),
+      counters,
+      copy: ownCopy(node, declarations),
+    })
+
+    open.push({ nodeId: node.id, depth: entry.depth })
+  }
 
   const addressed = new Set(parts.map((part) => part.nodeId))
 

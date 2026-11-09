@@ -8,7 +8,7 @@ describe("Pager", () => {
     render(
       <Pager
         span="51–100 of 312 · 05:41 to 06:12 UTC today"
-        back={{ label: "Newer", href: "/list" }}
+        newer="/list"
         older="/list?before=p_9"
       />
     )
@@ -21,9 +21,9 @@ describe("Pager", () => {
   })
 
   it("greys a way that leads nowhere rather than dropping it", () => {
-    render(<Pager span={undefined} back={{ label: "Newest", href: undefined }} older={undefined} />)
+    render(<Pager span={undefined} newer={undefined} older={undefined} />)
 
-    expect(screen.getByText("Newest").getAttribute("aria-disabled")).toBe("true")
+    expect(screen.getByText("Newer").getAttribute("aria-disabled")).toBe("true")
     expect(screen.getByText("Older").getAttribute("aria-disabled")).toBe("true")
     expect(screen.queryAllByRole("link")).toHaveLength(0)
   })
