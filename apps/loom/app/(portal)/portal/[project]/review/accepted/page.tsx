@@ -142,7 +142,7 @@ const AcceptedPage = async ({
             positionWords(page.first, page.last, { count: reading.changes.length, more: false }),
             stretchWords(page.rows.at(-1)?.acceptedAt, page.rows[0]?.acceptedAt, now)
           )}
-          back={{ label: "Newer", href: newerHref(here, page.newer) }}
+          newer={newerHref(here, page.newer)}
           older={olderHref(here, page.older)}
         />
       </div>

@@ -154,8 +154,16 @@ describe("the filter", () => {
       search: "sign up",
       live: false,
       range: "7d",
-      before: { seq: 4, index: 1 },
+      place: { towards: "older", from: { seq: 4, index: 1 } },
       open: { seq: 3, index: 0 },
+    })
+    expect(eventQueryOf({ after: "4.1" }).place).toEqual({
+      towards: "newer",
+      from: { seq: 4, index: 1 },
+    })
+    expect(eventQueryOf({ after: "4.1", before: "2.0" }).place).toEqual({
+      towards: "older",
+      from: { seq: 2, index: 0 },
     })
     expect(
       eventQueryOf({
@@ -173,7 +181,7 @@ describe("the filter", () => {
       search: undefined,
       live: false,
       range: "24h",
-      before: undefined,
+      place: undefined,
       open: undefined,
     })
   })
@@ -183,6 +191,7 @@ describe("the filter", () => {
     expect(eventQueryOf({ live: "yes" }).live).toBe(false)
     expect(eventQueryOf({ live: ["on", "on"] }).live).toBe(false)
     expect(eventQueryOf({ live: "on", before: "4.1" }).live).toBe(false)
+    expect(eventQueryOf({ live: "on", after: "4.1" }).live).toBe(false)
   })
 
   it("keeps an event only when it matches every part of the filter", () => {
@@ -211,9 +220,17 @@ describe("the filter", () => {
       range: "24h",
     }
 
-    expect(eventsHref("/portal/prj_a/signals", filter, { before: "4.1", event: "3.0" })).toBe(
-      `/portal/prj_a/signals?kind=activated&on=${home.treeId}&q=sign+up&before=4.1&event=3.0`
-    )
+    expect(
+      eventsHref("/portal/prj_a/signals", filter, {
+        place: { towards: "older", from: { seq: 4, index: 1 } },
+        event: "3.0",
+      })
+    ).toBe(`/portal/prj_a/signals?kind=activated&on=${home.treeId}&q=sign+up&before=4.1&event=3.0`)
+    expect(
+      eventsHref("/portal/prj_a/signals", filter, {
+        place: { towards: "newer", from: { seq: 4, index: 1 } },
+      })
+    ).toBe(`/portal/prj_a/signals?kind=activated&on=${home.treeId}&q=sign+up&after=4.1`)
     expect(eventsHref("/portal/prj_a/signals", { ...EVERYTHING, live: false, range: "24h" })).toBe(
       "/portal/prj_a/signals"
     )
@@ -228,18 +245,22 @@ describe("the filter", () => {
     expect(eventsHref("/portal/prj_a/signals", live, { event: "3.0" })).toBe(
       "/portal/prj_a/signals?kind=viewed&live=on&event=3.0"
     )
-    expect(eventsHref("/portal/prj_a/signals", live, { before: "4.1" })).toBe(
-      "/portal/prj_a/signals?kind=viewed&before=4.1"
-    )
+    expect(
+      eventsHref("/portal/prj_a/signals", live, {
+        place: { towards: "newer", from: { seq: 4, index: 1 } },
+      })
+    ).toBe("/portal/prj_a/signals?kind=viewed&after=4.1")
   })
 
   it("carries a range other than the default to every address", () => {
     const week: EventView = { ...EVERYTHING, live: true, range: "7d" }
 
     expect(eventsHref("/portal/prj_a/signals", week)).toBe("/portal/prj_a/signals?range=7d&live=on")
-    expect(eventsHref("/portal/prj_a/signals", week, { before: "4.1" })).toBe(
-      "/portal/prj_a/signals?range=7d&before=4.1"
-    )
+    expect(
+      eventsHref("/portal/prj_a/signals", week, {
+        place: { towards: "older", from: { seq: 4, index: 1 } },
+      })
+    ).toBe("/portal/prj_a/signals?range=7d&before=4.1")
   })
 })
 

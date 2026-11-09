@@ -1,11 +1,5 @@
 import Link from "next/link"
 
-/**
- * *Newer* where a list can step back one page, and *Newest* where it can only
- * start again from the top, as *Events* does, whose cursor reads one way.
- */
-export type PagerBack = { readonly label: "Newer" | "Newest"; readonly href: string | undefined }
-
 const Step = ({ label, href }: { label: string; href: string | undefined }) =>
   href === undefined ? (
     <span aria-disabled="true">{label}</span>
@@ -24,11 +18,11 @@ const Step = ({ label, href }: { label: string; href: string | undefined }) =>
  */
 export const Pager = ({
   span,
-  back,
+  newer,
   older,
 }: {
   span: string | undefined
-  back: PagerBack
+  newer: string | undefined
   older: string | undefined
 }) => (
   <nav
@@ -37,7 +31,7 @@ export const Pager = ({
   >
     <span>{span}</span>
     <span className="flex gap-3">
-      <Step label={back.label} href={back.href} />
+      <Step label="Newer" href={newer} />
       <Step label="Older" href={older} />
     </span>
   </nav>
