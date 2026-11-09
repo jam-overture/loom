@@ -1,8 +1,8 @@
 import type { NodeId } from "../ids.js"
-import { err, mapResult, ok, reduceResult, type Result } from "../result.js"
+import { err, flatMapResult, mapResult, ok, type Result } from "../result.js"
 
 import type { TreeError } from "./errors.js"
-import { containsNode, findNode, findParent } from "./navigation.js"
+import { findNode, findParent, nodePath } from "./navigation.js"
 import {
   isContainerNode,
   withChildren,
@@ -15,6 +15,12 @@ import {
  * Structural edits on an immutable tree. Each returns a new root; nodes off the
  * edited path keep their identity, so a renderer can rely on reference equality
  * to skip untouched subtrees.
+ *
+ * **Nothing here recurses into the tree, and nothing rebuilds a list of
+ * children one child at a time**, for the same reason the reads in
+ * `navigation.ts` do not (0372, 0373): a page's shape is data, and an edit that
+ * spends a call frame per level or copies the accumulated siblings per sibling
+ * stops answering at a shape a page is allowed to have.
  */
 
 export type NodeTransform = (node: LoomNode) => Result<LoomNode, TreeError>
@@ -24,27 +30,54 @@ const requireContainer = (node: LoomNode): Result<ElementNode | SlotNode, TreeEr
     ? ok(node)
     : err({ code: "not-a-container", nodeId: node.id, nodeKind: node.kind })
 
+/** One child swapped for its rebuilt self, by reference, in one pass. */
+const withChildSwapped = (
+  parent: LoomNode,
+  previous: LoomNode,
+  next: LoomNode
+): Result<LoomNode, TreeError> =>
+  mapResult(requireContainer(parent), (container) =>
+    withChildren(
+      container,
+      container.children.map((child) => (child === previous ? next : child))
+    )
+  )
+
+/**
+ * The addressed node, transformed, and every ancestor rebuilt around it.
+ *
+ * It descends by the **path** rather than by a search. `nodePath` names the
+ * chain from the root to the node in one walk, so the rebuild touches one node
+ * per level and asks nothing: no `containsNode` per level, no frame per level.
+ *
+ * Where a tree holds the same id twice — which `duplicateNodeIds` exists to
+ * find and no valid tree has — the node this edits is the first in tree order,
+ * because that is the one `nodePath` addresses. The search this replaced edited
+ * every copy.
+ */
 export const replaceNode = (
   root: LoomNode,
   nodeId: NodeId,
   transform: NodeTransform
 ): Result<LoomNode, TreeError> => {
-  if (!containsNode(root, nodeId)) return err({ code: "node-not-found", nodeId })
+  const path = nodePath(root, nodeId)
+  const [target, ...ancestorsNearestFirst] = path ? [...path].reverse() : []
+  if (!target) return err({ code: "node-not-found", nodeId })
 
-  const rebuild = (node: LoomNode): Result<LoomNode, TreeError> => {
-    if (node.id === nodeId) return transform(node)
-    if (!isContainerNode(node) || !containsNode(node, nodeId)) return ok(node)
+  const rebuilt = ancestorsNearestFirst.reduce<
+    Result<{ readonly was: LoomNode; readonly now: LoomNode }, TreeError>
+  >(
+    (carried, ancestor) =>
+      flatMapResult(carried, (below) =>
+        mapResult(withChildSwapped(ancestor, below.was, below.now), (next) => ({
+          was: ancestor,
+          now: next,
+        }))
+      ),
+    mapResult(transform(target), (now) => ({ was: target, now }))
+  )
 
-    const rebuiltChildren = reduceResult(
-      node.children,
-      [] as readonly LoomNode[],
-      (accumulated, child) => mapResult(rebuild(child), (next) => [...accumulated, next])
-    )
-
-    return mapResult(rebuiltChildren, (children) => withChildren(node, children))
-  }
-
-  return rebuild(root)
+  return mapResult(rebuilt, (top) => top.now)
 }
 
 export const insertChild = (
