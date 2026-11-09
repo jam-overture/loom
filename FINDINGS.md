@@ -68937,3 +68937,84 @@ Nothing needs doing this week. The figure is here so that the next run reading
 *437 bytes* knows what the last one spent it on and why, and so that the
 question in front of the maintainer is the accurate one: not *may this site add
 a page* but **may this site keep its pages true**.
+
+---
+## 2026-11-09 — `pnpm verify` is red on `main`, on a whole-repository sweep with no timeout of its own, and it is red for whoever is running
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom daily build`
+(`tools/sources/semicolons.test.ts`) · **Status:** open — **the merge gate does
+not pass on this container today, for any lane**; the check is right, its
+assertion is right, and what fires is a clock
+
+`pnpm verify` on `docs-82-two-limits-the-runtime-no-longer-has` came back
+`EXIT=1` with one failure in 6,702:
+
+```
+FAIL  |unit| tools/sources/semicolons.test.ts > every source in this repository > ends no statement in a semicolon
+Error: Test timed out in 5000ms.
+```
+
+**It is not this branch's.** The same step was run on `origin/main` at
+`638470e`, the commit the branch was cut from, and fails identically:
+
+| | files | tests | the sweep |
+| --- | --- | --- | --- |
+| this branch, first gate run | 273 passed / 274 | 6,701 passed / 6,702 | **5,402 ms** |
+| this branch, second gate run | 273 / 274 | 6,701 / 6,702 | **5,730 ms** |
+| **`origin/main`, `638470e`** | **273 / 274** | **6,701 / 6,702** | **5,565 ms** |
+| the file run on its own, nothing else in the suite | 12 / 12 | 12 / 12 | **3,202 ms** |
+
+Three readings under the suite, none under 5,400; one reading alone, at 64% of
+the budget. **The failure is load, not content.** Every count is identical on
+both sides, which is also the cleanest available evidence that this branch
+touches nothing in that suite.
+
+**Why it fires.** `everySource()` is 1,800-plus files, each read with
+`readFileSync` and swept, in one `it` with no timeout of its own — so it runs
+against Vitest's 5,000 ms default while the postgres project's PGlite suites run
+beside it on another pool. Unloaded it has 1.8 seconds of margin. Under the
+suite it has none.
+
+**Why it matters more than one red run.** The failure arrives in another lane's
+suite, under a name that reads like a real style violation, on the branch of
+whoever happened to be running. The lane that reads it has three choices and two
+are wrong: go looking for a semicolon they did not write, weaken something, or
+re-run and hope — and nothing in the output says which. This lane spent two full
+gate cycles and a run of `pnpm test` on `main` to learn that the answer was the
+third, and then that the third does not work either.
+
+It is also a cost that only goes one way. The sweep's work is a function of how
+many files this repository has, and seven routines add files every day.
+[0360](decisions/0360-the-style-of-this-repository-is-maintained-by-hand-and-what-is-checked-is-that-no-statement-ends-in-a-semicolon.md)
+made this sweep the enforcement of a style maintained by hand, so it will be
+read by every lane for as long as that holds.
+
+**Recommendation, cheapest first.**
+
+1. **Give the test its own timeout**, set clear of the loaded measurement rather
+   than just above it — 30,000 ms is not generous for a sweep that reads 1,800
+   files, and the thing it is protecting against is an infinite loop, not a slow
+   disk. One line, and the gate passes again.
+2. **Have it print the sweep's wall-clock and its file count**, the way
+   `reports:check` prints its totals. A sibling in the same file already asserts
+   `sources.length >= 1800`, so the count is in hand; what is missing is that
+   either number ever reaches a reader while the check passes. Then the next
+   lane that meets a timeout can see whether the sweep got slower or the machine
+   did, rather than measuring it by hand as this entry did.
+3. Not recommended: lowering what is swept, or an exemption. Nothing is wrong
+   with the check.
+
+**What this lane did not do.** It did not touch the test, which is not its file.
+It did not report a green gate. The pull request says the gate is red, says the
+red reproduces on `main`, and carries every number above — and the app half of
+the gate, which `pnpm test` failing had stopped `pnpm verify` from ever reaching,
+was run separately so that the branch's own figures exist.
+
+**And the gate was read from the file, twice.** Both runs' completion notices
+from this session's own harness reported **exit code 0** while `verify.exit` and
+`verify2.exit` said `EXIT=1`. That is the **fifth and sixth** instances of the
+entry in `docs/routines.md`, and the second and third in which the thing that
+lied was a harness notification rather than a shell's exit code. The remedy in
+that document — write the status to a file as the last thing on its line, read
+it in a separate command, quote the number from the file — is the only reason
+this run did not open a pull request claiming green twice over.

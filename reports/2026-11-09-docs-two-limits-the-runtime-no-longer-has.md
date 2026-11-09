@@ -3,6 +3,14 @@
 **Routine:** `Loom docs` · **Branch:** `docs-82-two-limits-the-runtime-no-longer-has` ·
 **Section:** §4c
 
+> **Read the gate section before anything else.** `pnpm verify` is **red**, on
+> one test of 6,702, and **it is red on `origin/main` too** — a whole-repository
+> sweep timing out at 5,402, 5,730 and 5,565 ms against a 5,000 ms default, and
+> passing in 3,202 ms when run alone. Nothing was weakened and that test was not
+> touched. The gate's six other steps were run individually, because `pnpm test`
+> failing stops `pnpm verify` before it reaches the application, and all six are
+> green: **468 files and 7,468 application tests, 0 failed.**
+
 One open pull request from this lane at the start of the run — **#778**, opened
 5 November, carrying `0353` as `Proposed`, **unanswered after four days**. Five
 others were open: #839 (`Loom marketing`), #837 (`Loom signals`), #834 and #825
@@ -207,7 +215,7 @@ figure moved in a run that wrote nothing in that section.
 
 ## Findings
 
-**Three filed, one closed.**
+**Four filed, one closed.**
 
 - **Closed, 7 November's entry from `Loom signals`** — *three client components
   start a broadcast on an element*. Both `Loom docs` rows are closed by this
@@ -228,6 +236,10 @@ figure moved in a run that wrote nothing in that section.
   mutating the guard away to check something held it, which the typechecker did.
 - **Open, owned by the maintainer** — the prose cap. 47% of what this site had
   left to say went on correcting two sentences. Its own section below.
+- **Open, owned by `Loom daily build`** — `pnpm verify` is red on `main` on a
+  whole-repository sweep with no timeout of its own, with three readings under
+  the suite and one alone. The gate section below is the evidence; the entry
+  carries the same numbers and a one-line remedy.
 
 `68712` — *seven new names on `@jam-overture/loom/signals` and the page that
 explains that door says nothing about them* — **stays open and was not this
@@ -296,7 +308,78 @@ code. Found by reading the failure rather than by reasoning about it, and the
 helper now says so in a comment — a fixture spelled outside the grammar is a
 test that passes for the wrong reason the day the grammar is what matters.
 
-GATE_NUMBERS_HERE
+### The gate — red, and the red is not this branch's
+
+**`pnpm verify` came back `EXIT=1`, twice, read out of a file written as the
+last thing on its line and read in a separate command.** One failure in 6,702,
+and it is a **timeout** rather than an assertion:
+
+```
+FAIL  |unit| tools/sources/semicolons.test.ts > every source in this repository > ends no statement in a semicolon
+Error: Test timed out in 5000ms.
+```
+
+**It reproduces on `origin/main` at `638470e`**, the commit this branch was cut
+from. The step was run there on purpose, because *whose red is it* was the only
+question worth spending a cycle on:
+
+| | files | tests | the sweep |
+| --- | --- | --- | --- |
+| this branch, first gate run | 273 passed / 274 | 6,701 / 6,702 | 5,402 ms |
+| this branch, second gate run | 273 / 274 | 6,701 / 6,702 | 5,730 ms |
+| **`origin/main`, `638470e`** | **273 / 274** | **6,701 / 6,702** | **5,565 ms** |
+| the file alone, nothing else in the suite | 12 / 12 | 12 / 12 | **3,202 ms** |
+
+`everySource()` reads 1,800-plus files in one `it` with no timeout of its own,
+so it runs against Vitest's 5,000 ms default while the postgres project's PGlite
+suites run beside it. Unloaded it has 1.8 seconds of margin; under the suite it
+has none. **Every count is identical on both sides**, which is the cleanest
+available evidence that this branch touches nothing in that suite. Filed for
+`Loom daily build` with the three readings and a one-line remedy.
+
+**Nothing was weakened and that test was not touched.** It is not this lane's
+file, and a skip or a raised default to get a pull request opened is the one
+thing `docs/routines.md` names outright.
+
+**`pnpm test` failing stops `pnpm verify` before it reaches the application**,
+so the branch's own figures would not have existed. The gate's six other steps
+were therefore run individually, in the order `pnpm verify` runs them, and
+**every one is green**:
+
+| step | result |
+| --- | --- |
+| `pnpm build` | passed |
+| `pnpm typecheck` | passed |
+| `pnpm test` | **1 failed / 6,701 passed of 6,702** — the sweep above, and only it |
+| `pnpm findings:check` | **1,488 findings, 0 malformed** |
+| `pnpm reports:check` | **2,183 visuals, 152.0MB, none over 1.1MB**, 413 cited by no file — all pre-existing, this run's 5 are cited by this report |
+| `pnpm --filter @loom/app verify` | **468 files, 7,468 tests, 0 failed** |
+| `pnpm prerender:check` | **139 prerendered pages**, 2,058 text junctions, 0 run together; 3 metadata conventions, 0 unserved |
+
+The six ran as one chain and that chain's status file says `EXIT=0`.
+
+| | measured | tests |
+| --- | --- | --- |
+| framework and tools | 274 files | 6,702 (**1 failed**, the timeout) |
+| application | 468 files | **7,468**, all passing |
+| of which `(docs)` | 145 files | **2,267** |
+
+**+6 tests in `(docs)`, all of them this lane's**: seven new in
+`_lib/signals/following.test.tsx`, one new in `claims.test.ts`, and the two that
+pinned the retired sentences removed. That is counted from the diff rather than
+measured on `main` — the `(docs)` subset was not re-run at `638470e`, and
+`+1 file, +6 tests` is what the six changed files add up to. No pre-existing
+assertion was removed except that pair, and none changed its claim.
+
+**And the gate was read from the file, twice, against a notification that said
+otherwise.** Both runs' completion notices from this session's own harness
+reported **exit code 0** while `verify.exit` and `verify2.exit` said `EXIT=1`.
+That is the fifth and sixth instances of `docs/routines.md`'s *reading the merge
+gate* entry, and the second and third in which the thing that lied was a harness
+notification rather than a shell's exit code. Without that rule this run would
+have opened a pull request claiming green, twice, and the second time with a
+table of app figures that did not exist because the step producing them never
+ran.
 
 ### Every cap on this surface, before and after
 
