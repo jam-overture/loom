@@ -68776,9 +68776,15 @@ reading. The fix is small; what it needs is to be the unit.
 ## 2026-11-08 (evening) — the rebuild every accepted delta goes through throws at two thousand deep, which is now the shallowest bound in the tree
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom daily build`
-(`src/tree/mutation.ts`) · **Status:** open — **nothing is red and no page is
-near it**; filed with the numbers while they were in hand, and it is this lane's
-own next unit rather than anyone's blocker
+(`src/tree/mutation.ts`) · **Status:** closed 9 November by
+[0373](decisions/0373-an-edit-to-a-tree-descends-by-the-path-and-rebuilds-a-sibling-list-in-one-pass.md)
+on **#829**, the same branch that filed it. `replaceNode` descends by the path:
+2,000 deep went from `RangeError` to 5.1 ms, and 500,000 deep answers in 182 ms.
+**What this entry got wrong is worth reading before the rest of it.** It named
+depth as the bound. Measuring it to fix it found the rebuild is also quadratic
+in a page **width** — 15,731 ms to swap one node among 60,000 siblings, now
+11.4 ms — which is the dimension a real page can actually reach, and which this
+entry did not look at.
 
 Found while closing the `outlineTree` entry above (#829). Every read of a tree is now
 linear in nodes and bounded by the heap (0372). `replaceNode` is not, and it is
@@ -68812,3 +68818,60 @@ than a slow one, and one pull request that changes both is one nobody can
 review.
 
 **Measured** on this session's container with `tsx`, one run per size.
+
+---
+## 2026-11-09 — three tree walks in this lane still recurse per level, and the one that is measured throws five thousand deep short of where the delta path now answers
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build`
+(`src/runtime/nesting.ts`, `src/interpretation/materialize.ts`,
+`src/render/render.ts`) · **Status:** open — **nothing is red, nothing is on the
+delta path, and no page is near any of it.** Filed so that the claim 0372 and
+0373 now make about `src/tree/` is not read as a claim about the repository.
+
+[0372](decisions/0372-every-read-of-a-tree-carries-an-explicit-stack-because-a-page-s-depth-is-data.md)
+and
+[0373](decisions/0373-an-edit-to-a-tree-descends-by-the-path-and-rebuilds-a-sibling-list-in-one-pass.md)
+took the shape bound off every read and every edit in `src/tree/`. They did not
+take it off the rest of the lane, and a reader of either record could reasonably
+think they did.
+
+Three walks outside that directory still spend a call frame per level:
+
+| | what it is | measured |
+| --- | --- | --- |
+| `src/runtime/nesting.ts` `collect` | every target this tree puts inside another | `RangeError` at **10,000** deep; 1.0 ms at 4,000 |
+| `src/interpretation/materialize.ts` `materializeNode` | AI output becomes a tree | not measured |
+| `src/render/render.ts` `renderNode` / `renderChildren` | every page render | not measured |
+
+`nestedTargetsIn` is the one with a number because it takes a `LoomNode` and
+nothing else, so it costs one script to measure. It is linear in time — no
+quadratic factor — so the only bound is the stack, and it is **five times deeper
+than `replaceNode`'s was**: the delta path answers at 500,000 now, and this
+stops at 10,000.
+
+### Why it is filed rather than fixed
+
+**None of the three is on the delta path**, which is what made `replaceNode`
+worth a unit of its own: there, a wrong answer is a wrong tree.
+
+**The render path has React's own per-level recursion under it.** Removing
+Loom's recursion from `renderNode` would not remove the depth bound from
+rendering a page, so the fix is a smaller improvement than it looks and needs
+its argument made separately rather than smuggled in behind a number.
+
+**`materializeNode` is the interesting one** and the one this lane would do
+next if any of them were worth doing: it is on the path AI output takes to
+become a tree, and the depth of that output is not this repository's to choose.
+It is unmeasured because measuring it needs a materialisation fixture rather
+than a chain, which is more than the finding is worth today.
+
+### What would close it
+
+A measurement of each, then the same treatment `src/tree/` got — an explicit
+stack — for whichever ones a number justifies, and a line in the record for
+whichever ones it does not. **Do not open this because it is tidy.** 0372 and
+0373 were each paid for by a claim another lane had published or by a figure in
+seconds; none of these three has either yet.
+
+**Measured** on this session's container with `tsx`, default stack, one run per
+size.

@@ -462,3 +462,4 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0370](0370-loomjs-org-serves-its-live-pages-and-pulls-them-like-a-customers-site.md) | loomjs.org serves its live pages, and pulls them like a customer's site | Accepted | §5 (portal), the connection plane |
 | 0371 | *No record on this branch* | — | — |
 | [0372](0372-every-read-of-a-tree-carries-an-explicit-stack-because-a-page-s-depth-is-data.md) | Every read of a tree carries an explicit stack, because a page's depth is data | Accepted | §2, the tree |
+| [0373](0373-an-edit-to-a-tree-descends-by-the-path-and-rebuilds-a-sibling-list-in-one-pass.md) | An edit to a tree descends by the path and rebuilds a sibling list in one pass | Accepted | §2, the tree |

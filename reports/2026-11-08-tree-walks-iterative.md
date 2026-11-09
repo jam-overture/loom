@@ -71,7 +71,9 @@ untouched: pre-order, sibling order, `depth`, `parentId`, `index`, the path's
 direction and contents, `isDescendantOf`'s answer for a node asked about itself,
 and `duplicateNodeIds` on a tree with a repeat in it.
 
-**The guard.** `src/tree/depth.test.ts` reads a chain of ten thousand six ways —
+**The guard.** `src/tree/depth.test.ts` — renamed `src/tree/shape.test.ts` on
+9 November, when the same defect was found in the rebuild and in a page's width
+as well as its depth — reads a chain of ten thousand six ways —
 the outline whole with the depth and parent of every row, every node walked, the
 whole chain as a path root-first, the deepest node's parent, `isDescendantOf`
 root to bottom, and `textOf`. All four of its cases throw `RangeError` against

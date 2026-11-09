@@ -65,8 +65,10 @@ not delegate a yield.**
    re-searches the tree per level.
 4. The bound is the heap rather than the stack. A chain of **500,000** outlines
    in 195 ms, walks in 42 ms and gives a path in 58 ms.
-5. **The guard is a test at a depth no page meets.** `src/tree/depth.test.ts`
-   reads a chain of ten thousand six ways. All four of its cases throw
+5. **The guard is a test at a depth no page meets.** `src/tree/shape.test.ts`
+   — named `depth.test.ts` when this was written, renamed on 9 November when
+   0373 found the same defect in a page's width — reads a chain of ten thousand
+   six ways. All four of its cases throw
    `RangeError` against the implementation this record replaces, which is how it
    is known to be a guard and not a decoration.
 
@@ -91,7 +93,10 @@ rebuilds a tree recursively and calls `containsNode` at every level, so it is
 `O(n·d)` and it throws at **2,000** deep — against 23.6 ms at 1,000 and 7.2 ms
 at 500. Every accepted delta goes through it. That is filed rather than fixed
 here: this record is about reads, a rebuild is a different shape of change, and
-one unit that changes both is one nobody can review.
+one unit that changes both is one nobody can review. **Fixed by 0373 on
+9 November**, on this same branch, which also found it quadratic in a page's
+*width* — the bound a real page can actually reach. Nothing this record decides
+is changed by that; 0373 extends it to edits.
 
 **Zod's `loomNodeSchema` recursion is untouched**, so `parseTree` keeps whatever
 depth bound the parser has. Nothing here claims otherwise.
