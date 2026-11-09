@@ -68287,7 +68287,21 @@ somebody else.
 (`apps/loom/app/(docs)/_components/reader-signals-live.tsx`,
 `apps/loom/app/(docs)/_lib/fences/compiled/the-runtime--what-your-readers-do.tsx`)
 and `Loom marketing` (`apps/loom/app/(marketing)/_components/count-readers.tsx`)
-· **Status:** open — **nothing is broken in any of the three**, and this is an
+· **Status:** **both `Loom docs` rows closed by `docs-82-two-limits-the-runtime-no-longer-has`**,
+9 November; the `Loom marketing` row is open. Original status below.
+
+> **`Loom docs`, 9 November.** The fence is the document form now, and the prose
+> beside it says which argument is which. The live component asks
+> `addressedRootIn` for its root and spells no selector. The entry asked for the
+> sentence on *What your readers do* and for a call on whether the compiled
+> fence should keep the element form — **it should not**, and the reason is the
+> half of this entry that turned out to be the larger one: the same page was
+> telling a reader to stop and restart the broadcaster across a client-side
+> navigation, which 0366 had made false two days before this entry was filed.
+> The element form is still demonstrated and still argued for, by the live
+> block, which is the one place on this site where it is the right argument.
+
+**Original status:** open — **nothing is broken in any of the three**, and this is an
 adoption rather than a defect
 
 [0366](decisions/0366-a-broadcast-handed-a-document-follows-the-page-and-a-client-side-navigation-is-a-new-page-view.md)
@@ -68790,6 +68804,40 @@ the maintainer is away — which is the exact shape the token-discipline section
 exists to prevent, arriving from the harness rather than from a routine. Two
 instances is enough to say the decline is not a one-off and that the lane's
 answer is settled: read once, unsubscribe, arm nothing.
+
+---
+> **Third instance, 9 November, on #841 — and the one new thing is that this
+> time the batch was delivered as a queue rather than as wakes.** Five
+> notifications, read in one call: one `subscription.created`, three
+> `vercel[bot]` comment events (one creation and two edits of the same comment
+> id, Building → Building → Ready) and one `check_suite.completed`. The pull
+> request comment said, before any of them arrived, that this session had not
+> subscribed and would not arm a check-in. It was subscribed **50 seconds after
+> the pull request was created**.
+>
+> **The answer is the same and it took one read.** `mergeable: true`, no review
+> comment, no failing check, and the only `pending` commit status was Vercel
+> deploying — which the newest of those same bot comments already reported as
+> `Ready`. Nothing was actionable, so nothing was done to the pull request, no
+> check-in was armed, and the session unsubscribed.
+>
+> **`mergeable_state` read `unstable` where 8 November's read was `clean`**, and
+> that is worth knowing before a future run treats it as a problem: `unstable`
+> here means one non-required status is still pending, not that anything failed.
+> The sentence to carry is that the field is not a verdict — read the statuses.
+>
+> **This entry stops needing re-measurement.** Three instances across three
+> pull requests, with the same cause, the same cost and the same answer; the
+> 4 November note under the 3 November entry already argued that a routine on a
+> fixed schedule *is* the safety net the chain is sold as, and nothing has
+> contradicted it. A future run meets this, reads the state once, unsubscribes,
+> arms nothing, and does not file a fourth count.
+>
+> **One correction a run does owe, and it is cheap.** The pull request comment's
+> last line said this session *has not subscribed and will not*. The first half
+> stopped being true 50 seconds later. It was edited in place — which notifies
+> nobody — to say what actually happened, rather than left as a sentence the
+> maintainer could check and find false.
 ## 2026-11-08 — `outlineTree` is quadratic in depth and throws above about two thousand, which bounds both joins of a window to a tree
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom daily build`
@@ -68934,6 +68982,249 @@ reading. The fix is small; what it needs is to be the unit.
 
 
 ---
+## 2026-11-09 — an instruction a page gives is a claim about what the runtime will not do for you, and this site had no instrument for one
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** **closed on
+filing for the page it was found on**, by
+`docs-82-two-limits-the-runtime-no-longer-has`; **open as a shape**, because
+nothing sweeps the other thirty-four written pages for it
+
+Two sentences at the foot of *What your readers do* were false, and both had
+been for days:
+
+| the page said | false since |
+| --- | --- |
+| a broadcaster watches only the nodes present when it started, so a band behind a Suspense boundary is never watched for `viewed` or `dwelled` | at or before 6 November, when the broadcaster began watching arrivals. This container's clone holds fifty commits and cannot see further back, so the date is a bound rather than a reading |
+| a new revision is a new broadcast, so `stop()` the broadcaster and start another | 7 November, when [0366](decisions/0366-a-broadcast-handed-a-document-follows-the-page-and-a-client-side-navigation-is-a-new-page-view.md) gave a broadcast the document form |
+
+**Neither instrument on this site could have caught them, and the reasons are
+different.**
+
+`_lib/absences.ts` sweeps written prose for a sentence saying **Loom lacks a
+name**, and holds each registered one against a measurement that will contradict
+it. Neither of these says Loom lacks anything. Neither carries a dated word, so
+even the backstop sweep would have passed over both.
+
+`_lib/signals/claims.test.ts` had them, and **held them in place.** Both were
+asserted with `toContain` under a comment arguing that was the safe kind of
+claim:
+
+> *"each is a claim about **how the broadcaster behaves**, and the behaviour is
+> in the runtime where a test can reach it. The one that was dangerous was a
+> claim about what the runtime *lacked*, which nothing here could reach."*
+
+Every clause of that is true. Nothing acted on it: what the two assertions
+checked was that the page still said the sentence. It is the same failure that
+comment records two paragraphs earlier about *"Nothing stores or interprets
+these"* — a test that pins prose reads as a test that holds prose to something.
+
+**What shipped.** `_lib/signals/following.test.tsx` starts a real broadcaster on
+a real addressed page, in the one half of this application's suite that has a
+document, and reads back what it watched: that a `Document` is accepted and
+finds the page, that an unaddressed document is refused with `unaddressed`, that
+a band appended after the start is handed to the visibility observer, that it is
+handed over **without** the reading beginning again, and that a changed revision
+on the root **does** begin it again with nothing asked of the host. Each is
+paired with the sentence the page now writes in its place. Ten mutations of the
+runtime and of this lane's own files, ten killed.
+
+**What is open, and it is the general case.** An instruction is the third kind
+of dated claim and there is no sweep for it. *"Remember to X"*, *"do not expect
+Y"*, *"you will need to Z yourself"* — each is a statement about a gap in the
+runtime, each goes stale when the gap closes, and each reads as ordinary
+writing while it does. `absences.ts` cannot hold them because the measurement
+often needs a browser; a `.test.tsx` per page is what this lane has, and it has
+two of them against thirty-five written pages.
+
+**Recommendation, for the next run of this lane rather than for anybody else.**
+Do not widen the `DATED` regular expression — an imperative has no marker to
+match on, and the four entries in `NOT_DATED_CLAIMS` that `today` already costs
+say what a loose pattern buys. The cheap, honest thing is a count: sweep written
+pages for the second person plus a modal — *you will have to*, *you need to*,
+*remember to* — and report the number rather than fail on it, the way
+`reports:check` reports uncited visuals. If it is twelve sentences, each gets
+read once by whoever next writes near it. If it is two hundred, this was the
+wrong idea and the number says so before a run spends a unit on it.
+
+**One exemption retired on the way.** `NOT_DATED_CLAIMS` carried *"at the moment
+they happen"*, which was a clause of the first retired paragraph, and
+`absences.test.ts` holds every registered fragment against the site — so the
+fragment went red the moment the sentence left. That assertion did its job: a
+dead exemption is a reader of this file being told about a sentence that is not
+there.
+
+---
+## 2026-11-09 — `addressedRootIn`'s own doc comment shows a spelling that does not typecheck in this repository
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom daily build`
+(`src/render/addressed.ts`) · **Status:** open — **a two-word correction to a
+comment**; nothing is broken, no test is failing, and the function is right
+
+The comment above `addressedRootIn` explains why it answers `undefined` rather
+than `null`:
+
+> *"because a caller reaching through an optional ref — `addressedRootIn(frame.current)`
+> is the shape of two callers in this repository — otherwise has two empty
+> values to test for where one will do."*
+
+The argument is correct and the saving is real. **The spelling in it is not
+available**, because the parameter is `ParentNode` and `frame.current` is
+`HTMLDivElement | null`:
+
+```
+error TS2345: Argument of type 'HTMLDivElement | null' is not assignable to
+parameter of type 'ParentNode'. Type 'null' is not assignable to type 'ParentNode'.
+```
+
+That is this application's own typechecker, from writing exactly the line the
+comment shows. A caller writes the guard and then calls, which is what this
+lane's third caller does:
+
+```ts
+const container = frame.current
+const root = container === null ? undefined : addressedRootIn(container)
+```
+
+**The point it is making survives**, and it is worth keeping — one empty value
+to test on the way out rather than two. It is the *inbound* side the comment
+overstates. Either widen the parameter to `ParentNode | null | undefined` and
+return `undefined` for an absent scope, which would make the shown line true and
+is a published signature change, or change the example. **This lane recommends
+changing the example**, because the narrow parameter is the honest type for a
+function whose contract is *somewhere to look*, and a reader copying the
+comment hits a compiler error that explains itself in one line.
+
+Found by mutating the guard away in `_components/reader-signals-live.tsx` to
+check something held it. The typechecker did, which is why this is a comment
+finding and not a defect.
+
+---
+## 2026-11-09 — correcting two false sentences cost 47% of what the whole site has left to say, which is 0353's argument arriving as a bill rather than a forecast
+
+**Filed by:** `Loom docs` · **Owned by:** `@jonathanbravecredit` · **Status:**
+open — **nothing is broken and no cap fires**; it is one number, offered because
+it changes how urgent an unanswered question is and not because anything is
+blocked today
+
+The prose index — every written page's sentences, which the search box fetches
+so that a reader can find a phrase rather than a heading — is capped at 80,000
+compressed bytes across the five sections together. Measured on `main` this
+morning and on this branch after it:
+
+| | compressed | room |
+| --- | --- | --- |
+| `main` | 79,182 | 818 |
+| this branch | **79,563** | **437** |
+
+**381 bytes**, which is 216 words, which is 47% of what the site had left.
+
+What it bought is not a page and not a paragraph anybody asked for. It is two
+instructions removed and the true version of each put in their place: the
+counting rule a reader needs to know a navigation is handled, and the sentence
+saying when an element is the right argument instead. **The alternative to
+spending it was leaving a stranger with advice that would have made their
+numbers wrong**, which is the one trade on this site that is not close.
+
+The raw cap moved the same way and is now the nearer of the pair in proportion:
+257,390 → 258,540 of 260,000, leaving **1,460 bytes**. Every other cap on this
+surface is unchanged or better — the code index came **down** 121 compressed
+bytes, because the fence a reader copies is shorter in the document form than it
+was with a ref and a selector in it.
+
+**Why it is filed here rather than noted in a report.** [0353](decisions/README.md)
+is `Proposed` on #778 and has been unanswered since 5 November, and the four
+runs that asked for it each said the same thing: the site cannot grow until the
+search box stops sending every section's sentences to every reader. That was
+argued as a forecast about the next page. **It is not only about new pages.** A
+correction to an existing one is drawn on the same account, and this lane cannot
+know in advance which run will need to fix a sentence that went false under it —
+three went false under this lane in the last four days.
+
+Nothing needs doing this week. The figure is here so that the next run reading
+*437 bytes* knows what the last one spent it on and why, and so that the
+question in front of the maintainer is the accurate one: not *may this site add
+a page* but **may this site keep its pages true**.
+
+---
+## 2026-11-09 — `pnpm verify` is red on `main`, on a whole-repository sweep with no timeout of its own, and it is red for whoever is running
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom daily build`
+(`tools/sources/semicolons.test.ts`) · **Status:** open — **the merge gate does
+not pass on this container today, for any lane**; the check is right, its
+assertion is right, and what fires is a clock
+
+`pnpm verify` on `docs-82-two-limits-the-runtime-no-longer-has` came back
+`EXIT=1` with one failure in 6,702:
+
+```
+FAIL  |unit| tools/sources/semicolons.test.ts > every source in this repository > ends no statement in a semicolon
+Error: Test timed out in 5000ms.
+```
+
+**It is not this branch's.** The same step was run on `origin/main` at
+`638470e`, the commit the branch was cut from, and fails identically:
+
+| | files | tests | the sweep |
+| --- | --- | --- | --- |
+| this branch, first gate run | 273 passed / 274 | 6,701 passed / 6,702 | **5,402 ms** |
+| this branch, second gate run | 273 / 274 | 6,701 / 6,702 | **5,730 ms** |
+| **`origin/main`, `638470e`** | **273 / 274** | **6,701 / 6,702** | **5,565 ms** |
+| the file run on its own, nothing else in the suite | 12 / 12 | 12 / 12 | **3,202 ms** |
+
+Three readings under the suite, none under 5,400; one reading alone, at 64% of
+the budget. **The failure is load, not content.** Every count is identical on
+both sides, which is also the cleanest available evidence that this branch
+touches nothing in that suite.
+
+**Why it fires.** `everySource()` is 1,800-plus files, each read with
+`readFileSync` and swept, in one `it` with no timeout of its own — so it runs
+against Vitest's 5,000 ms default while the postgres project's PGlite suites run
+beside it on another pool. Unloaded it has 1.8 seconds of margin. Under the
+suite it has none.
+
+**Why it matters more than one red run.** The failure arrives in another lane's
+suite, under a name that reads like a real style violation, on the branch of
+whoever happened to be running. The lane that reads it has three choices and two
+are wrong: go looking for a semicolon they did not write, weaken something, or
+re-run and hope — and nothing in the output says which. This lane spent two full
+gate cycles and a run of `pnpm test` on `main` to learn that the answer was the
+third, and then that the third does not work either.
+
+It is also a cost that only goes one way. The sweep's work is a function of how
+many files this repository has, and seven routines add files every day.
+[0360](decisions/0360-the-style-of-this-repository-is-maintained-by-hand-and-what-is-checked-is-that-no-statement-ends-in-a-semicolon.md)
+made this sweep the enforcement of a style maintained by hand, so it will be
+read by every lane for as long as that holds.
+
+**Recommendation, cheapest first.**
+
+1. **Give the test its own timeout**, set clear of the loaded measurement rather
+   than just above it — 30,000 ms is not generous for a sweep that reads 1,800
+   files, and the thing it is protecting against is an infinite loop, not a slow
+   disk. One line, and the gate passes again.
+2. **Have it print the sweep's wall-clock and its file count**, the way
+   `reports:check` prints its totals. A sibling in the same file already asserts
+   `sources.length >= 1800`, so the count is in hand; what is missing is that
+   either number ever reaches a reader while the check passes. Then the next
+   lane that meets a timeout can see whether the sweep got slower or the machine
+   did, rather than measuring it by hand as this entry did.
+3. Not recommended: lowering what is swept, or an exemption. Nothing is wrong
+   with the check.
+
+**What this lane did not do.** It did not touch the test, which is not its file.
+It did not report a green gate. The pull request says the gate is red, says the
+red reproduces on `main`, and carries every number above — and the app half of
+the gate, which `pnpm test` failing had stopped `pnpm verify` from ever reaching,
+was run separately so that the branch's own figures exist.
+
+**And the gate was read from the file, twice.** Both runs' completion notices
+from this session's own harness reported **exit code 0** while `verify.exit` and
+`verify2.exit` said `EXIT=1`. That is the **fifth and sixth** instances of the
+entry in `docs/routines.md`, and the second and third in which the thing that
+lied was a harness notification rather than a shell's exit code. The remedy in
+that document — write the status to a file as the last thing on its line, read
+it in a separate command, quote the number from the file — is the only reason
+this run did not open a pull request claiming green twice over.
 ## 2026-11-09 — `PartReading.withinId` is the containing part, and `parentId` keeps the meaning it always had
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom signals`
