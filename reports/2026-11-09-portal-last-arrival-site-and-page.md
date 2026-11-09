@@ -59,7 +59,7 @@ counted* with its *By page* link, nothing yet), 1 in `signals-frame.test.tsx`
 (the sentence and link drawn). Changed: `arrivals.test.ts` now asserts the
 page on both kinds, with a third row so the newest is not the last listed.
 
-`pnpm verify` results are in the pull request.
+`pnpm verify` on the branch over `main` at `3b58461` exits 0: the framework suite 275 files, 6,738 tests passed (2 skipped, as on `main`); the app suite 470 files, 7,506 tests passed; prerender check 139 pages, 0 run together.
 
 ## Toward the wireframe
 
