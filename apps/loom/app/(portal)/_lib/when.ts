@@ -71,3 +71,30 @@ export const plainDay = (iso: string): string => {
 
   return `${Number(day)} ${monthName} ${year}`
 }
+
+/**
+ * The day without its year, the month cut to three letters: *8 Nov*.
+ *
+ * For the marks under a chart, where the range is said in full beneath and a
+ * week of labels has to fit across a phone.
+ */
+export const plainTickDay = (iso: string): string => {
+  const parts = ISO_UTC.exec(iso)
+  if (parts === null) return iso
+
+  const [, , month, day] = parts
+  const monthName = MONTHS[Number(month) - 1]
+  if (monthName === undefined) return iso
+
+  return `${Number(day)} ${monthName.slice(0, 3)}`
+}
+
+/** The time of day alone, for the marks under a chart of one day: *18:00*. */
+export const plainTime = (iso: string): string => {
+  const parts = ISO_UTC.exec(iso)
+  if (parts === null) return iso
+
+  const [, , , , hour, minute] = parts
+
+  return `${hour}:${minute}`
+}
