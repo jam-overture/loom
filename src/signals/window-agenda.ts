@@ -6,12 +6,14 @@ import {
 } from "./arriving.js"
 import { deploymentConversionOf, type DeploymentConversion } from "./conversion.js"
 import { deploymentReadingOf, type DeploymentReading } from "./deployment.js"
+import { pageFrontierOf } from "./frontier.js"
 import {
   collectionHealthOf,
   type CollectionHealth,
   type CollectionSchedule,
 } from "./health.js"
 import { readingProgressOf, type ReadingProgress } from "./progress.js"
+import { deploymentUnreadOf, type DeploymentUnread } from "./unread.js"
 import type { WindowFunnels } from "./window-funnels.js"
 import type { ReaderWindow, WindowAssembly } from "./window.js"
 
@@ -127,6 +129,25 @@ import type { ReaderWindow, WindowAssembly } from "./window.js"
  * exists to make impossible. The order of falls and the health reading have no
  * such call, and both are made here and published whole.
  *
+ * ## Why the order of places is published and does not reach the fix-list
+ *
+ * `deploymentUnreadOf` is the fourth order over the same pages
+ * ([0375](../../decisions/0375-a-deployments-unread-places-are-a-fourth-order-ranked-on-what-one-fix-recovers.md)),
+ * and it is **made** here under the rule above: `pageFrontierOf` is one call
+ * over the assembly's own readings, so a caller asked to hand it in would be
+ * writing the line this rung exists to write.
+ *
+ * It is not an argument to `deploymentAgendaOf` and does not move
+ * `DeploymentAgenda.first`. Its key is parts of a page and the fix-list's three
+ * are readers, so there is no comparing them (0327) — and re-ranking what an
+ * operator is already handed, on a figure in a fourth unit, is a judgement about
+ * a screen rather than a join. The two stand side by side here, which is the
+ * shape that lets a surface choose and lets neither hide the other.
+ *
+ * Every page's frontier is reachable from it — each row carries the reading
+ * whole — so there is no second list of them beside this, for the reason there
+ * is no second anything in this rung.
+ *
  * ## It composes and does not count
  *
  * Nothing here counts, divides, sums or withholds — the rule the rungs under it
@@ -188,6 +209,19 @@ export type WindowAgenda<TReason extends string = string> = {
    * reasons would be wording a vocabulary it does not define (0311, 0326).
    */
   readonly arrival: ArrivalStanding<TReason>
+  /**
+   * The pages by what one fix to each would recover, worst first, and every
+   * place the reading of each stopped.
+   *
+   * The fourth order, in the fourth unit: parts of a page rather than readers.
+   * Published beside the fix-list and not inside it — `agenda.first` is
+   * untouched by it — because a part is not a reader and the two cannot be
+   * ranked against each other (0327, 0375).
+   *
+   * Its `duplicated` is nought from here, for the reason the order's is: the
+   * assembly never holds two readings of one page.
+   */
+  readonly unread: DeploymentUnread
   /**
    * The fix-list: the two orders of pages, the measurements to repair, and the
    * one thing to do first.
@@ -284,6 +318,7 @@ export const windowAgendaOf = <TReason extends string = string>(
     conversion,
     health,
     arrival,
+    unread: deploymentUnreadOf(assembly.readings.pages.map(pageFrontierOf)),
     agenda: deploymentAgendaOf(order, conversion, health, arrival),
   }
 }
