@@ -16,6 +16,7 @@ import { ByPageTable, PageDrawerPanel } from "./by-page"
 const row = (treeId: string, overrides: Partial<ByPageRow> = {}): ByPageRow => ({
   treeId,
   name: undefined,
+  published: true,
   liveVersion: 2,
   opened: 1_234,
   lastMoved: "2026-11-05T10:00:00.000Z",
@@ -383,7 +384,7 @@ describe("the drawer for one page", () => {
     expect(screen.getByText("This deployment could not read its goals just now.")).toBeTruthy()
   })
 
-  it("links to what waits for the page, to the page and its events, and closes back to the list", () => {
+  it("links to what waits on the page's own tab, to the page, its history and its events, and closes back to the list", () => {
     render(
       <PageDrawerPanel drawer={drawer} address={{ ...address, range: "30d" }} projectId="prj_a" />
     )
@@ -392,15 +393,37 @@ describe("the drawer for one page", () => {
       screen
         .getByRole("link", { name: "1 change for this page waits for review." })
         .getAttribute("href")
-    ).toBe("/portal/prj_a/review")
+    ).toBe("/portal/prj_a/pages/t_home/review")
     expect(screen.getByRole("link", { name: "Open the page" }).getAttribute("href")).toBe(
       "/portal/prj_a/pages/t_home"
+    )
+    expect(screen.getByRole("link", { name: "Page history" }).getAttribute("href")).toBe(
+      "/portal/prj_a/pages/t_home/history"
     )
     expect(screen.getByRole("link", { name: "Events on this page" }).getAttribute("href")).toBe(
       "/portal/prj_a/signals?on=t_home&range=30d"
     )
     expect(screen.getByRole("link", { name: "Close" }).getAttribute("href")).toBe(
       "/portal/prj_a/signals/pages?range=30d"
+    )
+  })
+
+  it("offers no screen of the page's own where the site has not published it, and still its events", () => {
+    render(
+      <PageDrawerPanel
+        drawer={{ ...drawer, row: row("t_draft", { published: false }) }}
+        address={address}
+        projectId="prj_a"
+      />
+    )
+
+    expect(screen.queryByRole("link", { name: "Open the page" })).toBeNull()
+    expect(screen.queryByRole("link", { name: "Page history" })).toBeNull()
+    expect(
+      screen.getByText("The site has not published this page, so it has no screens of its own yet.")
+    ).toBeTruthy()
+    expect(screen.getByRole("link", { name: "Events on this page" }).getAttribute("href")).toBe(
+      "/portal/prj_a/signals?on=t_draft"
     )
   })
 })

@@ -101,6 +101,7 @@ const nothingElse = {
 const rowAt = (treeId: string, lastMoved: string): ByPageRow => ({
   treeId,
   name: undefined,
+  published: false,
   liveVersion: 1,
   opened: 1,
   lastMoved,
@@ -136,6 +137,7 @@ describe("a project's pages, one row each", () => {
     expect(row).toMatchObject({
       treeId: "t_a",
       name: undefined,
+      published: false,
       liveVersion: 2,
       opened: 7,
       lastMoved: "2026-11-05T12:00:00.000Z",
@@ -166,6 +168,7 @@ describe("a project's pages, one row each", () => {
 
     expect(row).toMatchObject({
       name: "Welcome",
+      published: true,
       liveVersion: 3,
       mostPressed: {
         nodeId: heading,

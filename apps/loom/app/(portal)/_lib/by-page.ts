@@ -63,6 +63,12 @@ export type ByPageRow = {
   readonly treeId: string
   /** The heading the published page gives it, `undefined` where it published none. */
   readonly name: string | undefined
+  /**
+   * Whether the site has published the page, which is what gives it screens of
+   * its own under *Pages*. Readers can be counted on a page before its site
+   * publishes it, and such a page has nothing there to open.
+   */
+  readonly published: boolean
   /** The version the site last published, else the newest version readers were counted on. */
   readonly liveVersion: number
   /** Page views that began on any version of it (0219). */
@@ -254,6 +260,7 @@ export const byPageRowsOf = (readings: ByPageReadings): readonly ByPageRow[] => 
       return {
         treeId,
         name: heading?.derived === true ? heading.name : undefined,
+        published: tree !== undefined,
         liveVersion: tree?.revision ?? Math.max(...rows.map((row) => row.revision)),
         opened: rows.reduce((sum, row) => sum + row.opened, 0),
         lastMoved: rows.map((row) => row.updatedAt).reduce(later),
