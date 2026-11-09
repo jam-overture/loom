@@ -87,6 +87,14 @@ export const historyOf = (
   }
 }
 
+/**
+ * The page's newest version, as the list of pages names it: a change accepted
+ * on it and on its way to readers, else the newest version readers had, or
+ * `undefined` for a page nothing has happened to since Loom first saw it.
+ */
+export const newestOf = (history: PageHistory): Version | undefined =>
+  history.pending[0] ?? history.versions[0]
+
 /** A moment the page changed for its readers, and the version it started. */
 export type Mark = {
   readonly at: number
@@ -196,7 +204,8 @@ export const loomOutcomeOf = (
   }
 }
 
-const NOT_LOOMS = "Not a Loom change"
+/** What stands in for a verdict on the site's own edit, which Loom does not judge. */
+export const NOT_A_LOOM_CHANGE = "Not a Loom change"
 
 const JUDGED = "Loom judges only the changes it made, so this one gets no verdict."
 
@@ -216,21 +225,21 @@ export const siteOutcomeOf = (figures: SiteFigures, now: number): Outcome => {
   switch (figures.kind) {
     case "no-goal":
       return {
-        label: NOT_LOOMS,
+        label: NOT_A_LOOM_CHANGE,
         tone: "plain",
         lines: [JUDGED, "No goal is on this page, so there are no figures to show around it."],
       }
     case "unreadable":
-      return { label: NOT_LOOMS, ...UNREADABLE }
+      return { label: NOT_A_LOOM_CHANGE, ...UNREADABLE }
     case "measured": {
       const { goal, measurement } = figures
 
-      if (measurement.kind === "unreadable") return { label: NOT_LOOMS, ...UNREADABLE }
+      if (measurement.kind === "unreadable") return { label: NOT_A_LOOM_CHANGE, ...UNREADABLE }
 
       const { before, after, windows } = measurement
 
       return {
-        label: NOT_LOOMS,
+        label: NOT_A_LOOM_CHANGE,
         tone: "plain",
         lines: [
           `${JUDGED} For context, on ${goal}:`,
