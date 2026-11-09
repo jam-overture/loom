@@ -8,7 +8,7 @@
       "files": 100,
       "narrower": [],
       "standing": {
-        "packageNames": 1994,
+        "packageNames": 1999,
         "otherDoors": 18,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -4246,7 +4246,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 1994,
+        "packageNames": 1999,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -4290,7 +4290,7 @@
       "files": 63,
       "narrower": [],
       "standing": {
-        "packageNames": 1994,
+        "packageNames": 1999,
         "otherDoors": 18,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -5243,7 +5243,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 1994,
+        "packageNames": 1999,
         "otherDoors": 18,
         "doorsSharingNothing": 17,
         "widest": false,
@@ -5318,7 +5318,7 @@
       "files": 220,
       "narrower": [],
       "standing": {
-        "packageNames": 1994,
+        "packageNames": 1999,
         "otherDoors": 18,
         "doorsSharingNothing": 17,
         "widest": false,
@@ -5788,7 +5788,7 @@
       "files": 81,
       "narrower": [],
       "standing": {
-        "packageNames": 1994,
+        "packageNames": 1999,
         "otherDoors": 18,
         "doorsSharingNothing": 17,
         "widest": false,
@@ -6876,7 +6876,7 @@
       "files": 38,
       "narrower": [],
       "standing": {
-        "packageNames": 1994,
+        "packageNames": 1999,
         "otherDoors": 18,
         "doorsSharingNothing": 17,
         "widest": false,
@@ -7441,7 +7441,7 @@
       "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 1994,
+        "packageNames": 1999,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -7644,7 +7644,7 @@
       "files": 42,
       "narrower": [],
       "standing": {
-        "packageNames": 1994,
+        "packageNames": 1999,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -8554,7 +8554,7 @@
       "files": 61,
       "narrower": [],
       "standing": {
-        "packageNames": 1994,
+        "packageNames": 1999,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -8933,7 +8933,7 @@
       "files": 41,
       "narrower": [],
       "standing": {
-        "packageNames": 1994,
+        "packageNames": 1999,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -9151,7 +9151,7 @@
       "files": 14,
       "narrower": [],
       "standing": {
-        "packageNames": 1994,
+        "packageNames": 1999,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -9313,7 +9313,7 @@
       "slug": "signals",
       "types": "./dist/signals/index.d.ts",
       "requires": [],
-      "files": 83,
+      "files": 84,
       "narrower": [
         {
           "specifier": "@jam-overture/loom/signals/broadcast",
@@ -9326,7 +9326,7 @@
         }
       ],
       "standing": {
-        "packageNames": 1994,
+        "packageNames": 1999,
         "otherDoors": 18,
         "doorsSharingNothing": 16,
         "widest": true,
@@ -11006,6 +11006,43 @@
           ]
         },
         {
+          "module": "signals/frontier",
+          "title": "Frontier",
+          "summary": "**Where a window's reading of a page stopped.**",
+          "symbols": [
+            {
+              "name": "UnreachedPart",
+              "kind": "type",
+              "signature": "type UnreachedPart = {\n    readonly nodeId: NodeId;\n    readonly type: PrimitiveType;\n    /** What part it plays, or `null` where its type declared none. */\n    readonly role: PrimitiveRole | null;\n    /** Depth in the tree, counting every node; 0 at the root. */\n    readonly depth: number;\n    /**\n     * The part it sits inside, and `null` at the outermost part — which is the\n     * one stop that means *the page itself was never reported on*.\n     */\n    readonly withinId: NodeId | null;\n    /**\n     * What that containing part's standing was.\n     */\n    readonly within: PartStanding | null;\n    /** Parts in its subtree, itself excluded, whatever each of them reported. */\n    readonly beneath: number;\n    /**\n     * Parts this stop accounts for, itself included — so 1 for a stop with\n     * nothing inside it.\n     */\n    readonly unseen: number;\n    /**\n     * Parts in its subtree that **did** report reach, which should be none.\n     */\n    readonly reportedBelow: number;\n    /**\n     * The words nobody reached here, in reading order: this part's own and those\n     * of every part it accounts for.\n     */\n    readonly words: readonly string[];\n};",
+              "summary": "One place the reading of a page stopped: a part no view reported reaching, sitting inside a part that was reached."
+            },
+            {
+              "name": "PageFrontier",
+              "kind": "type",
+              "signature": "type PageFrontier = {\n    readonly treeId: TreeId;\n    readonly revision: number;\n    /**\n     * The floor on page views the reading was drawn from, carried through from\n     * {@link PageReading.views}.\n     */\n    readonly views: number;\n    /** Every place the reading stopped, in reading order. */\n    readonly frontier: readonly UnreachedPart[];\n    /**\n     * Parts no view reported reaching — the sum of every stop's `unseen`, and so\n     * equal to `skipped` in {@link PageReading.standings}.\n     */\n    readonly unseen: number;\n    /** Parts at least one view reported reaching. */\n    readonly read: number;\n    /** Parts nothing can be said about. */\n    readonly unknown: number;\n    /** Every addressed node of the revision, which is the universe the rest is out of. */\n    readonly parts: number;\n    /**\n     * Parts that were reached, hold at least one part, and whose every part went\n     * unreached.\n     */\n    readonly passedOver: readonly NodeId[];\n    /**\n     * Parts that reported nothing while a part inside them reported reach.\n     */\n    readonly notReporting: readonly NodeId[];\n    /**\n     * Rows of the reading that named a node this revision does not contain,\n     * carried through from {@link PageReading.orphaned}.\n     */\n    readonly orphaned: number;\n};",
+              "summary": "Where one window's reading of one revision of one page stopped."
+            },
+            {
+              "name": "pageFrontierOf",
+              "kind": "function",
+              "signature": "const pageFrontierOf: (reading: PageReading) => PageFrontier",
+              "summary": "Read a page's reading as the places it stopped."
+            },
+            {
+              "name": "largestUnreachedIn",
+              "kind": "function",
+              "signature": "const largestUnreachedIn: (frontier: PageFrontier, limit?: number) => readonly UnreachedPart[]",
+              "summary": "The frontier parts that cost the page the most, largest first."
+            },
+            {
+              "name": "unreachedWordsIn",
+              "kind": "function",
+              "signature": "const unreachedWordsIn: (frontier: PageFrontier) => readonly string[]",
+              "summary": "The words nobody reached, in reading order."
+            }
+          ]
+        },
+        {
           "module": "signals/funnel",
           "title": "Funnel",
           "summary": "A funnel, read against the readers who arrived.",
@@ -12559,7 +12596,7 @@
             {
               "name": "PartReading",
               "kind": "type",
-              "signature": "type PartReading = {\n    readonly nodeId: NodeId;\n    readonly type: PrimitiveType;\n    /** What part it plays, or `null` where its type declared none. */\n    readonly role: PrimitiveRole | null;\n    /** 0 at the root. */\n    readonly depth: number;\n    /** null at the root. */\n    readonly parentId: NodeId | null;\n    readonly standing: PartStanding;\n    /**\n     * The counters, or `undefined` where no signal in the window named it.\n     */\n    readonly counters: ReaderTally | undefined;\n    /**\n     * The words this part says itself: its declared copy props, and the text\n     * handed to it directly or through a slot.\n     */\n    readonly copy: NodeCopy;\n};",
+              "signature": "type PartReading = {\n    readonly nodeId: NodeId;\n    readonly type: PrimitiveType;\n    /** What part it plays, or `null` where its type declared none. */\n    readonly role: PrimitiveRole | null;\n    /** 0 at the root. */\n    readonly depth: number;\n    /**\n     * The **tree** parent, which may be a node that is in no part's list, and\n     * `null` at the root.\n     */\n    readonly parentId: NodeId | null;\n    /**\n     * The nearest **addressed** ancestor — the part this part sits inside — and\n     * `null` at the outermost part.\n     */\n    readonly withinId: NodeId | null;\n    readonly standing: PartStanding;\n    /**\n     * The counters, or `undefined` where no signal in the window named it.\n     */\n    readonly counters: ReaderTally | undefined;\n    /**\n     * The words this part says itself: its declared copy props, and the text\n     * handed to it directly or through a slot.\n     */\n    readonly copy: NodeCopy;\n};",
               "summary": "One element node of one revision, with whatever the window said about it."
             },
             {
@@ -13780,7 +13817,7 @@
       "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 1994,
+        "packageNames": 1999,
         "otherDoors": 18,
         "doorsSharingNothing": 17,
         "widest": false,
@@ -13915,7 +13952,7 @@
       "files": 21,
       "narrower": [],
       "standing": {
-        "packageNames": 1994,
+        "packageNames": 1999,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -13977,7 +14014,7 @@
       "files": 65,
       "narrower": [],
       "standing": {
-        "packageNames": 1994,
+        "packageNames": 1999,
         "otherDoors": 18,
         "doorsSharingNothing": 17,
         "widest": false,
@@ -14551,7 +14588,7 @@
       "files": 43,
       "narrower": [],
       "standing": {
-        "packageNames": 1994,
+        "packageNames": 1999,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -14621,7 +14658,7 @@
       "files": 100,
       "narrower": [],
       "standing": {
-        "packageNames": 1994,
+        "packageNames": 1999,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -15043,7 +15080,7 @@
       "files": 79,
       "narrower": [],
       "standing": {
-        "packageNames": 1994,
+        "packageNames": 1999,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
