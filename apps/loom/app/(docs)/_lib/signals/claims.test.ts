@@ -317,21 +317,37 @@ describe("the limits this page admits to", () => {
    * hundred names — and this assertion went on passing the whole time, because
    * what it checked was that the page still said it.
    *
-   * The two below are safe for a reason worth naming: each is a claim about
-   * **how the broadcaster behaves**, and the behaviour is in the runtime where a
-   * test can reach it. The one that was dangerous was a claim about what the
-   * runtime *lacked*, which nothing here could reach. Those live in
-   * `absences.ts` now, each beside the measurement that will contradict it.
+   * **Two more below it were the same lie in a shape this comment argued was
+   * safe**, and they are gone. The claim was that a page-level limit is
+   * trustworthy *because* it is a claim about how the broadcaster behaves and
+   * the behaviour is in the runtime where a test can reach it. Both halves were
+   * true. Nothing reached it. What these two assertions checked was that the
+   * page still said it:
+   *
+   * | the page said | it had been false since |
+   * | --- | --- |
+   * | a broadcaster watches only the nodes present when it started | at or before 6 November, when the arrivals observer landed |
+   * | a new revision is a new broadcast, so `stop()` and start another | 7 November, when 0366 shipped the document form |
+   *
+   * They are replaced by `following.test.tsx`, which starts a real broadcaster
+   * on a real addressed page and reads back what it did. A claim about
+   * behaviour is held by running the behaviour or it is not held at all — which
+   * needs a document, which is why it is a `.test.tsx` in this directory rather
+   * than two more lines here.
    */
-  it("says a broadcaster watches only the nodes present when it started", () => {
-    expect(flowed).toContain("watches the nodes that were there when it started")
-  })
-
-  it("says a new revision needs a new broadcast", () => {
-    expect(flowed).toContain("A new revision is a new broadcast")
-  })
-
   it("says consent is the host's, not the runtime's", () => {
     expect(flowed).toContain("It does not give you a lawful basis")
+  })
+
+  /**
+   * The retired pair, as the page may not say them again.
+   *
+   * Written the way the vocabulary group above writes its own retirements: the
+   * sentence that was wrong is named, so a run reinstating it from an old copy
+   * of the page goes red rather than shipping.
+   */
+  it("no longer tells a reader to restart a broadcast or that arrivals are unwatched", () => {
+    expect(flowed).not.toContain("A new revision is a new broadcast")
+    expect(flowed).not.toContain("watches the nodes that were there when it started")
   })
 })

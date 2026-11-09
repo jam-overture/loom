@@ -62,6 +62,36 @@ import { apiEntries } from "./api/reference"
  * generating a reference rather than writing one, arriving from the other
  * direction.
  *
+ * ## Two more this file could never have caught
+ *
+ * Found on 9 November on *What your readers do*, and they are here because the
+ * shape is different from all four above:
+ *
+ * | the page said | it had been false since |
+ * | --- | --- |
+ * | a broadcaster watches only the nodes present when it started | at or before 6 November, when the broadcaster began watching arrivals |
+ * | a new revision is a new broadcast, so `stop()` and start another | 7 November, when 0366 gave a broadcast the document form |
+ *
+ * Neither was a claim that **Loom lacks a name**, so neither could be
+ * registered below. Neither carried a dated word, so the sweep would have let
+ * it through even if it had been prose it reads. Both were **instructions** —
+ * do not expect this, remember to do that — and an instruction goes false the
+ * same way an absence does and reads as ordinary writing while it does.
+ *
+ * And both were held in place by a test. `_lib/signals/claims.test.ts` asserted
+ * that the page still said them, under a comment arguing that was safe
+ * *because* a claim about how the broadcaster behaves has its behaviour in the
+ * runtime where a test can reach it. The argument was sound and nothing acted
+ * on it. What replaced them is `_lib/signals/following.test.tsx`, which starts a
+ * real broadcaster on a real addressed page and reads back what it watched.
+ *
+ * **The lesson that generalises is one line: an instruction a page gives is a
+ * claim about what the runtime will not do for you**, and it wants the same
+ * treatment as an absence — the measurement beside the sentence, or the
+ * sentence does not get to be there. This file cannot hold it, because the
+ * measurement needs a document; the two instruments named above are where a
+ * page-level behavioural claim goes until something generalises them.
+ *
  * ## What is registered, and what is merely allowed
  *
  * Two lists, and every dated sentence on a written page has to be in one of
@@ -276,8 +306,15 @@ export const NOT_DATED_CLAIMS: readonly NotADatedClaim[] = [
     says: ["it is just short so far"],
   },
   {
+    /**
+     * One fragment where there were two. *"read from the root at the moment
+     * they happen"* was a clause of the limitation paragraph this directory
+     * retired on 9 November, and it went with it: what it explained was why a
+     * press inside a late-arriving band still reported when nothing was
+     * watching that band for time on screen, and the broadcaster watches it now.
+     */
     reason: "`at the moment` meaning *at the instant*, which is the opposite of *currently*.",
-    says: ["at the moment they happen", "at the moment of the answer"],
+    says: ["at the moment of the answer"],
   },
 ]
 
