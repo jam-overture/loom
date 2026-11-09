@@ -1,15 +1,11 @@
-import Link from "next/link"
-
 import { projectIdSchema } from "@jam-overture/loom/store"
-
-import { screenName } from "@/app/(portal)/_lib/screen-names"
 
 import { ProjectRail } from "./_components/project-rail"
 
 /**
- * The frame every screen of one project shares: the way back to the
- * workspace, and the rail between the project's screens beside it
- * (`docs/portal-wireframes.md`, *The chrome*).
+ * The frame every screen of one project shares: the rail between the
+ * project's screens beside it (`docs/portal-wireframes.md`, *The chrome*).
+ * The way back to the projects is the top bar's breadcrumb, above every screen.
  *
  * **It reads nothing.** A layout is not re-run when a person moves between
  * the screens it wraps, and it runs beside the page rather than after the
@@ -35,10 +31,7 @@ const ProjectLayout = async ({
 
   return (
     <div className="flex w-full flex-col md:flex-row">
-      <aside className="border-edge-subtle flex shrink-0 flex-col gap-4 border-b px-8 pt-6 pb-3 md:sticky md:top-14 md:h-[calc(100vh-3.5rem)] md:w-56 md:overflow-y-auto md:border-r md:border-b-0 md:px-3">
-        <Link href="/portal" className="text-ink-muted px-3 text-sm no-underline hover:underline">
-          ← {screenName("/portal")}
-        </Link>
+      <aside className="border-edge-subtle flex shrink-0 flex-col border-b px-8 pt-6 pb-3 md:sticky md:top-14 md:h-[calc(100vh-3.5rem)] md:w-56 md:overflow-y-auto md:border-r md:border-b-0 md:px-3">
         <ProjectRail projectId={asked.data} />
       </aside>
       <div className="flex min-w-0 flex-1 flex-col">{children}</div>

@@ -2,12 +2,13 @@ import Link from "next/link"
 
 import { currentActor } from "@/app/(portal)/_lib/auth/identity"
 
+import { Breadcrumb } from "./breadcrumb"
 import { SignedInAs } from "./signed-in-as"
 
 /**
- * Fixed, 56px, above the rail. Deliberately thin: the portal's status belongs to
- * whatever tree is open, so this holds identity only until there is a tree to
- * describe.
+ * Fixed, 56px, above the rail. Deliberately thin: the wordmark, where a
+ * signed-in person is (the projects, then the project the screen is about),
+ * and who they are. The portal's status belongs to the screen, not here.
  *
  * "Identity" is now literal. Who you are signed in as is shown on every page,
  * because every change made from here is recorded under that name (0027) — and
@@ -57,14 +58,10 @@ export const TopBarChrome = ({ actor }: { readonly actor: string | null }) => {
       >
         <span className="bg-nav-edge inline-block h-4 w-4 rounded-sm" aria-hidden="true" />
         <span className="text-md tracking-tight">loom</span>
-        <span className="text-ink-muted font-mono text-2xs">portal · alpha</span>
+        <span className="text-ink-muted hidden font-mono text-2xs sm:inline">portal · alpha</span>
       </Link>
 
-      {actor !== null && (
-        <Link href="/portal" className="text-ink-secondary hover:text-ink text-sm no-underline">
-          Projects
-        </Link>
-      )}
+      {actor !== null && <Breadcrumb />}
 
       {actor !== null && <SignedInAs actor={actor} />}
     </header>

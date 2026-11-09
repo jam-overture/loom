@@ -24,8 +24,7 @@ const FRESH = { "Cache-Control": "no-store" } as const
 export const answerMember =
   <Body>(sources: MemberSources, nothing: Body, read: (projectId: ProjectId) => Promise<Body>) =>
   async (project: string): Promise<Response> => {
-    const refuse = (status: number): Response =>
-      Response.json(nothing, { status, headers: FRESH })
+    const refuse = (status: number): Response => Response.json(nothing, { status, headers: FRESH })
 
     const actor = await sources.currentActor()
 
