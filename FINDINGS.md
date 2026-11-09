@@ -69454,3 +69454,71 @@ seconds; none of these three has either yet.
 
 **Measured** on this session's container with `tsx`, default stack, one run per
 size.
+
+## 2026-11-09 (evening) — the two whole-repository sweeps each read and lex all 2,065 sources, and one pass would answer both
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build`
+(`tools/sources/`) · **Status:** open — **nothing is broken and nothing is
+blocked**; the budget no longer needs this and it is recorded so that it is a
+decision rather than something nobody noticed
+
+`code.test.ts > lexes to the end` and `semicolons.test.ts > ends no statement in
+a semicolon` are two sweeps over the same 2,065 files. Each reads every one and
+runs `scan` over it. **They are the same read and the same lex, done twice**,
+because they are in two test files and vitest gives each file its own worker.
+
+After [0375](decisions/0375-a-whole-repository-check-is-budgeted-by-what-it-reads-rather-than-by-a-wall-clock.md)
+that is 841 ms and 1,075 ms, so one pass would save about 850 ms of every
+`pnpm verify`. `scan` already returns both answers in one value — `mode.kind`
+for the first sweep and `code` for the second — so what it needs is for
+`semicolonTerminated` to be split at the seam it already has, into the part that
+blanks and the part that reads blanked code, and for the two sweeps to sit in one
+file over one pass.
+
+**It is filed rather than done** because the run that found it had just removed
+the reason it mattered. The budget is 41,300 ms now and grows with the
+repository, so 850 ms is a saving rather than a risk, and moving tests between
+files to collect it is the kind of tidying 0375's own alternatives section
+argues against doing quietly. The two sweeps also assert different things about
+different modules, and a reader looking for what `code.ts` is held to should
+find it in `code.test.ts`.
+
+**What would close it:** a measured reason to want the 850 ms — a `pnpm verify`
+that is too slow to run twice, or a third sweep arriving that would make it
+three passes rather than two.
+
+## 2026-11-09 (evening) — `tools/` is in no lane's row, and the second finding to land there picked an owner by guessing
+
+**Filed by:** `Loom daily build` · **Owned by:** `@jonathanbravecredit`
+(`docs/routines.md`, the lane table) · **Status:** open — **nothing is blocked
+and two findings have now been addressed on a guess**
+
+The lane table in `docs/routines.md` gives nine routines a row each. Eight name a
+directory; `Loom merge` names none deliberately. **`tools/` appears in none of
+them.** `Loom daily build`'s row reads *`src/` except `src/primitives/` and
+`src/signals/`, and the application shell*.
+
+So when #843 filed the wall-clock entry it wrote, in as many words, that `tools/`
+*"is not in the lane table at all, so the entry names `Loom daily build` as the
+closest fit and says to reassign it if that is wrong."* This run picked it up and
+acted on it, which makes two findings resolved against a directory nobody is
+recorded as owning.
+
+**The guess is probably right.** `tools/sources/files.ts` already says these
+checks *"live here, in the lane that owns the repository's own tooling"*, and
+`docs/routines.md` has this lane writing `pnpm weigh`, `pnpm shoot`,
+`pnpm specimen` and the decisions index. Nothing in this entry is a complaint
+about where the work landed.
+
+**What it is:** fifteen directories under `tools/` that four routines all run and
+none is recorded as owning, where the convention for every other directory in
+this repository is that exactly one routine edits it. A lane that wants to change
+a tool another lane depends on has no row to point at, and the only thing
+stopping two lanes editing `tools/screenshot/` on the same day is that neither
+has wanted to.
+
+**The recommendation is one cell:** add `tools/` to `Loom daily build`'s row.
+That matches what is already happening and what `files.ts` already claims. If it
+should be somewhere else — or explicitly shared, the way `Loom merge`'s row is
+explicitly nowhere — that is worth a sentence in the table rather than a third
+finding that opens by saying the table does not cover this.
