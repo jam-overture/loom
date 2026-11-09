@@ -119,6 +119,7 @@ const ByPageScreen = async ({
             address={address}
             open={opened?.treeId}
             primaryGoal={goals.ok ? primaryOf(goals.value)?.name : undefined}
+            now={now}
           />
           {opened === undefined || hourly === undefined ? null : (
             <PageDrawerPanel

@@ -1,4 +1,4 @@
-import { notFound } from "next/navigation"
+import { notFound, redirect } from "next/navigation"
 
 import { projectIdSchema } from "@jam-overture/loom/store"
 
@@ -54,7 +54,8 @@ const EventsScreen = async ({
   await requireActor(base)
   await requireRole(projectId)
 
-  const reading = await readSignals(projectId, query.range, Date.now())
+  const now = Date.now()
+  const reading = await readSignals(projectId, query.range, now)
   const rangeHref = (range: SignalsRange) => eventsHref(base, { ...query, range })
 
   if (!drawsTab(reading))
@@ -67,7 +68,7 @@ const EventsScreen = async ({
   const naming = namingOf(reading.published)
 
   const [page, opened, goals] = await Promise.all([
-    readEventPage(journal.read, query, query.before, naming),
+    readEventPage(journal.read, query, query.place, naming),
     query.open === undefined ? undefined : readOpenedEvent(journal.read, query.open),
     query.open === undefined
       ? undefined
@@ -85,11 +86,16 @@ const EventsScreen = async ({
     )
   }
 
-  const address = {
-    base,
-    filter: query,
-    before: query.before === undefined ? undefined : eventKeyOf(query.before),
+  /** Newer than this place, the newest page is all there is: its own address says so. */
+  if (page.value.at === "newest") {
+    redirect(
+      eventsHref(base, query, {
+        event: query.open === undefined ? undefined : eventKeyOf(query.open),
+      })
+    )
   }
+
+  const address = { base, filter: query, place: query.place }
   const shown = opened?.ok === true ? opened.value : undefined
   const counted =
     shown === undefined || goals?.ok !== true
@@ -107,7 +113,13 @@ const EventsScreen = async ({
         )}
       />
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
-        <EventsTable page={page.value} address={address} naming={naming} open={shown?.event.key} />
+        <EventsTable
+          page={page.value.page}
+          address={address}
+          naming={naming}
+          open={shown?.event.key}
+          now={now}
+        />
         {query.open === undefined ? null : shown === undefined ? (
           <p className="text-ink-muted w-full text-xs lg:w-[440px]">
             {opened?.ok === false
