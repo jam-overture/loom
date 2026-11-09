@@ -46,5 +46,15 @@ describe("the site pulls table — Postgres specifics", () => {
     expect((await store.record({ application, tag: '"a"', at: 2, kept: true })).ok).toBe(false)
     expect(await store.span(application)).toEqual({ ok: true, value: { first: 1, last: 2 } })
     expect((await store.newest(application)).ok).toBe(false)
+    expect(await store.takenSince(application, 0)).toEqual({
+      ok: true,
+      value: { answers: [{ first: 1, last: 2, kept: false }], namesBack: false },
+    })
+  })
+
+  it("says it cannot read what was taken where there is no table at all", async () => {
+    const store = postgresSitePullStore(await emptyDatabase())
+
+    expect((await store.takenSince(applicationIdSchema.parse("app_shop"), 0)).ok).toBe(false)
   })
 })

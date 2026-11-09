@@ -51,6 +51,21 @@ export type NewestAnswer = {
   readonly anyKept: boolean
 }
 
+/** One answer the site was given: when it was first and last given, and whether it was named back. */
+export type TakenAnswer = PullSpan & {
+  /** The site named this answer back as the pages it holds. */
+  readonly kept: boolean
+}
+
+export type TakenSince = {
+  readonly answers: readonly TakenAnswer[]
+  /**
+   * The site has named some answer back, ever, so it is one that says what it
+   * holds, and an answer it never named back is one it may have refused.
+   */
+  readonly namesBack: boolean
+}
+
 export type SitePullStoreError = { readonly code: "unavailable"; readonly detail: string }
 
 export interface SitePullStore {
@@ -64,19 +79,20 @@ export interface SitePullStore {
     application: ApplicationId
   ) => Promise<Result<PullSpan | null, SitePullStoreError>>
   /**
-   * When each answer the site took was first taken, for the answers first taken
-   * at or after `since`, earliest first.
+   * The answers the site was first given at or after `since`, earliest first,
+   * and whether it is a site that names back the pages it holds.
    *
    * Accepting a change changes the live pages and so their entity tag, so the
-   * first of these at or after the moment a change was accepted is when the
-   * site first took the pages that change made: the *Live* step of the
-   * timeline from *Accept*. An answer first taken before `since` and again
-   * after it is pages from before, so it is not listed.
+   * answers given at or after the moment a change was accepted are the pages
+   * that change made, and the first of them the site kept is when readers had
+   * it: the *Live* step of the timeline from *Accept*. An answer first given
+   * before `since` and again after it is pages from before, so it is not
+   * listed.
    */
-  readonly firstTakenSince: (
+  readonly takenSince: (
     application: ApplicationId,
     since: number
-  ) => Promise<Result<readonly number[], SitePullStoreError>>
+  ) => Promise<Result<TakenSince, SitePullStoreError>>
   /** `null` for a project whose site has never pulled. */
   readonly newest: (
     application: ApplicationId

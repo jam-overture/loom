@@ -13,6 +13,8 @@ import {
 } from "@jam-overture/loom"
 import type { StoredRevision } from "@jam-overture/loom/store"
 
+import type { TakenAnswer, TakenSince } from "@/app/_lib/pages/pulls"
+
 import {
   acceptedChangesOf,
   boundsAround,
@@ -49,6 +51,8 @@ const NOT_LIVE: Measurement = { kind: "not-live" }
 
 const AT = Date.UTC(2026, 10, 7, 9, 0)
 const MINUTE = 60_000
+
+const NOTHING_TAKEN: TakenSince = { answers: [], namesBack: false }
 
 const entry = (
   copy: TreeId,
@@ -97,10 +101,20 @@ const only = (records: readonly CopyRecord[]): AcceptedChange => {
   return change
 }
 
-const pulling = (taken: readonly number[], quiet = false): Reach => ({
+/** A site that has never named an answer back: each answer given is taken. */
+const pulling = (given: readonly number[], quiet = false): Reach => ({
   kind: "pulling",
   quiet,
-  taken,
+  answers: given.map((first) => ({ first, last: first, kept: false })),
+  namesBack: false,
+})
+
+/** A site that names back what it holds, given these answers. */
+const naming = (answers: readonly TakenAnswer[], quiet = false): Reach => ({
+  kind: "pulling",
+  quiet,
+  answers,
+  namesBack: true,
 })
 
 const titles = (change: AcceptedChange, reach: Reach, now = AT): readonly string[] =>
@@ -172,13 +186,20 @@ describe("acceptedChangesOf", () => {
 
 describe("reachOf", () => {
   it("passes the site's standing through, and the answers it took when it pulls", () => {
-    expect(reachOf({ kind: "own-site" }, { ok: true, value: [] })).toEqual({ kind: "own-site" })
-    expect(reachOf({ kind: "never" }, { ok: true, value: [] })).toEqual({ kind: "never" })
-    expect(reachOf({ kind: "unreadable" }, { ok: true, value: [] })).toEqual({
+    expect(reachOf({ kind: "own-site" }, { ok: true, value: NOTHING_TAKEN })).toEqual({
+      kind: "own-site",
+    })
+    expect(reachOf({ kind: "never" }, { ok: true, value: NOTHING_TAKEN })).toEqual({
+      kind: "never",
+    })
+    expect(reachOf({ kind: "unreadable" }, { ok: true, value: NOTHING_TAKEN })).toEqual({
       kind: "unreadable",
     })
     expect(
-      reachOf({ kind: "pulling", first: AT, last: AT, quiet: false }, { ok: true, value: [AT] })
+      reachOf(
+        { kind: "pulling", first: AT, last: AT, quiet: false },
+        { ok: true, value: { answers: [{ first: AT, last: AT, kept: false }], namesBack: false } }
+      )
     ).toEqual(pulling([AT]))
   })
 
@@ -259,6 +280,86 @@ describe("timelineOf", () => {
     expect(
       timelineOf(accepted, pulling([], true), AT, NOT_RECORDED, NOT_LIVE)[1]?.lines[0]
     ).toContain("has not pulled for over an hour")
+  })
+
+  describe("for a site that names back the pages it holds", () => {
+    const given = (first: number, last = first): TakenAnswer => ({ first, last, kept: false })
+    const kept = (first: number, last = first + MINUTE): TakenAnswer => ({
+      first,
+      last,
+      kept: true,
+    })
+
+    it("is live from the first answer since Accept the site named back, not the first given", () => {
+      const reach = naming([kept(AT - 5 * MINUTE), given(AT + MINUTE), kept(AT + 2 * MINUTE)])
+      const live = timelineOf(accepted, reach, AT + 3 * MINUTE, NOT_RECORDED, NOT_LIVE)[1]
+
+      expect(live).toMatchObject({ title: "Live", state: "done", at: AT + 2 * MINUTE })
+      expect(live?.lines[0]).toContain("named it back on its next pull")
+      expect(liveAtOf(accepted, reach)).toBe(AT + 2 * MINUTE)
+    })
+
+    it("says the page was given and is live from the pull that names it back", () => {
+      const live = timelineOf(
+        accepted,
+        naming([kept(AT - 5 * MINUTE), given(AT + MINUTE)]),
+        AT + 2 * MINUTE,
+        NOT_RECORDED,
+        NOT_LIVE
+      )[1]
+
+      expect(live).toMatchObject({ title: "Given to your site", state: "current", at: AT + MINUTE })
+      expect(liveAtOf(accepted, naming([given(AT + MINUTE)]))).toBeUndefined()
+    })
+
+    it("says the site is not keeping it once it has been given it for ten minutes, with the way to fix it", () => {
+      const reach = naming([
+        kept(AT - 5 * MINUTE),
+        given(AT + MINUTE),
+        given(AT + 3 * MINUTE, AT + 13 * MINUTE),
+      ])
+      const live = timelineOf(accepted, reach, AT + 13 * MINUTE, NOT_RECORDED, NOT_LIVE)[1]
+
+      expect(live).toMatchObject({
+        title: "Your site is not keeping the page with this change",
+        state: "current",
+        at: AT + MINUTE,
+        connect: true,
+      })
+      expect(live?.lines[1]).toContain("cannot read it")
+      expect(statusOf(accepted, reach).title).toBe(
+        "Your site is not keeping the page with this change"
+      )
+    })
+
+    it("says only that the site has gone quiet, whatever it was last given", () => {
+      const live = timelineOf(
+        accepted,
+        naming([given(AT + MINUTE, AT + 20 * MINUTE)], true),
+        AT + 90 * MINUTE,
+        NOT_RECORDED,
+        NOT_LIVE
+      )[1]
+
+      expect(live?.title).toBe("Waiting for your site to pull")
+      expect(live?.lines[0]).toContain("has not pulled for over an hour")
+    })
+
+    it("was never live where it came off the page before the site kept an answer with it", () => {
+      const undone = acceptedChangesOf(PAGE, [
+        first([
+          entry(PAGE, 1, "p_done", AT),
+          entry(PAGE, 2, "p_undo", AT + 2 * MINUTE, { undoes: 1 }),
+        ]),
+      ]).find((change) => change.proposalId === "p_done")
+
+      if (undone === undefined) throw new Error("expected the undone change")
+
+      const reach = naming([given(AT + MINUTE), kept(AT + 3 * MINUTE)])
+
+      expect(statusOf(undone, reach).title).toBe("Undone")
+      expect(liveAtOf(undone, reach)).toBeUndefined()
+    })
   })
 
   it("says a site that never pulled is connected for observation only, with the way to connect", () => {
