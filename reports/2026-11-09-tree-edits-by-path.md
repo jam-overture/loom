@@ -10,9 +10,13 @@ as a second pull request**. Record
 
 Preview:
 https://loom-git-framework-tree-walk-600a93-jpizzolato36-6341s-projects.vercel.app
-Nothing on it looks different, and nothing should. Every output of every
-function this run touches is unchanged. The chart is the measurement and it is
-the only thing here there is anything to look at.
+Nothing on it should look different: every output of every function this run
+touches is unchanged, and the chart is the measurement. **This run could not
+open the preview to confirm that** — `vercel.app` is not on the sandbox's egress
+allowlist, which is deliberate (`docs/routines.md`, *Network access*), so the
+URL is here for a reader who can reach it and is not a thing this run checked.
+That is the standing condition for every lane, not a new problem, so it is said
+here rather than filed.
 
 ## The migration is done, and this run did not do it
 
