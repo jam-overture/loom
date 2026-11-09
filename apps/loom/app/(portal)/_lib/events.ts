@@ -64,11 +64,39 @@ export const parseEventKey = (asked: string | undefined): EventPosition | undefi
 export const newerFirst = (a: EventPosition, b: EventPosition): number =>
   b.seq - a.seq || b.index - a.index
 
+/** Oldest first: the earlier delivery, and within one delivery the earlier signal. */
+export const olderFirst = (a: EventPosition, b: EventPosition): number => newerFirst(b, a)
+
 /** Strictly older than a position, which is what *the page after this one* starts from. */
 export const isOlderThan =
   (position: EventPosition) =>
   (event: EventPosition): boolean =>
     newerFirst(position, event) < 0
+
+/** Strictly newer than a position, which is what *the page before this one* ends at. */
+export const isNewerThan =
+  (position: EventPosition) =>
+  (event: EventPosition): boolean =>
+    newerFirst(position, event) > 0
+
+/**
+ * Below every delivery the journal can hold, whose places count from one: the
+ * place a read toward newer starts from when nothing it could start above is
+ * still kept.
+ */
+export const BEFORE_EVERY_EVENT: EventPosition = { seq: 0, index: 0 }
+
+/**
+ * Where a page of the list starts, when it is not the newest: the events just
+ * older than a place (*Older*, `before` in the address), or just newer than one
+ * (*Newer*, `after`).
+ */
+export type EventPlace = {
+  readonly towards: "older" | "newer"
+  readonly from: EventPosition
+}
+
+const PLACE_PARAM = { older: "before", newer: "after" } as const
 
 /** One delivery's signals as events, newest first. */
 export const eventsOfBatch = (batch: ReceivedBatch): readonly ReaderEvent[] =>
@@ -169,7 +197,7 @@ export type EventView = EventFilter & {
 }
 
 export type EventQuery = EventView & {
-  readonly before: EventPosition | undefined
+  readonly place: EventPlace | undefined
   readonly open: EventPosition | undefined
 }
 
@@ -188,16 +216,22 @@ export const eventQueryOf = (
     return typeof value === "string" ? value : undefined
   }
 
-  const before = parseEventKey(one("before"))
+  const placed = (towards: EventPlace["towards"]): EventPlace | undefined => {
+    const from = parseEventKey(one(PLACE_PARAM[towards]))
+
+    return from === undefined ? undefined : { towards, from }
+  }
+  /** A mangled address naming both ways reads the older one. */
+  const place = placed("older") ?? placed("newer")
 
   return {
     kind: parsedOr(readerSignalKindSchema, one("kind")),
     page: parsedOr(treeIdSchema, one("on")),
     view: parsedOr(viewKeySchema, one("view")),
     search: searchOf(one("q")),
-    live: one("live") === LIVE_ON && before === undefined,
+    live: one("live") === LIVE_ON && place === undefined,
     range: rangeOf(one("range")),
-    before,
+    place,
     open: parseEventKey(one("event")),
   }
 }
@@ -219,8 +253,9 @@ export const matchesFilter =
 export const eventsHref = (
   base: string,
   view: EventView,
-  more: { readonly before?: string | undefined; readonly event?: string | undefined } = {}
+  more: { readonly place?: EventPlace | undefined; readonly event?: string | undefined } = {}
 ): string => {
+  const { place } = more
   const query = new URLSearchParams(
     Object.entries({
       kind: view.kind,
@@ -228,8 +263,8 @@ export const eventsHref = (
       view: view.view,
       q: view.search,
       range: rangeParam(view.range),
-      live: view.live && more.before === undefined ? LIVE_ON : undefined,
-      before: more.before,
+      live: view.live && place === undefined ? LIVE_ON : undefined,
+      ...(place === undefined ? {} : { [PLACE_PARAM[place.towards]]: eventKeyOf(place.from) }),
       event: more.event,
     }).flatMap(([key, value]) => (value === undefined ? [] : [[key, value]]))
   ).toString()
@@ -238,18 +273,22 @@ export const eventsHref = (
 }
 
 /**
- * One page of the list, and where the next one starts.
+ * One page of the list, newest first, and where the pages either side of it
+ * start: *Older* reads below `older`, *Newer* above `newer`. `newer` is
+ * `undefined` only on the newest page, and `older` where nothing older is kept.
  *
- * `searchedTo` is set when the reading stopped at its budget before it had
+ * `searched` is set when the reading stopped at its budget before it had
  * fifty matching events: the list then holds what it found among the
- * deliveries received since that moment, and *Older* carries on from there.
- * Without it, a narrow filter over a busy window would read as *nothing
- * older* when the truth is *not looked at yet*.
+ * deliveries received between the place it started from and that moment, and
+ * the way it was reading carries on from there. Without it, a narrow filter
+ * over a busy window would read as *nothing older* when the truth is *not
+ * looked at yet*.
  */
 export type EventPage = {
   readonly events: readonly ReaderEvent[]
-  readonly older: string | undefined
-  readonly searchedTo: string | undefined
+  readonly older: EventPosition | undefined
+  readonly newer: EventPosition | undefined
+  readonly searched: { readonly towards: EventPlace["towards"]; readonly to: string } | undefined
 }
 
 /** A person's word for each part of the page, by the page's published version. */

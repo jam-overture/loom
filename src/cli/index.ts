@@ -1,8 +1,7 @@
 /**
- * The commands `loom` runs.
- *
- * Scaffolding a new project, and driving a proposal from the terminal against the
- * same runtime a server would use.
+ * The commands `loom` runs: scaffolding a new project, and adding a primitive
+ * to one. `parseArguments` takes `init`, `add primitive` and `--help`, and
+ * nothing here drives a proposal from the terminal.
  */
 
 export * from "./args.js"
