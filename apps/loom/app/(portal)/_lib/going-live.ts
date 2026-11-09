@@ -1,6 +1,8 @@
 import type { IntentId, ProposalId, StakeLevel, TreeId } from "@jam-overture/loom"
 import type { StoredRevision } from "@jam-overture/loom/store"
 
+import type { TakenAnswer, TakenSince } from "@/app/_lib/pages/pulls"
+
 import type { GoalId } from "./goals/goal"
 import type { ProposalGoal } from "./goals/serving"
 import {
@@ -18,7 +20,7 @@ import {
 import { firstNamed, namesInOperations, type PartName } from "./part-name"
 import type { PageCopy } from "./proposing/copies"
 import type { MadeFrom } from "./proposing/made-from"
-import { pullingWords, type Pulling } from "./pulling"
+import { NOT_KEPT_AFTER_MS, pullingWords, type Pulling } from "./pulling"
 import { changesOf } from "./revision-view"
 import { STAKES, type PlainLine } from "./vocabulary"
 import { plainDay } from "./when"
@@ -127,8 +129,8 @@ export const newestFirst = (left: AcceptedChange, right: AcceptedChange): number
   right.acceptedAt - left.acceptedAt || right.proposalId.localeCompare(left.proposalId)
 
 /**
- * Whether a project's site takes accepted changes, and when it took each
- * answer it has taken since the oldest change on the screen.
+ * Whether a project's site takes accepted changes, and each answer it was
+ * given since the oldest change on the screen.
  */
 export type Reach =
   | { readonly kind: "own-site" }
@@ -138,26 +140,33 @@ export type Reach =
       readonly kind: "pulling"
       /** No pull for over an hour (`QUIET_AFTER_MS`). */
       readonly quiet: boolean
-      /** When each answer was first taken, earliest first (`SitePullStore.firstTakenSince`). */
-      readonly taken: readonly number[]
+      /** Each answer it was given, earliest first (`SitePullStore.takenSince`). */
+      readonly answers: readonly TakenAnswer[]
+      /** It names back the pages it holds, so an answer it never named back was not taken. */
+      readonly namesBack: boolean
     }
 
 export const reachOf = (
   pulling: Pulling,
-  taken: { readonly ok: true; readonly value: readonly number[] } | { readonly ok: false }
+  taken: { readonly ok: true; readonly value: TakenSince } | { readonly ok: false }
 ): Reach => {
   if (pulling.kind !== "pulling") return { kind: pulling.kind }
   if (!taken.ok) return { kind: "unreadable" }
 
-  return { kind: "pulling", quiet: pulling.quiet, taken: taken.value }
+  return { kind: "pulling", quiet: pulling.quiet, ...taken.value }
 }
 
 /** Where the change is between *Accept* and live. */
 type Arrival =
-  | { readonly kind: "live"; readonly at: number }
+  /** `kept` where the site named the pages back, rather than only being given them. */
+  | { readonly kind: "live"; readonly at: number; readonly kept: boolean }
   /** It came off the page before any reader could have been given it. */
   | { readonly kind: "never-live" }
   | { readonly kind: "waiting"; readonly quiet: boolean }
+  /** Given to the site, which has not named it back yet. */
+  | { readonly kind: "given"; readonly at: number }
+  /** Given to the site since `since`, for long enough to tell, and never named back. */
+  | { readonly kind: "not-kept"; readonly since: number }
   | { readonly kind: "not-pulling" }
   | { readonly kind: "unreadable" }
 
@@ -165,30 +174,55 @@ const endedAt = (ending: Ending): number =>
   ending.kind === "standing" ? Number.POSITIVE_INFINITY : ending.at
 
 /**
+ * Where a standing change is that the site has not taken: not given yet, given
+ * and not yet named back, or given for long enough to tell and not kept. A
+ * site gone quiet is told that first, since nothing it is given reaches it.
+ */
+const untakenOf = (given: readonly TakenAnswer[], quiet: boolean): Arrival => {
+  const [first] = given
+  const newest = given.at(-1)
+
+  if (first === undefined || newest === undefined || quiet) return { kind: "waiting", quiet }
+
+  return newest.last - newest.first >= NOT_KEPT_AFTER_MS
+    ? { kind: "not-kept", since: first.first }
+    : { kind: "given", at: newest.first }
+}
+
+/**
  * When the change went live: at once for this deployment's own site, which
- * reads its pages from the store as it draws them (0259), and otherwise on the
- * site's first pull of a new answer after it was accepted, provided the change
- * was still on the page by then.
+ * reads its pages from the store as it draws them (0259), and otherwise when
+ * the site first took an answer given after it was accepted, provided the
+ * change was still on the page by then.
+ *
+ * **An answer given is not an answer taken.** A site whose installed Loom
+ * cannot read an answer refuses it whole and goes on serving the pages it
+ * held (`FINDINGS.md`, 7 November), so for a site that names back the pages
+ * it holds, the change is live from the first answer since *Accept* it named
+ * back. An answer replaced before the site's next pull is never named back,
+ * so the moment can be one pull late; never early. A site that has never
+ * named any answer back (or a deployment whose record cannot yet say) is read
+ * as before: the first answer given is the one taken.
  */
 const arrivalOf = (change: AcceptedChange, reach: Reach): Arrival => {
-  const live = (at: number): Arrival =>
-    at < endedAt(change.ending) ? { kind: "live", at } : { kind: "never-live" }
+  const live = (at: number, kept: boolean): Arrival =>
+    at < endedAt(change.ending) ? { kind: "live", at, kept } : { kind: "never-live" }
+  const standing = change.ending.kind === "standing"
 
   switch (reach.kind) {
     case "own-site":
-      return live(change.acceptedAt)
+      return live(change.acceptedAt, true)
     case "unreadable":
-      return change.ending.kind === "standing" ? { kind: "unreadable" } : { kind: "never-live" }
+      return standing ? { kind: "unreadable" } : { kind: "never-live" }
     case "never":
-      return change.ending.kind === "standing" ? { kind: "not-pulling" } : { kind: "never-live" }
+      return standing ? { kind: "not-pulling" } : { kind: "never-live" }
     case "pulling": {
-      const at = reach.taken.find((taken) => taken >= change.acceptedAt)
+      const given = reach.answers.filter((answer) => answer.first >= change.acceptedAt)
+      const taken = reach.namesBack ? given.find((answer) => answer.kept) : given[0]
 
-      if (at !== undefined) return live(at)
+      if (taken !== undefined) return live(taken.first, reach.namesBack)
 
-      return change.ending.kind === "standing"
-        ? { kind: "waiting", quiet: reach.quiet }
-        : { kind: "never-live" }
+      return standing ? untakenOf(given, reach.quiet) : { kind: "never-live" }
     }
   }
 }
@@ -298,7 +332,9 @@ const liveStep = (arrival: Arrival, reach: Reach): TimelineStep => {
         lines: [
           reach.kind === "own-site"
             ? "This deployment's own site reads its pages from Loom as it draws them, so it was live at once."
-            : "Your site's server took the page with this change on its first pull after it was accepted.",
+            : arrival.kept
+              ? "Your site's server took the page with this change, and named it back on its next pull as the page it holds."
+              : "Your site's server took the page with this change on its first pull after it was accepted.",
         ],
       }
     case "never-live":
@@ -316,6 +352,26 @@ const liveStep = (arrival: Arrival, reach: Reach): TimelineStep => {
             ? "Your site has not pulled for over an hour, so it may have stopped. The change is live from its next pull."
             : "Your site pulls its pages on its own schedule, and the change is live from its next pull.",
         ],
+      }
+    case "given":
+      return {
+        title: "Given to your site",
+        state: "current",
+        at: arrival.at,
+        lines: [
+          "Your site's server has been given the page with this change and has not yet named it back as the page it holds. It is live from the pull that does, usually the next one.",
+        ],
+      }
+    case "not-kept":
+      return {
+        title: "Your site is not keeping the page with this change",
+        state: "current",
+        at: arrival.since,
+        lines: [
+          "Your site has been given the page with this change on every pull since, and goes on asking for the pages it had before, so no reader has it.",
+          "The usual cause is that the version of Loom installed on your site cannot read it. Updating it there lets your site take it on its next pull.",
+        ],
+        connect: true,
       }
     case "not-pulling":
       return {

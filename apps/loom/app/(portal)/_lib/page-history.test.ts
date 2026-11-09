@@ -53,7 +53,12 @@ const changesOn = (revisions: readonly StoredRevision[]): readonly AcceptedChang
 
 const ended = (change: AcceptedChange, ending: Ending): AcceptedChange => ({ ...change, ending })
 
-const pulling = (taken: readonly number[]): Reach => ({ kind: "pulling", quiet: false, taken })
+const pulling = (given: readonly number[]): Reach => ({
+  kind: "pulling",
+  quiet: false,
+  answers: given.map((first) => ({ first, last: first, kept: false })),
+  namesBack: false,
+})
 
 const [newer, older] = changesOn([
   entry(1, "p_old", AT, "ana@example.com"),

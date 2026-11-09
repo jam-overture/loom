@@ -585,8 +585,12 @@ tag on every pull just as a healthy one is. What tells them apart is whether
 the site sent that tag back, so the door now records it (`kept`, `304`), and
 *Connect your site* says *Your site pulls, and is not keeping its newest
 pages* once a site that has named some answer back has been given the newest
-for ten minutes without naming it. The request is unchanged. **Still open on
-the timeline:** its *Live* step reads an answer given as an answer taken.
+for ten minutes without naming it. The request is unchanged. ~~**Still open on
+the timeline:** its *Live* step reads an answer given as an answer taken.~~
+**Closed on the timeline, 9 November:** for a site that names back what it
+holds, a change is live from the first answer since *Accept* the site named
+back, and an answer given for ten minutes and never named back says the site
+is not keeping it (`going-live.ts`, `SitePullStore.takenSince`).
 
 The client (`@jam-overture/loom/live`, 0361) refuses an answer whole when one
 page in it cannot be parsed by the version of Loom the customer has installed,

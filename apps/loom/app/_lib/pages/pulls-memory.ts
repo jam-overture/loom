@@ -1,11 +1,9 @@
 import { ok } from "@jam-overture/loom"
 import type { ApplicationId } from "@jam-overture/loom/store"
 
-import type { NewestAnswer, PullSpan, SitePullStore } from "./pulls"
+import type { NewestAnswer, PullSpan, SitePullStore, TakenAnswer } from "./pulls"
 
-type Answer = PullSpan & { readonly kept: boolean }
-
-const widened = (held: Answer | undefined, at: number, kept: boolean): Answer =>
+const widened = (held: TakenAnswer | undefined, at: number, kept: boolean): TakenAnswer =>
   held === undefined
     ? { first: at, last: at, kept }
     : {
@@ -24,7 +22,7 @@ const joined = (spans: readonly PullSpan[]): PullSpan | null =>
   )
 
 /** The answer first taken latest; on a tie the tag that sorts last, as the Postgres store breaks it. */
-const newestOf = (answers: ReadonlyMap<string, Answer>): NewestAnswer | null => {
+const newestOf = (answers: ReadonlyMap<string, TakenAnswer>): NewestAnswer | null => {
   const [newest] = [...answers.entries()].sort(
     ([leftTag, left], [rightTag, right]) =>
       right.first - left.first || rightTag.localeCompare(leftTag)
@@ -42,11 +40,11 @@ const newestOf = (answers: ReadonlyMap<string, Answer>): NewestAnswer | null => 
 
 /** The pulls in the process: the reference implementation. */
 export const memorySitePullStore = (): SitePullStore => {
-  const held = new Map<ApplicationId, ReadonlyMap<string, Answer>>()
+  const held = new Map<ApplicationId, ReadonlyMap<string, TakenAnswer>>()
 
   return {
     record: ({ application, tag, at, kept }) => {
-      const tags = held.get(application) ?? new Map<string, Answer>()
+      const tags = held.get(application) ?? new Map<string, TakenAnswer>()
 
       held.set(application, new Map([...tags, [tag, widened(tags.get(tag), at, kept)]]))
 
@@ -56,15 +54,18 @@ export const memorySitePullStore = (): SitePullStore => {
     span: (application) =>
       Promise.resolve(ok(joined([...(held.get(application)?.values() ?? [])]))),
 
-    firstTakenSince: (application, since) =>
-      Promise.resolve(
-        ok(
-          [...(held.get(application)?.values() ?? [])]
-            .map((span) => span.first)
-            .filter((first) => first >= since)
-            .sort((left, right) => left - right)
-        )
-      ),
+    takenSince: (application, since) => {
+      const answers = [...(held.get(application)?.values() ?? [])]
+
+      return Promise.resolve(
+        ok({
+          answers: answers
+            .filter((answer) => answer.first >= since)
+            .sort((left, right) => left.first - right.first),
+          namesBack: answers.some((answer) => answer.kept),
+        })
+      )
+    },
 
     newest: (application) => Promise.resolve(ok(newestOf(held.get(application) ?? new Map()))),
   }
