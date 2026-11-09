@@ -3,7 +3,13 @@
 **`Loom signals`, 9 November 2026, evening run.**
 Branch `signals-81-the-place-one-fix-recovers-most-of-a-page`. Record
 [0375](../decisions/0375-a-deployments-unread-places-are-a-fourth-order-ranked-on-what-one-fix-recovers.md),
-`Accepted`. `pnpm verify` **EXIT=0**, read out of a file.
+`Accepted`. `pnpm verify` **EXIT=0**, read out of a file. Pull request
+[#848](https://github.com/jam-overture/loom/pull/848); preview
+<https://loom-git-signals-81-the-plac-ef22d3-jpizzolato36-6341s-projects.vercel.app>,
+which Vercel reported `Building` as this was written — nothing in the change
+reaches the site, and this session's network policy does not reach
+`*.vercel.app`, so the deployment's own status is the evidence rather than a
+fetch of the page.
 
 ## What this run completed
 
