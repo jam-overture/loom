@@ -69454,3 +69454,72 @@ seconds; none of these three has either yet.
 
 **Measured** on this session's container with `tsx`, default stack, one run per
 size.
+
+---
+## 2026-11-09 (afternoon) — two whole-repository scans are wall-clock gates with 1.7x headroom, and they time out inside `pnpm verify` while passing beside it
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom daily build`
+(`tools/sources/code.test.ts`, `tools/sources/semicolons.test.ts`) ·
+**Status:** open — **it cost one run of this lane a full gate re-run and nothing
+else**; `main` is green and the tests are right about what they check
+
+`pnpm verify` went red on `signals-80-where-a-reading-of-a-page-stopped` after
+`Loom merge` brought `main` in, with two failures and both of them timeouts
+rather than assertions:
+
+```
+FAIL tools/sources/code.test.ts > every source in this repository > lexes to the end
+FAIL tools/sources/semicolons.test.ts > every source in this repository > ends no statement in a semicolon
+Error: Test timed out in 5000ms.
+```
+
+**It is not the branch's**, and it is not a flake with no cause.
+
+| | |
+| --- | --- |
+| the two tests on `main`, run beside each other | 2,451 ms and 2,587 ms |
+| the same two on the merged branch, beside each other | 2,711 ms and 3,304 ms |
+| `pnpm verify` on `main` | **EXIT=0** |
+| `pnpm verify` on the branch, first run | **EXIT=1** — these two, timed out |
+| `pnpm verify` on the branch, re-run | **EXIT=0**, 14,216 tests |
+
+**What the branch's own files cost that scan is nothing measurable.** Three runs
+of the semicolons scan with `src/signals/frontier.ts` and `frontier.test.ts`
+present: **2,773, 2,760, 2,983 ms**. Three runs with those two files moved out of
+the tree and nothing else changed: **2,654, 2,745, 2,991 ms**. The distributions
+overlap completely. The 717 ms that separated the branch from `main` on a single
+sample each was run-to-run variance, and reading it as the diff's cost would have
+been the wrong conclusion from the right-looking number.
+
+**The cause is that the budget is wall clock and the work is the whole
+repository.** Each test reads and lexes every source under `src/`, `tools/` and
+`apps/loom/`, which is ~2.7 s on an idle container against vitest's default
+5,000 ms — about **1.7x**. Inside `pnpm verify` the suite runs many files in
+parallel on a shared CPU, so the same scan can take twice as long in wall-clock
+terms while doing identical work. The repository grows every day and the scan
+grows with it; the headroom only goes one way.
+
+**This is the second instance of one shape**, and the first is this lane's own
+entry of 4 November (evening) about `src/signals/ledger.test.ts` carrying a
+wall-clock ratio with no headroom while being the gate for four surfaces. Two
+gates, two lanes, one failure mode: a number of milliseconds standing in for an
+amount of work, on a machine whose speed is not the thing under test.
+
+**Not fixed here, because `tools/` is not this lane's** — and it is not in the
+lane table at all, so the ownership above is the closest fit rather than the
+table's answer. Reassign it if that is wrong.
+
+**Two shapes a fix could take, and the second is the one worth the code.**
+
+1. **Give the two tests a timeout that matches what they do.** Vitest says so
+   itself in the failure text, and a whole-repository scan is a long-running test
+   by any honest reading. One argument each, and it buys time rather than
+   headroom — the ratio goes back to 3x or 4x and starts shrinking again.
+2. **Stop measuring the machine.** Neither test is about speed: both are about
+   whether any source in the repository lexes to its end and whether any
+   statement ends in a semicolon. A budget per thousand lines scanned, or a cap
+   on bytes rather than on seconds, asserts the thing they exist to assert and
+   cannot be failed by a busy container. The same argument applies to the
+   `ledger.test.ts` entry, where the measurement genuinely *is* about cost — so
+   the honest version there is a ratio against a calibration run rather than a
+   constant.
