@@ -7,7 +7,7 @@
 **Target:** [`docs/portal-wireframes.md`](../docs/portal-wireframes.md) *1 ·
 Signals, By page*
 
-Claimed by a portal run at 2026-11-09 23:25 UTC.
+Claimed by a portal run at 2026-11-09 23:20 UTC.
 
 ## Why this, and why now
 
