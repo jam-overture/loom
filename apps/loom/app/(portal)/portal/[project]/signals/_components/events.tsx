@@ -6,6 +6,7 @@ import { DEFAULT_AUDIENCE_ID } from "@jam-overture/loom/store"
 
 import { FilterChips } from "@/app/(portal)/_components/filter-chips"
 import { GoalChip } from "@/app/(portal)/_components/goal-chip"
+import { Pager } from "@/app/(portal)/_components/pager"
 import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"
 import {
   eventSentence,
@@ -23,6 +24,7 @@ import {
   type ReaderEvent,
 } from "@/app/(portal)/_lib/events"
 import type { OpenedEvent } from "@/app/(portal)/_lib/events-reading"
+import { spanLine, stretchWords } from "@/app/(portal)/_lib/list-span"
 import { rangeParam } from "@/app/(portal)/_lib/signals-range"
 import { SIGNAL_KINDS } from "@/app/(portal)/_lib/vocabulary"
 import { plainMoment } from "@/app/(portal)/_lib/when"
@@ -191,7 +193,18 @@ export const EventFacets = ({
   )
 }
 
-const Pager = ({ page, address }: { page: EventPage; address: EventsAddress }) => (
+/** How many events a page shows. Not its place in the list, which a cursor read cannot know. */
+const eventsWords = (shown: number): string => (shown === 1 ? "1 event" : `${shown} events`)
+
+const EventsPager = ({
+  page,
+  address,
+  now,
+}: {
+  page: EventPage
+  address: EventsAddress
+  now: number
+}) => (
   <div className="text-ink-muted flex flex-col gap-2 text-xs">
     {page.searchedTo === undefined ? null : (
       <p>
@@ -200,25 +213,25 @@ const Pager = ({ page, address }: { page: EventPage; address: EventsAddress }) =
         Older events continue on the next page.
       </p>
     )}
-    <span className="flex justify-end gap-3">
-      {address.before === undefined ? (
-        <span aria-disabled="true">Newest</span>
-      ) : (
-        <Link href={eventsHref(address.base, address.filter)} className="text-ink">
-          Newest
-        </Link>
-      )}
-      {page.older === undefined ? (
-        <span aria-disabled="true">Older</span>
-      ) : (
-        <Link
-          href={eventsHref(address.base, address.filter, { before: page.older })}
-          className="text-ink"
-        >
-          Older
-        </Link>
-      )}
-    </span>
+    <Pager
+      span={
+        page.events.length === 0
+          ? undefined
+          : spanLine(
+              eventsWords(page.events.length),
+              stretchWords(page.events.at(-1)?.receivedAt, page.events[0]?.receivedAt, now)
+            )
+      }
+      back={{
+        label: "Newest",
+        href: address.before === undefined ? undefined : eventsHref(address.base, address.filter),
+      }}
+      older={
+        page.older === undefined
+          ? undefined
+          : eventsHref(address.base, address.filter, { before: page.older })
+      }
+    />
   </div>
 )
 
@@ -227,11 +240,13 @@ export const EventsTable = ({
   address,
   naming,
   open,
+  now,
 }: {
   page: EventPage
   address: EventsAddress
   naming: Naming
   open: string | undefined
+  now: number
 }) => (
   <div className="flex min-w-0 flex-1 flex-col gap-2">
     {page.events.length === 0 && page.searchedTo === undefined ? (
@@ -281,7 +296,7 @@ export const EventsTable = ({
         </table>
       </div>
     )}
-    <Pager page={page} address={address} />
+    <EventsPager page={page} address={address} now={now} />
   </div>
 )
 

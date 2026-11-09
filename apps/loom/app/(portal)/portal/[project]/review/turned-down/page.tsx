@@ -3,10 +3,12 @@ import { notFound } from "next/navigation"
 
 import { projectIdSchema } from "@jam-overture/loom/store"
 
+import { Pager } from "@/app/(portal)/_components/pager"
 import { Screen } from "@/app/(portal)/_components/screen"
 import { StateNotice } from "@/app/(portal)/_components/state-notice"
 import { requireActor, requireRole } from "@/app/(portal)/_lib/auth/identity"
-import { changesPage } from "@/app/(portal)/_lib/changes-page"
+import { changesPage, newerHref, olderHref } from "@/app/(portal)/_lib/changes-page"
+import { positionWords, spanLine, stretchWords } from "@/app/(portal)/_lib/list-span"
 import { single, type Query } from "@/app/(portal)/_lib/query"
 import { countWords, RECENT_DAYS } from "@/app/(portal)/_lib/turned-down-list"
 import { readTurnedDown } from "@/app/(portal)/_lib/turned-down-reading"
@@ -42,7 +44,9 @@ const TurnedDownPage = async ({
   await requireActor(here)
   await requireRole(projectId)
 
-  const reading = await readTurnedDown(projectId, Date.now())
+  const now = Date.now()
+
+  const reading = await readTurnedDown(projectId, now)
 
   const body = (() => {
     if (reading.kind === "unavailable") {
@@ -90,18 +94,14 @@ const TurnedDownPage = async ({
         {page.rows.map((row) => (
           <TurnedDownCard key={row.proposalId} row={row} projectId={projectId} />
         ))}
-        <nav className="flex gap-4 text-xs">
-          {before === undefined ? null : (
-            <Link href={here} className="text-ink">
-              Newest
-            </Link>
+        <Pager
+          span={spanLine(
+            positionWords(page.first, page.last, reading.count),
+            stretchWords(page.rows.at(-1)?.at, page.rows[0]?.at, now)
           )}
-          {page.older === undefined ? null : (
-            <Link href={`${here}?before=${page.older}`} className="text-ink">
-              Older
-            </Link>
-          )}
-        </nav>
+          back={{ label: "Newer", href: newerHref(here, page.newer) }}
+          older={olderHref(here, page.older)}
+        />
       </div>
     )
   })()

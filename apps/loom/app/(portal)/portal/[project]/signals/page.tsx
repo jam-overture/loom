@@ -54,7 +54,8 @@ const EventsScreen = async ({
   await requireActor(base)
   await requireRole(projectId)
 
-  const reading = await readSignals(projectId, query.range, Date.now())
+  const now = Date.now()
+  const reading = await readSignals(projectId, query.range, now)
   const rangeHref = (range: SignalsRange) => eventsHref(base, { ...query, range })
 
   if (!drawsTab(reading))
@@ -107,7 +108,13 @@ const EventsScreen = async ({
         )}
       />
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
-        <EventsTable page={page.value} address={address} naming={naming} open={shown?.event.key} />
+        <EventsTable
+          page={page.value}
+          address={address}
+          naming={naming}
+          open={shown?.event.key}
+          now={now}
+        />
         {query.open === undefined ? null : shown === undefined ? (
           <p className="text-ink-muted w-full text-xs lg:w-[440px]">
             {opened?.ok === false

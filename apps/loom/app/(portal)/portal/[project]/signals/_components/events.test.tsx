@@ -50,6 +50,8 @@ const firstOf = (list: readonly ReaderEvent[]): ReaderEvent => {
   return first
 }
 
+const NOW = Date.parse("2026-11-05T15:00:00.000Z")
+
 const address: EventsAddress = {
   base: "/portal/prj_a/signals",
   filter: {
@@ -72,7 +74,9 @@ const page = (overrides: Partial<EventPage> = {}): EventPage => ({
 
 describe("Events", () => {
   it("lists each event by what happened, on which page and part, linking to its drawer", () => {
-    render(<EventsTable page={page()} address={address} naming={naming} open={undefined} />)
+    render(
+      <EventsTable page={page()} address={address} naming={naming} open={undefined} now={NOW} />
+    )
 
     const rows = screen.getAllByRole("row").slice(1)
 
@@ -94,6 +98,7 @@ describe("Events", () => {
         address={{ ...address, before: "3.0" }}
         naming={naming}
         open={undefined}
+        now={NOW}
       />
     )
 
@@ -105,6 +110,16 @@ describe("Events", () => {
     )
   })
 
+  it("says how many events the page shows and the stretch of time they were received in", () => {
+    render(
+      <EventsTable page={page()} address={address} naming={naming} open={undefined} now={NOW} />
+    )
+
+    expect(screen.getByText("2 events · at 09:30 UTC today")).toBeTruthy()
+    expect(screen.getByText("Newest").getAttribute("aria-disabled")).toBe("true")
+    expect(screen.getByText("Older").getAttribute("aria-disabled")).toBe("true")
+  })
+
   it("says how far back it looked when it stopped before filling a page", () => {
     render(
       <EventsTable
@@ -112,6 +127,7 @@ describe("Events", () => {
         address={address}
         naming={naming}
         open={undefined}
+        now={NOW}
       />
     )
 
@@ -123,7 +139,13 @@ describe("Events", () => {
 
   it("says plainly when nothing kept matches", () => {
     render(
-      <EventsTable page={page({ events: [] })} address={address} naming={naming} open={undefined} />
+      <EventsTable
+        page={page({ events: [] })}
+        address={address}
+        naming={naming}
+        open={undefined}
+        now={NOW}
+      />
     )
 
     expect(screen.getByText("Nothing kept matches this filter.")).toBeTruthy()
