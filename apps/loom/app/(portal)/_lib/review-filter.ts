@@ -59,11 +59,15 @@ export const reviewFilterOf = (query: {
   readonly standing: string | undefined
 }): ReviewFilter => ({ goal: goalOf(query.goal), standing: standingOf(query.standing) })
 
-/** The address of *For review* with this filter, carrying only what narrows it. */
-export const reviewHrefOf = (projectId: string, filter: ReviewFilter): string => {
+/**
+ * The address of *For review* with this filter, carrying only what narrows it,
+ * and the change whose drawer is open (`?change=`) where one is.
+ */
+export const reviewHrefOf = (projectId: string, filter: ReviewFilter, change?: string): string => {
   const query = new URLSearchParams([
     ...(filter.goal === null ? [] : [["goal", filter.goal]]),
     ...(filter.standing === null ? [] : [["standing", filter.standing]]),
+    ...(change === undefined ? [] : [["change", change]]),
   ])
   const search = query.toString()
 

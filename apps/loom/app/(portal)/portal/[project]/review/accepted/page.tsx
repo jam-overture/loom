@@ -4,11 +4,11 @@ import { notFound } from "next/navigation"
 import { projectIdSchema } from "@jam-overture/loom/store"
 
 import { GoalChip } from "@/app/(portal)/_components/goal-chip"
+import { Pager } from "@/app/(portal)/_components/pager"
 import { Screen } from "@/app/(portal)/_components/screen"
 import { StateNotice } from "@/app/(portal)/_components/state-notice"
 import { requireActor, requireRole } from "@/app/(portal)/_lib/auth/identity"
 import {
-  acceptedPage,
   goalNameOf,
   sentencesOf,
   servedOf,
@@ -18,6 +18,8 @@ import {
 import { plainMoment } from "@/app/(portal)/_lib/when"
 
 import { readAccepted } from "@/app/(portal)/_lib/accepted/reading"
+import { changesPage, newerHref, olderHref } from "@/app/(portal)/_lib/changes-page"
+import { positionWords, spanLine, stretchWords } from "@/app/(portal)/_lib/list-span"
 import { single } from "@/app/(portal)/_lib/query"
 
 /**
@@ -56,7 +58,9 @@ const AcceptedPage = async ({
   await requireActor(here)
   await requireRole(projectId)
 
-  const reading = await readAccepted(projectId, Date.now())
+  const now = Date.now()
+
+  const reading = await readAccepted(projectId, now)
 
   const body = (() => {
     if (reading.kind === "unavailable") {
@@ -93,7 +97,7 @@ const AcceptedPage = async ({
       )
     }
 
-    const page = acceptedPage(reading.changes, before)
+    const page = changesPage(reading.changes, before)
 
     return (
       <div className="flex flex-col gap-3">
@@ -133,18 +137,14 @@ const AcceptedPage = async ({
             </Link>
           )
         })}
-        <nav className="flex gap-4 text-xs">
-          {before === undefined ? null : (
-            <Link href={here} className="text-ink">
-              Newest
-            </Link>
+        <Pager
+          span={spanLine(
+            positionWords(page.first, page.last, { count: reading.changes.length, more: false }),
+            stretchWords(page.rows.at(-1)?.acceptedAt, page.rows[0]?.acceptedAt, now)
           )}
-          {page.older === undefined ? null : (
-            <Link href={`${here}?before=${page.older}`} className="text-ink">
-              Older
-            </Link>
-          )}
-        </nav>
+          newer={newerHref(here, page.newer)}
+          older={olderHref(here, page.older)}
+        />
       </div>
     )
   })()

@@ -53,5 +53,22 @@ export const describeTurnedDownStoreContract = (
 
       expect(unwrap(await store.forPage(HOME, 10))).toEqual([entry("b", 1)])
     })
+
+    it("reads every page's since a moment, newest first, at most as many as asked", async () => {
+      const store = await make()
+
+      unwrap(await store.record(entry("a", 1)))
+      unwrap(await store.record(entry("b", 3)))
+      unwrap(await store.record(entry("c", 2, PRICING)))
+      unwrap(await store.record(entry("d", 4, PRICING)))
+
+      expect(unwrap(await store.since(2, 10))).toEqual([
+        entry("d", 4, PRICING),
+        entry("b", 3),
+        entry("c", 2, PRICING),
+      ])
+      expect(unwrap(await store.since(2, 2))).toEqual([entry("d", 4, PRICING), entry("b", 3)])
+      expect(unwrap(await store.since(5, 10))).toEqual([])
+    })
   })
 }

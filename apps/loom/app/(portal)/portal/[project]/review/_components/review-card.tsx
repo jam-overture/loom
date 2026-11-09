@@ -10,16 +10,20 @@ import { AnswerControls } from "./answer-controls"
  * a page's own draw it: its goal (0352) where which goal it serves was read,
  * its page and how long it has waited, the change, its standing against the
  * site's newer version (0340), who proposed it, why the Gate stopped, the
- * stake, and *Accept* and *Turn down*, or the role that can answer it.
+ * stake, and *Accept* and *Turn down*, or the role that can answer it. The
+ * change itself opens its drawer on *For review* (`open`).
  */
 export const ReviewCard = ({
   row,
   projectId,
   goalsRead,
+  open,
 }: {
   readonly row: QueueRow
   readonly projectId: string
   readonly goalsRead: boolean
+  /** The address of the drawer for this change. */
+  readonly open: string
 }) => (
   <section className="border-edge-subtle bg-surface-base flex flex-col gap-2 rounded-lg border p-4">
     {goalsRead && <GoalChip goal={row.goal} />}
@@ -32,7 +36,9 @@ export const ReviewCard = ({
       </Link>
       <span className="text-ink-muted text-xs">{row.since}</span>
     </div>
-    <p className="m-0 text-sm">&ldquo;{row.asked}&rdquo;</p>
+    <Link href={open} className="text-ink m-0 text-sm no-underline hover:underline">
+      &ldquo;{row.asked}&rdquo;
+    </Link>
     {row.standingSentence === null ? null : (
       <p
         className={`m-0 text-xs ${row.standing === "conflicts" ? "text-refuse-ink" : "text-ink-secondary"}`}

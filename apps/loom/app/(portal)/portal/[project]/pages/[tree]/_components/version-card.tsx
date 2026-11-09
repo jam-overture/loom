@@ -2,14 +2,9 @@ import Link from "next/link"
 import type { ReactNode } from "react"
 
 import { GoalChip } from "@/app/(portal)/_components/goal-chip"
+import { OutcomeChip } from "@/app/(portal)/_components/outcome-chip"
 import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"
 import type { Outcome } from "@/app/(portal)/_lib/page-history"
-
-const TONE: Readonly<Record<Outcome["tone"], string>> = {
-  good: "bg-applied text-applied-ink border-applied-ink/20",
-  bad: "bg-refuse text-refuse-ink border-refuse-ink/20",
-  plain: "border-edge-subtle text-ink-secondary",
-}
 
 /**
  * One version of a page on its *History* tab: what changed, where it came
@@ -48,11 +43,7 @@ export const VersionCard = ({
     }`}
   >
     <div className="flex flex-wrap items-center gap-2">
-      <span
-        className={`inline-block rounded border px-1.5 py-px text-[11px] font-medium ${TONE[outcome.tone]}`}
-      >
-        {outcome.label}
-      </span>
+      <OutcomeChip outcome={outcome} />
       {goal === undefined ? null : <GoalChip goal={goal} />}
     </div>
     <h3 className="m-0 text-sm font-medium tracking-tight">{heading}</h3>

@@ -1,4 +1,4 @@
-import { and, desc, eq, sql } from "drizzle-orm"
+import { and, desc, eq, gte, sql, type SQL } from "drizzle-orm"
 import { bigint, pgTable, primaryKey, text } from "drizzle-orm/pg-core"
 
 import { err, ok, proposalIdSchema, treeIdSchema } from "@jam-overture/loom"
@@ -49,6 +49,40 @@ const failure = (cause: unknown, detail: string): TurnedDownStoreError => ({
   detail: `${detail}: ${cause instanceof Error ? cause.message : String(cause)}`,
 })
 
+/** One application's rows that match `where`, newest first, at most `limit`. */
+const readRows = async (
+  db: LoomDatabase,
+  where: SQL,
+  application: ApplicationId,
+  limit: number
+): Promise<readonly TurnedDown[]> => {
+  const rows = await db
+    .select()
+    .from(loomTurnedDown)
+    .where(and(eq(loomTurnedDown.applicationId, application), where))
+    .orderBy(desc(loomTurnedDown.turnedDownAt), loomTurnedDown.proposalId)
+    .limit(Math.max(0, limit))
+
+  /** A row whose ids do not parse is not one this build wrote, so it is left out. */
+  return rows.flatMap((row): TurnedDown[] => {
+    const proposalId = proposalIdSchema.safeParse(row.proposalId)
+    const page = treeIdSchema.safeParse(row.pageTreeId)
+
+    return proposalId.success && page.success
+      ? [
+          {
+            proposalId: proposalId.data,
+            pageId: page.data,
+            request: row.request,
+            reason: row.reason,
+            by: row.turnedDownBy,
+            at: row.turnedDownAt,
+          },
+        ]
+      : []
+  })
+}
+
 export const postgresTurnedDownStore = (
   db: LoomDatabase,
   scope: { readonly application: ApplicationId }
@@ -76,40 +110,17 @@ export const postgresTurnedDownStore = (
 
   forPage: async (pageId, limit) => {
     try {
-      const rows = await db
-        .select()
-        .from(loomTurnedDown)
-        .where(
-          and(
-            eq(loomTurnedDown.applicationId, scope.application),
-            eq(loomTurnedDown.pageTreeId, pageId)
-          )
-        )
-        .orderBy(desc(loomTurnedDown.turnedDownAt), loomTurnedDown.proposalId)
-        .limit(Math.max(0, limit))
-
-      /** A row whose ids do not parse is not one this build wrote, so it is left out. */
-      return ok(
-        rows.flatMap((row): TurnedDown[] => {
-          const proposalId = proposalIdSchema.safeParse(row.proposalId)
-          const page = treeIdSchema.safeParse(row.pageTreeId)
-
-          return proposalId.success && page.success
-            ? [
-                {
-                  proposalId: proposalId.data,
-                  pageId: page.data,
-                  request: row.request,
-                  reason: row.reason,
-                  by: row.turnedDownBy,
-                  at: row.turnedDownAt,
-                },
-              ]
-            : []
-        })
-      )
+      return ok(await readRows(db, eq(loomTurnedDown.pageTreeId, pageId), scope.application, limit))
     } catch (cause) {
       return err(failure(cause, `could not read what was turned down on ${pageId}`))
+    }
+  },
+
+  since: async (at, limit) => {
+    try {
+      return ok(await readRows(db, gte(loomTurnedDown.turnedDownAt, at), scope.application, limit))
+    } catch (cause) {
+      return err(failure(cause, `could not read what was turned down since ${at}`))
     }
   },
 })

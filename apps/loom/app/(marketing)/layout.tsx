@@ -3,8 +3,9 @@ import type { Metadata } from "next"
 import type { ReactNode } from "react"
 
 import { CountReaders } from "@/app/(marketing)/_components/count-readers"
+import { SiteNavigation } from "@/app/(marketing)/_components/site-navigation"
 import { readerSignalUrl } from "@/app/(marketing)/_lib/readers/counting"
-import { HOME, siteOrigin } from "@/app/(marketing)/_lib/site"
+import { HOME, SITE_PATHS, siteOrigin } from "@/app/(marketing)/_lib/site"
 
 import "./globals.css"
 
@@ -59,8 +60,9 @@ export const metadata: Metadata = {
 const GEIST = "https://fonts.googleapis.com/css2?family=Geist:wght@400;700&display=swap"
 
 /**
- * The one thing this layout mounts besides Vercel Speed Insights, and the only
- * code of this site's own that runs in a browser.
+ * What this layout mounts besides Vercel Speed Insights: the reader counter
+ * below, and `SiteNavigation`, which takes clicks on this site's own links so
+ * moving between pages does not load a new document. Neither draws anything.
  *
  * It is here rather than on a page because a broadcaster's subject is *a
  * visit*, not a page: it is started once against the tree the document
@@ -97,6 +99,7 @@ const RootLayout = async ({ children }: { readonly children: ReactNode }) => {
       </head>
       <body>
         {children}
+        <SiteNavigation paths={SITE_PATHS} />
         {url === null ? null : <CountReaders url={url} />}
         <SpeedInsights />
       </body>

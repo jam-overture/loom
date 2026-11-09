@@ -10,6 +10,7 @@ import {
   keyOf,
   loomOutcomeOf,
   marksOf,
+  newestOf,
   originOf,
   siteOutcomeOf,
   versionWordsOf,
@@ -53,7 +54,12 @@ const changesOn = (revisions: readonly StoredRevision[]): readonly AcceptedChang
 
 const ended = (change: AcceptedChange, ending: Ending): AcceptedChange => ({ ...change, ending })
 
-const pulling = (taken: readonly number[]): Reach => ({ kind: "pulling", quiet: false, taken })
+const pulling = (given: readonly number[]): Reach => ({
+  kind: "pulling",
+  quiet: false,
+  answers: given.map((first) => ({ first, last: first, kept: false })),
+  namesBack: false,
+})
 
 const [newer, older] = changesOn([
   entry(1, "p_old", AT, "ana@example.com"),
@@ -103,6 +109,26 @@ describe("historyOf", () => {
     const history = historyOf(PAGE, [older], [AT], { kind: "own-site" })
 
     expect(history.versions.map(keyOf)).toEqual(["p_old", `site-${AT}`])
+  })
+})
+
+describe("newestOf", () => {
+  it("has none for a page nothing happened to", () => {
+    expect(newestOf(historyOf(PAGE, [], [], pulling([])))).toBeUndefined()
+  })
+
+  it("is the newest version readers had", () => {
+    const reach = pulling([AT + HOUR, AT + 3 * DAY + HOUR])
+    const newest = newestOf(historyOf(PAGE, [newer, older], [AT + 4 * DAY], reach))
+
+    expect(newest === undefined ? undefined : keyOf(newest)).toBe(`site-${AT + 4 * DAY}`)
+  })
+
+  it("is a change accepted and on its way to readers, ahead of what they have", () => {
+    const newest = newestOf(historyOf(PAGE, [newer, older], [], pulling([AT + HOUR])))
+
+    expect(newest === undefined ? undefined : keyOf(newest)).toBe("p_new")
+    expect(newest?.kind === "loom" ? newest.liveAt : "site").toBeUndefined()
   })
 })
 
