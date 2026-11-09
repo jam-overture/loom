@@ -510,11 +510,11 @@ spend an hour on it.
 *Taken from the `vercel[bot]` comment after the pull request was opened, not
 composed from the branch name.*
 
-PREVIEW_URL_HERE
+https://loom-git-docs-82-two-limits-7465b9-jpizzolato36-6341s-projects.vercel.app
 
 The page the pictures are of:
 
-PREVIEW_PAGE_HERE
+- https://loom-git-docs-82-two-limits-7465b9-jpizzolato36-6341s-projects.vercel.app/docs/the-runtime/what-your-readers-do
 
 Every picture above was taken against a build in this container, not fetched
 from the preview: `*.vercel.app` is denied by the environment's egress policy,
