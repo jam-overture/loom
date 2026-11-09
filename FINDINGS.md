@@ -8,6 +8,166 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-11-09 — a ready-made section cannot be shown on any page but the one it was dropped into, because it ships a live link and a developer tool's claims
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom primitives`
+(`src/primitives/compositions/`) · **Status:** open — **nothing is broken for a
+host and one band on this site is weaker than it should be.** The marketing
+site now says the ready-made sections exist; it cannot show one, and the two
+reasons are independent.
+
+`STARTER_COMPOSITIONS` is 67 designs across the 22 sections a landing page has,
+settled as a shape by
+[0120](decisions/0120-a-starting-composition-is-a-subtree-a-catalogue-hands-to-the-ordinary-seam.md)
+on 9 September, and until today no page, band or sentence of
+`app/(marketing)/` mentioned them.
+`_lib/ready.ts` is the band that does. **It names three figures and renders
+nothing**, and this entry is why — because the band that was set out to be
+built is a browser frame with a ready-made section composed inside it at the
+same moment as the rest of the page, the way `_lib/example.ts` renders the
+coffee page.
+
+### 1. Every section with a control ships a live same-origin path
+
+`heroBand` ships two actions whose paths are a sign-up page and a price list.
+`ctaBand`, `navBand`, `footerBand`, `bannerBand`, `pricingBand` and
+`changelogBand` are the same shape, and `contactDetailsBand` goes one further
+with a `mailto:` and a `tel:` of its own. The reasoning is recorded in
+`hero-band.ts` and it is right for the host it was written for:
+
+> *"A same-origin path is a destination on the site this band is dropped into
+> (0100, 0102), so the band arrives with no dependency on anything outside the
+> deployment. The alternative — a placeholder on someone else's domain — ships
+> a live link to a third party in a tree a page might publish before anyone
+> re-reads it."*
+
+**Both of the available spellings are wrong for a host that has not edited the
+band yet, and the one that was chosen is the better of the two.** A path on the
+host's own origin is a **dead button** until the host has that route, which on
+this surface is a gate failure rather than a soft defect: `routes.test.ts`'
+*sends nobody to an address this application does not serve* goes red on the
+first of them, and `_lib/example.ts` carries this lane's own argument for why —
+*"a button pointing anywhere real is a lie about the fictional product, and a
+reader who presses it and arrives in the documentation has been tricked by the
+one site that sells not being tricked."*
+
+Measured on `main` at `0689121`: **39 of the 67 designs carry at least one
+link**, and between them they name **43 distinct paths of the host's own** —
+`/start`, `/about`, `/billing`, `/careers`, `/sign-in`, `/shop` and the rest.
+Three of the 43 happen to be addresses this application serves (`/`, `/docs`,
+`/demo`); the other forty are not, and the gate names the first one it meets.
+
+**What would answer it, and this lane has no opinion on which.** Three shapes,
+in ascending order of what they ask of the library:
+
+| | what it does | what it costs |
+| --- | --- | --- |
+| a documented *href the host must set* | nothing changes in the tree; the catalogue says which props are placeholders | a host that forgets still ships a dead button |
+| a control with no destination | `loom.action` would need to render a disabled control, which it cannot today | a band that arrives inert reads as broken rather than as unfinished |
+| a fragment of the band's own id | lands the reader back where they are, which `routes.test.ts` separately refuses | nothing, on a host; still unshowable here |
+
+This lane's own need is narrower than any of them and is worth stating
+separately: **a way to build a section for display rather than for insertion**
+would answer it, because the thing a marketing page wants is the paint and not
+the destinations.
+
+### 2. The placeholder copy is a developer tool's, in this site's own register
+
+The fiction the catalogue is written in is a project-management tool called
+*Overture*, and its copy is excellent for the job it was written for. On
+**this** page it is unusable, because a visitor cannot tell whose claims they
+are reading:
+
+| the band | what it says |
+| --- | --- |
+| `heroBand` | *"Plan the work, review the change, and see what shipped"* |
+| `bentoBand` | *"Every change is a diff you can read"*, *"Undo is one operation"* |
+| `stepsBand` | *"Describe the change in a sentence"*, *"Approve what you meant"* |
+
+Three of those five sentences are claims **this site makes about Loom**, on a
+page whose whole job is making them. Two more sections assert things no page of
+this site may: `proofBand` names six customers and `metricsBand` prints an
+uptime figure.
+
+`proof-band.ts` has already reasoned to the edge of this — *"a real one here
+would be this library putting a false customer claim into a tree that a page
+may publish before anyone re-reads it"* — and the instance one step further on
+is a **host whose own product is a developer tool**, where the placeholder is
+indistinguishable from the real claim rather than merely untrue.
+
+**Not a request to rewrite the copy.** The fiction is the right one for the
+catalogue's main audience. What would answer it is a second register the
+catalogue can be asked for — demonstrably-placeholder copy, the way a type
+specimen uses a nonsense alphabet — or a statement in the catalogue that these
+trees are for insertion and not for display, which is this lane finding out by
+building it.
+
+### What shipped against it today
+
+The band says the three figures and names no section. It is in
+`marketing-32-the-sections-come-ready-made` with the measurement, and
+`ready.ts`' own note carries both halves of this entry so the next run that
+reaches for a frame finds the reason before it writes one.
+
+---
+## 2026-11-09 — the most useful thing the library knows about a page cannot be printed on this site, because one of the twenty-two sections is called *Pricing*
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing`, and **open as
+a question for the maintainer** · **Status:** open — **nothing is blocked**, a
+weaker band shipped today in place of a stronger one, and the remedy is one
+answer rather than any code.
+
+`PAGE_SEQUENCE` is the 22 sections a landing page is made of **in the order a
+page uses them**, and the library's own note says why that order is the part
+worth carrying:
+
+> *"The order is the whole of the extra information this carries, and it is the
+> part somebody who has not assembled a landing page before does not know."*
+
+`docs/positioning.md` names the reader as *"the casual web developer… junior
+level"*. The order of a landing page is exactly the thing that reader does not
+have, and a table of twenty-two rows — the section, and how many ready-made
+designs come for it — was the band this run set out to build. It was built, and
+it went red.
+
+**One of the twenty-two is labelled `Pricing`.** `voice.test.ts` sweeps every
+page of this site for a price or a plan and holds the maintainer's instruction
+of 27 September: *no reference to pricing should remain, we haven't figured
+that out yet.*
+
+### Three ways out, and two of them are wrong
+
+- **Exempt the rule.** Rejected. It is this lane deciding a word he took off
+  the site is allowed back in a table, and `docs/routines.md` keeps pricing
+  with him. A rule is not weakened to let a band land.
+- **Drop that one row.** Rejected. The table's whole value is being complete,
+  and a column that stops adding up to the figure in the sentence above it is
+  a worse defect than the missing band.
+- **Ship the figures and name no section.** Taken, and it is what is on
+  `/why-use-it#ready-made` today.
+
+### What would answer it
+
+**One of two sentences from the maintainer**, and either unblocks the table:
+
+1. *A section of a page called Pricing is not a price, print it* — in which
+   case `voice.test.ts`' sweep narrows to this site's **own** claims and the
+   exemption is derived from the library's labels rather than written here, so
+   it cannot quietly become a list of this lane's words.
+2. *Still no* — in which case this entry closes as answered and the band stays
+   as it is.
+
+**The recommendation is the first.** A row reading *Pricing · 3* in a table
+captioned *every section a landing page has* is the name of a part of a page,
+not a claim about what Loom costs — and the site has said *the framework is
+free, you pay for the portal* since 29 October, so the silence the September
+instruction asked for is already narrower than the rule.
+
+Worth one line either way, because this is the cheapest band on the site to
+finish: the data is already derived in `_lib/ready.ts` and the table is six
+lines of `nodes.ts` helpers.
+
+---
 ## 2026-11-08 — `pnpm weigh` reported a 78-byte rule as 33,150 bytes repeated, because for a short text the landmark it counts by can be an ordinary CSS property name
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom daily build`
@@ -68681,7 +68841,20 @@ answer is settled: read once, unsubscribe, arm nothing.
 ## 2026-11-08 — `outlineTree` is quadratic in depth and throws above about two thousand, which bounds both joins of a window to a tree
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom daily build`
-(`src/tree/outline.ts`) · **Status:** open — **nothing is red and no real page
+(`src/tree/outline.ts`) · **Status:** closed by #829
+(`framework-tree-walks-iterative`) — fixed as the entry recommends, an explicit
+stack in place of the recursion, and in `src/tree/navigation.ts` as well as in
+`outline.ts` because `walkTree` had the identical defect and six readers.
+`outlineTree` on a chain of 1,000 went 20.0 ms to 0.8 ms; a chain of 500,000
+now outlines in 195 ms. The deepest-tree test this entry asked for is
+`src/tree/depth.test.ts`, a chain of ten thousand read six ways, and all four
+of its cases throw `RangeError` against the implementation it replaces.
+[0372](decisions/0372-every-read-of-a-tree-carries-an-explicit-stack-because-a-page-s-depth-is-data.md)
+records it. **The linearity claim in `pageReadingOf` and `insideReadingOf` now
+holds in a page's depth as well as in its parts**, with no change in
+`src/signals/`. Original status below.
+
+**Original status:** open — **nothing is red and no real page
 is near it**; filed with the numbers because two readings in this lane are
 linear only up to this
 
@@ -69052,3 +69225,232 @@ lied was a harness notification rather than a shell's exit code. The remedy in
 that document — write the status to a file as the last thing on its line, read
 it in a separate command, quote the number from the file — is the only reason
 this run did not open a pull request claiming green twice over.
+## 2026-11-09 — `PartReading.withinId` is the containing part, and `parentId` keeps the meaning it always had
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/parts.ts`) · **Status:** **closed by
+`signals-80-where-a-reading-of-a-page-stopped`**
+([0374](decisions/0374-a-pages-unread-parts-are-reported-as-the-places-its-reading-stopped-and-each-is-behind-exactly-one.md)
+clause 1). **It closes this lane's own entry of 8 November — *`PartReading.parentId`
+can name a node that is in no part's list, because a slot is a node with
+children*.**
+
+That entry said the fix was small and what it needed was to be the unit. It is
+the first half of one: the frontier reading in the same branch groups a page's
+parts by what contains them, which is the reading the defect would have made
+wrong, so it had to land first.
+
+**The second field, which is what that entry recommended**, rather than a
+correction. `parentId` is published, three readings and the generated reference
+carry it, and it is the right answer to the question it asks — *where is this
+node in the tree*. Its documentation now says so, including that the answer can
+be a slot that appears in no part's list. `withinId` is the nearest **addressed**
+ancestor: the same field, by the same rule and now from the same shape of pass,
+as `InsidePart.withinId` (0368 clause 4).
+
+**Three tests, and the middle one is the finding itself**: a slot between a band
+and the row inside it is passed through; every `withinId` on such a page is an id
+the parts list has a row for, while a `parentId` on it is not; and the two fields
+agree on every part of a page with no slot in it.
+
+---
+## 2026-11-09 — the fix-list orders by a count that is forty times the size of the thing to fix, and now has a figure that is not
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/agenda.ts`) · **Status:** open — **nothing is broken and no
+deadline is attached**; the ordering is a judgement about a screen and belongs in
+a unit of its own
+
+`agenda.ts` already carries a paragraph about this count. A page whose counters
+name nodes its tree does not contain reads mostly `skipped` (0212), which
+manufactures the steepest fall in the deployment and puts a page that is fine at
+the head of the order — so the fix-list guards against the *orphaned* case
+already.
+
+**What it cannot guard against is the ordinary case.** `PageReading.standings`'
+`skipped` counts a band, the rows inside it, the cells inside those and every
+heading among them — one band nobody reached, counted once per node underneath
+it. Two pages with one unread band each are ordered by how deeply each band
+happens to nest, which is a fact about the markup and not about the readers.
+
+`pageFrontierOf` is the figure that is not: `PageFrontier.frontier` is the places
+the reading stopped, and `largestUnreachedIn` ranks them by the parts of the page
+one absence accounts for. A page with one unread band is **one** row with a cost
+beside it.
+
+**Three things a future run should hold.**
+
+1. **Order by `unseen`, never by `frontier.length`.** A page with forty unread
+   leaves at the top level has forty frontier parts and forty unread parts, and a
+   page with one unread band has one of the first and forty of the second. The
+   second is the page to go and look at, and the counts of frontier parts would
+   rank them the other way round.
+2. **`orphaned` still has to be checked first**, and it is carried through onto
+   the frontier for exactly that reason: a wrong tree-and-window pair reads as a
+   page readers stopped at the very top of, which is the most plausible-looking
+   output this reading has.
+3. **`notReporting` is a different list and wants a different sentence.** A part
+   that said nothing with a reader demonstrably below it is a primitive to fix in
+   the library, not a page to rewrite — the fault vocabulary has no member for it
+   and the fix-list would be the place to say so.
+
+---
+## 2026-11-09 — the *By page* drawer's skipped count is a page's markup depth as much as its readers
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom portal`
+(`apps/loom/app/(portal)/portal/[project]/signals/`) · **Status:** open —
+**nothing is blocked and nothing is wrong on the screen today**; what is
+available is a better figure for the same box
+
+A drawer that prints *six parts of this page went unread* is printing
+`PageReading.standings`' `skipped`, which is right about what it says and is not
+the number a reader of the screen will take from it. Six unread parts are usually
+one unread band with five parts inside it, and an operator reading six goes
+looking for six things.
+
+`pageFrontierOf(reading)` is one call on a reading the drawer already has — pure,
+no store, no second query — and gives:
+
+| | |
+| --- | --- |
+| `frontier` | the places the reading stopped, in reading order, each with the part it plays, the words nobody reached there, and how much of the page is behind it |
+| `largestUnreachedIn(frontier, 3)` | the three worth drawing, ordered by what each costs |
+| `passedOver` | parts a reader had on screen and went past the whole of — the one statement here about a reader rather than about an absence |
+| `notReporting` | parts that said nothing with a reader below them, which is a primitive to fix rather than a page |
+| `unseen` | the old count, unchanged, so nothing on the screen has to move at once |
+
+**What it costs you:** nothing of the reading's shape, and one sentence of
+copy — *where readers stopped* is not *parts nobody read*, and a box labelled the
+second showing the first would be the plainest kind of wrong. `unreachedWordsIn`
+is there if the drawer wants to show the words rather than count the parts, which
+is the version a non-technical operator can act on.
+
+---
+## 2026-11-09 — five new names on `@jam-overture/loom/signals`, and the sentence the page would want is short
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/docs/the-runtime/what-your-readers-do/page.mdx`) ·
+**Status:** open — **the generator said so and `pnpm verify` is green**; what is
+open is whether that page wants a paragraph
+
+`docs:api` reported, on regenerating the reference for 0374:
+
+```
+@jam-overture/loom/signals — PageFrontier, UnreachedPart, largestUnreachedIn,
+  pageFrontierOf, unreachedWordsIn
+```
+
+The sentence, if the page wants one: **a part nobody reached has no row, so the
+tree is what says it was there to be reached — and once the tree is in hand, forty
+unread parts are usually one unread band.** The reading names the places a page's
+reading stopped rather than every part behind them, and every unread part is
+behind exactly one of them, so *this is the one place to fix and it costs you
+nineteen parts of the page* is arithmetic rather than an estimate.
+
+**This lane did not write it**, for 5 November's reason: that page is `(docs)`'
+and a run that edits prose on another lane's surface is a conflict waiting for
+whoever is drafting it. It is the same page the entry of 8 November asks for seven
+names on, so one paragraph can answer both.
+---
+## 2026-11-08 (evening) — the rebuild every accepted delta goes through throws at two thousand deep, which is now the shallowest bound in the tree
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build`
+(`src/tree/mutation.ts`) · **Status:** closed 9 November by
+[0373](decisions/0373-an-edit-to-a-tree-descends-by-the-path-and-rebuilds-a-sibling-list-in-one-pass.md)
+on **#829**, the same branch that filed it. `replaceNode` descends by the path:
+2,000 deep went from `RangeError` to 5.1 ms, and 500,000 deep answers in 182 ms.
+**What this entry got wrong is worth reading before the rest of it.** It named
+depth as the bound. Measuring it to fix it found the rebuild is also quadratic
+in a page **width** — 15,731 ms to swap one node among 60,000 siblings, now
+11.4 ms — which is the dimension a real page can actually reach, and which this
+entry did not look at.
+
+Found while closing the `outlineTree` entry above (#829). Every read of a tree is now
+linear in nodes and bounded by the heap (0372). `replaceNode` is not, and it is
+the shallower of the two bounds:
+
+| chain depth | `replaceNode` |
+| --- | --- |
+| 500 | 7.2 ms |
+| 1,000 | 23.6 ms |
+| 2,000 | `RangeError: Maximum call stack size exceeded` |
+| 4,000 | same |
+
+Two causes, and the second is the larger one. It **recurses** to rebuild, one
+frame per level, which is the bound. And its `rebuild` asks
+`containsNode(node, nodeId)` at every level to decide whether to descend, so the
+walk costs `O(n·d)` — on a chain, the square of the depth, which is the 7.2 →
+23.6 ms step at a doubling.
+
+**Why it matters more than the reads did.** `applyInsert`, `applyMove` and
+`applyConfigure` all go through `replaceNode`, so this is the path every
+accepted delta takes, and `insertChild` and `detachNode` call it as well.
+
+**What would fix it:** descend by the path rather than by a search —
+`pathToNode` already gives the chain from the root to the node in one linear
+walk, and a rebuild that walks that chain back up touches one node per level and
+asks nothing. That removes the quadratic factor and the recursion together.
+
+**Not done here** because 0372's unit is reads: a rebuild is a different shape
+of change, it is on the delta path where a wrong answer is a wrong tree rather
+than a slow one, and one pull request that changes both is one nobody can
+review.
+
+**Measured** on this session's container with `tsx`, one run per size.
+
+---
+## 2026-11-09 — three tree walks in this lane still recurse per level, and the one that is measured throws five thousand deep short of where the delta path now answers
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build`
+(`src/runtime/nesting.ts`, `src/interpretation/materialize.ts`,
+`src/render/render.ts`) · **Status:** open — **nothing is red, nothing is on the
+delta path, and no page is near any of it.** Filed so that the claim 0372 and
+0373 now make about `src/tree/` is not read as a claim about the repository.
+
+[0372](decisions/0372-every-read-of-a-tree-carries-an-explicit-stack-because-a-page-s-depth-is-data.md)
+and
+[0373](decisions/0373-an-edit-to-a-tree-descends-by-the-path-and-rebuilds-a-sibling-list-in-one-pass.md)
+took the shape bound off every read and every edit in `src/tree/`. They did not
+take it off the rest of the lane, and a reader of either record could reasonably
+think they did.
+
+Three walks outside that directory still spend a call frame per level:
+
+| | what it is | measured |
+| --- | --- | --- |
+| `src/runtime/nesting.ts` `collect` | every target this tree puts inside another | `RangeError` at **10,000** deep; 1.0 ms at 4,000 |
+| `src/interpretation/materialize.ts` `materializeNode` | AI output becomes a tree | not measured |
+| `src/render/render.ts` `renderNode` / `renderChildren` | every page render | not measured |
+
+`nestedTargetsIn` is the one with a number because it takes a `LoomNode` and
+nothing else, so it costs one script to measure. It is linear in time — no
+quadratic factor — so the only bound is the stack, and it is **five times deeper
+than `replaceNode`'s was**: the delta path answers at 500,000 now, and this
+stops at 10,000.
+
+### Why it is filed rather than fixed
+
+**None of the three is on the delta path**, which is what made `replaceNode`
+worth a unit of its own: there, a wrong answer is a wrong tree.
+
+**The render path has React's own per-level recursion under it.** Removing
+Loom's recursion from `renderNode` would not remove the depth bound from
+rendering a page, so the fix is a smaller improvement than it looks and needs
+its argument made separately rather than smuggled in behind a number.
+
+**`materializeNode` is the interesting one** and the one this lane would do
+next if any of them were worth doing: it is on the path AI output takes to
+become a tree, and the depth of that output is not this repository's to choose.
+It is unmeasured because measuring it needs a materialisation fixture rather
+than a chain, which is more than the finding is worth today.
+
+### What would close it
+
+A measurement of each, then the same treatment `src/tree/` got — an explicit
+stack — for whichever ones a number justifies, and a line in the record for
+whichever ones it does not. **Do not open this because it is tidy.** 0372 and
+0373 were each paid for by a claim another lane had published or by a figure in
+seconds; none of these three has either yet.
+
+**Measured** on this session's container with `tsx`, default stack, one run per
+size.

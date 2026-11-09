@@ -1,0 +1,89 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 620" width="1080" height="620" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif">
+  <style>
+    .title { font-size: 21px; font-weight: 650; fill: #0f172a; }
+    .sub { font-size: 13px; fill: #64748b; }
+    .panel-title { font-size: 12px; font-weight: 650; fill: #475569; letter-spacing: 0.09em; }
+    .axis { font-size: 11.5px; fill: #94a3b8; }
+    .axis-name { font-size: 11.5px; fill: #64748b; font-weight: 600; }
+    .val { font-size: 11px; fill: #334155; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .valw { font-size: 11px; fill: #ffffff; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .wall { font-size: 11px; font-weight: 650; fill: #b91c1c; }
+    .legend { font-size: 12px; fill: #475569; }
+    .note { font-size: 12px; fill: #475569; }
+    .mono { font-size: 12px; fill: #334155; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+  </style>
+  <rect width="1080" height="620" fill="#ffffff"/>
+  <text x="72" y="48" class="title">A tree&#8217;s depth no longer bounds a read of it</text>
+  <text x="72" y="72" class="sub">outlineTree on a chain, measured with tsx on one container. Recursive generator against an explicit stack.</text>
+  <rect x="72" y="92" width="13" height="13" rx="2.5" fill="#94a3b8"/>
+  <text x="92" y="103" class="legend">recursive, delegating with yield* (before)</text>
+  <rect x="352" y="92" width="13" height="13" rx="2.5" fill="#7c3aed"/>
+  <text x="372" y="103" class="legend">explicit stack, one frame yields (after)</text>
+  <text x="72" y="128" class="panel-title">MILLISECONDS, AT THE DEPTHS THE RECURSION REACHED</text>
+  <line x1="72" y1="480.0" x2="512" y2="480.0" stroke="#e2e8f0" stroke-width="1"/>
+  <text x="62" y="484.0" class="axis" text-anchor="end">0</text>
+  <line x1="72" y1="385.7" x2="512" y2="385.7" stroke="#e2e8f0" stroke-width="1"/>
+  <text x="62" y="389.7" class="axis" text-anchor="end">20</text>
+  <line x1="72" y1="291.4" x2="512" y2="291.4" stroke="#e2e8f0" stroke-width="1"/>
+  <text x="62" y="295.4" class="axis" text-anchor="end">40</text>
+  <line x1="72" y1="197.1" x2="512" y2="197.1" stroke="#e2e8f0" stroke-width="1"/>
+  <text x="62" y="201.1" class="axis" text-anchor="end">60</text>
+  <rect x="86.0" y="385.7" width="26" height="94.3" fill="#94a3b8" rx="2"/>
+  <text x="99.0" y="378.7" class="val" text-anchor="middle">20.0</text>
+  <rect x="120.0" y="476.2" width="26" height="3.8" fill="#7c3aed" rx="2"/>
+  <text x="133.0" y="469.2" class="val" text-anchor="middle">0.8</text>
+  <text x="116.0" y="500.0" class="axis" text-anchor="middle">1,000</text>
+  <rect x="174.0" y="186.8" width="26" height="293.2" fill="#94a3b8" rx="2"/>
+  <text x="187.0" y="179.8" class="val" text-anchor="middle">62.2</text>
+  <rect x="208.0" y="472.9" width="26" height="7.1" fill="#7c3aed" rx="2"/>
+  <text x="221.0" y="465.9" class="val" text-anchor="middle">1.5</text>
+  <text x="204.0" y="500.0" class="axis" text-anchor="middle">2,000</text>
+  <rect x="262.0" y="150.0" width="26" height="330" fill="#fef2f2" stroke="#fecaca" stroke-width="1" stroke-dasharray="3 3"/>
+  <text x="275.0" y="315.0" class="wall" text-anchor="middle" transform="rotate(-90 275.0 315.0)">RangeError</text>
+  <rect x="296.0" y="472.5" width="26" height="7.5" fill="#7c3aed" rx="2"/>
+  <text x="309.0" y="465.5" class="val" text-anchor="middle">1.6</text>
+  <text x="292.0" y="500.0" class="axis" text-anchor="middle">4,000</text>
+  <rect x="350.0" y="150.0" width="26" height="330" fill="#fef2f2" stroke="#fecaca" stroke-width="1" stroke-dasharray="3 3"/>
+  <text x="363.0" y="315.0" class="wall" text-anchor="middle" transform="rotate(-90 363.0 315.0)">RangeError</text>
+  <rect x="384.0" y="464.4" width="26" height="15.6" fill="#7c3aed" rx="2"/>
+  <text x="397.0" y="457.4" class="val" text-anchor="middle">3.3</text>
+  <text x="380.0" y="500.0" class="axis" text-anchor="middle">8,000</text>
+  <rect x="438.0" y="150.0" width="26" height="330" fill="#fef2f2" stroke="#fecaca" stroke-width="1" stroke-dasharray="3 3"/>
+  <text x="451.0" y="315.0" class="wall" text-anchor="middle" transform="rotate(-90 451.0 315.0)">RangeError</text>
+  <rect x="472.0" y="459.3" width="26" height="20.7" fill="#7c3aed" rx="2"/>
+  <text x="485.0" y="452.3" class="val" text-anchor="middle">4.4</text>
+  <text x="468.0" y="500.0" class="axis" text-anchor="middle">10,000</text>
+  <line x1="72" y1="480" x2="512" y2="480" stroke="#cbd5e1" stroke-width="1.5"/>
+  <text x="72" y="524" class="axis-name">depth of the chain</text>
+  <text x="72" y="554" class="note">Per-node cost doubled when the depth doubled, which is the</text>
+  <text x="72" y="572" class="note">sum of the depths. Past about two thousand there was no answer.</text>
+  <text x="592" y="128" class="panel-title">WHERE THE STACK STOPS BEING INTERESTING</text>
+  <line x1="592" y1="480.0" x2="1008" y2="480.0" stroke="#e2e8f0" stroke-width="1"/>
+  <text x="582" y="484.0" class="axis" text-anchor="end">0</text>
+  <line x1="592" y1="397.5" x2="1008" y2="397.5" stroke="#e2e8f0" stroke-width="1"/>
+  <text x="582" y="401.5" class="axis" text-anchor="end">50</text>
+  <line x1="592" y1="315.0" x2="1008" y2="315.0" stroke="#e2e8f0" stroke-width="1"/>
+  <text x="582" y="319.0" class="axis" text-anchor="end">100</text>
+  <line x1="592" y1="232.5" x2="1008" y2="232.5" stroke="#e2e8f0" stroke-width="1"/>
+  <text x="582" y="236.5" class="axis" text-anchor="end">150</text>
+  <line x1="592" y1="150.0" x2="1008" y2="150.0" stroke="#e2e8f0" stroke-width="1"/>
+  <text x="582" y="154.0" class="axis" text-anchor="end">200</text>
+  <polyline points="592.0,478.7 633.9,477.5 675.9,477.4 717.8,474.6 731.3,472.7 870.6,405.1 968.0,157.8" fill="none" stroke="#7c3aed" stroke-width="2.5"/>
+  <circle cx="592.0" cy="478.7" r="4" fill="#7c3aed"/>
+  <circle cx="633.9" cy="477.5" r="4" fill="#7c3aed"/>
+  <circle cx="675.9" cy="477.4" r="4" fill="#7c3aed"/>
+  <circle cx="717.8" cy="474.6" r="4" fill="#7c3aed"/>
+  <circle cx="731.3" cy="472.7" r="4" fill="#7c3aed"/>
+  <circle cx="870.6" cy="405.1" r="4" fill="#7c3aed"/>
+  <circle cx="968.0" cy="157.8" r="4" fill="#7c3aed"/>
+  <text x="592.0" y="500.0" class="axis" text-anchor="middle">1k</text>
+  <text x="731.3" y="500.0" class="axis" text-anchor="middle">10k</text>
+  <text x="870.6" y="500.0" class="axis" text-anchor="middle">100k</text>
+  <text x="968.0" y="500.0" class="axis" text-anchor="middle">500k</text>
+  <text x="960.0" y="145.8" class="val" text-anchor="end">195.3 ms</text>
+  <text x="878.6" y="421.1" class="val">45.4 ms</text>
+  <line x1="592" y1="480" x2="1008" y2="480" stroke="#cbd5e1" stroke-width="1.5"/>
+  <text x="592" y="524" class="axis-name">depth of the chain, log scale</text>
+  <text x="592" y="554" class="note">Half a million deep answers in 195 ms. The bound is the heap,</text>
+  <text x="592" y="572" class="note">and no page anyone has written is within three orders of it.</text>
+</svg>

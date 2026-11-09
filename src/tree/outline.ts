@@ -15,6 +15,13 @@ import { childrenOf, type LoomNode } from "./node.js"
  * `index` is the position among the parent's children, which is the same number
  * an `insert` or a `move` names — an outline row is therefore enough to address
  * a position, not only a node.
+ *
+ * The walk carries an **explicit stack** and is not recursive, which is a
+ * correctness requirement rather than a preference (0372). A recursive
+ * generator delegating with `yield*` passes every value back up through each
+ * delegating frame, so a node at depth *d* costs *d*, the walk costs the sum of
+ * the depths rather than the number of nodes, and past about two thousand deep
+ * it does not return at all.
  */
 
 export type OutlineEntry = {
@@ -27,19 +34,19 @@ export type OutlineEntry = {
   readonly index: number
 }
 
-function* walkOutline(
-  node: LoomNode,
-  depth: number,
-  parentId: NodeId | null,
-  index: number
-): Generator<OutlineEntry> {
-  yield { node, depth, parentId, index }
+function* walkOutline(root: LoomNode): Generator<OutlineEntry> {
+  const pending: OutlineEntry[] = [{ node: root, depth: 0, parentId: null, index: 0 }]
 
-  for (const [childIndex, child] of childrenOf(node).entries()) {
-    yield* walkOutline(child, depth + 1, node.id, childIndex)
+  for (let entry = pending.pop(); entry !== undefined; entry = pending.pop()) {
+    yield entry
+
+    const nested = Array.from(childrenOf(entry.node).entries()).reverse()
+    for (const [index, child] of nested) {
+      pending.push({ node: child, depth: entry.depth + 1, parentId: entry.node.id, index })
+    }
   }
 }
 
 /** Pre-order, so a row is always preceded by the row it is nested inside. */
 export const outlineTree = (root: LoomNode): readonly OutlineEntry[] =>
-  Array.from(walkOutline(root, 0, null, 0))
+  Array.from(walkOutline(root))

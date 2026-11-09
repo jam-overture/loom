@@ -142,6 +142,24 @@ export const COUNTED_ANCHOR = "what-we-count"
 export const ALLOWED_ANCHOR = "what-allowed-it"
 
 /**
+ * The band that says the sections come assembled, which is the second anchor
+ * on this site nothing links to.
+ *
+ * Declared for the reason `ALLOWED_ANCHOR` above gives in full, and the reason
+ * holds without a change of a word: an anchor buys **addressability**, so a
+ * report can send the maintainer to the band, a pull request comment can, and
+ * `pnpm shoot` can photograph it by name rather than by a selector guessed off
+ * the markup. This is the surface judged by eye and this band is the one a run
+ * will most want photographed on its own.
+ *
+ * It is not in `WHY_USE_IT_ANCHOR` below for the same reason that map excludes
+ * the two above it: its first line says what it is for — the bands of
+ * `/why-use-it` that the chain points at — and the chain has six links, none
+ * of which is this. `ready.ts` has the band.
+ */
+export const READY_MADE_ANCHOR = "ready-made"
+
+/**
  * The bands of `/why-use-it` that the chain points at.
  *
  * **The chain is the site's map as of today**, and that is what these exist

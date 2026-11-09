@@ -36,6 +36,7 @@ import {
   YOUR_COMPONENT,
 } from "../written"
 import { siteFooter, siteHeader, siteReadingBand, type ChromeContext } from "../chrome"
+import { readyMadeBand } from "../ready"
 import {
   action,
   code,
@@ -913,6 +914,7 @@ export const whyUseItPageTree = (context: PageContext): LoomTree => {
         staysYours(ids),
         alreadyWritten(ids),
         theParts(ids),
+        readyMadeBand(ids),
         whatYouWrite(ids),
         onAPage(ids),
         whatItReports(ids),

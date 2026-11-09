@@ -6,7 +6,7 @@ import { sampleTree } from "../testing/fixtures.js"
 
 import { buildElement, buildText } from "./builders.js"
 import { detachNode, insertChild, replaceNode } from "./mutation.js"
-import { findNode } from "./navigation.js"
+import { findNode, textOf } from "./navigation.js"
 import { childrenOf } from "./node.js"
 
 const missingId = nodeIdSchema.parse("n_missing")
@@ -41,6 +41,29 @@ describe("replaceNode", () => {
     const result = replaceNode(tree.root, missingId, (node) => ok(node))
 
     expect(!result.ok && result.error.code).toBe("node-not-found")
+  })
+
+  /**
+   * No valid tree holds an id twice — `duplicateNodeIds` exists to find one
+   * that does — and this pins which copy an edit lands on rather than leaving
+   * it to the shape of the walk (0373). The search this replaced edited every
+   * copy; descending by the path edits the first in tree order.
+   */
+  it("edits the first of two nodes sharing an id, and leaves the second", () => {
+    const { tree, ids } = sampleTree()
+    const twin = { kind: "text" as const, id: ids.headline, value: "Twin" }
+
+    const withTwin = insertChild(tree.root, ids.footer, 0, twin)
+    if (!withTwin.ok) throw new Error(withTwin.error.code)
+
+    const result = replaceNode(withTwin.value, ids.headline, () =>
+      ok(buildText(spare, "Edited"))
+    )
+    if (!result.ok) throw new Error(result.error.code)
+
+    const footer = findNode(result.value, ids.footer)
+    expect(footer && childrenOf(footer).map((child) => child.id)).toEqual([ids.headline])
+    expect(textOf(result.value)).toBe("EditedBody copyTwin")
   })
 
   it("propagates a failing transform", () => {
