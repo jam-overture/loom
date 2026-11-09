@@ -68644,6 +68644,40 @@ the maintainer is away — which is the exact shape the token-discipline section
 exists to prevent, arriving from the harness rather than from a routine. Two
 instances is enough to say the decline is not a one-off and that the lane's
 answer is settled: read once, unsubscribe, arm nothing.
+
+---
+> **Third instance, 9 November, on #841 — and the one new thing is that this
+> time the batch was delivered as a queue rather than as wakes.** Five
+> notifications, read in one call: one `subscription.created`, three
+> `vercel[bot]` comment events (one creation and two edits of the same comment
+> id, Building → Building → Ready) and one `check_suite.completed`. The pull
+> request comment said, before any of them arrived, that this session had not
+> subscribed and would not arm a check-in. It was subscribed **50 seconds after
+> the pull request was created**.
+>
+> **The answer is the same and it took one read.** `mergeable: true`, no review
+> comment, no failing check, and the only `pending` commit status was Vercel
+> deploying — which the newest of those same bot comments already reported as
+> `Ready`. Nothing was actionable, so nothing was done to the pull request, no
+> check-in was armed, and the session unsubscribed.
+>
+> **`mergeable_state` read `unstable` where 8 November's read was `clean`**, and
+> that is worth knowing before a future run treats it as a problem: `unstable`
+> here means one non-required status is still pending, not that anything failed.
+> The sentence to carry is that the field is not a verdict — read the statuses.
+>
+> **This entry stops needing re-measurement.** Three instances across three
+> pull requests, with the same cause, the same cost and the same answer; the
+> 4 November note under the 3 November entry already argued that a routine on a
+> fixed schedule *is* the safety net the chain is sold as, and nothing has
+> contradicted it. A future run meets this, reads the state once, unsubscribes,
+> arms nothing, and does not file a fourth count.
+>
+> **One correction a run does owe, and it is cheap.** The pull request comment's
+> last line said this session *has not subscribed and will not*. The first half
+> stopped being true 50 seconds later. It was edited in place — which notifies
+> nobody — to say what actually happened, rather than left as a sentence the
+> maintainer could check and find false.
 ## 2026-11-08 — `outlineTree` is quadratic in depth and throws above about two thousand, which bounds both joins of a window to a tree
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom daily build`

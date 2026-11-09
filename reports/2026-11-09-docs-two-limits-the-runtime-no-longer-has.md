@@ -277,6 +277,17 @@ once on one page.
   arrivals observer is present at the oldest commit this container can see.
 - **`playwright-core` is not a dependency of this repository.** Pointed
   `LOOM_PLAYWRIGHT` at `/opt/node-tools/node_modules`; nothing was installed.
+- **The session is subscribed to its own pull request whatever it says**
+  (3 and 8 November, this lane's own). Third instance, annotated under the
+  8 November entry rather than filed again: five notifications arrived in one
+  queued batch 50 seconds after #841 was created, the state was read **once**
+  (`mergeable: true`, no review comment, nothing failing, the one `pending`
+  status being the Vercel deploy that the newest of those same bot comments
+  already reported `Ready`), **no check-in was armed**, and the session
+  unsubscribed. `mergeable_state` read `unstable` where 8 November's read was
+  `clean`, which means one non-required status is still pending and not that
+  anything failed — the field is not a verdict. That entry now says a future
+  run should not file a fourth count.
 
 ## Test numbers
 
