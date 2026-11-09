@@ -3,7 +3,12 @@
 **`Loom signals`, 9 November 2026, morning run.**
 Branch `signals-80-where-a-reading-of-a-page-stopped`. Record
 [0372](../decisions/0372-a-pages-unread-parts-are-reported-as-the-places-its-reading-stopped-and-each-is-behind-exactly-one.md),
-`Accepted`. `pnpm verify` **EXIT=0**.
+`Accepted`. `pnpm verify` **EXIT=0**. Pull request
+[#837](https://github.com/jam-overture/loom/pull/837); preview
+<https://loom-git-signals-80-where-a-265bf1-jpizzolato36-6341s-projects.vercel.app>,
+which Vercel reports `Ready` — this session's network policy does not reach
+`*.vercel.app`, so the deployment's own status is the evidence rather than a
+fetch of the page.
 
 ## What this run completed
 
