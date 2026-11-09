@@ -1,17 +1,31 @@
 import Link from "next/link"
 import { notFound } from "next/navigation"
 
+import type { TreeId } from "@jam-overture/loom"
 import { projectIdSchema } from "@jam-overture/loom/store"
 
 import { Screen } from "@/app/(portal)/_components/screen"
 import { StateNotice } from "@/app/(portal)/_components/state-notice"
+import { readMeasurement } from "@/app/(portal)/_lib/accepted/measurement"
+import { readAccepted, type AcceptedReading } from "@/app/(portal)/_lib/accepted/reading"
 import { requireActor, requireRole } from "@/app/(portal)/_lib/auth/identity"
+import { sentencesOf, servedOf } from "@/app/(portal)/_lib/going-live"
+import {
+  historyOf,
+  loomOutcomeOf,
+  newestOf,
+  NOT_A_LOOM_CHANGE,
+  originOf,
+  versionWordsOf,
+} from "@/app/(portal)/_lib/page-history"
 import { publishedRowOf } from "@/app/(portal)/_lib/published-view"
 import { portalApplications, portalProjects } from "@/app/(portal)/_lib/store"
 import { PORTAL_READ_BUDGET_MS } from "@/app/_lib/app/bounded"
 import { readWithin, unavailable } from "@/app/_lib/app/bounded-store"
 import { soleApplicationOf } from "@/app/_lib/app/sole-application"
 import { publishedPagesFor } from "@/app/_lib/pages/store"
+
+import { NewestChange, type Newest } from "./_components/newest-change"
 
 /**
  * *Pages*: the pages a project's site last published — unit 6 of
@@ -22,7 +36,47 @@ import { publishedPagesFor } from "@/app/_lib/pages/store"
  * the site says it serves, not what Loom changed. A page a later snapshot left
  * out stays, with the date it last arrived (clause 4), and anybody in the
  * project reads it, because it says nothing a reader of the site cannot see.
+ *
+ * Each page also says its newest change, answering the rail's question for
+ * *Pages* (`docs/portal-wireframes.md`, *The chrome*: what is live, and did
+ * each change help?): a Loom change with the verdict its card on *Page
+ * history* gives, one accepted and on its way to readers with where it has
+ * got to, or the site's own version, which Loom does not judge. Where Loom's
+ * record of changes cannot be read the column is left out and the list stands.
  */
+
+/**
+ * A page's newest version in the list's words, from the record every screen
+ * under *Accepted* reads: a Loom change measured as its card on *Page history*
+ * measures it, or the site's own version.
+ */
+const newestWordsOf = async (
+  reading: Extract<AcceptedReading, { readonly kind: "read" }>,
+  pageId: TreeId,
+  now: number
+): Promise<Newest | undefined> => {
+  const newest = newestOf(
+    historyOf(pageId, reading.changes, reading.copyStarts.get(pageId) ?? [], reading.reach)
+  )
+
+  if (newest === undefined) return undefined
+
+  if (newest.kind === "site") {
+    return { outcome: { label: NOT_A_LOOM_CHANGE, tone: "plain" }, what: originOf(newest) }
+  }
+
+  const { change } = newest
+  const measurement = await readMeasurement(
+    reading,
+    change,
+    servedOf(change.proposalId, reading.origins)
+  )
+
+  return {
+    outcome: loomOutcomeOf(change, reading.reach, measurement, now),
+    what: versionWordsOf(change, reading.changes, sentencesOf(change, reading.parts)).heading,
+  }
+}
 const PagesPage = async ({ params }: { params: Promise<{ project: string }> }) => {
   const asked = projectIdSchema.safeParse((await params).project)
 
@@ -41,14 +95,29 @@ const PagesPage = async ({ params }: { params: Promise<{ project: string }> }) =
 
   const application = applications.ok ? soleApplicationOf(applications.value, projectId) : undefined
 
-  const published =
+  const now = Date.now()
+  const [published, accepted] =
     application === undefined
-      ? undefined
-      : await readWithin(
-          () => publishedPagesFor(application.applicationId).list(),
-          unavailable,
-          PORTAL_READ_BUDGET_MS
+      ? [undefined, undefined]
+      : await Promise.all([
+          readWithin(
+            () => publishedPagesFor(application.applicationId).list(),
+            unavailable,
+            PORTAL_READ_BUDGET_MS
+          ),
+          readAccepted(projectId, now),
+        ])
+  const pageIds = published?.ok === true ? published.value.map((page) => page.tree.treeId) : []
+  const newest =
+    accepted?.kind === "read"
+      ? new Map<string, Newest | undefined>(
+          await Promise.all(
+            pageIds.map(
+              async (pageId) => [pageId, await newestWordsOf(accepted, pageId, now)] as const
+            )
+          )
         )
+      : undefined
 
   const body = (() => {
     /** A store that cannot answer is said, never drawn as *nothing published*. */
@@ -86,32 +155,49 @@ const PagesPage = async ({ params }: { params: Promise<{ project: string }> }) =
     }
 
     return (
-      <table className="w-full text-left text-xs">
-        <thead className="text-ink-muted">
-          <tr>
-            <th className="py-1.5 font-normal">Page</th>
-            <th className="py-1.5 font-normal">Version</th>
-            <th className="py-1.5 text-right font-normal">Last published</th>
-          </tr>
-        </thead>
-        <tbody>
-          {published.value.map(publishedRowOf).map((row) => (
-            <tr key={row.treeId} className="border-edge-subtle border-t">
-              <td className="py-1.5">
-                <Link
-                  href={`/portal/${projectId}/pages/${row.treeId}`}
-                  className={row.derived ? "text-ink" : "text-ink-muted italic"}
-                >
-                  {row.name}
-                </Link>
-                <span className="text-ink-muted block font-mono text-[11px]">{row.treeId}</span>
-              </td>
-              <td className="py-1.5">{row.revision}</td>
-              <td className="py-1.5 text-right">{row.received}</td>
+      <div className="flex flex-col gap-3">
+        <table className="w-full text-left text-xs">
+          <thead className="text-ink-muted">
+            <tr>
+              <th className="py-1.5 font-normal">Page</th>
+              <th className="py-1.5 font-normal">Version</th>
+              {newest === undefined ? null : <th className="py-1.5 font-normal">Newest change</th>}
+              <th className="py-1.5 text-right font-normal">Last published</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {published.value.map(publishedRowOf).map((row) => (
+              <tr key={row.treeId} className="border-edge-subtle border-t">
+                <td className="py-1.5">
+                  <Link
+                    href={`/portal/${projectId}/pages/${row.treeId}`}
+                    className={row.derived ? "text-ink" : "text-ink-muted italic"}
+                  >
+                    {row.name}
+                  </Link>
+                  <span className="text-ink-muted block font-mono text-[11px]">{row.treeId}</span>
+                </td>
+                <td className="py-1.5">{row.revision}</td>
+                {newest === undefined ? null : (
+                  <td className="py-1.5">
+                    <NewestChange
+                      newest={newest.get(row.treeId)}
+                      history={`/portal/${projectId}/pages/${row.treeId}/history`}
+                    />
+                  </td>
+                )}
+                <td className="py-1.5 text-right">{row.received}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        {newest === undefined ? (
+          <p className="text-ink-muted m-0 text-xs">
+            Loom&apos;s record of the changes made to these pages could not be read, so the list
+            does not say what changed on each. Try again in a moment.
+          </p>
+        ) : null}
+      </div>
     )
   })()
 
