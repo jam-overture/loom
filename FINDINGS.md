@@ -69576,3 +69576,54 @@ whoever is drafting it. It is the third entry asking for a paragraph on that one
 page — 8 November's seven names, this morning's five, and these — so **one
 paragraph answers all three**, and the sentences in all three entries are written
 to be lifted rather than rewritten.
+
+---
+## 2026-11-09 (evening) — the transit mangling spares an autolink and a backticked path, and that is the first time the surviving form has been isolated
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom daily build`, as the lane that
+owns the routines document · **Status:** open — **nothing is broken**; what is
+new is a workaround that is known to work rather than a defect that is known to
+happen
+
+This is the **fourth** instance of the entry of 5 November — *a markdown link
+posted to GitHub from a routine session can arrive with backticks wrapping its
+URL, and re-posting it does not fix it* — and the second where it ate something
+load-bearing. On #848 it mangled the two links a reviewer would follow first:
+
+```
+**Report:** [`…-the-place-one-fix….md`](``https://github.com/…/reports/…md)``
+**Record:** [0375](```https://github.com/…/decisions/0375-….md),```
+```
+
+**The new fact is the comparison, and it was clean**, because one description
+carried three URLs in three shapes and only one shape came back wrong:
+
+| the shape | what arrived |
+| --- | --- |
+| `[label](https://…)` | **mangled** — a run of backticks before the URL and after the closing paren |
+| `<https://…>` (autolink) | intact, in the same description, twice |
+| a bare backticked path, `` `reports/….md` `` | intact |
+| a bare URL on its own line | intact |
+
+Two further things the earlier entries left open:
+
+1. **Re-posting does not fix it and `update_pull_request` does.** The 5 November
+   entry records that re-posting the same body changes nothing. Replacing the
+   markdown links with paths, in one `update_pull_request` call, produced a clean
+   body on the first attempt — so what is wrong is the **text**, and the
+   round-trip is deterministic rather than flaky.
+2. **It is not GitHub's renderer.** The backticks are in the stored body: a read
+   of the pull request through `pull_request_read` returns them in the raw
+   markdown. Whatever inserts them does it before GitHub sees it.
+
+**The recommendation is one line in `docs/routines.md`**, beside the merge-gate
+rule, which is where a routine already learns what it cannot trust about its own
+output: **do not post a markdown link from a routine session — post the URL as an
+autolink, `<https://…>`, or the repository path in backticks.** Both survive, both
+are clickable or searchable, and neither can be mangled into something a reviewer
+has to read past.
+
+**What this lane did not do.** It did not edit `docs/routines.md`, which is not
+its file and is the document it is bound by rather than one it writes. The three
+earlier entries are left as they are and this one is appended, because
+`FINDINGS.md` is union-merged.

@@ -256,7 +256,7 @@ refused to put on the wire for exactly the kinds this reads.
 
 ## Findings
 
-**Filed three, closed one.**
+**Filed four, closed one.**
 
 1. **Closed** — this lane's own entry of this morning, *the fix-list orders by a
    count that is forty times the size of the thing to fix*. The closing entry
@@ -274,6 +274,19 @@ refused to put on the wire for exactly the kinds this reads.
    rewritten. It is the **third** entry asking for a paragraph on that one page —
    8 November's seven names, this morning's five, and these eight — so one
    paragraph answers all three, and the entry says so.
+4. **The transit mangling spares an autolink and a backticked path**
+   (`Loom daily build`). Filed after it ate the two links a reviewer of this
+   pull request would follow first, which is the fourth instance of the entry of
+   5 November and the second where it cost something load-bearing. **The new
+   fact is the surviving form**, isolated because one description carried three
+   URLs in three shapes and only `[label](url)` came back wrong — `<https://…>`
+   survived twice in the same body, and so did a backticked repository path. Two
+   further things: replacing the links in one `update_pull_request` call fixed it
+   on the first attempt, where re-posting the same body never has, so the
+   round-trip is deterministic rather than flaky; and the backticks are in the
+   **stored** body, which a read of the pull request returns, so it is not
+   GitHub's renderer. The recommendation is one line in `docs/routines.md`,
+   which this lane did not write because it is the document it is bound by.
 
 ## The branches beside this one
 
