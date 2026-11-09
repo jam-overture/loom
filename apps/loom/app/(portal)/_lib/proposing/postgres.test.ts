@@ -1,7 +1,13 @@
 import { sql } from "drizzle-orm"
 import { describe, expect, it, vi } from "vitest"
 
-import { ok, proposalIdSchema, sequentialIdFactory, treeIdSchema } from "@jam-overture/loom"
+import {
+  intentIdSchema,
+  ok,
+  proposalIdSchema,
+  sequentialIdFactory,
+  treeIdSchema,
+} from "@jam-overture/loom"
 import { ensureTreeStoreSchema, postgresTreeStore } from "@jam-overture/loom/postgres"
 import { applicationIdSchema } from "@jam-overture/loom/store"
 import { memoryHoldStore } from "@jam-overture/loom/write"
@@ -70,6 +76,55 @@ describe("the proposing tables — Postgres specifics", () => {
     })
 
     expect(await blog.list()).toEqual({ ok: true, value: [] })
+  })
+})
+
+describe("the turned-down changes on a table pushed before intents were kept", () => {
+  const before = async () => {
+    const db = await freshDatabase()
+
+    await db.execute(sql`ALTER TABLE loom_turned_down DROP COLUMN intent_id`)
+
+    return db
+  }
+
+  const turnedDown = {
+    proposalId: proposalIdSchema.parse("p_old"),
+    pageId: treeIdSchema.parse("t_home"),
+    request: "Move the button up.",
+    reason: null,
+    by: "ana",
+    at: 5,
+  }
+  const change = { ...turnedDown, intentId: intentIdSchema.parse("i_old") }
+
+  it("still remembers a change turned down, and reads it back for the AI to weigh", async () => {
+    const store = postgresTurnedDownStore(await before(), { application: SHOP })
+
+    expect(await store.record(change)).toEqual(ok(undefined))
+    expect(await store.forPage(turnedDown.pageId, 10)).toEqual(ok([turnedDown]))
+    expect(await store.since(0, 10)).toEqual(ok([turnedDown]))
+  })
+
+  it("says it cannot read the intents, rather than that none were kept", async () => {
+    const store = postgresTurnedDownStore(await before(), { application: SHOP })
+
+    await store.record(change)
+
+    expect((await store.intentsOf([turnedDown.proposalId])).ok).toBe(false)
+  })
+
+  it("gains the column on the next push, rows from before it naming no intent", async () => {
+    const db = await before()
+    const store = postgresTurnedDownStore(db, { application: SHOP })
+
+    await store.record(change)
+    await ensureTurnedDownSchema(db)
+    await store.record({ ...change, proposalId: proposalIdSchema.parse("p_new") })
+
+    expect(
+      await store.intentsOf([turnedDown.proposalId, proposalIdSchema.parse("p_new")])
+    ).toEqual(ok(new Map([[proposalIdSchema.parse("p_new"), change.intentId]])))
   })
 })
 
