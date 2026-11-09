@@ -45,6 +45,8 @@ on the maintainer.
 - **`isMissingColumn`** moved to `app/_lib/app/missing-column.ts`, shared by the
   site pulls store (which had its own copy) and this one, with its own test.
 
+![Turned down, drawn from the card component with sample rows: a goal, No goal named, and an older change with none](2026-11-09-portal-turned-down-goal-chip.webp)
+
 **Needs `pnpm db:push` on production** (from `apps/loom`): until then the list
 names no goal and says why; nothing else changes.
 
@@ -64,7 +66,9 @@ names no goal and says why; nothing else changes.
 
 ## Tests
 
-See the pull request for the full `pnpm verify` numbers. New or changed:
+`pnpm verify` exits 0 on the branch with `main` merged in: the package 6,738
+passed and 2 skipped (276 files), the app 7,526 passed (471 files), typecheck,
+lint, the Next build and the prerender check included. New or changed:
 
 - `turned-down.contract.ts` (memory and Postgres): the intent of each change,
   leaving out what is not held; the first record's intent kept when a change is
