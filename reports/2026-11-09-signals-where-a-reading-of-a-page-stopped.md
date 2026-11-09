@@ -2,7 +2,7 @@
 
 **`Loom signals`, 9 November 2026, morning run.**
 Branch `signals-80-where-a-reading-of-a-page-stopped`. Record
-[0372](../decisions/0372-a-pages-unread-parts-are-reported-as-the-places-its-reading-stopped-and-each-is-behind-exactly-one.md),
+[0374](../decisions/0374-a-pages-unread-parts-are-reported-as-the-places-its-reading-stopped-and-each-is-behind-exactly-one.md),
 `Accepted`. `pnpm verify` **EXIT=0**. Pull request
 [#837](https://github.com/jam-overture/loom/pull/837); preview
 <https://loom-git-signals-80-where-a-265bf1-jpizzolato36-6341s-projects.vercel.app>,
@@ -128,7 +128,7 @@ not also re-order the thing an operator is handed.
 
 ## Records added
 
-**0372**, `Accepted` — *a page's unread parts are reported as the places its
+**0374**, `Accepted` — *a page's unread parts are reported as the places its
 reading stopped, and each is behind exactly one*. It contradicts no accepted
 record and touches neither the tree schema nor the delta model, so it is not
 architectural. Seven clauses and five rejected alternatives, including the two
@@ -137,10 +137,14 @@ reader scrolled past this* — refused under rule 6 and also the wrong instrumen
 because a browser cannot tell *scrolled past* from *never rendered* and a server
 holding the tree can.
 
-**Written as 0372 rather than 0371.** 0370 is the highest on `main`, and both
-0370 and 0371 are claimed by open branches — #829 wrote 0370, which `main`
-already has, and #834 wrote 0371. 0372 is the next number free on `main` and on
-every open branch, which is the precedent 0368 set a day earlier.
+**Written as 0372 rather than 0371, and renumbered 0374 at merge.** 0370 was
+the highest on `main` when this ran, and both 0370 and 0371 were claimed by open
+branches — #829 wrote 0370, which `main` already had, and #834 wrote 0371. 0372
+was then the next number free on `main` and on every open branch, which is the
+precedent 0368 set a day earlier. #829 afterwards renumbered its own record 0370
+→ 0372 and merged first, so `Loom merge` renumbered this one to 0374 — the next
+number free on `main` and on every open branch — with a dated note under its
+header. Nothing it decides changed.
 
 ## Real test numbers
 

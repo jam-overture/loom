@@ -3974,7 +3974,7 @@
               "name": "replaceNode",
               "kind": "function",
               "signature": "const replaceNode: (root: LoomNode, nodeId: NodeId, transform: NodeTransform) => Result<LoomNode, TreeError>",
-              "summary": ""
+              "summary": "The addressed node, transformed, and every ancestor rebuilt around it."
             },
             {
               "name": "insertChild",

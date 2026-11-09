@@ -1,15 +1,19 @@
-# 0372. A page's unread parts are reported as the places its reading stopped, and each is behind exactly one
+# 0374. A page's unread parts are reported as the places its reading stopped, and each is behind exactly one
 
 **Status:** Accepted
 **Date:** 2026-11-09
 **Section:** §5 (reader signals), the counters
 
-> **Written as `0372` rather than `0371`.** `0370` is the highest on `main`, and
-> `0370` and `0371` are both claimed by open branches — #829 (*every read of a
-> tree carries an explicit stack*) wrote `0370`, which `main` already has, and
-> #834 wrote `0371`. `0372` is the next number free on `main` and on every open
-> branch, which is the precedent #802 and 0368 set for this situation: take the
-> number that needs the fewest records renumbered at merge (0097).
+> **Renumbered on 2026-11-09**, from `0372`, by `Loom merge` when this branch
+> (#837) was merged. It was written as `0372` because `0370` was the highest on
+> `main` and `0370` and `0371` were both claimed by open branches — #829 wrote
+> `0370`, which `main` already had, and #834 wrote `0371`. #829 then renumbered
+> its own record `0370` → `0372` and merged first, so `main` accepted a
+> different `0372` — *every read of a tree carries an explicit stack, because a
+> page's depth is data* — and two records sharing a number is fatal (0097).
+> `0374` is the next number free on `main` and on every open branch (`0371` is
+> still claimed by #834). Nothing in this record changed but its number;
+> references on this branch were updated with it.
 
 ## Context
 

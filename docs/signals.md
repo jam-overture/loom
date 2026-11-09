@@ -5070,7 +5070,7 @@ fix-list already has a paragraph about this count manufacturing the steepest fal
 in a deployment (`agenda.ts`); what it did not have was a figure to use instead.
 
 **Done**
-([0372](../decisions/0372-a-pages-unread-parts-are-reported-as-the-places-its-reading-stopped-and-each-is-behind-exactly-one.md)),
+([0374](../decisions/0374-a-pages-unread-parts-are-reported-as-the-places-its-reading-stopped-and-each-is-behind-exactly-one.md)),
 as a read-time derivation with nothing added to any payload, table or browser.
 
 - **A place the reading stopped is a part that reported nothing whose containing

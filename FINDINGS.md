@@ -68779,7 +68779,7 @@ reading. The fix is small; what it needs is to be the unit.
 **Filed by:** `Loom signals` · **Owned by:** `Loom signals`
 (`src/signals/parts.ts`) · **Status:** **closed by
 `signals-80-where-a-reading-of-a-page-stopped`**
-([0372](decisions/0372-a-pages-unread-parts-are-reported-as-the-places-its-reading-stopped-and-each-is-behind-exactly-one.md)
+([0374](decisions/0374-a-pages-unread-parts-are-reported-as-the-places-its-reading-stopped-and-each-is-behind-exactly-one.md)
 clause 1). **It closes this lane's own entry of 8 November — *`PartReading.parentId`
 can name a node that is in no part's list, because a slot is a node with
 children*.**
@@ -68882,7 +68882,7 @@ is the version a non-technical operator can act on.
 **Status:** open — **the generator said so and `pnpm verify` is green**; what is
 open is whether that page wants a paragraph
 
-`docs:api` reported, on regenerating the reference for 0372:
+`docs:api` reported, on regenerating the reference for 0374:
 
 ```
 @jam-overture/loom/signals — PageFrontier, UnreachedPart, largestUnreachedIn,
