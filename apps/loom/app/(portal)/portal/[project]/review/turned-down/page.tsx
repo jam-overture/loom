@@ -99,7 +99,7 @@ const TurnedDownPage = async ({
             positionWords(page.first, page.last, reading.count),
             stretchWords(page.rows.at(-1)?.at, page.rows[0]?.at, now)
           )}
-          back={{ label: "Newer", href: newerHref(here, page.newer) }}
+          newer={newerHref(here, page.newer)}
           older={olderHref(here, page.older)}
         />
       </div>

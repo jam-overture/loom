@@ -162,13 +162,11 @@ export const ByPageTable = ({
         positionWords(list.first, list.last, { count: list.total, more: false }),
         stretchWords(list.rows.at(-1)?.lastMoved, list.rows[0]?.lastMoved, now)
       )}
-      back={{
-        label: "Newer",
-        href:
-          list.newer === undefined && list.first <= 1
-            ? undefined
-            : byPageHref(address, { from: list.newer }),
-      }}
+      newer={
+        list.newer === undefined && list.first <= 1
+          ? undefined
+          : byPageHref(address, { from: list.newer })
+      }
       older={list.older === undefined ? undefined : byPageHref(address, { from: list.older })}
     />
   </div>
