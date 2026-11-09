@@ -1,3 +1,4 @@
+import type { TreeId } from "@jam-overture/loom"
 import type { ReceivedBatch, StoredPageViews } from "@jam-overture/loom/signals"
 
 /**
@@ -32,7 +33,7 @@ import type { ReceivedBatch, StoredPageViews } from "@jam-overture/loom/signals"
 export type Latest = {
   readonly kind: "arrived" | "counted"
   readonly at: string
-  readonly treeId: string
+  readonly treeId: TreeId
 }
 
 export type Arrivals = {
