@@ -1,3 +1,4 @@
+import type { TreeId } from "@jam-overture/loom"
 import type { ReceivedBatch, StoredPageViews } from "@jam-overture/loom/signals"
 
 /**
@@ -25,9 +26,15 @@ import type { ReceivedBatch, StoredPageViews } from "@jam-overture/loom/signals"
  * wrong by however long collection waited.
  */
 
-export type Latest =
-  | { readonly kind: "arrived"; readonly at: string }
-  | { readonly kind: "counted"; readonly at: string }
+/**
+ * When the last one came, and the page it came from: the newest delivery's
+ * page, or the page whose row moved last.
+ */
+export type Latest = {
+  readonly kind: "arrived" | "counted"
+  readonly at: string
+  readonly treeId: TreeId
+}
 
 export type Arrivals = {
   /** Page views counted across every page and version. */
@@ -35,8 +42,6 @@ export type Arrivals = {
   /** `undefined` where nothing has ever arrived. */
   readonly latest: Latest | undefined
 }
-
-const later = (a: string, b: string): string => (a >= b ? a : b)
 
 /**
  * Everything the screen says, from the page-view rows and the newest page of
@@ -49,9 +54,9 @@ export const arrivalsOf = (
   const arrived = newest.reduce<ReceivedBatch | undefined>(
     (latest, batch) => (latest === undefined || batch.seq > latest.seq ? batch : latest),
     undefined
-  )?.receivedAt
-  const counted = rows.reduce<string | undefined>(
-    (latest, row) => (latest === undefined ? row.updatedAt : later(latest, row.updatedAt)),
+  )
+  const counted = rows.reduce<StoredPageViews | undefined>(
+    (latest, row) => (latest === undefined || row.updatedAt > latest.updatedAt ? row : latest),
     undefined
   )
 
@@ -59,9 +64,9 @@ export const arrivalsOf = (
     opened: rows.reduce((sum, row) => sum + row.opened, 0),
     latest:
       arrived !== undefined
-        ? { kind: "arrived", at: arrived }
+        ? { kind: "arrived", at: arrived.receivedAt, treeId: arrived.treeId }
         : counted !== undefined
-          ? { kind: "counted", at: counted }
+          ? { kind: "counted", at: counted.updatedAt, treeId: counted.treeId }
           : undefined,
   }
 }
