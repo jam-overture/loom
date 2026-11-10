@@ -312,5 +312,7 @@ place of a fix, and no test was weakened.** The two new repository sweeps take
 `sweepBudget(sources)` — 0375's budget, derived from the number of sources
 rather than from a clock — which is the house pattern for a whole-repository
 scan and not a loosened assertion. The whole `deployment.test.ts` file runs in
-**1.8 s**, of which 752 ms is the marker-spelling sweep and 389 ms the existing
-guide check.
+**2,386 ms inside the gate** — of which 838 ms is the marker-spelling sweep —
+against a `sweepBudget` of **41,640 ms** for 2,082 sources. That is roughly 50x
+headroom on the whole file, where the fixed 5,000 ms default the two sweeps used
+to run against gave 1.7x and turned the gate red on 9 November.
