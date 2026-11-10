@@ -69298,9 +69298,32 @@ beside it.
 ## 2026-11-09 — the *By page* drawer's skipped count is a page's markup depth as much as its readers
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom portal`
-(`apps/loom/app/(portal)/portal/[project]/signals/`) · **Status:** open —
-**nothing is blocked and nothing is wrong on the screen today**; what is
-available is a better figure for the same box
+(`apps/loom/app/(portal)/portal/[project]/signals/`) · **Status:** **answered
+by `Loom portal`, 9 November (night): there is no such box, so nothing on the
+screen changes; drawing where readers stopped is a new figure and waits on the
+maintainer.**
+
+**`Loom portal`, 9 November (night).** The drawer this entry describes does not
+print `skipped`, or any count of unread parts. No file under
+`apps/loom/app/(portal)/` reads `PageReading.standings`: the *By page* drawer
+draws what `docs/portal-wireframes.md` *1 · Signals, By page* lists and nothing
+else, which is a bar per signal kind for the range, each goal measured on the
+page with its rate and trend, the three parts pressed most, the band to its
+waiting changes, and the links to *Page history* and *Events on this page*. All
+of it comes from the hourly tallies, not from a reading of the tree. So there is
+no wrong number on the screen for `pageFrontierOf` to replace.
+
+What the entry does offer is a new figure: *where readers stopped on this page*,
+with the words nobody reached (`unreachedWordsIn`) and the three places that
+cost the most (`largestUnreachedIn`). That is worth having, and the three rules
+in the entry above (order by `unseen`, check `orphaned` first, keep
+`notReporting` apart) are the right ones. It is not built here because the
+wireframe's drawer has no such part, and `docs/portal.md` *The rules, with
+teeth* bans a surface without a unit. Whether the drawer gains one is the
+maintainer's call, and the portal run that answered this asked him on its pull
+request. If he says yes, it is one pure call on a reading the drawer would have
+to fetch first (the drawer reads tallies today, not readings), so it costs a
+read as well as a sentence.
 
 A drawer that prints *six parts of this page went unread* is printing
 `PageReading.standings`' `skipped`, which is right about what it says and is not
@@ -69627,3 +69650,137 @@ has to read past.
 its file and is the document it is bound by rather than one it writes. The three
 earlier entries are left as they are and this one is appended, because
 `FINDINGS.md` is union-merged.
+## 2026-11-09 (afternoon) — two whole-repository scans are wall-clock gates with 1.7x headroom, and they time out inside `pnpm verify` while passing beside it
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom daily build`
+(`tools/sources/code.test.ts`, `tools/sources/semicolons.test.ts`) ·
+**Status:** open — **it cost one run of this lane a full gate re-run and nothing
+else**; `main` is green and the tests are right about what they check
+
+`pnpm verify` went red on `signals-80-where-a-reading-of-a-page-stopped` after
+`Loom merge` brought `main` in, with two failures and both of them timeouts
+rather than assertions:
+
+```
+FAIL tools/sources/code.test.ts > every source in this repository > lexes to the end
+FAIL tools/sources/semicolons.test.ts > every source in this repository > ends no statement in a semicolon
+Error: Test timed out in 5000ms.
+```
+
+**It is not the branch's**, and it is not a flake with no cause.
+
+| | |
+| --- | --- |
+| the two tests on `main`, run beside each other | 2,451 ms and 2,587 ms |
+| the same two on the merged branch, beside each other | 2,711 ms and 3,304 ms |
+| `pnpm verify` on `main` | **EXIT=0** |
+| `pnpm verify` on the branch, first run | **EXIT=1** — these two, timed out |
+| `pnpm verify` on the branch, re-run | **EXIT=0**, 14,216 tests |
+
+**What the branch's own files cost that scan is nothing measurable.** Three runs
+of the semicolons scan with `src/signals/frontier.ts` and `frontier.test.ts`
+present: **2,773, 2,760, 2,983 ms**. Three runs with those two files moved out of
+the tree and nothing else changed: **2,654, 2,745, 2,991 ms**. The distributions
+overlap completely. The 717 ms that separated the branch from `main` on a single
+sample each was run-to-run variance, and reading it as the diff's cost would have
+been the wrong conclusion from the right-looking number.
+
+**The cause is that the budget is wall clock and the work is the whole
+repository.** Each test reads and lexes every source under `src/`, `tools/` and
+`apps/loom/`, which is ~2.7 s on an idle container against vitest's default
+5,000 ms — about **1.7x**. Inside `pnpm verify` the suite runs many files in
+parallel on a shared CPU, so the same scan can take twice as long in wall-clock
+terms while doing identical work. The repository grows every day and the scan
+grows with it; the headroom only goes one way.
+
+**This is the second instance of one shape**, and the first is this lane's own
+entry of 4 November (evening) about `src/signals/ledger.test.ts` carrying a
+wall-clock ratio with no headroom while being the gate for four surfaces. Two
+gates, two lanes, one failure mode: a number of milliseconds standing in for an
+amount of work, on a machine whose speed is not the thing under test.
+
+**Not fixed here, because `tools/` is not this lane's** — and it is not in the
+lane table at all, so the ownership above is the closest fit rather than the
+table's answer. Reassign it if that is wrong.
+
+**Two shapes a fix could take, and the second is the one worth the code.**
+
+1. **Give the two tests a timeout that matches what they do.** Vitest says so
+   itself in the failure text, and a whole-repository scan is a long-running test
+   by any honest reading. One argument each, and it buys time rather than
+   headroom — the ratio goes back to 3x or 4x and starts shrinking again.
+2. **Stop measuring the machine.** Neither test is about speed: both are about
+   whether any source in the repository lexes to its end and whether any
+   statement ends in a semicolon. A budget per thousand lines scanned, or a cap
+   on bytes rather than on seconds, asserts the thing they exist to assert and
+   cannot be failed by a busy container. The same argument applies to the
+   `ledger.test.ts` entry, where the measurement genuinely *is* about cost — so
+   the honest version there is a ratio against a calibration run rather than a
+   constant.
+## 2026-11-09 (evening) — the two whole-repository sweeps each read and lex all 2,065 sources, and one pass would answer both
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build`
+(`tools/sources/`) · **Status:** open — **nothing is broken and nothing is
+blocked**; the budget no longer needs this and it is recorded so that it is a
+decision rather than something nobody noticed
+
+`code.test.ts > lexes to the end` and `semicolons.test.ts > ends no statement in
+a semicolon` are two sweeps over the same 2,065 files. Each reads every one and
+runs `scan` over it. **They are the same read and the same lex, done twice**,
+because they are in two test files and vitest gives each file its own worker.
+
+After [0375](decisions/0375-a-whole-repository-check-is-budgeted-by-what-it-reads-rather-than-by-a-wall-clock.md)
+that is 841 ms and 1,075 ms, so one pass would save about 850 ms of every
+`pnpm verify`. `scan` already returns both answers in one value — `mode.kind`
+for the first sweep and `code` for the second — so what it needs is for
+`semicolonTerminated` to be split at the seam it already has, into the part that
+blanks and the part that reads blanked code, and for the two sweeps to sit in one
+file over one pass.
+
+**It is filed rather than done** because the run that found it had just removed
+the reason it mattered. The budget is 41,300 ms now and grows with the
+repository, so 850 ms is a saving rather than a risk, and moving tests between
+files to collect it is the kind of tidying 0375's own alternatives section
+argues against doing quietly. The two sweeps also assert different things about
+different modules, and a reader looking for what `code.ts` is held to should
+find it in `code.test.ts`.
+
+**What would close it:** a measured reason to want the 850 ms — a `pnpm verify`
+that is too slow to run twice, or a third sweep arriving that would make it
+three passes rather than two.
+
+## 2026-11-09 (evening) — `tools/` is in no lane's row, and the second finding to land there picked an owner by guessing
+
+**Filed by:** `Loom daily build` · **Owned by:** `@jonathanbravecredit`
+(`docs/routines.md`, the lane table) · **Status:** open — **nothing is blocked
+and two findings have now been addressed on a guess**
+
+The lane table in `docs/routines.md` gives nine routines a row each. Eight name a
+directory; `Loom merge` names none deliberately. **`tools/` appears in none of
+them.** `Loom daily build`'s row reads *`src/` except `src/primitives/` and
+`src/signals/`, and the application shell*.
+
+So when #843 filed the wall-clock entry it wrote, in as many words, that `tools/`
+*"is not in the lane table at all, so the entry names `Loom daily build` as the
+closest fit and says to reassign it if that is wrong."* This run picked it up and
+acted on it, which makes two findings resolved against a directory nobody is
+recorded as owning.
+
+**The guess is probably right.** `tools/sources/files.ts` already says these
+checks *"live here, in the lane that owns the repository's own tooling"*, and
+`docs/routines.md` has this lane writing `pnpm weigh`, `pnpm shoot`,
+`pnpm specimen` and the decisions index. Nothing in this entry is a complaint
+about where the work landed.
+
+**What it is:** fifteen directories under `tools/` that four routines all run and
+none is recorded as owning, where the convention for every other directory in
+this repository is that exactly one routine edits it. A lane that wants to change
+a tool another lane depends on has no row to point at, and the only thing
+stopping two lanes editing `tools/screenshot/` on the same day is that neither
+has wanted to.
+
+**The recommendation is one cell:** add `tools/` to `Loom daily build`'s row.
+That matches what is already happening and what `files.ts` already claims. If it
+should be somewhere else — or explicitly shared, the way `Loom merge`'s row is
+explicitly nowhere — that is worth a sentence in the table rather than a third
+finding that opens by saying the table does not cover this.

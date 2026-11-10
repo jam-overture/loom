@@ -6,6 +6,7 @@ import type { LoomDatabase } from "@jam-overture/loom/postgres"
 import type { ApplicationId } from "@jam-overture/loom/store"
 
 import type { SitePullStore, SitePullStoreError, TakenAnswer, TakenSince } from "./pulls"
+import { isMissingColumn } from "@/app/_lib/app/missing-column"
 
 /** One row per answer a project's site took from the read door, by its entity tag (0358 clause 3). */
 export const loomSitePulls = pgTable(
@@ -43,15 +44,6 @@ export const ensureSitePullsSchema = async (db: LoomDatabase): Promise<void> => 
     await db.execute(sql.raw(statement))
   }
 }
-
-/** Postgres's `undefined_column`, wherever the driver or the query builder wraps it. */
-const UNDEFINED_COLUMN = "42703"
-
-const isMissingColumn = (cause: unknown): boolean =>
-  typeof cause === "object" &&
-  cause !== null &&
-  (("code" in cause && cause.code === UNDEFINED_COLUMN) ||
-    ("cause" in cause && isMissingColumn(cause.cause)))
 
 const failure = (cause: unknown, detail: string): SitePullStoreError => ({
   code: "unavailable",

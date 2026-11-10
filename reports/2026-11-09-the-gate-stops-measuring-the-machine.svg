@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 640" width="1080" height="640" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif">
+  <style>
+    .title { font-size: 21px; font-weight: 650; fill: #0f172a; }
+    .sub { font-size: 13px; fill: #64748b; }
+    .panel-title { font-size: 12px; font-weight: 650; fill: #475569; letter-spacing: 0.09em; }
+    .axis { font-size: 11.5px; fill: #94a3b8; }
+    .val { font-size: 11px; fill: #334155; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .valw { font-size: 11px; fill: #ffffff; font-weight: 650; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .wall { font-size: 11px; font-weight: 650; fill: #b91c1c; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .ok { font-size: 11px; font-weight: 650; fill: #047857; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .legend { font-size: 12px; fill: #475569; }
+    .note { font-size: 12px; fill: #475569; }
+  </style>
+  <rect width="1080" height="640" fill="#ffffff"/>
+  <text x="72" y="48" class="title">The merge gate for four surfaces stops measuring the machine</text>
+  <text x="72" y="72" class="sub">Two whole-repository sweeps over 2,065 sources and 18.0M characters. One container, three isolated runs each, worst run shown.</text>
+  <rect x="72" y="92" width="13" height="13" rx="2.5" fill="#94a3b8"/>
+  <text x="92" y="103" class="legend">on main &#8212; the whole emitted output joined on every slash</text>
+  <rect x="470" y="92" width="13" height="13" rx="2.5" fill="#7c3aed"/>
+  <text x="490" y="103" class="legend">on this branch &#8212; the tail of the emitted code read instead</text>
+  <text x="72" y="142" class="panel-title">THE TWO SWEEPS, AGAINST WHAT MAY FAIL THEM</text>
+  <line x1="72" y1="460.0" x2="520" y2="460.0" stroke="#e2e8f0" stroke-width="1"/>
+  <text x="62" y="464.0" class="axis" text-anchor="end">0</text>
+  <line x1="72" y1="405.5" x2="520" y2="405.5" stroke="#e2e8f0" stroke-width="1"/>
+  <text x="62" y="409.5" class="axis" text-anchor="end">1 s</text>
+  <line x1="72" y1="350.9" x2="520" y2="350.9" stroke="#e2e8f0" stroke-width="1"/>
+  <text x="62" y="354.9" class="axis" text-anchor="end">2 s</text>
+  <line x1="72" y1="296.4" x2="520" y2="296.4" stroke="#e2e8f0" stroke-width="1"/>
+  <text x="62" y="300.4" class="axis" text-anchor="end">3 s</text>
+  <line x1="72" y1="241.8" x2="520" y2="241.8" stroke="#e2e8f0" stroke-width="1"/>
+  <text x="62" y="245.8" class="axis" text-anchor="end">4 s</text>
+  <line x1="72" y1="187.3" x2="520" y2="187.3" stroke="#e2e8f0" stroke-width="1"/>
+  <text x="62" y="191.3" class="axis" text-anchor="end">5 s</text>
+  <line x1="72" y1="187.3" x2="520" y2="187.3" stroke="#dc2626" stroke-width="1.6" stroke-dasharray="5 3"/>
+  <text x="520" y="179.3" class="wall" text-anchor="end">vitest default timeout, 5,000 ms &#8212; what turned the gate red</text>
+  <rect x="138.0" y="299.0" width="40" height="161.0" rx="2" fill="#94a3b8"/>
+  <text x="158.0" y="292.0" class="val" text-anchor="middle">2,952 ms</text>
+  <rect x="186.0" y="414.1" width="40" height="45.9" rx="2" fill="#7c3aed"/>
+  <text x="206.0" y="407.1" class="val" text-anchor="middle">841 ms</text>
+  <text x="184.0" y="482.0" class="axis" text-anchor="middle">lexes to the end</text>
+  <rect x="362.0" y="309.0" width="40" height="151.0" rx="2" fill="#94a3b8"/>
+  <text x="382.0" y="302.0" class="val" text-anchor="middle">2,768 ms</text>
+  <rect x="410.0" y="401.4" width="40" height="58.6" rx="2" fill="#7c3aed"/>
+  <text x="430.0" y="394.4" class="val" text-anchor="middle">1,075 ms</text>
+  <text x="408.0" y="482.0" class="axis" text-anchor="middle">ends no statement in a semicolon</text>
+  <text x="72" y="516.0" class="note">Headroom against that wall: <tspan class="wall">1.69x</tspan> before, <tspan class="ok">4.65x</tspan> after.</text>
+  <text x="72" y="536.0" class="note">And the wall itself is gone, replaced by 20 ms a source &#8212;</text>
+  <text x="72" y="556.0" class="note">at 2,065 sources, <tspan class="ok">41,300 ms</tspan>. It grows as the repository does.</text>
+  <text x="608" y="142" class="panel-title">WHY IT WAS SLOW &#8212; ONE FILE, 47% OF THE SCAN</text>
+  <line x1="608" y1="460.0" x2="1008" y2="460.0" stroke="#e2e8f0" stroke-width="1"/>
+  <text x="598" y="464.0" class="axis" text-anchor="end">0.01</text>
+  <line x1="608" y1="360.0" x2="1008" y2="360.0" stroke="#e2e8f0" stroke-width="1"/>
+  <text x="598" y="364.0" class="axis" text-anchor="end">0.10</text>
+  <line x1="608" y1="260.0" x2="1008" y2="260.0" stroke="#e2e8f0" stroke-width="1"/>
+  <text x="598" y="264.0" class="axis" text-anchor="end">1.00</text>
+  <line x1="608" y1="160.0" x2="1008" y2="160.0" stroke="#e2e8f0" stroke-width="1"/>
+  <text x="598" y="164.0" class="axis" text-anchor="end">10.0</text>
+  <text x="598" y="150.0" class="axis" text-anchor="end">ms / 1k chars</text>
+  <rect x="640.7" y="222.0" width="68" height="238.0" rx="2" fill="#b91c1c"/>
+  <text x="674.7" y="215.0" class="val" text-anchor="middle">2.400</text>
+  <text x="674.7" y="482.0" class="axis" text-anchor="middle">library.test.ts</text>
+  <text x="674.7" y="498.0" class="axis" text-anchor="middle">1,224 slashes, 444,658 chars</text>
+  <rect x="774.0" y="334.7" width="68" height="125.3" rx="2" fill="#94a3b8"/>
+  <text x="808.0" y="327.7" class="val" text-anchor="middle">0.179</text>
+  <text x="808.0" y="482.0" class="axis" text-anchor="middle">p95 of all files</text>
+  <rect x="907.3" y="409.5" width="68" height="50.5" rx="2" fill="#94a3b8"/>
+  <text x="941.3" y="402.5" class="val" text-anchor="middle">0.032</text>
+  <text x="941.3" y="482.0" class="axis" text-anchor="middle">median of all files</text>
+  <text x="608" y="516.0" class="note">75x the median &#8212; and not the largest file here, the one</text>
+  <text x="608" y="536.0" class="note">with the most slashes. The cost was length <tspan font-weight="650">times</tspan> slashes,</text>
+  <text x="608" y="556.0" class="note">so one file was 1,067 ms of the repository&#8217;s 2,290.</text>
+</svg>

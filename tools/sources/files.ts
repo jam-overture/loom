@@ -48,3 +48,22 @@ export const everySource = (): readonly string[] =>
 
 /** The path as a report should print it: relative to the repository root. */
 export const relative = (path: string): string => path.slice(ROOT.length)
+
+/**
+ * How long a sweep over every source may take.
+ *
+ * **The default 5,000 ms is a fixed wall-clock budget over work that is the
+ * whole repository**, and it is the instrument rather than the work that turned
+ * the merge gate red on #837's merged head: two sweeps timed out, and the diff
+ * under test was measured to cost that scan nothing. The repository grows every
+ * day and a fixed budget only moves one way.
+ *
+ * So the budget is per source, which is the unit the work is in. At 20 ms a
+ * source against a measured 0.3 to 0.5 ms, it is about forty times what the
+ * sweep costs on an idle container — a net for a scan that has stopped, not a
+ * measure of how busy the machine is. A sweep that fails this has stopped
+ * making progress, which is worth being told about; one that is merely sharing
+ * a CPU with forty other suites is not.
+ */
+export const sweepBudget = (sources: readonly string[]): number =>
+  Math.max(10_000, sources.length * 20)

@@ -91,6 +91,7 @@ export const answerAction = async (
       proposalId: discarded.value.proposalId,
       pageId: pageOfCopy(copies.value, discarded.value.treeId),
       request: discarded.value.intent.utterance,
+      intentId: discarded.value.intent.intentId,
       reason: reasonFrom(form.get("reason")),
       by: site.actor,
       at: Date.now(),

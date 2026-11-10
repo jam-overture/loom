@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest"
 import {
   err,
   fixedPolicy,
+  intentIdSchema,
   ok,
   proposalIdSchema,
   sequentialIdFactory,
@@ -229,6 +230,7 @@ describe("proposeFor", () => {
       reason: "We need it.",
       by: "jonathan",
       at: AT.getTime(),
+      intentId: intentIdSchema.parse("i_before"),
     })
     await proposeFor(given(pathFor(), { client, turnedDown }))
 
