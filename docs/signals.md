@@ -70,6 +70,7 @@ the portal every day.
 | Whether readers have time for a kind of part | the time on screen across its places against the time its words take the readers who met them ([0325](../decisions/0325-a-kinds-pace-is-a-pooled-ratio-over-its-outermost-placements-and-an-unscaled-page-is-kept.md)) — a pooled ratio and never a mean of ratios, the outermost placement standing for the ones inside it, and a page the door cannot scale kept rather than refused, because the missing correction only makes a kind read as more skimmed |
 | What a window could not answer, and what each reason cost it | the states its readings are in, as a condition and a subject, with the readings each took and the pages each cost ([0324](../decisions/0324-what-a-window-could-not-answer-is-a-census-over-its-silences-and-a-page-is-counted-once.md)) — a page counted once however many of its readings report one state, no total over the states because one page is in as many as it has reasons, and a page's own row with a denominator, because *nine of nine readings silent* is a page to fix and *one of nine* is a page that works |
 | Whether the page to fix first is a page to fix | the order of pages held against the faults in the collection, as two orders and the overlap between them ([0330](../decisions/0330-the-page-to-fix-first-is-not-the-page-to-fix-when-its-own-fault-made-the-fall.md)) — because a tree and a window that do not belong together manufacture the steepest fall in the deployment, and *rewrite this page* was then the wrong errand; with no reader count over it, the two orders being in two units |
+| Where in a deployment to go and look | every page's largest unread place, as a fourth order ranked on what one fix recovers ([0377](../decisions/0377-a-deployments-unread-places-are-a-fourth-order-ranked-on-what-one-fix-recovers.md)) — because a page with forty unread leaves outranks a page with one unread band on every other key, and the second is the page to go to; with *four hundred and twelve unread parts in nine places* said as two figures that are never added, the places across the whole deployment in one list, and the fix-list's own first row untouched, the two keys being readers and parts |
 | Arrivals | one batch of a page view says it opened one, which is how a region is counted once per reader, and how page views are counted exactly |
 | Whether a funnel question still names anything | each end looked up in the revision, with what is withheld decided per figure ([0238](../decisions/0238-a-funnel-end-the-revision-no-longer-has-is-a-standing-and-what-is-withheld-is-per-figure.md)) |
 | What a change did | two readings compared, pair by pair, as shares and never counts ([0224](../decisions/0224-a-before-and-after-reading-compares-two-shares-and-a-pair-the-change-dissolved-is-an-answer.md)) — which is also *this week against last week* |
@@ -5129,6 +5130,72 @@ measures **7,543 bytes minified and 3,350 gzipped**, which is what it measures o
 is a judgement about a screen; the *By page* drawer's skipped count, which is the
 portal's to draw; and five new names on `@jam-overture/loom/signals` with no
 prose, which is `Loom docs`'.
+
+### 81. The place one fix recovers the most of a page at · `Loom signals` · **done, 9 November**
+
+§80 made one page's unread parts readable as **the places its reading stopped**
+([0374](../decisions/0374-a-pages-unread-parts-are-reported-as-the-places-its-reading-stopped-and-each-is-behind-exactly-one.md)),
+because `skipped` counts a band, the rows inside it and every heading among them
+— forty parts about one place to fix. **That reading is per page and the question
+is not.** This lane filed the gap the same day: the fix-list has no order over
+unread-ness at all, and the only figure available to put one on was the count the
+frontier was built to replace, so two pages with one unread band each would be
+ordered by how deeply each band happens to nest.
+
+**Done**
+([0377](../decisions/0377-a-deployments-unread-places-are-a-fourth-order-ranked-on-what-one-fix-recovers.md)),
+as a fourth deployment-scale order beside the fix-list, in its own unit, derived
+from readings that already exist.
+
+- **The key is what one fix recovers.** `deploymentUnreadOf` in
+  `src/signals/unread.ts` ranks each page on the parts behind its single
+  costliest place — not on the page's whole unread count, and not on how many
+  places it has, both of which put forty leaves costing one each above one band
+  costing forty. The precedent is 0250, which ranks a page by its **steepest**
+  fall and not by everything it loses. Ties fall to the share of the page one
+  place hides.
+- **Both figures are published and neither is added into the other.** *Four
+  hundred and twelve unread parts in nine places* is the sentence: `unseen` is
+  the first number, `places` the second, and the second is the one an afternoon
+  is spent on.
+- **Five standings, and only one means what an empty reading looks like.** A
+  page nobody opened, a page every part of which was reached, a window read as
+  neither of two forms, and a wrong tree-and-window pair all produce an empty or
+  plausible reading. They are asked in the order the wrong answers are
+  comforting in — `mismatched`, then `unsplit`, then `unread`, and only then is
+  `whole` allowed.
+- **A page off the order has its figures withheld rather than zeroed**, and its
+  reading carried whole, so every place it has is findable where it was taken
+  (0301, 0326). The sums are over the ranked rows for the same reason.
+- **`worstPlacesIn` is the question the per-page reading could not be asked**:
+  every place across the deployment, worst first, each carrying the page it is
+  on — *where in this deployment is the one place worth going to*, over nine
+  pages rather than one opened at a time.
+- **`notReporting` is a slice over every row and a different sentence.** A part a
+  reader was demonstrably below that said nothing about itself is a primitive to
+  fix in the library, and it is named on the page whose figures are withheld,
+  which is the page where nothing else would say so. No fault vocabulary gains a
+  member for it.
+- **It does not reach the fix-list.** `DeploymentAgenda.first` is untouched: the
+  key is parts of a page and the fix-list's three orders are readers, so there is
+  nothing to compare (0327). It is published from `windowAgendaOf` as
+  `WindowAgenda.unread`, beside the agenda the way `converting` stands beside
+  `page`.
+
+**Also in this step:** `PageFrontier` carries `audienceId` and `audiences` now,
+from the page reading unchanged and on the terms `ReadingProgress` carries them.
+Without the first, an order over frontiers counts a deployment's second form of a
+page as its first handed in twice (0158, 0300); without the second, a window read
+as neither form is indistinguishable from a page nobody opened.
+
+**Nothing reaches a reader's browser.** `broadcast.ts` and its import graph are
+untouched, and the bundle measures **7,543 bytes minified and 3,350 gzipped**,
+which is what it measures on `main`.
+
+**What is left and is filed:** whether an `AgendaRow` should carry the place a
+page's reading stopped, which would make *rewrite this page* arrive with *and
+here is where* — and is a change to the fix-list's own shape rather than a corner
+of this run.
 
 ## Still not in scope
 

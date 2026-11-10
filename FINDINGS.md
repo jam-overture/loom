@@ -69584,3 +69584,310 @@ seconds; none of these three has either yet.
 
 **Measured** on this session's container with `tsx`, default stack, one run per
 size.
+
+---
+## 2026-11-09 (evening) — the fix-list's unread-ness order exists now, and it is beside the fix-list rather than inside it
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/unread.ts`) · **Status:** **closed by
+`signals-81-the-place-one-fix-recovers-most-of-a-page`**
+([0377](decisions/0377-a-deployments-unread-places-are-a-fourth-order-ranked-on-what-one-fix-recovers.md)).
+**It closes this lane's own entry of earlier today — *the fix-list orders by a
+count that is forty times the size of the thing to fix, and now has a figure that
+is not*.**
+
+That entry named three things a future run should hold and all three are held.
+
+1. **Ordered by what one place costs, never by the number of places.**
+   `PageUnread.costs` is the parts behind a page's single largest place, which is
+   what one fix recovers. A page with forty unread leaves at the top level has
+   forty places costing one each; a page with one unread band has one place
+   costing forty, and it is the page to go to. The mutations that order on the
+   page's whole unread count and on the number of places each fail three tests.
+2. **`orphaned` is checked first.** It is the `mismatched` standing, asked before
+   anything else, because a wrong tree-and-window pair produces places *and*
+   figures and they are the most plausible-looking output this reading has. Such
+   a page is out of the order, its `at`, `costs` and `share` are withheld rather
+   than zeroed, its reading is carried whole, and its places are in no sum and in
+   no `worstPlacesIn` listing.
+3. **`notReporting` is a different list and a different sentence.** A slice of
+   the rows, over every row and not only the ranked ones — so a library defect is
+   named on the page whose figures are withheld, which is the page where nothing
+   else would say so. No fault vocabulary gained a member: that waits for a real
+   instance, which was this lane's own recommendation this morning.
+
+**What the entry asked for and this did not do.** It did not reorder
+`DeploymentAgenda`. The key here is parts of a page and the fix-list's three
+orders are readers, so there is nothing to compare (0327), and re-ranking what an
+operator is already handed on a figure in a fourth unit is a judgement about a
+screen rather than a join. The order is published from `windowAgendaOf` as
+`WindowAgenda.unread`, beside the agenda the way `converting` stands beside
+`page`, and `read.agenda` is asserted equal to `deploymentAgendaOf` over the same
+three readings — so the fix-list is provably untouched by it.
+
+---
+## 2026-11-09 (evening) — a fix-list row says which page to rewrite and not where on it, and the place is now one join away
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/agenda.ts`) · **Status:** open — **nothing is broken and no
+deadline is attached**; it is a change to the fix-list's own shape and wants to
+be a unit rather than a corner of one
+
+`AgendaRow` carries the page as three readings have it and the instruction
+*rewrite the page*. It names no part of the page. Two locations are available on
+or beside the row today and they are **different questions**, which is the whole
+reason this is filed rather than done:
+
+| | the sentence | where it is |
+| --- | --- | --- |
+| `row.order.at` | *a third of the readers who got this far stopped between these two parts* | already on the row, carried from `RankedPage` (0250) |
+| `PageUnread.at` | *this is as far as the reading goes, and nineteen parts are behind it* | `unread.ranked`, keyed on the same trio (0377) |
+
+A fall needs both ends to have reported and is a ratio of two reach counts; a
+place the reading stopped is the other end of the same page, where there is no
+ratio to take. A row that printed one of them under a heading that reads like the
+other would be the plainest kind of wrong, which is why `progress.ts` owns the
+word *stop* and nothing in `frontier.ts` or `unread.ts` uses it.
+
+**What a fix would look like, and the three things it has to settle.**
+
+1. **A fifth argument to `deploymentAgendaOf`**, on the terms the fourth was
+   taken: required rather than optional, because an argument a caller may omit is
+   a fix-list that type-checks and says nothing about half of what it knows
+   (0343). `windowAgendaOf` already makes the frontiers, so the rung's line does
+   not grow.
+2. **`AgendaWork` must not gain a member.** The vocabulary answers *whose hand*,
+   and an unread band is the page writer's work exactly as a fall is. `agenda.ts`
+   states this about leaks already and the same paragraph covers this.
+3. **`first` is the open question and is not a coding decision.** A page high in
+   the order of places and absent from `DeploymentAgenda.page` is a real state —
+   readers reach what they reach and lose nobody at a fall — and whether the one
+   thing to do first may ever be *go and look at this band* is a judgement about
+   a screen. 0377 left it open deliberately, with the figures on the table.
+
+**What it is not.** It is not a re-ranking. The place would ride on a row the
+order of falls put where it is, which is the rule the join already keeps about
+every reading it carries (0250, 0265): nothing is re-ranked, because the ranking
+rule lives in one place.
+
+---
+## 2026-11-09 (evening) — eight more names on `@jam-overture/loom/signals`, and the two sentences the page would want
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/docs/the-runtime/what-your-readers-do/page.mdx`) ·
+**Status:** open — **the generator said so and `pnpm verify` is green**; what is
+open is whether that page wants a paragraph
+
+`docs:api` reported, on regenerating the reference for 0377:
+
+```
+@jam-overture/loom/signals — DeploymentPlace, DeploymentUnread, PageUnread,
+  UNREAD_STANDINGS, UnreadStanding, deploymentUnreadOf, describeUnreadStanding,
+  worstPlacesIn
+```
+
+Two sentences, if the page wants them:
+
+**On the figure.** *Four hundred and twelve unread parts in nine places* is one
+fact said two ways, and the second number is the one an afternoon is spent on. A
+deployment's pages are ordered on what **one** fix recovers, so a page with forty
+unread leaves at the top level sits below a page with one unread band — which is
+the order every other available key gets backwards.
+
+**On what it costs a reader.** Nothing. A place the reading stopped is derived
+from the tree the counters already name, so a deployment can be asked where in it
+to go and look without a byte added to any payload, any table or any browser.
+That is the half of this subsystem's argument that is easiest to state on a page
+and hardest to state anywhere else.
+
+**This lane did not write it**, for 5 November's reason: that page is `(docs)`'
+and a run that edits prose on another lane's surface is a conflict waiting for
+whoever is drafting it. It is the third entry asking for a paragraph on that one
+page — 8 November's seven names, this morning's five, and these — so **one
+paragraph answers all three**, and the sentences in all three entries are written
+to be lifted rather than rewritten.
+
+---
+## 2026-11-09 (evening) — the transit mangling spares an autolink and a backticked path, and that is the first time the surviving form has been isolated
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom daily build`, as the lane that
+owns the routines document · **Status:** open — **nothing is broken**; what is
+new is a workaround that is known to work rather than a defect that is known to
+happen
+
+This is the **fourth** instance of the entry of 5 November — *a markdown link
+posted to GitHub from a routine session can arrive with backticks wrapping its
+URL, and re-posting it does not fix it* — and the second where it ate something
+load-bearing. On #848 it mangled the two links a reviewer would follow first:
+
+```
+**Report:** [`…-the-place-one-fix….md`](``https://github.com/…/reports/…md)``
+**Record:** [0375](```https://github.com/…/decisions/0375-….md),```
+```
+
+**The new fact is the comparison, and it was clean**, because one description
+carried three URLs in three shapes and only one shape came back wrong:
+
+| the shape | what arrived |
+| --- | --- |
+| `[label](https://…)` | **mangled** — a run of backticks before the URL and after the closing paren |
+| `<https://…>` (autolink) | intact, in the same description, twice |
+| a bare backticked path, `` `reports/….md` `` | intact |
+| a bare URL on its own line | intact |
+
+Two further things the earlier entries left open:
+
+1. **Re-posting does not fix it and `update_pull_request` does.** The 5 November
+   entry records that re-posting the same body changes nothing. Replacing the
+   markdown links with paths, in one `update_pull_request` call, produced a clean
+   body on the first attempt — so what is wrong is the **text**, and the
+   round-trip is deterministic rather than flaky.
+2. **It is not GitHub's renderer.** The backticks are in the stored body: a read
+   of the pull request through `pull_request_read` returns them in the raw
+   markdown. Whatever inserts them does it before GitHub sees it.
+
+**The recommendation is one line in `docs/routines.md`**, beside the merge-gate
+rule, which is where a routine already learns what it cannot trust about its own
+output: **do not post a markdown link from a routine session — post the URL as an
+autolink, `<https://…>`, or the repository path in backticks.** Both survive, both
+are clickable or searchable, and neither can be mangled into something a reviewer
+has to read past.
+
+**What this lane did not do.** It did not edit `docs/routines.md`, which is not
+its file and is the document it is bound by rather than one it writes. The three
+earlier entries are left as they are and this one is appended, because
+`FINDINGS.md` is union-merged.
+## 2026-11-09 (afternoon) — two whole-repository scans are wall-clock gates with 1.7x headroom, and they time out inside `pnpm verify` while passing beside it
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom daily build`
+(`tools/sources/code.test.ts`, `tools/sources/semicolons.test.ts`) ·
+**Status:** open — **it cost one run of this lane a full gate re-run and nothing
+else**; `main` is green and the tests are right about what they check
+
+`pnpm verify` went red on `signals-80-where-a-reading-of-a-page-stopped` after
+`Loom merge` brought `main` in, with two failures and both of them timeouts
+rather than assertions:
+
+```
+FAIL tools/sources/code.test.ts > every source in this repository > lexes to the end
+FAIL tools/sources/semicolons.test.ts > every source in this repository > ends no statement in a semicolon
+Error: Test timed out in 5000ms.
+```
+
+**It is not the branch's**, and it is not a flake with no cause.
+
+| | |
+| --- | --- |
+| the two tests on `main`, run beside each other | 2,451 ms and 2,587 ms |
+| the same two on the merged branch, beside each other | 2,711 ms and 3,304 ms |
+| `pnpm verify` on `main` | **EXIT=0** |
+| `pnpm verify` on the branch, first run | **EXIT=1** — these two, timed out |
+| `pnpm verify` on the branch, re-run | **EXIT=0**, 14,216 tests |
+
+**What the branch's own files cost that scan is nothing measurable.** Three runs
+of the semicolons scan with `src/signals/frontier.ts` and `frontier.test.ts`
+present: **2,773, 2,760, 2,983 ms**. Three runs with those two files moved out of
+the tree and nothing else changed: **2,654, 2,745, 2,991 ms**. The distributions
+overlap completely. The 717 ms that separated the branch from `main` on a single
+sample each was run-to-run variance, and reading it as the diff's cost would have
+been the wrong conclusion from the right-looking number.
+
+**The cause is that the budget is wall clock and the work is the whole
+repository.** Each test reads and lexes every source under `src/`, `tools/` and
+`apps/loom/`, which is ~2.7 s on an idle container against vitest's default
+5,000 ms — about **1.7x**. Inside `pnpm verify` the suite runs many files in
+parallel on a shared CPU, so the same scan can take twice as long in wall-clock
+terms while doing identical work. The repository grows every day and the scan
+grows with it; the headroom only goes one way.
+
+**This is the second instance of one shape**, and the first is this lane's own
+entry of 4 November (evening) about `src/signals/ledger.test.ts` carrying a
+wall-clock ratio with no headroom while being the gate for four surfaces. Two
+gates, two lanes, one failure mode: a number of milliseconds standing in for an
+amount of work, on a machine whose speed is not the thing under test.
+
+**Not fixed here, because `tools/` is not this lane's** — and it is not in the
+lane table at all, so the ownership above is the closest fit rather than the
+table's answer. Reassign it if that is wrong.
+
+**Two shapes a fix could take, and the second is the one worth the code.**
+
+1. **Give the two tests a timeout that matches what they do.** Vitest says so
+   itself in the failure text, and a whole-repository scan is a long-running test
+   by any honest reading. One argument each, and it buys time rather than
+   headroom — the ratio goes back to 3x or 4x and starts shrinking again.
+2. **Stop measuring the machine.** Neither test is about speed: both are about
+   whether any source in the repository lexes to its end and whether any
+   statement ends in a semicolon. A budget per thousand lines scanned, or a cap
+   on bytes rather than on seconds, asserts the thing they exist to assert and
+   cannot be failed by a busy container. The same argument applies to the
+   `ledger.test.ts` entry, where the measurement genuinely *is* about cost — so
+   the honest version there is a ratio against a calibration run rather than a
+   constant.
+## 2026-11-09 (evening) — the two whole-repository sweeps each read and lex all 2,065 sources, and one pass would answer both
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build`
+(`tools/sources/`) · **Status:** open — **nothing is broken and nothing is
+blocked**; the budget no longer needs this and it is recorded so that it is a
+decision rather than something nobody noticed
+
+`code.test.ts > lexes to the end` and `semicolons.test.ts > ends no statement in
+a semicolon` are two sweeps over the same 2,065 files. Each reads every one and
+runs `scan` over it. **They are the same read and the same lex, done twice**,
+because they are in two test files and vitest gives each file its own worker.
+
+After [0375](decisions/0375-a-whole-repository-check-is-budgeted-by-what-it-reads-rather-than-by-a-wall-clock.md)
+that is 841 ms and 1,075 ms, so one pass would save about 850 ms of every
+`pnpm verify`. `scan` already returns both answers in one value — `mode.kind`
+for the first sweep and `code` for the second — so what it needs is for
+`semicolonTerminated` to be split at the seam it already has, into the part that
+blanks and the part that reads blanked code, and for the two sweeps to sit in one
+file over one pass.
+
+**It is filed rather than done** because the run that found it had just removed
+the reason it mattered. The budget is 41,300 ms now and grows with the
+repository, so 850 ms is a saving rather than a risk, and moving tests between
+files to collect it is the kind of tidying 0375's own alternatives section
+argues against doing quietly. The two sweeps also assert different things about
+different modules, and a reader looking for what `code.ts` is held to should
+find it in `code.test.ts`.
+
+**What would close it:** a measured reason to want the 850 ms — a `pnpm verify`
+that is too slow to run twice, or a third sweep arriving that would make it
+three passes rather than two.
+
+## 2026-11-09 (evening) — `tools/` is in no lane's row, and the second finding to land there picked an owner by guessing
+
+**Filed by:** `Loom daily build` · **Owned by:** `@jonathanbravecredit`
+(`docs/routines.md`, the lane table) · **Status:** open — **nothing is blocked
+and two findings have now been addressed on a guess**
+
+The lane table in `docs/routines.md` gives nine routines a row each. Eight name a
+directory; `Loom merge` names none deliberately. **`tools/` appears in none of
+them.** `Loom daily build`'s row reads *`src/` except `src/primitives/` and
+`src/signals/`, and the application shell*.
+
+So when #843 filed the wall-clock entry it wrote, in as many words, that `tools/`
+*"is not in the lane table at all, so the entry names `Loom daily build` as the
+closest fit and says to reassign it if that is wrong."* This run picked it up and
+acted on it, which makes two findings resolved against a directory nobody is
+recorded as owning.
+
+**The guess is probably right.** `tools/sources/files.ts` already says these
+checks *"live here, in the lane that owns the repository's own tooling"*, and
+`docs/routines.md` has this lane writing `pnpm weigh`, `pnpm shoot`,
+`pnpm specimen` and the decisions index. Nothing in this entry is a complaint
+about where the work landed.
+
+**What it is:** fifteen directories under `tools/` that four routines all run and
+none is recorded as owning, where the convention for every other directory in
+this repository is that exactly one routine edits it. A lane that wants to change
+a tool another lane depends on has no row to point at, and the only thing
+stopping two lanes editing `tools/screenshot/` on the same day is that neither
+has wanted to.
+
+**The recommendation is one cell:** add `tools/` to `Loom daily build`'s row.
+That matches what is already happening and what `files.ts` already claims. If it
+should be somewhere else — or explicitly shared, the way `Loom merge`'s row is
+explicitly nowhere — that is worth a sentence in the table rather than a third
+finding that opens by saying the table does not cover this.

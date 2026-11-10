@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs"
 
 import { describe, expect, it } from "vitest"
 
-import { everySource, relative } from "./files.js"
+import { everySource, relative, sweepBudget } from "./files.js"
 import { semicolonTerminated } from "./semicolons.js"
 
 const lines = (source: string): readonly string[] =>
@@ -108,7 +108,7 @@ describe("every source in this repository", () => {
     expect(sources.length).toBeGreaterThanOrEqual(1800)
   })
 
-  it("ends no statement in a semicolon", () => {
+  it("ends no statement in a semicolon", { timeout: sweepBudget(sources) }, () => {
     const found = sources.flatMap((path) =>
       semicolonTerminated(readFileSync(path, "utf8")).map(
         (line) => `${relative(path)}:${line.line}: ${line.text}`
