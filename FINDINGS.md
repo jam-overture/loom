@@ -8,6 +8,116 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-11-10 — a printed specimen that reads the environment arrives in the deployment sweep as a setting of this deployment, and the panel that would print the real spelling is shaped around it
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom daily build`
+(`tools/sources/deployment.ts`) · **Status:** open — **nothing is broken, no
+test is failing on `main`, and one panel on this site prints a spelling one
+step away from the one a reader writes.**
+
+`app/(marketing)/_lib/wired/page.tsx` is the route the new *On your own site*
+band prints: the two calls
+[0361](decisions/0361-the-site-pulls-into-its-own-process-and-a-host-wires-the-live-page-in-two-calls.md)
+clause 2 names, and the render under them. It is a **real compiled module**,
+because that is this lane's whole discipline for a code panel — `written.ts`
+has the argument and it is one sentence: *a stranger cannot be shown code that
+does not compile.*
+
+The spelling a reader writes, which is also the one the published entry point's
+own example gives, is:
+
+```ts
+const live = startPullingLivePages({
+  deployment: process.env.LOOM_URL ?? "",
+  key: process.env.LOOM_PROJECT_KEY ?? "",
+})
+```
+
+**Written that way the panel turns two of `tools/sources/deployment.test.ts`'
+cases red.** Measured on this branch before the panel was reshaped:
+
+```
+- []
++ [ "LOOM_PROJECT_KEY", "LOOM_URL" ]
+  ❯ tools/sources/deployment.test.ts:252  (the variables an operator is offered)
+```
+
+The sweep is right about what it read and wrong about what it means. It reads
+every environment variable the **application's code** names and holds
+`apps/loom/.env.example` to offering each one, which is exactly the drift it was
+written for — three findings in six weeks, all the same shape. What it cannot do
+is tell a setting **this** deployment reads from one a **printed specimen**
+reads, and this lane's panels are specimens that are also code.
+
+### The sweep already knows this class of thing exists
+
+Its own docblock records the near-miss:
+
+> *"the portal's Credentials screen prints `process.env.LOOM_INGEST_KEY` inside
+> a template literal, as a snippet for a customer to paste into their own
+> application. It is not this deployment's setting, and reading the raw text
+> would have made it one."*
+
+`codeOnly` blanks a literal's body, so that one is invisible and the portal's
+screen is safe. **A specimen is the same claim one level up**: it is a snippet
+for a customer, and it is in code rather than in a literal *on purpose*, because
+a snippet in a literal is a snippet nothing typechecks. So `_lib/wired.ts` — the
+module that publishes the text as a template literal — passes, and the file that
+makes the text trustworthy fails.
+
+### What this run did instead, and why it is not the fix
+
+Both ways out are another lane's file:
+
+- **Offer them in `apps/loom/.env.example`.** That documents two settings this
+  deployment does not have, in the one file the guide calls the full list. It is
+  the failure the sweep exists to catch, caused by satisfying the sweep.
+- **Add them to `NOT_SET_BY_AN_OPERATOR`.** This is the sweep's own designed
+  escape hatch and the right category, and the table is in `tools/`. A marketing
+  branch editing the framework's tooling is the diff `docs/routines.md` says
+  nobody can review.
+
+So the panel takes the two values from the configuration module it already
+imports from, the copy beside it says *the address and the key come out of your
+environment*, and `wired/loom.ts` carries the whole of why in a docblock.
+`wired.test.ts` holds it there — `reads no environment variable, because the
+sweep cannot tell this from a setting` — so a later run cannot quietly put the
+real spelling back and go red on `main`.
+
+**Nothing a reader is shown is false.** It is one indirection away from the
+file they would write, on the one panel whose value is being exactly that file.
+
+### Three shapes, and this lane has no opinion on which
+
+Costed in what each would cost the owning lane, not in what this lane wants.
+
+| | what changes | cost | what it gives up |
+| --- | --- | --- | --- |
+| **A third category in the table** | one row per name in `NOT_SET_BY_AN_OPERATOR`, reason *printed on the marketing site as a customer's own code* | two lines | the reason is per-name, so each new specimen variable is another row and another review |
+| **A marker the sweep reads** | `environmentNames` skips a file carrying the published-region marker `// ── shown on the site ──` | a few lines, and the marker is already load-bearing in three files | a file could opt out by writing a comment, which is why the marker rather than a new one — it is the thing `written.test.ts`, `connected.test.ts` and `wired.test.ts` all already read |
+| **A directory the sweep skips** | the three specimen directories, named | one list | a list somebody maintains, which is what `files.ts` says these sweeps exist not to have |
+
+**The second is the one worth looking at first**, and the reason is the sweep's
+own: the marker is not a new opt-out, it is the existing declaration that a
+file's body is published to strangers rather than run by this deployment. A file
+carrying it is by definition a specimen, and three tests already fail if it
+moves.
+
+### What else carries this today, and what will carry it next
+
+Two specimen directories exist now and neither reads the environment, so
+nothing else is affected: `_lib/written/` (a component and its registration) and
+`_lib/connected/` (a model client, which takes its endpoint and key as
+**arguments** — `connected.ts` gives a different reason for that, and this is a
+second one it did not know about).
+
+The next panel that wants it is the one a reader needs most. Every real
+integration reads its configuration from somewhere, and the honest spelling for
+a Next application is `process.env`. `(docs)` prints its quickstart with a
+`readFileSync` of a file it runs, so a documentation page showing the same code
+would hit the same sweep from the other lane.
+
+---
 ## 2026-11-09 — a ready-made section cannot be shown on any page but the one it was dropped into, because it ships a live link and a developer tool's claims
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom primitives`
