@@ -1,4 +1,4 @@
-import type { ProposalId, Result, TreeId } from "@jam-overture/loom"
+import type { IntentId, ProposalId, Result, TreeId } from "@jam-overture/loom"
 
 /**
  * The changes a person turned down on a page, kept so the next proposal for it
@@ -18,6 +18,13 @@ export type TurnedDown = {
   readonly at: number
 }
 
+/**
+ * A change as it is turned down, with the intent it was made from: what the
+ * goal it served is kept by (0352), so *Turned down* can lead with that goal as
+ * every other list of changes does.
+ */
+export type TurnedDownChange = TurnedDown & { readonly intentId: IntentId }
+
 /** Room for a sentence or two, which is what a reason is. */
 export const MAX_REASON_LENGTH = 300
 
@@ -29,7 +36,7 @@ export type TurnedDownStoreError = { readonly code: "unavailable"; readonly deta
 /** One application's turned-down changes, scoped at construction. */
 export interface TurnedDownStore {
   /** Recording the same proposal twice keeps the first: a change is turned down once. */
-  readonly record: (entry: TurnedDown) => Promise<Result<void, TurnedDownStoreError>>
+  readonly record: (entry: TurnedDownChange) => Promise<Result<void, TurnedDownStoreError>>
   /** Newest first, at most `limit`. */
   readonly forPage: (
     pageId: TreeId,
@@ -40,6 +47,13 @@ export interface TurnedDownStore {
     at: number,
     limit: number
   ) => Promise<Result<readonly TurnedDown[], TurnedDownStoreError>>
+  /**
+   * The intent each of these was made from, where it was kept: a change turned
+   * down before intents were kept has none, and is left out of the map.
+   */
+  readonly intentsOf: (
+    proposalIds: readonly ProposalId[]
+  ) => Promise<Result<ReadonlyMap<ProposalId, IntentId>, TurnedDownStoreError>>
 }
 
 /** The order `forPage` promises, for every implementation to share. */

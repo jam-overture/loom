@@ -1,14 +1,19 @@
+import type { ProposalId } from "@jam-overture/loom"
 import type { ApplicationId, ProjectId } from "@jam-overture/loom/store"
 
+import { proposalGoalsFor } from "./goals/stores"
 import { turnedDownFor } from "./proposing/stores"
 import { pageNamesOf } from "./published-view"
 import { portalApplications, portalProjects } from "./store"
 import {
+  NOT_RECORDED,
   RECENT_LIMIT,
   recentCountOf,
   recentSince,
+  turnedDownGoalsOf,
   turnedDownRowOf,
   type RecentCount,
+  type TurnedDownGoal,
   type TurnedDownRow,
 } from "./turned-down-list"
 import { PORTAL_READ_BUDGET_MS } from "@/app/_lib/app/bounded"
@@ -20,7 +25,7 @@ import { publishedPagesFor } from "@/app/_lib/pages/store"
  * What *Turned down* reads: the changes turned down on the project's pages in
  * the last thirty days, newest first (0341 keeps them). The changes must
  * answer, or nothing is a statement about what was turned down; the page
- * names cost only the names.
+ * names cost only the names, and the goals each served only the goal chips.
  */
 export type TurnedDownReading =
   | { readonly kind: "unavailable" }
@@ -30,7 +35,35 @@ export type TurnedDownReading =
       readonly projectName: string
       readonly rows: readonly TurnedDownRow[]
       readonly count: RecentCount
+      /** Whether the goal each change served was read; where not, no row names one. */
+      readonly goalsRead: boolean
     }
+
+/**
+ * The goal each change served, or `undefined` where the intents they were made
+ * from or the goals kept by those intents could not be read: an intent without
+ * its goal would say *No goal named* of a change that named one.
+ */
+const readGoals = async (
+  application: ApplicationId,
+  proposalIds: readonly ProposalId[]
+): Promise<((proposalId: ProposalId) => TurnedDownGoal) | undefined> => {
+  const intents = await readWithin(
+    () => turnedDownFor(application).intentsOf(proposalIds),
+    unavailable,
+    PORTAL_READ_BUDGET_MS
+  )
+
+  if (!intents.ok) return undefined
+
+  const served = await readWithin(
+    () => proposalGoalsFor(application).forIntents([...intents.value.values()]),
+    unavailable,
+    PORTAL_READ_BUDGET_MS
+  )
+
+  return served.ok ? turnedDownGoalsOf(intents.value, served.value) : undefined
+}
 
 export const readTurnedDown = async (
   projectId: ProjectId,
@@ -58,13 +91,20 @@ export const readTurnedDown = async (
 
   if (!turnedDown.ok) return { kind: "unavailable" }
 
+  const goalOf = await readGoals(
+    application,
+    turnedDown.value.map((entry) => entry.proposalId)
+  )
   const names = published.ok ? pageNamesOf(published.value) : new Map<string, string>()
 
   return {
     kind: "read",
     projectName: project.value.name,
-    rows: turnedDown.value.map((entry) => turnedDownRowOf(entry, names)),
+    rows: turnedDown.value.map((entry) =>
+      turnedDownRowOf(entry, names, goalOf?.(entry.proposalId) ?? NOT_RECORDED)
+    ),
     count: recentCountOf(turnedDown.value),
+    goalsRead: goalOf !== undefined,
   }
 }
 
