@@ -3,8 +3,13 @@
 **`Loom signals`, 10 November 2026, evening run.**
 Branch `signals-83-the-place-a-row-says-to-go-to`. Record
 [0378](../decisions/0378-a-fix-lists-row-carries-the-place-its-pages-reading-stopped-and-the-fourth-reading-cannot-take-a-row-away.md),
-`Accepted`. `pnpm verify` **EXIT=0**, read out of a file. Pull request and
-preview URL at the end of this report.
+`Accepted`. `pnpm verify` **EXIT=0**, read out of a file. Pull request
+[#855](https://github.com/jam-overture/loom/pull/855); preview
+<https://loom-git-signals-83-the-plac-f6758f-jpizzolato36-6341s-projects.vercel.app>,
+which Vercel reported `Building` as this was written — nothing in this change
+reaches the site, and this session's network policy does not reach
+`*.vercel.app`, so the deployment's own status is the evidence rather than a
+fetch of the page.
 
 ## What this run completed
 
