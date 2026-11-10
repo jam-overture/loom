@@ -14,9 +14,12 @@ import { registryOf, testDefinitions } from "../testing/definitions.js"
 import { sampleTree } from "../testing/fixtures.js"
 import { buildElement, buildText } from "../tree/builders.js"
 
+import { memoryAudienceOverlayStore } from "../audience/memory.js"
+
 import { memoryTreeStore } from "./memory.js"
 import { auditSnapshot } from "./replay.js"
 import {
+  audienceOverlaySourceFromStore,
   composingTreeSourceFromStore,
   treeSourceFromStore,
   type AudienceOverlaySource,
@@ -293,6 +296,112 @@ describe("composingTreeSourceFromStore", () => {
     const rendered = await renderFor(tree.treeId, composingTreeSourceFromStore(store, broken), {
       region: "eu",
     })
+
+    expect(!rendered.ok && JSON.stringify(rendered.error)).toContain("rules unreachable")
+  })
+})
+
+/**
+ * The seam, with the table under it. Every test above hands the composition an
+ * overlay from a module, which is what 0359 clause 6 said already satisfied the
+ * seam; these drive the same path with the overlay **read out of a store a
+ * person wrote to**, which is the half that record left out.
+ */
+describe("audienceOverlaySourceFromStore", () => {
+  const audience = audienceIdSchema.parse("aud_eu")
+
+  const storedBaseAndOverlay = async () => {
+    const { tree, ids } = sampleTree()
+    const store = memoryTreeStore()
+    await store.create(tree)
+
+    const spare = sequentialIdFactory("stored")
+    const banner = buildElement(spare, {
+      type: "loom.header",
+      children: [buildText(spare, "Sondertarif")],
+    })
+
+    const overlays = memoryAudienceOverlayStore()
+    await overlays.recordRules(tree.treeId, {
+      rules: [{ audienceId: audience, clauses: [{ key: "region", anyOf: ["eu"] }] }],
+      actor: "person:ana",
+      recordedAt: "2026-11-10T09:00:00.000Z",
+    })
+    await overlays.setForm(tree.treeId, {
+      audienceId: audience,
+      delta: {
+        deltaId: spare.deltaId(),
+        treeId: tree.treeId,
+        baseRevision: 0,
+        operations: [{ op: "insert", parentId: ids.page, index: 0, node: banner }],
+      },
+      actor: "person:ana",
+      authoredAt: "2026-11-10T09:00:00.000Z",
+    })
+
+    return { tree, store, overlays }
+  }
+
+  const renderFor = async (
+    treeId: ReturnType<typeof treeIdSchema.parse>,
+    source: ReturnType<typeof composingTreeSourceFromStore>,
+    context?: Record<string, string>
+  ) => {
+    const registry = registryOf(testDefinitions)
+
+    return renderRequest(
+      { treeId, editMode: false, ...(context ? { context } : {}) },
+      { source, resolver: registry, validator: registry }
+    )
+  }
+
+  it("serves the page the stored rules and the stored form make", async () => {
+    const { tree, store, overlays } = await storedBaseAndOverlay()
+    const source = composingTreeSourceFromStore(store, audienceOverlaySourceFromStore(overlays))
+
+    const inside = await renderFor(tree.treeId, source, { region: "eu" })
+    const outside = await renderFor(tree.treeId, source, { region: "us" })
+
+    expect(inside.ok && renderToStaticMarkup(inside.value.element)).toContain("Sondertarif")
+    expect(outside.ok && renderToStaticMarkup(outside.value.element)).not.toContain("Sondertarif")
+    expect(inside.ok && inside.value.tree.revision).toBe(0)
+  })
+
+  /**
+   * The property 0359 promised and this adapter must not quietly break: wiring
+   * the composing source into a deployment that has never defined an audience
+   * changes nothing about what it serves.
+   */
+  it("serves the base to a deployment that has written no rules at all", async () => {
+    const { tree } = sampleTree()
+    const store = memoryTreeStore()
+    await store.create(tree)
+
+    const rendered = await renderFor(
+      tree.treeId,
+      composingTreeSourceFromStore(
+        store,
+        audienceOverlaySourceFromStore(memoryAudienceOverlayStore())
+      ),
+      { region: "eu" }
+    )
+
+    expect(rendered.ok && renderToStaticMarkup(rendered.value.element)).toContain("Welcome")
+  })
+
+  it("passes a store that cannot be read through rather than serving the base", async () => {
+    const { tree, store } = await storedBaseAndOverlay()
+    const broken = {
+      ...memoryAudienceOverlayStore(),
+      overlay: async () =>
+        ({ ok: false, error: { code: "unavailable" as const, detail: "rules unreachable" } }) as const,
+    }
+
+    const rendered = await renderFor(
+      tree.treeId,
+      composingTreeSourceFromStore(store, audienceOverlaySourceFromStore(broken)),
+      { region: "eu" }
+    )
 
     expect(!rendered.ok && JSON.stringify(rendered.error)).toContain("rules unreachable")
   })
