@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest"
 import { collapse, writtenPages, type WrittenPage } from "./cross-references"
 import {
   commandKindsIn,
+  commandsBeyondScaffolding,
   everyPublishedName,
   instructionSentencesIn,
   namesASource,
@@ -11,6 +12,7 @@ import {
   publishedSignatureOf,
   READER_INSTRUCTIONS,
   SCAFFOLDING_COMMANDS,
+  sourceNamedOnAnAnswer,
   type ReaderInstruction,
 } from "./instructions"
 
@@ -116,6 +118,18 @@ describe("the measurements read something", () => {
 
     expect([...kinds].sort()).toEqual([...SCAFFOLDING_COMMANDS].sort())
     expect(commandKindsIn('type X = { kind: "propose" }')).toEqual(["propose"])
+  })
+
+  /**
+   * The branch no reference can reach while the declaration is still there.
+   *
+   * A measurement that reads a name nothing publishes any more and answers
+   * *nothing found* is green forever, and it is green in exactly the case
+   * where the page has most likely changed underneath it.
+   */
+  it("says so when the declaration it reads has gone", () => {
+    expect(sourceNamedOnAnAnswer(undefined)).toEqual(["DataOutcome is no longer published"])
+    expect(commandsBeyondScaffolding(undefined)).toEqual(["CliCommand is no longer published"])
   })
 
   it("would see a published override", () => {

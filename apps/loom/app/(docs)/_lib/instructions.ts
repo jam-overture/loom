@@ -187,6 +187,28 @@ export const commandKindsIn = (signature: string): readonly string[] =>
 export const SCAFFOLDING_COMMANDS: readonly string[] = ["init", "add-primitive", "help"]
 
 /**
+ * The two readings that take a published signature, each as a function of the
+ * signature rather than of the reference.
+ *
+ * Extracted because of a mutation that survived: a measurement that answers
+ * *nothing found* when the declaration it reads **has gone** is a measurement
+ * that passes forever, and with the declaration present no test could reach
+ * that branch. A guard whose failure mode is silence is the thing this whole
+ * directory exists to avoid, so the branch is a value a test can hand in.
+ */
+export const sourceNamedOnAnAnswer = (outcome: string | undefined): readonly string[] => {
+  if (outcome === undefined) return ["DataOutcome is no longer published"]
+
+  return namesASource(outcome) ? [`DataOutcome now carries a source: ${outcome}`] : []
+}
+
+export const commandsBeyondScaffolding = (command: string | undefined): readonly string[] => {
+  if (command === undefined) return ["CliCommand is no longer published"]
+
+  return commandKindsIn(command).filter((kind) => !SCAFFOLDING_COMMANDS.includes(kind))
+}
+
+/**
  * The instructions, each with the thing that would make it unnecessary.
  *
  * Three. Each is a sentence a stranger acts on, so each is a sentence worth
@@ -199,13 +221,7 @@ export const READER_INSTRUCTIONS: readonly ReaderInstruction[] = [
     says: ["You still check the shape yourself", "never told which source it was bound to"],
     of: "A primitive is handed an answer and not the source it came from, so whether a row can be drawn is a question only the primitive can ask — three lines the reader writes.",
     from: "the published signature of `DataOutcome`, which is the whole of what a bound primitive is handed for a name",
-    found: () => {
-      const outcome = publishedSignatureOf("DataOutcome")
-
-      if (outcome === undefined) return ["DataOutcome is no longer published"]
-
-      return namesASource(outcome) ? [`DataOutcome now carries a source: ${outcome}`] : []
-    },
+    found: () => sourceNamedOnAnAnswer(publishedSignatureOf("DataOutcome")),
     whenItLands:
       "An answer that names its source is an answer the runtime could validate against the binding's schema, so say which of the two checks is now the runtime's and which three lines a primitive still owes — a reader who stops writing them because half the job moved is the worst outcome of this page.",
   },
@@ -215,13 +231,7 @@ export const READER_INSTRUCTIONS: readonly ReaderInstruction[] = [
     says: ["library code you call yourself"],
     of: "The CLI scaffolds and stops: it writes files and never runs a page, so everything after `loom init` is the reader calling the library.",
     from: "the published `CliCommand`, which is every command `loom` parses",
-    found: () => {
-      const command = publishedSignatureOf("CliCommand")
-
-      if (command === undefined) return ["CliCommand is no longer published"]
-
-      return commandKindsIn(command).filter((kind) => !SCAFFOLDING_COMMANDS.includes(kind))
-    },
+    found: () => commandsBeyondScaffolding(publishedSignatureOf("CliCommand")),
     whenItLands:
       "A third command means the terminal does something a reader was told to write, so say what it does and where it stops — the sentence's value is the boundary, and a boundary that has moved and not been redrawn is worse than none.",
   },
