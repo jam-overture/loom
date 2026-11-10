@@ -69479,6 +69479,177 @@ seconds; none of these three has either yet.
 size.
 
 ---
+## 2026-11-09 (evening) — the fix-list's unread-ness order exists now, and it is beside the fix-list rather than inside it
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/unread.ts`) · **Status:** **closed by
+`signals-81-the-place-one-fix-recovers-most-of-a-page`**
+([0377](decisions/0377-a-deployments-unread-places-are-a-fourth-order-ranked-on-what-one-fix-recovers.md)).
+**It closes this lane's own entry of earlier today — *the fix-list orders by a
+count that is forty times the size of the thing to fix, and now has a figure that
+is not*.**
+
+That entry named three things a future run should hold and all three are held.
+
+1. **Ordered by what one place costs, never by the number of places.**
+   `PageUnread.costs` is the parts behind a page's single largest place, which is
+   what one fix recovers. A page with forty unread leaves at the top level has
+   forty places costing one each; a page with one unread band has one place
+   costing forty, and it is the page to go to. The mutations that order on the
+   page's whole unread count and on the number of places each fail three tests.
+2. **`orphaned` is checked first.** It is the `mismatched` standing, asked before
+   anything else, because a wrong tree-and-window pair produces places *and*
+   figures and they are the most plausible-looking output this reading has. Such
+   a page is out of the order, its `at`, `costs` and `share` are withheld rather
+   than zeroed, its reading is carried whole, and its places are in no sum and in
+   no `worstPlacesIn` listing.
+3. **`notReporting` is a different list and a different sentence.** A slice of
+   the rows, over every row and not only the ranked ones — so a library defect is
+   named on the page whose figures are withheld, which is the page where nothing
+   else would say so. No fault vocabulary gained a member: that waits for a real
+   instance, which was this lane's own recommendation this morning.
+
+**What the entry asked for and this did not do.** It did not reorder
+`DeploymentAgenda`. The key here is parts of a page and the fix-list's three
+orders are readers, so there is nothing to compare (0327), and re-ranking what an
+operator is already handed on a figure in a fourth unit is a judgement about a
+screen rather than a join. The order is published from `windowAgendaOf` as
+`WindowAgenda.unread`, beside the agenda the way `converting` stands beside
+`page`, and `read.agenda` is asserted equal to `deploymentAgendaOf` over the same
+three readings — so the fix-list is provably untouched by it.
+
+---
+## 2026-11-09 (evening) — a fix-list row says which page to rewrite and not where on it, and the place is now one join away
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/agenda.ts`) · **Status:** open — **nothing is broken and no
+deadline is attached**; it is a change to the fix-list's own shape and wants to
+be a unit rather than a corner of one
+
+`AgendaRow` carries the page as three readings have it and the instruction
+*rewrite the page*. It names no part of the page. Two locations are available on
+or beside the row today and they are **different questions**, which is the whole
+reason this is filed rather than done:
+
+| | the sentence | where it is |
+| --- | --- | --- |
+| `row.order.at` | *a third of the readers who got this far stopped between these two parts* | already on the row, carried from `RankedPage` (0250) |
+| `PageUnread.at` | *this is as far as the reading goes, and nineteen parts are behind it* | `unread.ranked`, keyed on the same trio (0377) |
+
+A fall needs both ends to have reported and is a ratio of two reach counts; a
+place the reading stopped is the other end of the same page, where there is no
+ratio to take. A row that printed one of them under a heading that reads like the
+other would be the plainest kind of wrong, which is why `progress.ts` owns the
+word *stop* and nothing in `frontier.ts` or `unread.ts` uses it.
+
+**What a fix would look like, and the three things it has to settle.**
+
+1. **A fifth argument to `deploymentAgendaOf`**, on the terms the fourth was
+   taken: required rather than optional, because an argument a caller may omit is
+   a fix-list that type-checks and says nothing about half of what it knows
+   (0343). `windowAgendaOf` already makes the frontiers, so the rung's line does
+   not grow.
+2. **`AgendaWork` must not gain a member.** The vocabulary answers *whose hand*,
+   and an unread band is the page writer's work exactly as a fall is. `agenda.ts`
+   states this about leaks already and the same paragraph covers this.
+3. **`first` is the open question and is not a coding decision.** A page high in
+   the order of places and absent from `DeploymentAgenda.page` is a real state —
+   readers reach what they reach and lose nobody at a fall — and whether the one
+   thing to do first may ever be *go and look at this band* is a judgement about
+   a screen. 0377 left it open deliberately, with the figures on the table.
+
+**What it is not.** It is not a re-ranking. The place would ride on a row the
+order of falls put where it is, which is the rule the join already keeps about
+every reading it carries (0250, 0265): nothing is re-ranked, because the ranking
+rule lives in one place.
+
+---
+## 2026-11-09 (evening) — eight more names on `@jam-overture/loom/signals`, and the two sentences the page would want
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/docs/the-runtime/what-your-readers-do/page.mdx`) ·
+**Status:** open — **the generator said so and `pnpm verify` is green**; what is
+open is whether that page wants a paragraph
+
+`docs:api` reported, on regenerating the reference for 0377:
+
+```
+@jam-overture/loom/signals — DeploymentPlace, DeploymentUnread, PageUnread,
+  UNREAD_STANDINGS, UnreadStanding, deploymentUnreadOf, describeUnreadStanding,
+  worstPlacesIn
+```
+
+Two sentences, if the page wants them:
+
+**On the figure.** *Four hundred and twelve unread parts in nine places* is one
+fact said two ways, and the second number is the one an afternoon is spent on. A
+deployment's pages are ordered on what **one** fix recovers, so a page with forty
+unread leaves at the top level sits below a page with one unread band — which is
+the order every other available key gets backwards.
+
+**On what it costs a reader.** Nothing. A place the reading stopped is derived
+from the tree the counters already name, so a deployment can be asked where in it
+to go and look without a byte added to any payload, any table or any browser.
+That is the half of this subsystem's argument that is easiest to state on a page
+and hardest to state anywhere else.
+
+**This lane did not write it**, for 5 November's reason: that page is `(docs)`'
+and a run that edits prose on another lane's surface is a conflict waiting for
+whoever is drafting it. It is the third entry asking for a paragraph on that one
+page — 8 November's seven names, this morning's five, and these — so **one
+paragraph answers all three**, and the sentences in all three entries are written
+to be lifted rather than rewritten.
+
+---
+## 2026-11-09 (evening) — the transit mangling spares an autolink and a backticked path, and that is the first time the surviving form has been isolated
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom daily build`, as the lane that
+owns the routines document · **Status:** open — **nothing is broken**; what is
+new is a workaround that is known to work rather than a defect that is known to
+happen
+
+This is the **fourth** instance of the entry of 5 November — *a markdown link
+posted to GitHub from a routine session can arrive with backticks wrapping its
+URL, and re-posting it does not fix it* — and the second where it ate something
+load-bearing. On #848 it mangled the two links a reviewer would follow first:
+
+```
+**Report:** [`…-the-place-one-fix….md`](``https://github.com/…/reports/…md)``
+**Record:** [0375](```https://github.com/…/decisions/0375-….md),```
+```
+
+**The new fact is the comparison, and it was clean**, because one description
+carried three URLs in three shapes and only one shape came back wrong:
+
+| the shape | what arrived |
+| --- | --- |
+| `[label](https://…)` | **mangled** — a run of backticks before the URL and after the closing paren |
+| `<https://…>` (autolink) | intact, in the same description, twice |
+| a bare backticked path, `` `reports/….md` `` | intact |
+| a bare URL on its own line | intact |
+
+Two further things the earlier entries left open:
+
+1. **Re-posting does not fix it and `update_pull_request` does.** The 5 November
+   entry records that re-posting the same body changes nothing. Replacing the
+   markdown links with paths, in one `update_pull_request` call, produced a clean
+   body on the first attempt — so what is wrong is the **text**, and the
+   round-trip is deterministic rather than flaky.
+2. **It is not GitHub's renderer.** The backticks are in the stored body: a read
+   of the pull request through `pull_request_read` returns them in the raw
+   markdown. Whatever inserts them does it before GitHub sees it.
+
+**The recommendation is one line in `docs/routines.md`**, beside the merge-gate
+rule, which is where a routine already learns what it cannot trust about its own
+output: **do not post a markdown link from a routine session — post the URL as an
+autolink, `<https://…>`, or the repository path in backticks.** Both survive, both
+are clickable or searchable, and neither can be mangled into something a reviewer
+has to read past.
+
+**What this lane did not do.** It did not edit `docs/routines.md`, which is not
+its file and is the document it is bound by rather than one it writes. The three
+earlier entries are left as they are and this one is appended, because
+`FINDINGS.md` is union-merged.
 ## 2026-11-09 (afternoon) — two whole-repository scans are wall-clock gates with 1.7x headroom, and they time out inside `pnpm verify` while passing beside it
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom daily build`

@@ -8,7 +8,7 @@
       "files": 100,
       "narrower": [],
       "standing": {
-        "packageNames": 1999,
+        "packageNames": 2007,
         "otherDoors": 18,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -4246,7 +4246,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 1999,
+        "packageNames": 2007,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -4290,7 +4290,7 @@
       "files": 63,
       "narrower": [],
       "standing": {
-        "packageNames": 1999,
+        "packageNames": 2007,
         "otherDoors": 18,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -5243,7 +5243,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 1999,
+        "packageNames": 2007,
         "otherDoors": 18,
         "doorsSharingNothing": 17,
         "widest": false,
@@ -5318,7 +5318,7 @@
       "files": 220,
       "narrower": [],
       "standing": {
-        "packageNames": 1999,
+        "packageNames": 2007,
         "otherDoors": 18,
         "doorsSharingNothing": 17,
         "widest": false,
@@ -5788,7 +5788,7 @@
       "files": 81,
       "narrower": [],
       "standing": {
-        "packageNames": 1999,
+        "packageNames": 2007,
         "otherDoors": 18,
         "doorsSharingNothing": 17,
         "widest": false,
@@ -6876,7 +6876,7 @@
       "files": 38,
       "narrower": [],
       "standing": {
-        "packageNames": 1999,
+        "packageNames": 2007,
         "otherDoors": 18,
         "doorsSharingNothing": 17,
         "widest": false,
@@ -7441,7 +7441,7 @@
       "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 1999,
+        "packageNames": 2007,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -7644,7 +7644,7 @@
       "files": 42,
       "narrower": [],
       "standing": {
-        "packageNames": 1999,
+        "packageNames": 2007,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -8554,7 +8554,7 @@
       "files": 61,
       "narrower": [],
       "standing": {
-        "packageNames": 1999,
+        "packageNames": 2007,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -8933,7 +8933,7 @@
       "files": 41,
       "narrower": [],
       "standing": {
-        "packageNames": 1999,
+        "packageNames": 2007,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -9151,7 +9151,7 @@
       "files": 14,
       "narrower": [],
       "standing": {
-        "packageNames": 1999,
+        "packageNames": 2007,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -9313,7 +9313,7 @@
       "slug": "signals",
       "types": "./dist/signals/index.d.ts",
       "requires": [],
-      "files": 84,
+      "files": 85,
       "narrower": [
         {
           "specifier": "@jam-overture/loom/signals/broadcast",
@@ -9326,7 +9326,7 @@
         }
       ],
       "standing": {
-        "packageNames": 1999,
+        "packageNames": 2007,
         "otherDoors": 18,
         "doorsSharingNothing": 16,
         "widest": true,
@@ -11019,7 +11019,7 @@
             {
               "name": "PageFrontier",
               "kind": "type",
-              "signature": "type PageFrontier = {\n    readonly treeId: TreeId;\n    readonly revision: number;\n    /**\n     * The floor on page views the reading was drawn from, carried through from\n     * {@link PageReading.views}.\n     */\n    readonly views: number;\n    /** Every place the reading stopped, in reading order. */\n    readonly frontier: readonly UnreachedPart[];\n    /**\n     * Parts no view reported reaching — the sum of every stop's `unseen`, and so\n     * equal to `skipped` in {@link PageReading.standings}.\n     */\n    readonly unseen: number;\n    /** Parts at least one view reported reaching. */\n    readonly read: number;\n    /** Parts nothing can be said about. */\n    readonly unknown: number;\n    /** Every addressed node of the revision, which is the universe the rest is out of. */\n    readonly parts: number;\n    /**\n     * Parts that were reached, hold at least one part, and whose every part went\n     * unreached.\n     */\n    readonly passedOver: readonly NodeId[];\n    /**\n     * Parts that reported nothing while a part inside them reported reach.\n     */\n    readonly notReporting: readonly NodeId[];\n    /**\n     * Rows of the reading that named a node this revision does not contain,\n     * carried through from {@link PageReading.orphaned}.\n     */\n    readonly orphaned: number;\n};",
+              "signature": "type PageFrontier = {\n    readonly treeId: TreeId;\n    readonly revision: number;\n    /**\n     * The audience the reading was of, carried through from\n     * {@link PageReading.audienceId} unchanged.\n     */\n    readonly audienceId: AudienceId | null;\n    /**\n     * Every audience the window named, carried through from\n     * {@link PageReading.audiences} unchanged.\n     */\n    readonly audiences: readonly AudienceId[];\n    /**\n     * The floor on page views the reading was drawn from, carried through from\n     * {@link PageReading.views}.\n     */\n    readonly views: number;\n    /** Every place the reading stopped, in reading order. */\n    readonly frontier: readonly UnreachedPart[];\n    /**\n     * Parts no view reported reaching — the sum of every stop's `unseen`, and so\n     * equal to `skipped` in {@link PageReading.standings}.\n     */\n    readonly unseen: number;\n    /** Parts at least one view reported reaching. */\n    readonly read: number;\n    /** Parts nothing can be said about. */\n    readonly unknown: number;\n    /** Every addressed node of the revision, which is the universe the rest is out of. */\n    readonly parts: number;\n    /**\n     * Parts that were reached, hold at least one part, and whose every part went\n     * unreached.\n     */\n    readonly passedOver: readonly NodeId[];\n    /**\n     * Parts that reported nothing while a part inside them reported reach.\n     */\n    readonly notReporting: readonly NodeId[];\n    /**\n     * Rows of the reading that named a node this revision does not contain,\n     * carried through from {@link PageReading.orphaned}.\n     */\n    readonly orphaned: number;\n};",
               "summary": "Where one window's reading of one revision of one page stopped."
             },
             {
@@ -13497,6 +13497,61 @@
           ]
         },
         {
+          "module": "signals/unread",
+          "title": "Unread",
+          "summary": "**The places a deployment's readers stopped, by what one fix recovers.**",
+          "symbols": [
+            {
+              "name": "UnreadStanding",
+              "kind": "type",
+              "signature": "type UnreadStanding =\n/** In the order, with at least one place the reading stopped and a sound pair behind it. */\n\"ranked\"\n/**\n * Every part of the page was reached by somebody.\n */\n | \"whole\"\n/**\n * Nothing reported a view of this revision in the window, so nothing can be\n * said about any part of it.\n */\n | \"unread\"\n/**\n * One window holds two forms of the page and the asking named neither, so it\n * is read as neither.\n */\n | \"unsplit\"\n/**\n * The reading names nodes this revision does not contain, so the tree and the\n * window do not belong together.\n */\n | \"mismatched\";",
+              "summary": "Where one page stands in the order of places, or why it is not in it."
+            },
+            {
+              "name": "UNREAD_STANDINGS",
+              "kind": "value",
+              "signature": "const UNREAD_STANDINGS: readonly UnreadStanding[]",
+              "summary": ""
+            },
+            {
+              "name": "describeUnreadStanding",
+              "kind": "function",
+              "signature": "const describeUnreadStanding: (standing: UnreadStanding) => string",
+              "summary": "One line per standing, for a surface naming why a page is where it is."
+            },
+            {
+              "name": "PageUnread",
+              "kind": "type",
+              "signature": "type PageUnread = {\n    readonly treeId: TreeId;\n    readonly revision: number;\n    /**\n     * The audience this row is about, or `null` where the reading named none.\n     */\n    readonly audienceId: AudienceId | null;\n    readonly standing: UnreadStanding;\n    /** The page's frontier reading, carried whole and unchanged. */\n    readonly reading: PageFrontier;\n    /**\n     * The place one fix recovers the most of this page at, or `null` where the\n     * order did not rank it.\n     */\n    readonly at: UnreachedPart | null;\n    /**\n     * Parts of the page that one place accounts for, which is the key the order is\n     * on.\n     */\n    readonly costs: number | null;\n    /**\n     * What share of the page's parts that one place accounts for, or `null` on the\n     * same terms as {@link PageUnread.costs}.\n     */\n    readonly share: number | null;\n};",
+              "summary": "One revision of one page, as the order of places has it."
+            },
+            {
+              "name": "DeploymentPlace",
+              "kind": "type",
+              "signature": "type DeploymentPlace = {\n    readonly treeId: TreeId;\n    readonly revision: number;\n    readonly audienceId: AudienceId | null;\n    /** The place itself, carried whole off its page's reading. */\n    readonly at: UnreachedPart;\n    /** What share of that page's parts this one place accounts for. */\n    readonly share: number;\n};",
+              "summary": "One place the reading of a page stopped, with the page it is on."
+            },
+            {
+              "name": "DeploymentUnread",
+              "kind": "type",
+              "signature": "type DeploymentUnread = {\n    /**\n     * Every page with a place the reading stopped and a sound pair behind it,\n     * worst first.\n     */\n    readonly ranked: readonly PageUnread[];\n    /** Every other page, by tree id and newest revision first. */\n    readonly unranked: readonly PageUnread[];\n    /** The head of the order, which is the one place in this deployment to go to first. */\n    readonly worst: PageUnread | null;\n    /** How many pages stand in each state, over the ranked and the unranked alike. */\n    readonly standings: Readonly<Record<UnreadStanding, number>>;\n    /**\n     * Distinct trees across every page read, which is not the number of pages.\n     */\n    readonly trees: number;\n    /**\n     * Places the reading stopped, added across the **ranked** pages.\n     */\n    readonly places: number;\n    /**\n     * Parts nobody reached, added across the **ranked** pages.\n     */\n    readonly unseen: number;\n    /**\n     * Pages whose reading names a part that said nothing while a part inside it\n     * reported reach — a **slice** of the rows and not a further list.\n     */\n    readonly notReporting: readonly PageUnread[];\n    /**\n     * Readings of a revision beyond the first, which were dropped.\n     */\n    readonly duplicated: number;\n};",
+              "summary": "A deployment's pages, by what one fix to each would recover."
+            },
+            {
+              "name": "deploymentUnreadOf",
+              "kind": "function",
+              "signature": "const deploymentUnreadOf: (pages: readonly PageFrontier[]) => DeploymentUnread",
+              "summary": "Read a deployment's pages as the places their readings stopped."
+            },
+            {
+              "name": "worstPlacesIn",
+              "kind": "function",
+              "signature": "const worstPlacesIn: (unread: DeploymentUnread, limit?: number) => readonly DeploymentPlace[]",
+              "summary": "Every place the reading stopped across the deployment, worst first."
+            }
+          ]
+        },
+        {
           "module": "signals/view",
           "title": "View",
           "summary": "The one value in the reader-signal seam that correlates anything.",
@@ -13746,7 +13801,7 @@
             {
               "name": "WindowAgenda",
               "kind": "type",
-              "signature": "type WindowAgenda<TReason extends string = string> = {\n    /**\n     * Where reading stops on each page the window holds, in the readings' own\n     * order.\n     */\n    readonly progress: readonly ReadingProgress[];\n    /**\n     * The pages by the readers each loses at its sharpest fall, worst first.\n     */\n    readonly order: DeploymentReading;\n    /**\n     * The pages by the readers each loses between the two ends of its sharpest\n     * question, worst first.\n     */\n    readonly conversion: DeploymentConversion;\n    /**\n     * What is wrong with what this deployment collects, page by page.\n     */\n    readonly health: CollectionHealth;\n    /**\n     * Whether anything is arriving at this deployment, and what its door turned\n     * away.\n     */\n    readonly arrival: ArrivalStanding<TReason>;\n    /**\n     * The fix-list: the two orders of pages, the measurements to repair, and the\n     * one thing to do first.\n     */\n    readonly agenda: DeploymentAgenda;\n};",
+              "signature": "type WindowAgenda<TReason extends string = string> = {\n    /**\n     * Where reading stops on each page the window holds, in the readings' own\n     * order.\n     */\n    readonly progress: readonly ReadingProgress[];\n    /**\n     * The pages by the readers each loses at its sharpest fall, worst first.\n     */\n    readonly order: DeploymentReading;\n    /**\n     * The pages by the readers each loses between the two ends of its sharpest\n     * question, worst first.\n     */\n    readonly conversion: DeploymentConversion;\n    /**\n     * What is wrong with what this deployment collects, page by page.\n     */\n    readonly health: CollectionHealth;\n    /**\n     * Whether anything is arriving at this deployment, and what its door turned\n     * away.\n     */\n    readonly arrival: ArrivalStanding<TReason>;\n    /**\n     * The pages by what one fix to each would recover, worst first, and every\n     * place the reading of each stopped.\n     */\n    readonly unread: DeploymentUnread;\n    /**\n     * The fix-list: the two orders of pages, the measurements to repair, and the\n     * one thing to do first.\n     */\n    readonly agenda: DeploymentAgenda;\n};",
               "summary": "A deployment's fix-list and each of the readings it was joined from."
             },
             {
@@ -13817,7 +13872,7 @@
       "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 1999,
+        "packageNames": 2007,
         "otherDoors": 18,
         "doorsSharingNothing": 17,
         "widest": false,
@@ -13952,7 +14007,7 @@
       "files": 21,
       "narrower": [],
       "standing": {
-        "packageNames": 1999,
+        "packageNames": 2007,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -14014,7 +14069,7 @@
       "files": 65,
       "narrower": [],
       "standing": {
-        "packageNames": 1999,
+        "packageNames": 2007,
         "otherDoors": 18,
         "doorsSharingNothing": 17,
         "widest": false,
@@ -14588,7 +14643,7 @@
       "files": 43,
       "narrower": [],
       "standing": {
-        "packageNames": 1999,
+        "packageNames": 2007,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -14658,7 +14713,7 @@
       "files": 100,
       "narrower": [],
       "standing": {
-        "packageNames": 1999,
+        "packageNames": 2007,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -15080,7 +15135,7 @@
       "files": 79,
       "narrower": [],
       "standing": {
-        "packageNames": 1999,
+        "packageNames": 2007,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,

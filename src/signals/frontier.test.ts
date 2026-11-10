@@ -365,6 +365,52 @@ describe("pageFrontierOf", () => {
     expect(twice.duplicated).toHaveLength(3)
     expect(pageFrontierOf(twice)).toEqual(pageFrontierOf(once))
   })
+
+  /**
+   * An order over a deployment's frontiers tells two readings apart by the tree,
+   * the revision **and** the audience, so a reading that dropped the audience
+   * would hand it two forms of one page it could not tell apart (0300).
+   */
+  it("carries the audience the reading was of, so two forms of a page are two readings", () => {
+    const window = [
+      { ...reached("page", "loom.stack", 12), audienceId: SKIERS },
+      { ...reached("hero", "loom.heading", 11), audienceId: SKIERS },
+      { ...reached("page", "loom.stack", 4), audienceId: RIDERS },
+    ]
+
+    const skiers = pageFrontierOf(pageReadingOf(treeOf(PAGE), window, DECLARED, SKIERS))
+    const riders = pageFrontierOf(pageReadingOf(treeOf(PAGE), window, DECLARED, RIDERS))
+
+    expect(skiers.audienceId).toBe(SKIERS)
+    expect(riders.audienceId).toBe(RIDERS)
+    expect(skiers.audiences).toEqual([RIDERS, SKIERS])
+    expect(skiers.audiences).toEqual(riders.audiences)
+  })
+
+  /**
+   * A window read as neither of two forms is empty in the same shape an unopened
+   * page is, and the census is the only thing that tells them apart.
+   */
+  it("carries the census, so a window read as neither form is not an unopened page", () => {
+    const mixed = pageFrontierOf(
+      pageReadingOf(
+        treeOf(PAGE),
+        [
+          { ...reached("page", "loom.stack", 12), audienceId: SKIERS },
+          { ...reached("hero", "loom.heading", 11), audienceId: RIDERS },
+        ],
+        DECLARED
+      )
+    )
+
+    const unopened = pageFrontierOf(pageReadingOf(treeOf(PAGE), [], DECLARED))
+
+    expect(mixed.views).toBe(unopened.views)
+    expect(mixed.frontier).toEqual(unopened.frontier)
+    expect(mixed.audiences).toEqual([RIDERS, SKIERS])
+    expect(unopened.audiences).toEqual([])
+    expect(mixed.audienceId).toBeNull()
+  })
 })
 
 describe("the words nobody reached", () => {

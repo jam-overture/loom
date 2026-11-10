@@ -10,8 +10,11 @@ import { TREE_SCHEMA_VERSION, type LoomTree } from "../tree/tree.js"
 import {
   collectionHealthOf,
   DEFAULT_REGION_FLOOR,
+  deploymentAgendaOf,
   deploymentConversionOf,
   deploymentReadingOf,
+  deploymentUnreadOf,
+  pageFrontierOf,
   readingProgressOf,
   treesIn,
   arrivalStandingOf,
@@ -229,6 +232,50 @@ describe("a deployment's fix-list, read off one window", () => {
 
     expect(read.agenda.rows.map((row) => row.revision)).toEqual([2, 1])
     expect(read.agenda.trees).toBe(1)
+  })
+
+  /**
+   * The fourth order, made here under the rung's own rule: `pageFrontierOf` is
+   * one call over the assembly's own readings, so a caller asked to hand it in
+   * would be writing the line this rung exists to write.
+   */
+  it("reads the places reading stopped off the same readings the orders were ranked from", () => {
+    const { assembly, read } = agendaOf(FALLING)
+
+    expect(read.unread).toEqual(
+      deploymentUnreadOf(assembly.readings.pages.map(pageFrontierOf))
+    )
+    expect(read.unread.duplicated).toBe(0)
+    expect(read.unread.ranked).toHaveLength(1)
+    expect(read.unread.ranked.map((row) => row.reading)).toEqual(
+      assembly.readings.pages.map(pageFrontierOf)
+    )
+  })
+
+  /**
+   * Its key is parts of a page and the fix-list's three are readers, so the two
+   * can name different pages and the fourth order does not get to re-rank what
+   * an operator is already handed (0327, 0377).
+   */
+  it("ranks the places in parts of a page and leaves the fix-list untouched", () => {
+    const { read } = agendaOf({
+      tallies: [
+        tally({}, "band", 100),
+        tally({}, "cta", 20),
+        tally({ treeId: OTHER_TREE }, "band", 5),
+      ],
+      pageViews: [door({}, 200), door({ treeId: OTHER_TREE }, 10)],
+      funnels: [funnel({}, 100, 10)],
+    })
+
+    expect(read.agenda.first?.treeId).toBe(TREE)
+    expect(read.unread.worst?.treeId).toBe(OTHER_TREE)
+    expect(read.unread.worst?.costs).toBe(2)
+    expect(read.unread.ranked.find((row) => row.treeId === TREE)?.costs).toBe(1)
+
+    expect(read.agenda).toEqual(
+      deploymentAgendaOf(read.order, read.conversion, read.health, read.arrival)
+    )
   })
 
   it("reads the conversion order off the funnel answers handed in", () => {
