@@ -257,6 +257,30 @@ describe("the sweep", () => {
     expect(removed.flatMap((sentence) => instructionSentencesIn(sentence))).toEqual([])
   })
 
+  /**
+   * The forms the finding named, which this site does not write today.
+   *
+   * `remember to`, `do not expect` and `it is up to you` match nothing here,
+   * the way four of `absences.ts`' dated words do. Dropping one of them from
+   * the net changes no page's result, so without this the net could be
+   * narrowed to what today's prose happens to say and nothing would notice —
+   * and the first sentence somebody wrote in one of these voices would go
+   * unseen. `stop() the broadcaster and start another` was in that voice.
+   */
+  it("flags the obligations this site has not written yet", () => {
+    const unwritten = [
+      "Remember to stop the broadcaster and start another.",
+      "Do not expect a delivery for the page the reader left.",
+      "It is up to you to mint the token before the form posts.",
+      "You are expected to rebase the form onto the new base.",
+      "You will need a cron route to collect them.",
+      "You must register the primitive before the tree names it.",
+      "Thread it through on your own.",
+    ]
+
+    expect(unwritten.flatMap((sentence) => instructionSentencesIn(sentence))).toEqual(unwritten)
+  })
+
   /** The third-person voice, which this site barely writes in. */
   it("flags a host obligation written in the third person", () => {
     const written = "Your application has to mint the token before the form posts."
