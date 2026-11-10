@@ -68982,6 +68982,20 @@ report is for, and it is where the pair is.
 is broken and nothing was polled**; it is a count of instances against a
 standing instruction
 
+> **Third instance, 10 November, on #853.** Same shape, smaller: this session
+> called no subscribe tool, the pull request comment says for the sixth time
+> that it would not, and **three** wakes arrived within two minutes of opening
+> it — one `subscription.created` and two `vercel[bot]` events, the second an
+> edit of the first comment id as the deployment went `Building` → `Ready`. No
+> check-in was armed. **This run also unsubscribed**, which the two earlier
+> instances did not, on the reading that the brief's *do not poll for review*
+> and *never a process whose cost scales with how long he is away* are a
+> standing ask to stop following up, and that the risk of doing so was
+> measurable rather than guessed: the pull request carries **one** check, the
+> Vercel deployment, and it was already `success` on the current head when the
+> decision was taken. Recorded here rather than as a fourth entry, because the
+> instances are one fact and the count is what it is for.
+
 The 3 November entry records that *declining to subscribe does not prevent the
 subscription, and the wake that creates it asks the session to arm a check-in
 chain.* It happened again on #820. This session called no subscribe tool, the
@@ -69201,8 +69215,11 @@ reading. The fix is small; what it needs is to be the unit.
 
 **Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** **closed on
 filing for the page it was found on**, by
-`docs-82-two-limits-the-runtime-no-longer-has`; **open as a shape**, because
-nothing sweeps the other thirty-four written pages for it
+`docs-82-two-limits-the-runtime-no-longer-has`; **closed as a shape for the
+second person on 10 November** by `docs-83-an-instruction-is-a-claim-about-the-runtime`,
+which counted the four candidate nets before building one and swept the thirty-five
+pages with the narrowest; **open for the instruction written with no marker in
+it**, which is the entry of 10 November below
 
 Two sentences at the foot of *What your readers do* were false, and both had
 been for days:
@@ -69694,6 +69711,102 @@ seconds; none of these three has either yet.
 size.
 
 ---
+## 2026-11-10 — the second person is swept now, and the instruction with no marker in it is the part that is still out of reach
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** open, and
+**deliberately not acted on** — the residue of the 9 November shape, named so
+that `instructions.ts` is not read as covering more than it does
+
+`_lib/instructions.ts` and its test sweep every written page for a sentence
+that tells a reader the work is theirs, and hold each one against either a
+published declaration or a written reason. That closes the second-person half
+of the 9 November finding.
+
+**It does not close the half that found the finding.** Of the two false
+sentences on *What your readers do*, this instrument would have caught the
+second — *stop() the broadcaster and start another* — and **not the first**:
+
+> A broadcaster watches the nodes that were there when it started. […] A band
+> that streams in behind a Suspense boundary is never watched for `viewed` or
+> `dwelled`.
+
+That is a statement of fact. It contains no second person, no modal, no
+imperative and no dated word. Its **only purpose on the page** was to make a
+reader write a workaround, which is what makes it an instruction, and nothing
+in its grammar says so.
+
+### Why the obvious widening is refused
+
+Counted on this branch, over the same thirty-five pages:
+
+| the net | matches | what they are |
+| --- | --- | --- |
+| a sentence opening in an imperative verb | **97** | *Press a chip*, *Run it*, *Look at what is not there* — the tutorial voice, and this site is a tutorial |
+| `by hand` | **11** | the work the runtime **removed**, which is the opposite claim |
+| the host in the third person | **7** | six are the title of *What your app has to do* inside a link |
+| the second person under an obligation | **19** | the net that shipped; 3 are real and registered, 16 carry a written reason |
+
+A net that flagged the imperative would flag a hundred sentences to find three,
+and the three would be read by nobody. That is the 9 November recommendation's
+own test — *if it is two hundred, this was the wrong idea and the number says
+so* — applied to the net rather than to the result.
+
+### What would actually close it
+
+Not a pattern. A sentence like the broadcaster one is only identifiable by what
+it is **for**, and the instrument that reaches that is the one the same run
+built: `following.test.tsx` starts a real broadcaster and reads back what it
+watched. **A page whose behavioural claims are each run is a page where the
+grammar does not matter.** Two of thirty-five pages have one of those today.
+
+**Do not open this as a sweep.** The next honest step is one more page-level
+behavioural test, on the page whose claims a stranger acts on soonest, and the
+count above is here so that nobody spends a unit widening a regular expression
+instead.
+
+---
+## 2026-11-10 — a claim about what Loom lacks reached a page with no dated word in it, and the sweep that exists for exactly that claim had never seen it
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` (`_lib/absences.ts`) ·
+**Status:** open — **the sentence is true today and is now held by a
+measurement**, so what is open is the blind spot rather than the page
+
+*What AI may change* says, of a refused change:
+
+> A refusal is not a strong hold. **There is no button that turns it into a
+> yes, and no reviewer who can wave it through.** If you find yourself wanting
+> one, the answer is to change the policy — under a new name — rather than to
+> look for an override.
+
+The emphasised sentence is a claim that **Loom lacks a name**. That is exactly
+what `SITE_ABSENCES` is for, and it was not in it. It had never been flagged
+either, because `datedSentencesIn` matches on a dated word — `yet`, `so far`,
+`for now`, `today` — and this sentence has none. `absences.ts` says in its own
+notes that this is its blind spot; this is the first measured instance of it.
+
+**What caught it was the next sentence.** *If you find yourself wanting one*
+carries `yourself`, so the instruction sweep built on this branch flagged it,
+and reading it is what found the absence one line above.
+
+It is registered in `READER_INSTRUCTIONS` rather than moved to
+`SITE_ABSENCES`, with the measurement being every published name swept for one
+that overrides, bypasses, exempts or waives a verdict — **nought today**. The
+instruction is the sentence a reader acts on, so the instruction is where the
+guard belongs.
+
+### The open part
+
+**One blind spot found by luck is not a measurement of the blind spot.** There
+is no count of how many other absence claims on this site are written without a
+dated word, because finding them is reading thirty-five pages rather than
+running something. What this branch can say is that the two sweeps now overlap
+in a way neither was designed for: a dated word, or an obligation, and a
+sentence with neither is still invisible.
+
+**Cheap next step, for whoever writes near a page rather than for a sweep
+run:** when a page says Loom does not have something, register it — the habit
+`absences.ts` was built to be the net under, stated again because the net has
+now been measured letting one through.
 ## 2026-11-09 (evening) — the fix-list's unread-ness order exists now, and it is beside the fix-list rather than inside it
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom signals`
