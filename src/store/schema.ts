@@ -238,3 +238,78 @@ export const loomProjects = pgTable("loom_projects", {
    */
   closedAt: text("closed_at"),
 })
+
+/**
+ * A page's audience rules, as an append-only log of the whole ordered list.
+ *
+ * The composite primary key is load-bearing exactly as `loom_revisions`' and
+ * `loom_policy_revisions`' are: it makes the *database* enforce the sequence, so
+ * two people editing one page's rules cannot both commit even if both read the
+ * head before either wrote. `overlay-store.ts` says the same from the other
+ * side.
+ *
+ * `rules` is the whole ordered list as JSON rather than a row per rule, and that
+ * is the decision this table exists to carry. 0359 clause 3 makes the order the
+ * precedence — the last matching rule wins a contested node — and an order
+ * expressed as a `position` column is an order a reorder half-applies: several
+ * row updates, with a reader arriving between two of them served a precedence
+ * nobody authored. One value, written once, is the only shape that cannot do
+ * that. It is also the reason `loom_trees.document` is one column.
+ *
+ * `recorded_at` is text rather than a timestamp to match
+ * `loom_revisions.applied_at` and `loom_policy_revisions.recorded_at` — an
+ * ISO-8601 UTC instant orders lexicographically exactly as it orders in time, and
+ * what the runtime holds above this boundary is a string.
+ */
+export const loomAudienceRules = pgTable(
+  "loom_audience_rules",
+  {
+    /** See `loomTrees.applicationId`. */
+    applicationId: text("application_id").notNull().default("app_default"),
+    treeId: text("tree_id").notNull(),
+    revision: integer("revision").notNull(),
+    rules: jsonb("rules").notNull(),
+    /** Who made these the rules (0200). Never null, for the reason `loom_policy_revisions.actor` is not. */
+    actor: text("actor").notNull(),
+    recordedAt: text("recorded_at").notNull(),
+  },
+  (table) => [primaryKey({ columns: [table.applicationId, table.treeId, table.revision] })]
+)
+
+/**
+ * The delta each audience earns, one row per audience per page.
+ *
+ * Rows rather than a second log, and the asymmetry with the table above is
+ * deliberate: a rule decides *who sees which form* and is therefore a decision
+ * to be attributed, where a form is a document being worked on and rebased onto
+ * a base that has moved. A log of every edit of a form would be a record of
+ * drafting rather than of deciding, and the record of how a form came to say
+ * what it says is the proposal that produced it.
+ *
+ * One row per audience rather than one row per page holding every form: two
+ * audiences' forms are then independent writes, which is what a deployment with
+ * four audiences and two editors needs.
+ *
+ * `base_revision` is the one denormalised value here, and it is a column for the
+ * query it exists for — the same argument `loom_policy_revisions.fingerprint` is
+ * a column on. A screen listing a page's audiences asks *which of these forms is
+ * behind the page*, and answering it from `delta` means loading every delta to
+ * read one integer off each. The write takes it from the delta beside it and
+ * never from a caller, so the two cannot disagree.
+ */
+export const loomAudienceForms = pgTable(
+  "loom_audience_forms",
+  {
+    /** See `loomTrees.applicationId`. */
+    applicationId: text("application_id").notNull().default("app_default"),
+    treeId: text("tree_id").notNull(),
+    audienceId: text("audience_id").notNull(),
+    delta: jsonb("delta").notNull(),
+    baseRevision: integer("base_revision").notNull(),
+    actor: text("actor").notNull(),
+    authoredAt: text("authored_at").notNull(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.applicationId, table.treeId, table.audienceId] }),
+  ]
+)
