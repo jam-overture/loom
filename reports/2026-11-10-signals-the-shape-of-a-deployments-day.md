@@ -3,7 +3,14 @@
 **`Loom signals`, 10 November 2026, morning run.**
 Branch `signals-82-the-shape-of-a-deployments-day`. Record
 [0376](../decisions/0376-a-range-of-hours-is-folded-into-its-days-and-into-the-hours-of-a-readers-day-where-the-mean-is-the-only-comparable-figure.md),
-`Accepted`. `pnpm verify` **EXIT=0**, read out of a file in its own command.
+`Accepted`. `pnpm verify` **EXIT=0**, read out of a file in its own command, on
+the committed tree. Pull request
+[#851](https://github.com/jam-overture/loom/pull/851); preview
+<https://loom-git-signals-82-the-shap-0df26d-jpizzolato36-6341s-projects.vercel.app>,
+which Vercel reported `Building` as this was written — nothing in the change
+reaches the site, and this session's network policy does not reach
+`*.vercel.app`, so the deployment's own status is the evidence rather than a
+fetch of the page.
 
 ## What this run completed
 
