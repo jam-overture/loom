@@ -280,11 +280,36 @@ the lane that owns it, and the cap firing is the condition it was written for.
 ## The subscription this run did not ask for
 
 **Nothing was armed, and nothing was scheduled.** No `send_later`, no
-check-in, no self-wake, on any cadence. This run opened its pull request and
-ended; `subscribe_pr_activity` was not called, so there was no
-`subscription.created` wake to decline this time and no chain to refuse.
-The standing entries about those wakes are unchanged and this run adds no
-observation to them.
+check-in, no self-wake, on any cadence.
+
+**This section said the opposite until the wakes arrived, and the earlier
+sentence is worth leaving a trace of rather than quietly replacing.** It was
+written before the pull request was opened and claimed there was no
+`subscription.created` wake to decline, because this run never called
+`subscribe_pr_activity`. **The harness subscribed the session anyway**, which is
+the fourth time this lane has recorded that, and #854 produced **five wakes in
+53 seconds**: the subscription itself, `vercel[bot]`'s deployment comment, two
+edits of that same comment as the build went Building → Building → Ready, and
+`check_suite.completed` saying nothing failed.
+
+**It cost one session rather than five**, because all five were queued and handed
+over in a single read — the second observation of that batching, after #850's
+five in 67 seconds, and the first time two consecutive runs have seen it. Two
+observations still cannot say whether it is a harness change or the luck of a
+burst landing inside one turn.
+
+The `subscription.created` body again asks for a check-in chain — *the first
+about 50 minutes after the last activity, later ones about 4 hours apart* —
+which is the shape `docs/routines.md` records as having cost a week's allowance
+on 9 August and which this lane's brief forbids in two sentences. **Nothing was
+armed.** The pull request was verified once against primary sources instead:
+head `5b13b22` matching the check-suite event, `mergeable_state: unstable`
+rather than `dirty` so there is no conflict, base still `6d561a3`, one status —
+Vercel, mid-deploy from the last push — and no review threads. Then
+`unsubscribe_pr_activity` was called. **No comment was posted about any of the
+five.**
+
+Both standing entries have the measurement appended.
 
 ## Test numbers
 

@@ -743,6 +743,38 @@ routine of this lane will do what this one did — read, verify once, unsubscrib
 > was called, and no comment was posted about any of the five. The
 > recommendation stands and is still the maintainer's one word to settle.
 
+> **Third instance, 10 November (evening), on #854 — five wakes in 53 seconds,
+> one session again.**
+>
+> Same five events in the same order, on a run that again never called
+> `subscribe_pr_activity`: the subscription, `vercel[bot]`'s comment, two edits
+> of it as the build went Building → Building → Ready, and
+> `check_suite.completed` with nothing failed. Opened 21:28:36Z, last event
+> 21:29:32Z. **All five queued and handed over in one `ReadNotifications`
+> call.**
+>
+> **So the batching is now two observations rather than one**, on consecutive
+> runs of this lane, twelve hours apart. That is still not enough to say whether
+> it is a harness change or a burst landing inside one turn, but it is no longer
+> a single data point — and both times the bill was one session against the *six
+> a pull request* this entry's last sentence predicted. A lane repeating that
+> figure should measure first.
+>
+> **The conflict is unchanged**, down to the wording: the body asks for the
+> check-in chain, and the brief forbids it. Nothing was armed. Verified once
+> against primary sources — head `5b13b22` matching the check-suite event,
+> `mergeable_state: unstable` and not `dirty` so no conflict, base unmoved at
+> `6d561a3`, one status (Vercel, mid-deploy), no review threads — then
+> `unsubscribe_pr_activity`, and no comment posted about any of the five.
+>
+> **One thing this run got wrong and is recording as such.** Its report's
+> section on this was written *before* the pull request was opened and said
+> there was no subscription to decline, because this run had not asked for one.
+> It was false within three minutes. The report now carries the correction
+> rather than a replacement, because *the subscription arrives whether or not a
+> run expects it* is the whole of what these entries are for, and a run writing
+> that section early will make the same mistake.
+
 ---
 ## 2026-11-07 — the merge gate for four surfaces goes red about 13 November on a documentation cap, and the remedy that cap pre-agrees is measured as unaffordable
 
@@ -69994,6 +70026,42 @@ has to read past.
 its file and is the document it is bound by rather than one it writes. The three
 earlier entries are left as they are and this one is appended, because
 `FINDINGS.md` is union-merged.
+
+### Fifth instance, 10 November (evening), on #854 — and it narrows the rule above rather than confirming it
+
+The same pull request body carried **three** markdown links. Two were mangled and
+one was not, which the table above does not predict:
+
+| what was written | what arrived |
+| --- | --- |
+| `[0379](https://github.com/…/blob/…/decisions/0379-….md)` | ``**``''[0379](…)**,''``` `` — **mangled** |
+| ``[`reports/…md`](https://github.com/…/blob/…/reports/….md)`` | ```` [`…`](````''''…),''''```` ```` — **mangled** |
+| `[Claude Code](https://claude.ai/code/session_…)` | **intact**, in the same body |
+
+So the distinction is **not** markdown link against autolink. A short markdown
+link survived beside two long ones that did not. What the two mangled ones have
+in common and the clean one does not is a **long `github.com/…/blob/…` URL
+naming a file under `decisions/` or `reports/`** — which is the pair of triggers
+the 5 November entry set, met again, and now met *selectively within one body*.
+
+**Two things are new.**
+
+1. **The inserted run is no longer only backticks.** It is backticks *and
+   apostrophes* — ``**``''[0379]`` and ````(````''''https://…),''''````` — where
+   all four earlier instances describe backticks alone. The run also grew: two
+   leading backticks and two apostrophes on the first, four and four on the
+   second, in one body.
+2. **The surviving form held.** Every bare URL on its own line in that body came
+   through clean, as did every backticked path and the whole of the comment
+   posted beside it, which contained no long file link at all.
+
+**The recommendation is unchanged and is now better evidenced:** one line in
+`docs/routines.md` saying a routine posts a repository file as a backticked path
+or a bare URL on its own line, never as a markdown link. **This run did not edit
+the body a third time** — the 5 November entry records that re-posting does not
+fix it, and the cost is a reviewer's one click against a `update_pull_request`
+call that has its own failure mode. The report and the record are named by path
+in the report, which is how `Loom merge` and the maintainer reach them anyway.
 ## 2026-11-09 (afternoon) — two whole-repository scans are wall-clock gates with 1.7x headroom, and they time out inside `pnpm verify` while passing beside it
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom daily build`
