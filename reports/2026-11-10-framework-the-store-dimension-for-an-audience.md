@@ -249,6 +249,28 @@ consumer is a published name to maintain for nothing, so it went.
   decided and they reach a reader the same way. Three shapes, a recommendation
   (*leave it, and write it down*), and **nothing waits on the answer.**
 
+## The subscription this run did not ask for, again
+
+#850 produced **five wakes in 67 seconds** — `subscription.created` for a
+subscription this session never called for, `vercel[bot]`'s deployment comment,
+two edits of that same comment as the build went Building → Ready, and
+`check_suite.completed` saying nothing failed. The 7 November entry this lane
+owns predicted exactly that and counted six on #801.
+
+**It cost one session rather than six**, because all five were queued and handed
+over in a single read. That is the one number in that entry worth updating, and
+it is appended there with the caveat that one observation cannot say whether the
+batching is a harness change or the luck of five events landing inside one turn.
+
+The `subscription.created` body still asks for a check-in chain — *the first
+about 50 minutes after the last activity, later ones about 4 hours apart* —
+which is the shape `docs/routines.md` records as having cost a week's allowance
+on 9 August and which this lane's brief forbids in two sentences. **Nothing was
+armed.** The pull request was verified once against primary sources — Vercel
+`Ready` on `d68ecdea`, check suite completed with nothing failed, no review
+threads — and then `unsubscribe_pr_activity` was called. No comment was posted
+about any of the five.
+
 ## Open questions
 
 1. **Is an unjudged form right?** The filed finding above, and the one thing on

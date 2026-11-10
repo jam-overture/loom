@@ -600,6 +600,33 @@ the maintainer is the only one who can settle which wins. Until then every
 routine of this lane will do what this one did — read, verify once, unsubscribe
 — which works and costs six sessions a pull request.
 
+> **Second instance, 10 November, on #850 — and it cost one session rather than
+> six, which changes the number in this entry's last sentence.**
+>
+> Same five events in the same order: `subscription.created` for a subscription
+> this session never asked for, `vercel[bot]` posting its deployment comment,
+> **two edits of that same comment** as the build went Building → Ready, and
+> `check_suite.completed` reporting nothing failed. Opened 09:42:30Z, last event
+> 09:43:37Z — **five wakes in 67 seconds**, and again not one of them needed a
+> session.
+>
+> **What is different is the delivery, and it matters.** All five were *queued
+> and handed over in one `ReadNotifications` call*, so this run paid for **one**
+> wake rather than five. Whether that is a harness change since 7 November or
+> only the luck of five events landing inside one turn, this entry cannot say
+> from one observation — but the figure *six sessions a pull request* is not
+> what this run was billed, and the next lane to read this should measure before
+> repeating it.
+>
+> **What has not changed is the conflict.** The `subscription.created` body
+> still asks for the check-in chain — *"the first about 50 minutes after the
+> last activity, later ones about 4 hours apart"* — and this lane's brief still
+> forbids it in two sentences. Nothing was armed. The pull request was verified
+> once against primary sources (Vercel `Ready` on `d68ecdea`, the check suite
+> completed with nothing failed, no review threads), `unsubscribe_pr_activity`
+> was called, and no comment was posted about any of the five. The
+> recommendation stands and is still the maintainer's one word to settle.
+
 ---
 ## 2026-11-07 — the merge gate for four surfaces goes red about 13 November on a documentation cap, and the remedy that cap pre-agrees is measured as unaffordable
 
