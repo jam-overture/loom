@@ -164,6 +164,29 @@ export const everyPublishedName = (): readonly string[] =>
   publishedDeclarations().map((declaration) => declaration.name)
 
 /**
+ * Whether a published signature names the source an answer came from.
+ *
+ * Named and exported so the test can ask it both ways round. A measurement
+ * that is only ever asked about today's declaration passes identically when
+ * the pattern inside it has stopped matching anything, which is the way a
+ * guard dies quietly.
+ */
+export const namesASource = (signature: string): boolean => /\bsource\b/i.test(signature)
+
+/** Whether a published name would turn a verdict into a different one. */
+export const overridesAVerdict = (name: string): boolean =>
+  /override|bypass|exempt|waive/i.test(name)
+
+/** The command kinds a published union of commands offers. */
+export const commandKindsIn = (signature: string): readonly string[] =>
+  [...signature.matchAll(/kind:\s*"([^"]+)"/g)].flatMap((match) =>
+    match[1] === undefined ? [] : [match[1]]
+  )
+
+/** What `loom` does today, which is write files and stop. */
+export const SCAFFOLDING_COMMANDS: readonly string[] = ["init", "add-primitive", "help"]
+
+/**
  * The instructions, each with the thing that would make it unnecessary.
  *
  * Three. Each is a sentence a stranger acts on, so each is a sentence worth
@@ -181,7 +204,7 @@ export const READER_INSTRUCTIONS: readonly ReaderInstruction[] = [
 
       if (outcome === undefined) return ["DataOutcome is no longer published"]
 
-      return /\bsource\b/i.test(outcome) ? [`DataOutcome now carries a source: ${outcome}`] : []
+      return namesASource(outcome) ? [`DataOutcome now carries a source: ${outcome}`] : []
     },
     whenItLands:
       "An answer that names its source is an answer the runtime could validate against the binding's schema, so say which of the two checks is now the runtime's and which three lines a primitive still owes — a reader who stops writing them because half the job moved is the worst outcome of this page.",
@@ -197,11 +220,7 @@ export const READER_INSTRUCTIONS: readonly ReaderInstruction[] = [
 
       if (command === undefined) return ["CliCommand is no longer published"]
 
-      const kinds = [...command.matchAll(/kind:\s*"([^"]+)"/g)].flatMap((match) =>
-        match[1] === undefined ? [] : [match[1]]
-      )
-
-      return kinds.filter((kind) => kind !== "init" && kind !== "add-primitive" && kind !== "help")
+      return commandKindsIn(command).filter((kind) => !SCAFFOLDING_COMMANDS.includes(kind))
     },
     whenItLands:
       "A third command means the terminal does something a reader was told to write, so say what it does and where it stops — the sentence's value is the boundary, and a boundary that has moved and not been redrawn is worse than none.",
@@ -212,8 +231,7 @@ export const READER_INSTRUCTIONS: readonly ReaderInstruction[] = [
     says: ["If you find yourself wanting one", "no reviewer who can wave it through"],
     of: "Nothing published turns a refusal into a yes, so a deployment that wants a refused change allowed has to change the policy under a new name.",
     from: "every published name, swept for one that overrides, bypasses, exempts or waives a verdict",
-    found: () =>
-      everyPublishedName().filter((name) => /override|bypass|exempt|waive/i.test(name)),
+    found: () => everyPublishedName().filter(overridesAVerdict),
     whenItLands:
       "Say who may use it and what it leaves in the history, because the callout's argument is that a refusal is evidence rather than an obstacle — and an override that leaves no record is the one thing this framework claims cannot happen.",
   },

@@ -2,11 +2,15 @@ import { describe, expect, it } from "vitest"
 
 import { collapse, writtenPages, type WrittenPage } from "./cross-references"
 import {
+  commandKindsIn,
   everyPublishedName,
   instructionSentencesIn,
+  namesASource,
   NOT_AN_INSTRUCTION,
+  overridesAVerdict,
   publishedSignatureOf,
   READER_INSTRUCTIONS,
+  SCAFFOLDING_COMMANDS,
   type ReaderInstruction,
 } from "./instructions"
 
@@ -92,6 +96,32 @@ describe("the measurements read something", () => {
 
   it("reads every published name", () => {
     expect(everyPublishedName()).toContain("renderLoomTree")
+  })
+
+  /**
+   * Each measurement asked the other way round.
+   *
+   * Asking only about today's declarations cannot tell a guard that works from
+   * a guard whose pattern has stopped matching anything: both answer *nothing
+   * found*, and one of them will answer that forever. So each predicate is
+   * handed the thing it is watching for.
+   */
+  it("would see a source on the answer a primitive is handed", () => {
+    expect(namesASource('{ readonly source: SourceId; readonly value: JsonValue }')).toBe(true)
+    expect(namesASource(publishedSignatureOf("DataOutcome") ?? "")).toBe(false)
+  })
+
+  it("would see a command beyond scaffolding", () => {
+    const kinds = commandKindsIn(publishedSignatureOf("CliCommand") ?? "")
+
+    expect([...kinds].sort()).toEqual([...SCAFFOLDING_COMMANDS].sort())
+    expect(commandKindsIn('type X = { kind: "propose" }')).toEqual(["propose"])
+  })
+
+  it("would see a published override", () => {
+    expect(["overrideVerdict", "bypassGate", "exemptPrimitive", "waiveRefusal"].filter(overridesAVerdict))
+      .toHaveLength(4)
+    expect(everyPublishedName().filter(overridesAVerdict)).toEqual([])
   })
 })
 
