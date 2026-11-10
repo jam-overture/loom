@@ -7,7 +7,8 @@ Branch `framework-92-a-published-region-is-not-a-setting`. Record
 
 ![One file, two parts, two readers — and the boundary is a line the surface already wrote](2026-11-10-framework-a-published-region-is-not-a-setting.svg)
 
-Preview: `PREVIEW_URL`
+Preview:
+https://loom-git-framework-92-a-publ-c1c0f9-jpizzolato36-6341s-projects.vercel.app
 **Nothing on it should look different, and this run could not open it to
 confirm that.** `vercel.app` is not on the sandbox's egress allowlist, which is
 deliberate, so the URL is here for a reader who can reach it and is not a thing
