@@ -255,7 +255,7 @@ describe("a deployment's fix-list, read off one window", () => {
   /**
    * Its key is parts of a page and the fix-list's three are readers, so the two
    * can name different pages and the fourth order does not get to re-rank what
-   * an operator is already handed (0327, 0375).
+   * an operator is already handed (0327, 0377).
    */
   it("ranks the places in parts of a page and leaves the fix-list untouched", () => {
     const { read } = agendaOf({

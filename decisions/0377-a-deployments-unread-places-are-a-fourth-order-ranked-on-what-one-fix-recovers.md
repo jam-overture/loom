@@ -1,8 +1,17 @@
-# 0375. A deployment's unread places are a fourth order, ranked on what one fix recovers
+# 0377. A deployment's unread places are a fourth order, ranked on what one fix recovers
 
 **Status:** Accepted
 **Date:** 2026-11-09
 **Section:** §5 (reader signals), the counters
+
+> **Renumbered on 2026-11-10**, from 0375, by `Loom merge`. `main` had meanwhile
+> accepted a different 0375 — *a whole-repository check is budgeted by what it
+> reads, rather than by a wall clock* (#847) — and two records sharing a number
+> is fatal ([0097](0097-a-hole-in-the-numbering-is-reported-and-a-clash-is-fatal.md)).
+> #847 was opened twelve minutes earlier and merged first, so it keeps the
+> number. 0376 was already claimed by two other open branches, which makes 0377
+> the next free number. Nothing in this record changed but its number;
+> references on this branch were updated with it.
 
 ## Context
 

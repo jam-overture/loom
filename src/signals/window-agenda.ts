@@ -132,7 +132,7 @@ import type { ReaderWindow, WindowAssembly } from "./window.js"
  * ## Why the order of places is published and does not reach the fix-list
  *
  * `deploymentUnreadOf` is the fourth order over the same pages
- * ([0375](../../decisions/0375-a-deployments-unread-places-are-a-fourth-order-ranked-on-what-one-fix-recovers.md)),
+ * ([0377](../../decisions/0377-a-deployments-unread-places-are-a-fourth-order-ranked-on-what-one-fix-recovers.md)),
  * and it is **made** here under the rule above: `pageFrontierOf` is one call
  * over the assembly's own readings, so a caller asked to hand it in would be
  * writing the line this rung exists to write.
@@ -216,7 +216,7 @@ export type WindowAgenda<TReason extends string = string> = {
    * The fourth order, in the fourth unit: parts of a page rather than readers.
    * Published beside the fix-list and not inside it — `agenda.first` is
    * untouched by it — because a part is not a reader and the two cannot be
-   * ranked against each other (0327, 0375).
+   * ranked against each other (0327, 0377).
    *
    * Its `duplicated` is nought from here, for the reason the order's is: the
    * assembly never holds two readings of one page.

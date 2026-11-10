@@ -2,7 +2,7 @@
 
 **`Loom signals`, 9 November 2026, evening run.**
 Branch `signals-81-the-place-one-fix-recovers-most-of-a-page`. Record
-[0375](../decisions/0375-a-deployments-unread-places-are-a-fourth-order-ranked-on-what-one-fix-recovers.md),
+[0377](../decisions/0377-a-deployments-unread-places-are-a-fourth-order-ranked-on-what-one-fix-recovers.md),
 `Accepted`. `pnpm verify` **EXIT=0**, read out of a file. Pull request
 [#848](https://github.com/jam-overture/loom/pull/848); preview
 <https://loom-git-signals-81-the-plac-ef22d3-jpizzolato36-6341s-projects.vercel.app>,
@@ -153,16 +153,19 @@ reading.
 
 ## Records added
 
-**0375**, `Accepted` — *a deployment's unread places are a fourth order, ranked
+**0377**, `Accepted` — *a deployment's unread places are a fourth order, ranked
 on what one fix recovers*. It contradicts no accepted record and touches neither
 the tree schema nor the delta model, so it is not architectural. Seven clauses
 and eight rejected alternatives, the three worth reading being ranking on the
 page's total, ranking on the number of places, and widening `DeploymentAgenda` to
 hold this.
 
-**Numbered 0375, which is the next free number on `main` and on every open
-branch.** `main` carries 0374 as its highest; 0371 is still claimed by #834 and
-0375 is claimed by nothing.
+**Written as 0375, and renumbered to 0377 by `Loom merge` on 10 November.**
+`main` carried 0374 as its highest when this branch was cut, and 0375 looked
+free from here; #847 claimed it twelve minutes earlier on a branch this one
+could not see, and merged first, so it keeps the number (0097). 0376 was
+claimed by two further open branches, which made 0377 the next free number.
+0371 is still claimed by #834.
 
 ## Real test numbers
 

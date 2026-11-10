@@ -69484,7 +69484,7 @@ size.
 **Filed by:** `Loom signals` · **Owned by:** `Loom signals`
 (`src/signals/unread.ts`) · **Status:** **closed by
 `signals-81-the-place-one-fix-recovers-most-of-a-page`**
-([0375](decisions/0375-a-deployments-unread-places-are-a-fourth-order-ranked-on-what-one-fix-recovers.md)).
+([0377](decisions/0377-a-deployments-unread-places-are-a-fourth-order-ranked-on-what-one-fix-recovers.md)).
 **It closes this lane's own entry of earlier today — *the fix-list orders by a
 count that is forty times the size of the thing to fix, and now has a figure that
 is not*.**
@@ -69534,7 +69534,7 @@ reason this is filed rather than done:
 | | the sentence | where it is |
 | --- | --- | --- |
 | `row.order.at` | *a third of the readers who got this far stopped between these two parts* | already on the row, carried from `RankedPage` (0250) |
-| `PageUnread.at` | *this is as far as the reading goes, and nineteen parts are behind it* | `unread.ranked`, keyed on the same trio (0375) |
+| `PageUnread.at` | *this is as far as the reading goes, and nineteen parts are behind it* | `unread.ranked`, keyed on the same trio (0377) |
 
 A fall needs both ends to have reported and is a ratio of two reach counts; a
 place the reading stopped is the other end of the same page, where there is no
@@ -69556,7 +69556,7 @@ word *stop* and nothing in `frontier.ts` or `unread.ts` uses it.
    the order of places and absent from `DeploymentAgenda.page` is a real state —
    readers reach what they reach and lose nobody at a fall — and whether the one
    thing to do first may ever be *go and look at this band* is a judgement about
-   a screen. 0375 left it open deliberately, with the figures on the table.
+   a screen. 0377 left it open deliberately, with the figures on the table.
 
 **What it is not.** It is not a re-ranking. The place would ride on a row the
 order of falls put where it is, which is the rule the join already keeps about
@@ -69571,7 +69571,7 @@ rule lives in one place.
 **Status:** open — **the generator said so and `pnpm verify` is green**; what is
 open is whether that page wants a paragraph
 
-`docs:api` reported, on regenerating the reference for 0375:
+`docs:api` reported, on regenerating the reference for 0377:
 
 ```
 @jam-overture/loom/signals — DeploymentPlace, DeploymentUnread, PageUnread,
