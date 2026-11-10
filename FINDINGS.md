@@ -68767,6 +68767,20 @@ report is for, and it is where the pair is.
 is broken and nothing was polled**; it is a count of instances against a
 standing instruction
 
+> **Third instance, 10 November, on #853.** Same shape, smaller: this session
+> called no subscribe tool, the pull request comment says for the sixth time
+> that it would not, and **three** wakes arrived within two minutes of opening
+> it — one `subscription.created` and two `vercel[bot]` events, the second an
+> edit of the first comment id as the deployment went `Building` → `Ready`. No
+> check-in was armed. **This run also unsubscribed**, which the two earlier
+> instances did not, on the reading that the brief's *do not poll for review*
+> and *never a process whose cost scales with how long he is away* are a
+> standing ask to stop following up, and that the risk of doing so was
+> measurable rather than guessed: the pull request carries **one** check, the
+> Vercel deployment, and it was already `success` on the current head when the
+> decision was taken. Recorded here rather than as a fourth entry, because the
+> instances are one fact and the count is what it is for.
+
 The 3 November entry records that *declining to subscribe does not prevent the
 subscription, and the wake that creates it asks the session to arm a check-in
 chain.* It happened again on #820. This session called no subscribe tool, the
