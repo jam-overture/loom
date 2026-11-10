@@ -160,6 +160,22 @@ export const ALLOWED_ANCHOR = "what-allowed-it"
 export const READY_MADE_ANCHOR = "ready-made"
 
 /**
+ * The band that shows the route a reader puts a Loom page on, which is the
+ * third anchor on this site nothing links to.
+ *
+ * Declared for the reason `ALLOWED_ANCHOR` and `READY_MADE_ANCHOR` above both
+ * give: an anchor buys **addressability**, and this is the surface the
+ * maintainer judges by eye. A band whose whole content is a panel of code is
+ * the one a report most wants photographed on its own and the one a pull
+ * request comment most wants to send him straight to.
+ *
+ * It is not in `WHY_USE_IT_ANCHOR` below for the same reason those two are not:
+ * that map is the bands of `/why-use-it` **the chain points at**, and the chain
+ * has six links, none of which is this. `wired.ts` has the band's panel.
+ */
+export const ON_YOUR_SITE_ANCHOR = "on-your-own-site"
+
+/**
  * The bands of `/why-use-it` that the chain points at.
  *
  * **The chain is the site's map as of today**, and that is what these exist

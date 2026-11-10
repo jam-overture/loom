@@ -1,0 +1,40 @@
+{
+  "baseUrl": "http://localhost:3000",
+  "outDir": "reports",
+  "shots": [
+    {
+      "path": "/why-use-it?theme=minimal",
+      "out": "2026-11-10-marketing-what-you-wire-minimal.webp",
+      "viewport": "wide",
+      "waitFor": "#on-your-own-site",
+      "clip": "#on-your-own-site"
+    },
+    {
+      "path": "/why-use-it?theme=editorial",
+      "out": "2026-11-10-marketing-what-you-wire-editorial.webp",
+      "viewport": "wide",
+      "waitFor": "#on-your-own-site",
+      "clip": "#on-your-own-site"
+    },
+    {
+      "path": "/why-use-it?theme=bold",
+      "out": "2026-11-10-marketing-what-you-wire-bold.webp",
+      "viewport": "wide",
+      "waitFor": "#on-your-own-site",
+      "clip": "#on-your-own-site"
+    },
+    {
+      "path": "/why-use-it?theme=bold",
+      "out": "2026-11-10-marketing-what-you-wire-phone.webp",
+      "viewport": "phone",
+      "waitFor": "#on-your-own-site",
+      "clip": "#on-your-own-site"
+    },
+    {
+      "path": "/why-use-it?theme=minimal#on-your-own-site",
+      "out": "2026-11-10-marketing-what-you-wire-in-context.webp",
+      "viewport": "wide",
+      "waitFor": "#on-your-own-site"
+    }
+  ]
+}
