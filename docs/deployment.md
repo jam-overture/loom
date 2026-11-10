@@ -392,10 +392,10 @@ pnpm --filter @loom/app db:push
 ```
 
 Once, from a machine with `.env.local` in place. Idempotent — every statement is
-`IF NOT EXISTS`, so re-running is a no-op. It creates five tables: `loom_trees`
-and `loom_revisions` for the store, `loom_holds` for the changes the Gate held
-back, `loom_telemetry` for the journal §6 records into, and
-`loom_signin_attempts` for the sign-in throttle. The last of those belongs to the
+`IF NOT EXISTS`, so re-running is a no-op. It creates every table the list below
+names, among them `loom_trees` and `loom_revisions` for the store, `loom_holds`
+for the changes the Gate held back, `loom_telemetry` for the journal §6 records
+into, and `loom_signin_attempts` for the sign-in throttle. The last of those belongs to the
 portal rather than to `@jam-overture/loom` — the runtime takes an actor and never asks
 how a host established one.
 
@@ -405,7 +405,7 @@ a column added after a deployment reaches it only through the `ALTER TABLE …
 ADD COLUMN IF NOT EXISTS` beside it. A deployment that skips the re-run keeps
 serving and fails the write that needed the column.
 
-Three so far, and the last two are the ones to get right:
+Each one that has arrived so far, and the ones to get right are marked:
 
 - `loom_revisions.answered_by` (0029), which every confirmation of a held
   proposal writes.
@@ -430,6 +430,15 @@ Three so far, and the last two are the ones to get right:
   described above a proposal marked *requires confirmation* is gone before the
   confirmation arrives. `db:push` creates the table either way, so adopting the
   Postgres store later is a code change and not a database step.
+- `loom_audience_rules` and `loom_audience_forms` (0263, 0376), which hold a
+  page's audience rules and the delta each audience earns. **Miss these and
+  nothing changes** for a deployment serving one form of every page: a page
+  with no rules composes to its base tree, which is what every deployment that
+  has never heard of an audience is already being served. They are needed by a
+  deployment that wires `composingTreeSourceFromStore`, and the read that
+  reaches them refuses a page rather than quietly serving the base, so a missing
+  table is a page that is honestly unavailable rather than a measurement that is
+  wrong.
 
 ### 5. The tables are locked down for you
 

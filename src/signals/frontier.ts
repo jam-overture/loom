@@ -1,3 +1,4 @@
+import type { AudienceId } from "../audience/audience.js"
 import type { NodeId, TreeId } from "../ids.js"
 import type { PrimitiveType } from "../primitive-type.js"
 import type { PrimitiveRole } from "../role.js"
@@ -154,6 +155,30 @@ export type UnreachedPart = {
 export type PageFrontier = {
   readonly treeId: TreeId
   readonly revision: number
+  /**
+   * The audience the reading was of, carried through from
+   * {@link PageReading.audienceId} unchanged.
+   *
+   * Carried rather than derived, and carried for one reason: an order over a
+   * deployment's pages tells two readings apart by this trio and refuses to
+   * count a page twice by it (`readingKeyOf`), and a frontier that dropped the
+   * audience would hand such an order two forms of one page it could not tell
+   * apart. It is the field `ReadingProgress.audienceId` is, for the reading
+   * beside it (0300).
+   */
+  readonly audienceId: AudienceId | null
+  /**
+   * Every audience the window named, carried through from
+   * {@link PageReading.audiences} unchanged.
+   *
+   * Carried for the reason above, one step further on. A window holding two
+   * forms with none asked for is read as neither, so every part is `unknown`,
+   * {@link PageFrontier.views} is nought and this reading is empty — which is
+   * the **same shape** an unopened page produces and a different sentence
+   * entirely. The pair of fields is what `audienceScopeRead` needs to tell them
+   * apart, and nothing else can (0290, 0300).
+   */
+  readonly audiences: readonly AudienceId[]
   /**
    * The floor on page views the reading was drawn from, carried through from
    * {@link PageReading.views}.
@@ -355,6 +380,8 @@ export const pageFrontierOf = (reading: PageReading): PageFrontier => {
   return {
     treeId: reading.treeId,
     revision: reading.revision,
+    audienceId: reading.audienceId,
+    audiences: reading.audiences,
     views: reading.views,
     frontier,
     unseen: reading.standings.skipped,

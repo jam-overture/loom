@@ -31,6 +31,14 @@
  * which the Postgres suites already do.
  */
 
+export {
+  audienceNamed,
+  CONTRACT_TREE,
+  describeAudienceOverlayStoreContract,
+  formDelta,
+  ruleFor,
+} from "./audience-overlay-contract.js"
+
 export { describeHoldStoreContract, heldProposalFixture } from "./hold-contract.js"
 
 export {
