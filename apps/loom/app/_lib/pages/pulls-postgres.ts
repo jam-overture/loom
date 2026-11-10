@@ -3,8 +3,10 @@ import { bigint, boolean, pgTable, primaryKey, text } from "drizzle-orm/pg-core"
 
 import { err, ok } from "@jam-overture/loom"
 import type { LoomDatabase } from "@jam-overture/loom/postgres"
+import type { ApplicationId } from "@jam-overture/loom/store"
 
-import type { SitePullStore, SitePullStoreError } from "./pulls"
+import type { SitePullStore, SitePullStoreError, TakenAnswer, TakenSince } from "./pulls"
+import { isMissingColumn } from "@/app/_lib/app/missing-column"
 
 /** One row per answer a project's site took from the read door, by its entity tag (0358 clause 3). */
 export const loomSitePulls = pgTable(
@@ -47,6 +49,53 @@ const failure = (cause: unknown, detail: string): SitePullStoreError => ({
   code: "unavailable",
   detail: `${detail}: ${cause instanceof Error ? cause.message : String(cause)}`,
 })
+
+const givenSince = (application: ApplicationId, since: number) =>
+  and(eq(loomSitePulls.applicationId, application), gte(loomSitePulls.firstPulledAt, since))
+
+const SPAN = { first: loomSitePulls.firstPulledAt, last: loomSitePulls.lastPulledAt } as const
+
+/** `bigint` columns may come back as text. */
+const answerOf = (row: {
+  readonly first: unknown
+  readonly last: unknown
+  readonly kept: boolean
+}): TakenAnswer => ({ first: Number(row.first), last: Number(row.last), kept: row.kept })
+
+const answersSince = async (
+  db: LoomDatabase,
+  application: ApplicationId,
+  since: number
+): Promise<TakenSince> => {
+  const [rows, [named]] = await Promise.all([
+    db
+      .select({ ...SPAN, kept: loomSitePulls.kept })
+      .from(loomSitePulls)
+      .where(givenSince(application, since))
+      .orderBy(asc(loomSitePulls.firstPulledAt)),
+    db
+      .select({ tag: loomSitePulls.tag })
+      .from(loomSitePulls)
+      .where(and(eq(loomSitePulls.applicationId, application), eq(loomSitePulls.kept, true)))
+      .limit(1),
+  ])
+
+  return { answers: rows.map(answerOf), namesBack: named !== undefined }
+}
+
+const answersSinceBeforeKept = async (
+  db: LoomDatabase,
+  application: ApplicationId,
+  since: number
+): Promise<TakenSince> => {
+  const rows = await db
+    .select(SPAN)
+    .from(loomSitePulls)
+    .where(givenSince(application, since))
+    .orderBy(asc(loomSitePulls.firstPulledAt))
+
+  return { answers: rows.map((row) => answerOf({ ...row, kept: false })), namesBack: false }
+}
 
 export const postgresSitePullStore = (db: LoomDatabase): SitePullStore => ({
   /**
@@ -98,17 +147,23 @@ export const postgresSitePullStore = (db: LoomDatabase): SitePullStore => ({
     }
   },
 
-  firstTakenSince: async (application, since) => {
+  /**
+   * On a table pushed before `kept`, the answers are read without it, each as
+   * never named back by a site that names none back: what the timeline read
+   * before the column (an answer given is an answer taken), until
+   * `pnpm db:push` adds it.
+   */
+  takenSince: async (application, since) => {
     try {
-      const rows = await db
-        .select({ first: loomSitePulls.firstPulledAt })
-        .from(loomSitePulls)
-        .where(
-          and(eq(loomSitePulls.applicationId, application), gte(loomSitePulls.firstPulledAt, since))
-        )
-        .orderBy(asc(loomSitePulls.firstPulledAt))
+      return ok(await answersSince(db, application, since))
+    } catch (cause) {
+      if (!isMissingColumn(cause)) {
+        return err(failure(cause, `could not read what ${application} took since ${since}`))
+      }
+    }
 
-      return ok(rows.map((row) => Number(row.first)))
+    try {
+      return ok(await answersSinceBeforeKept(db, application, since))
     } catch (cause) {
       return err(failure(cause, `could not read what ${application} took since ${since}`))
     }

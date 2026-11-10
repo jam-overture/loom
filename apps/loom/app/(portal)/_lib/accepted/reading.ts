@@ -111,8 +111,8 @@ export const readAccepted = async (projectId: ProjectId, now: number): Promise<A
   const oldest = changes.value.at(-1)?.acceptedAt
   const [taken, origins] = await Promise.all([
     pulling.kind !== "pulling" || oldest === undefined
-      ? ok([])
-      : readWithin(() => appSitePulls.firstTakenSince(application, oldest), unavailable),
+      ? ok({ answers: [], namesBack: false })
+      : readWithin(() => appSitePulls.takenSince(application, oldest), unavailable),
     originsOf(
       application,
       changes.value.map((change) => change.proposalId)

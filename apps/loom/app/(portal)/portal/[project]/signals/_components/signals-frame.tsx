@@ -5,6 +5,8 @@ import { Screen } from "@/app/(portal)/_components/screen"
 import { FilterChips } from "@/app/(portal)/_components/filter-chips"
 import { StateNotice } from "@/app/(portal)/_components/state-notice"
 import { goalFigureOf } from "@/app/(portal)/_lib/goal-range"
+import { lastArrivalFigureOf } from "@/app/(portal)/_lib/last-arrival"
+import { pageNamesOf } from "@/app/(portal)/_lib/published-view"
 import {
   rangeChartOf,
   rangeFigureOf,
@@ -14,7 +16,6 @@ import {
   type SignalsRange,
 } from "@/app/(portal)/_lib/signals-range"
 import type { TurnedAway } from "@/app/(portal)/_lib/turned-away"
-import { plainMoment } from "@/app/(portal)/_lib/when"
 
 import type { SignalsReading } from "../_lib/reading"
 
@@ -22,9 +23,9 @@ import { RangeChart } from "./range-chart"
 
 /**
  * What both *Signals* tabs share: the heading, the range picker, the figures
- * (the primary goal's among them once the project has one), page views by
- * hour, what was turned away, and the two tabs (`docs/portal-wireframes.md`,
- * *1 · Signals*).
+ * (the primary goal's among them once the project has one, and the last
+ * arrival with its site and page), page views by hour, what was turned away,
+ * and the two tabs (`docs/portal-wireframes.md`, *1 · Signals*).
  *
  * The tab's own list is handed in and drawn only once something has arrived:
  * a store that did not answer, a project with no single site, and a project
@@ -33,11 +34,26 @@ import { RangeChart } from "./range-chart"
 
 export type SignalsTab = "events" | "pages"
 
-const Figure = ({ label, value, note }: { label: string; value: string; note: string }) => (
+const Figure = ({
+  label,
+  value,
+  note,
+  link,
+}: {
+  label: string
+  value: string
+  note: string
+  link?: { readonly label: string; readonly href: string } | undefined
+}) => (
   <div className="border-edge-subtle bg-surface-base flex flex-col gap-1 rounded-lg border p-4">
     <span className="text-ink-muted text-[11px] tracking-wide uppercase">{label}</span>
     <span className="text-xl tracking-tight">{value}</span>
     <span className="text-ink-muted text-xs">{note}</span>
+    {link === undefined ? null : (
+      <Link href={link.href} className="text-ink text-xs underline">
+        {link.label}
+      </Link>
+    )}
   </div>
 )
 
@@ -67,9 +83,21 @@ const TurnedAwayList = ({ turnedAway }: { turnedAway: TurnedAway | undefined }) 
     </section>
   )
 
-const Figures = ({ reading }: { reading: Extract<SignalsReading, { state: "read" }> }) => {
+const Figures = ({
+  reading,
+  projectId,
+}: {
+  reading: Extract<SignalsReading, { state: "read" }>
+  projectId: string
+}) => {
   const { arrivals, turnedAway } = reading
   const goal = goalFigureOf(reading.goal, reading.range)
+  const last = lastArrivalFigureOf(arrivals.latest, {
+    projectId,
+    host: reading.application.host,
+    names: pageNamesOf(reading.published),
+    range: reading.range,
+  })
 
   return (
     <div
@@ -77,15 +105,7 @@ const Figures = ({ reading }: { reading: Extract<SignalsReading, { state: "read"
     >
       <Figure {...rangeFigureOf(reading.hourly, reading.range, arrivals.opened)} />
       {goal === undefined ? null : <Figure {...goal} />}
-      <Figure
-        label={arrivals.latest?.kind === "counted" ? "Last counted" : "Last arrival"}
-        value={arrivals.latest === undefined ? "Nothing yet" : plainMoment(arrivals.latest.at)}
-        note={
-          arrivals.latest?.kind === "counted"
-            ? "Nothing that arrived is still kept, so this is when something was last added up."
-            : "When this deployment last received something from one of your pages."
-        }
-      />
+      <Figure {...last} />
       <Figure label="Turned away" {...refusedFigure(turnedAway)} />
     </div>
   )
@@ -98,13 +118,7 @@ export type RangeHref = (range: SignalsRange) => string
  * The range picker. Each choice is an address the tab builds, so changing the
  * range keeps whatever else the tab's address holds.
  */
-const RangePicker = ({
-  current,
-  hrefOf,
-}: {
-  current: SignalsRange
-  hrefOf: RangeHref
-}) => (
+const RangePicker = ({ current, hrefOf }: { current: SignalsRange; hrefOf: RangeHref }) => (
   <FilterChips
     label="Range"
     choices={SIGNALS_RANGES.map((range) => ({
@@ -211,7 +225,7 @@ const Body = ({
   return (
     <div className="flex flex-col gap-6">
       <RangePicker current={reading.range} hrefOf={rangeHref} />
-      <Figures reading={reading} />
+      <Figures reading={reading} projectId={projectId} />
       {reading.hourly === undefined ? null : (
         <RangeChart chart={rangeChartOf(reading.hourly.series, reading.range)} />
       )}

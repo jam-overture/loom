@@ -1,0 +1,41 @@
+{
+  "baseUrl": "http://localhost:3000",
+  "outDir": "reports",
+  "shots": [
+    {
+      "path": "/docs/the-runtime/what-your-readers-do#two-start-the-broadcaster-in-the-browser",
+      "out": "2026-11-09-docs-two-limits-the-runtime-no-longer-has-wide-step-two",
+      "viewport": { "width": 1280, "height": 1760 },
+      "waitFor": "h1",
+      "measure": ["text=One reading of one page", "text=Hand it an element instead", "pre:has-text(\"broadcastReaderSignals(document\")"]
+    },
+    {
+      "path": "/docs/the-runtime/what-your-readers-do#what-this-still-does-not-do",
+      "out": "2026-11-09-docs-two-limits-the-runtime-no-longer-has-wide-limits",
+      "viewport": "wide",
+      "waitFor": "h1",
+      "measure": ["text=A new revision is a new broadcast", "text=watches the nodes that were there"]
+    },
+    {
+      "path": "/docs/the-runtime/what-your-readers-do#two-start-the-broadcaster-in-the-browser",
+      "out": "2026-11-09-docs-two-limits-the-runtime-no-longer-has-phone-fence",
+      "viewport": "phone",
+      "waitFor": "h1"
+    },
+    {
+      "_at": "origin/main's page.mdx, _components/reader-signals-live.tsx and the compiled fence put back, rebuilt, photographed, restored — the two shots below are the before half of the pairs above",
+      "path": "/docs/the-runtime/what-your-readers-do#two-start-the-broadcaster-in-the-browser",
+      "out": "2026-11-09-docs-two-limits-the-runtime-no-longer-has-wide-step-two-before",
+      "viewport": { "width": 1280, "height": 1760 },
+      "waitFor": "h1",
+      "measure": ["pre:has-text(\"querySelector\")", "text=It returns a"]
+    },
+    {
+      "path": "/docs/the-runtime/what-your-readers-do#what-this-still-does-not-do",
+      "out": "2026-11-09-docs-two-limits-the-runtime-no-longer-has-wide-limits-before",
+      "viewport": "wide",
+      "waitFor": "h1",
+      "measure": ["text=A new revision is a new broadcast", "text=watches the nodes that were there"]
+    }
+  ]
+}

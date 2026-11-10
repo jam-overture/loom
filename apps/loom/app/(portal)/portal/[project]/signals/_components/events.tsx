@@ -6,6 +6,7 @@ import { DEFAULT_AUDIENCE_ID } from "@jam-overture/loom/store"
 
 import { FilterChips } from "@/app/(portal)/_components/filter-chips"
 import { GoalChip } from "@/app/(portal)/_components/goal-chip"
+import { Pager } from "@/app/(portal)/_components/pager"
 import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"
 import {
   eventSentence,
@@ -18,11 +19,13 @@ import {
   SEARCH_LENGTH,
   type EventPageChoice,
   type EventPage,
+  type EventPlace,
   type EventView,
   type Naming,
   type ReaderEvent,
 } from "@/app/(portal)/_lib/events"
 import type { OpenedEvent } from "@/app/(portal)/_lib/events-reading"
+import { spanLine, stretchWords } from "@/app/(portal)/_lib/list-span"
 import { rangeParam } from "@/app/(portal)/_lib/signals-range"
 import { SIGNAL_KINDS } from "@/app/(portal)/_lib/vocabulary"
 import { plainMoment } from "@/app/(portal)/_lib/when"
@@ -36,7 +39,8 @@ import { LiveRefresh } from "./live-refresh"
  *
  * Every control is an address — `kind`, `on`, `view` and `q` for the filter,
  * `range` for the stretch the figures above are read over, `live` for reading
- * the newest again as it arrives, `before` for where the list starts, `event`
+ * the newest again as it arrives, `before` or `after` for where the list
+ * starts when it is not the newest page, `event`
  * for the drawer's subject — so a link a person sends reopens exactly what
  * they were looking at. Being live is the one piece of client code, and all it
  * does is ask the server to draw the address again.
@@ -45,7 +49,7 @@ import { LiveRefresh } from "./live-refresh"
 export type EventsAddress = {
   readonly base: string
   readonly filter: EventView
-  readonly before: string | undefined
+  readonly place: EventPlace | undefined
 }
 
 /** A page by the heading it published, with its id beneath; by its id alone otherwise. */
@@ -80,7 +84,7 @@ const PartCell = ({ event, naming }: { event: ReaderEvent; naming: Naming }) => 
  * before it is pressed.
  */
 const LiveSwitch = ({ address }: { address: EventsAddress }) => {
-  const { base, filter, before } = address
+  const { base, filter, place } = address
 
   return (
     <p className="text-ink-muted m-0 flex flex-wrap items-center gap-2 text-xs">
@@ -102,7 +106,7 @@ const LiveSwitch = ({ address }: { address: EventsAddress }) => {
       </Link>
       {filter.live
         ? "New events appear at the top as they arrive."
-        : before === undefined
+        : place === undefined
           ? "Switch on to see new events as they arrive."
           : "Switching on goes back to the newest events."}
       {filter.live ? <LiveRefresh everyMs={LIVE_EVERY_MS} /> : null}
@@ -191,34 +195,54 @@ export const EventFacets = ({
   )
 }
 
-const Pager = ({ page, address }: { page: EventPage; address: EventsAddress }) => (
+/** How many events a page shows. Not its place in the list, which a cursor read cannot know. */
+const eventsWords = (shown: number): string => (shown === 1 ? "1 event" : `${shown} events`)
+
+/** Where a read stopped at its budget, and which way the list carries on. */
+const searchedWords = (searched: NonNullable<EventPage["searched"]>, shown: number): string =>
+  searched.towards === "older"
+    ? `Looked through everything received since ${plainMoment(searched.to)}. ${
+        shown === 0 ? "Nothing there matches. " : ""
+      }Older events continue on the next page.`
+    : `Looked through everything received up to ${plainMoment(searched.to)}. ${
+        shown === 0 ? "Nothing there matches. " : ""
+      }Newer events continue on the page before.`
+
+const EventsPager = ({
+  page,
+  address,
+  now,
+}: {
+  page: EventPage
+  address: EventsAddress
+  now: number
+}) => (
   <div className="text-ink-muted flex flex-col gap-2 text-xs">
-    {page.searchedTo === undefined ? null : (
-      <p>
-        Looked through everything received since {plainMoment(page.searchedTo)}.{" "}
-        {page.events.length === 0 ? "Nothing there matches. " : ""}
-        Older events continue on the next page.
-      </p>
-    )}
-    <span className="flex justify-end gap-3">
-      {address.before === undefined ? (
-        <span aria-disabled="true">Newest</span>
-      ) : (
-        <Link href={eventsHref(address.base, address.filter)} className="text-ink">
-          Newest
-        </Link>
-      )}
-      {page.older === undefined ? (
-        <span aria-disabled="true">Older</span>
-      ) : (
-        <Link
-          href={eventsHref(address.base, address.filter, { before: page.older })}
-          className="text-ink"
-        >
-          Older
-        </Link>
-      )}
-    </span>
+    {page.searched === undefined ? null : <p>{searchedWords(page.searched, page.events.length)}</p>}
+    <Pager
+      span={
+        page.events.length === 0
+          ? undefined
+          : spanLine(
+              eventsWords(page.events.length),
+              stretchWords(page.events.at(-1)?.receivedAt, page.events[0]?.receivedAt, now)
+            )
+      }
+      newer={
+        page.newer === undefined
+          ? undefined
+          : eventsHref(address.base, address.filter, {
+              place: { towards: "newer", from: page.newer },
+            })
+      }
+      older={
+        page.older === undefined
+          ? undefined
+          : eventsHref(address.base, address.filter, {
+              place: { towards: "older", from: page.older },
+            })
+      }
+    />
   </div>
 )
 
@@ -227,14 +251,16 @@ export const EventsTable = ({
   address,
   naming,
   open,
+  now,
 }: {
   page: EventPage
   address: EventsAddress
   naming: Naming
   open: string | undefined
+  now: number
 }) => (
   <div className="flex min-w-0 flex-1 flex-col gap-2">
-    {page.events.length === 0 && page.searchedTo === undefined ? (
+    {page.events.length === 0 && page.searched === undefined ? (
       <p className="text-ink-muted text-xs">Nothing kept matches this filter.</p>
     ) : (
       <div className="overflow-x-auto">
@@ -259,7 +285,7 @@ export const EventsTable = ({
                 <td className="py-1.5 pr-3 whitespace-nowrap">
                   <Link
                     href={eventsHref(address.base, address.filter, {
-                      before: address.before,
+                      place: address.place,
                       event: event.key,
                     })}
                     className="text-ink no-underline hover:underline"
@@ -281,7 +307,7 @@ export const EventsTable = ({
         </table>
       </div>
     )}
-    <Pager page={page} address={address} />
+    <EventsPager page={page} address={address} now={now} />
   </div>
 )
 
@@ -311,7 +337,7 @@ export const EventDrawerPanel = ({
 }) => {
   const { event, pageView, whole } = opened
   const happened = happenedOf(event.signal)
-  const back = eventsHref(address.base, address.filter, { before: address.before })
+  const back = eventsHref(address.base, address.filter, { place: address.place })
 
   return (
     <aside
@@ -378,7 +404,7 @@ export const EventDrawerPanel = ({
                   ) : (
                     <Link
                       href={eventsHref(address.base, address.filter, {
-                        before: address.before,
+                        place: address.place,
                         event: each.key,
                       })}
                       className="text-ink"

@@ -142,6 +142,40 @@ export const COUNTED_ANCHOR = "what-we-count"
 export const ALLOWED_ANCHOR = "what-allowed-it"
 
 /**
+ * The band that says the sections come assembled, which is the second anchor
+ * on this site nothing links to.
+ *
+ * Declared for the reason `ALLOWED_ANCHOR` above gives in full, and the reason
+ * holds without a change of a word: an anchor buys **addressability**, so a
+ * report can send the maintainer to the band, a pull request comment can, and
+ * `pnpm shoot` can photograph it by name rather than by a selector guessed off
+ * the markup. This is the surface judged by eye and this band is the one a run
+ * will most want photographed on its own.
+ *
+ * It is not in `WHY_USE_IT_ANCHOR` below for the same reason that map excludes
+ * the two above it: its first line says what it is for — the bands of
+ * `/why-use-it` that the chain points at — and the chain has six links, none
+ * of which is this. `ready.ts` has the band.
+ */
+export const READY_MADE_ANCHOR = "ready-made"
+
+/**
+ * The band that shows the route a reader puts a Loom page on, which is the
+ * third anchor on this site nothing links to.
+ *
+ * Declared for the reason `ALLOWED_ANCHOR` and `READY_MADE_ANCHOR` above both
+ * give: an anchor buys **addressability**, and this is the surface the
+ * maintainer judges by eye. A band whose whole content is a panel of code is
+ * the one a report most wants photographed on its own and the one a pull
+ * request comment most wants to send him straight to.
+ *
+ * It is not in `WHY_USE_IT_ANCHOR` below for the same reason those two are not:
+ * that map is the bands of `/why-use-it` **the chain points at**, and the chain
+ * has six links, none of which is this. `wired.ts` has the band's panel.
+ */
+export const ON_YOUR_SITE_ANCHOR = "on-your-own-site"
+
+/**
  * The bands of `/why-use-it` that the chain points at.
  *
  * **The chain is the site's map as of today**, and that is what these exist

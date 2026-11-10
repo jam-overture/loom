@@ -198,10 +198,36 @@ const hero = (ids: IdFactory): LoomNode =>
         { size: "lead", measured: true, align: "center" }
       ),
       buildSlot(ids, "actions", [
+        /**
+         * **It landed at the top of `/why-use-it` until today**, and the press
+         * is the argument.
+         *
+         * The label is this lane's own, written on 1 November when
+         * [0328](../../../../../decisions/0328-the-marketing-site-has-no-demonstration-and-no-mechanism-page.md)
+         * took the demonstration away and the hero's two controls both pointed
+         * at pages that no longer existed. The destination was not chosen with
+         * it: it is the page, bare, so a reader pressing *See what you can
+         * build* arrives on a headline reading *You could build all of this
+         * yourself* — the work argument, which is the right first screen for
+         * that page and an answer to a different question from the one the
+         * button asked. On a phone the band that does answer it is four
+         * screens further down.
+         *
+         * `theSet` is that band, and the three after it read as one run from
+         * there: every part that comes with the install, the sections that come
+         * already assembled out of them, what adding one of your own costs,
+         * and a page built from the set. `anchors.test.ts` holds the fragment
+         * against the band on the page it is served from.
+         *
+         * **It is a destination and not a rewrite of the page.** What the
+         * reader skipped is reachable by scrolling up, by the menu, and by the
+         * chain's first rung one band below this one, which points at
+         * `staysYours` on the same page.
+         */
         action(
           ids,
           "See what you can build",
-          sitePath(WHY_USE_IT.path),
+          `${sitePath(WHY_USE_IT.path)}#${WHY_USE_IT_ANCHOR.theSet}`,
           { variant: "primary", scale: "large" }
         ),
         /**
@@ -1305,10 +1331,11 @@ const closing = (ids: IdFactory): LoomNode =>
       { tone: "muted", align: "center", measured: true }
     ),
     stack(ids, { direction: "row", gap: "snug", justify: "center", wrap: true }, [
+      /** The same control as the hero's, so it lands where that one lands. */
       action(
         ids,
         "See what you can build",
-        sitePath(WHY_USE_IT.path),
+        `${sitePath(WHY_USE_IT.path)}#${WHY_USE_IT_ANCHOR.theSet}`,
         { variant: "primary", scale: "large" }
       ),
       action(ids, "Read the source", REPOSITORY_URL, {

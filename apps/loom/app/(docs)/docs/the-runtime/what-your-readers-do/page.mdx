@@ -146,21 +146,18 @@ already assigned — neither is content.
 
 ### Two: start the broadcaster, in the browser
 
+Hand it the `document` and it finds the addressed page itself. Mount this once,
+anywhere in your app, and every Loom page the app serves is measured.
+
 ```tsx
 "use client"
 
 import { broadcastReaderSignals } from "@jam-overture/loom/signals/broadcast"
-import { useEffect, useRef } from "react"
+import { useEffect } from "react"
 
-export const Measured = ({ children }: { readonly children: React.ReactNode }) => {
-  const frame = useRef<HTMLDivElement>(null)
-
+export const Measured = () => {
   useEffect(() => {
-    const root = frame.current?.querySelector("[data-loom-tree]")
-
-    if (!(root instanceof Element)) return
-
-    const started = broadcastReaderSignals(root, {
+    const started = broadcastReaderSignals(document, {
       kinds: ["dwelled", "activated"],
       types: { dwelled: ["loom.section"], activated: ["loom.link", "loom.action"] },
       send: (batch) => {
@@ -176,9 +173,37 @@ export const Measured = ({ children }: { readonly children: React.ReactNode }) =
     return started.value.stop
   }, [])
 
-  return <div ref={frame}>{children}</div>
+  return null
 }
 ```
+
+**One reading of one page, and what ends it.** The broadcaster watches two
+things on the page's root: which tree it is, and which revision. While those two
+stay put, everything happening underneath is one reading of one page — nodes
+arriving, leaving and changing do not start a second one. When they change, the
+reader is looking at a different page: what was gathered is delivered under the
+revision it was gathered on, and a fresh reading begins with its own arrival
+counted. A page taken down and put back at the same revision has sent the reader
+nowhere, so the reading already running simply carries on
+([0366](/docs/architecture/decision-records)).
+
+That is the sentence worth having, because the alternative is silent. A
+broadcaster left watching the page a reader has walked away from does not stop
+reporting — it files everything the reader does next under the page they left,
+and nothing at either end says so.
+
+A band that arrives late is picked up and watched like the rest of the page —
+streamed in behind a Suspense boundary, mounted by a client component, or
+rewritten by a change the Gate has just accepted. That last one is the
+measurement Loom exists to make, which makes it the worst one to have missed.
+
+**Hand it an element instead when the tree is one panel among other things.**
+Then that element is the root, its tree and revision are read once, and a panel
+that becomes a different panel wants `stop()` and another call. A component that
+rendered the tree already holds its root; `addressedRootIn` from
+`@jam-overture/loom/addressed` finds it inside a container when the component
+holds the container instead. The live block further down this page is that case,
+and so is every tree on this site.
 
 <Callout>
   **Import it from `@jam-overture/loom/signals/broadcast`, not from
@@ -337,17 +362,6 @@ the other end: an ask may arrive marked `system-signal`, and the Gate gives that
 origin its own lower ceiling. What is missing is anything that produces one. A
 deployment that wants this reads its own counters and asks for the change
 itself, like any other author.
-
-**A broadcaster watches the nodes that were there when it started.** It finds the
-addressed elements under its root once. A band that streams in behind a Suspense
-boundary, or a list that grows after hydration, is never watched for `viewed` or
-`dwelled` — though presses and disclosures inside it still report, because both
-are read from the root at the moment they happen.
-
-**A new revision is a new broadcast.** After a client-side navigation, or after a
-change is applied and the page re-renders at a new revision, `stop()` the
-broadcaster and start another. One left running on the old root keeps naming the
-old revision, which is a subtler problem than reporting nothing.
 
 <Callout kind="warning">
   **A page that measures readers is a page with a consent obligation.** Loom

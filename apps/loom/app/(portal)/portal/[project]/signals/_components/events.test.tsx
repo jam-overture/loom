@@ -50,6 +50,8 @@ const firstOf = (list: readonly ReaderEvent[]): ReaderEvent => {
   return first
 }
 
+const NOW = Date.parse("2026-11-05T15:00:00.000Z")
+
 const address: EventsAddress = {
   base: "/portal/prj_a/signals",
   filter: {
@@ -60,19 +62,22 @@ const address: EventsAddress = {
     live: false,
     range: "24h",
   },
-  before: undefined,
+  place: undefined,
 }
 
 const page = (overrides: Partial<EventPage> = {}): EventPage => ({
   events,
   older: undefined,
-  searchedTo: undefined,
+  newer: undefined,
+  searched: undefined,
   ...overrides,
 })
 
 describe("Events", () => {
   it("lists each event by what happened, on which page and part, linking to its drawer", () => {
-    render(<EventsTable page={page()} address={address} naming={naming} open={undefined} />)
+    render(
+      <EventsTable page={page()} address={address} naming={naming} open={undefined} now={NOW} />
+    )
 
     const rows = screen.getAllByRole("row").slice(1)
 
@@ -87,31 +92,65 @@ describe("Events", () => {
     ).toBe("/portal/prj_a/signals?kind=activated&event=2.0")
   })
 
-  it("pages older with the filter kept, and back to the newest", () => {
+  it("pages older and a page newer, with the filter kept", () => {
     render(
       <EventsTable
-        page={page({ older: "1.0" })}
-        address={{ ...address, before: "3.0" }}
+        page={page({ older: { seq: 1, index: 0 }, newer: { seq: 2, index: 0 } })}
+        address={{ ...address, place: { towards: "older", from: { seq: 3, index: 0 } } }}
         naming={naming}
         open={undefined}
+        now={NOW}
       />
     )
 
     expect(screen.getByRole("link", { name: "Older" }).getAttribute("href")).toBe(
       "/portal/prj_a/signals?kind=activated&before=1.0"
     )
-    expect(screen.getByRole("link", { name: "Newest" }).getAttribute("href")).toBe(
-      "/portal/prj_a/signals?kind=activated"
+    expect(screen.getByRole("link", { name: "Newer" }).getAttribute("href")).toBe(
+      "/portal/prj_a/signals?kind=activated&after=2.0"
     )
+  })
+
+  it("keeps the page it is on in the address each event opens", () => {
+    render(
+      <EventsTable
+        page={page()}
+        address={{ ...address, place: { towards: "newer", from: { seq: 1, index: 0 } } }}
+        naming={naming}
+        open={undefined}
+        now={NOW}
+      />
+    )
+
+    expect(
+      within(screen.getAllByRole("row")[1] as HTMLElement)
+        .getByRole("link")
+        .getAttribute("href")
+    ).toBe("/portal/prj_a/signals?kind=activated&after=1.0&event=2.0")
+  })
+
+  it("says how many events the page shows and the stretch of time they were received in", () => {
+    render(
+      <EventsTable page={page()} address={address} naming={naming} open={undefined} now={NOW} />
+    )
+
+    expect(screen.getByText("2 events · at 09:30 UTC today")).toBeTruthy()
+    expect(screen.getByText("Newer").getAttribute("aria-disabled")).toBe("true")
+    expect(screen.getByText("Older").getAttribute("aria-disabled")).toBe("true")
   })
 
   it("says how far back it looked when it stopped before filling a page", () => {
     render(
       <EventsTable
-        page={page({ events: [], older: "5.0", searchedTo: "2026-11-04T08:00:00.000Z" })}
+        page={page({
+          events: [],
+          older: { seq: 5, index: 0 },
+          searched: { towards: "older", to: "2026-11-04T08:00:00.000Z" },
+        })}
         address={address}
         naming={naming}
         open={undefined}
+        now={NOW}
       />
     )
 
@@ -123,7 +162,13 @@ describe("Events", () => {
 
   it("says plainly when nothing kept matches", () => {
     render(
-      <EventsTable page={page({ events: [] })} address={address} naming={naming} open={undefined} />
+      <EventsTable
+        page={page({ events: [] })}
+        address={address}
+        naming={naming}
+        open={undefined}
+        now={NOW}
+      />
     )
 
     expect(screen.getByText("Nothing kept matches this filter.")).toBeTruthy()
@@ -207,7 +252,12 @@ describe("the Live switch", () => {
   })
 
   it("says that switching on from an older page goes back to the newest", () => {
-    render(<EventFacets address={{ ...address, before: "4.1" }} pages={[]} />)
+    render(
+      <EventFacets
+        address={{ ...address, place: { towards: "older", from: { seq: 4, index: 1 } } }}
+        pages={[]}
+      />
+    )
 
     expect(screen.getByRole("switch", { name: "Live" }).getAttribute("href")).toBe(
       "/portal/prj_a/signals?kind=activated&live=on"
@@ -295,7 +345,7 @@ describe("the drawer for one event", () => {
         opened={opened}
         goals={[]}
         naming={naming}
-        address={{ ...address, before: "9.0" }}
+        address={{ ...address, place: { towards: "older", from: { seq: 9, index: 0 } } }}
         projectId="prj_a"
       />
     )

@@ -3,10 +3,12 @@ import { notFound } from "next/navigation"
 
 import { projectIdSchema } from "@jam-overture/loom/store"
 
+import { Pager } from "@/app/(portal)/_components/pager"
 import { Screen } from "@/app/(portal)/_components/screen"
 import { StateNotice } from "@/app/(portal)/_components/state-notice"
 import { requireActor, requireRole } from "@/app/(portal)/_lib/auth/identity"
-import { changesPage } from "@/app/(portal)/_lib/changes-page"
+import { changesPage, newerHref, olderHref } from "@/app/(portal)/_lib/changes-page"
+import { positionWords, spanLine, stretchWords } from "@/app/(portal)/_lib/list-span"
 import { single, type Query } from "@/app/(portal)/_lib/query"
 import { countWords, RECENT_DAYS } from "@/app/(portal)/_lib/turned-down-list"
 import { readTurnedDown } from "@/app/(portal)/_lib/turned-down-reading"
@@ -20,6 +22,10 @@ import { TurnedDownCard } from "./_components/turned-down-card"
  * see them*). Loom weighs these the next time it proposes for a page, and may
  * propose one again when the page's signals have moved; this is where a
  * person sees what it is weighing.
+ *
+ * Each change leads with the goal it served, where the intent it was made from
+ * was kept when it was turned down (0352); one turned down before that names
+ * none rather than guess.
  *
  * Fifty to a page, with the last change shown in the address (`before`).
  */
@@ -42,7 +48,9 @@ const TurnedDownPage = async ({
   await requireActor(here)
   await requireRole(projectId)
 
-  const reading = await readTurnedDown(projectId, Date.now())
+  const now = Date.now()
+
+  const reading = await readTurnedDown(projectId, now)
 
   const body = (() => {
     if (reading.kind === "unavailable") {
@@ -87,21 +95,24 @@ const TurnedDownPage = async ({
           {countWords(reading.count)} in the last {RECENT_DAYS} days, newest first. Loom weighs each
           the next time it proposes for its page, and proposes one again only with a reason.
         </p>
+        {reading.goalsRead ? null : (
+          <p className="text-ink-muted m-0 text-xs">
+            Which goal each change served cannot be read here. If this is new to this deployment,
+            whoever runs it has to run <code>pnpm db:push</code> once; otherwise try again in a
+            moment.
+          </p>
+        )}
         {page.rows.map((row) => (
           <TurnedDownCard key={row.proposalId} row={row} projectId={projectId} />
         ))}
-        <nav className="flex gap-4 text-xs">
-          {before === undefined ? null : (
-            <Link href={here} className="text-ink">
-              Newest
-            </Link>
+        <Pager
+          span={spanLine(
+            positionWords(page.first, page.last, reading.count),
+            stretchWords(page.rows.at(-1)?.at, page.rows[0]?.at, now)
           )}
-          {page.older === undefined ? null : (
-            <Link href={`${here}?before=${page.older}`} className="text-ink">
-              Older
-            </Link>
-          )}
-        </nav>
+          newer={newerHref(here, page.newer)}
+          older={olderHref(here, page.older)}
+        />
       </div>
     )
   })()

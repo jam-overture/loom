@@ -1,6 +1,7 @@
 "use client"
 
 import { type LoomTree } from "@jam-overture/loom"
+import { addressedRootIn } from "@jam-overture/loom/addressed"
 import { renderLoomTree } from "@jam-overture/loom/react"
 import { READER_SIGNALS_EVENT, broadcastReaderSignals } from "@jam-overture/loom/signals/broadcast"
 /**
@@ -36,6 +37,17 @@ import {
  * component and the batches live for as long as the tab does, which is also the
  * most a documentation page should ever do with a record of how somebody read
  * it.
+ *
+ * **It is the element form on purpose, and the page says why beside the fence
+ * it tells a reader to copy.** A broadcast handed the `document` follows the
+ * page across a client-side navigation (0366), and that is the argument a host
+ * serving whole Loom pages should pass. This is not that: it is one tree inside
+ * a documentation page, this component already holds the container it rendered
+ * into, and a page that grew a second live block would hand a document-form
+ * broadcast whichever of them came first. `addressedRootIn` is the published
+ * way to find the root inside a container (0354) — asked for here rather than
+ * spelled as a selector, which is what this file did until the function existed
+ * on the light side of the split.
  */
 
 const SUBJECT_ID = "a-page-a-reader-scrolls"
@@ -91,9 +103,10 @@ export const ReaderSignalsLive = () => {
   })
 
   useEffect(() => {
-    const root = frame.current?.querySelector("[data-loom-tree]")
+    const container = frame.current
+    const root = container === null ? undefined : addressedRootIn(container)
 
-    if (root === null || root === undefined) {
+    if (root === undefined) {
       setFault("nothing under this frame carries a tree id, so there is nothing to broadcast from")
       return
     }

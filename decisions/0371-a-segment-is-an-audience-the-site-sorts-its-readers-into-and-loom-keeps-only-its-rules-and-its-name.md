@@ -4,6 +4,27 @@
 **Date:** 2026-11-09
 **Section:** §5 (portal), the governance and reasoning planes
 
+> **Since this was written (10 November 2026).** [0376](0376-a-pages-audience-rules-are-an-attributed-log-and-its-forms-are-rows.md),
+> Accepted the next day, built 0263's store dimension in the framework:
+> `loom_audience_rules` keeps each **page's** ordered rule list as an
+> append-only, attributed log, and `loom_audience_forms` keeps one form per
+> audience per page. Two clauses below now meet it head on, and this record is
+> left `Proposed` so the maintainer can settle them together:
+>
+> - **Clause 3** keeps the rules in portal tables, one list per **project**.
+>   0376 keeps them in the store, one list per **page** (`tree_id`). The
+>   reasonable default is to drop the portal tables and have the editor write
+>   through 0376's store (`rules`, `recordRules` with the head revision, so a
+>   stale edit is refused, and `history`), offering one list per page with
+>   *copy to every page* rather than a second, project-wide copy of the same
+>   rules. Piece 1 of clause 7 would then need no table and no `pnpm db:push`.
+> - **Clause 5** sends a segment's change through the Gate. 0376 writes a form
+>   straight to a row, unjudged, and files that asymmetry as an open question
+>   for the maintainer (`FINDINGS.md`, 10 November, *a form an audience is
+>   served is a change a reader sees that no policy judged*). The framework
+>   lane recommends leaving forms unjudged; this record's clause 5 is the other
+>   answer. Only one of them can stand, and piece 4 waits on it either way.
+
 ## Context
 
 Unit 9 of the portal plan ([`docs/portal.md`](../docs/portal.md), *The units,

@@ -19,7 +19,7 @@ import {
   WHAT_ALLOWED_IT,
   WHEN_IT_ASKS,
 } from "../allowed"
-import { ALLOWED_ANCHOR, COUNTED_ANCHOR, WHY_USE_IT_ANCHOR } from "../bands"
+import { ALLOWED_ANCHOR, COUNTED_ANCHOR, ON_YOUR_SITE_ANCHOR, WHY_USE_IT_ANCHOR } from "../bands"
 import { CONNECTED_LANGUAGE, REFUSAL_CODES, YOUR_MODEL } from "../connected"
 import { FACTS } from "../copy"
 import { examplePage, rearrangedExample } from "../example"
@@ -35,7 +35,9 @@ import {
   WRITTEN_LANGUAGE,
   YOUR_COMPONENT,
 } from "../written"
+import { WIRED_LANGUAGE, YOUR_ROUTE } from "../wired"
 import { siteFooter, siteHeader, siteReadingBand, type ChromeContext } from "../chrome"
+import { readyMadeBand } from "../ready"
 import {
   action,
   code,
@@ -861,6 +863,93 @@ const whatAllowedIt = (ids: IdFactory): LoomNode =>
     { align: "center" }
   )
 
+/**
+ * The route a reader puts the page on, and it is the step this page assumed.
+ *
+ * ## Where the hole was
+ *
+ * By the band above, a reader has been shown every part of the claim: the
+ * components that come with the install, the two files that add one of their
+ * own, a page made out of them, what that page reports, the function that
+ * brings their model, that page arranged for somebody else, and the record of
+ * what let the change through.
+ *
+ * **Not one of those said where any of it runs.** A reader who believes all of
+ * it still does not know what goes in `app/page.tsx`, and `renderLoomTree` —
+ * the published seam every band above rests on — appeared nowhere a visitor
+ * could read it. This site showed a stranger how to write a component, how to
+ * register it and how to connect a model, and never how to serve a page.
+ *
+ * ## Why it is last rather than next to the other two panels
+ *
+ * It was drafted directly under *What you write*, which is where the other
+ * source panels are, and it reads worse there: three panels in a row is a
+ * tutorial, and the question this one answers is not one a reader has yet. The
+ * band above ends on a rule stopping a change and asking a person
+ * (`WHEN_IT_ASKS`), so the reader arriving here has exactly one question left
+ * and it is **how does either of those reach my site**. That is what the last
+ * sentence of this band answers, and it only lands in this position.
+ *
+ * ## What the copy may claim, and where the permission comes from
+ *
+ * `wired.ts` carries that in full, with the quotations. The short version:
+ * [0361](../../../../../decisions/0361-the-site-pulls-into-its-own-process-and-a-host-wires-the-live-page-in-two-calls.md)
+ * clause 2 is where *two calls* comes from, and
+ * [0358](../../../../../decisions/0358-an-accepted-change-goes-live-from-the-portal-and-the-site-pulls-it-with-no-pull-request.md)
+ * is where *no pull request, no merge and no deploy* comes from, in those
+ * words. Neither is this lane's claim to make or to soften.
+ *
+ * **It is the pitch half of `docs/positioning.md` and not the under-the-hood
+ * half.** A copy change that is live without shipping anything is a fact about
+ * a developer's working day, which that file puts in front; the rules, the
+ * record and the refusals are what it puts under the hood, and this band says
+ * nothing about any of them that the band above it has not already said.
+ *
+ * ## `wrap: false`, like the three panels before it
+ *
+ * This is source and not data, so a wrapped line reads as two statements.
+ * `wired.test.ts` bounds how far the longest line runs, which is what makes
+ * saying `false` honest on a phone.
+ */
+const onYourOwnSite = (ids: IdFactory): LoomNode =>
+  section(
+    ids,
+    { width: "wide", eyebrow: "On your own site", anchor: ON_YOUR_SITE_ANCHOR },
+    "Two calls put a Loom page on your route",
+    [
+      prose(
+        ids,
+        "This is the whole of a route in a Next.js app. The address and the key come out of your environment.",
+        { tone: "muted", align: "center", measured: true }
+      ),
+      code(ids, YOUR_ROUTE.source, {
+        language: WIRED_LANGUAGE,
+        caption: YOUR_ROUTE.caption,
+        wrap: false,
+      }),
+      prose(ids, "The first call runs once per server rather than once per reader.", {
+        tone: "muted",
+        align: "center",
+        measured: true,
+      }),
+      proseParts(
+        ids,
+        [
+          "That ",
+          codeSpan(ids, "??"),
+          " is the whole fallback. If Loom has not answered yet, or has nothing for this page, your reader gets the page your code built.",
+        ],
+        { tone: "muted", align: "center", measured: true }
+      ),
+      prose(
+        ids,
+        "A change your rules allowed, or one you said yes to, is on your site within a minute. There is no pull request, no merge and no deploy in between.",
+        { tone: "muted", align: "center", measured: true }
+      ),
+    ],
+    { align: "center" }
+  )
+
 const closing = (ids: IdFactory): LoomNode =>
   section(ids, { width: "wide", eyebrow: "Next" }, "Try it on a page of your own", [
     /**
@@ -913,12 +1002,14 @@ export const whyUseItPageTree = (context: PageContext): LoomTree => {
         staysYours(ids),
         alreadyWritten(ids),
         theParts(ids),
+        readyMadeBand(ids),
         whatYouWrite(ids),
         onAPage(ids),
         whatItReports(ids),
         connected(ids),
         forAReader(ids),
         whatAllowedIt(ids),
+        onYourOwnSite(ids),
         closing(ids),
         ...siteReadingBand(ids, chrome),
         siteFooter(ids, chrome),
