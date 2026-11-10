@@ -8,6 +8,62 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-11-10 — a form an audience is served is a change a reader sees that no policy judged, and the asymmetry is now in code rather than implied by a seam
+
+**Filed by:** `Loom framework` · **Owned by:** `Loom framework`
+(`src/audience/`, `src/runtime/`), and **open as a question for the
+maintainer** · **Status:** open — **nothing is broken and nothing is blocked.**
+Both halves work as their records say. This is one question about which of the
+two is right, and it is cheaper to ask before a screen is built on either
+answer.
+
+[0376](decisions/0376-a-pages-audience-rules-are-an-attributed-log-and-its-forms-are-rows.md)
+built the store dimension for 0263's audiences, and building it put the two
+paths a change can take to a reader side by side for the first time:
+
+| | a change to the base | a change to one audience's form |
+| --- | --- | --- |
+| who may ask | anything holding the runtime | anything holding the store |
+| what judges it | the Gate, under a recorded policy (0033) | nothing |
+| what it leaves | a revision, a proposal, a disposition, a fingerprint | a row |
+| what a reader gets | the page, once the log has it | the page, at once |
+| who can say why | `judgedUnder`, `policyHistoryOf`, the log | the actor and the stamp on the row |
+
+**Both columns are what their own records decided**, and neither is an
+oversight. 0263 made a form *a delta that applies when an audience matches*, and
+0359 made composition a projection with no place in the history — a form is
+deliberately not a revision, so there is deliberately nothing in the log to
+judge. 0033 makes the Gate the thing a *proposal* passes through, and a form is
+not a proposal.
+
+**What makes it worth asking anyway** is that the two produce the same effect on
+a reader. A deployment with an `aud_eu` rule matching a third of its traffic can
+change what that third sees by writing one row — no confidence threshold, no
+hold, no disposition, and no record beyond *who wrote it and when*. The thing
+0033 exists to prevent on the base is unprevented one dimension across.
+
+**Three shapes it could take, and this lane has a recommendation rather than an
+opinion it is sure of:**
+
+| | what it would mean | what it would cost |
+| --- | --- | --- |
+| **leave it** | a form is configuration, and the governance is on the base the form is authored against | the asymmetry above, stated in the deployment guide so nobody finds it in production |
+| judge a form as a proposal | one path, one policy, one disposition for everything a reader can be served | a form is not a revision and cannot become one without breaking 0359 clause 4 — the judgment would have to attach to something that is not in the log |
+| a policy knob — *forms may be written by* | the narrow version: an audience form is a privileged write rather than an ordinary one | a knob on a Zod-parsed policy, which 0179 is the precedent for keeping *off* a policy when it is really a capability |
+
+**Recommendation: leave it, and write the asymmetry down.** A form is authored
+against a base the Gate already judged, and the delta it carries is bounded by
+the operations §1 allows — so what an unjudged form can do to a reader is
+narrower than it first reads. But *leave it* is a decision somebody should make
+on purpose, because the alternative is that it stays true by nobody having
+looked.
+
+**Nothing waits on the answer.** The store is built either way, and the portal's
+rule editor is built either way; what changes is whether a sentence in
+`docs/deployment.md` says *forms are not judged* or a future record says they
+are.
+
+---
 ## 2026-11-09 — a ready-made section cannot be shown on any page but the one it was dropped into, because it ships a live link and a developer tool's claims
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom primitives`
@@ -1140,9 +1196,29 @@ hazard that cannot be caught by review.
 ## 2026-11-05 (evening) — a page can be served per audience now, and the two halves that would let the portal offer it are a schema change and a screen
 
 **Filed by:** `Loom framework` · **Owned by:** `Loom portal` (the screen) and
-`Loom framework` (the store dimension) · **Status:** open — **nothing is
-broken and nothing is blocked today**; filed because unit 9 now has its record
-and the remaining work is nameable
+`Loom framework` (the store dimension) · **Status:** **the store dimension is
+closed by `framework-91-the-store-dimension-for-an-audience`**
+([0376](decisions/0376-a-pages-audience-rules-are-an-attributed-log-and-its-forms-are-rows.md)),
+10 November. **The rule editor stays open and is `Loom portal`'s** — nothing is
+broken and nothing is blocked today.
+
+> **What landed against the store half.** `loom_audience_rules` keeps the whole
+> ordered list as an **append-only, attributed log**, because a rule decides
+> which readers get which form and editing one changes what every reader in that
+> audience sees without touching the page, its delta or its revision log — so a
+> mutable row would make that the one change in this system with no record of
+> it. `loom_audience_forms` keeps one row per audience, replaced in place,
+> because a form is a document being rebased rather than an event that happened.
+> `audienceOverlaySourceFromStore` satisfies the seam 0359 clause 6 declared,
+> and a deployment with no rules is served exactly what it is served today.
+>
+> **What the editor now has to work with.** `rules(treeId)` is the current list
+> with its revision and author; `recordRules` refuses an edit of a revision that
+> is no longer the head when the caller names one, so a person reordering a list
+> somebody else has changed is told rather than overwriting them; `history` is
+> the record of who changed who sees what; and `forms(treeId)` lists each
+> audience's `baseRevision` **without its delta**, which is the *stale* reading
+> this entry asked for in a form a screen can afford.
 
 [0359](decisions/0359-an-audience-rule-is-a-conjunction-of-scalar-clauses-and-a-composed-page-is-a-projection-of-a-revision.md)
 built 0263 clauses 1 to 4: `audiencesFor` sorts a reader by rules over
@@ -1174,10 +1250,14 @@ conflicts* reading that screen already has is the one audience deltas will need.
 ## 2026-11-05 (evening) — a defensive invariant check in new code was unreachable, and the thing that makes it unreachable is one line in `insert`
 
 **Filed by:** `Loom framework` · **Owned by:** `Loom framework` · **Status:**
-open — **no defect and no edit outstanding**; filed for the same reason the
-8 October entry on types printed whole was: the constraint is real, it is not
-written where a run would meet it, and the next thing that composes operations
-from two sources will have the same fear
+**closed by `framework-91-the-store-dimension-for-an-audience`**, 10 November —
+the sentence is in `src/tree/apply.ts`, on `rejectIdCollisions`, which is where
+the invariant is actually enforced and therefore where a run that reaches for a
+defensive check will meet it. It says that unique ids are the only structural
+invariant a tree has, that this is where the second `insert` of a held id fails,
+and that anything composing operations from two sources needs no check of its
+own. The branch that wrote it was the next composer this entry predicted: the
+store dimension above.
 
 `composeTreeForContext` is the first place in this repository where
 **operations authored by two separate deltas, each judged against the same base,

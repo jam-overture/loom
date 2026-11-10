@@ -464,3 +464,5 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0372](0372-every-read-of-a-tree-carries-an-explicit-stack-because-a-page-s-depth-is-data.md) | Every read of a tree carries an explicit stack, because a page's depth is data | Accepted | §2, the tree |
 | [0373](0373-an-edit-to-a-tree-descends-by-the-path-and-rebuilds-a-sibling-list-in-one-pass.md) | An edit to a tree descends by the path and rebuilds a sibling list in one pass | Accepted | §2, the tree |
 | [0374](0374-a-pages-unread-parts-are-reported-as-the-places-its-reading-stopped-and-each-is-behind-exactly-one.md) | A page's unread parts are reported as the places its reading stopped, and each is behind exactly one | Accepted | §5 (reader signals), the counters |
+| 0375 | *No record on this branch* | — | — |
+| [0376](0376-a-pages-audience-rules-are-an-attributed-log-and-its-forms-are-rows.md) | A page's audience rules are an attributed log and its forms are rows | Accepted | §5, and §1's audience dimension |

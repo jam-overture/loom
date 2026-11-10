@@ -3,6 +3,10 @@ import {
   describeComposeError,
   type AudienceOverlay,
 } from "../audience/compose.js"
+import {
+  describeAudienceOverlayError,
+  type AudienceOverlayReader,
+} from "../audience/overlay-store.js"
 import type { TreeId } from "../ids.js"
 import { err, ok, type Result } from "../result.js"
 import type { RenderRequest, TreeSource, TreeSourceError } from "../render/request.js"
@@ -101,5 +105,37 @@ export const composingTreeSourceFromStore = (
     return composed.ok
       ? ok(composed.value.tree)
       : err({ code: "unavailable", detail: describeComposeError(composed.error) })
+  },
+})
+
+/**
+ * The store, as the composition's `AudienceOverlaySource`.
+ *
+ * The seam 0359 clause 6 declared instead of a table now has the table under
+ * it, and this is the one function that joins them. It is the audience
+ * dimension's `treeSourceFromStore`: two reads above it, a pure composition
+ * beside it, and nothing about the reader leaving the process (0262).
+ *
+ * **A page with no rules is an empty overlay and not a failure**, which is what
+ * the store answers and what `composeTreeForContext` serves the base for. So
+ * wiring the composing source into a deployment that has never defined an
+ * audience changes nothing about what it serves — the property 0359 promised
+ * and the one this adapter must not quietly break.
+ *
+ * `unreadable` and `out-of-date` both read as `unavailable` here for the reason
+ * the composition's own errors do: `TreeSourceError` is published and
+ * exhaustively switched on by hosts, what a caller does about a page it cannot
+ * have does not change with the reason, and the sentence somebody acts on is in
+ * `detail`.
+ */
+export const audienceOverlaySourceFromStore = (
+  overlays: AudienceOverlayReader
+): AudienceOverlaySource => ({
+  load: async (treeId: TreeId): Promise<Result<AudienceOverlay, TreeSourceError>> => {
+    const overlay = await overlays.overlay(treeId)
+
+    return overlay.ok
+      ? overlay
+      : err({ code: "unavailable", detail: describeAudienceOverlayError(overlay.error) })
   },
 })

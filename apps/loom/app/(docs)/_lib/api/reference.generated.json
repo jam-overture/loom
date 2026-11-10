@@ -8,7 +8,7 @@
       "files": 100,
       "narrower": [],
       "standing": {
-        "packageNames": 1999,
+        "packageNames": 2029,
         "otherDoors": 18,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -4246,7 +4246,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 1999,
+        "packageNames": 2029,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -4290,7 +4290,7 @@
       "files": 63,
       "narrower": [],
       "standing": {
-        "packageNames": 1999,
+        "packageNames": 2029,
         "otherDoors": 18,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -5243,7 +5243,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 1999,
+        "packageNames": 2029,
         "otherDoors": 18,
         "doorsSharingNothing": 17,
         "widest": false,
@@ -5318,7 +5318,7 @@
       "files": 220,
       "narrower": [],
       "standing": {
-        "packageNames": 1999,
+        "packageNames": 2029,
         "otherDoors": 18,
         "doorsSharingNothing": 17,
         "widest": false,
@@ -5788,7 +5788,7 @@
       "files": 81,
       "narrower": [],
       "standing": {
-        "packageNames": 1999,
+        "packageNames": 2029,
         "otherDoors": 18,
         "doorsSharingNothing": 17,
         "widest": false,
@@ -6876,7 +6876,7 @@
       "files": 38,
       "narrower": [],
       "standing": {
-        "packageNames": 1999,
+        "packageNames": 2029,
         "otherDoors": 18,
         "doorsSharingNothing": 17,
         "widest": false,
@@ -7441,7 +7441,7 @@
       "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 1999,
+        "packageNames": 2029,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -7641,10 +7641,10 @@
       "slug": "store",
       "types": "./dist/store/index.d.ts",
       "requires": [],
-      "files": 42,
+      "files": 45,
       "narrower": [],
       "standing": {
-        "packageNames": 1999,
+        "packageNames": 2029,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -7822,6 +7822,134 @@
               "kind": "function",
               "signature": "const composeTreeForContext: (base: LoomTree, overlay: AudienceOverlay, context: JsonObject | undefined) => Result<ComposedTree, ComposeError>",
               "summary": "The page this context earns, or why it cannot be served."
+            }
+          ]
+        },
+        {
+          "module": "audience/memory",
+          "title": "Memory",
+          "summary": "An `AudienceOverlayStore` in two `Map`s, for a test and for a deployment with no database.",
+          "symbols": [
+            {
+              "name": "memoryAudienceOverlayStore",
+              "kind": "function",
+              "signature": "const memoryAudienceOverlayStore: () => AudienceOverlayStore",
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "audience/overlay-store",
+          "title": "Overlay store",
+          "summary": "Custody of the two things a deployment needs to serve one page to more than one audience: the **rules** that sort readers, and the **form** each audience earns.",
+          "symbols": [
+            {
+              "name": "AudienceRuleRevision",
+              "kind": "type",
+              "signature": "type AudienceRuleRevision = {\n    readonly treeId: TreeId;\n    readonly revision: number;\n    readonly rules: readonly AudienceRule[];\n    /** Who made these the rules. Never absent: a rule nobody can be named for is not a decision. */\n    readonly actor: string;\n    readonly recordedAt: string;\n};",
+              "summary": "One recorded state of a page's audience rules."
+            },
+            {
+              "name": "StoredAudienceForm",
+              "kind": "type",
+              "signature": "type StoredAudienceForm = {\n    readonly treeId: TreeId;\n    readonly audienceId: AudienceId;\n    readonly delta: TreeDelta;\n    readonly actor: string;\n    readonly authoredAt: string;\n};",
+              "summary": "One audience's delta, as the store keeps it."
+            },
+            {
+              "name": "AudienceFormListing",
+              "kind": "type",
+              "signature": "type AudienceFormListing = {\n    readonly audienceId: AudienceId;\n    readonly baseRevision: number;\n    readonly actor: string;\n    readonly authoredAt: string;\n};",
+              "summary": "What a screen listing a page's audiences needs, **without the deltas**."
+            },
+            {
+              "name": "AudienceOverlayError",
+              "kind": "type",
+              "signature": "type AudienceOverlayError =\n/**\n * Somebody else recorded rules for this page while this caller was editing\n * the ones they read. Nothing was written.\n */\n{\n    readonly code: \"out-of-date\";\n    readonly treeId: TreeId;\n    readonly expected: number;\n    readonly current: number;\n}\n/**\n * The delta is for another page.\n */\n | {\n    readonly code: \"tree-mismatch\";\n    readonly treeId: TreeId;\n    readonly delta: string;\n}\n/** A row the current code cannot parse, which is a row an older one wrote. */\n | {\n    readonly code: \"unreadable\";\n    readonly treeId: TreeId;\n    readonly detail: string;\n} | {\n    readonly code: \"unavailable\";\n    readonly detail: string;\n};",
+              "summary": ""
+            },
+            {
+              "name": "describeAudienceOverlayError",
+              "kind": "function",
+              "signature": "const describeAudienceOverlayError: (error: AudienceOverlayError) => string",
+              "summary": ""
+            },
+            {
+              "name": "parseAudienceRuleRevision",
+              "kind": "function",
+              "signature": "const parseAudienceRuleRevision: (row: unknown, treeId: TreeId) => Result<AudienceRuleRevision, AudienceOverlayError>",
+              "summary": "A row on the way out, checked rather than cast — the boundary every stored shape in this repository crosses the same way. These two outlive the code that wrote them by more than most: a rule is edited rarely and read on every request for as long as the page is published."
+            },
+            {
+              "name": "parseStoredAudienceForm",
+              "kind": "function",
+              "signature": "const parseStoredAudienceForm: (row: unknown, treeId: TreeId) => Result<StoredAudienceForm, AudienceOverlayError>",
+              "summary": ""
+            },
+            {
+              "name": "AudienceRuleHistoryRequest",
+              "kind": "type",
+              "signature": "type AudienceRuleHistoryRequest = {\n    /** Clamped by the implementation — see `clampAudienceRuleHistoryLimit`. */\n    readonly limit?: number;\n};",
+              "summary": ""
+            },
+            {
+              "name": "RecordAudienceRulesRequest",
+              "kind": "type",
+              "signature": "type RecordAudienceRulesRequest = {\n    readonly rules: readonly AudienceRule[];\n    readonly actor: string;\n    readonly recordedAt: string;\n    /**\n     * The revision the caller believes is current, or `0` for *this page has no\n     * rules yet*.\n     */\n    readonly expectedRevision?: number;\n};",
+              "summary": ""
+            },
+            {
+              "name": "AudienceRulesRecorded",
+              "kind": "type",
+              "signature": "type AudienceRulesRecorded = {\n    readonly outcome: \"recorded\";\n    readonly revision: AudienceRuleRevision;\n} | {\n    readonly outcome: \"unchanged\";\n    readonly revision: AudienceRuleRevision;\n};",
+              "summary": "What recording did, which is not always *appended*."
+            },
+            {
+              "name": "AuthorAudienceFormRequest",
+              "kind": "type",
+              "signature": "type AuthorAudienceFormRequest = {\n    readonly audienceId: AudienceId;\n    readonly delta: TreeDelta;\n    readonly actor: string;\n    readonly authoredAt: string;\n};",
+              "summary": ""
+            },
+            {
+              "name": "DEFAULT_AUDIENCE_RULE_HISTORY_LIMIT",
+              "kind": "value",
+              "signature": "const DEFAULT_AUDIENCE_RULE_HISTORY_LIMIT = 25",
+              "summary": "How much of a page's rule history one read answers."
+            },
+            {
+              "name": "MAX_AUDIENCE_RULE_HISTORY_LIMIT",
+              "kind": "value",
+              "signature": "const MAX_AUDIENCE_RULE_HISTORY_LIMIT = 100",
+              "summary": ""
+            },
+            {
+              "name": "clampAudienceRuleHistoryLimit",
+              "kind": "function",
+              "signature": "const clampAudienceRuleHistoryLimit: (limit: number | undefined) => number",
+              "summary": ""
+            },
+            {
+              "name": "audienceRulesOutcomeOf",
+              "kind": "function",
+              "signature": "const audienceRulesOutcomeOf: (treeId: TreeId, request: RecordAudienceRulesRequest, head: AudienceRuleRevision | undefined) => Result<AudienceRulesRecorded, AudienceOverlayError>",
+              "summary": "What a `record` call should do, given the head it would append after."
+            },
+            {
+              "name": "AudienceOverlayReader",
+              "kind": "interface",
+              "signature": "interface AudienceOverlayReader {\n    readonly overlay: (treeId: TreeId) => Promise<Result<AudienceOverlay, AudienceOverlayError>>;\n    /** The current rules with their revision and author, for a screen editing them. */\n    readonly rules: (treeId: TreeId) => Promise<Result<AudienceRuleRevision | undefined, AudienceOverlayError>>;\n    /**\n     * The edits this page's rules have had, **newest first**.\n     */\n    readonly history: (treeId: TreeId, request?: AudienceRuleHistoryRequest) => Promise<Result<readonly AudienceRuleRevision[], AudienceOverlayError>>;\n    readonly forms: (treeId: TreeId) => Promise<Result<readonly AudienceFormListing[], AudienceOverlayError>>;\n}",
+              "summary": "The read half, for the render path."
+            },
+            {
+              "name": "AudienceOverlayStore",
+              "kind": "interface",
+              "signature": "interface AudienceOverlayStore extends AudienceOverlayReader {\n    readonly recordRules: (treeId: TreeId, request: RecordAudienceRulesRequest) => Promise<Result<AudienceRulesRecorded, AudienceOverlayError>>;\n    /**\n     * The form this audience earns, replacing whatever it had.\n     */\n    readonly setForm: (treeId: TreeId, request: AuthorAudienceFormRequest) => Promise<Result<StoredAudienceForm, AudienceOverlayError>>;\n}",
+              "summary": "Three reads and two writes, and **no delete**, which this store shares with every other one here for a reason of its own: an audience stops being served by leaving the rules, not by having its form removed. The form then matches nobody and costs a row — and the day the rule comes back, the work is still there. A delete would make *we stopped serving this* and *we threw the work away* one button."
+            },
+            {
+              "name": "audienceOverlayOf",
+              "kind": "function",
+              "signature": "const audienceOverlayOf: (head: AudienceRuleRevision | undefined, forms: readonly AudienceForm[]) => AudienceOverlay",
+              "summary": "The overlay a reader of the two halves assembles, shared so the backends cannot disagree about what *whole* means."
             }
           ]
         },
@@ -8407,6 +8535,12 @@
               "kind": "function",
               "signature": "const composingTreeSourceFromStore: (store: TreeReader, overlays: AudienceOverlaySource) => TreeSource",
               "summary": "The composing sibling of `treeSourceFromStore` — one tree per id stays the right answer for a deployment that wants it, so this is a second function rather than an option on the first."
+            },
+            {
+              "name": "audienceOverlaySourceFromStore",
+              "kind": "function",
+              "signature": "const audienceOverlaySourceFromStore: (overlays: AudienceOverlayReader) => AudienceOverlaySource",
+              "summary": "The store, as the composition's `AudienceOverlaySource`."
             }
           ]
         },
@@ -8554,7 +8688,7 @@
       "files": 61,
       "narrower": [],
       "standing": {
-        "packageNames": 1999,
+        "packageNames": 2029,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -8930,10 +9064,10 @@
           "reach": "loaded"
         }
       ],
-      "files": 41,
+      "files": 45,
       "narrower": [],
       "standing": {
-        "packageNames": 1999,
+        "packageNames": 2029,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -8996,6 +9130,12 @@
               "summary": "Moving the ids themselves, which the rename above does not."
             },
             {
+              "name": "AUDIENCE_OVERLAY_DDL",
+              "kind": "value",
+              "signature": "const AUDIENCE_OVERLAY_DDL: readonly string[]",
+              "summary": "The tables a page's audience rules and its per-audience forms are kept in."
+            },
+            {
               "name": "ensureTreeStoreSchema",
               "kind": "function",
               "signature": "const ensureTreeStoreSchema: (db: LoomDatabase) => Promise<void>",
@@ -9030,6 +9170,12 @@
               "kind": "function",
               "signature": "const migrateApplicationIds: (db: LoomDatabase) => Promise<void>",
               "summary": "Carries `prj_default` to `app_default` across every table that names an application. Safe to run on a database that has already been carried, and on one that was never on the old value."
+            },
+            {
+              "name": "ensureAudienceOverlaySchema",
+              "kind": "function",
+              "signature": "const ensureAudienceOverlaySchema: (db: LoomDatabase) => Promise<void>",
+              "summary": "Creates the audience dimension's two tables if they are absent. Idempotent, and separate for the reason the other four are: a deployment that wants to serve one page to more than one audience gets the tables by adding this call on purpose."
             }
           ]
         },
@@ -9056,6 +9202,19 @@
               "kind": "function",
               "signature": "const postgresApplicationStore: (db: LoomDatabase) => ApplicationStore",
               "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "store/postgres-audience",
+          "title": "Postgres audience",
+          "summary": "The audience dimension, backed by Postgres. It is the table that `AudienceOverlaySource` was declared as a seam in place of, and it is the store dimension a page served per audience has been waiting on.",
+          "symbols": [
+            {
+              "name": "postgresAudienceOverlayStore",
+              "kind": "function",
+              "signature": "const postgresAudienceOverlayStore: (db: LoomDatabase, scope?: StoreScope) => AudienceOverlayStore",
+              "summary": "Every query is filtered by the application this handle speaks for, and every write sets it."
             }
           ]
         },
@@ -9138,6 +9297,18 @@
               "kind": "value",
               "signature": "const loomProjects: import(\"drizzle-orm/pg-core\").PgTableWithColumns<{\n    name: \"loom_projects\";\n    schema: undefined;\n    columns: {\n        projectId: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"project_id\";\n            tableName: \"loom_projects\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: true;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        name: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"name\";\n            tableName: \"loom_projects\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        createdAt: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"created_at\";\n            tableName: \"loom_projects\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        repository: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"repository\";\n            tableName: \"loom_projects\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: false;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        closedAt: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"closed_at\";\n            tableName: \"loom_projects\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: false;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n    };\n    dialect: \"pg\";\n}>",
               "summary": "The projects a deployment has, which group the applications above."
+            },
+            {
+              "name": "loomAudienceRules",
+              "kind": "value",
+              "signature": "const loomAudienceRules: import(\"drizzle-orm/pg-core\").PgTableWithColumns<{\n    name: \"loom_audience_rules\";\n    schema: undefined;\n    columns: {\n        applicationId: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"application_id\";\n            tableName: \"loom_audience_rules\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: true;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        treeId: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"tree_id\";\n            tableName: \"loom_audience_rules\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        revision: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"revision\";\n            tableName: \"loom_audience_rules\";\n            dataType: \"number\";\n            columnType: \"PgInteger\";\n            data: number;\n            driverParam: string | number;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: undefined;\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        rules: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"rules\";\n            tableName: \"loom_audience_rules\";\n            dataType: \"json\";\n            columnType: \"PgJsonb\";\n            data: unknown;\n            driverParam: unknown;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: undefined;\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        actor: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"actor\";\n            tableName: \"loom_audience_rules\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        recordedAt: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"recorded_at\";\n            tableName: \"loom_audience_rules\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n    };\n    dialect: \"pg\";\n}>",
+              "summary": "A page's audience rules, as an append-only log of the whole ordered list."
+            },
+            {
+              "name": "loomAudienceForms",
+              "kind": "value",
+              "signature": "const loomAudienceForms: import(\"drizzle-orm/pg-core\").PgTableWithColumns<{\n    name: \"loom_audience_forms\";\n    schema: undefined;\n    columns: {\n        applicationId: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"application_id\";\n            tableName: \"loom_audience_forms\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: true;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        treeId: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"tree_id\";\n            tableName: \"loom_audience_forms\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        audienceId: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"audience_id\";\n            tableName: \"loom_audience_forms\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        delta: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"delta\";\n            tableName: \"loom_audience_forms\";\n            dataType: \"json\";\n            columnType: \"PgJsonb\";\n            data: unknown;\n            driverParam: unknown;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: undefined;\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        baseRevision: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"base_revision\";\n            tableName: \"loom_audience_forms\";\n            dataType: \"number\";\n            columnType: \"PgInteger\";\n            data: number;\n            driverParam: string | number;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: undefined;\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        actor: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"actor\";\n            tableName: \"loom_audience_forms\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        authoredAt: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"authored_at\";\n            tableName: \"loom_audience_forms\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n    };\n    dialect: \"pg\";\n}>",
+              "summary": "The delta each audience earns, one row per audience per page."
             }
           ]
         }
@@ -9151,7 +9322,7 @@
       "files": 14,
       "narrower": [],
       "standing": {
-        "packageNames": 1999,
+        "packageNames": 2029,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -9326,7 +9497,7 @@
         }
       ],
       "standing": {
-        "packageNames": 1999,
+        "packageNames": 2029,
         "otherDoors": 18,
         "doorsSharingNothing": 16,
         "widest": true,
@@ -13817,7 +13988,7 @@
       "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 1999,
+        "packageNames": 2029,
         "otherDoors": 18,
         "doorsSharingNothing": 17,
         "widest": false,
@@ -13952,7 +14123,7 @@
       "files": 21,
       "narrower": [],
       "standing": {
-        "packageNames": 1999,
+        "packageNames": 2029,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -14014,7 +14185,7 @@
       "files": 65,
       "narrower": [],
       "standing": {
-        "packageNames": 1999,
+        "packageNames": 2029,
         "otherDoors": 18,
         "doorsSharingNothing": 17,
         "widest": false,
@@ -14588,7 +14759,7 @@
       "files": 43,
       "narrower": [],
       "standing": {
-        "packageNames": 1999,
+        "packageNames": 2029,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -14658,7 +14829,7 @@
       "files": 100,
       "narrower": [],
       "standing": {
-        "packageNames": 1999,
+        "packageNames": 2029,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -15077,10 +15248,10 @@
           "reach": "loaded"
         }
       ],
-      "files": 79,
+      "files": 81,
       "narrower": [],
       "standing": {
-        "packageNames": 1999,
+        "packageNames": 2029,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -15088,6 +15259,43 @@
         "collisions": []
       },
       "groups": [
+        {
+          "module": "testing/audience-overlay-contract",
+          "title": "Audience overlay contract",
+          "summary": "One suite, run against every `AudienceOverlayStore`.",
+          "symbols": [
+            {
+              "name": "CONTRACT_TREE",
+              "kind": "value",
+              "signature": "const CONTRACT_TREE: TreeId",
+              "summary": ""
+            },
+            {
+              "name": "audienceNamed",
+              "kind": "function",
+              "signature": "const audienceNamed: (name: string) => AudienceId",
+              "summary": ""
+            },
+            {
+              "name": "ruleFor",
+              "kind": "function",
+              "signature": "const ruleFor: (audienceId: AudienceId, key: string, value: string) => AudienceRule",
+              "summary": ""
+            },
+            {
+              "name": "formDelta",
+              "kind": "function",
+              "signature": "const formDelta: (over?: Partial<TreeDelta>) => TreeDelta",
+              "summary": "A delta that is well-formed and is never applied by this suite — what is under test is custody, not composition, which `compose.test.ts` covers against the tree it belongs to."
+            },
+            {
+              "name": "describeAudienceOverlayStoreContract",
+              "kind": "function",
+              "signature": "const describeAudienceOverlayStoreContract: (name: string, make: () => Promise<AudienceOverlayStore> | AudienceOverlayStore) => void",
+              "summary": ""
+            }
+          ]
+        },
         {
           "module": "testing/hold-contract",
           "title": "Hold contract",

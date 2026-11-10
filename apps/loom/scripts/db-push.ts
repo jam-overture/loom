@@ -14,6 +14,7 @@ import postgres from "postgres"
 
 import {
   ensureApplicationStoreSchema,
+  ensureAudienceOverlaySchema,
   ensureHoldStoreSchema,
   ensureProjectStoreSchema,
   ensureTreeStoreSchema,
@@ -198,6 +199,14 @@ try {
    * could not be read, and nothing made meanwhile is recorded.
    */
   await ensureMadeChangesSchema(db)
+  /**
+   * A page's audience rules and the form each audience earns (0263's store
+   * dimension). Created here rather than when a rule editor first needs it,
+   * because the two tables are empty on every deployment that has not defined
+   * an audience and a page with no rules is served exactly as it is today —
+   * so there is nothing to weigh against having them ready.
+   */
+  await ensureAudienceOverlaySchema(db)
   /**
    * Last, because it is the only data statement here and every column it writes
    * to has to exist first. It carries rows written before 12 October from
