@@ -284,10 +284,22 @@ it is in the pull request comment once, as the entry at
 rather than off a notification:
 
 ```
-PLACEHOLDER
+Test Files  276 passed (276)      Tests  6740 passed (6740)    # framework
+1497 findings, 0 malformed
+2201 visuals in reports/, 152.8MB, none over 1.1MB, 413 cited by no file
+Test Files  472 passed (472)      Tests  7542 passed (7542)    # @loom/app
+139 prerendered pages, 2060 text junctions, 0 run together; 3 metadata conventions, 0 unserved
+EXIT=0
 ```
 
-**Nothing failed and nothing was skipped.**
+**Nothing failed and nothing was skipped.** `413 cited by no file` is not this
+branch's: it is the same 413 the gate printed on `main` before this branch
+existed, and the five visuals this run added are all cited by this report — the
+visual count went 2,196 → 2,201 and the uncited count did not move.
+
+**Two runs of the gate, and the second is the one quoted.** The first covered
+the code and ran before `FINDINGS.md`, this report and the shots existed. The
+run above is the whole tree as it is committed.
 
 This branch's own additions: **16 cases**, all in `wired.test.ts`, which is a
 new file. One existing case was changed and it is the pinned panel list in
