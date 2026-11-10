@@ -47,7 +47,11 @@ describe("what has arrived for a project", () => {
       [batch(2, "t_b", "2026-10-20T10:01:00.000Z"), batch(1, "t_a", "2026-10-20T10:00:00.000Z")]
     )
 
-    expect(arrivals.latest).toEqual({ kind: "arrived", at: "2026-10-20T10:01:00.000Z" })
+    expect(arrivals.latest).toEqual({
+      kind: "arrived",
+      at: "2026-10-20T10:01:00.000Z",
+      treeId: "t_b",
+    })
   })
 
   /** The buffer stamps the instant it received a batch, which is exact. */
@@ -57,19 +61,31 @@ describe("what has arrived for a project", () => {
       [batch(7, "t_a", "2026-10-20T11:59:00.000Z")]
     )
 
-    expect(arrivals.latest).toEqual({ kind: "arrived", at: "2026-10-20T11:59:00.000Z" })
+    expect(arrivals.latest).toEqual({
+      kind: "arrived",
+      at: "2026-10-20T11:59:00.000Z",
+      treeId: "t_a",
+    })
   })
 
   /**
    * A row moves on arrival and again when collection counts it, so once the
    * buffer is empty it can only say when something was last counted.
    */
-  it("says only when something was last counted once the journal holds nothing", () => {
+  it("says only when something was last counted, and on which page, once the journal holds nothing", () => {
     const arrivals = arrivalsOf(
-      [row("t_a", 1, 3, "2026-10-20T10:00:00.000Z"), row("t_b", 1, 1, "2026-10-20T12:00:00.000Z")],
+      [
+        row("t_a", 1, 3, "2026-10-20T10:00:00.000Z"),
+        row("t_b", 1, 1, "2026-10-20T12:00:00.000Z"),
+        row("t_c", 2, 5, "2026-10-20T11:00:00.000Z"),
+      ],
       []
     )
 
-    expect(arrivals.latest).toEqual({ kind: "counted", at: "2026-10-20T12:00:00.000Z" })
+    expect(arrivals.latest).toEqual({
+      kind: "counted",
+      at: "2026-10-20T12:00:00.000Z",
+      treeId: "t_b",
+    })
   })
 })

@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
 
-import { nodeIdSchema } from "@jam-overture/loom"
+import { nodeIdSchema, treeIdSchema } from "@jam-overture/loom"
 import type { ArrivalReading } from "@jam-overture/loom/signals"
 import type { Application, Project } from "@jam-overture/loom/store"
 
@@ -53,7 +53,10 @@ const read = (
   pageViews: [],
   arrivals: {
     opened: 12,
-    latest: latest === undefined ? undefined : { kind: latest, at: "2026-11-05T09:30:00.000Z" },
+    latest:
+      latest === undefined
+        ? undefined
+        : { kind: latest, at: "2026-11-05T09:30:00.000Z", treeId: treeIdSchema.parse("t_home") },
   },
   turnedAway: undefined,
   published: [],
@@ -78,6 +81,25 @@ describe("the Signals frame", () => {
     expect(screen.getByText("40")).toBeTruthy()
     expect(screen.getByText("the list")).toBeTruthy()
     expect(drawsTab(read("arrived"))).toBe(true)
+  })
+
+  it("says which site and page the last delivery came from, with a link to follow it", () => {
+    render(
+      <SignalsFrame
+        reading={read("arrived", { application: { ...application, host: "example.com" } })}
+        projectId="prj_a"
+        tab="events"
+        rangeHref={rangeHref}
+      >
+        <p>the list</p>
+      </SignalsFrame>
+    )
+
+    expect(screen.getByText("Last arrival")).toBeTruthy()
+    expect(screen.getByText("Received from example.com, on the page t_home.")).toBeTruthy()
+    expect(screen.getByRole("link", { name: "Events on this page" }).getAttribute("href")).toBe(
+      "/portal/prj_a/signals?on=t_home"
+    )
   })
 
   it("says nothing has arrived, and draws no tab, before anything has", () => {

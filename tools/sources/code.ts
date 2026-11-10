@@ -57,18 +57,68 @@ const CODE: Mode = { kind: "code" }
  */
 const BEFORE_REGEX = new Set("(,=:[!&|?{};+-*%~^<>".split(""))
 
-const KEYWORD_BEFORE_REGEX =
-  /(?:^|[^\w$])(?:return|typeof|case|in|of|do|else|yield|await|new|delete|void|instanceof)$/
+const KEYWORDS_BEFORE_REGEX = [
+  "return",
+  "typeof",
+  "case",
+  "in",
+  "of",
+  "do",
+  "else",
+  "yield",
+  "await",
+  "new",
+  "delete",
+  "void",
+  "instanceof",
+] as const
+
+const KEYWORD_BEFORE_REGEX = new RegExp(`(?:^|[^\\w$])(?:${KEYWORDS_BEFORE_REGEX.join("|")})$`)
+
+/**
+ * How many characters of the emitted code the keyword test has to see.
+ *
+ * The pattern is anchored at the end and matches a keyword preceded either by
+ * the start of the code or by one character that is not part of a word. So the
+ * longest keyword plus that one character is the whole of what can decide it,
+ * and a tail that long gives the same answer as the entire file would.
+ *
+ * It is derived from the list rather than typed, because a longer keyword added
+ * to the list would otherwise silently shorten what the test can see.
+ */
+const KEYWORD_TAIL = Math.max(...KEYWORDS_BEFORE_REGEX.map((word) => word.length)) + 1
+
+/**
+ * The end of the emitted code, with trailing whitespace dropped.
+ *
+ * **Reading it rather than joining the whole array is what keeps the scan
+ * linear.** This is asked on every `/` that might open a regular expression, and
+ * joining everything emitted so far made the cost of a file the product of its
+ * length and its number of slashes: `src/primitives/library.test.ts`, 444,658
+ * characters and 1,224 slashes, was 1,067 ms of the repository's 2,290 ms —
+ * 2.400 ms per thousand characters against a median of 0.032.
+ *
+ * `emitted` holds one character per entry, which is what makes a count of
+ * entries a count of characters. `trim()` per entry is the same test
+ * `trimEnd()` applies, so the result is the tail of what the old spelling
+ * computed in full.
+ */
+const codeTail = (emitted: readonly string[]): string => {
+  let last = emitted.length - 1
+
+  while (last >= 0 && (emitted[last] ?? "").trim() === "") last -= 1
+
+  return emitted.slice(Math.max(0, last - KEYWORD_TAIL + 1), last + 1).join("")
+}
 
 const opensRegex = (emitted: readonly string[]): boolean => {
-  const code = emitted.join("")
-  const trimmed = code.trimEnd()
-  const last = trimmed.at(-1)
+  const tail = codeTail(emitted)
+  const last = tail.at(-1)
 
   if (last === undefined) return true
   if (BEFORE_REGEX.has(last)) return true
 
-  return KEYWORD_BEFORE_REGEX.test(trimmed)
+  return KEYWORD_BEFORE_REGEX.test(tail)
 }
 
 /** A newline survives blanking; everything else becomes a space. */

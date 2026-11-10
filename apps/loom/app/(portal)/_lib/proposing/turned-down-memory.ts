@@ -1,10 +1,25 @@
-import { ok } from "@jam-overture/loom"
+import { ok, type IntentId, type ProposalId } from "@jam-overture/loom"
 
-import { newestFirst, type TurnedDown, type TurnedDownStore } from "./turned-down"
+import {
+  newestFirst,
+  type TurnedDown,
+  type TurnedDownChange,
+  type TurnedDownStore,
+} from "./turned-down"
 
 /** One application's turned-down changes in the process: the reference implementation. */
 export const memoryTurnedDownStore = (): TurnedDownStore => {
-  const held = new Map<string, TurnedDown>()
+  const held = new Map<ProposalId, TurnedDownChange>()
+
+  const entries = (): readonly TurnedDown[] =>
+    [...held.values()].map(({ proposalId, pageId, request, reason, by, at }) => ({
+      proposalId,
+      pageId,
+      request,
+      reason,
+      by,
+      at,
+    }))
 
   return {
     record: (entry) => {
@@ -16,7 +31,7 @@ export const memoryTurnedDownStore = (): TurnedDownStore => {
     forPage: (pageId, limit) =>
       Promise.resolve(
         ok(
-          newestFirst([...held.values()].filter((entry) => entry.pageId === pageId)).slice(
+          newestFirst(entries().filter((entry) => entry.pageId === pageId)).slice(
             0,
             Math.max(0, limit)
           )
@@ -25,10 +40,18 @@ export const memoryTurnedDownStore = (): TurnedDownStore => {
 
     since: (at, limit) =>
       Promise.resolve(
+        ok(newestFirst(entries().filter((entry) => entry.at >= at)).slice(0, Math.max(0, limit)))
+      ),
+
+    intentsOf: (proposalIds) =>
+      Promise.resolve(
         ok(
-          newestFirst([...held.values()].filter((entry) => entry.at >= at)).slice(
-            0,
-            Math.max(0, limit)
+          new Map(
+            proposalIds.flatMap((proposalId): (readonly [ProposalId, IntentId])[] => {
+              const entry = held.get(proposalId)
+
+              return entry === undefined ? [] : [[proposalId, entry.intentId]]
+            })
           )
         )
       ),

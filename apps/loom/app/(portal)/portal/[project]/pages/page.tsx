@@ -9,7 +9,7 @@ import { StateNotice } from "@/app/(portal)/_components/state-notice"
 import { readMeasurement } from "@/app/(portal)/_lib/accepted/measurement"
 import { readAccepted, type AcceptedReading } from "@/app/(portal)/_lib/accepted/reading"
 import { requireActor, requireRole } from "@/app/(portal)/_lib/auth/identity"
-import { sentencesOf, servedOf } from "@/app/(portal)/_lib/going-live"
+import { goalNameOf, sentencesOf, servedOf } from "@/app/(portal)/_lib/going-live"
 import {
   historyOf,
   loomOutcomeOf,
@@ -40,7 +40,7 @@ import { NewestChange, type Newest } from "./_components/newest-change"
  * Each page also says its newest change, answering the rail's question for
  * *Pages* (`docs/portal-wireframes.md`, *The chrome*: what is live, and did
  * each change help?): a Loom change with the verdict its card on *Page
- * history* gives, one accepted and on its way to readers with where it has
+ * history* gives and the goal it served beside it, one accepted and on its way to readers with where it has
  * got to, or the site's own version, which Loom does not judge. Where Loom's
  * record of changes cannot be read the column is left out and the list stands.
  */
@@ -66,15 +66,13 @@ const newestWordsOf = async (
   }
 
   const { change } = newest
-  const measurement = await readMeasurement(
-    reading,
-    change,
-    servedOf(change.proposalId, reading.origins)
-  )
+  const served = servedOf(change.proposalId, reading.origins)
+  const measurement = await readMeasurement(reading, change, served)
 
   return {
     outcome: loomOutcomeOf(change, reading.reach, measurement, now),
     what: versionWordsOf(change, reading.changes, sentencesOf(change, reading.parts)).heading,
+    ...(served.kind === "recorded" ? { goal: goalNameOf(served) } : {}),
   }
 }
 const PagesPage = async ({ params }: { params: Promise<{ project: string }> }) => {

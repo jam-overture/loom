@@ -23,6 +23,51 @@ describe("a page's newest change on the list of pages", () => {
     expect(link.textContent).toBe("HelpedVersion 3: Removes the banner.")
   })
 
+  it("names the goal the change served beside its verdict", () => {
+    render(
+      <NewestChange
+        newest={{
+          outcome: { label: "Helped", tone: "good" },
+          what: "Version 3: Removes the banner.",
+          goal: "Sign-ups",
+        }}
+        history={HISTORY}
+      />
+    )
+
+    expect(screen.getByText("Goal: Sign-ups")).toBeDefined()
+    expect(screen.getByRole("link").textContent).toBe(
+      "HelpedGoal: Sign-upsVersion 3: Removes the banner."
+    )
+  })
+
+  it("says a change raised before proposals named a goal names none", () => {
+    render(
+      <NewestChange
+        newest={{
+          outcome: { label: "Too early", tone: "plain" },
+          what: "Version 2: Moves Start up.",
+          goal: null,
+        }}
+        history={HISTORY}
+      />
+    )
+
+    expect(screen.getByText("No goal named")).toBeDefined()
+  })
+
+  it("draws no goal chip where none is known, as for the site's own edit", () => {
+    render(
+      <NewestChange
+        newest={{ outcome: { label: "Not a Loom change", tone: "plain" }, what: "Your site" }}
+        history={HISTORY}
+      />
+    )
+
+    expect(screen.queryByText(/^Goal:/)).toBeNull()
+    expect(screen.queryByText("No goal named")).toBeNull()
+  })
+
   it("draws a Hurt verdict in the refusing tone", () => {
     render(
       <NewestChange
