@@ -7,7 +7,8 @@ Branch `framework-91-the-store-dimension-for-an-audience`. Record
 
 ![The two tables under the audience seam, and the two paths a change takes to a reader](2026-11-10-framework-the-store-dimension-for-an-audience.svg)
 
-Preview: PREVIEW_URL
+Preview:
+https://loom-git-framework-91-the-st-3bb4ce-jpizzolato36-6341s-projects.vercel.app
 Nothing on it should look different. This run adds no page, no route and no
 pixel: it is two tables, a contract and the adapter between them. **This run
 could not open the preview to confirm that** — `vercel.app` is not on the
