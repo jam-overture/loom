@@ -38,6 +38,7 @@ the portal every day.
 | What an operator can look at, delivery by delivery | one row per signal the deployment still keeps, newest first, in exact pages, with the rest of one page view beside any of them ([0355](../decisions/0355-the-events-a-screen-lists-are-one-row-per-signal-and-one-page-view-is-read-on-a-key-the-caller-already-holds.md)) — the handle the *Events* tab is drawn from, which counts nothing, names no page and cannot be asked which page views exist |
 | What readers did inside a part | every addressed node of one revision, with what readers did **to** it and what they did **inside** it over a range ([0368](../decisions/0368-what-readers-did-inside-a-part-is-derived-from-the-tree-and-the-sum-is-exact-because-occurrences-add.md)) — derived from the tree rather than from the payload, so *forty presses in the pricing band last Tuesday* costs no byte anywhere, and exact because one signal wrote one row on one node |
 | When readers arrived | page views counted under the hour they began in as well as in total ([0356](../decisions/0356-page-views-are-counted-under-the-hour-they-began-in-as-a-sixth-counter-written-at-the-door.md)), written at the door in the same transaction as the total — so a chart by hour sums to the count drawn beside it, and a reading over a range says where its data starts |
+| What a reader's day looks like | a range of hours folded two ways ([0376](../decisions/0376-a-range-of-hours-is-folded-into-its-days-and-into-the-hours-of-a-readers-day-where-the-mean-is-the-only-comparable-figure.md)) — into its **days**, so the thirty-day range the wireframe offers is thirty bars rather than seven hundred and twenty, and into the **hours of the day**, so *when are my readers here* and *when can a change go out* are answerable. Read-time, nothing stored, and the hours of the day are compared by a mean per day, because a range is almost never a whole number of days and the totals would rank them by where it ended |
 | Which page a change helped and which it hurt | every page's sharpest movement in each direction, at the later window's door scale ([0291](../decisions/0291-a-deployments-change-is-two-orders-at-the-doors-scale-because-a-page-has-no-net-movement.md)), as two orders rather than one — because a page the change both helped and hurt has no net |
 | What a change did to the funnel | the rate bracketed by each window's own ceiling, with a counterfactual saying which half moved ([0288](../decisions/0288-a-change-to-a-funnel-is-two-shares-that-factor-and-a-difference-of-two-floors-is-a-bracket.md)), so a rollup window a deployment shortened cannot read as a collapse |
 | How much of what it says gets read | words readers reached against the words the window can speak for ([0235](../decisions/0235-how-much-of-a-page-gets-read-is-a-share-of-words-that-partition-it-and-the-typical-reader-is-a-ceiling.md), [0287](../decisions/0287-a-share-of-a-pages-words-is-a-share-of-the-words-the-window-can-speak-for-and-spoken-for-is-one-predicate.md)), with the passages nobody saw — and no share at all where nothing reports reach |
@@ -5129,6 +5130,80 @@ measures **7,543 bytes minified and 3,350 gzipped**, which is what it measures o
 is a judgement about a screen; the *By page* drawer's skipped count, which is the
 portal's to draw; and five new names on `@jam-overture/loom/signals` with no
 prose, which is `Loom docs`'.
+
+### 82. The shape of a deployment's day · `Loom signals` · **done, 10 November**
+
+> **§81 is on an open branch** (#848, *the place one fix recovers the most of a
+> page at*) and is not on `main` yet, which is why the numbers here skip one.
+> Nothing in this step reads anything that step added.
+
+§76 put a clock on the page-view counter
+([0356](../decisions/0356-page-views-are-counted-under-the-hour-they-began-in-as-a-sixth-counter-written-at-the-door.md))
+and §77 put one on what readers did
+([0362](../decisions/0362-what-readers-did-is-counted-under-the-hour-they-did-it-in-as-a-seventh-counter-the-fold-writes-for-the-three-delegated-kinds.md)).
+Both are read as a dense hourly series over a range, under one honesty rule
+spelled once in `hourlySeriesOf`.
+
+**An hour is the unit the counter holds and not the unit a screen can draw.**
+[`portal-wireframes.md`](portal-wireframes.md) *1 · Signals* offers a range
+picker of **last 24 hours, 7 days, 30 days**. The first is 24 bars. The third is
+**720** — and a surface that buckets them itself is that rule spelled a third
+time, in a route group, by whoever is drawing the chart that week.
+
+**Done**
+([0376](../decisions/0376-a-range-of-hours-is-folded-into-its-days-and-into-the-hours-of-a-readers-day-where-the-mean-is-the-only-comparable-figure.md)),
+as two read-time folds of a series a caller already holds — no store, no clock,
+no new table, nothing added to any payload.
+
+- **`daySeriesOf` is the picker's third option, drawn.** Thirty bars, dense, with
+  a day the range or the clock cut short **marked rather than dropped**: it keeps
+  its count, says how many of its twenty-four hours the series could speak for,
+  and the sum over the days equals the sum over the hours in every range.
+- **`dayShapeOf` is a question no counter here had been asked.** Every 09:00 of a
+  range summed together is what a reader's day looks like on this deployment —
+  *when are my readers here*, and *when can a change go out without anybody
+  reading the page as it moves*. Twenty-four bars whatever the range.
+- **The mean per day is the key, and the totals are the plausible-false
+  figure.** A range is hour-aligned and almost never a whole number of days, so
+  the hours of the day do not rest on the same number of days: *last 7 days* read
+  at 09:30 holds eight 09:00s and seven 03:00s. `DayHour.perDay` is what
+  `busiestHoursIn` ranks on, `days` and `count` are published beside it, and
+  `DayShape.even` says whether the raw counts may be compared at all. **The
+  mutation that ranks by the total survived the first sweep of this module's
+  tests**, which is the evidence that the wrong key is invisible rather than
+  obviously wrong.
+- **An hour of the day no day could speak for is withheld and never nought.**
+  *Nobody reads this page at 03:00* and *this range holds no finished 03:00* are
+  one bar apart and opposite answers, and `quietestHoursIn` **will not name an
+  unobserved hour** — which is the one way this reading could recommend a deploy
+  window off the absence of evidence rather than evidence of absence.
+- **Only whole hours reach the shape, and the arithmetic closes.** The hour in
+  progress is kept out of the mean and out of the day count, and what it held is
+  published as `incomplete`, so `count + incomplete` is the figure the series
+  publishes for the range.
+- **Counts add and days do not.** An hour handed over twice adds its count twice
+  and is one hour of one day either way, because a denominator that counted a day
+  twice is a mean permanently half what it should be (0158). The input is a
+  **series** and not a store's rows, and `whole` is the field no row carries, so
+  the mistake does not typecheck.
+- **The offset is whole hours from UTC and is not a time zone.** A nine-o'clock
+  peak in California arrives in these buckets as 17:00, so both readings take an
+  offset and publish the one they were taken at. A half-hour zone is not nameable
+  from hour buckets at all, and a zone that observes summer time is an hour out
+  for part of the range — stated rather than papered over.
+- **No floor, and the reason is not the region counter's reason.** A region bucket
+  is floored because a place and a handful of views is a person
+  ([0214](../decisions/0214-where-readers-are-is-a-floored-bucket-counted-at-the-door-and-a-page-view-says-when-it-began.md));
+  neither fold narrows anything the hourly series does not already narrow, both
+  are strictly coarser than it, and no bucket here names anywhere or anybody.
+
+**Nothing reaches a reader's browser.** `broadcast.ts` and its import graph hold
+no file in this branch, and the bundle measures what it measures on `main`.
+
+**What is left and is filed:** the two charts are the portal's to draw; a third
+fold by the day of the week, which is the same machinery and which nothing on a
+wireframe asks for yet; and sixteen new names on `@jam-overture/loom/signals`
+with no prose, which is `Loom docs`'.
 
 ## Still not in scope
 
