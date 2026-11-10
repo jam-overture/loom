@@ -8,6 +8,49 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-11-10 — the transit mangling has eaten a `decisions/` link, which is one of the two triggers the 5 November entry set for raising it
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom daily build` (run mechanics;
+it owns the 5 and 7 November entries this extends) · **Status:** open — **one
+instance, recorded against a trigger that entry set itself**; nothing is broken
+in the repository and the remedy is still the one it names.
+
+The 5 November entry closes: *"Worth raising only if it ever mangles something
+load-bearing — a URL inside a code fence a reader is meant to copy, or a
+`decisions/` link in a record."* The 7 November entry met the first half of that
+(it ate the `!` off three image embeds). **This is the second half**, on #851,
+twice in one body, and the detail that is new is which text survived beside it.
+
+| as composed | as it arrived |
+| --- | --- |
+| `Record [0376](…-comparable-figure.md), `Accepted`` | the link wrapped in **2 backticks**, so it renders as code and does not open |
+| the same URL, bare, alone on its own line | wrapped in **2 backticks** again |
+| the report URL, bare, on the next line but one | **intact** |
+| the preview URL, bare, two lines later | **intact** |
+
+**Three things here the earlier entries do not have.**
+
+1. **It is a `decisions/` URL**, which is the trigger. A record a reviewer cannot
+   open from the pull request is the one link in a Loom pull request body that
+   has to work, because the record is where the argument is.
+2. **Rewriting it did not avoid it.** The first body had the link inline before a
+   comma and a backticked word; the second had the same URL alone on a line, in a
+   list, with nothing adjacent to confuse anything. **Both were wrapped.** So it
+   is not the inline context.
+3. **Two bare URLs in the same list, a line or two below, came through clean.**
+   The mangled one is the longest token in the body by some margin (158
+   characters, 23 hyphens); the two that survived are 118 and 92. That is one
+   observation and not a rule, but it is the first instance where the same body
+   shows both outcomes, which is what makes it worth writing down.
+
+**Nothing is asked and the remedy is unchanged** — stop rather than fix, per the 5
+November entry. What this lane did was leave the mangled link in place rather
+than edit the body a third time, and add the record and the report as plain
+paths in the pull request comment, which arrive unharmed. A run that needs a
+record link to work in a body should expect to spell it as a path rather than a
+URL.
+
+---
 ## 2026-11-10 — a new silence set is published and is not in the census, because its second member is a condition no reading has needed
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom signals`

@@ -244,6 +244,14 @@ record and a unit of its own rather than a line in this one. Half-registering it
 would be worse than leaving it out, by that module's own argument, so it is
 written down with the three options and this lane's preference.
 
+**Filed for `Loom daily build`:** the transit mangling ate the **`decisions/`
+link** out of #851's body — twice, inline and then bare on a line of its own,
+while two shorter bare URLs a line below came through clean. That is the second
+of the two triggers the 5 November entry set for raising it, and the first
+instance where one body shows both outcomes. Nothing is asked; the remedy is
+still to stop rather than to fix, and this run left the mangled link rather than
+editing the body a third time.
+
 **Updated, not closed:** the 7 November request for narrower entry points onto
 `src/signals/`, with the measurement that removes its deadline and what a run
 whose unit is the door would owe.
