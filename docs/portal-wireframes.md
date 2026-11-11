@@ -41,6 +41,10 @@ portal's own palette (`(portal)/globals.css`: white surfaces, borders that
 carry structure, green as a tinted mark, one black filled action per screen).
 
 - **Top bar:** `loom / <workspace> / <project>` breadcrumb, search, avatar.
+  Search finds the portal's own screens and features by plain words (the
+  maintainer, 11 November: *"largely it should be for searching for portal
+  features. Not necessarily data."*); each screen keeps its own *Find* for
+  its data.
 - **One labelled left rail**, replacing today's tab row
   (`_lib/project-tabs.ts`). Words at rest, never icons that need a hover.
   In order: **Signals · For review** (with a count of what waits) **· Pages ·
@@ -124,7 +128,10 @@ writes it down cites this decision. The By page tab does not wait on it.
   changes wait for that page.
 - **The drawer for one page:** a bar per signal kind for the range (what
   readers did on it), the goals measured on it with their rate and trend, the
-  three parts pressed most, a band linking to its waiting changes, and
+  three parts pressed most, **where readers stopped** (the places on the page
+  where reading stopped, the words nobody reached, and the three places that
+  cost the most, from `pageFrontierOf`, 0374; added on 11 November at the
+  maintainer's yes), a band linking to its waiting changes, and
   *Page history* and *Events on this page*.
 - Built from data kept today (tallies by page and version). The goal columns
   wait for Goals.
