@@ -140,24 +140,30 @@ short one beside it. That body is now the headline fixture in
 ## The gate
 
 `pnpm install && pnpm verify` — **EXIT=0**, read out of a file in its own
-command, on the committed tree.
+command, **on the committed tree**. The first run of this gate was started
+before the record, the report and two docblocks were written, so it is not the
+one quoted here; this one ran on `c30e517`.
 
 | | files | tests |
 | --- | --- | --- |
-| framework and tools | 284 | **6,861** |
-| application | 473 | **7,622** |
-| | **757** | **14,483** |
+| framework and tools | 284 | **6,879** |
+| application | 476 | **7,712** |
+| | **760** | **14,591** |
 
-**14,483 pass. Nothing failed, nothing skipped, no test weakened.** +29 tests and
-+1 file over `main` at `18b72f5` (6,832 / 7,622 = 14,454). All 29 are the new
+**14,591 pass. Nothing failed, nothing skipped, no test weakened.** +29 tests and
++1 file over `main` at `18b72f5` (283 / 6,850). All 29 are the new
 `tools/posted/mangling.test.ts` and **no existing test file changed** — this
-branch adds a directory under `tools/`, a section to a document, a record, and
-six status lines, and touches no source anything imports. The application half is
-unchanged to the test.
+branch adds a directory under `tools/`, a section to a document, a record, a
+report, and six status lines, and touches no source anything imports. **The
+application half is unchanged to the test**, which is the cleanest evidence that
+nothing here reaches a surface.
 
-`findings:check` 1,514 findings, 0 malformed. `decisions:index` regenerated; it
-notes **0381** as a hole, which under 0097 is a note rather than a failure — it
-is claimed by #856.
+The morning run reported the application at 473 / 7,622. That figure is `main`'s
+from before #860, #861 and #862 merged, not a change on this branch.
+
+`findings:check` 1,514 findings, 0 malformed. `prerender:check` 139 pages, 2,062
+junctions, 0 run together. `decisions:index` regenerated; it notes **0381** as a
+hole, which under 0097 is a note rather than a failure — it is claimed by #856.
 
 **Numbering.** `main` holds up to 0380. #856 claims 0381 as a `Proposed` record,
 so this took **0382**.
@@ -166,7 +172,7 @@ so this took **0382**.
 survived the first sweep, and that is the part worth reading. The four were
 exactly the four thresholds above: the run of one inside the parentheses, the run
 of one against the bracket, the whitespace that separates a code span from a
-weld, and the trailing run's floor. Twenty-seven tests of recorded instances had
+weld, and the trailing run's floor. Twenty-three tests of recorded instances had
 not tested a single one of the module's own decisions. Six more tests, and the
 same ten mutations all fail.
 
