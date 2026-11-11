@@ -10,6 +10,7 @@ import {
   type KindBar,
   type PageDrawer,
 } from "@/app/(portal)/_lib/by-page"
+import type { PageStops } from "@/app/(portal)/_lib/page-stops"
 
 import { ByPageTable, PageDrawerPanel } from "./by-page"
 
@@ -27,6 +28,8 @@ const row = (treeId: string, overrides: Partial<ByPageRow> = {}): ByPageRow => (
 })
 
 const NOW = Date.parse("2026-11-05T15:00:00.000Z")
+
+const UNOPENED: PageStops = { kind: "unopened", version: 2 }
 
 const address = { base: "/portal/prj_a/signals/pages", from: undefined, range: "24h" as const }
 
@@ -184,7 +187,7 @@ describe("the drawer for one page", () => {
   }
 
   it("says what readers did, what they pressed and what they kept on screen", () => {
-    render(<PageDrawerPanel drawer={drawer} address={address} projectId="prj_a" />)
+    render(<PageDrawerPanel stops={UNOPENED} drawer={drawer} address={address} projectId="prj_a" />)
 
     const panel = screen.getByRole("complementary", { name: "One page" })
 
@@ -206,6 +209,7 @@ describe("the drawer for one page", () => {
   it("draws what readers did over the range, with since the page was first counted one click away", () => {
     render(
       <PageDrawerPanel
+        stops={UNOPENED}
         drawer={{
           ...drawer,
           range: { kind: "read", bars: [bar("Pressed something", 4)], countedFrom: undefined },
@@ -228,6 +232,7 @@ describe("the drawer for one page", () => {
   it("says where counting by the hour began when it began inside the range", () => {
     render(
       <PageDrawerPanel
+        stops={UNOPENED}
         drawer={{
           ...drawer,
           range: {
@@ -248,7 +253,7 @@ describe("the drawer for one page", () => {
 
   it("falls back to since the page was first counted, and says why, where the hours give nothing", () => {
     const { unmount } = render(
-      <PageDrawerPanel drawer={drawer} address={address} projectId="prj_a" />
+      <PageDrawerPanel stops={UNOPENED} drawer={drawer} address={address} projectId="prj_a" />
     )
 
     expect(section().heading.textContent).toBe(
@@ -263,6 +268,7 @@ describe("the drawer for one page", () => {
     unmount()
     render(
       <PageDrawerPanel
+        stops={UNOPENED}
         drawer={{ ...drawer, range: { kind: "uncounted" } }}
         address={address}
         projectId="prj_a"
@@ -295,6 +301,7 @@ describe("the drawer for one page", () => {
   it("names each goal covering the page with its rate here over the range and since counting began, the primary marked", () => {
     render(
       <PageDrawerPanel
+        stops={UNOPENED}
         drawer={{
           ...drawer,
           goals: [
@@ -340,6 +347,7 @@ describe("the drawer for one page", () => {
   it("says a goal had no page views on this page, not on the pages it covers", () => {
     render(
       <PageDrawerPanel
+        stops={UNOPENED}
         drawer={{
           ...drawer,
           goals: [
@@ -364,7 +372,7 @@ describe("the drawer for one page", () => {
 
   it("says plainly when no goal covers the page, and when goals could not be read", () => {
     const { unmount } = render(
-      <PageDrawerPanel drawer={drawer} address={address} projectId="prj_a" />
+      <PageDrawerPanel stops={UNOPENED} drawer={drawer} address={address} projectId="prj_a" />
     )
 
     expect(screen.getByText(/No goal covers this page/)).toBeTruthy()
@@ -375,6 +383,7 @@ describe("the drawer for one page", () => {
     unmount()
     render(
       <PageDrawerPanel
+        stops={UNOPENED}
         drawer={{ ...drawer, goals: undefined }}
         address={address}
         projectId="prj_a"
@@ -386,7 +395,12 @@ describe("the drawer for one page", () => {
 
   it("links to what waits on the page's own tab, to the page, its history and its events, and closes back to the list", () => {
     render(
-      <PageDrawerPanel drawer={drawer} address={{ ...address, range: "30d" }} projectId="prj_a" />
+      <PageDrawerPanel
+        stops={UNOPENED}
+        drawer={drawer}
+        address={{ ...address, range: "30d" }}
+        projectId="prj_a"
+      />
     )
 
     expect(
@@ -411,6 +425,7 @@ describe("the drawer for one page", () => {
   it("offers no screen of the page's own where the site has not published it, and still its events", () => {
     render(
       <PageDrawerPanel
+        stops={UNOPENED}
         drawer={{ ...drawer, row: row("t_draft", { published: false }) }}
         address={address}
         projectId="prj_a"
@@ -426,4 +441,103 @@ describe("the drawer for one page", () => {
       "/portal/prj_a/signals?on=t_draft"
     )
   })
+})
+
+describe("Where readers stopped", () => {
+  const address = { base: "/portal/prj_a/signals/pages", from: undefined, range: "24h" as const }
+  const drawer: PageDrawer = {
+    row: row("t_home", { name: "Welcome" }),
+    range: { kind: "unreadable" },
+    bars: [],
+    pressed: [],
+    longest: undefined,
+    goals: [],
+  }
+  const READ: PageStops = {
+    kind: "read",
+    version: 3,
+    views: 120,
+    parts: 40,
+    unseen: 20,
+    places: 2,
+    costliest: [
+      { nodeId: "n_pricing", name: "the band “Pricing”", unseen: 19 },
+      { nodeId: "n_note", name: undefined, unseen: 1 },
+    ],
+    words: ["Pricing", "Pay as you go"],
+    notReporting: [],
+  }
+  const section = (stops: PageStops) => {
+    render(<PageDrawerPanel stops={stops} drawer={drawer} address={address} projectId="prj_a" />)
+
+    const heading = screen.getByRole("heading", { name: "Where readers stopped" })
+    const found = heading.closest("section")
+
+    if (found === null) throw new Error("the heading sits in a section")
+
+    return found
+  }
+
+  it("says how many places reading stopped and what they cost, the costliest first", () => {
+    const part = section(READ)
+
+    expect(part.textContent).toContain(
+      "On version 3, over 120 page views since it was first counted, reading stopped in 2 places, and 20 of its 40 parts went unreached."
+    )
+    expect(
+      within(part)
+        .getAllByRole("listitem")
+        .slice(0, 2)
+        .map((item) => item.textContent)
+    ).toEqual(["the band “Pricing” n_pricing 19 parts unreached", "n_note 1 part unreached"])
+  })
+
+  it("keeps the words nobody reached one click away, counted", () => {
+    const part = section(READ)
+
+    expect(within(part).getByText("The words nobody reached (5 words)")).toBeTruthy()
+    expect(within(part).getByText("Pay as you go")).toBeTruthy()
+  })
+
+  it("names parts on a reader's screen that did not say so apart from the places readers stopped", () => {
+    const part = section({ ...READ, notReporting: [{ nodeId: "n_band", name: undefined }] })
+
+    expect(part.textContent).toContain(
+      "1 part was on a reader's screen without saying so, so it is not counted as a place readers stopped: n_band."
+    )
+  })
+
+  it("says plainly when no part went unreached", () => {
+    const part = section({ ...READ, places: 0, unseen: 0, costliest: [], words: [] })
+
+    expect(part.textContent).toContain(
+      "No part of version 3 went unreached, over 120 page views since it was first counted."
+    )
+    expect(within(part).queryByRole("list")).toBeNull()
+  })
+
+  it.each([
+    [
+      { kind: "unpublished" },
+      "The site has not published this page, so there is no version to read where readers stopped against.",
+    ],
+    [{ kind: "unreadable" }, "Where readers stopped could not be read just now."],
+    [
+      { kind: "two-forms" },
+      "This page is served in more than one form, and the readers of each stop in different places, so no one answer is drawn.",
+    ],
+    [
+      { kind: "mismatched", orphaned: 2 },
+      "Readers were counted on 2 parts this version does not have, so the counts and the page do not belong together and nothing is drawn rather than something wrong.",
+    ],
+    [{ kind: "unopened", version: 2 }, "No page view of version 2 has been counted yet."],
+  ] satisfies readonly (readonly [PageStops, string])[])(
+    "says why nothing is drawn: %o",
+    (stops, sentence) => {
+      const part = section(stops)
+
+      expect(part.textContent).toContain(sentence)
+      expect(within(part).queryByRole("list")).toBeNull()
+    }
+  )
 })
