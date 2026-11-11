@@ -104,7 +104,10 @@ const SettingsPage = async ({ params }: { params: Promise<{ project: string }> }
           )}
         </section>
 
-        <section className="border-edge-subtle bg-surface-base flex flex-col gap-3 rounded-lg border p-4">
+        <section
+          id="model-key"
+          className="border-edge-subtle bg-surface-base flex flex-col gap-3 rounded-lg border scroll-mt-20 p-4"
+        >
           <h2 className="text-sm font-medium tracking-tight">Model key</h2>
           <p className="text-ink-muted m-0 text-xs">
             Loom reads what readers do on your pages and proposes changes with a model. It uses this
@@ -122,7 +125,10 @@ const SettingsPage = async ({ params }: { params: Promise<{ project: string }> }
         </section>
 
         {owner && (
-          <section className="border-edge-subtle bg-surface-base flex flex-col gap-3 rounded-lg border p-4">
+          <section
+            id="closing"
+            className="border-edge-subtle bg-surface-base flex scroll-mt-20 flex-col gap-3 rounded-lg border p-4"
+          >
             <h2 className="text-sm font-medium tracking-tight">
               {closed ? "Reopen this project" : "Close this project"}
             </h2>
