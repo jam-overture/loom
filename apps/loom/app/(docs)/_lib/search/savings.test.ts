@@ -105,6 +105,27 @@ describe("the free one, and what it is worth", () => {
   it("leaves the room exactly as it was", () => {
     expect(priceOf(savingOf("identical-bodies-once"), SECTION).words).toBe(roomIn(SECTION).words)
   })
+
+  /**
+   * **And it really does store a repeated body once**, which the two cases
+   * above cannot show: on this site there is nothing for it to do, so an
+   * implementation that did nothing at all would pass both of them and the
+   * registry's description of it would be a lie nobody could catch. Handed two
+   * addresses with the same words, it keeps the first and empties the second.
+   */
+  it("stores a repeated body once, on words that are repeated", () => {
+    expect(
+      savingOf("identical-bodies-once").storedAs([
+        ["/docs/one", "the same words"],
+        ["/docs/other", "the same words"],
+        ["/docs/third", "its own words"],
+      ])
+    ).toEqual([
+      ["/docs/one", "the same words"],
+      ["/docs/other", ""],
+      ["/docs/third", "its own words"],
+    ])
+  })
 })
 
 describe("storing a repeated sentence once", () => {
