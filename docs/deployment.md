@@ -167,8 +167,8 @@ itself, in the format a machine reads as fact, as this product.
 
 ## Environment
 
-`apps/loom/.env.example` is the full list with the commentary. Eleven variables,
-**one** of which is required:
+`apps/loom/.env.example` is the full list with the commentary. Nineteen
+variables, **one** of which is required:
 
 | Variable                         | Required | Notes                                   |
 | -------------------------------- | -------- | --------------------------------------- |
@@ -176,12 +176,32 @@ itself, in the format a machine reads as fact, as this product.
 | `LOOM_ANTHROPIC_API_KEY`         | no       | The demo's and the docs' model. Falls back to `ANTHROPIC_API_KEY`. Projects use their own key |
 | `CRON_SECRET`                    | for proposals | Lets Vercel's daily schedule start Loom's proposals. See [The site's own pages](#10-the-sites-own-pages--publish-them-to-see-them-by-name) |
 | `DATABASE_URL`                   | no       | Absent means memory — see below         |
+| `LOOM_PUBLISH_KEY`               | no       | Publishes the site's pages at the end of each production build. See [The site's own pages](#10-the-sites-own-pages--publish-them-to-see-them-by-name) |
 | `LOOM_PORTAL_TRUSTED_PROXY_HOPS` | no       | Proxies in front. 1 unless you added one |
 | `LOOM_SITE_ORIGIN`               | in production | The domain, pinned. See [The domain](#the-domain-and-going-public) |
 | `LOOM_SITE_PROJECT`              | no       | The project the site's readers are counted under. Unset is the deployment's own. See [Reader signals](#8-reader-signals--nothing-arrives-until-you-open-the-door) |
 | `LOOM_SUPABASE_URL`              | for passwords | Supabase project URL. See [Email and password](#email-and-password) |
 | `LOOM_SUPABASE_ANON_KEY`         | for passwords | Supabase anon key. Server-side only |
 | `LOOM_PORTAL_EMAILS`             | for passwords | Comma-separated addresses allowed an account. Unset is nobody |
+| `LOOM_SIGNAL_INTAKE`             | for signals | `on` opens `/api/reader-signals`. Unset is a `404`. See [Reader signals](#8-reader-signals--nothing-arrives-until-you-open-the-door) |
+| `LOOM_SIGNAL_WINDOW_MS`          | no       | How old a delivery gets before it is counted. Unset is an hour |
+| `LOOM_SIGNAL_KEPT_MS`            | no       | How long a counted delivery is kept. Unset is thirty days |
+| `LOOM_SIGNAL_SWEEP_MS`           | no       | How often you run the sweep. Unset publishes no ceiling. See [The buffer](#9-reader-signals--the-buffer-only-empties-when-you-run-this) |
+| `LOOM_SIGNAL_REGION`             | no       | `off` stops counting which country readers are in. Unset is **on** |
+| `LOOM_SIGNAL_REGION_HEADER`      | no       | Where a country is read from. Unset is `x-vercel-ip-country` |
+| `LOOM_SIGNAL_REGION_FLOOR`       | no       | Smallest region bucket named. Unset is 25, and it only goes up |
+| `LOOM_TELEMETRY_MAX_AGE_MS`      | no       | How old a telemetry row gets before the prune deletes it. Unset is ninety days. See [Telemetry retention](#7-telemetry-retention--optional-and-nothing-runs-it-for-you) |
+
+**Four more names appear in this application's code and none of them are
+yours.** `POSTGRES_URL` is the second name a platform's Postgres integration
+sets, read only when `DATABASE_URL` is unset; `VERCEL_URL`, `VERCEL_ENV` and
+`NODE_ENV` are written by the platform and the build.
+
+**This table is checked against the application**
+([0367](../decisions/0367-what-an-operator-must-set-is-read-off-the-application-and-the-guide-goes-red-when-it-is-behind.md)).
+A variable the code reads and this file does not name fails `pnpm verify` on the
+branch that adds it, which is why six settings that were documented nowhere are
+in the rows above.
 
 **Never prefix any of them `NEXT_PUBLIC_`.** 0017 exists partly to keep the model
 key off the client, and a public prefix would undo the whole record in one
@@ -360,6 +380,11 @@ Nothing in that mentions the environment. `app/(portal)/_lib/connection.ts` now 
 says so by name, but the fastest check is still to look at the value and confirm it
 begins `postgresql://`.
 
+**`POSTGRES_URL` is read if `DATABASE_URL` is unset**, and that is for one
+reason: a platform's own Postgres integration sets its own name, and a
+deployment that added the integration and never typed a variable should not read
+as having no database. Set either. If you set both, `DATABASE_URL` wins.
+
 ### 4. Create the tables
 
 ```bash
@@ -367,10 +392,10 @@ pnpm --filter @loom/app db:push
 ```
 
 Once, from a machine with `.env.local` in place. Idempotent — every statement is
-`IF NOT EXISTS`, so re-running is a no-op. It creates five tables: `loom_trees`
-and `loom_revisions` for the store, `loom_holds` for the changes the Gate held
-back, `loom_telemetry` for the journal §6 records into, and
-`loom_signin_attempts` for the sign-in throttle. The last of those belongs to the
+`IF NOT EXISTS`, so re-running is a no-op. It creates every table the list below
+names, among them `loom_trees` and `loom_revisions` for the store, `loom_holds`
+for the changes the Gate held back, `loom_telemetry` for the journal §6 records
+into, and `loom_signin_attempts` for the sign-in throttle. The last of those belongs to the
 portal rather than to `@jam-overture/loom` — the runtime takes an actor and never asks
 how a host established one.
 
@@ -380,7 +405,7 @@ a column added after a deployment reaches it only through the `ALTER TABLE …
 ADD COLUMN IF NOT EXISTS` beside it. A deployment that skips the re-run keeps
 serving and fails the write that needed the column.
 
-Three so far, and the last two are the ones to get right:
+Each one that has arrived so far, and the ones to get right are marked:
 
 - `loom_revisions.answered_by` (0029), which every confirmation of a held
   proposal writes.
@@ -405,6 +430,15 @@ Three so far, and the last two are the ones to get right:
   described above a proposal marked *requires confirmation* is gone before the
   confirmation arrives. `db:push` creates the table either way, so adopting the
   Postgres store later is a code change and not a database step.
+- `loom_audience_rules` and `loom_audience_forms` (0263, 0376), which hold a
+  page's audience rules and the delta each audience earns. **Miss these and
+  nothing changes** for a deployment serving one form of every page: a page
+  with no rules composes to its base tree, which is what every deployment that
+  has never heard of an audience is already being served. They are needed by a
+  deployment that wires `composingTreeSourceFromStore`, and the read that
+  reaches them refuses a page rather than quietly serving the base, so a missing
+  table is a page that is honestly unavailable rather than a measurement that is
+  wrong.
 
 ### 5. The tables are locked down for you
 
@@ -495,9 +529,42 @@ curl https://your-deployment/api/reader-signals
 ```
 
 ```json
-{ "intake": "on", "durable": true, "maxBytes": 65536, "deliveries": 120,
-  "windowMs": 60000, "subjects": 3, "detail": "reader signals are being collected" }
+{
+  "intake": "on",
+  "durable": true,
+  "maxBytes": 65536,
+  "deliveries": 120,
+  "windowMs": 60000,
+  "subjects": 3,
+  "detail": "reader signals are being collected",
+  "regions": "where readers are is read from x-vercel-ip-country; a bucket is reported once it holds 25 views",
+  "collection": "a delivery is counted into the totals once it is 3600000ms old; set LOOM_SIGNAL_WINDOW_MS to change it",
+  "kept": "a counted delivery is kept for 2592000000ms from when it arrived, and then deleted; set LOOM_SIGNAL_KEPT_MS to change it",
+  "sweep": "how often the sweep runs is not stated, so readers are told only when a delivery ripens; set LOOM_SIGNAL_SWEEP_MS to how often your cron runs to publish a ceiling"
+}
 ```
+
+**Every field of that answer is listed above, and a check holds it so**
+([0367](../decisions/0367-what-an-operator-must-set-is-read-off-the-application-and-the-guide-goes-red-when-it-is-behind.md)).
+It had been three fields short for a fortnight and four short for a week, which
+matters because an operator reading this is counting fields against what their
+own deployment answered.
+
+**The last four are sentences and not numbers**, because each is a setting
+whose answer is *what this deployment is doing about readers* rather than a
+limit. They are the only way to find out from outside that a value was refused:
+a window that cannot be read stops the sweep and admits every batch regardless,
+and a region floor below 25 is raised rather than honoured. Three of them are
+the windows this deployment's collection runs on and the fourth is the floor its
+region counts are kept to: `collection` is the age a delivery is counted at,
+`kept` the age it is deleted at — **the window your readers are promised** — and
+`sweep` what you have stated about how often the sweep runs, which nothing in
+the application can discover for itself.
+
+**`windowMs` is the rate limit's window and `collection` is the sweep's.** Two
+windows, and the field names say so unevenly for one reason: `windowMs` is this
+answer's oldest field and renaming it would have broken every operator's script
+reading it. The sentence beside it is what disambiguates.
 
 `durable: false` means `DATABASE_URL` is unset, so batches are being kept in the
 instance's memory — fine for `pnpm dev`, and on serverless it means the collector
@@ -555,6 +622,25 @@ owner changes it under *Where signals are taken from* on the same screen. A sett
 nothing usable (not a project id, a closed project, one without exactly one
 site) mounts no broadcaster rather than falling back to the deployment's own
 project.
+
+**Where readers are, which is on by default.** Switching intake on switches on
+a count of page views per country, because a floored count with the address it
+was read from never stored is the least a measurement can say about anybody.
+Three settings, all optional:
+
+```bash
+LOOM_SIGNAL_REGION=off              # stop counting it at all
+LOOM_SIGNAL_REGION_HEADER=cf-ipcountry
+LOOM_SIGNAL_REGION_FLOOR=100        # 25 by default, and it only goes up
+```
+
+The header defaults to `x-vercel-ip-country`, which this platform writes and
+*overwrites*, so a caller cannot choose their own country. **If what sits in
+front of this deployment passes a caller's value through, switch regions off**
+rather than count buckets a stranger can fill — that is why the header is a
+setting and not a constant. The floor is raise-only: a floor is what makes an
+aggregate an aggregate, so you may be more careful than 25 and not less, and a
+smaller number is reported as refused on the status above rather than honoured.
 
 **Who may post, and how often.** The endpoint is public — a published page is
 public, so a session check is not available, and 0146 forbids the endpoint
@@ -614,6 +700,37 @@ and they do not all want the same answer:
 | how long a view key lives | it lives longer | it expires sooner, which is 0146's argument |
 | how far the tallies lag the buffer | more lag | fresher numbers |
 
+**Tell this deployment how often you run it.** Nothing here can discover that —
+a cron, a deploy hook or a person runs the sweep, outside the application — and
+the cost of leaving it unsaid lands on your readers rather than on you:
+
+```bash
+LOOM_SIGNAL_SWEEP_MS=3600000        # the interval of the cron you just set up
+```
+
+Set it to how often that schedule actually runs, in whole milliseconds. The
+privacy notice your pages publish then names a **ceiling on how long a delivery
+lives** — the window above plus one sweep — instead of only the age at which a
+delivery ripens. Unset, nothing is refused and nothing stops: the notice says
+when a delivery ripens and nothing promises when it goes, which is the honest
+thing for a deployment that has not told anybody its schedule. A value that is
+not whole milliseconds above nought is reported as unusable on
+`GET /api/reader-signals` rather than read as unset, because somebody who typed
+`10m` meant ten minutes and should be told their readers were promised nothing.
+
+**How long a counted delivery is kept is a second window.** Counting used to
+delete, and since 0351 it does not: the deliveries behind the counters stay, so
+a project's *Events* tab can show what its numbers are made of.
+
+```bash
+LOOM_SIGNAL_KEPT_MS=2592000000      # thirty days, which is the default
+```
+
+Anything under a minute is refused. It is the number your readers are actually
+promised — the signals of one page view stay correlatable for as long as it
+lasts — and a value that cannot be read **deletes nothing** while the notice
+still publishes the default, so the status says which of the two is happening.
+
 Safe to run on a schedule and safe to interrupt. It is incremental — a buffer
 far behind is caught up over several runs — and it says when there is more:
 
@@ -655,19 +772,30 @@ what its site published to `/api/pages`
 ([0312](../decisions/0312-a-site-hands-loom-a-snapshot-of-its-pages-with-a-secret-key-and-loom-never-runs-its-code.md)).
 Until something is published, *Signals* shows each page by its id.
 
-This deployment's own site publishes the same way a customer's build would.
-On the *Connect your site* screen of the project the site counts under (the
-one `LOOM_SITE_PROJECT` names, from step 8), an owner presses *Make a publish
-key*. The key is shown once, so copy it then. Then, from `apps/loom`:
+This deployment's own site publishes the same way a customer's build would,
+and it does so on every production deploy. On the *Connect your site* screen of
+the project the site counts under (the one `LOOM_SITE_PROJECT` names, from
+step 8), an owner presses *Make a publish key*. The key is shown once, so copy
+it then, and add it to the project's production environment as
+`LOOM_PUBLISH_KEY`.
+
+From then on `pnpm build` ends by sending every page the site's code authors to
+the deployment at `LOOM_SITE_ORIGIN`
+([0369](../decisions/0369-the-sites-build-publishes-its-pages-and-a-refusal-never-stops-a-deploy.md)),
+and the build log carries one line saying what happened: `loom: published 12
+pages`, or why nothing was. A preview build, a build with no key and a build
+with no pinned domain publish nothing and say so. **A refusal never fails the
+build**: the deploy goes on and the line says *warning*, so look for it if the
+*Pages* tab is behind the site.
+
+To publish by hand, from `apps/loom`:
 
 ```bash
 LOOM_PUBLISH_KEY=lp_… pnpm pages:publish https://www.loomjs.org
 ```
 
-It sends every page the site's code authors, and prints the deployment's
-answer, such as `loom: published 3 pages`, or why they were refused. Run it again
-whenever a page is added or its heading changes. A page left out of a later
-run keeps its last version rather than disappearing.
+A page left out of a later run keeps its last version rather than
+disappearing.
 
 The key is a secret, unlike the ingest key: anybody holding it can change what
 the portal believes your pages are. It is read from the environment so it
@@ -681,7 +809,12 @@ once a day it reads what readers did on each page and, when the figures
 support one, raises a change. A change it may not make alone waits on the
 project's *For review* tab for an approver or owner. An approver or owner can also
 press *Look now* on a page. A change is made to Loom's copy of the page, and
-your site keeps serving what it published. When you publish a newer version of
+an accepted one usually reaches readers on this site within a minute: the production
+server pulls the project's live pages from its own domain with the project's
+public key and serves each page as Loom has it, or as built when Loom has no
+version of it
+([0370](../decisions/0370-loomjs-org-serves-its-live-pages-and-pulls-them-like-a-customers-site.md)).
+A preview serves what its code builds. When you publish a newer version of
 a page, a change still waiting on it is checked against the new version and
 marked *stale* or *conflicts*
 ([0340](../decisions/0340-a-pages-copy-starts-again-from-a-newer-published-version-and-a-waiting-change-is-checked-against-it.md)),

@@ -41,10 +41,12 @@
 export const PORTAL_READ_BUDGET_MS = 5_000
 
 /**
- * What a marketing page waits before serving what it was authored as.
+ * What a marketing request waits for a read before going on without it.
  *
- * Shorter on purpose: this fallback is a page, and a reader who gets it has
- * lost nothing they can see.
+ * Shorter on purpose: what the site reads on a request is whether, and under
+ * which key, it counts readers, and a reader whose request goes without the
+ * answer has lost nothing they can see. The page itself is never read from the
+ * store as of 7 November (0363), so no budget decides what a reader is shown.
  */
 export const SITE_READ_BUDGET_MS = 1_500
 

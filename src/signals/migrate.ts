@@ -3,7 +3,7 @@ import { sql } from "drizzle-orm"
 import type { LoomDatabase } from "../store/database.js"
 
 /**
- * Creating the five reader-signal tables, with row level security switched on.
+ * Creating the seven reader-signal tables, with row level security switched on.
  *
  * The same shape as the store's and the journal's migrations, and here for the
  * same reason: a DDL statement that lives in a document is a DDL statement a
@@ -13,11 +13,12 @@ import type { LoomDatabase } from "../store/database.js"
  * Nothing in these tables identifies a reader — that is 0146's whole argument —
  * but the buffer holds view keys, and a view key plus another deployment's rows
  * is the only combination in Loom that could correlate anything across a
- * tenancy boundary. It expires within hours; the policy does not depend on
- * that.
+ * tenancy boundary. It used to expire within hours and now expires within the
+ * window the deployment states, thirty days by default (0349, 0351); the policy
+ * never depended on that and now carries more of the weight.
  *
  * Every table is led by `application_id` (0269). The backfill is the column
- * default rather than an `UPDATE`: these five never carried `project_id`, so
+ * default rather than an `UPDATE`: these seven never carried `project_id`, so
  * there is no earlier spelling to correct the way `APPLICATION_ID_MIGRATION`
  * corrects the store's — rows that predate the column belong to the deployment
  * that wrote them, which is what `app_default` names.
@@ -33,7 +34,7 @@ import type { LoomDatabase } from "../store/database.js"
  */
 
 /**
- * The five tables, as statements a host can run.
+ * The seven tables, as statements a host can run.
  *
  * One statement per entry for the same reason the store's DDL is a list: a
  * driver may refuse several commands in a single prepared statement, and
@@ -50,8 +51,20 @@ export const READER_SIGNALS_DDL: readonly string[] = [
     sent_at bigint NOT NULL,
     view text,
     signals jsonb NOT NULL,
-    received_at timestamptz NOT NULL DEFAULT now()
+    received_at timestamptz NOT NULL DEFAULT now(),
+    folded_at timestamptz
   )`,
+  /**
+   * **When the fold counted the delivery**, for a deployment whose buffer
+   * predates the kept window (0351).
+   *
+   * Additive, nullable and undefaulted, and the absence is a state the readings
+   * publish: *not yet counted*. There is no backfill and none is wanted — a row
+   * still in this table on a deployment that upgrades was, by the old rule, one
+   * no fold had reached, and a backfill that guessed otherwise would make
+   * retention eligible to delete a delivery the counters never saw.
+   */
+  `ALTER TABLE loom_reader_signals ADD COLUMN IF NOT EXISTS folded_at timestamptz`,
   /**
    * **The application, for a database that predates it (0269).** The same
    * shape the store's tables take: the column is additive and defaulted, and
@@ -83,6 +96,36 @@ export const READER_SIGNALS_DDL: readonly string[] = [
   `ALTER TABLE loom_reader_signals ADD COLUMN IF NOT EXISTS audience_id text NOT NULL DEFAULT 'aud_everyone'`,
   `DROP INDEX IF EXISTS loom_reader_signals_tree_seq_idx`,
   `CREATE INDEX IF NOT EXISTS loom_reader_signals_tree_seq_idx ON loom_reader_signals (application_id, tree_id, seq)`,
+  /**
+   * **The oldest end across every tree** (0351), which is where both sweeps
+   * start: the fold scans for the oldest uncounted delivery and retention for
+   * the oldest kept one.
+   *
+   * Created rather than inherited because the table's lifetime changed. An hour
+   * of deliveries is a cheap scan however it is served; thirty days of them,
+   * with a deployment invited to state more, is not.
+   */
+  `CREATE INDEX IF NOT EXISTS loom_reader_signals_seq_idx ON loom_reader_signals (application_id, seq)`,
+  /**
+   * **The uncounted prefix** (0351), which is the fold's own read and the one
+   * index here that is partial.
+   *
+   * It is partial because the set it serves is bounded by the collection window
+   * and the rest of the table is not: on a deployment folding every hour and
+   * keeping thirty days, this covers about a seven-hundredth of the rows, and
+   * it shrinks to nothing every time the sweep runs. An index on `folded_at`
+   * across the whole table would be one entry per kept delivery to answer a
+   * question only ever asked about the newest few.
+   */
+  `CREATE INDEX IF NOT EXISTS loom_reader_signals_uncounted_idx ON loom_reader_signals (application_id, seq) WHERE folded_at IS NULL`,
+  /**
+   * **One page view's deliveries** (0355), which is the *Events* drawer's read.
+   *
+   * Partial for the reason the uncounted index is partial, though the set it
+   * leaves out is the other one: a delivery that names no page view is never
+   * looked up by one, so an entry for it would be paid for and never read.
+   */
+  `CREATE INDEX IF NOT EXISTS loom_reader_signals_view_idx ON loom_reader_signals (application_id, view) WHERE view IS NOT NULL`,
   `ALTER TABLE loom_reader_signals ENABLE ROW LEVEL SECURITY`,
   `CREATE TABLE IF NOT EXISTS loom_reader_tallies (
     application_id text NOT NULL DEFAULT 'app_default',
@@ -189,6 +232,70 @@ export const READER_SIGNALS_DDL: readonly string[] = [
   `ALTER TABLE loom_reader_page_views DROP CONSTRAINT IF EXISTS loom_reader_page_views_pkey`,
   `ALTER TABLE loom_reader_page_views ADD PRIMARY KEY (application_id, audience_id, tree_id, revision)`,
   `ALTER TABLE loom_reader_page_views ENABLE ROW LEVEL SECURITY`,
+  /**
+   * **When the page views began**, which is the sixth table and the first
+   * here with a clock in its key (`arrivals.ts`); the seventh below is the
+   * other.
+   *
+   * No `ALTER` beside it and no backfill, which is the one thing about this
+   * table an operator has to know: nothing but this counter ever knew which
+   * hour an arrival was in, so a deployment that upgrades starts counting hours
+   * from the moment it runs this and has no earlier ones. The reading publishes
+   * that as the hour counting began, so a chart over thirty days on a
+   * deployment that has counted for a week draws a week and says so rather than
+   * drawing three empty weeks.
+   */
+  `CREATE TABLE IF NOT EXISTS loom_reader_arrivals (
+    application_id text NOT NULL DEFAULT 'app_default',
+    audience_id text NOT NULL DEFAULT 'aud_everyone',
+    tree_id text NOT NULL,
+    revision integer NOT NULL,
+    hour timestamptz NOT NULL,
+    views bigint NOT NULL,
+    updated_at timestamptz NOT NULL,
+    PRIMARY KEY (application_id, audience_id, tree_id, revision, hour)
+  )`,
+  /**
+   * **Every tree of one application, by hour**, which is the deployment-wide
+   * chart. The primary key already serves a reading of one page, because that
+   * read names the tree and the revision.
+   */
+  `CREATE INDEX IF NOT EXISTS loom_reader_arrivals_hour_idx ON loom_reader_arrivals (application_id, hour)`,
+  `ALTER TABLE loom_reader_arrivals ENABLE ROW LEVEL SECURITY`,
+  /**
+   * **What readers did to a part, by the hour they did it in**, which is the
+   * seventh table and the second with a clock in its key (`acted.ts`).
+   *
+   * No `ALTER` beside it and no backfill, for the reason the sixth table has
+   * none: nothing but this counter ever knew which hour a press was in, so a
+   * deployment that upgrades starts counting from the moment it runs this. The
+   * reading publishes the hour counting began, so a goal's figure over thirty
+   * days on a deployment that has counted for a week draws a week and says so.
+   */
+  `CREATE TABLE IF NOT EXISTS loom_reader_acted_hours (
+    application_id text NOT NULL DEFAULT 'app_default',
+    audience_id text NOT NULL DEFAULT 'aud_everyone',
+    tree_id text NOT NULL,
+    revision integer NOT NULL,
+    node_id text NOT NULL,
+    hour timestamptz NOT NULL,
+    type text NOT NULL,
+    activations bigint NOT NULL DEFAULT 0,
+    opens bigint NOT NULL DEFAULT 0,
+    closes bigint NOT NULL DEFAULT 0,
+    completions bigint NOT NULL DEFAULT 0,
+    updated_at timestamptz NOT NULL,
+    PRIMARY KEY (application_id, audience_id, tree_id, revision, node_id, hour)
+  )`,
+  /**
+   * **One part of one page over a range**, which is a goal's series: the
+   * primary key cannot serve it, because a goal names the tree and the part and
+   * neither of the two columns between them.
+   */
+  `CREATE INDEX IF NOT EXISTS loom_reader_acted_part_idx ON loom_reader_acted_hours (application_id, tree_id, node_id, hour)`,
+  /** **Every part of one application, by hour**, which is the deployment-wide reading. */
+  `CREATE INDEX IF NOT EXISTS loom_reader_acted_hour_idx ON loom_reader_acted_hours (application_id, hour)`,
+  `ALTER TABLE loom_reader_acted_hours ENABLE ROW LEVEL SECURITY`,
 ]
 
 /** Idempotent, so running it against a populated database is a no-op. */

@@ -40,6 +40,10 @@
       "types": "./dist/render/index.d.ts",
       "default": "./dist/render/index.js"
     },
+    "./addressed": {
+      "types": "./dist/render/addressed.d.ts",
+      "default": "./dist/render/addressed.js"
+    },
     "./primitives": {
       "types": "./dist/primitives/index.d.ts",
       "default": "./dist/primitives/index.js"
@@ -67,6 +71,10 @@
     "./postgres": {
       "types": "./dist/store/postgres.d.ts",
       "default": "./dist/store/postgres.js"
+    },
+    "./live": {
+      "types": "./dist/live/index.d.ts",
+      "default": "./dist/live/index.js"
     },
     "./signals": {
       "types": "./dist/signals/index.d.ts",
@@ -187,6 +195,10 @@
         "types": "./dist/render/index.d.ts",
         "default": "./dist/render/index.js"
       },
+      "./addressed": {
+        "types": "./dist/render/addressed.d.ts",
+        "default": "./dist/render/addressed.js"
+      },
       "./sdk": {
         "types": "./dist/sdk/index.d.ts",
         "default": "./dist/sdk/index.js"
@@ -206,6 +218,10 @@
       "./postgres": {
         "types": "./dist/store/postgres.d.ts",
         "default": "./dist/store/postgres.js"
+      },
+      "./live": {
+        "types": "./dist/live/index.d.ts",
+        "default": "./dist/live/index.js"
       },
       "./signals": {
         "types": "./dist/signals/index.d.ts",

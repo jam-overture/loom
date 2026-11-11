@@ -506,3 +506,85 @@ describe("registering a primitive that names a control from the tree", () => {
     expect(built.value.controlNamePropsFor?.(type("loom.dialog"))).toEqual({})
   })
 })
+
+describe("registering a primitive that says what shape of answer it reads", () => {
+  const listing = (
+    reads: PrimitiveDefinition["reads"],
+    expects: PrimitiveDefinition["expects"]
+  ) =>
+    definePrimitive({
+      type: "loom.listing",
+      description: "A list of entries a source answered with",
+      props: z.object({ binding: z.string().optional() }).strict(),
+      ...(reads ? { reads } : {}),
+      ...(expects ? { expects } : {}),
+      component: () => null,
+    })
+
+  it("accepts an expectation for a name it declares that it reads", () => {
+    const built = createPrimitiveRegistry([listing(["entries"], { entries: z.array(z.unknown()) })])
+
+    expect(built.ok).toBe(true)
+  })
+
+  /**
+   * The drift `frames` and `copy` are each checked for, one seam over: a
+   * binding renamed in `reads` would leave this expectation checking nothing,
+   * for ever and silently.
+   */
+  it("refuses an expectation for a name it does not read", () => {
+    const built = createPrimitiveRegistry([listing(["entries"], { rows: z.array(z.unknown()) })])
+
+    expect(built.ok).toBe(false)
+    if (built.ok) return
+
+    expect(built.error).toEqual({
+      code: "unread-expects-binding",
+      type: "loom.listing",
+      name: "rows",
+    })
+    expect(describeRegistryError(built.error)).toContain("rows")
+  })
+
+  /**
+   * Said what shape an answer would be without ever saying it reads one, so
+   * there is no name the expectation could be about.
+   */
+  it("refuses an expectation from a primitive that declares no reads at all", () => {
+    const built = createPrimitiveRegistry([listing(undefined, { entries: z.array(z.unknown()) })])
+
+    expect(built.ok).toBe(false)
+    if (built.ok) return
+
+    expect(built.error).toMatchObject({ code: "unread-expects-binding", name: "entries" })
+  })
+
+  /** Keyed by the declared name, which for a prop-named entry is its default. */
+  it("accepts an expectation keyed by a prop-named declaration's default", () => {
+    const built = createPrimitiveRegistry([
+      listing([{ fromProp: "binding", default: "entries" }], { entries: z.array(z.unknown()) }),
+    ])
+
+    expect(built.ok).toBe(true)
+  })
+
+  it("refuses one keyed by the prop rather than by the name", () => {
+    const built = createPrimitiveRegistry([
+      listing([{ fromProp: "binding", default: "entries" }], { binding: z.array(z.unknown()) }),
+    ])
+
+    expect(built.ok).toBe(false)
+  })
+
+  it("answers the declared shapes, and nothing for a primitive that declared none", () => {
+    const built = createPrimitiveRegistry([
+      listing(["entries"], { entries: z.array(z.unknown()) }),
+      cardDefinition,
+    ])
+    if (!built.ok) throw new Error("expected a registry")
+
+    expect(built.value.answersExpectedBy(type("loom.listing"))?.["entries"]).toBeTypeOf("function")
+    expect(built.value.answersExpectedBy(type("loom.card"))).toBeUndefined()
+    expect(built.value.answersExpectedBy(type("loom.nothing"))).toBeUndefined()
+  })
+})

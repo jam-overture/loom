@@ -23,8 +23,8 @@ import {
   type CollectionOutcome,
 } from "./collect.js"
 import type {
-  ForgetBefore,
-  ForgetOutcome,
+  CountedBefore,
+  CountedOutcome,
   ReaderSignalJournal,
   ReaderSignalStoreError,
   ReceivedBatch,
@@ -65,10 +65,10 @@ const unwrap = <TValue>(result: Result<TValue, ReaderSignalStoreError>): TValue 
 
 const BROKEN: ReaderSignalStoreError = { code: "unavailable", detail: "the connection went away" }
 
-/** A journal that works until `forget`, which is the one failure with a state of its own. */
-const forgetFails = (journal: ReaderSignalJournal): ReaderSignalJournal => ({
+/** A journal that works until `counted`, which is the one failure with a state of its own. */
+const countedFails = (journal: ReaderSignalJournal): ReaderSignalJournal => ({
   ...journal,
-  forget: (_request: ForgetBefore): Promise<Result<ForgetOutcome, ReaderSignalStoreError>> =>
+  counted: (_request: CountedBefore): Promise<Result<CountedOutcome, ReaderSignalStoreError>> =>
     Promise.resolve(err(BROKEN)),
 })
 
@@ -204,6 +204,107 @@ describe("horizonOf", () => {
 })
 
 describe("collectReaderSignals", () => {
+  /**
+   * The hourly slice reaching the counters (`acted.ts`).
+   *
+   * The end-to-end property is the one no unit of either half can assert: the
+   * hour a press is filed under is the instant **the buffer** stamped on the
+   * delivery, so a window that spans an hour boundary writes two rows and not
+   * one — and both go in with the tallies, in the single window write.
+   */
+  describe("what readers did, by hour", () => {
+    const pressedOverTwoHours = async () => {
+      const time = movingClock(-3 * HOUR)
+      const journal = memoryReaderSignalJournal(time.clock)
+      const store = memoryReaderTallyStore()
+
+      await journal.receive([batchOf([activated("buy")], { view: viewKey(1) })])
+      time.moveTo(-2 * HOUR)
+      await journal.receive([batchOf([activated("buy")], { view: viewKey(2) })])
+      time.moveTo(0)
+
+      return { journal, store, time }
+    }
+
+    it("files a window's presses under the hours the door received them in", async () => {
+      const { journal, store, time } = await pressedOverTwoHours()
+
+      const outcome = await collectReaderSignals(journal, store, { clock: time.clock })
+
+      expect(outcome.outcome).toBe("collected")
+      const { hours } = unwrap(await store.acted())
+      expect(hours).toHaveLength(2)
+      expect(hours.map((row) => row.activations)).toEqual([1, 1])
+      expect(new Set(hours.map((row) => row.hour)).size).toBe(2)
+    })
+
+    it("reports how many hourly rows it wrote, and nought where readers only looked", async () => {
+      const { journal, store, time } = await pressedOverTwoHours()
+      const pressed = await collectReaderSignals(journal, store, { clock: time.clock })
+
+      expect(pressed.outcome === "collected" && pressed.summary.acted).toBe(2)
+
+      const quiet = await ripeBuffer()
+      const looked = await collectReaderSignals(quiet.journal, quiet.store, {
+        clock: quiet.time.clock,
+      })
+
+      expect(looked.outcome === "collected" && looked.summary.tallies).toBeGreaterThan(0)
+      expect(looked.outcome === "collected" && looked.summary.acted).toBe(1)
+    })
+
+    it("writes the hours in the same window write as the tallies they slice", async () => {
+      const { journal, store, time } = await pressedOverTwoHours()
+      const watched = watchingWrites(store)
+
+      await collectReaderSignals(journal, watched.store, { clock: time.clock })
+
+      expect(watched.windows()).toHaveLength(1)
+      expect(watched.windows()[0]?.[0]?.acted).toHaveLength(2)
+    })
+
+    it("keeps two audiences' hours apart, because each is folded on its own (0284)", async () => {
+      const time = movingClock(-2 * HOUR)
+      const journal = memoryReaderSignalJournal(time.clock)
+      const store = memoryReaderTallyStore()
+
+      await journal.receive([
+        batchOf([activated("buy")], { view: viewKey(1), audience: SKIERS }),
+        batchOf([activated("buy")], { view: viewKey(2), audience: RIDERS }),
+      ])
+      time.moveTo(0)
+
+      await collectReaderSignals(journal, store, { clock: time.clock })
+
+      expect(unwrap(await store.acted({ audience: SKIERS })).hours).toHaveLength(1)
+      expect(unwrap(await store.acted({ audience: RIDERS })).hours).toHaveLength(1)
+    })
+
+    /**
+     * The sum the chart is drawn against: a part's hours add up to the part's
+     * own tally, over however many runs folded them.
+     */
+    it("leaves a part's hours summing to the part's own counters across two runs", async () => {
+      const time = movingClock(-3 * HOUR)
+      const journal = memoryReaderSignalJournal(time.clock)
+      const store = memoryReaderTallyStore()
+
+      await journal.receive([batchOf([activated("buy")], { view: viewKey(1) })])
+      time.moveTo(-2 * HOUR)
+      await collectReaderSignals(journal, store, { clock: time.clock })
+
+      await journal.receive([batchOf([activated("buy")], { view: viewKey(2) })])
+      time.moveTo(0)
+      await collectReaderSignals(journal, store, { clock: time.clock })
+
+      const { hours } = unwrap(await store.acted({ nodeId: nodeId("buy") }))
+      const [tally] = unwrap(await store.tallies())
+
+      expect(hours.reduce((sum, row) => sum + row.activations, 0)).toBe(2)
+      expect(tally?.activations).toBe(2)
+    })
+  })
+
   const ripeBuffer = async () => {
     const time = movingClock(-2 * HOUR)
     const journal = memoryReaderSignalJournal(time.clock)
@@ -344,7 +445,7 @@ describe("collectReaderSignals", () => {
 
     const second = await collectReaderSignals(journal, store, { clock: time.clock })
 
-    expect(second).toMatchObject({ outcome: "collected", removed: 2 })
+    expect(second).toMatchObject({ outcome: "collected", recorded: 2 })
 
     const rows = unwrap(await store.tallies({ treeId: TREE }))
 
@@ -374,7 +475,7 @@ describe("collectReaderSignals", () => {
 
     expect(outcome).toMatchObject({
       outcome: "collected",
-      removed: 2,
+      recorded: 2,
       summary: { counted: 2, tallies: 2, views: 2, uncorrelated: 0 },
     })
   })
@@ -401,7 +502,7 @@ describe("collectReaderSignals", () => {
 
     expect(outcome).toMatchObject({
       outcome: "collected",
-      removed: 4,
+      recorded: 4,
       summary: { counted: 4, views: 2, redelivered: 2 },
     })
     expect(unwrap(await store.tallies({ treeId: TREE }))).toContainEqual(
@@ -409,21 +510,23 @@ describe("collectReaderSignals", () => {
     )
   })
 
-  it("counts a ripe window into the counters and empties the buffer", async () => {
+  it("counts a ripe window into the counters and marks it counted", async () => {
     const { journal, store, time } = await ripeBuffer()
 
     const outcome = await collectReaderSignals(journal, store, { clock: time.clock })
 
     expect(outcome).toMatchObject({
       outcome: "collected",
-      removed: 2,
+      recorded: 2,
       more: false,
       summary: { counted: 2, views: 2, uncorrelated: 0 },
     })
     expect(unwrap(await store.tallies({ treeId: TREE }))).toContainEqual(
       expect.objectContaining({ nodeId: nodeId("pricing"), dwellMs: 1_000, views: 2, reached: 2 })
     )
-    expect(unwrap(await journal.read()).batches).toEqual([])
+    /** Nothing uncounted is left, and nothing was deleted (0351). */
+    expect(unwrap(await journal.read({ counted: false })).batches).toEqual([])
+    expect(unwrap(await journal.read({ counted: true })).batches).toHaveLength(2)
   })
 
   /**
@@ -477,10 +580,14 @@ describe("collectReaderSignals", () => {
   })
 
   /**
-   * The property the whole design rests on, and the reason counting and
-   * forgetting are one call. A rollup reports what one window *added*, so a
-   * batch counted twice is counted twice forever — there is no idempotence to
-   * fall back on, and the wrong number looks exactly like a busy afternoon.
+   * The property the whole design rests on, and the reason counting and marking
+   * are one call. A rollup reports what one window *added*, so a batch counted
+   * twice is counted twice forever — there is no idempotence to fall back on,
+   * and the wrong number looks exactly like a busy afternoon.
+   *
+   * **It was a delete until 5 November and is now a mark** (0351), which is
+   * exactly the kind of change that can reopen a double-count with nothing
+   * noticing, so this is the case the unit is tested against.
    */
   it("does not count the same batch twice when it runs again", async () => {
     const { journal, store, time } = await ripeBuffer()
@@ -553,7 +660,7 @@ describe("collectReaderSignals", () => {
       scanLimit: 1,
     })
 
-    expect(outcome).toMatchObject({ outcome: "collected", removed: 1, more: true })
+    expect(outcome).toMatchObject({ outcome: "collected", recorded: 1, more: true })
   })
 
   it("refuses a window under the floor without reading anything", async () => {
@@ -595,16 +702,16 @@ describe("collectReaderSignals", () => {
 
   /**
    * The one state that gets worse when it is ignored: durable in the counters
-   * and still in the buffer, so the next run counts it again. It has its own
-   * outcome, and it names the position an operator prunes below by hand.
+   * and still unmarked, so the next run counts it again. It has its own
+   * outcome, and it names the position an operator marks below by hand.
    */
-  it("says so when the counters took the window and the buffer would not drop it", async () => {
+  it("says so when the counters took the window and the journal would not record it", async () => {
     const { journal, store, time } = await ripeBuffer()
 
-    const outcome = await collectReaderSignals(forgetFails(journal), store, { clock: time.clock })
+    const outcome = await collectReaderSignals(countedFails(journal), store, { clock: time.clock })
 
     expect(outcome).toMatchObject({
-      outcome: "counted-not-forgotten",
+      outcome: "counted-not-recorded",
       before: 3,
       error: BROKEN,
       summary: { counted: 2 },
@@ -612,11 +719,43 @@ describe("collectReaderSignals", () => {
     expect(unwrap(await store.tallies())).not.toEqual([])
   })
 
+  /**
+   * The mark is what stops the next run folding the same window, so the run
+   * that cannot write it leaves every delivery readable to the next scan —
+   * which is the loud half of `counted-not-recorded` and the reason it is not
+   * reported as a success.
+   */
+  it("leaves the window uncounted for the next scan where it could not record the fold", async () => {
+    const { journal, store, time } = await ripeBuffer()
+
+    await collectReaderSignals(countedFails(journal), store, { clock: time.clock })
+
+    expect(unwrap(await journal.read({ counted: false })).batches).toHaveLength(2)
+  })
+
+  /**
+   * A counted delivery stays in the table for the window the deployment keeps
+   * events for (0349), which is the whole of what changed: nothing in
+   * collection deletes, and the row the fold counted is still readable
+   * afterwards — with the fold's own instant on it.
+   */
+  it("keeps every delivery it counted, marked with the fold's instant", async () => {
+    const { journal, store, time } = await ripeBuffer()
+
+    await collectReaderSignals(journal, store, { clock: time.clock })
+
+    const kept = unwrap(await journal.read()).batches
+
+    expect(kept).toHaveLength(2)
+    expect(kept.map((batch) => batch.foldedAt)).toEqual([time.clock.now(), time.clock.now()])
+  })
+
   it("reports a buffer it could not read as a non-event, having changed nothing", async () => {
     const { store, time } = await ripeBuffer()
     const unreadable: ReaderSignalJournal = {
       receive: () => Promise.resolve(ok(undefined)),
       read: () => Promise.resolve(err(BROKEN)),
+      counted: () => Promise.resolve(err(BROKEN)),
       forget: () => Promise.resolve(err(BROKEN)),
     }
 
@@ -635,34 +774,37 @@ describe("describeCollection", () => {
     counted: 2,
     tallies: 1,
     funnels: 0,
+    acted: 0,
     views: 2,
     uncorrelated: 0,
     redelivered: 0,
     oldestMs: 2 * HOUR,
   }
 
-  it("says what a run counted and what it dropped", () => {
-    expect(line({ outcome: "collected", summary, removed: 2, more: false })).toBe(
-      "counted 2 batches into 1 tally over 2 views, and forgot 2"
+  it("says what a run counted and what it marked", () => {
+    expect(line({ outcome: "collected", summary, recorded: 2, more: false })).toBe(
+      "counted 2 batches into 1 tally over 2 views, and marked 2 counted"
     )
   })
 
   it("says when another run has work now", () => {
-    expect(line({ outcome: "collected", summary, removed: 2, more: true })).toContain(
+    expect(line({ outcome: "collected", summary, recorded: 2, more: true })).toContain(
       "more is waiting"
     )
   })
 
   it("names the uncorrelated batches, because the denominator depends on them", () => {
     expect(
-      line({ outcome: "collected", summary: { ...summary, uncorrelated: 1 }, removed: 2, more: false })
+      line({ outcome: "collected", summary: { ...summary, uncorrelated: 1 }, recorded: 2, more: false })
     ).toContain("1 with no view key")
   })
 
   it("names the repeats, because a sender retrying is a thing to go and find", () => {
     expect(
-      line({ outcome: "collected", summary: { ...summary, redelivered: 1 }, removed: 2, more: false })
-    ).toBe("counted 2 batches into 1 tally over 2 views, 1 delivered again and folded once, and forgot 2")
+      line({ outcome: "collected", summary: { ...summary, redelivered: 1 }, recorded: 2, more: false })
+    ).toBe(
+      "counted 2 batches into 1 tally over 2 views, 1 delivered again and folded once, and marked 2 counted"
+    )
   })
 
   it("inflects a single batch", () => {
@@ -670,10 +812,10 @@ describe("describeCollection", () => {
       line({
         outcome: "collected",
         summary: { ...summary, counted: 1, views: 1 },
-        removed: 1,
+        recorded: 1,
         more: false,
       })
-    ).toBe("counted 1 batch into 1 tally over 1 view, and forgot 1")
+    ).toBe("counted 1 batch into 1 tally over 1 view, and marked 1 counted")
   })
 
   it("says a quiet run is quiet", () => {
@@ -684,8 +826,8 @@ describe("describeCollection", () => {
   })
 
   it("tells an operator what a half-finished run left behind, and where", () => {
-    expect(line({ outcome: "counted-not-forgotten", summary, before: 41, error: BROKEN })).toBe(
-      "counted 2 batches and could not forget them, so the next run counts them again unless the buffer is pruned below 41: the connection went away"
+    expect(line({ outcome: "counted-not-recorded", summary, before: 41, error: BROKEN })).toBe(
+      "counted 2 batches and could not record it, so the next run counts them again unless they are marked counted below 41: the connection went away"
     )
   })
 

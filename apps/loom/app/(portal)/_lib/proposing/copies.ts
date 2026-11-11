@@ -4,11 +4,11 @@ import type { Result, TreeId } from "@jam-overture/loom"
  * Which governed tree carries a page's copy, and since when (0340).
  *
  * A page's copy starts as the version its site published (0329 clause 2). When
- * the site publishes a newer version of a page whose copy no accepted change
- * has moved, the copy starts again from the newer one, under a tree id of its
- * own: the store has no way to reset a tree, and the site's own version is a
- * fact Loom records rather than a change the Gate weighs. Each start is a row
- * here.
+ * the site publishes a newer version of the page, the copy starts again from
+ * the newer one, under a tree id of its own, with the changes accepted on the
+ * old copy applied to it again (0358 clause 6): the store has no way to reset
+ * a tree, and the site's own version is a fact Loom records rather than a
+ * change the Gate weighs. Each start is a row here.
  *
  * The first copy of a page is the page's own id and has no row, which is what
  * every copy made before this record is.

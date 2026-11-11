@@ -2,6 +2,7 @@ import { isInteractiveWith, sequentialIdFactory, type LoomNode } from "@jam-over
 import { READER_SIGNAL_KINDS, readerSignalBatchSchema } from "@jam-overture/loom/signals"
 import { describe, expect, it } from "vitest"
 
+import { AS_BUILT_PAGE } from "./allowed"
 import { examplePage } from "./example"
 import { siteRegistry } from "./registry"
 import { REPORT_CAPTION, REPORT_FIELDS, REPORT_LANGUAGE, THE_REPORT } from "./reported"
@@ -200,5 +201,58 @@ describe("the budget this panel is kept to", () => {
   it("is captioned and labelled", () => {
     expect(REPORT_CAPTION.length).toBeGreaterThan(0)
     expect(REPORT_LANGUAGE).toBe("json")
+  })
+})
+
+/**
+ * Every part of the built page, by name.
+ *
+ * `exampleElements` above reads the band's own nodes, which is what the type
+ * assertions want and is useless for the names: the band mints its ids from
+ * the page builder's factory, so they are `n_why…` and say nothing about the
+ * page the report claims to come from. `allowed.ts` builds that page as a tree
+ * of its own, from the same arrangement, and those are the names a report off
+ * it would really carry.
+ */
+const partsByName = (): ReadonlyMap<string, string> => {
+  const found = new Map<string, string>()
+  const walk = (node: LoomNode): void => {
+    if (node.kind === "element") found.set(node.id, node.type)
+    for (const child of node.kind === "text" ? [] : node.children) walk(child)
+  }
+  walk(AS_BUILT_PAGE.root)
+
+  return found
+}
+
+describe("the names in the report are the page's own", () => {
+  /**
+   * **The gap this closes, which is three assertions wide.** The rules below
+   * hold the report to naming types the page renders, to carrying no field
+   * about a person, and to reporting no press. All three passed while two of
+   * the panel's four observations named a part that is not on the page, and
+   * one of the two named the heading's *words* rather than any part at all.
+   *
+   * A name a stranger cannot check is still a name this site has to be right
+   * about, because the band under this one edits the same parts and a reader
+   * who reads both panels is entitled to find the same page in them.
+   */
+  it("names a part that is really on that page, and names it as that part", () => {
+    const parts = partsByName()
+    const batch = report() as {
+      readonly signals: readonly { readonly nodeId: string; readonly type: string }[]
+    }
+
+    expect(
+      batch.signals.map(({ nodeId, type }) => ({ nodeId, type, is: parts.get(nodeId) ?? "nothing" }))
+    ).toEqual(batch.signals.map(({ nodeId, type }) => ({ nodeId, type, is: type })))
+  })
+
+  /** And the page it says it came from is that page. */
+  it("is a report from the page the band above renders", () => {
+    const batch = report() as { readonly treeId: string; readonly revision: number }
+
+    expect(batch.treeId).toBe(AS_BUILT_PAGE.treeId)
+    expect(batch.revision).toBe(AS_BUILT_PAGE.revision)
   })
 })

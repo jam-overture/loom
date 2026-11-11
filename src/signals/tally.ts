@@ -1,7 +1,9 @@
 import type { AudienceId } from "../audience/audience.js"
-import type { TreeId } from "../ids.js"
+import type { NodeId, TreeId } from "../ids.js"
 import type { Result } from "../result.js"
 
+import type { ActedHourCount, StoredActed } from "./acted.js"
+import type { StoredArrivals } from "./arrivals.js"
 import type { ReaderSignalStoreError } from "./journal.js"
 import type { RevisionViews, StoredPageViews } from "./page-views.js"
 import type { FunnelAnswer, ReaderTally } from "./rollup.js"
@@ -102,6 +104,14 @@ export interface ReaderOpeningCounter {
    * Additive like everything else in this file, and for the sharpest reason of
    * any of them: every call is one delivery's worth of arrivals, so a store
    * that replaced would report the last reader rather than the readership.
+   *
+   * **It writes two rows for every opening: the revision's total and the hour
+   * it arrived in** (`arrivals.ts`), in one atomic write. One call rather than
+   * two because the two numbers are the same arrivals counted under two keys,
+   * and a door that could move one without the other would be a deployment
+   * whose hourly chart does not sum to its own page-view count — for ever,
+   * invisibly, with no way to tell which of the two is the wrong one. `at` is
+   * the hour, so the second row needs nothing this call did not already have.
    */
   readonly opened: (
     openings: readonly RevisionViews[],
@@ -147,6 +157,21 @@ export type AppliedCounters = {
    * make a reading claim the node counters were exact.
    */
   readonly appearances?: readonly RevisionViews[]
+  /**
+   * The same window's occurrences of the three delegated kinds, filed under the
+   * hour the door received them in (`acted.ts`).
+   *
+   * Optional on the same terms as `appearances`, and absent is not none: a
+   * caller composing counters by hand has no receive instants to file them
+   * under, and rows of noughts would claim that readers did nothing in an hour
+   * nothing was measured in.
+   *
+   * **Written in the same transaction as the tallies it slices**, because the
+   * two numbers a reading divides have to describe the same window — and
+   * because the hours of a part are expected to sum to the part's own counters
+   * for every window folded since the table existed.
+   */
+  readonly acted?: readonly ActedHourCount[]
 }
 
 /** One audience's share of a window, which is what {@link ReaderTallyStore.applyWindow} takes a list of. */
@@ -219,4 +244,57 @@ export interface ReaderTallyStore extends ReaderOpeningCounter {
   readonly pageViews: (
     request?: TallyReadRequest
   ) => Promise<Result<readonly StoredPageViews[], ReaderSignalStoreError>>
+  /**
+   * The same page views, by the hour they began in, over a range (`arrivals.ts`).
+   *
+   * The one read here that takes a stretch of time, because it is the one
+   * counter that has one. It answers two things in a call — the hours in the
+   * range, and the first hour this scope ever counted — so that a surface
+   * drawing a chart over a range the deployment is younger than can say so
+   * instead of drawing it empty.
+   */
+  readonly arrivals: (
+    request?: ArrivalReadRequest
+  ) => Promise<Result<StoredArrivals, ReaderSignalStoreError>>
+  /**
+   * What readers did, per part, by the hour they did it in, over a range
+   * (`acted.ts`).
+   *
+   * The second read here that takes a stretch of time, and the second that
+   * answers two things in a call — the rows in the range, and the first hour
+   * this scope ever counted — so a goal's figure over thirty days on a
+   * deployment that has counted for a week says so instead of drawing a fall.
+   */
+  readonly acted: (
+    request?: ActedReadRequest
+  ) => Promise<Result<StoredActed, ReaderSignalStoreError>>
+}
+
+/**
+ * A counter read, narrowed to a stretch of time.
+ *
+ * The three optional narrowings every counter read takes, and the range. Both
+ * ends are optional and absent is *unbounded on that side*: a surface asking
+ * when counting began passes neither, and a chart passes both. Hours are
+ * matched by the instant they began, which is the rule `ArrivalRange` states —
+ * a bucket belongs to the range its start falls in.
+ */
+export type ArrivalReadRequest = TallyReadRequest & {
+  /** Inclusive. Absent reads from the first hour the scope has. */
+  readonly from?: number
+  /** Exclusive. Absent reads to the last hour the scope has. */
+  readonly to?: number
+}
+
+/**
+ * The same read, narrowed to one part as well.
+ *
+ * A goal is a kind on a part (0350), so the reading that serves one names the
+ * part and the store answers it from an index rather than by reading the rest
+ * of the page. Absent reads every part the narrowing holds, which is *what
+ * readers did on this page* — the bars the wireframe puts in the `By page`
+ * drawer.
+ */
+export type ActedReadRequest = ArrivalReadRequest & {
+  readonly nodeId?: NodeId
 }

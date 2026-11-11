@@ -10,7 +10,7 @@
 
 import { renderLoomTree } from "@jam-overture/loom/react"
 import { broadcastReaderSignals } from "@jam-overture/loom/signals/broadcast"
-import { useEffect, useRef } from "react"
+import { useEffect } from "react"
 import { collectReaderSignals, parseReaderSignalBatch } from "@jam-overture/loom/signals"
 
 import { journal, registry, tallies, themes, tree } from "../context/the-runtime--what-your-readers-do"
@@ -23,18 +23,12 @@ const rendered = renderLoomTree(tree, {
   addressed: true,
 })
 
-// page.mdx:149 — a program
+// page.mdx:152 — a program
 "use client"
 
-export const Measured = ({ children }: { readonly children: React.ReactNode }) => {
-  const frame = useRef<HTMLDivElement>(null)
-
+export const Measured = () => {
   useEffect(() => {
-    const root = frame.current?.querySelector("[data-loom-tree]")
-
-    if (!(root instanceof Element)) return
-
-    const started = broadcastReaderSignals(root, {
+    const started = broadcastReaderSignals(document, {
       kinds: ["dwelled", "activated"],
       types: { dwelled: ["loom.section"], activated: ["loom.link", "loom.action"] },
       send: (batch) => {
@@ -50,11 +44,11 @@ export const Measured = ({ children }: { readonly children: React.ReactNode }) =
     return started.value.stop
   }, [])
 
-  return <div ref={frame}>{children}</div>
+  return null
 }
 
-// page.mdx:221 — the inside of an object literal
-const objectAtLine221 = {
+// page.mdx:246 — the inside of an object literal
+const objectAtLine246 = {
 kinds: ["viewed", "dwelled", "activated"],
 types: {
   dwelled: ["loom.section", "loom.hero"],
@@ -62,7 +56,7 @@ types: {
 },
 }
 
-// page.mdx:252 — a program
+// page.mdx:277 — a program
 export const POST = async (request: Request): Promise<Response> => {
   const read = parseReaderSignalBatch(await request.json())
 
@@ -79,9 +73,9 @@ export const POST = async (request: Request): Promise<Response> => {
   return new Response(null, { status: 204 })
 }
 
-// page.mdx:304 — a program
+// page.mdx:329 — a program
 /** Folds every batch old enough to be safe to count, adds it to the counters,
  * and forgets exactly the batches it counted. */
 const collected = await collectReaderSignals(journal, tallies)
 
-export { rendered, objectAtLine221, collected, renderLoomTree, broadcastReaderSignals, useEffect, useRef, parseReaderSignalBatch, collectReaderSignals }
+export { rendered, objectAtLine246, collected, renderLoomTree, broadcastReaderSignals, useEffect, parseReaderSignalBatch, collectReaderSignals }

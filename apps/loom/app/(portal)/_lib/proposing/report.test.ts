@@ -21,7 +21,6 @@ describe("who may set Loom looking at a page", () => {
 describe("passedSentence", () => {
   it.each<[string, Passed, RegExp]>([
     ["a change is waiting", { kind: "waiting" }, /already under For review/u],
-    ["the copy is ahead", { kind: "unshipped", copy: 4 }, /does not serve yet \(version 4\)/u],
     ["this deployment serves its copy", { kind: "apart" }, /serves Loom's copy of this page/u],
     ["no goal is on the page", { kind: "no-goal" }, /No goal is on this page.*under Goals/u],
     [
@@ -47,8 +46,8 @@ describe("siteReport", () => {
     detail: "d",
   } as const
 
-  it("says a customer's site keeps serving what it published", () => {
-    expect(siteReport(applied, SHOP).meaning).toMatch(/keeps serving what it published/u)
+  it("says a customer's site serves the change from its next pull (0358)", () => {
+    expect(siteReport(applied, SHOP).meaning).toMatch(/serves it from its next pull/u)
   })
 
   it("says this deployment's own site serves the copy, so the change is live", () => {

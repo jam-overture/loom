@@ -2,6 +2,7 @@ import type { IntentId } from "@jam-overture/loom"
 import type { HeldProposal } from "@jam-overture/loom/write"
 
 import { mayAccept, roleThatCanAccept, type Role } from "./auth/roles"
+import type { GoalId } from "./goals/goal"
 import type { ProposalGoal } from "./goals/serving"
 import { pageOfCopy, type PageCopy } from "./proposing/copies"
 import { holdStandingOf, type HoldStanding } from "./proposing/following"
@@ -22,6 +23,8 @@ import { plainMoment } from "./when"
  */
 export type QueueRow = {
   readonly proposalId: string
+  /** The goal it serves, `null` where none was recorded. */
+  readonly goalId: GoalId | null
   /** The goal's name as it was when the change was raised, `null` where none was recorded. */
   readonly goal: string | null
   /** The page it is for, whichever copy of the page it waits on. */
@@ -67,10 +70,12 @@ export const queueRowOf = (
   const stake = held.disposition.stakes
   const pageId = pageOfCopy(copies, held.treeId)
   const standing = holdStandingOf(held, copies)
+  const served = goals.get(held.intent.intentId)
 
   return {
     proposalId: held.proposalId,
-    goal: goals.get(held.intent.intentId)?.name ?? null,
+    goalId: served?.goalId ?? null,
+    goal: served?.name ?? null,
     pageId,
     page: names.get(pageId) ?? pageId,
     asked: held.intent.utterance,

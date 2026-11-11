@@ -118,14 +118,15 @@ describe("a waiting change, as the For review tab shows it", () => {
       ],
     ])
 
-    expect(queueRowOf(held, { names: NONE, role: "owner", copies: [], goals }).goal).toBe(
-      "Starts a trial"
-    )
+    expect(queueRowOf(held, { names: NONE, role: "owner", copies: [], goals })).toMatchObject({
+      goalId: `g_${"b".repeat(32)}`,
+      goal: "Starts a trial",
+    })
   })
 
   it("names no goal for a change raised before proposals named one", () => {
-    expect(
-      queueRowOf(held, { names: NONE, role: "owner", copies: [], goals: NONE }).goal
-    ).toBeNull()
+    expect(queueRowOf(held, { names: NONE, role: "owner", copies: [], goals: NONE })).toMatchObject(
+      { goalId: null, goal: null }
+    )
   })
 })

@@ -18,6 +18,7 @@ import { keptOrigin, type RefusalCounter, type RefusalReason } from "./refusals"
 import {
   describeCollectionWindow,
   describeIntakeSwitch,
+  describeKeptWindow,
   describeRegionSettings,
   describeSweepSchedule,
   type IntakeSettings,
@@ -317,6 +318,24 @@ export type IntakeStatus = {
    */
   readonly collection: string
   /**
+   * How long a counted delivery is kept before it is deleted, and whether the
+   * value it was given could be read. One sentence, for an operator.
+   *
+   * **The third window, and the one a deployment's readers are actually
+   * promised** (0349, 0351). `collection` above is the age a delivery is
+   * counted at; this is the age it goes at, and the ceiling the notice
+   * publishes is this window plus one sweep.
+   *
+   * It is reported for `collection`'s reason and one sharper: a value that
+   * cannot be read stops the expiry sweep and refuses nothing, so a deployment
+   * whose readers are being told thirty days while nothing at all is being
+   * deleted looks, from every other vantage point in the application, exactly
+   * like a deployment that is keeping its promise. Two of this deployment's
+   * three reader windows were on this status and this one was not, which is the
+   * one an operator is answerable for.
+   */
+  readonly kept: string
+  /**
    * How often this deployment says it sweeps, and what its readers are told as
    * a result. One sentence, for an operator.
    *
@@ -355,6 +374,7 @@ export const describeIntake = (intake: Intake): IntakeStatus => {
     subjects: intake.gate.subjects(),
     regions: describeRegionSettings(intake.settings.region),
     collection: describeCollectionWindow(intake.settings.window),
+    kept: describeKeptWindow(intake.settings.kept),
     sweep: describeSweepSchedule(intake.settings.sweep),
     detail:
       intake.settings.chosen.state === "on" && !intake.durable

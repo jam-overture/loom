@@ -70,7 +70,7 @@ describe("the pages this site names", () => {
   let pages: readonly ServedPage[] = []
 
   beforeAll(async () => {
-    pages = await servedPages()
+    pages = servedPages()
   })
 
   /**

@@ -275,6 +275,59 @@ describe("what the registry adds", () => {
     expect(wordsReadIn(reading)).toEqual([])
   })
 
+  /**
+   * The same clause, on the field a surface draws the page's shape from.
+   * `parentId` is the tree parent and a slot is a node with children, so an
+   * element handed into one has an id nothing in this list has a row for;
+   * `withinId` is the nearest *addressed* ancestor, which is what `within`
+   * names on the wire (0167) and what `InsidePart.withinId` is (0368 clause 4).
+   */
+  it("names the part an element sits inside, passing a slot through", () => {
+    const slotted = element("page", "loom.stack", {}, [
+      {
+        kind: "slot",
+        id: nodeId("hole"),
+        name: "children" as SlotNode["name"],
+        children: [element("band", "loom.section", {}, [element("row", "loom.section")])],
+      },
+    ])
+
+    const reading = pageReadingOf(treeOf(slotted), [], NOTHING_DECLARED)
+
+    expect(partFor(reading, "band")?.parentId).toBe(nodeId("hole"))
+    expect(partFor(reading, "band")?.withinId).toBe(nodeId("page"))
+    expect(partFor(reading, "row")?.withinId).toBe(nodeId("band"))
+    expect(partFor(reading, "page")?.withinId).toBeNull()
+  })
+
+  it("never names a part that is in no part's list, which the tree parent can", () => {
+    const slotted = element("page", "loom.stack", {}, [
+      {
+        kind: "slot",
+        id: nodeId("hole"),
+        name: "children" as SlotNode["name"],
+        children: [element("band", "loom.section", {}, [element("row", "loom.section")])],
+      },
+    ])
+
+    const reading = pageReadingOf(treeOf(slotted), [], NOTHING_DECLARED)
+    const addressed = new Set(reading.parts.map((part) => part.nodeId))
+
+    for (const part of reading.parts) {
+      if (part.withinId !== null) expect(addressed.has(part.withinId)).toBe(true)
+    }
+    expect(reading.parts.some((part) => part.parentId !== null && !addressed.has(part.parentId))).toBe(
+      true
+    )
+  })
+
+  it("names the tree parent and the containing part alike where no slot is between them", () => {
+    const reading = pageReadingOf(treeOf(PAGE), [], NOTHING_DECLARED)
+
+    expect(partFor(reading, "buy")?.withinId).toBe(nodeId("pricing"))
+    expect(reading.parts.every((part) => part.withinId === part.parentId)).toBe(true)
+  })
+
   it("names what nobody declared rather than reporting a part as wordless", () => {
     const reading = pageReadingOf(treeOf(PAGE), [], NOTHING_DECLARED)
 

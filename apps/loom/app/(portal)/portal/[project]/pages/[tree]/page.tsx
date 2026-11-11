@@ -15,6 +15,7 @@ import { currentCopyOf } from "@/app/(portal)/_lib/proposing/copies"
 import { mayPropose } from "@/app/(portal)/_lib/proposing/report"
 import { pageCopiesFor } from "@/app/(portal)/_lib/proposing/stores"
 import { publishedRowOf } from "@/app/(portal)/_lib/published-view"
+import { readWaitingOn } from "@/app/(portal)/_lib/review-reading"
 import { portalApplications, portalProjects } from "@/app/(portal)/_lib/store"
 import { governedPagesFor } from "@/app/(portal)/_lib/write"
 import { PORTAL_READ_BUDGET_MS } from "@/app/_lib/app/bounded"
@@ -24,15 +25,16 @@ import { modelKeyOf } from "@/app/_lib/models/store"
 import { publishedPagesFor } from "@/app/_lib/pages/store"
 
 import { LookForm } from "./_components/look-form"
+import { PageHeading } from "./_components/page-heading"
+import { PageTabs } from "./_components/page-tabs"
 
 /**
  * One published page, and what Loom proposes for it (0329).
  *
  * It says two versions because there are two: the one the site last
  * published, and the one Loom's copy of the page has reached through the
- * changes proposed for it. They start equal and part when a change is made,
- * and until unit 8 turns an accepted change into a pull request, the site
- * keeps serving the published one.
+ * changes accepted on it. They start equal and part when a change is made,
+ * and the site serves Loom's copy from its next pull (0358).
  *
  * Loom looks at every page once a day by itself. *Look now* is offered only
  * where it can run: to a role that could accept a change, on an open project
@@ -42,7 +44,8 @@ import { LookForm } from "./_components/look-form"
 /**
  * Where Loom's copy stands against what the site published. This
  * deployment's own site serves its copy (0259), so there a change is live;
- * every other site keeps serving what it published (0329 clause 7).
+ * every other site serves the copy from its next pull (0358 clause 3), which
+ * *Accepted* follows change by change.
  */
 const copyStanding = (copied: number | undefined, published: number, servesCopy: boolean) => {
   if (copied === undefined) return "Loom has not proposed anything for this page yet."
@@ -50,7 +53,7 @@ const copyStanding = (copied: number | undefined, published: number, servesCopy:
 
   return servesCopy
     ? `Changes Loom proposed have taken it to version ${copied}, and this deployment's own site serves that version.`
-    : `Changes Loom proposed have taken its copy to version ${copied}. Your site still serves the published one.`
+    : `Changes accepted have taken its copy to version ${copied}, which your site serves from its next pull.`
 }
 
 /**
@@ -90,9 +93,9 @@ const PageScreen = async ({ params }: { params: Promise<{ project: string; tree:
 
   const application = applications.ok ? soleApplicationOf(applications.value, projectId) : undefined
 
-  const [published, copy, key] =
+  const [published, copy, key, waiting] =
     application === undefined
-      ? [undefined, undefined, undefined]
+      ? [undefined, undefined, undefined, undefined]
       : await Promise.all([
           readWithin(
             () => publishedPagesFor(application.applicationId).list(),
@@ -101,6 +104,7 @@ const PageScreen = async ({ params }: { params: Promise<{ project: string; tree:
           ),
           currentCopyFor(application.applicationId, treeId.data),
           modelKeyOf(application.applicationId),
+          readWaitingOn(application.applicationId, treeId.data),
         ])
 
   if (
@@ -175,18 +179,13 @@ const PageScreen = async ({ params }: { params: Promise<{ project: string; tree:
 
   return (
     <Screen>
-      <div className="flex flex-col gap-2">
-        <Link
-          href={`/portal/${projectId}/pages`}
-          className="text-ink-muted self-start text-xs no-underline hover:underline"
-        >
-          ← Pages
-        </Link>
-        <h1 className={row.derived ? "text-2xl tracking-tight" : "text-ink-muted text-2xl italic"}>
-          {row.name}
-        </h1>
-        <p className="text-ink-muted font-mono text-xs">{row.treeId}</p>
-      </div>
+      <PageHeading
+        projectId={projectId}
+        pageId={row.treeId}
+        name={row.derived ? row.name : undefined}
+      />
+
+      <PageTabs projectId={projectId} treeId={row.treeId} current="page" waiting={waiting} />
 
       <section className="border-edge-subtle bg-surface-base flex flex-col gap-1.5 rounded-lg border p-4">
         <p className="text-xs">

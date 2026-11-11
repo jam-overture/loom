@@ -29,9 +29,9 @@ its unit serves.
 | --- | --- | --- | --- |
 | 1 | Readers act: views, dwells, presses, opens, completions arrive with the project key | Signals | built (tallies, buffer, by page) |
 | 2 | A goal says which signals count | Goals | built (goals kept and measured, 0350; proposals aim at them, 0352) |
-| 3 | Loom proposes one change toward a goal | For review | partly (each proposal names its goal, 0352; no goal picker or predicted effect yet) |
+| 3 | Loom proposes one change toward a goal | For review | partly (each proposal names its goal, 0352; the goal picker, the drawer with before and after, *Turned down recently* and the next time Loom looks are built; no predicted effect yet) |
 | 4 | A person accepts or turns it down | For review | partly (the queue exists, as *Waiting*) |
-| 5 | An accepted change becomes a pull request on the site | Unit 8 | new |
+| 5 | An accepted change goes live on the site, with no pull request (0358) | Unit 8 | built (read door, replay, whether the site pulls, *Accepted* and the timeline from *Accept*; the goal chip on it still owed) |
 | 6 | The next version is measured against the last, on its goal | Pages · History | new |
 
 ## The chrome
@@ -153,8 +153,8 @@ looks at the pages under the title.
     be measured for), *At stake* (the stake in words, and which roles can
     accept it).
   - A reason box for turning down (optional, remembered per 0341), then
-    **Accept and open a pull request** (the one black button, absent when the
-    change conflicts) and *Turn down*, with one line saying what accepting
+    **Accept** (the one black button, absent when the change conflicts; it
+    makes the change live on the site's next pull) and *Turn down*, with one line saying what accepting
     does next.
   - Below the list: *Turned down recently: N · see them*.
 
@@ -183,7 +183,12 @@ looks at the pages under the title.
 
 **New data:** a goals table, the proposer reading goals, and a decision record.
 
-## 4 · Unit 8 · An accepted change becomes a pull request
+## 4 · Unit 8 · An accepted change goes live
+
+> **Changed on 6 November 2026** ([0358](../decisions/0358-an-accepted-change-goes-live-from-the-portal-and-the-site-pulls-it-with-no-pull-request.md)).
+> The board drew a pull request. The maintainer chose that the review stays in
+> the portal and *Accept* makes the change live, with no pull request and no
+> third party. The section below is the board as amended.
 
 **Answers:** where is the change I accepted?
 
@@ -191,27 +196,22 @@ Reached from *Accept* and from the change itself afterwards. Breadcrumb
 *For review / Accepted*, the change as a heading with its goal chip, and
 *page · accepted by <who> on <date> · stake*.
 
-- **A timeline** of seven steps, each with its time: *Accepted* (the Gate ran
-  again and applied it to Loom's copy) → *Pull request opened* (number, repo,
-  branch) → *Checks passed* (the repository's own; Loom does not merge, a
-  person does) → *Waiting to be merged* (nothing is live yet) → *Published as a
-  new version* (when a snapshot with the change arrives, the page becomes the
-  next version) → *Measuring* (N days on the new version against the same on
-  the old, on its goal) → *Result* (a plain verdict, also on the page's
-  history). Done steps green, the current one ringed, the rest grey.
-- A pull request closed without merging records the change as turned down,
-  with the closing comment as its reason.
-- **Beside it, the pull request:** number and title, repository, branch
-  (`loom/…`), into `main`, what changed (*1 file, the page's source*), what the
-  description carries (the figure, the goal, the expected effect, a link
-  back), *Open on GitHub*.
-- **And the repository connection** (it lives on *Connect your site*): the
-  GitHub App and where it is installed, what it may write (*branches named
-  loom/… and pull requests, never main*), and where page sources come from.
+- **A timeline**, each step with its time: *Accepted* (the Gate ran again and
+  applied it to Loom's copy) → *Live* (the site's next pull took it; until
+  then, *Waiting for the site to pull*, or *Your site is not pulling yet* with
+  the way to connect it) → *Measuring* (the agreed window on the new version
+  against the same on the old, on its goal) → *Result* (a plain verdict, also
+  on the page's history). Done steps green, the current one ringed, the rest
+  grey.
+- If the site later publishes a newer version and the change no longer fits
+  it, the timeline ends at *No longer fits the site's newer version*, and the
+  change is listed on the page's history; Loom may propose it again.
+- **And the site's connection** (it lives on *Connect your site*): whether the
+  site pulls, when it last did, and the snippet that makes it pull.
 
-**Needs:** the GitHub App connection, and knowing which file each page is built
-from (most likely carried in the snapshot). Loom writes only through a pull
-request (0275).
+**Needs:** a read door that hands a project's live pages to its key, the pull
+in the customer's app (framework code), and the replay of accepted changes
+onto a newer snapshot (0358).
 
 ## 5 · Pages · History
 
@@ -224,11 +224,11 @@ A page's screen gets tabs: *The page · History · For review (N)*, and a
   where the version came from (green after a Loom change, grey after the site's
   own edit), with version labels along the bottom at each boundary.
 - **One card per version, newest first:** the version and its date; what
-  changed; where it came from (*Loom change, accepted by <who> · PR #N*, or *the
+  changed; where it came from (*Loom change, accepted by <who>*, or *the
   site's own edit*); before → after on the goal with the window and the page
   views each side rests on; a verdict; *Compare* and, for Loom changes,
-  *Propose reverting*. An accepted change not yet published sits on top as a
-  dashed card, *Not live yet*, linking to its timeline.
+  *Propose reverting*. An accepted change the site has not pulled yet sits on
+  top as a dashed card, *Not live yet*, linking to its timeline.
 - Loom does not judge changes it did not make: a site edit shows its before and
   after for context and says *Not a Loom change*.
 
@@ -266,7 +266,7 @@ It needs its own decision record before any of it is built.
 | 1 | Signals | Figures, chart, Events and By page tabs, the drawer | A table keeping events 30 days (settled), for Events only |
 | 2 | For review | Rename, goal-led cards, before and after in the drawer | #767; the goal field arrives with 3 |
 | 3 | Goals | Define goals, one primary; proposals name one | A goals table and a record |
-| 4 | Unit 8 | An accepted change opens a PR; the timeline follows it | GitHub App; where each page lives in the repo |
+| 4 | Unit 8 | Accept goes live; the timeline follows it | A read door, the site's pull (framework), the replay (0358) |
 | 5 | Pages · History | Versions on a timeline with before and after | Goals |
 | 6 | Segments | Rough concept only | Its own record, on 0263 |
 

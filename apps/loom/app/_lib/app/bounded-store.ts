@@ -227,15 +227,17 @@ export const boundedTelemetryJournal = (
  * The reader-signal buffer the readers screen reads one row of to say whether
  * anything is waiting to be collected.
  *
- * `receive` is the intake endpoint writing what a reader's browser sent, and
- * `forget` is the collector pruning what it has folded in. Neither is a screen
- * waiting for a page.
+ * `receive` is the intake endpoint writing what a reader's browser sent,
+ * `counted` is the collector recording the window it folded, and `forget` is
+ * the expiry sweep deleting what this deployment no longer keeps (0351). None
+ * of the three is a screen waiting for a page.
  */
 export const boundedReaderSignalJournal = (
   journal: ReaderSignalJournal,
   budgetMs: number = PORTAL_READ_BUDGET_MS
 ): ReaderSignalJournal => ({
   receive: (batches) => journal.receive(batches),
+  counted: (request) => journal.counted(request),
   forget: (request) => journal.forget(request),
   read: (request) => readWithin(() => journal.read(request), unavailable, budgetMs),
 })
@@ -244,7 +246,7 @@ export const boundedReaderSignalJournal = (
  * The rollups the readers and pieces screens draw every rate from.
  *
  * `opened`, `apply` and `applyWindow` are the door and the collector writing a
- * window in; the three listings are what a screen prints.
+ * window in; the four listings are what a screen prints.
  *
  * **The three writes forward every argument they were given**, the audience
  * among them. They used to forward two of three, which nothing could see today
@@ -263,4 +265,17 @@ export const boundedReaderTallyStore = (
   tallies: (request) => readWithin(() => store.tallies(request), unavailable, budgetMs),
   funnels: (request) => readWithin(() => store.funnels(request), unavailable, budgetMs),
   pageViews: (request) => readWithin(() => store.pageViews(request), unavailable, budgetMs),
+  /**
+   * The fourth listing, over a range of hours (`arrivals.ts`). Bounded like the
+   * other three and for a sharper reason: it is the one read here whose cost
+   * grows with what a screen asks for, because a range is a parameter.
+   */
+  arrivals: (request) => readWithin(() => store.arrivals(request), unavailable, budgetMs),
+  /**
+   * The fifth listing, over the same range of hours for what readers *did*
+   * (`acted.ts`). Bounded for the reason the fourth is, and narrower whenever a
+   * screen names the part: a goal's series is one part and a page's bars are
+   * one tree.
+   */
+  acted: (request) => readWithin(() => store.acted(request), unavailable, budgetMs),
 })

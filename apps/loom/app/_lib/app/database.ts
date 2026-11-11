@@ -21,6 +21,24 @@ import { resolveConnectionString } from "./connection"
  * Constructing this is cheap — postgres.js does not connect until the first
  * query — so nothing here reaches the network at import time.
  */
+
+/**
+ * How many connections one instance may hold, and it is not one.
+ *
+ * It was `max: 1` from 11 October to 8 November, and that was why the portal
+ * was slow to navigate: a screen's reads are written to run together
+ * (`Promise.all`), but on one connection every one of them waited for the last.
+ * Measured against a database 50ms away, *Goals* made 19 reads and took 1.9s;
+ * on five connections the same screen took 0.47s, and *Signals* went from
+ * 1.0s to 0.45s.
+ *
+ * Five rather than more because the reads a screen runs at once number about
+ * that, and postgres.js opens a connection only when a query is waiting for
+ * one, so an idle instance holds one. Through Supabase's transaction pooler a
+ * client connection is not a database connection, so this is well inside its
+ * limits however many instances are running.
+ */
+const CONNECTIONS_PER_INSTANCE = 5
 const connectionString = resolveConnectionString()
 
 const CARRIER_KEY = Symbol.for("loom.portal.database")
@@ -40,7 +58,7 @@ const build = (): LoomDatabase | undefined => {
 
   if (connectionString === undefined) return undefined
 
-  const client = postgres(connectionString, { prepare: false, max: 1 })
+  const client = postgres(connectionString, { prepare: false, max: CONNECTIONS_PER_INSTANCE })
   const db = drizzle(client)
 
   carrier[CARRIER_KEY] = db

@@ -455,7 +455,8 @@ describe("which door a reader should have gone through instead", () => {
         slug: "signals-broadcast",
         avoids: ["zod"],
         shared: 15,
-        files: 10,
+        /** 11 since 0366: the broadcaster reads `addressedRootIn` to find a page in a document. */
+        files: 11,
       },
     ])
   })
@@ -494,23 +495,50 @@ describe("which door a reader should have gone through instead", () => {
 })
 
 describe("how much of the package is behind one door", () => {
-  it("says the root door is the widest and still has less than half of it", () => {
+  /**
+   * **The property, not which door happens to hold it.** This asserted that
+   * `@jam-overture/loom` was the widest door until 5 November, when
+   * `@jam-overture/loom/signals` passed it — 610 names against 600 — and the
+   * assertion went red on a branch in another lane that had added a module to
+   * `src/signals/`.
+   *
+   * That is *this lane's number about somebody else's growth*, which is the
+   * shape the 2 November finding against `fields.test.ts` wrote down and asked
+   * every check in this directory to stop taking: a figure read from
+   * `reference.generated.json` is another lane's, whatever it is counting, so
+   * the question to ask of it is *would I defend this if `src/` doubled*.
+   * Which door is biggest would not survive that and the band never depended on
+   * it — `api-reference.tsx` reads `standing.widest` per door and prints *not
+   * even this one* on whichever door has it.
+   *
+   * **What the band does depend on is the half kept here**: the widest door,
+   * whichever it is, still has less than half the package, and so does the root
+   * door that a reader arriving from search assumes has all of it. The figures
+   * are in the report that changed this, where they carry a date.
+   */
+  it("says the widest door, and the root door, still have less than half of the package", () => {
+    const widest = apiEntries.filter((entry) => entry.standing.widest)
     const runtime = apiEntryAt("runtime")
     const published = runtime === undefined ? 0 : apiSymbolCount(runtime)
 
-    expect(runtime?.standing.widest).toBe(true)
+    expect(widest.length).toBeGreaterThan(0)
+
+    for (const door of widest) {
+      expect(apiSymbolCount(door) * 2).toBeLessThan(door.standing.packageNames)
+    }
+
     expect(published * 2).toBeLessThan(runtime?.standing.packageNames ?? 0)
   })
 
   /**
-   * The belief this band exists to correct, stated as a number. Fourteen of
-   * the sixteen other doors publish not one name the root door publishes, so a
+   * The belief this band exists to correct, stated as a number. Sixteen of
+   * the eighteen other doors publish not one name the root door publishes, so a
    * reader who reads `@jam-overture/loom` as the door with everything behind it is
    * wrong about almost the whole package.
    */
-  it("finds that fourteen of the other sixteen doors share nothing with the root door", () => {
-    expect(apiEntryAt("runtime")?.standing.doorsSharingNothing).toBe(14)
-    expect(apiEntryAt("runtime")?.standing.otherDoors).toBe(16)
+  it("finds that sixteen of the other eighteen doors share nothing with the root door", () => {
+    expect(apiEntryAt("runtime")?.standing.doorsSharingNothing).toBe(16)
+    expect(apiEntryAt("runtime")?.standing.otherDoors).toBe(18)
   })
 
   it("counts a shared name once, so the package publishes fewer names than its doors do slots", () => {
@@ -722,6 +750,206 @@ describe("a doc comment a stranger has to read", () => {
     expect(cleaned.split("\n")).toHaveLength(3)
   })
 
+  /**
+   * The rule the symbol summaries have always had, now applied to the comments
+   * inside a declaration.
+   *
+   * The member is `"different-trees"` of `ActionChangeSilence`, which is the
+   * real shape: one sentence saying what the key means, and a paragraph under
+   * it arguing about how the key is spelled. The sentence is what a reader
+   * scanning a union of seven keys is reading.
+   */
+  const memberWithTwoParagraphs = [
+    "type Silence =",
+    "/**",
+    " * The two readings are of different trees.",
+    " *",
+    " * Spelled as `ChangeSilence` spells it, because a surface drawing four",
+    " * comparisons of one change should not meet four names for one state.",
+    " */",
+    '"different-trees";',
+  ].join("\n")
+
+  it("shortens a comment inside a declaration to its first paragraph", () => {
+    const cleaned = readerFacingSignature(memberWithTwoParagraphs)
+
+    expect(cleaned).toContain(" * The two readings are of different trees.")
+    expect(cleaned).not.toContain("four names for one state")
+    expect(cleaned).toContain('"different-trees";')
+  })
+
+  /**
+   * **Nothing is re-wrapped.** The kept paragraph is the source's own lines in
+   * the source's own order, which is the whole reason a generated signature can
+   * claim to be what the package declares. An implementation that joined the
+   * paragraph into one line would pass the case above and fail this one.
+   */
+  it("keeps the kept paragraph as the lines the package wrote", () => {
+    const cleaned = readerFacingSignature(memberWithTwoParagraphs)
+
+    expect(cleaned.split("\n").slice(0, 3)).toEqual(memberWithTwoParagraphs.split("\n").slice(0, 3))
+  })
+
+  /** The delimiter lines up with the asterisks above it, at whatever indent they are at. */
+  it("closes the shortened block at the margin the block closed at", () => {
+    const nested = [
+      "type Reading = {",
+      "    /**",
+      "     * What the window counted.",
+      "     *",
+      "     * And a paragraph of why.",
+      "     */",
+      "    readonly counted: number;",
+      "}",
+    ].join("\n")
+
+    expect(readerFacingSignature(nested).split("\n")).toEqual([
+      "type Reading = {",
+      "    /**",
+      "     * What the window counted.",
+      "     */",
+      "    readonly counted: number;",
+      "}",
+    ])
+  })
+
+  it("leaves a comment of one paragraph, however many lines it runs to", () => {
+    const signature = [
+      "type Reading = {",
+      "    /**",
+      "     * What the window counted, over the half-open stretch of receipt times",
+      "     * the handle was asked for.",
+      "     */",
+      "    readonly counted: number;",
+      "}",
+    ].join("\n")
+
+    expect(readerFacingSignature(signature)).toBe(signature)
+  })
+
+  /**
+   * **A one-paragraph comment whose text ends on the closing line.** The
+   * closing line is the last line either way, so an implementation that
+   * dropped it and closed the block itself would be byte-identical on every
+   * comment that closes on a line of its own, and would lose a word here.
+   *
+   * It runs to **three** lines on purpose. Written as two, the slice that
+   * looks at the paragraph is empty, `every` is vacuously true, and the case
+   * passes against an implementation with no `-1` guard at all. Found by a
+   * mutation surviving a first version of this test.
+   */
+  it("leaves a one-paragraph comment that ends on its closing line", () => {
+    const signature = [
+      "type Reading = {",
+      "    /**",
+      "     * What the window counted, over the half-open stretch of receipt",
+      "     * times the handle was asked for. */",
+      "    readonly counted: number;",
+      "}",
+    ].join("\n")
+
+    expect(readerFacingSignature(signature)).toBe(signature)
+  })
+
+  /**
+   * A block whose first paragraph is itself empty. There is no first paragraph
+   * to keep, so the comment is left as the package wrote it rather than
+   * published as an empty pair of delimiters.
+   */
+  it("leaves a comment whose first line after the delimiter is blank", () => {
+    const signature = [
+      "type Reading = {",
+      "    /**",
+      "     *",
+      "     * What the window counted.",
+      "     */",
+      "    readonly counted: number;",
+      "}",
+    ].join("\n")
+
+    expect(readerFacingSignature(signature)).toBe(signature)
+  })
+
+  it("leaves a comment written on one line", () => {
+    const signature = ["type Reading = {", "    /** What the window counted. */", "    readonly counted: number;", "}"].join(
+      "\n"
+    )
+
+    expect(readerFacingSignature(signature)).toBe(signature)
+  })
+
+  /**
+   * **A paragraph that ends on the closing line takes none of its words with
+   * it.** The margin is read as the leading whitespace of that line rather
+   * than as everything before the delimiter, and this is the case that tells
+   * the two apart: get it wrong and `who paid for it` is still on the page
+   * with a closing delimiter after it.
+   */
+  it("keeps no word of a paragraph that ended on the closing line", () => {
+    const signature = [
+      "type Reading = {",
+      "    /**",
+      "     * What the window counted.",
+      "     *",
+      "     * And who paid for it. */",
+      "    readonly counted: number;",
+      "}",
+    ].join("\n")
+
+    const cleaned = readerFacingSignature(signature)
+
+    expect(cleaned).not.toContain("who paid for it")
+    expect(cleaned.split("\n")[3]).toBe("     */")
+  })
+
+  /**
+   * The order between shortening and the two cleaning rules, which is the one
+   * thing about this that is not obvious.
+   *
+   * A comment whose grammar needs a decision-record number is withheld whole.
+   * Before 8 November a comment whose **fourth** paragraph needed one lost all
+   * four, and forty member comments across the reference were in that state.
+   * Shortening runs first, so the first paragraph reaches the page.
+   */
+  it("keeps the first paragraph of a comment whose later paragraph needed the number", () => {
+    const signature = [
+      "type Reading = {",
+      "    /**",
+      "     * What the window counted.",
+      "     *",
+      "     * 0049's three ids are the reason it is spelled this way.",
+      "     */",
+      "    readonly counted: number;",
+      "}",
+    ].join("\n")
+
+    const cleaned = readerFacingSignature(signature)
+
+    expect(cleaned).toContain("What the window counted.")
+    expect(DECISION_NUMBER.test(cleaned)).toBe(false)
+    expect(cleaned).toContain("readonly counted: number;")
+  })
+
+  /** And a comment whose **first** paragraph needs it is withheld exactly as before. */
+  it("still withholds a comment whose first paragraph needs the number", () => {
+    const signature = [
+      "type Reading = {",
+      "    /**",
+      "     * 0049's three ids, of which this is one.",
+      "     *",
+      "     * And a paragraph under it.",
+      "     */",
+      "    readonly counted: number;",
+      "}",
+    ].join("\n")
+
+    const cleaned = readerFacingSignature(signature)
+
+    expect(cleaned).not.toContain("/**")
+    expect(cleaned).not.toContain("0049")
+    expect(cleaned).toContain("readonly counted: number;")
+  })
+
   it("leaves a signature with nothing to lift exactly as it was", () => {
     const signature = "const applyDelta: (tree: LoomTree, delta: TreeDelta) => Result<LoomTree, TreeError>"
 
@@ -757,6 +985,14 @@ describe("a signature longer than a page can hold", () => {
    *
    * Written out rather than taken from the package, so that the case stays put
    * when somebody shortens the comment on `CopyReading`.
+   *
+   * **The second paragraph is dropped before the cap is counted**, since
+   * `toItsFirstParagraph` shortened member comments on 8 November, so a member
+   * costs about 123 characters here rather than about 270 and the count that
+   * runs past the cap went from thirty to ninety. The paragraph is kept in the
+   * fixture because the shape it stands for is a member whose reasoning is
+   * longer than the member, which is still what these declarations look like
+   * in the package.
    */
   const citedMembers = (count: number): string =>
     [
@@ -820,7 +1056,7 @@ describe("a signature longer than a page can hold", () => {
    * expectation fails on the same string.
    */
   it("lifts a citation out of the comment the cut lands in, which cutting first could not", () => {
-    const declaration = citedMembers(30)
+    const declaration = citedMembers(90)
 
     expect(declaration.length).toBeGreaterThan(SIGNATURE_CAP)
 
@@ -877,7 +1113,7 @@ describe("a signature longer than a page can hold", () => {
   })
 
   it("keeps everything above the comment it dropped", () => {
-    const { signature } = publishedSignature(citedMembers(30))
+    const { signature } = publishedSignature(citedMembers(90))
 
     expect(signature).toContain("readonly figure0: number | null;")
     expect(signature.endsWith("\n…")).toBe(true)

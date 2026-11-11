@@ -10,7 +10,17 @@ import {
 } from "@jam-overture/loom"
 import { THEME_PROP_KEY } from "@jam-overture/loom/react"
 
-import { COUNTED_ANCHOR, WHY_USE_IT_ANCHOR } from "../bands"
+import {
+  EDIT_COLUMNS,
+  EDITS,
+  EDITS_CAPTION,
+  THE_CLAIM,
+  THE_WAY_BACK,
+  WHAT_ALLOWED_IT,
+  WHEN_IT_ASKS,
+} from "../allowed"
+import { ALLOWED_ANCHOR, COUNTED_ANCHOR, ON_YOUR_SITE_ANCHOR, WHY_USE_IT_ANCHOR } from "../bands"
+import { CONNECTED_LANGUAGE, REFUSAL_CODES, YOUR_MODEL } from "../connected"
 import { FACTS } from "../copy"
 import { examplePage, rearrangedExample } from "../example"
 import { LIBRARY_PARTS } from "../library"
@@ -25,7 +35,9 @@ import {
   WRITTEN_LANGUAGE,
   YOUR_COMPONENT,
 } from "../written"
+import { WIRED_LANGUAGE, YOUR_ROUTE } from "../wired"
 import { siteFooter, siteHeader, siteReadingBand, type ChromeContext } from "../chrome"
+import { readyMadeBand } from "../ready"
 import {
   action,
   code,
@@ -613,6 +625,89 @@ const whatItReports = (ids: IdFactory): LoomNode =>
   )
 
 /**
+ * The third of the maintainer's four steps, which is the one the site had never
+ * shown.
+ *
+ * ## Where it sits, and why it is here rather than on the front door
+ *
+ * The band above prints one report the page sends. The band below shows the
+ * page rearranged for a reader it was not built for. **Between those two
+ * something has to receive the report and answer it**, and until today this
+ * site said whose job that was in one sentence on the front door and never
+ * once said what it costs.
+ *
+ * That sentence is the third step: *"Loom is AI model agnostic. Pick the model
+ * you already use, or bring your own."* The first half is the maintainer's own
+ * line of 1 October. It is a claim about **what it takes**, and the three other
+ * steps each land on a band where a reader can see the quantity for themselves.
+ * This one landed nowhere, so the front door's step three pointed at nothing
+ * and now points here.
+ *
+ * ## One panel, and the reason it is not two
+ *
+ * `whatYouWrite` prints two files because adding a component really is two
+ * files. Connecting a model is one function with one method in it, and a second
+ * panel would have to be invented to fill the space. `connected.ts` says what
+ * the panel is checked against, which is more than compilation: the test starts
+ * a server, points this function at it, and hands the answer to the
+ * interpreter.
+ *
+ * ## The copy names the two refusals because Loom acts on them differently
+ *
+ * `REFUSAL_CODES` is read rather than typed, so the sentence under the panel
+ * cannot drift from the code in it. The distinction is the one thing in this
+ * panel a reader would be tempted to collapse, and `client.ts` records that
+ * the framework itself collapsed it until day 37 and reported a dead key as
+ * *ask again later*.
+ *
+ * ## `wrap: false`, like the two panels under *What you write*
+ *
+ * This is source and not data, so a wrapped line reads as two statements.
+ * `nodes.ts` wrote the prop for the distinction and `connected.test.ts` bounds
+ * how far the longest line runs, which is what makes saying `false` honest on
+ * a phone.
+ */
+const connected = (ids: IdFactory): LoomNode =>
+  section(
+    ids,
+    {
+      width: "wide",
+      eyebrow: "Hook up your model",
+      anchor: WHY_USE_IT_ANCHOR.connected,
+    },
+    "Connecting your own model is one function",
+    [
+      prose(
+        ids,
+        "Loom has no AI model of its own. You point it at the one you already use, and this is all you write to do it.",
+        { tone: "muted", align: "center", measured: true }
+      ),
+      code(ids, YOUR_MODEL.source, {
+        language: CONNECTED_LANGUAGE,
+        caption: YOUR_MODEL.caption,
+        wrap: false,
+      }),
+      prose(
+        ids,
+        "Each line pairs something Loom hands you with the name your provider expects for it. That translation is the only part that changes when you switch providers.",
+        { tone: "muted", align: "center", measured: true }
+      ),
+      proseParts(
+        ids,
+        [
+          "A key that will never work comes back as ",
+          codeSpan(ids, REFUSAL_CODES[0] ?? ""),
+          " and a service that is briefly down comes back as ",
+          codeSpan(ids, REFUSAL_CODES[1] ?? ""),
+          ". Loom waits for the second one and tells you about the first.",
+        ],
+        { tone: "muted", align: "center", measured: true }
+      ),
+    ],
+    { align: "center" }
+  )
+
+/**
  * The headline of this site, happening to a page the reader has just met.
  *
  * `onAPage` above answers *what do the parts look like together* and leaves
@@ -646,13 +741,211 @@ const forAReader = (ids: IdFactory): LoomNode =>
        * band was a wipe, and the wipe is gone. A sentence describing a control
        * that is not there is the worst line this site could carry, on a page
        * arguing that Loom can say what a thing actually is.
+       *
+       * **It named the two sides until 6 November** — *"The page on the left is
+       * the one above. On the right is…"* — and `loom.split` wraps to one
+       * column when there is no room, so at 390 there was no left and no right.
+       * It now names the order, which is true at every width and is what the
+       * band under it already did. `positions.test.ts` holds the general
+       * version over every page of this site.
        */
       prose(
         ids,
-        "The page on the left is the one above. On the right is what a visitor who came looking for a gift gets.",
+        "The first of these is the page above. The second is what a visitor who came looking for a gift gets.",
         { tone: "muted", align: "center", measured: true }
       ),
       rearrangedExample(ids),
+    ],
+    { align: "center" }
+  )
+
+/**
+ * What stood between the two frames, which is the second sentence of the
+ * chain's fifth link and the one nothing on this site has ever shown.
+ *
+ * `allowed.ts` carries the whole argument for the band and for where it sits.
+ * The short version: the rung says *"Loom checks that against your rules
+ * before anything moves"*, the band above shows the moving, and a reader had
+ * nothing at all for the checking. Every number and every verdict below comes
+ * back from the framework judging this exact change.
+ *
+ * **It is the last band before the closing one on purpose.**
+ * `docs/positioning.md` keeps the governance under the hood and off the pitch,
+ * and keeps it *"worth saying on a page somebody reads after they want the
+ * product."* This is the furthest point on the second page of a three-page
+ * site, one screen under a page the reader has watched rearrange itself. A
+ * stranger who reaches it has asked the question it answers.
+ */
+const whatAllowedIt = (ids: IdFactory): LoomNode =>
+  section(
+    ids,
+    /**
+     * `readable` rather than the `wide` every other band on this page takes,
+     * and it is the table that asks for it.
+     *
+     * At the page's full width the two columns sit 1,078px apart with four
+     * words in each, so a reader tracking *A Feature was added* across to
+     * *Send it as a gift* crosses most of a screen of nothing. A table reads
+     * as a table when its columns are near enough to be one line; past that it
+     * reads as two lists that happen to share a rule. The prose in the band is
+     * `measured` already, so this brings the one element that was not into the
+     * same measure as the rest.
+     */
+    { width: "readable", eyebrow: "What allowed it", anchor: ALLOWED_ANCHOR },
+    "What changed and what let it through",
+    [
+      prose(ids, THE_CLAIM, { tone: "muted", align: "center", measured: true }),
+      /**
+       * A table rather than a list, and the two columns are why.
+       *
+       * Each edit is a verb and a piece of the fictional product's copy, and
+       * the copy is the half a reader recognises: they have just read *Send it
+       * as a gift* on the frame above. In one column those two run together
+       * into three sentences a reader has to parse; in two they read as three
+       * of one kind of thing, which is what they are.
+       *
+       * `prose: false` by omission, because these cells are a few words each
+       * rather than sentences. `loom.table`'s own note has the measurement
+       * behind that prop and the case it is for, which is a cell holding a
+       * paragraph.
+       */
+      buildElement(ids, {
+        type: "loom.table",
+        props: { caption: EDITS_CAPTION, tone: "panel", rules: "rows", density: "comfortable" },
+        children: [
+          buildSlot(ids, "columns", [
+            buildElement(ids, {
+              type: "loom.table-row",
+              props: {},
+              children: EDIT_COLUMNS.map((name) =>
+                buildElement(ids, {
+                  type: "loom.table-cell",
+                  props: { role: "column" },
+                  children: [buildText(ids, name)],
+                })
+              ),
+            }),
+          ]),
+          ...EDITS.map((edit) =>
+            buildElement(ids, {
+              type: "loom.table-row",
+              props: {},
+              children: [
+                buildElement(ids, {
+                  type: "loom.table-cell",
+                  props: { role: "row" },
+                  children: [buildText(ids, edit.did)],
+                }),
+                buildElement(ids, {
+                  type: "loom.table-cell",
+                  props: {},
+                  children: [buildText(ids, edit.words)],
+                }),
+              ],
+            })
+          ),
+        ],
+      }),
+      prose(ids, WHAT_ALLOWED_IT, { tone: "muted", align: "center", measured: true }),
+      prose(ids, THE_WAY_BACK, { tone: "muted", align: "center", measured: true }),
+      /**
+       * The refusal, as two sentences rather than one.
+       *
+       * One sentence carrying both halves came to 32 words, and the site holds
+       * every sentence a reader meets to 30. Splitting it is the better
+       * writing anyway: the first line is the surprise and the second is the
+       * reason, and a reader who stops after the first has still got the point.
+       */
+      ...WHEN_IT_ASKS.map((sentence) =>
+        prose(ids, sentence, { tone: "muted", align: "center", measured: true })
+      ),
+    ],
+    { align: "center" }
+  )
+
+/**
+ * The route a reader puts the page on, and it is the step this page assumed.
+ *
+ * ## Where the hole was
+ *
+ * By the band above, a reader has been shown every part of the claim: the
+ * components that come with the install, the two files that add one of their
+ * own, a page made out of them, what that page reports, the function that
+ * brings their model, that page arranged for somebody else, and the record of
+ * what let the change through.
+ *
+ * **Not one of those said where any of it runs.** A reader who believes all of
+ * it still does not know what goes in `app/page.tsx`, and `renderLoomTree` —
+ * the published seam every band above rests on — appeared nowhere a visitor
+ * could read it. This site showed a stranger how to write a component, how to
+ * register it and how to connect a model, and never how to serve a page.
+ *
+ * ## Why it is last rather than next to the other two panels
+ *
+ * It was drafted directly under *What you write*, which is where the other
+ * source panels are, and it reads worse there: three panels in a row is a
+ * tutorial, and the question this one answers is not one a reader has yet. The
+ * band above ends on a rule stopping a change and asking a person
+ * (`WHEN_IT_ASKS`), so the reader arriving here has exactly one question left
+ * and it is **how does either of those reach my site**. That is what the last
+ * sentence of this band answers, and it only lands in this position.
+ *
+ * ## What the copy may claim, and where the permission comes from
+ *
+ * `wired.ts` carries that in full, with the quotations. The short version:
+ * [0361](../../../../../decisions/0361-the-site-pulls-into-its-own-process-and-a-host-wires-the-live-page-in-two-calls.md)
+ * clause 2 is where *two calls* comes from, and
+ * [0358](../../../../../decisions/0358-an-accepted-change-goes-live-from-the-portal-and-the-site-pulls-it-with-no-pull-request.md)
+ * is where *no pull request, no merge and no deploy* comes from, in those
+ * words. Neither is this lane's claim to make or to soften.
+ *
+ * **It is the pitch half of `docs/positioning.md` and not the under-the-hood
+ * half.** A copy change that is live without shipping anything is a fact about
+ * a developer's working day, which that file puts in front; the rules, the
+ * record and the refusals are what it puts under the hood, and this band says
+ * nothing about any of them that the band above it has not already said.
+ *
+ * ## `wrap: false`, like the three panels before it
+ *
+ * This is source and not data, so a wrapped line reads as two statements.
+ * `wired.test.ts` bounds how far the longest line runs, which is what makes
+ * saying `false` honest on a phone.
+ */
+const onYourOwnSite = (ids: IdFactory): LoomNode =>
+  section(
+    ids,
+    { width: "wide", eyebrow: "On your own site", anchor: ON_YOUR_SITE_ANCHOR },
+    "Two calls put a Loom page on your route",
+    [
+      prose(
+        ids,
+        "This is the whole of a route in a Next.js app. The address and the key come out of your environment.",
+        { tone: "muted", align: "center", measured: true }
+      ),
+      code(ids, YOUR_ROUTE.source, {
+        language: WIRED_LANGUAGE,
+        caption: YOUR_ROUTE.caption,
+        wrap: false,
+      }),
+      prose(ids, "The first call runs once per server rather than once per reader.", {
+        tone: "muted",
+        align: "center",
+        measured: true,
+      }),
+      proseParts(
+        ids,
+        [
+          "That ",
+          codeSpan(ids, "??"),
+          " is the whole fallback. If Loom has not answered yet, or has nothing for this page, your reader gets the page your code built.",
+        ],
+        { tone: "muted", align: "center", measured: true }
+      ),
+      prose(
+        ids,
+        "A change your rules allowed, or one you said yes to, is on your site within a minute. There is no pull request, no merge and no deploy in between.",
+        { tone: "muted", align: "center", measured: true }
+      ),
     ],
     { align: "center" }
   )
@@ -709,10 +1002,14 @@ export const whyUseItPageTree = (context: PageContext): LoomTree => {
         staysYours(ids),
         alreadyWritten(ids),
         theParts(ids),
+        readyMadeBand(ids),
         whatYouWrite(ids),
         onAPage(ids),
         whatItReports(ids),
+        connected(ids),
         forAReader(ids),
+        whatAllowedIt(ids),
+        onYourOwnSite(ids),
         closing(ids),
         ...siteReadingBand(ids, chrome),
         siteFooter(ids, chrome),

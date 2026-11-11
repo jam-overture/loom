@@ -6,7 +6,7 @@ import { pageFixture } from "@/app/_lib/pages/fixtures"
 
 import { elementIdsOf, goalOn } from "../proposing/fixtures"
 import { goalIdSchema } from "./goal"
-import { goalForPage, proposalGoalOf } from "./serving"
+import { goalForPage, goalsOnPage, measuredOnFor, proposalGoalOf, waitingByGoalOf } from "./serving"
 
 const HOME = pageFixture("home", "Welcome home")
 const PRICING = treeIdSchema.parse("t_pricing")
@@ -63,6 +63,40 @@ describe("goalForPage", () => {
   })
 })
 
+describe("goalsOnPage", () => {
+  it("is every goal on the page, the primary first and then the oldest", () => {
+    expect(goalsOnPage([own, older, primary], HOME)).toEqual([primary, older, own])
+  })
+
+  it("leaves out a goal on other pages and one counting a part the page lacks", () => {
+    const elsewhere = { ...older, pages: [PRICING] }
+    const missing = { ...own, nodeId: nodeIdSchema.parse("n_elsewhere") }
+
+    expect(goalsOnPage([primary, elsewhere, missing], HOME)).toEqual([primary])
+  })
+})
+
+describe("measuredOnFor", () => {
+  it("is the goal the address names, where it is on the page", () => {
+    expect(measuredOnFor([primary, older, own], HOME, older.goalId)).toBe(older)
+  })
+
+  it("is the goal a change to the page serves when the address names none", () => {
+    expect(measuredOnFor([primary, older, own], HOME, undefined)).toBe(own)
+  })
+
+  it("is the goal a change to the page serves when the address names one not on the page", () => {
+    const elsewhere = { ...older, pages: [PRICING] }
+
+    expect(measuredOnFor([primary, elsewhere], HOME, elsewhere.goalId)).toBe(primary)
+    expect(measuredOnFor([primary], HOME, "g_unknown")).toBe(primary)
+  })
+
+  it("is nothing for a page no goal is on", () => {
+    expect(measuredOnFor([], HOME, primary.goalId)).toBeUndefined()
+  })
+})
+
 describe("proposalGoalOf", () => {
   it("keeps what the goal was when the proposal was raised", () => {
     const intentId = intentIdSchema.parse("i_1")
@@ -75,5 +109,29 @@ describe("proposalGoalOf", () => {
       nodeId: HEADING,
       at: 42,
     })
+  })
+})
+
+describe("waitingByGoalOf", () => {
+  const intent = (n: number) => intentIdSchema.parse(`i_${n}`)
+  const served = new Map([
+    [intent(1), proposalGoalOf(primary, intent(1), 1)],
+    [intent(2), proposalGoalOf(primary, intent(2), 2)],
+    [intent(3), proposalGoalOf(own, intent(3), 3)],
+    [intent(9), proposalGoalOf(older, intent(9), 9)],
+  ])
+
+  it("counts the waiting changes each goal is served by, and only the waiting ones", () => {
+    expect(waitingByGoalOf([intent(1), intent(2), intent(3)], served)).toEqual(
+      new Map([
+        [primary.goalId, 2],
+        [own.goalId, 1],
+      ])
+    )
+  })
+
+  it("counts a change no goal was recorded for towards none", () => {
+    expect(waitingByGoalOf([intent(4)], served)).toEqual(new Map())
+    expect(waitingByGoalOf([], served)).toEqual(new Map())
   })
 })

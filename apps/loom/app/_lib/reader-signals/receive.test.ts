@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it } from "vitest"
 import {
   createIntakeGate,
   DEFAULT_INTAKE_POLICY,
+  DEFAULT_READER_EVENT_RETENTION_MS,
   DEFAULT_READER_SIGNAL_WINDOW_MS,
   DEFAULT_REGION_FLOOR,
   memoryReaderRegionStore,
@@ -36,6 +37,7 @@ import { memoryRefusalCounter } from "./refusals-memory"
 import {
   DEFAULT_REGION_HEADER,
   readCollectionWindow,
+  readKeptWindow,
   readSweepSchedule,
   readIntakeSwitch,
   readRegionFloor,
@@ -71,6 +73,7 @@ const settingsOf = (over: Partial<IntakeSettings> = {}): IntakeSettings => ({
     floor: { state: "default", floor: DEFAULT_REGION_FLOOR },
   },
   window: { state: "default", windowMs: DEFAULT_READER_SIGNAL_WINDOW_MS },
+  kept: { state: "default", keptMs: DEFAULT_READER_EVENT_RETENTION_MS },
   sweep: { state: "unstated" },
   ...over,
 })
@@ -869,6 +872,57 @@ describe("the status", () => {
     )
 
     expect(refused.sweep).toContain('"10m"')
+  })
+
+  /**
+   * The window a reader is promised, and the one of this deployment's three
+   * that an operator had no way to ask about. A value that cannot be read
+   * stops the expiry sweep and refuses nothing, so *the notice says thirty days
+   * and nothing is being deleted* presented from outside exactly as a
+   * deployment keeping its promise did.
+   */
+  it("says how long a counted delivery is kept, and when it could not read the window", () => {
+    expect(describeIntake(intakeOf()).kept).toContain(
+      `${DEFAULT_READER_EVENT_RETENTION_MS}ms`
+    )
+
+    const set = describeIntake(
+      intakeOf({ settings: settingsOf({ kept: readKeptWindow("604800000") }) })
+    )
+
+    expect(set.kept).toContain("604800000ms")
+    expect(set.kept).not.toContain("LOOM_SIGNAL_KEPT_MS")
+
+    const refused = describeIntake(
+      intakeOf({ settings: settingsOf({ kept: readKeptWindow("30d") }) })
+    )
+
+    expect(refused.kept).toContain('"30d"')
+    expect(refused.kept).toContain("nothing is being deleted")
+  })
+
+  /**
+   * Three windows, three sentences, and the way they went wrong before was one
+   * of them being missing rather than one of them being wrong — so what is
+   * asserted is that each is about its own window.
+   */
+  it("keeps the three windows apart, and does not report one as another", () => {
+    const status = describeIntake(
+      intakeOf({
+        settings: settingsOf({
+          window: readCollectionWindow("120000"),
+          kept: readKeptWindow("604800000"),
+          sweep: readSweepSchedule("600000"),
+        }),
+      })
+    )
+
+    expect(status.collection).toContain("120000ms")
+    expect(status.collection).not.toContain("604800000ms")
+    expect(status.kept).toContain("604800000ms")
+    expect(status.kept).not.toContain("120000ms")
+    expect(status.sweep).toContain("600000ms")
+    expect(status.windowMs).toBe(policy.windowMs)
   })
 
   it("names no secret", () => {

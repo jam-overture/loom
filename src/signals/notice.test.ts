@@ -11,6 +11,10 @@ import {
 } from "./broadcast.js"
 import { DEFAULT_READER_SIGNAL_WINDOW_MS, MIN_READER_SIGNAL_WINDOW_MS } from "./collect.js"
 import {
+  DEFAULT_READER_EVENT_RETENTION_MS,
+  MIN_READER_EVENT_RETENTION_MS,
+} from "./expire.js"
+import {
   collectionNoticeOf,
   describeBuffer,
   describeFieldSubject,
@@ -206,8 +210,9 @@ describe("collectionNoticeOf", () => {
 
   describe("how long a delivery lives", () => {
     /** No schedule stated, which is every deployment that has not set one. */
-    const unswept = (bufferMs: number): DeliveryRetention => ({
+    const unswept = (bufferMs: number, keptMs = DEFAULT_READER_EVENT_RETENTION_MS): DeliveryRetention => ({
       bufferMs,
+      keptMs,
       sweep: { state: "unstated" },
     })
 
@@ -215,7 +220,25 @@ describe("collectionNoticeOf", () => {
       const sentence = describeBuffer(unswept(DEFAULT_READER_SIGNAL_WINDOW_MS))
 
       expect(sentence).toContain("60 minutes")
-      expect(sentence).toContain("this deployment's own sweep")
+      expect(sentence).toContain("this deployment")
+    })
+
+    /**
+     * **The sentence the kept window made true** (0349, 0351). A delivery is
+     * counted at one age and deleted at another, and a notice that said only
+     * the first would tell a reader a delivery was gone an hour after it
+     * arrived when the deployment keeps it for a month.
+     *
+     * The reason for the gap is in the sentence rather than left to be
+     * inferred: a reader who is told a delivery is kept for thirty days and not
+     * told what for has been given the number without the disclosure.
+     */
+    it("says both ages, and what the second one is for", () => {
+      const sentence = describeBuffer(unswept(DEFAULT_READER_SIGNAL_WINDOW_MS))
+
+      expect(sentence).toContain("counted into this deployment's totals once it is 60 minutes old")
+      expect(sentence).toContain("kept for 30 days from when it arrived")
+      expect(sentence).toContain("look at the deliveries its totals were made from")
     })
 
     /**
@@ -233,29 +256,45 @@ describe("collectionNoticeOf", () => {
     })
 
     /**
+     * A day is where minutes stop reading as a length of time, and the kept
+     * window is the one figure here that is in days. Below it every figure
+     * reads exactly as it did before the window existed, which is why the break
+     * is at a day rather than at an hour.
+     */
+    it("says a kept window in days above a day and in minutes below one", () => {
+      expect(describeBuffer(unswept(60_000, 7 * 24 * 60 * 60_000))).toContain("kept for 7 days")
+      expect(describeBuffer(unswept(60_000, 24 * 60 * 60_000))).toContain("kept for a day")
+      expect(describeBuffer(unswept(60_000, MIN_READER_EVENT_RETENTION_MS))).toContain(
+        "kept for a minute"
+      )
+    })
+
+    /**
      * The sentence this module exists for, in the state most deployments are
-     * in: the age is a ripeness window and **nothing here promises when the
-     * delivery actually goes**, because nothing in `src/signals/` deletes it.
-     * A notice that stopped at the age would be read as a deletion it cannot
-     * promise.
+     * in: the ages are this deployment's and **nothing here promises when the
+     * delivery actually goes**, because nothing in `src/signals/` schedules the
+     * sweep. A notice that stopped at an age would be read as a deletion it
+     * cannot promise.
      */
     it("says that nothing promises a deletion where no schedule was stated", () => {
       const sentence = describeBuffer(unswept(DEFAULT_READER_SIGNAL_WINDOW_MS))
 
       expect(sentence).toContain("has not said how often that sweep runs")
-      expect(sentence).toContain("nothing here promises when a ripe delivery actually goes")
+      expect(sentence).toContain("nothing here promises when a kept delivery actually goes")
       expect(sentence).not.toContain("gone within")
     })
 
     it("ends on a ceiling a reader can hold the deployment to where one was stated", () => {
       const sentence = describeBuffer({
         bufferMs: DEFAULT_READER_SIGNAL_WINDOW_MS,
-        sweep: { state: "stated", everyMs: 10 * 60_000, goneWithinMs: 70 * 60_000 },
+        keptMs: 30 * 24 * 60 * 60_000,
+        sweep: { state: "stated", everyMs: 10 * 60_000, goneWithinMs: 30 * 24 * 60 * 60_000 + 10 * 60_000 },
       })
 
       expect(sentence).toContain("60 minutes old")
+      expect(sentence).toContain("kept for 30 days")
       expect(sentence).toContain("at least every 10 minutes")
-      expect(sentence).toContain("gone within 70 minutes of arriving")
+      expect(sentence).toContain("gone within 30 days of arriving")
       expect(sentence).not.toContain("has not said")
     })
   })
@@ -266,28 +305,62 @@ describe("collectionNoticeOf", () => {
     })
 
     /**
-     * The ceiling is the ripeness window **plus one sweep**, because a delivery
-     * is not counted until it ripens and then not until the next run — the
-     * same addition the stall check asks a deployment for in one number (0274).
+     * The ceiling is the **later of the two windows** plus one sweep, because a
+     * delivery is not deleted until it is past both and then not until the next
+     * run — the same addition the stall check asks a deployment for in one
+     * number (0274), over the window that governs deletion (0351).
      *
-     * The two addends are deliberately different lengths here. Fifteen and five
-     * make twenty; the window counted twice would make thirty and the interval
-     * counted twice ten, and all three are plausible-looking minute figures in
-     * a sentence nobody would check (0158).
+     * The three lengths are deliberately different. Fifteen kept and five swept
+     * make twenty; summing the two windows would make twenty-five, reading the
+     * collection window would make ten, and doubling the interval would make
+     * twenty-five again — all plausible-looking minute figures in a sentence
+     * nobody would check (0158).
      */
-    it("adds the deployment's own window once, and the interval once", () => {
+    it("adds the later of the deployment's two windows once, and the interval once", () => {
       expect(
-        collectionNoticeOf({ windowMs: 15 * 60_000, sweep: { everyMs: 5 * 60_000 } }).sweep
+        collectionNoticeOf({
+          windowMs: 5 * 60_000,
+          keptMs: 15 * 60_000,
+          sweep: { everyMs: 5 * 60_000 },
+        }).sweep
       ).toEqual({ state: "stated", everyMs: 5 * 60_000, goneWithinMs: 20 * 60_000 })
     })
 
-    /** The default window is what the ceiling is over where a deployment set none. */
-    it("adds the interval to the default window where the deployment set none", () => {
+    /**
+     * Where the kept window is the shorter of the two, a delivery still has to
+     * be counted before anything may delete it (`expire.ts`), so the ceiling is
+     * the collection window plus a sweep rather than the shorter promise.
+     */
+    it("takes the collection window where it is the later of the two", () => {
+      expect(
+        collectionNoticeOf({
+          windowMs: 15 * 60_000,
+          keptMs: 5 * 60_000,
+          sweep: { everyMs: 5 * 60_000 },
+        }).sweep
+      ).toEqual({ state: "stated", everyMs: 5 * 60_000, goneWithinMs: 20 * 60_000 })
+    })
+
+    /** The default kept window is what the ceiling is over where a deployment set none. */
+    it("adds the interval to the default kept window where the deployment set none", () => {
       expect(collectionNoticeOf({ sweep: { everyMs: 10 * 60_000 } }).sweep).toEqual({
         state: "stated",
         everyMs: 10 * 60_000,
-        goneWithinMs: DEFAULT_READER_SIGNAL_WINDOW_MS + 10 * 60_000,
+        goneWithinMs: DEFAULT_READER_EVENT_RETENTION_MS + 10 * 60_000,
       })
+    })
+
+    /**
+     * Thirty days is the default (0349) and absent is the default rather than
+     * *nothing is kept*: a notice that read an unstated window as a deletion at
+     * the fold would understate what the deployment holds, and this module may
+     * never overstate what is deleted.
+     */
+    it("reports the kept window a deployment stated, and the default where it stated none", () => {
+      expect(collectionNoticeOf().keptMs).toBe(DEFAULT_READER_EVENT_RETENTION_MS)
+      expect(collectionNoticeOf({ keptMs: 7 * 24 * 60 * 60_000 }).keptMs).toBe(
+        7 * 24 * 60 * 60_000
+      )
     })
 
     /**

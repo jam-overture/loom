@@ -116,6 +116,66 @@ export const ANCHOR = {
 export const COUNTED_ANCHOR = "what-we-count"
 
 /**
+ * The band that says what allowed a change, which is the one anchor on this
+ * site that nothing links to.
+ *
+ * **Declared anyway, and the reason is the opposite of the usual one.** Every
+ * other anchor here exists because a control points at it;
+ * `anchors.test.ts` is written about the press that lands nowhere. This band
+ * is the last one before the closing band of `/why-use-it`, six thousand
+ * pixels down a page, and the chain's fifth rung already has its destination
+ * one band above it — so there is no press to serve and there is not going to
+ * be one until somebody decides this band is worth a rung of its own.
+ *
+ * What an anchor buys instead is that the band is **addressable**: a report
+ * can send the maintainer to it, a pull request comment can, and
+ * `pnpm shoot` can photograph it by name rather than by a selector guessed off
+ * the markup. A band this site cannot link to is a band nobody can be asked to
+ * look at, and this is the surface the maintainer judges by eye.
+ *
+ * Its own constant rather than an entry in `WHY_USE_IT_ANCHOR` below, because
+ * that map says what it is for in its first line — *the bands of `/why-use-it`
+ * that the chain points at* — and this is not one. Same reasoning as
+ * `COUNTED_ANCHOR` above, one layer in: a key that means two things is a key a
+ * later run reads wrongly.
+ */
+export const ALLOWED_ANCHOR = "what-allowed-it"
+
+/**
+ * The band that says the sections come assembled, which is the second anchor
+ * on this site nothing links to.
+ *
+ * Declared for the reason `ALLOWED_ANCHOR` above gives in full, and the reason
+ * holds without a change of a word: an anchor buys **addressability**, so a
+ * report can send the maintainer to the band, a pull request comment can, and
+ * `pnpm shoot` can photograph it by name rather than by a selector guessed off
+ * the markup. This is the surface judged by eye and this band is the one a run
+ * will most want photographed on its own.
+ *
+ * It is not in `WHY_USE_IT_ANCHOR` below for the same reason that map excludes
+ * the two above it: its first line says what it is for — the bands of
+ * `/why-use-it` that the chain points at — and the chain has six links, none
+ * of which is this. `ready.ts` has the band.
+ */
+export const READY_MADE_ANCHOR = "ready-made"
+
+/**
+ * The band that shows the route a reader puts a Loom page on, which is the
+ * third anchor on this site nothing links to.
+ *
+ * Declared for the reason `ALLOWED_ANCHOR` and `READY_MADE_ANCHOR` above both
+ * give: an anchor buys **addressability**, and this is the surface the
+ * maintainer judges by eye. A band whose whole content is a panel of code is
+ * the one a report most wants photographed on its own and the one a pull
+ * request comment most wants to send him straight to.
+ *
+ * It is not in `WHY_USE_IT_ANCHOR` below for the same reason those two are not:
+ * that map is the bands of `/why-use-it` **the chain points at**, and the chain
+ * has six links, none of which is this. `wired.ts` has the band's panel.
+ */
+export const ON_YOUR_SITE_ANCHOR = "on-your-own-site"
+
+/**
  * The bands of `/why-use-it` that the chain points at.
  *
  * **The chain is the site's map as of today**, and that is what these exist
@@ -171,4 +231,14 @@ export const WHY_USE_IT_ANCHOR = {
    * outside link is most likely to want.
    */
   forAReader: "for-a-reader",
+  /**
+   * The one function a reader writes to connect a model of their own.
+   *
+   * It is not one of the chain's six, so it is in this map rather than beside
+   * it for a different reason: the front door's four steps now carry an `href`
+   * each, and this is the one of the four that had nowhere to point.
+   * `connected.ts` has why the band exists and `using-it.test.ts` holds every
+   * step to landing on a band that declares its anchor.
+   */
+  connected: "hook-up-your-model",
 } as const

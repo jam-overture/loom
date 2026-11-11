@@ -22,6 +22,7 @@ import {
   type ControlNameProps,
 } from "../render/behaviour.js"
 import type { FrameResolver } from "../render/frame.js"
+import { declaredName, type AnswerExpectation, type AnswerReader } from "../render/expected.js"
 import type { BindingDeclaration, BindingReader } from "../render/reads.js"
 import type { UnshownDeclaration, UnshownReader } from "../render/unshown.js"
 import type { LoomPrimitive, PrimitiveResolver } from "../render/primitive.js"
@@ -98,6 +99,17 @@ export type RegisteredPrimitive = {
    */
   readonly reads: readonly BindingDeclaration<BindingName>[] | undefined
   /**
+   * The shape of answer it can read under each of those names (0357), erased to
+   * a validator. `undefined` where the primitive has declared none, which here
+   * is the same answer as declaring an empty map — unlike `reads` and `copy`,
+   * because there is no claim in the absence to tell apart: a name with no
+   * expectation is handed its answer unchecked either way.
+   *
+   * Keyed by the name as declared, so a prop-named declaration's expectation is
+   * found under its `default` and not under whatever a node renamed it to.
+   */
+  readonly expects: Readonly<Record<string, AnswerExpectation>> | undefined
+  /**
    * Its own reading of the answers it was given (0206). `undefined` where the
    * author has not said, which here is the same answer as declaring one that
    * reports nothing — unlike `copy` and `reads`, because there is no emptiness
@@ -155,6 +167,7 @@ export type RegistryError =
   | { readonly code: "unknown-role"; readonly type: string; readonly role: string }
   | { readonly code: "invalid-binding-name"; readonly type: string; readonly name: string }
   | { readonly code: "undeclared-reads-prop"; readonly type: string; readonly prop: string }
+  | { readonly code: "unread-expects-binding"; readonly type: string; readonly name: string }
   | { readonly code: "duplicate-primitive-type"; readonly type: string }
 
 export type PrimitiveRegistry = PrimitiveResolver &
@@ -163,6 +176,7 @@ export type PrimitiveRegistry = PrimitiveResolver &
   BehaviourResolver &
   FrameResolver &
   BindingReader &
+  AnswerReader &
   SlotPlacer &
   UnshownReader &
   CopyDeclarations & {
@@ -209,6 +223,8 @@ export const describeRegistryError = (error: RegistryError): string => {
       return `"${error.type}" says it reads a binding called "${error.name}", which is not a binding name — ${BINDING_NAME_EXPECTATION}; a tree cannot ask under a name it cannot write, so this primitive would report every binding it was ever given`
     case "unpaired-behaviour":
       return `"${error.type}" takes the "${error.behaviour}" behaviour and not "${error.requires}", which it does nothing without; it would render a control that asks a region nothing opens to close`
+    case "unread-expects-binding":
+      return `"${error.type}" says what shape it expects under "${error.name}", which is not a binding name it declares that it reads; the expectation would then be checked against nothing, and would go on being checked against nothing after the name it was written for was renamed`
     case "undeclared-reads-prop":
       return `"${error.type}" says it reads a binding under whichever name its "${error.prop}" prop gives, which its props schema does not declare; that prop can never arrive, so the primitive would read its default for ever and go on doing so after the prop it names was renamed`
     case "undeclared-named-behaviour":
@@ -460,6 +476,31 @@ const registeredReads = (
 const declaresProp = (entry: PrimitiveEntry, prop: string): boolean =>
   !entry.declaredProps || entry.declaredProps.some((declared) => declared.name === prop)
 
+/**
+ * An expectation written for a name this primitive does not read, if there is
+ * one.
+ *
+ * The drift `frames` and `copy` are checked for, one seam over: a declaration
+ * naming something the thing it describes does not have, left pointing at
+ * nothing by a rename. It is checked against `reads` rather than against the
+ * props schema because a binding name is not a prop name, and against the name
+ * as **declared** — a prop-named declaration's `default` — because that is what
+ * an expectation is keyed by (0184, 0357).
+ *
+ * A primitive that declared expectations and no `reads` at all fails here on its
+ * first expectation, which is right: it has said what shape it expects of an
+ * answer without ever saying it reads one, so there is no name any of it could
+ * be about.
+ */
+const unreadExpectsBinding = (entry: PrimitiveEntry): string | undefined => {
+  const { expects, reads } = entry
+  if (!expects) return undefined
+
+  const names = new Set((reads ?? []).map(declaredName))
+
+  return Object.keys(expects).find((name) => !names.has(name))
+}
+
 const registerEntry = (entry: PrimitiveEntry): Result<RegisteredPrimitive, RegistryError> => {
   const type = primitiveTypeSchema.safeParse(entry.type)
   if (!type.success) return err({ code: "invalid-primitive-type", type: entry.type })
@@ -496,6 +537,11 @@ const registerEntry = (entry: PrimitiveEntry): Result<RegisteredPrimitive, Regis
     return err({ code: "undeclared-copy-prop", type: entry.type, prop: unreadable })
   }
 
+  const unexpected = unreadExpectsBinding(entry)
+  if (unexpected !== undefined) {
+    return err({ code: "unread-expects-binding", type: entry.type, name: unexpected })
+  }
+
   const behaviours = registeredBehaviours(entry)
   if (!behaviours.ok) return behaviours
 
@@ -525,6 +571,7 @@ const registerEntry = (entry: PrimitiveEntry): Result<RegisteredPrimitive, Regis
     role: role.value,
     copy: entry.copy ? Object.freeze([...entry.copy]) : undefined,
     reads: reads.value,
+    expects: entry.expects,
     unshown: entry.unshown,
     validate: entry.validate,
   })
@@ -597,6 +644,16 @@ export const createPrimitiveRegistry = (
      */
     bindingsReadBy: (type: PrimitiveType): readonly BindingDeclaration[] | undefined =>
       byType.get(type)?.reads,
+    /**
+     * `undefined` for a primitive that declared no expectation and for a type
+     * this registry does not hold, and the two collapsing is correct for
+     * `bindingsReadBy`'s reason: a walk that could not find the primitive has
+     * said so as `unknown-primitive` and has no standing to say what shape that
+     * primitive can read.
+     */
+    answersExpectedBy: (
+      type: PrimitiveType
+    ): Readonly<Record<string, AnswerExpectation>> | undefined => byType.get(type)?.expects,
     /**
      * `undefined` for a type nobody registered as well as for one that declared
      * nothing, and the two collapsing here is correct: neither has said what a

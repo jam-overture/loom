@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, gt, lt, sql } from "drizzle-orm"
+import { and, asc, desc, eq, gt, gte, isNotNull, isNull, lt, min, sql } from "drizzle-orm"
 import type { PgColumn } from "drizzle-orm/pg-core"
 import { z } from "zod"
 
@@ -15,18 +15,25 @@ import { err, ok, type Result } from "../result.js"
 import type { LoomDatabase } from "../store/database.js"
 
 import {
+  actedKey,
+  addActedCounts,
+  addArrivalCounts,
   addFunnelAnswers,
   addPageViewCounts,
   addRegionCounts,
   addTallies,
+  arrivalKey,
   foldedBy,
   funnelKey,
   pageViewKey,
   regionKey,
   tallyKey,
 } from "./counters.js"
+import { arrivalHoursOf, type StoredArrivalHour, type StoredArrivals } from "./arrivals.js"
+import type { StoredActed, StoredActedHour } from "./acted.js"
 import {
   clampReaderSignalLimit,
+  type CountedOutcome,
   type ForgetOutcome,
   type ReaderSignalJournal,
   type ReaderSignalPage,
@@ -41,6 +48,8 @@ import {
 } from "./region.js"
 import { readerSignalKindSchema, readerSignalSchema, viewKeySchema } from "./signal.js"
 import {
+  loomReaderActedHours,
+  loomReaderArrivals,
   loomReaderFunnels,
   loomReaderPageViews,
   loomReaderRegions,
@@ -49,7 +58,9 @@ import {
 } from "./schema.js"
 import type { StoredPageViews } from "./page-views.js"
 import type {
+  ActedReadRequest,
   AppliedCounters,
+  ArrivalReadRequest,
   AudienceCounters,
   ReaderTallyStore,
   StoredFunnel,
@@ -118,6 +129,14 @@ const receivedSchema = z.object({
   view: viewKeySchema.nullable().transform((value) => value ?? undefined),
   signals: z.array(readerSignalSchema).min(1),
   receivedAt: instantSchema,
+  /**
+   * `null` in the column, absent on the row — a delivery no fold has counted
+   * (0351). The same nullable-to-absent transform `view` takes, for the same
+   * reason: an optional field is how the rest of the subsystem spells *there is
+   * nothing here*, and two spellings of that is how a `null` comes to be read
+   * as a value.
+   */
+  foldedAt: instantSchema.nullable().transform((value) => value ?? undefined),
 })
 
 /**
@@ -259,12 +278,30 @@ const journalIn = (db: LoomDatabase, application: ApplicationId): ReaderSignalJo
           view: loomReaderSignals.view,
           signals: loomReaderSignals.signals,
           receivedAt: loomReaderSignals.receivedAt,
+          foldedAt: loomReaderSignals.foldedAt,
         })
         .from(loomReaderSignals)
         .where(
           and(
             eq(loomReaderSignals.applicationId, application),
             request?.treeId === undefined ? undefined : eq(loomReaderSignals.treeId, request.treeId),
+            /**
+             * Served by the partial index where it is `false`, which is the
+             * fold's read and the one that would otherwise scan the kept window
+             * (0351).
+             */
+            request?.counted === undefined
+              ? undefined
+              : request.counted
+                ? isNotNull(loomReaderSignals.foldedAt)
+                : isNull(loomReaderSignals.foldedAt),
+            /**
+             * One page view's deliveries (0355), served by the partial index on
+             * the column. A request naming a key that no row carries is an
+             * empty page, which is what a page view whose rows have been swept
+             * is.
+             */
+            request?.view === undefined ? undefined : eq(loomReaderSignals.view, request.view),
             from === undefined
               ? undefined
               : direction === "older"
@@ -301,6 +338,39 @@ const journalIn = (db: LoomDatabase, application: ApplicationId): ReaderSignalJo
       })
     } catch (cause) {
       return err(failure(cause, "could not read reader signals"))
+    }
+  },
+
+  /**
+   * One `UPDATE`, carrying its own idempotence in the `WHERE` (0351).
+   *
+   * `folded_at IS NULL` is what makes a repeat of this statement a no-op rather
+   * than a rewrite: the caller has already made the counters durable before it
+   * gets here, so a retry must not move an instant that a reading has been
+   * taken against. It is also what makes the reported count honest — rows this
+   * call stamped, not rows below the position.
+   *
+   * Scoped to the application like every other statement in this journal: `seq`
+   * is database-wide, so an unscoped `UPDATE` would stamp another deployment's
+   * uncounted deliveries and make them eligible for its retention sweep.
+   */
+  counted: async ({ before, at }) => {
+    try {
+      const stamped = await db
+        .update(loomReaderSignals)
+        .set({ foldedAt: new Date(at) })
+        .where(
+          and(
+            eq(loomReaderSignals.applicationId, application),
+            lt(loomReaderSignals.seq, before),
+            isNull(loomReaderSignals.foldedAt)
+          )
+        )
+        .returning({ seq: loomReaderSignals.seq })
+
+      return ok<CountedOutcome>({ counted: stamped.length })
+    } catch (cause) {
+      return err(failure(cause, `could not record the fold of reader signals below ${before}`))
     }
   },
 
@@ -354,6 +424,40 @@ const within = (
     request?.revision === undefined ? undefined : eq(columns.revision, request.revision)
   )
 
+/**
+ * An hour comes back as a `Date` and is read as the instant it began, in
+ * milliseconds — which is what the vocabulary above this boundary counts in,
+ * because an hour is a bucket arithmetic is done on rather than a label.
+ */
+const hourSchema = z
+  .union([z.date(), z.string()])
+  .transform((value) => (value instanceof Date ? value : new Date(value)))
+  .refine((value) => Number.isFinite(value.getTime()), "is not an instant")
+  .transform((value) => value.getTime())
+
+const storedArrivalSchema = z.object({
+  audienceId: audienceIdSchema,
+  treeId: treeIdSchema,
+  revision: z.number().int().nonnegative(),
+  hour: hourSchema,
+  views: countSchema,
+  updatedAt: instantSchema,
+})
+
+const storedActedSchema = z.object({
+  audienceId: audienceIdSchema,
+  treeId: treeIdSchema,
+  revision: z.number().int().nonnegative(),
+  nodeId: nodeIdSchema,
+  type: primitiveTypeSchema,
+  hour: hourSchema,
+  activations: countSchema,
+  opens: countSchema,
+  closes: countSchema,
+  completions: countSchema,
+  updatedAt: instantSchema,
+})
+
 /** Scoped on the same terms as the journal — see its note. */
 export const postgresReaderTallyStore = (
   db: LoomDatabase,
@@ -379,8 +483,8 @@ const writable = (
 ): readonly (AppliedCounters & { readonly audience: AudienceId })[] =>
   window
     .filter(
-      ({ tallies, funnels, appearances = [] }) =>
-        tallies.length > 0 || funnels.length > 0 || appearances.length > 0
+      ({ tallies, funnels, appearances = [], acted = [] }) =>
+        tallies.length > 0 || funnels.length > 0 || appearances.length > 0 || acted.length > 0
     )
     .map((counters) => ({ ...counters, audience: counters.audience ?? DEFAULT_AUDIENCE_ID }))
 
@@ -411,7 +515,7 @@ const tallyStoreIn = (db: LoomDatabase, application: ApplicationId): ReaderTally
 
     try {
       await db.transaction(async (tx) => {
-        for (const { audience, tallies, funnels, appearances = [] } of groups) {
+        for (const { audience, tallies, funnels, appearances = [], acted = [] } of groups) {
           if (tallies.length > 0) {
             await tx
               .insert(loomReaderTallies)
@@ -452,6 +556,51 @@ const tallyStoreIn = (db: LoomDatabase, application: ApplicationId): ReaderTally
                   opens: sql`${loomReaderTallies.opens} + excluded.opens`,
                   closes: sql`${loomReaderTallies.closes} + excluded.closes`,
                   completions: sql`${loomReaderTallies.completions} + excluded.completions`,
+                  updatedAt,
+                },
+              })
+          }
+
+          if (acted.length > 0) {
+            /**
+             * The hourly slice of the four occurrence counters above
+             * (`acted.ts`), in the same transaction and from the same fold —
+             * so a part's hours sum to the part's own counters rather than to
+             * whatever survived a second write.
+             */
+            await tx
+              .insert(loomReaderActedHours)
+              .values(
+                foldedBy(acted, actedKey, addActedCounts).map((count) => ({
+                  applicationId: application,
+                  audienceId: audience,
+                  treeId: count.treeId,
+                  revision: count.revision,
+                  nodeId: count.nodeId,
+                  hour: new Date(count.hour),
+                  type: count.type,
+                  activations: count.activations,
+                  opens: count.opens,
+                  closes: count.closes,
+                  completions: count.completions,
+                  updatedAt,
+                }))
+              )
+              .onConflictDoUpdate({
+                target: [
+                  loomReaderActedHours.applicationId,
+                  loomReaderActedHours.audienceId,
+                  loomReaderActedHours.treeId,
+                  loomReaderActedHours.revision,
+                  loomReaderActedHours.nodeId,
+                  loomReaderActedHours.hour,
+                ],
+                set: {
+                  type: sql`excluded.type`,
+                  activations: sql`${loomReaderActedHours.activations} + excluded.activations`,
+                  opens: sql`${loomReaderActedHours.opens} + excluded.opens`,
+                  closes: sql`${loomReaderActedHours.closes} + excluded.closes`,
+                  completions: sql`${loomReaderActedHours.completions} + excluded.completions`,
                   updatedAt,
                 },
               })
@@ -576,33 +725,73 @@ const tallyStoreIn = (db: LoomDatabase, application: ApplicationId): ReaderTally
     opened: async (openings, at, audience = DEFAULT_AUDIENCE_ID) => {
       if (openings.length === 0) return ok(undefined)
 
+      const hours = arrivalHoursOf(openings, at)
+      if (!hours.ok) return hours
+
       const updatedAt = new Date(at)
 
       try {
-        await db
-          .insert(loomReaderPageViews)
-          .values(
-            foldedBy(openings, pageViewKey, addPageViewCounts).map((count) => ({
-              applicationId: application,
-              audienceId: audience,
-              treeId: count.treeId,
-              revision: count.revision,
-              opened: count.views,
-              updatedAt,
-            }))
-          )
-          .onConflictDoUpdate({
-            target: [
-                  loomReaderPageViews.applicationId,
-                  loomReaderPageViews.audienceId,
-                  loomReaderPageViews.treeId,
-                  loomReaderPageViews.revision,
-                ],
-            set: {
-              opened: sql`${loomReaderPageViews.opened} + excluded.opened`,
-              updatedAt,
-            },
-          })
+        /**
+         * **Two upserts in one transaction**, which is the pair the interface
+         * promises: the revision's total and the hour it arrived in are the
+         * same arrivals under two keys, and a door that moved one without the
+         * other would leave an hourly chart that does not sum to the page-view
+         * count it is drawn beside — permanently, because a count cannot be
+         * uncounted (0158).
+         */
+        await db.transaction(async (tx) => {
+          await tx
+            .insert(loomReaderPageViews)
+            .values(
+              foldedBy(openings, pageViewKey, addPageViewCounts).map((count) => ({
+                applicationId: application,
+                audienceId: audience,
+                treeId: count.treeId,
+                revision: count.revision,
+                opened: count.views,
+                updatedAt,
+              }))
+            )
+            .onConflictDoUpdate({
+              target: [
+                loomReaderPageViews.applicationId,
+                loomReaderPageViews.audienceId,
+                loomReaderPageViews.treeId,
+                loomReaderPageViews.revision,
+              ],
+              set: {
+                opened: sql`${loomReaderPageViews.opened} + excluded.opened`,
+                updatedAt,
+              },
+            })
+
+          await tx
+            .insert(loomReaderArrivals)
+            .values(
+              foldedBy(hours.value, arrivalKey, addArrivalCounts).map((count) => ({
+                applicationId: application,
+                audienceId: audience,
+                treeId: count.treeId,
+                revision: count.revision,
+                hour: new Date(count.hour),
+                views: count.views,
+                updatedAt,
+              }))
+            )
+            .onConflictDoUpdate({
+              target: [
+                loomReaderArrivals.applicationId,
+                loomReaderArrivals.audienceId,
+                loomReaderArrivals.treeId,
+                loomReaderArrivals.revision,
+                loomReaderArrivals.hour,
+              ],
+              set: {
+                views: sql`${loomReaderArrivals.views} + excluded.views`,
+                updatedAt,
+              },
+            })
+        })
 
         return ok(undefined)
       } catch (cause) {
@@ -660,6 +849,117 @@ const tallyStoreIn = (db: LoomDatabase, application: ApplicationId): ReaderTally
             })
       } catch (cause) {
         return err(failure(cause, "could not read reader page views"))
+      }
+    },
+
+    /**
+     * Two statements and one call: the hours in the range, and the first hour
+     * the same narrowing has at all.
+     *
+     * The second is a `MIN` over an index whose leading column is the
+     * application, so it costs a lookup rather than a scan — and it is the only
+     * way to tell an empty range apart from a deployment that was not counting
+     * through it. Not in one statement with a window function, because the two
+     * answers have different shapes and a row carrying both would make every
+     * caller unpack a figure repeated on every row.
+     */
+    arrivals: async (request?: ArrivalReadRequest) => {
+      const scope = within(loomReaderArrivals, application, request)
+
+      try {
+        const rows = await db
+          .select()
+          .from(loomReaderArrivals)
+          .where(
+            and(
+              scope,
+              request?.from === undefined
+                ? undefined
+                : gte(loomReaderArrivals.hour, new Date(request.from)),
+              request?.to === undefined
+                ? undefined
+                : lt(loomReaderArrivals.hour, new Date(request.to))
+            )
+          )
+        const parsed = z.array(storedArrivalSchema).safeParse(rows)
+
+        if (!parsed.success) {
+          return err<ReaderSignalStoreError>({
+            code: "unavailable",
+            detail: `a stored arrival did not parse: ${
+              parsed.error.issues[0]?.path.join(".") ?? "unknown"
+            }`,
+          })
+        }
+
+        const [earliest] = await db
+          .select({ hour: min(loomReaderArrivals.hour) })
+          .from(loomReaderArrivals)
+          .where(scope)
+        const begins = hourSchema.safeParse(earliest?.hour)
+
+        return ok<StoredArrivals>({
+          hours: parsed.data as readonly StoredArrivalHour[],
+          ...(begins.success ? { begins: begins.data } : {}),
+        })
+      } catch (cause) {
+        return err(failure(cause, "could not read reader arrivals"))
+      }
+    },
+
+    /**
+     * The rows in the range and the first hour the scope ever counted, as the
+     * arrivals read above answers them — with the part in **both** narrowings.
+     *
+     * A goal made today over a deployment that has counted for a year must
+     * report the first hour *that part* was acted in; taking the beginning over
+     * the deployment would draw a year of noughts behind a figure that has
+     * existed for an afternoon.
+     */
+    acted: async (request?: ActedReadRequest) => {
+      const scope = and(
+        within(loomReaderActedHours, application, request),
+        request?.nodeId === undefined ? undefined : eq(loomReaderActedHours.nodeId, request.nodeId)
+      )
+
+      try {
+        const rows = await db
+          .select()
+          .from(loomReaderActedHours)
+          .where(
+            and(
+              scope,
+              request?.from === undefined
+                ? undefined
+                : gte(loomReaderActedHours.hour, new Date(request.from)),
+              request?.to === undefined
+                ? undefined
+                : lt(loomReaderActedHours.hour, new Date(request.to))
+            )
+          )
+        const parsed = z.array(storedActedSchema).safeParse(rows)
+
+        if (!parsed.success) {
+          return err<ReaderSignalStoreError>({
+            code: "unavailable",
+            detail: `a stored action hour did not parse: ${
+              parsed.error.issues[0]?.path.join(".") ?? "unknown"
+            }`,
+          })
+        }
+
+        const [earliest] = await db
+          .select({ hour: min(loomReaderActedHours.hour) })
+          .from(loomReaderActedHours)
+          .where(scope)
+        const begins = hourSchema.safeParse(earliest?.hour)
+
+        return ok<StoredActed>({
+          hours: parsed.data as readonly StoredActedHour[],
+          ...(begins.success ? { begins: begins.data } : {}),
+        })
+      } catch (cause) {
+        return err(failure(cause, "could not read what readers did by hour"))
       }
     },
   }

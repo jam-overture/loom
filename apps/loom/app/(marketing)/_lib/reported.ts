@@ -88,16 +88,45 @@ export const REPORT_LANGUAGE = "json"
  * Four observations, two parts, one visit. The reader can see the shape of it
  * in a glance, which is the whole reason it is four and not fourteen.
  */
+/**
+ * **The names and the revision were corrected on 5 November, against a build
+ * of the page they claim to come from.**
+ *
+ * They were authored, which is right, and nothing checked them against
+ * anything — the three assertions below are about the report's *types*, its
+ * fields and its shape, and every one of them passed on a report naming parts
+ * that do not exist. `allowed.ts` built this page as a tree for the band under
+ * this one and the real names came out `n_fern6` for the opening and
+ * `n_fern10` for the row of tiles; the panel said `n_fern1` and `n_fern6`, so
+ * one of its two names belonged to a different part of the same page and the
+ * other to its words.
+ *
+ * Nothing a reader could see was wrong: a name in a report is a name, and no
+ * stranger was ever going to check it. What it cost is the thing the band
+ * below needs — **the two panels on this page are one page's story**, the
+ * fourth link reporting on these parts and the fifth link editing them, and a
+ * reader who looked closely found two sets of names that could not both be
+ * right.
+ *
+ * `revision` went from 1 to 0 for the same reason. A page as its author built
+ * it is at its first revision, which is what the frame above shows and what
+ * the change below is proposed against; 1 would be a report from a page that
+ * had already adapted once, which is a different moment than either band is
+ * describing.
+ *
+ * `reported.test.ts` now reads both names off the built page, so the next one
+ * to drift fails rather than shipping.
+ */
 export const THE_REPORT = `{
   "treeId": "t_fern1",
-  "revision": 1,
+  "revision": 0,
   "sentAt": 1793784678000,
   "view": "9f14c0a7b65d4e2318ab7d90c4e6f512",
   "signals": [
-    { "kind": "viewed", "nodeId": "n_fern1", "type": "loom.hero", "at": 1793784659240 },
-    { "kind": "dwelled", "nodeId": "n_fern1", "type": "loom.hero", "ms": 7420 },
-    { "kind": "viewed", "nodeId": "n_fern6", "type": "loom.feature-grid", "at": 1793784667100 },
-    { "kind": "dwelled", "nodeId": "n_fern6", "type": "loom.feature-grid", "ms": 2680 }
+    { "kind": "viewed", "nodeId": "n_fern6", "type": "loom.hero", "at": 1793784659240 },
+    { "kind": "dwelled", "nodeId": "n_fern6", "type": "loom.hero", "ms": 7420 },
+    { "kind": "viewed", "nodeId": "n_fern10", "type": "loom.feature-grid", "at": 1793784667100 },
+    { "kind": "dwelled", "nodeId": "n_fern10", "type": "loom.feature-grid", "ms": 2680 }
   ]
 }`
 

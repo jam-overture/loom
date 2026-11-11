@@ -16,6 +16,7 @@ import { briefFor, type BriefError } from "./brief"
 import type { PageCopyStore } from "./copies"
 import { readEvidence, type EvidenceSilence } from "./evidence"
 import { followPublished, waitingOnPage } from "./following"
+import { madeFromOf, type MadeFromStore } from "./made-from"
 import { REMEMBERED_PER_PAGE, type TurnedDownStore } from "./turned-down"
 
 /**
@@ -24,12 +25,11 @@ import { REMEMBERED_PER_PAGE, type TurnedDownStore } from "./turned-down"
  * nobody typed.
  *
  * It proposes against the project's governed copy of the page, never the
- * published table (clause 2), and only while that copy is the page the site
- * serves: the readings are about that page. So the copy is first brought to
- * the site's newest version where it can be (0340), and a page whose copy
- * carries accepted changes the site does not serve yet is left alone. A page
- * with a change still waiting, on any copy of it, is left alone too, so the
- * queue holds one question per page rather than a pile of them.
+ * published table (clause 2). That copy is the live page (0358 clause 5), so
+ * it is first brought to the site's newest version (0340), with the changes
+ * accepted on it applied again, and proposing goes on whatever was accepted
+ * before. A page with a change still waiting, on any copy of it, is left
+ * alone, so the queue holds one question per page rather than a pile of them.
  *
  * The model is shown what was turned down on the page before, and weighs a
  * change against it (0341).
@@ -46,7 +46,6 @@ export const PROPOSER = "Loom"
 /** Why a page had nothing proposed for it, each of which a person can be told. */
 export type Passed =
   | { readonly kind: "waiting" }
-  | { readonly kind: "unshipped"; readonly copy: number }
   | { readonly kind: "apart" }
   | { readonly kind: "no-goal" }
   | { readonly kind: "silent"; readonly silence: EvidenceSilence }
@@ -93,6 +92,8 @@ export type ProposeFor = {
   /** The project's goals, as its store listed them. */
   readonly goals: readonly Goal[]
   readonly proposalGoals: Pick<ProposalGoalStore, "record">
+  /** Where a change the Gate makes outright keeps what it was made from, for its timeline. */
+  readonly made: Pick<MadeFromStore, "record">
   /** False for this deployment's own site, which serves the copy itself (0259). */
   readonly follows: boolean
   /** What decides the request; the path's interpreter then turns it into a change. */
@@ -128,9 +129,6 @@ export const proposeFor = async (given: ProposeFor): Promise<Result<Proposed, Pr
   )
 
   if (!followed.ok) return err(followed.error)
-  if (followed.value.kind === "unshipped") {
-    return passed({ kind: "unshipped", copy: followed.value.copy.revision })
-  }
   if (followed.value.kind === "apart") return passed({ kind: "apart" })
 
   const copies = await given.copies.list()
@@ -181,6 +179,13 @@ export const proposeFor = async (given: ProposeFor): Promise<Result<Proposed, Pr
   if (!recorded.ok) return err({ code: "store", detail: recorded.error.detail })
 
   const outcome = await commitIntent(path, intent)
+  const made = madeFromOf(outcome, given.at.getTime())
+
+  /**
+   * After the change, and whatever it answers: the change is made either way,
+   * and its timeline says its goal was not recorded where this was not kept.
+   */
+  if (made !== undefined) await given.made.record(made)
 
   return ok({ kind: "proposed", request: brief.value.request, goal, outcome })
 }

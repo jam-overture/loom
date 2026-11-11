@@ -5,6 +5,7 @@ import { systemClock, type Clock } from "../runtime/events.js"
 
 import {
   clampReaderSignalLimit,
+  type CountedOutcome,
   type ForgetOutcome,
   type ReaderSignalJournal,
   type ReaderSignalPage,
@@ -12,12 +13,24 @@ import {
   type ReaderSignalStoreError,
   type ReceivedBatch,
 } from "./journal.js"
-import { funnelKey, inAudience, pageViewKey, regionKey, tallyKey } from "./counters.js"
+import {
+  actedKey,
+  arrivalKey,
+  funnelKey,
+  inAudience,
+  pageViewKey,
+  regionKey,
+  tallyKey,
+} from "./counters.js"
+import { arrivalHoursOf, type StoredArrivalHour, type StoredArrivals } from "./arrivals.js"
+import type { ActedHourCount, StoredActed, StoredActedHour } from "./acted.js"
 import type { RevisionViews, StoredPageViews } from "./page-views.js"
 import type { ReaderRegionStore, StoredRegionCount } from "./region.js"
 import type { FunnelAnswer, ReaderTally } from "./rollup.js"
 import type { ReaderSignalBatch } from "./signal.js"
 import type {
+  ActedReadRequest,
+  ArrivalReadRequest,
   AudienceCounters,
   ReaderTallyStore,
   StoredFunnel,
@@ -38,6 +51,13 @@ import type {
  */
 
 export const memoryReaderSignalJournal = (clock: Clock = systemClock): ReaderSignalJournal => {
+  /**
+   * Mutable rows rather than a frozen list, because one field on a stored
+   * delivery changes after it is written: the fold's instant (0351). The array
+   * is still replaced wholesale on a delete, so the only in-place write in this
+   * store is the stamp — which is the same single-column `UPDATE` Postgres
+   * makes.
+   */
   let batches: ReceivedBatch[] = []
   let nextSeq = 1
 
@@ -73,6 +93,9 @@ export const memoryReaderSignalJournal = (clock: Clock = systemClock): ReaderSig
       const matching = batches.filter(
         (batch) =>
           (request?.treeId === undefined || batch.treeId === request.treeId) &&
+          (request?.counted === undefined ||
+            request.counted === (batch.foldedAt !== undefined)) &&
+          (request?.view === undefined || batch.view === request.view) &&
           (from === undefined || (direction === "older" ? batch.seq < from : batch.seq > from))
       )
 
@@ -88,6 +111,29 @@ export const memoryReaderSignalJournal = (clock: Clock = systemClock): ReaderSig
           }),
         })
       )
+    },
+
+    /**
+     * Stamp the fold's instant on an unstamped prefix (0351).
+     *
+     * `foldedAt !== undefined` is the guard rather than a position comparison,
+     * so the second call over one prefix moves nothing — the property Postgres
+     * gets from `folded_at IS NULL` in its `WHERE`, written here so the two
+     * implementations are the same operation rather than two that happen to
+     * agree on the first call.
+     */
+    counted: ({ before, at }) => {
+      let counted = 0
+
+      batches = batches.map((batch) => {
+        if (batch.seq >= before || batch.foldedAt !== undefined) return batch
+
+        counted += 1
+
+        return { ...batch, foldedAt: at }
+      })
+
+      return Promise.resolve(ok<CountedOutcome>({ counted }))
     },
 
     /** `nextSeq` is not rewound, so a cursor held across a prune never resumes inside what it has seen. */
@@ -117,6 +163,8 @@ export const memoryReaderTallyStore = (): ReaderTallyStore => {
   const tallies = new Map<string, StoredTally>()
   const funnels = new Map<string, StoredFunnel>()
   const pageViews = new Map<string, StoredPageViews>()
+  const arrivals = new Map<string, StoredArrivalHour>()
+  const acted = new Map<string, StoredActedHour>()
 
   /**
    * One row written from two sides, so the add is spelled once and told which
@@ -174,6 +222,25 @@ export const memoryReaderTallyStore = (): ReaderTallyStore => {
     })
   }
 
+  /**
+   * One part's hour, added — the hourly slice of the four occurrence counters
+   * above (`acted.ts`).
+   */
+  const addActed = (count: ActedHourCount, at: string, audience: AudienceId): void => {
+    const key = inAudience(audience, actedKey(count))
+    const existing = acted.get(key)
+
+    acted.set(key, {
+      ...count,
+      audienceId: audience,
+      activations: (existing?.activations ?? 0) + count.activations,
+      opens: (existing?.opens ?? 0) + count.opens,
+      closes: (existing?.closes ?? 0) + count.closes,
+      completions: (existing?.completions ?? 0) + count.completions,
+      updatedAt: at,
+    })
+  }
+
   const addFunnel = (answer: FunnelAnswer, at: string, audience: AudienceId): void => {
     const key = inAudience(audience, funnelKey(answer))
     const existing = funnels.get(key)
@@ -204,6 +271,7 @@ export const memoryReaderTallyStore = (): ReaderTallyStore => {
       const audience = counters.audience ?? DEFAULT_AUDIENCE_ID
 
       for (const tally of counters.tallies) addTally(tally, at, audience)
+      for (const count of counters.acted ?? []) addActed(count, at, audience)
       for (const answer of counters.funnels) addFunnel(answer, at, audience)
       addPageViews(counters.appearances ?? [], "appearances", at, audience)
     }
@@ -217,8 +285,32 @@ export const memoryReaderTallyStore = (): ReaderTallyStore => {
     apply: (counters, at, audience = DEFAULT_AUDIENCE_ID) =>
       applyWindow([{ ...counters, audience }], at),
 
+    /**
+     * The total and the hour, or neither (`arrivals.ts`).
+     *
+     * Nothing here can fail once the hour is in hand, so the atomicity the
+     * interface promises costs this store nothing — which is exactly why the
+     * instant is turned into an hour **first**: the one failure the pair has is
+     * an instant that is not one, and a reference implementation that wrote the
+     * total and then discovered it would be a reference for the wrong thing.
+     */
     opened: (openings, at, audience = DEFAULT_AUDIENCE_ID) => {
+      const hours = arrivalHoursOf(openings, at)
+      if (!hours.ok) return Promise.resolve(hours)
+
       addPageViews(openings, "opened", at, audience)
+
+      for (const count of hours.value) {
+        const key = inAudience(audience, arrivalKey(count))
+        const existing = arrivals.get(key)
+
+        arrivals.set(key, {
+          ...count,
+          audienceId: audience,
+          views: (existing?.views ?? 0) + count.views,
+          updatedAt: at,
+        })
+      }
 
       return Promise.resolve(ok(undefined))
     },
@@ -231,6 +323,59 @@ export const memoryReaderTallyStore = (): ReaderTallyStore => {
 
     pageViews: (request?: TallyReadRequest) =>
       Promise.resolve(ok([...pageViews.values()].filter((row) => matches(row, request)))),
+
+    /**
+     * The rows in the range, and the first hour the scope has at all.
+     *
+     * The second figure is taken over the same narrowing without the range,
+     * which is the half a caller cannot compute from the first: a range that
+     * came back empty is *nobody arrived* or *we were not counting*, and the
+     * only way to tell is to look outside the range.
+     */
+    arrivals: (request?: ArrivalReadRequest) => {
+      const scoped = [...arrivals.values()].filter((row) => matches(row, request))
+      const hours = scoped.filter(
+        (row) =>
+          (request?.from === undefined || row.hour >= request.from) &&
+          (request?.to === undefined || row.hour < request.to)
+      )
+      const begins = scoped.reduce<number | undefined>(
+        (first, row) => (first === undefined || row.hour < first ? row.hour : first),
+        undefined
+      )
+
+      return Promise.resolve(
+        ok<StoredArrivals>({ hours, ...(begins === undefined ? {} : { begins }) })
+      )
+    },
+
+    /**
+     * The same two answers as `arrivals`, narrowed to a part as well.
+     *
+     * The part narrows **both** halves: the first hour a goal was ever counted
+     * in is the first hour that part was acted in, not the first hour the
+     * deployment counted anything — otherwise a goal made today would report
+     * that it has been measured since the deployment started and draw a flat
+     * nought back to then.
+     */
+    acted: (request?: ActedReadRequest) => {
+      const scoped = [...acted.values()].filter(
+        (row) =>
+          matches(row, request) &&
+          (request?.nodeId === undefined || row.nodeId === request.nodeId)
+      )
+      const hours = scoped.filter(
+        (row) =>
+          (request?.from === undefined || row.hour >= request.from) &&
+          (request?.to === undefined || row.hour < request.to)
+      )
+      const begins = scoped.reduce<number | undefined>(
+        (first, row) => (first === undefined || row.hour < first ? row.hour : first),
+        undefined
+      )
+
+      return Promise.resolve(ok<StoredActed>({ hours, ...(begins === undefined ? {} : { begins }) }))
+    },
   }
 }
 

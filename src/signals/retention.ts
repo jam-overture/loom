@@ -1,25 +1,34 @@
-import type { CollectionOutcome } from "./collect.js"
+import type { ExpiryOutcome } from "./expire.js"
 import type { DeliveryRetention } from "./notice.js"
 
 /**
  * Whether the deployment keeps the retention ceiling it publishes to its
  * readers.
  *
- * A notice tells the reader two things about a delivery's life: the age it
- * ripens at, which is this framework's own number, and how often the deployment
- * sweeps the ripe ones away, which is a claim about a cron nobody here can see
- * (0320). The two add to a ceiling — *gone within 70 minutes of arriving* — and
- * a deployment that states ten minutes and sweeps weekly publishes that
- * sentence to every reader of its privacy page with nothing behind it.
+ * A notice tells the reader three things about a delivery's life: the age it is
+ * counted at and the age it is deleted at, which are this deployment's own
+ * numbers, and how often its sweep runs, which is a claim about a cron nobody
+ * here can see (0320, 0351). They make a ceiling — *gone within 31 days of
+ * arriving* — and a deployment that states a day and sweeps monthly publishes
+ * that sentence to every reader of its privacy page with nothing behind it.
  *
- * **The evidence is already in the sweep's own hands.** A run scans the buffer
- * from its oldest end, so the age of the oldest delivery still waiting is a
+ * **The evidence is already in the sweep's own hands.** A run scans the table
+ * from its oldest end, so the age of the oldest delivery still there is a
  * number every run has and none of them reported. If that age is past the
  * ceiling, then a delivery existed that readers were told was gone — and it
  * existed for however long the gap is, whatever this run then deletes.
  *
  * So the check costs no read, no column, no byte on any wire and nothing in a
  * browser: it is a subtraction over what a sweep already looked at.
+ *
+ * **It is the expiry run's evidence, not the fold's** (0351). Until 5 November
+ * the fold was the deletion, so the run that counted a window was also the run
+ * whose scan proved when deliveries went; now counting and deleting are two
+ * operations with two windows, and the published ceiling is about the second.
+ * Handing this the fold's outcome would judge a promise about deletion against
+ * a figure that measures how far behind counting is — which on a healthy
+ * deployment is minutes, so the check would read *kept* while a broken expiry
+ * cron kept everything for ever.
  *
  * ## It is beside the notice and never inside it
  *
@@ -57,20 +66,20 @@ export type RetentionPromise =
   /**
    * The run read no delivery, so nothing here says how old the oldest one is.
    *
-   * Either it never reached the buffer — refused on its window, or the store
-   * was unavailable — or the one instant it needed could not be read. A buffer
-   * the sweep cannot see is a promise nothing can speak for, and the honest
-   * answer is silence rather than *kept*.
+   * Either it never reached the table — refused on its window, or the store was
+   * unavailable — or the one instant it needed could not be read. A table the
+   * sweep cannot see is a promise nothing can speak for, and the honest answer
+   * is silence rather than *kept*.
    */
   | { readonly state: "unread" }
   /**
-   * Nothing in the buffer is old enough to count, so nothing in it can be past
+   * Nothing in the table is old enough to delete, so nothing in it can be past
    * the ceiling.
    *
    * The strongest of the three quiet answers and the only one that is a proof.
-   * A scan runs from the oldest end, so a run that found nothing ripe found
-   * every delivery younger than the ripeness window — and the ceiling is that
-   * window plus a sweep, which is longer. An empty buffer lands here too, for
+   * A scan runs from the oldest end, so a run that found nothing expirable
+   * found every delivery younger than the kept window — and the ceiling is that
+   * window plus a sweep, which is longer. An empty table lands here too, for
    * the same reason and with nothing waiting.
    */
   | { readonly state: "unripe" }
@@ -84,9 +93,9 @@ export type RetentionPromise =
    */
   | {
       readonly state: "kept"
-      /** How old the oldest delivery still in the buffer was, in milliseconds. */
+      /** How old the oldest delivery still in the table was, in milliseconds. */
       readonly oldestMs: number
-      /** The ceiling the notice publishes: the ripeness window plus one sweep. */
+      /** The ceiling the notice publishes: the later of the two windows plus one sweep. */
       readonly goneWithinMs: number
     }
   /**
@@ -105,10 +114,23 @@ export type RetentionPromise =
       readonly goneWithinMs: number
       /** How far past the ceiling the oldest delivery is. */
       readonly byMs: number
+      /**
+       * Whether what is holding the oldest delivery is that no fold has counted
+       * it (`expire.ts`).
+       *
+       * The gap is real either way and this does not soften it — a delivery
+       * readers were told was gone is still there. What it does is name the
+       * remedy, which in this one case is not the expiry sweep's: nothing may
+       * delete an uncounted delivery, so a deployment whose collection has
+       * stopped breaks its retention promise by not counting, and running the
+       * deletion more often would change nothing.
+       */
+      readonly uncounted: boolean
     }
 
 /**
- * Judge one sweep's own evidence against the ceiling its deployment publishes.
+ * Judge one expiry sweep's own evidence against the ceiling its deployment
+ * publishes.
  *
  * The retention is taken whole — the same `Pick` of the notice the reader's
  * sentence is built from (0320) — so the ceiling judged here is the ceiling
@@ -126,7 +148,7 @@ export type RetentionPromise =
  * itself (0274).
  */
 export const retentionPromiseOf = (
-  outcome: CollectionOutcome,
+  outcome: ExpiryOutcome,
   retention: DeliveryRetention
 ): RetentionPromise => {
   if (retention.sweep.state !== "stated") return { state: "unpromised" }
@@ -136,14 +158,26 @@ export const retentionPromiseOf = (
   if (outcome.outcome === "refused" || outcome.outcome === "unavailable") {
     return { state: "unread" }
   }
-  if (outcome.outcome === "nothing-ripe") return { state: "unripe" }
 
-  const { oldestMs } = outcome.summary
-
+  /**
+   * A run that deleted nothing and read nothing saw no delivery at all, which
+   * is an empty table rather than a proof about one. Both answer *nothing here
+   * can be past the ceiling*, so the one with no figure is `unripe` beside the
+   * one whose figure is young — the distinction a reading of this would draw
+   * between them is one neither of them supports.
+   */
+  const { oldestMs } = outcome
+  if (oldestMs === null) return { state: "unripe" }
   if (!Number.isFinite(oldestMs)) return { state: "unread" }
 
   return oldestMs > goneWithinMs
-    ? { state: "broken", oldestMs, goneWithinMs, byMs: oldestMs - goneWithinMs }
+    ? {
+        state: "broken",
+        oldestMs,
+        goneWithinMs,
+        byMs: oldestMs - goneWithinMs,
+        uncounted: outcome.stopped === "uncounted",
+      }
     : { state: "kept", oldestMs, goneWithinMs }
 }
 
@@ -162,13 +196,16 @@ export const describeRetentionPromise = (promise: RetentionPromise): string => {
     case "unread":
       return "no delivery was read, so nothing here says whether the ceiling readers are promised is being kept"
     case "unripe":
-      return "nothing in the buffer is old enough to count, so no delivery is past the ceiling readers are promised"
+      return "nothing kept is old enough to delete, so no delivery is past the ceiling readers are promised"
     case "kept":
-      return `the oldest delivery waiting is ${promise.oldestMs}ms old, and readers are promised one is gone within ${promise.goneWithinMs}ms of arriving`
+      return `the oldest delivery kept is ${promise.oldestMs}ms old, and readers are promised one is gone within ${promise.goneWithinMs}ms of arriving`
     case "broken":
       return (
-        `the oldest delivery waiting is ${promise.oldestMs}ms old and readers are promised one is gone within ${promise.goneWithinMs}ms of arriving, ` +
-        `so that promise has been false for ${promise.byMs}ms: this deployment is sweeping less often than it stated, or not at all`
+        `the oldest delivery kept is ${promise.oldestMs}ms old and readers are promised one is gone within ${promise.goneWithinMs}ms of arriving, ` +
+        `so that promise has been false for ${promise.byMs}ms: ` +
+        (promise.uncounted
+          ? "no fold has counted it, so nothing may delete it and the remedy is to run collection"
+          : "this deployment is sweeping less often than it stated, or not at all")
       )
   }
 }

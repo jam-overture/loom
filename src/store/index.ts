@@ -14,10 +14,19 @@
  * speaks for — it is a column on the reader tables and a field a sender may
  * set — but it is an id a host has to be able to *name*, and the alternative
  * to naming it here is a host that can read the field and not write one.
+ *
+ * Its rules and its composition are here for a narrower reason: the thing that
+ * composes a page out of a base and the deltas an audience earned is a
+ * `TreeSource` over a store (0263), and `source.js` below is where a store
+ * becomes one. A host wiring the composing source needs the rule it hands it.
  */
 export * from "../application/application.js"
 export * from "../application/memory.js"
 export * from "../audience/audience.js"
+export * from "../audience/compose.js"
+export * from "../audience/memory.js"
+export * from "../audience/overlay-store.js"
+export * from "../audience/rule.js"
 export * from "../project/project.js"
 export * from "../project/memory.js"
 export * from "../project/closing.js"

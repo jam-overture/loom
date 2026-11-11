@@ -84,14 +84,1736 @@ the next person to open the file.
 terminal should be able to drive a proposal is a real question and a different
 one; a docblock is not where it gets answered, and a door whose summary promises
 a capability is how a reader spends an afternoon looking for it.
+## 2026-11-10 — a printed specimen that reads the environment arrives in the deployment sweep as a setting of this deployment, and the panel that would print the real spelling is shaped around it
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom daily build`
+(`tools/sources/deployment.ts`) · **Status:** open — **nothing is broken, no
+test is failing on `main`, and one panel on this site prints a spelling one
+step away from the one a reader writes.**
+
+`app/(marketing)/_lib/wired/page.tsx` is the route the new *On your own site*
+band prints: the two calls
+[0361](decisions/0361-the-site-pulls-into-its-own-process-and-a-host-wires-the-live-page-in-two-calls.md)
+clause 2 names, and the render under them. It is a **real compiled module**,
+because that is this lane's whole discipline for a code panel — `written.ts`
+has the argument and it is one sentence: *a stranger cannot be shown code that
+does not compile.*
+
+The spelling a reader writes, which is also the one the published entry point's
+own example gives, is:
+
+```ts
+const live = startPullingLivePages({
+  deployment: process.env.LOOM_URL ?? "",
+  key: process.env.LOOM_PROJECT_KEY ?? "",
+})
+```
+
+**Written that way the panel turns two of `tools/sources/deployment.test.ts`'
+cases red.** Measured on this branch before the panel was reshaped:
+
+```
+- []
++ [ "LOOM_PROJECT_KEY", "LOOM_URL" ]
+  ❯ tools/sources/deployment.test.ts:252  (the variables an operator is offered)
+```
+
+The sweep is right about what it read and wrong about what it means. It reads
+every environment variable the **application's code** names and holds
+`apps/loom/.env.example` to offering each one, which is exactly the drift it was
+written for — three findings in six weeks, all the same shape. What it cannot do
+is tell a setting **this** deployment reads from one a **printed specimen**
+reads, and this lane's panels are specimens that are also code.
+
+### The sweep already knows this class of thing exists
+
+Its own docblock records the near-miss:
+
+> *"the portal's Credentials screen prints `process.env.LOOM_INGEST_KEY` inside
+> a template literal, as a snippet for a customer to paste into their own
+> application. It is not this deployment's setting, and reading the raw text
+> would have made it one."*
+
+`codeOnly` blanks a literal's body, so that one is invisible and the portal's
+screen is safe. **A specimen is the same claim one level up**: it is a snippet
+for a customer, and it is in code rather than in a literal *on purpose*, because
+a snippet in a literal is a snippet nothing typechecks. So `_lib/wired.ts` — the
+module that publishes the text as a template literal — passes, and the file that
+makes the text trustworthy fails.
+
+### What this run did instead, and why it is not the fix
+
+Both ways out are another lane's file:
+
+- **Offer them in `apps/loom/.env.example`.** That documents two settings this
+  deployment does not have, in the one file the guide calls the full list. It is
+  the failure the sweep exists to catch, caused by satisfying the sweep.
+- **Add them to `NOT_SET_BY_AN_OPERATOR`.** This is the sweep's own designed
+  escape hatch and the right category, and the table is in `tools/`. A marketing
+  branch editing the framework's tooling is the diff `docs/routines.md` says
+  nobody can review.
+
+So the panel takes the two values from the configuration module it already
+imports from, the copy beside it says *the address and the key come out of your
+environment*, and `wired/loom.ts` carries the whole of why in a docblock.
+`wired.test.ts` holds it there — `reads no environment variable, because the
+sweep cannot tell this from a setting` — so a later run cannot quietly put the
+real spelling back and go red on `main`.
+
+**Nothing a reader is shown is false.** It is one indirection away from the
+file they would write, on the one panel whose value is being exactly that file.
+
+### Three shapes, and this lane has no opinion on which
+
+Costed in what each would cost the owning lane, not in what this lane wants.
+
+| | what changes | cost | what it gives up |
+| --- | --- | --- | --- |
+| **A third category in the table** | one row per name in `NOT_SET_BY_AN_OPERATOR`, reason *printed on the marketing site as a customer's own code* | two lines | the reason is per-name, so each new specimen variable is another row and another review |
+| **A marker the sweep reads** | `environmentNames` skips a file carrying the published-region marker `// ── shown on the site ──` | a few lines, and the marker is already load-bearing in three files | a file could opt out by writing a comment, which is why the marker rather than a new one — it is the thing `written.test.ts`, `connected.test.ts` and `wired.test.ts` all already read |
+| **A directory the sweep skips** | the three specimen directories, named | one list | a list somebody maintains, which is what `files.ts` says these sweeps exist not to have |
+
+**The second is the one worth looking at first**, and the reason is the sweep's
+own: the marker is not a new opt-out, it is the existing declaration that a
+file's body is published to strangers rather than run by this deployment. A file
+carrying it is by definition a specimen, and three tests already fail if it
+moves.
+
+### What else carries this today, and what will carry it next
+
+Two specimen directories exist now and neither reads the environment, so
+nothing else is affected: `_lib/written/` (a component and its registration) and
+`_lib/connected/` (a model client, which takes its endpoint and key as
+**arguments** — `connected.ts` gives a different reason for that, and this is a
+second one it did not know about).
+
+The next panel that wants it is the one a reader needs most. Every real
+integration reads its configuration from somewhere, and the honest spelling for
+a Next application is `process.env`. `(docs)` prints its quickstart with a
+`readFileSync` of a file it runs, so a documentation page showing the same code
+would hit the same sweep from the other lane.
+## 2026-11-10 — a form an audience is served is a change a reader sees that no policy judged, and the asymmetry is now in code rather than implied by a seam
+
+**Filed by:** `Loom framework` · **Owned by:** `Loom framework`
+(`src/audience/`, `src/runtime/`), and **open as a question for the
+maintainer** · **Status:** open — **nothing is broken and nothing is blocked.**
+Both halves work as their records say. This is one question about which of the
+two is right, and it is cheaper to ask before a screen is built on either
+answer.
+
+[0376](decisions/0376-a-pages-audience-rules-are-an-attributed-log-and-its-forms-are-rows.md)
+built the store dimension for 0263's audiences, and building it put the two
+paths a change can take to a reader side by side for the first time:
+
+| | a change to the base | a change to one audience's form |
+| --- | --- | --- |
+| who may ask | anything holding the runtime | anything holding the store |
+| what judges it | the Gate, under a recorded policy (0033) | nothing |
+| what it leaves | a revision, a proposal, a disposition, a fingerprint | a row |
+| what a reader gets | the page, once the log has it | the page, at once |
+| who can say why | `judgedUnder`, `policyHistoryOf`, the log | the actor and the stamp on the row |
+
+**Both columns are what their own records decided**, and neither is an
+oversight. 0263 made a form *a delta that applies when an audience matches*, and
+0359 made composition a projection with no place in the history — a form is
+deliberately not a revision, so there is deliberately nothing in the log to
+judge. 0033 makes the Gate the thing a *proposal* passes through, and a form is
+not a proposal.
+
+**What makes it worth asking anyway** is that the two produce the same effect on
+a reader. A deployment with an `aud_eu` rule matching a third of its traffic can
+change what that third sees by writing one row — no confidence threshold, no
+hold, no disposition, and no record beyond *who wrote it and when*. The thing
+0033 exists to prevent on the base is unprevented one dimension across.
+
+**Three shapes it could take, and this lane has a recommendation rather than an
+opinion it is sure of:**
+
+| | what it would mean | what it would cost |
+| --- | --- | --- |
+| **leave it** | a form is configuration, and the governance is on the base the form is authored against | the asymmetry above, stated in the deployment guide so nobody finds it in production |
+| judge a form as a proposal | one path, one policy, one disposition for everything a reader can be served | a form is not a revision and cannot become one without breaking 0359 clause 4 — the judgment would have to attach to something that is not in the log |
+| a policy knob — *forms may be written by* | the narrow version: an audience form is a privileged write rather than an ordinary one | a knob on a Zod-parsed policy, which 0179 is the precedent for keeping *off* a policy when it is really a capability |
+
+**Recommendation: leave it, and write the asymmetry down.** A form is authored
+against a base the Gate already judged, and the delta it carries is bounded by
+the operations §1 allows — so what an unjudged form can do to a reader is
+narrower than it first reads. But *leave it* is a decision somebody should make
+on purpose, because the alternative is that it stays true by nobody having
+looked.
+
+**Nothing waits on the answer.** The store is built either way, and the portal's
+rule editor is built either way; what changes is whether a sentence in
+`docs/deployment.md` says *forms are not judged* or a future record says they
+are.
+
+---
+## 2026-11-09 — a ready-made section cannot be shown on any page but the one it was dropped into, because it ships a live link and a developer tool's claims
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom primitives`
+(`src/primitives/compositions/`) · **Status:** open — **nothing is broken for a
+host and one band on this site is weaker than it should be.** The marketing
+site now says the ready-made sections exist; it cannot show one, and the two
+reasons are independent.
+
+`STARTER_COMPOSITIONS` is 67 designs across the 22 sections a landing page has,
+settled as a shape by
+[0120](decisions/0120-a-starting-composition-is-a-subtree-a-catalogue-hands-to-the-ordinary-seam.md)
+on 9 September, and until today no page, band or sentence of
+`app/(marketing)/` mentioned them.
+`_lib/ready.ts` is the band that does. **It names three figures and renders
+nothing**, and this entry is why — because the band that was set out to be
+built is a browser frame with a ready-made section composed inside it at the
+same moment as the rest of the page, the way `_lib/example.ts` renders the
+coffee page.
+
+### 1. Every section with a control ships a live same-origin path
+
+`heroBand` ships two actions whose paths are a sign-up page and a price list.
+`ctaBand`, `navBand`, `footerBand`, `bannerBand`, `pricingBand` and
+`changelogBand` are the same shape, and `contactDetailsBand` goes one further
+with a `mailto:` and a `tel:` of its own. The reasoning is recorded in
+`hero-band.ts` and it is right for the host it was written for:
+
+> *"A same-origin path is a destination on the site this band is dropped into
+> (0100, 0102), so the band arrives with no dependency on anything outside the
+> deployment. The alternative — a placeholder on someone else's domain — ships
+> a live link to a third party in a tree a page might publish before anyone
+> re-reads it."*
+
+**Both of the available spellings are wrong for a host that has not edited the
+band yet, and the one that was chosen is the better of the two.** A path on the
+host's own origin is a **dead button** until the host has that route, which on
+this surface is a gate failure rather than a soft defect: `routes.test.ts`'
+*sends nobody to an address this application does not serve* goes red on the
+first of them, and `_lib/example.ts` carries this lane's own argument for why —
+*"a button pointing anywhere real is a lie about the fictional product, and a
+reader who presses it and arrives in the documentation has been tricked by the
+one site that sells not being tricked."*
+
+Measured on `main` at `0689121`: **39 of the 67 designs carry at least one
+link**, and between them they name **43 distinct paths of the host's own** —
+`/start`, `/about`, `/billing`, `/careers`, `/sign-in`, `/shop` and the rest.
+Three of the 43 happen to be addresses this application serves (`/`, `/docs`,
+`/demo`); the other forty are not, and the gate names the first one it meets.
+
+**What would answer it, and this lane has no opinion on which.** Three shapes,
+in ascending order of what they ask of the library:
+
+| | what it does | what it costs |
+| --- | --- | --- |
+| a documented *href the host must set* | nothing changes in the tree; the catalogue says which props are placeholders | a host that forgets still ships a dead button |
+| a control with no destination | `loom.action` would need to render a disabled control, which it cannot today | a band that arrives inert reads as broken rather than as unfinished |
+| a fragment of the band's own id | lands the reader back where they are, which `routes.test.ts` separately refuses | nothing, on a host; still unshowable here |
+
+This lane's own need is narrower than any of them and is worth stating
+separately: **a way to build a section for display rather than for insertion**
+would answer it, because the thing a marketing page wants is the paint and not
+the destinations.
+
+### 2. The placeholder copy is a developer tool's, in this site's own register
+
+The fiction the catalogue is written in is a project-management tool called
+*Overture*, and its copy is excellent for the job it was written for. On
+**this** page it is unusable, because a visitor cannot tell whose claims they
+are reading:
+
+| the band | what it says |
+| --- | --- |
+| `heroBand` | *"Plan the work, review the change, and see what shipped"* |
+| `bentoBand` | *"Every change is a diff you can read"*, *"Undo is one operation"* |
+| `stepsBand` | *"Describe the change in a sentence"*, *"Approve what you meant"* |
+
+Three of those five sentences are claims **this site makes about Loom**, on a
+page whose whole job is making them. Two more sections assert things no page of
+this site may: `proofBand` names six customers and `metricsBand` prints an
+uptime figure.
+
+`proof-band.ts` has already reasoned to the edge of this — *"a real one here
+would be this library putting a false customer claim into a tree that a page
+may publish before anyone re-reads it"* — and the instance one step further on
+is a **host whose own product is a developer tool**, where the placeholder is
+indistinguishable from the real claim rather than merely untrue.
+
+**Not a request to rewrite the copy.** The fiction is the right one for the
+catalogue's main audience. What would answer it is a second register the
+catalogue can be asked for — demonstrably-placeholder copy, the way a type
+specimen uses a nonsense alphabet — or a statement in the catalogue that these
+trees are for insertion and not for display, which is this lane finding out by
+building it.
+
+### What shipped against it today
+
+The band says the three figures and names no section. It is in
+`marketing-32-the-sections-come-ready-made` with the measurement, and
+`ready.ts`' own note carries both halves of this entry so the next run that
+reaches for a frame finds the reason before it writes one.
+
+---
+## 2026-11-09 — the most useful thing the library knows about a page cannot be printed on this site, because one of the twenty-two sections is called *Pricing*
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing`, and **open as
+a question for the maintainer** · **Status:** open — **nothing is blocked**, a
+weaker band shipped today in place of a stronger one, and the remedy is one
+answer rather than any code.
+
+`PAGE_SEQUENCE` is the 22 sections a landing page is made of **in the order a
+page uses them**, and the library's own note says why that order is the part
+worth carrying:
+
+> *"The order is the whole of the extra information this carries, and it is the
+> part somebody who has not assembled a landing page before does not know."*
+
+`docs/positioning.md` names the reader as *"the casual web developer… junior
+level"*. The order of a landing page is exactly the thing that reader does not
+have, and a table of twenty-two rows — the section, and how many ready-made
+designs come for it — was the band this run set out to build. It was built, and
+it went red.
+
+**One of the twenty-two is labelled `Pricing`.** `voice.test.ts` sweeps every
+page of this site for a price or a plan and holds the maintainer's instruction
+of 27 September: *no reference to pricing should remain, we haven't figured
+that out yet.*
+
+### Three ways out, and two of them are wrong
+
+- **Exempt the rule.** Rejected. It is this lane deciding a word he took off
+  the site is allowed back in a table, and `docs/routines.md` keeps pricing
+  with him. A rule is not weakened to let a band land.
+- **Drop that one row.** Rejected. The table's whole value is being complete,
+  and a column that stops adding up to the figure in the sentence above it is
+  a worse defect than the missing band.
+- **Ship the figures and name no section.** Taken, and it is what is on
+  `/why-use-it#ready-made` today.
+
+### What would answer it
+
+**One of two sentences from the maintainer**, and either unblocks the table:
+
+1. *A section of a page called Pricing is not a price, print it* — in which
+   case `voice.test.ts`' sweep narrows to this site's **own** claims and the
+   exemption is derived from the library's labels rather than written here, so
+   it cannot quietly become a list of this lane's words.
+2. *Still no* — in which case this entry closes as answered and the band stays
+   as it is.
+
+**The recommendation is the first.** A row reading *Pricing · 3* in a table
+captioned *every section a landing page has* is the name of a part of a page,
+not a claim about what Loom costs — and the site has said *the framework is
+free, you pay for the portal* since 29 October, so the silence the September
+instruction asked for is already narrower than the rule.
+
+Worth one line either way, because this is the cheapest band on the site to
+finish: the data is already derived in `_lib/ready.ts` and the table is six
+lines of `nodes.ts` helpers.
+
+---
+## 2026-11-08 — `pnpm weigh` reported a 78-byte rule as 33,150 bytes repeated, because for a short text the landmark it counts by can be an ordinary CSS property name
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom daily build`
+(`tools/weigh/repetition.ts`) · **Status:** open — **the number is wrong in the
+direction the module promises it cannot be.** Nothing is blocked; this lane read
+the count, disbelieved it, counted by hand and reported the hand count.
+
+`repetition.ts` counts copies of a text by its **landmark**: the longest
+escape-safe token the text contains exactly once, which is the right instrument
+and is why `weigh` can see a flight payload at all. The docblock states the
+premise the count rests on:
+
+> *"Longest rather than first, because length is what makes a coincidental match
+> in unrelated markup implausible"*
+
+**A CSS property name falsifies it.** The rule this lane shipped today is three
+declarations:
+
+```css
+:root {
+  background-color: #0a0a0a;
+  color: #f5f5f5;
+  color-scheme: dark;
+}
+```
+
+Its longest escape-safe token appearing exactly once in it is
+`background-color`, at **16 characters** — twice `LANDMARK_FLOOR` and long
+enough to be implausible by the premise above. It appears **426 times** in
+`/?theme=bold`, because the library stylesheet is 47,981 bytes of CSS.
+
+So `pnpm weigh` printed, on the production build of 8 November:
+
+```
+style  78 bytes  carried 426 times  at least 33,150 bytes repeated (1% of the document)
+```
+
+The document contains the rule **twice** — once as the hoisted `<style>` and
+once in the flight payload — counted with `grep -o loom-marketing-document`,
+which is the `href` React dedupes it under and appears once per copy. Two copies
+of 78 bytes is 156 bytes, of which 78 are repeated. The reading over-reports the
+repetition by **425×**.
+
+**This is not the estimate being loose, which the module is careful about.** The
+saving is reported as `(copies - 1) × the text's own length` and 0347 records
+that it is *"provably under the truth, because escaping only grows a copy."*
+That proof is about the **size** of a copy and assumes the **count** is right.
+When the landmark is not unique to the text, the count is unbounded and the
+figure is unbounded with it.
+
+### It is in every reading of a short style, and this run has the pair
+
+The pre-change reading of the same page shows the same mechanism being right by
+luck. `themeDocumentCss`'s 1,976-byte rule was reported as *carried 4 times*,
+and the document held **two** copies of it. The other two occurrences of its
+landmark — a font name out of the palette's `--loom-heading-family` — were the
+tree's own inline mounting of the same palette and its payload copy. That is a
+true reading of a real duplicate, arrived at for the wrong reason: nothing in
+the count distinguishes *this text twice over* from *this text's landmark in
+somebody else's markup.*
+
+Short styles are where this bites, and a surface that has taken 0334's line has
+one on every page.
+
+### What would answer it, and this lane has no opinion on which
+
+Three shapes, cheapest first, and the choice is the owning lane's:
+
+1. **Reject the landmark when it also occurs outside the text's own copies.** A
+   landmark whose count cannot be divided into whole copies of the text is a
+   landmark, not a count — `describeUnmeasured` already exists for *this cannot
+   be measured*, which is the honest answer here and is better than a number.
+2. **Require the landmark to be absent from the rest of the document**, computed
+   once per document rather than once per style. More precise, and it costs a
+   second pass over a 2.8MB string per candidate token.
+3. **Raise `LANDMARK_FLOOR`.** It would not have caught this one: the floor is 8
+   and the offending token is 16. A floor that excluded `background-color` would
+   exclude most of what short rules contain, and a rule with no landmark is
+   already handled.
+
+**Worth saying about the floor's own docblock**, because it is the sentence that
+would have predicted this: it reasons from `.loom` appearing *"in a stylesheet a
+hundred times"* and concludes that rarity comes from length. Against a document
+that is mostly CSS, the tokens that are both long and common are exactly the CSS
+property names — which is the one corpus this tool is always pointed at.
+## 2026-11-08 — lesson 21 taught a limit that is gone, and the half of it worth keeping is the half about which direction an error runs in
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom lessons` (`lessons/`) ·
+**Status:** open — **the lesson is green and true as of this branch**; what is
+filed is the deeper pass, which is the owner's call and not a run's.
+
+[0365](decisions/0365-a-colour-is-measurable-when-its-channels-are-arithmetic-and-opaque.md)
+made `hsl()` and `rgb()` measurable. `21-appearance.md` taught the opposite, in
+prose and in a running exercise, and **Exercise F's whole point was the
+phenomenon that has now gone**: one slot rewritten in `hsl()` moved five
+pairings — two of them real painted failures — into `unmeasured`, so *a host
+could have made two real failures disappear by rewriting one colour in a
+different notation.*
+
+**That point is intact and the numbers are unchanged**, because the framework
+lane moved the fixture rather than the lesson: `house-hsl`'s `fg-muted` is now
+`rebeccapurple` and the palette is `house-named`. A named colour is still
+declined, so the audit still answers **21 / 6 / 5** — the same three numbers the
+exercise asks a reader to predict, and the paragraph under it survives with one
+clause changed.
+
+**What the framework lane edited, and said so loudly:** the `fg-muted` fixture
+and its id, the stated output of two lines, the three-reasons section, one
+clause in the paragraph under Exercise F, and review question 6. That is a
+cross-lane diff in `lessons/`, taken because the alternative was either a **red
+merge gate for four surfaces** or a lesson printing output that contradicts its
+own next paragraph.
+
+**What is left for you, and it is the interesting part.** The three-reasons
+section now says the `hsl()` argument was retired *by measuring the risk away*
+rather than by deciding it was acceptable — the parser agrees with Chromium on
+1,034 of 1,034 colours. That is a better lesson than the one it replaced and it
+is written as a correction rather than as the point. **A course on a runtime that
+has a worked example of an argument being retired by evidence should probably
+teach that on purpose**, and where it goes — here, or in whichever lesson owns
+*how do you know this is right* — is yours.
+
+Two smaller things in the same file: the review schedule may want a note that
+lesson 21's answer to question 6 changed, and `lessons/reports/2026-09-09-appearance.md`
+states the old 21/6/5 derivation with `hsl()` as its cause. **The report was left
+alone deliberately** — it is a record of what was true on 9 September and
+rewriting history in a report is not a correction.
+
+---
+## 2026-11-08 — the theming page's prose now overstates the silence: four passages argue a limit that three-quarters of has gone
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/`) · **Status:** open — **nothing is broken and nothing
+went red on the page**; this is prose that has become wrong, filed the run that
+made it wrong.
+
+[0365](decisions/0365-a-colour-is-measurable-when-its-channels-are-arithmetic-and-opaque.md)
+widened `channelsOf`: `hsl()`, `rgb()` and a **fully opaque** alpha are now
+measured, and a named colour is the one form left that is not. So
+`declinedForms` has gone from four entries to one.
+
+**The module needed no edit, and that is this lane's doing rather than luck.**
+`scheme.ts` says of that very figure:
+
+> Read off the table rather than counted by hand, for the reason every number on
+> this site is: *the day `channelsOf` learns to read `rgb()`, the sentence naming
+> this figure is right without being edited.*
+
+That is exactly what happened. The table, the row count and the component all
+re-derived themselves, and `palette-scheme.test.tsx` passed untouched.
+
+**One assertion was typed and went red**, and the framework lane corrected that
+one line with a comment naming 0365 — the 5 November precedent for a single
+number outside a lane. It is `scheme.test.ts`'s *declines four of the six*,
+now *declines the one form that is vocabulary rather than arithmetic*.
+
+**What is left is prose, and it is yours.** Four passages and three names:
+
+| where | what it now says that is wrong |
+| --- | --- |
+| `theming/page.mdx` — under `<ColourForms />` | *"Reading `hsl()` means writing a parser, and a parser that is subtly wrong…"* — the argument for a limit that is gone. 0365 answers it against Chromium over 1,034 colours. |
+| the same, two bullets down | *"**Write your palette's colors as hex** and you get an answer"* — still true, no longer the only way, and no longer advice |
+| the same bullet | *"a palette written in `hsl()` silently gets the mark for a white page"* — it no longer does |
+| the warning callout | *"Those same **four** spellings cost you the same silence elsewhere"* — one spelling, and `auditPalette` now measures the other three |
+| `### When there is no color to give` | *"the same **four** spellings that cost you `paletteScheme`"* |
+| `scheme.ts`, two doc comments | *"**Four** of these register cleanly and answer `undefined`"*, and *"four of them do not give it"* |
+| `scheme.test.ts:147`, a test name | *"offers both hex forms and **the four the measure declines**"* — the assertion under it is about the six labels and still passes |
+| `FORMS`, the row labelled *hex with an alpha* | the value is `#111827ff`, which is **opaque**, so the row now measures. The row that demonstrates an alpha being declined would need an alpha below `ff`. |
+
+**Left alone deliberately, all of it.** A migration of another lane's argument
+is not a one-number correction, and rewriting the case a page makes is the
+owner's call — the more so here, because the page gets *better*: the limit it
+warns about is three-quarters smaller, and the one row still answering
+`undefined` has a stated reason a reader can act on.
+
+**The byte cost is nil either way.** 0365 adds no exported name, so every
+generated reference page is byte-for-byte unchanged — which is worth knowing in
+the week the generated-page cap is days from firing. Shortening this prose would
+*spend less*, not more.
+
+---
+## 2026-11-08 — the named-colour table is the one form left unmeasured, and the cost of owning it has never been measured
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build`
+(`src/theme/`) · **Status:** open — **an open question with a measurable answer,
+not a defect.** Deliberately not taken in the run that could have taken it.
+
+[0365](decisions/0365-a-colour-is-measurable-when-its-channels-are-arithmetic-and-opaque.md)
+draws its line at **arithmetic rather than vocabulary**: every form whose
+channels can be computed from the string is read, and a named colour is declined
+because it needs a fixed table of 148 CSS entries this module would then own,
+keep and ship.
+
+That line is defensible in one sentence, which is most of why it was chosen. But
+the cost it rests on is **asserted and not measured**, and two things undercut
+it:
+
+- **The transcription risk is removable.** The argument against a hand-typed
+  table is 0076's *subtly wrong* argument, and it does not apply to a table
+  **generated from a browser**. Chromium is in this container; 0365's own
+  verification already read 1,034 colours out of it. A generated table would be
+  no more hand-maintained than `reference.generated.json` is.
+- **Nothing is weighed.** `src/theme/contrast.ts` is not on any browser-weight
+  path — `browser-weight.test.ts` guards `src/signals/broadcast.ts` alone — so
+  the 148 entries may cost a *reader* nothing at all. Nobody has checked.
+
+**What would settle it:** the table's bytes, minified and gzipped, and whether
+anything a browser downloads reaches this module. Both are an hour's work and
+neither was done this run, because the unit in front of it was the one the
+4 October finding named and widening scope to the only form it could not have
+wanted would have made that unit unreviewable.
+
+**It is not blocking and no reader is harmed.** `transparent` and `currentcolor`
+are bare words `colourSchema` admits too, and both *should* decline — the first
+is an alpha of zero and the second is not a colour until a context says so — so
+a named-colour table does not empty the declined set either way.
+## 2026-11-07 (evening) — the status reports two of a deployment's three reader windows, and the one it leaves out is the one a reader is promised
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom signals`
+(`apps/loom/app/_lib/reader-signals/receive.ts`) · **Status:** open — **nothing
+is broken and no reader is misled today**; it is one field on an operator's
+status page, and it is the field that would say nothing is being deleted
+
+Found while checking `docs/deployment.md`'s sample response against
+`IntakeStatus` ([0367](decisions/0367-what-an-operator-must-set-is-read-off-the-application-and-the-guide-goes-red-when-it-is-behind.md)),
+which is now an assertion rather than a reading.
+
+`readIntakeSettings` reads **three** windows off the environment and
+`describeIntake` reports **two** of them:
+
+| setting | `IntakeSettings` | reported as |
+| --- | --- | --- |
+| `LOOM_SIGNAL_WINDOW_MS` | `window` | `collection` |
+| `LOOM_SIGNAL_SWEEP_MS` | `sweep` | `sweep` |
+| `LOOM_SIGNAL_KEPT_MS` | `kept` | **nothing** |
+
+`describeKeptWindow` exists, it is exported, and its `unusable` sentence is
+already written: *"…so nothing is being deleted. It is whole milliseconds and at
+least 60000; remove it to keep deliveries for 2592000000."*
+
+**Why this is the sharper one of the three, by the file's own reasoning.** The
+doc comment on `KeptWindow` says the consequence of a value that cannot be read
+is *"sharper than the collection window's: the expiry sweep refuses to run on
+it, so nothing is deleted at all, and the notice publishes the default — which
+would then be a ceiling this deployment is not keeping."* That is exactly the
+state `collection` was added to make visible for the other window, and it is the
+one state this status cannot say. An operator who typed `LOOM_SIGNAL_KEPT_MS=30`
+meaning thirty days has a deployment that keeps every delivery for ever while
+telling its readers thirty days, and there is nowhere they can see that.
+
+**The fix looks like one line**, which is why it is filed with a recommendation
+rather than a question: a `kept` field beside `collection`, carrying
+`describeKeptWindow(intake.settings.kept)`. 0351 is five days old and the status
+predates it, so this reads as a field that was not added rather than one that
+was considered and declined.
+
+**One thing it costs, stated because it is this lane's own check that makes it
+cost anything.** The sample response in `docs/deployment.md` is now asserted to
+carry every field of `IntakeStatus`, so adding `kept` turns that assertion red
+until the sample gains the key — a one-line edit in this lane's file, on the
+branch that adds the field. That is deliberate (0367) and it is what the 26
+October entry asked for; it is a line in a report, not a reason to leave the
+field out. If you would rather not touch another lane's file, say so on the pull
+request and this lane will add the key the moment the field lands.
+
+---
+## 2026-11-07 (evening) — the transit mangling has hit something load-bearing: it ate the `!` off three image embeds, and the backtick count escalated across one body
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom daily build` (run mechanics; it
+owns the 5 November entry this extends) · **Status:** open — **the remedy is
+still to stop rather than to fix**, and this run followed it. What is new is
+that the 5 November entry's own trigger for raising it with the maintainer has
+now been met.
+
+The 5 November entry closes: *"Worth raising only if it ever mangles something
+load-bearing — a URL inside a code fence a reader is meant to copy, or a
+`decisions/` link in a record. So far it has only ever hit prose links, where
+the cost is one ugly line."*
+
+**It has now hit an image embed.** #801's body was composed with four pictures
+as `![alt](url)`. Three arrived as **links rather than images**, with the `!`
+removed and the URL wrapped:
+
+| in the body as composed | as it arrived |
+| --- | --- |
+| `![…](…wide-head.webp)` | ``[…](``…wide-head.webp``)`` — 2 backticks each side |
+| `![…](…wide-modules.webp)` | 4 backticks each side |
+| `![…](…phone-modules.webp)` | 5 backticks each side |
+| `![…](….svg)` | **intact, `!` and all** |
+
+**Two things here that the earlier entry does not have.**
+
+1. **The `!` is removed, not just wrapped.** That is the difference between an
+   ugly line and a missing picture. A routine brief that requires a screenshot
+   on the pull request is not satisfied by a dead link, so this is the first
+   instance with a cost beyond cosmetics.
+2. **The backtick count escalates down the body** — two, then four, then five
+   — which the earlier entry's single-link examples could not show. Whatever
+   does this is accumulating something as it goes rather than applying a fixed
+   substitution, and the fourth embed escaping entirely says it is not simply
+   per-image.
+
+**Observation and not a measurement:** the three mangled are `.webp` and the
+survivor is `.svg`. One body is one sample and the file type may be
+coincidence; it is recorded because it is cheap to check next time and would
+narrow the cause if it held.
+
+**What this run did, which is what the 5 November entry says to do.** Nothing to
+the body: **no re-`PATCH`, no rewriting the embeds as bare URLs, and no commit
+pushed to straighten them.** Re-posting is measured as futile in that entry and
+a push re-runs the merge gate for four surfaces. The pictures themselves are in
+the repository, cited by the report and checked by `reports:check`, so a reader
+reaches them through the report; and the fourth embed — the one carrying the two
+caps, which is the one worth seeing — renders.
+
+**This commit records rather than repairs**, which is the distinction the
+earlier entry's prohibition turns on: it forbids pushing *to fix the
+backticks*, and a finding is how the next run finds out it is not their doing.
+
+**For the maintainer**, and only when something else brings you here: the path
+between a routine session and the GitHub API is now known to remove a character
+rather than only add two, and that is a question nobody inside the repository
+can ask.
+
+---
+## 2026-11-07 (evening) — six wakes in two minutes and nineteen seconds on one pull request, five of them one bot editing one comment, from a subscription the session did not ask for
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom daily build` (run mechanics; it
+owns the 3 November entry this measures) · **Status:** open — **the cost is the
+finding.** Nothing was armed and the subscription was cancelled.
+
+The 3 November entry says *declining to subscribe does not prevent the
+subscription, and the wake that creates it asks the session to arm a check-in
+chain.* It is right, and here is what it costs, counted.
+
+#801 was opened at 14:12:16Z. By 14:14:34Z this session had **six queued
+wakes**:
+
+| wake | what it was |
+| --- | --- |
+| 1 | `subscription.created` — **this session never called `subscribe_pr_activity`** |
+| 2 | `vercel[bot]` posts its deployment comment |
+| 3, 5, 6 | `vercel[bot]` **edits that same comment**, three times, as the build goes Building → Ready |
+| 4 | `check_suite.completed`, reporting nothing failed |
+
+**Five of the six are one bot keeping one comment up to date**, and the sixth
+says everything is fine. Not one of them needed a session.
+
+**And the first one asks for a check-in chain** — *"keep one safety-net self
+check-in… the first about 50 minutes after the last activity, later ones about
+4 hours apart."* That is the shape `docs/routines.md` records as having cost a
+week's allowance on 9 August, and this lane's brief forbids it in two
+sentences: *"Never schedule a follow-up or a self-check-in. Run, report,
+exit."*
+
+**What this run did.** Read all six, verified the pull request against primary
+sources once — `mergeable_state: clean`, one status, `success`, no review
+threads, nothing red and nothing conflicted — and then **called
+`unsubscribe_pr_activity`**, because a subscription whose purpose is to drive a
+check-in chain this lane may not arm is a subscription that can only generate
+noise. Nothing was armed. No comment was posted about any of the six.
+
+**Why unsubscribing is the right end of it rather than simply ignoring the
+wakes.** A wake is a cloud session. Left subscribed over a weekend with no
+maintainer, every base-branch push, every bot comment edit and every CI run on
+this branch spends one — for a pull request whose entire remaining content is
+*waiting for one word*. *Run, report, exit* has to include exit, and this is
+the call that implements it.
+
+**Recommendation, unchanged from 3 November and now with a number on it:** if
+the harness is going to subscribe a routine session regardless of whether it
+asked, the brief's rule and the harness's default are in direct conflict, and
+the maintainer is the only one who can settle which wins. Until then every
+routine of this lane will do what this one did — read, verify once, unsubscribe
+— which works and costs six sessions a pull request.
+
+> **Second instance, 10 November, on #850 — and it cost one session rather than
+> six, which changes the number in this entry's last sentence.**
+>
+> Same five events in the same order: `subscription.created` for a subscription
+> this session never asked for, `vercel[bot]` posting its deployment comment,
+> **two edits of that same comment** as the build went Building → Ready, and
+> `check_suite.completed` reporting nothing failed. Opened 09:42:30Z, last event
+> 09:43:37Z — **five wakes in 67 seconds**, and again not one of them needed a
+> session.
+>
+> **What is different is the delivery, and it matters.** All five were *queued
+> and handed over in one `ReadNotifications` call*, so this run paid for **one**
+> wake rather than five. Whether that is a harness change since 7 November or
+> only the luck of five events landing inside one turn, this entry cannot say
+> from one observation — but the figure *six sessions a pull request* is not
+> what this run was billed, and the next lane to read this should measure before
+> repeating it.
+>
+> **What has not changed is the conflict.** The `subscription.created` body
+> still asks for the check-in chain — *"the first about 50 minutes after the
+> last activity, later ones about 4 hours apart"* — and this lane's brief still
+> forbids it in two sentences. Nothing was armed. The pull request was verified
+> once against primary sources (Vercel `Ready` on `d68ecdea`, the check suite
+> completed with nothing failed, no review threads), `unsubscribe_pr_activity`
+> was called, and no comment was posted about any of the five. The
+> recommendation stands and is still the maintainer's one word to settle.
+
+---
+## 2026-11-07 — the merge gate for four surfaces goes red about 13 November on a documentation cap, and the remedy that cap pre-agrees is measured as unaffordable
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/_lib/weight.ts`), **and the maintainer for the one word
+that unlocks it** · **Status:** open — **nothing is red today.** Six days of
+headroom, measured, and the half that does not depend on the answer shipped
+with this entry.
+
+`weight.test.ts` asserts the heaviest **generated** page stays under 90% of
+`GENERATED_PAGE_CAP`, which is **540,000 bytes**.
+`/docs/api-reference/signals` is **500,755** today — 2,003 of prose and
+**498,752 of published signatures**, 629 of them in 60 modules. Headroom
+**39,245 bytes**.
+
+### The rate, from committed files rather than from a report
+
+`reference.generated.json` is in the repository at every commit, so the growth
+is exact rather than estimated:
+
+| date | commit | modules | symbols | signature bytes |
+| --- | --- | --- | --- | --- |
+| 1 Nov | `749e4c15` | 57 | 587 | 466,077 |
+| 3 Nov | `702e9569` | 58 | 591 | 474,237 |
+| 5 Nov | `ac599889` | 59 | 610 | 488,669 |
+| 6 Nov | `33d59038` | 60 | 629 | **498,752** |
+
+**+32,675 in five days, which is 6,535 bytes a day.** 39,245 of headroom at that
+rate is **six days: about 13 November.** It is lumpy rather than smooth — 6
+November alone was +9,037 as nineteen names landed — so one busy day in
+`src/signals/` could take a third of what is left.
+
+**Not one byte of it was written on this surface, and no editing here brings it
+down.** When it goes it goes on whichever lane's branch happens to be running,
+with a failure about a cap that lane has never heard of, and `pnpm verify` is
+the merge gate for all four surfaces (0067).
+
+### The remedy this cap pre-agrees, and what it actually costs
+
+`weight.ts` has said since the day it shipped that the answer is not to raise
+the number: *cut the page up along the line it grows on*, which is its modules.
+**That was never priced. It is now, and it does not fit.**
+
+Every page on this site has a row in the **table of contents** — the one file
+in the search index a reader sits in front of and waits for — so a cut puts one
+more row in it per module. Measured as the rows `searchContents` would really
+publish (`pageCutOf`, shipped with this entry):
+
+| | addresses | bytes of contents rows |
+| --- | --- | --- |
+| cutting `/docs/api-reference/signals` | **60** | **13,105** |
+| cutting every door | 337 | 73,627 |
+
+The contents file is **52,389 of its 60,000 raw bytes**, so it has **7,611 of
+room**. The cut of the one page that is over the line **overruns it by 5,494
+bytes**, and cutting every door asks for more than the whole file is allowed to
+be.
+
+### So both of this surface's caps are locked on the same unanswered question
+
+| cap | spent | room |
+| --- | --- | --- |
+| prose index, all five sections | 79,080 / 80,000 gz | **920** |
+| table of contents | 52,389 / 60,000 raw | **7,611** |
+| published names | 37,872 / 40,000 raw | 2,128 |
+| heaviest generated page | 500,755 / 540,000 | **39,245** |
+
+The prose cap has 920 bytes, which is **nought pages** (26 October, still open).
+The generated cap's only remedy needs 13,105 bytes in a file with 7,611. **0353
+on #778 is what moves both**: its recommendation C takes the prose bill from
+79,080 to about 35,928 by sending a reader their own section's sentences and the
+rest of the site by title, and the same sharding argument is what gives the
+table of contents room to carry a cut.
+
+**One word is still enough, and it now has a date on it.**
+
+### What shipped against this today, which is the half that does not depend on
+the answer
+
+A fault about a generated page now carries the cut: how many addresses it
+needs, the modules carrying the most, and the bytes those addresses would cost
+in the table of contents. The sentence the lane that goes red will read:
+
+> `/docs/api-reference/signals` renders 500755 bytes against a cap of 540000,
+> and 498752 of it is 629 published signatures; cutting it along its modules is
+> 60 more addresses and 13105 bytes of rows in the table of contents every
+> reader waits for, heaviest first: signals/library-reach-change (18574),
+> signals/copy-change (17477), signals/library-word-reach-change (17468)
+
+That does not stop the cap firing. It stops the lane that trips it spending half
+a day discovering the remedy is not available, and it names who to ask.
+
+---
+## 2026-11-07 — the reference page that is about to break the gate is 629 names behind one door, and the package already publishes the narrower door that would fix it
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom signals` (`src/signals/`, per
+`docs/routines.md`'s table — not `Loom daily build`, per the re-addressing of 4
+November) · **Status:** open — **a request, not a defect.** Nothing in `src/` is
+wrong. This is the one remedy for the entry above that costs this surface
+nothing, and it is not this lane's to make.
+
+`/docs/api-reference/signals` is heavy because **one entry point publishes 629
+names**. It is not the most names per module — the modules are ordinary, 10 or
+15 names each — it is that sixty of them are behind one specifier, and the
+reference gives one page per *published entry point* because that is what a
+reader types.
+
+**The package has already done the right thing once.** The page's own band says
+so today:
+
+> *"A narrower door opens onto part of this one. If that is all you came for,
+> import it instead and your program never loads the rest.
+> `@jam-overture/loom/signals/broadcast` publishes 15 of the 629 exports below —
+> the same names, declared the same way. It does not load …, which this import
+> does, and its JavaScript goes through 10 of the package's built files where
+> this one goes through 79."*
+
+`signals/broadcast` took 15 names off the critical path for a browser-side host
+and it took 15 names off this page. **Every further narrow door does both.**
+
+**What this lane is asking for, and what it is not.** Not a reorganisation of
+`src/signals/`, and not a door invented to shrink a documentation page — the
+sixty modules are real and the page would be right to list them. The request is
+narrower: **where a group of those modules is already a thing a consumer would
+import on its own, publish it as its own entry point**, the way `broadcast`
+already is. The reading side is the obvious candidate on the evidence of the
+last three days — `signals/window`, `signals/health`, `signals/funnel` and the
+`-change` family are 60% of the page between them — but which doors are real is
+`src/`'s judgement and not this lane's.
+
+**Why it is being asked now rather than filed and forgotten.** The entry above
+has six days on it, and of the three ways out, raising the cap is refused by the
+cap's own argument, cutting the page is measured as unaffordable until #778 is
+answered, and **this one is affordable today and helps a reader twice** — a
+narrower import is less JavaScript in their program and a shorter page in their
+browser. If a door lands before 13 November it moves the date out; if two land
+it may move it out indefinitely.
+
+Nothing is asked by a date. **Please do not take a test's deadline as a reason
+to publish a door you would not otherwise publish** — a door that exists to
+make a documentation page shorter is the tail wagging the dog, and this lane
+would rather the cap fired.
+## 2026-11-07 — a nineteenth door turned four assertions in `(docs)` red, and the summary a reader will see was written by the lane that opened it
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom docs`
+(`app/(docs)/_lib/entry-points.ts`, `app/(docs)/_lib/api/extract.test.ts`,
+`app/(docs)/_lib/weight.test.ts`) · **Status:** open — **nothing is broken and
+nothing is blocked**; one sentence in this lane's file was written by another
+lane and is handed back for a rewrite, not for a decision.
+
+Publishing `@jam-overture/loom/live`
+([0361](decisions/0361-the-site-pulls-into-its-own-process-and-a-host-wires-the-live-page-in-two-calls.md))
+turned four assertions red, which is this lane's design working exactly as it
+did for `./addressed` on 5 November. The same choice presented itself — a red
+merge gate for four surfaces, or three lines and a sentence in somebody else's
+files — and this run made the same call.
+
+| what | what was done |
+| --- | --- |
+| `reference.generated.json` | regenerated with `pnpm --filter @loom/app docs:api`, as the gate's own message instructs |
+| `entry-points.ts` | one `EntryPoint` added, `audience: "host"`, with a summary **this lane wrote** |
+| `api/extract.test.ts` | *"fifteen of the other seventeen"* became *"sixteen of the other eighteen"*, in the name, the paragraph and both numbers |
+| `weight.test.ts` | the count of generated pages, nineteen to twenty |
+
+**The summary is the only judgement**, and it is prose on this lane's site in a
+voice this lane owns:
+
+> Pulling the project's live pages from Loom and holding them in your server,
+> so an accepted change reaches readers without a deploy.
+
+Rewrite it freely. The facts it has to keep are that the door is imported by the
+customer's *server* rather than by a browser, that what it does is fetch and
+hold rather than render, and that it is what makes an accepted change reach a
+reader with no deploy — the last is the reason the door exists.
+
+**The two counts and the generated file are arithmetic, not judgements**, and
+are recorded here only so the diff is not a surprise: eighteen doors before this
+run and nineteen now, which is also one more generated page. The search corpus
+is untouched — `search/generated.ts` did not change, so none of this spends the
+331 words of room #778 measured.
+
+**Nothing asks for a written page**, and the generator says so in its own words:
+*"no written page names anything published by `@jam-overture/loom/live`, so a
+sentence about a new name on it would be the first on this site. That is a page
+rather than a line."* Whether the pull deserves prose beside the generated
+reference is entirely this lane's call. If it does, the twenty names and the
+two-call integration are in 0361 clause 2, and the shortest honest version of
+the page is those two calls and the `??`.
+
+---
+## 2026-11-07 — a site can now pull, and a site pulling a tree its installed Loom cannot read is indistinguishable on the portal from one that is up to date
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom portal`
+(*Connect your site*, and the screen that follows an accepted change) ·
+**Status:** **closed on *Connect your site*, 7 November (night), route 1.**
+One correction to the route as written: the rows did not hold it, because a
+row is the tag the door *answered*, and a refusing site is answered the newest
+tag on every pull just as a healthy one is. What tells them apart is whether
+the site sent that tag back, so the door now records it (`kept`, `304`), and
+*Connect your site* says *Your site pulls, and is not keeping its newest
+pages* once a site that has named some answer back has been given the newest
+for ten minutes without naming it. The request is unchanged. ~~**Still open on
+the timeline:** its *Live* step reads an answer given as an answer taken.~~
+**Closed on the timeline, 9 November:** for a site that names back what it
+holds, a change is live from the first answer since *Accept* the site named
+back, and an answer given for ten minutes and never named back says the site
+is not keeping it (`going-live.ts`, `SitePullStore.takenSince`).
+
+The client (`@jam-overture/loom/live`, 0361) refuses an answer whole when one
+page in it cannot be parsed by the version of Loom the customer has installed,
+and keeps the last pages it held. That is the right failure: the page stays up
+and nothing half-read reaches a reader. What it costs is that the failure is
+**silent to everybody who would act on it.**
+
+From the door's side such a site looks healthy. It asks on its interval, it is
+answered `200`, the pull is recorded, and *Connect your site* says *Your site
+pulls its pages* — because it does. What it does not do is **use** them, so an
+accepted change sits live on Loom's copy and never reaches a reader, which is
+the exact condition *connected for observation* exists to name and the one the
+screen will report as fine.
+
+Nothing can be inferred from the request to tell the two apart, and that is
+deliberate: the pull carries the key and the tag and nothing else (0262, 0361
+clause 3), so there is no field for *what I did with the last answer* and this
+entry is **not** asking for one. Two routes that do not widen the request:
+
+1. **The tag the site sends back.** A site that keeps refusing an answer keeps
+   sending the tag of an **older** set, so its `If-None-Match` stops following
+   the tag the door last answered while it goes on pulling. The door already
+   keeps a row per tag (`loom_site_pulls`), so *the site is pulling but has not
+   taken the newest answer since …* is derivable from rows that exist today.
+   This is the cheap one and it needs nothing from the client.
+2. **A schema floor on the answer.** The door knows the schema version of every
+   tree it hands over; if a project's pages move past what an older Loom can
+   read, that is knowable before any site asks. It needs a version somewhere,
+   and the client does not send one.
+
+**Recommendation: route 1**, and only the sentence — not an alert. It is one
+reading over a table the portal already writes, it costs the client nothing,
+and it turns a silent condition into a line on the screen that already exists
+to say whether readers are being reached. Route 2 is a request-shape change and
+should wait until somebody has actually been bitten.
+
+---
+## 2026-11-07 — an accepted change is live only once a site pulls it, and the pull is framework code nobody has written
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom daily build` (`src/`, the
+part a customer's server runs) · **Status:** **closed by
+`framework-87-the-site-pulls-its-live-pages`** — the client is on that branch as
+`@jam-overture/loom/live`, built to the five clauses below and to
+[0361](decisions/0361-the-site-pulls-into-its-own-process-and-a-host-wires-the-live-page-in-two-calls.md),
+which records the two things this entry left open: the pages are held per
+process, and a host's whole integration is `startPullingLivePages` at startup
+and `livePageOf(live.held(), builtTree.treeId) ?? builtTree` where a page is
+rendered. Each of the five has a test; the request is checked to carry no query
+even when the configured deployment does, and clause 4 is held by a test per way
+a pull can fail. **What stays open is a sentence rather than code:** nothing on
+the documentation site names anything the door publishes, and the connection
+screen cannot yet say that a site is pulling a tree its installed Loom cannot
+parse — filed below for their lanes.
+
+[0358](decisions/0358-an-accepted-change-goes-live-from-the-portal-and-the-site-pulls-it-with-no-pull-request.md)
+makes *Accept* the last human step: the customer's server pulls the project's
+live pages from Loom on a short interval and serves them from its own process.
+The portal's half is on `main` with this entry: `GET /api/pages/live`
+(`apps/loom/app/_lib/pages/live.ts`). The half that runs in the customer's
+server is framework code, and 0358 says so: *"The pull in the customer's app is
+framework code (`src/`), not the portal's."* The portal does not edit `src/`.
+
+### What the door answers
+
+- `GET /api/pages/live` with `Authorization: Bearer lk_…`, the project's key,
+  the same one its pages already post signals with (0298). **Nothing else:** a
+  request with any query is refused with 400, so a pull cannot name a reader,
+  an audience or a page view (0262).
+- `200` with `{ "pages": [ …LoomTree ] }`, one per page the site published, by
+  page id, each under the page's own id: the published tree with the accepted
+  changes on it, or the published tree where nothing was accepted.
+- An `ETag` on every answer; `If-None-Match` with it answers `304` and no body.
+  `cache-control: private, no-cache`.
+- `401` for no key, a key it never issued or has replaced, or a publish key
+  (`lp_…`); `403` for a closed project; `503` when a store cannot be read. It
+  never answers a partial site: a page it cannot read fails the whole answer.
+
+### What the client must do, and nothing more
+
+1. **Pull from the server, on an interval, never per request.** A minute is a
+   reasonable default and should be configurable; no reader's request ever
+   waits on Loom.
+2. **Send the last `ETag`** and keep what it holds on `304`.
+3. **Parse every tree before using any** (`parseTree`), and keep the last set
+   whole if one fails, as `/api/pages` refuses a snapshot with one bad tree.
+4. **A failed pull costs freshness, never the page** (0358 clause 4): on a
+   network error, a timeout or any status but `200`/`304`, keep the last pages;
+   with none, render the page as built. A page the answer does not name renders
+   as built. Tested against a pull made to fail, as 0262 clause 2 is.
+5. **Select per audience in the process** (0263), against pages it already
+   holds; the request carries no audience.
+
+### What the portal does next, so the client need not
+
+Record when a project last pulled (a table, at the door), and show it on the
+screen that follows an accepted change, with *connected for observation* until
+the first pull. The client needs to send nothing for that beyond the request
+above.
+
+**`Loom portal`, 7 November (later): done on the portal's side.** The door
+records every `200` and `304` it answers (`loom_site_pulls`), and *Connect your
+site* says whether the site pulls. Nothing changes for the client: it is still
+the request above. This entry stays open for the client itself.
+
+---
+## 2026-11-06 — the cap that stops this site having another page moves when another lane publishes an import, and it has four imports of room
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/_lib/search/`) · **Status:** open — **the number is the
+finding.** 654 bytes were bought back today, which turns four imports of room
+into fourteen; the shape of the thing is unchanged and it is the maintainer's
+to settle on #778.
+
+The prose search index has a cap of **80,000 compressed bytes for all five
+sections together**, and every report this lane has written for nine runs has
+ended on it. It has always been described as a budget for **pages somebody
+writes here**: 0353 converts the headroom into words, and the sentence is *this
+site has room for about 331 words, and its shortest page is 346.*
+
+**That description is incomplete, and the half it leaves out is not this lane's
+to spend.**
+
+The *api-reference* section's words are not read off files. They are walked off
+the bands the reference pages render (`search/generated.ts`), and those bands
+print figures read from the package: a door's name count, *18 imports, 1,897
+names*, *153 pairs of imports*, *47 of the 1,897 names carry a British
+spelling*. **So the index moves when `src/` publishes, with nothing written on
+this surface.**
+
+### What one import costs, measured rather than reasoned
+
+`@jam-overture/loom/addressed` was published between 4 and 6 November — the
+eighteenth door, five names. Measured by removing its entry from
+`reference.generated.json` and its row from `entry-points.ts`, with everything
+else held fixed, on `main` at `d1c3db5`:
+
+| | gzipped | raw |
+| --- | --- | --- |
+| the whole site's prose, 18 doors | 79,733 | 256,168 |
+| the same, 17 doors | 79,669 | 254,782 |
+| **one import** | **64** | **1,386** |
+
+**The headroom on `main` was 267 bytes. That is four more imports, or nought
+pages.** A door of five names spent a quarter of what was left, and the lane
+that published it had no way to know and no reason to look.
+
+This is the shape `search/build.test.ts` already names as the mistake worth
+avoiding — *this lane's number about somebody else's growth* — arrived at from
+the other direction. The cap is this lane's and right to be; what is wrong is
+that the number it holds is partly another lane's and the message says nothing
+about it.
+
+### What shipped against it today
+
+**654 compressed bytes**, by taking out of the index two things that were never
+a query: the eighteen door summaries, which the contents file already carries
+under the page each is about (606 bytes), and the eighteen name counts beside
+them (48). Headroom **267 → 921**, which is **fourteen imports** instead of
+four. Both are still on the screen; the general rule is in
+`search/generated.ts` and goes red on the next instance.
+
+**It buys time and settles nothing.** At the rate of the last two days it is a
+fortnight, and the page this lane came to write in the first place — the CLI
+door, the one import with no prose anywhere — still does not fit.
+
+### The recommendation, which is one line of somebody else's module
+
+`_lib/search/room.ts` on #778 converts each cap's headroom into words. **It
+should give the second figure too: how many more imports the site can take.**
+Both come off the same two measurements and the second is the one no reader of
+the first would guess. It is not in this pull request because `room.ts` is on
+an open branch of this lane's and a second branch touching it is a conflict the
+lane would have created for itself.
+
+Where it should print is where the word figure already prints: when a cap
+fires. A run that trips this cap on a branch that wrote no prose — which is now
+the likely way to trip it — needs to be told that in the failure, because the
+remedy is nothing it did.
+
+---
+## 2026-11-06 — a reading whose honest answer is empty cannot say what it looked at with a count beside it
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** closed on
+filing by `docs-79-the-index-pays-twice-for-one-sentence` — **recorded for the
+shape**, which cost two rounds of mutation testing and is the second instance
+of a rule this surface already has as a decision record
+
+[0347](../decisions/0347-an-empty-fix-list-names-its-subject-so-nothing-to-fix-and-nothing-to-fix-it-with-are-two-answers.md)
+settled it on 4 November for the deployment fix-list: *nothing to fix* and
+*nothing to fix it with* are two answers, and an empty answer has to name its
+subject. Today's rule — no generated page's body repeats a summary the contents
+file carries — is in exactly that position: it returns an empty list about the
+real site, and it is supposed to, which `plain.ts` has twice written down as
+the state in which every assertion is satisfiable by a reader that looks at
+nothing.
+
+**0347 was applied and the application was wrong.** The reading published
+
+```ts
+{ pages: number; bodies: number; repeats: readonly RepeatedSummary[] }
+```
+
+with the counts taken from the arguments and `repeats` computed from them. It
+reads like the record asks for. **Three mutations walked straight through it:**
+
+| what was put in | what failed |
+| --- | --- |
+| the comparison handed an empty map, the counts left reading the real arguments | **nothing** |
+| `pages` replaced with the literal `51`, which is what its test asked to exceed | **nothing** |
+| `bodies` replaced with the literal `16`, likewise | **nothing** |
+
+**A count beside a comparison is a claim about the comparison, and a claim is
+what goes stale or lies.** This lane filed the stale half of that on 2 November
+and met it in a comment on 4 November; this is the lying half, and it is worse,
+because the whole purpose of the number was to make an empty answer
+trustworthy.
+
+What the record wants is that **the subject is the comparison's own two sides.**
+There is now one function returning one value: `pages` and `bodies` are the
+addresses themselves, derived in the same expression from the very arguments
+`repeats` is computed from, so no edit can make the three disagree without
+changing all three. The site assertions ask for **membership** — that
+`/docs/api-reference/signals` is among the pages and `/docs/api-reference`
+among the bodies — because membership is the thing a mutation cannot fabricate
+without naming the real answer.
+
+All three mutations are killed by the shape and not by an added assertion,
+which is the part worth keeping: *a count is a second value that can be wrong
+on its own; a list of what was compared is the comparison.*
+
+---
+## 2026-11-06 — the marketing suite stubbed `next/headers` and the stub only landed when no earlier file had loaded a page, so the gate for four surfaces was a coin toss
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing`
+(`apps/loom/app/(marketing)/_lib/serving.ts`, `_lib/addressed.test.ts`) ·
+**Status:** **closed by `marketing-29-a-check-that-holds-whatever-ran-first`** —
+reproduced deterministically, fixed, and the fix proved by re-running the
+ordering that failed
+
+**Filed at `Loom merge`'s request.** It found this after merging #776 and said
+so on that pull request: *"I could not file this in `FINDINGS.md`: doing so
+needs a commit, and `Loom merge` never pushes to `main`… Please file it
+properly on your next run."* This is that filing, with the measurement it asked
+for and **one correction to the remedy it recommended.**
+
+### What happened
+
+The first `pnpm verify` on `main` after the four merges of 5 November came back
+red: **12 failures in `app/(marketing)/_lib/addressed.test.ts`**, every case
+that renders a page, all of them
+
+```
+Error: `headers` was called outside a request scope.
+ ❯ servedOrigin app/(marketing)/_lib/serving.ts:30:26
+ ❯ Module.HomePage app/(marketing)/page.tsx:69:19
+```
+
+An immediate re-run of the same tree passed. Nothing was changed to get there.
+
+### Why
+
+`addressed.test.ts` carried `vi.mock("next/headers", …)`. The application's
+node suite runs on `forks: { isolate: false }` — deliberately, for the reason
+`vitest.config.ts` gives, and it saves most of the suite's time — so a worker
+keeps whatever the previous file in it loaded. **A mock replaces what a module
+resolves as it is evaluated, and a page module an earlier file has already
+evaluated is holding the real one.** `announced.test.ts` imports all three page
+modules and stubs nothing. Whichever of the two the suite handed a worker first
+decided whether the other passed.
+
+The hazard arrived with the file in #725. What moved on 5 November is the
+number of files the suite spreads over workers, 404 to 407, which reshuffles
+the assignment — so it can come back on any merge from any of the four
+surfaces, which is what made it worth more than a retry.
+
+### The correction
+
+`Loom merge` recommended *"stubbing `./serving`'s `servedOrigin` instead of the
+Next module, or giving this file a worker of its own"*. **The first does not
+hold.** Measured on this branch, by forcing a file that imports `../page` to
+run first in the worker:
+
+| | |
+| --- | --- |
+| `vi.mock("next/headers", …)`, as it was | **12 of 12** render cases fail |
+| `vi.mock("./serving", …)` | **4 still fail** — the pages the earlier file had already loaded |
+| the function answering for itself | nothing left to fail |
+
+The second number is the whole lesson: moving the mock one module closer only
+narrows the window. **Any remedy spelled as a mock has this property**, because
+the property belongs to mocking under a warm module cache and not to the module
+being mocked. The second recommendation — a worker of its own — does hold, and
+was not taken: it is an edit to the application-root `vitest.config.ts`, which
+is shared by four surfaces, and it would leave the next file to make the same
+mistake.
+
+### What was done instead
+
+`servedOrigin` now answers the case the stub was standing in for. It falls back
+to `siteOrigin()` where there is no request, which is the same answer a request
+carrying no usable host has always got, so no behaviour a reader can see
+changed. **A behaviour a test has to fake is a behaviour the function should
+have.** `addressed.test.ts` mocks nothing, `serving.test.ts` holds the fallback
+with the real `next/headers`, and the whole node project now contains **no
+order-dependent module mock**: the only remaining `vi.doMock` is
+`(portal)/_lib/write.test.ts`', which is preceded by `vi.resetModules()` and is
+therefore safe by construction.
+
+**The narrowness is held rather than assumed.** The fallback keys on Next's
+message *and* on the error carrying no `digest`, because a redirect, a
+not-found and the prerender bail-out are all thrown with one, and swallowing
+the third would freeze a page the portal governs — which is
+[0331](decisions/0331-a-marketing-page-is-served-per-request-because-the-store-governs-it.md)'s
+own failure reached from a direction that record did not have to consider. It
+cannot happen on this surface today because every route here declares
+`force-dynamic` and `governed.test.ts` fails if one stops; the check is there
+anyway, with cases, because a guarantee held in another file is a reason to be
+right rather than a reason not to look.
+
+---
+## 2026-11-06 — nothing stops the next order-dependent mock, and the class is empty today only because this run emptied it
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom daily build`
+(`apps/loom/vitest.config.ts` and the application suite's discipline) ·
+**Status:** **closed by `framework-86-what-a-lane-may-not-do`**, which took
+recommendation 1 and recommendation 2 both. The sweep is
+`tools/sources/mocks.ts` and it lives in this lane rather than in a route group,
+so no other lane's file is edited by it — which is the cross-lane objection
+answered rather than worked around. It reads `codeOnly` first, so
+`(marketing)/_lib/serving.test.ts`' docblock, which prints two `vi.mock(…)`
+calls in the table of what it measured, is invisible to it; that is asserted
+rather than exempted. Recommendation 3 stays rejected for the reason given here.
+Measured on that branch: zero `vi.mock` in 586 `*.test.ts`, one file using the
+allowed `vi.doMock` + `vi.resetModules()` pattern, and an assertion that the
+count of such files is not zero, so the allowance cannot quietly become a rule
+about nothing. Original status below.
+
+**Status:** open — **nothing is broken**; this is the general version of the
+entry above, and it is filed rather than fixed because a marketing file
+sweeping three other lanes' test files is the cross-lane shape
+`docs/routines.md` is hardest about
+
+The entry above closes one instance. The shape is unchanged: **a `vi.mock` in a
+`.test.ts` of this application is a mock that works or does not work depending
+on which files the suite happened to put in the worker with it**, and nothing
+anywhere says so. `vitest.config.ts`' docblock explains `isolate: false` and its
+reasoning is right — *"those files are functions of their arguments, so a warm
+module cache is scenery to them"* — but a file that installs a module mock is
+exactly the file that is **not** a function of its arguments, and the config does
+not say that.
+
+The `.test.tsx` half is safe and for a reason already written down: it runs on
+`threads` with `isolate: true`, because Testing Library binds to a document. Nine
+of those files mock modules and none can hit this. The hazard is the node half
+only.
+
+**Measured on this branch, after the fix above:** the node project contains
+**zero** `vi.mock` calls and **one** `vi.doMock`, in
+`(portal)/_lib/write.test.ts`, which calls `vi.resetModules()` first and
+re-imports — the pattern that is order-independent by construction, and whose
+own docblock explains why it resets. So there is nothing to fix today and
+nothing to stop tomorrow.
+
+**What would close it**, cheapest first:
+
+1. **A sweep**, alongside the ones in `apps/loom/test/`: read every `.test.ts`
+   under `apps/loom/app/`, fail on `vi.mock(` outright, and allow `vi.doMock(`
+   only where `vi.resetModules()` appears above it. Ten lines, holds the exact
+   property, and goes red on the branch that writes the next one rather than on
+   whichever lane's merge reshuffles the workers. It is the cheap version and
+   the recommendation.
+2. **A sentence in `vitest.config.ts`' docblock** saying that a file installing
+   a module mock is not a function of its arguments and must reset modules.
+   Worth having either way, and worth little on its own: the lane that writes
+   the next mock is not reading the pool configuration.
+3. **Isolating the node project.** Rejected here and named so nobody re-derives
+   it: the config measured 175s of loading against 180s of testing, and paying
+   that to prevent a hazard a ten-line sweep catches is the wrong trade.
+
+**Why it is worth more than it looks.** The instance above was red on `main`,
+not on a branch — it reached the one place where a red costs every lane a
+morning, and it got there without any branch being wrong. A hazard whose
+failures land on `main` rather than on the pull request that creates them is a
+hazard that cannot be caught by review.
+
+---
+## 2026-11-05 (evening) — a page can be served per audience now, and the two halves that would let the portal offer it are a schema change and a screen
+
+**Filed by:** `Loom framework` · **Owned by:** `Loom portal` (the screen) and
+`Loom framework` (the store dimension) · **Status:** **the store dimension is
+closed by `framework-91-the-store-dimension-for-an-audience`**
+([0376](decisions/0376-a-pages-audience-rules-are-an-attributed-log-and-its-forms-are-rows.md)),
+10 November. **The rule editor stays open and is `Loom portal`'s** — nothing is
+broken and nothing is blocked today.
+
+> **What landed against the store half.** `loom_audience_rules` keeps the whole
+> ordered list as an **append-only, attributed log**, because a rule decides
+> which readers get which form and editing one changes what every reader in that
+> audience sees without touching the page, its delta or its revision log — so a
+> mutable row would make that the one change in this system with no record of
+> it. `loom_audience_forms` keeps one row per audience, replaced in place,
+> because a form is a document being rebased rather than an event that happened.
+> `audienceOverlaySourceFromStore` satisfies the seam 0359 clause 6 declared,
+> and a deployment with no rules is served exactly what it is served today.
+>
+> **What the editor now has to work with.** `rules(treeId)` is the current list
+> with its revision and author; `recordRules` refuses an edit of a revision that
+> is no longer the head when the caller names one, so a person reordering a list
+> somebody else has changed is told rather than overwriting them; `history` is
+> the record of who changed who sees what; and `forms(treeId)` lists each
+> audience's `baseRevision` **without its delta**, which is the *stale* reading
+> this entry asked for in a form a screen can afford.
+
+[0359](decisions/0359-an-audience-rule-is-a-conjunction-of-scalar-clauses-and-a-composed-page-is-a-projection-of-a-revision.md)
+built 0263 clauses 1 to 4: `audiencesFor` sorts a reader by rules over
+`RenderRequest.context`, `composeTreeForContext` lays the matched deltas onto
+the base, and `composingTreeSourceFromStore` is the sibling 0263 said
+`treeSourceFromStore` would gain. All published through `./store`.
+
+**What `docs/portal.md` unit 9 still needs, and neither half is in that record:**
+
+| half | whose | what it is |
+| --- | --- | --- |
+| the store dimension | `Loom framework` | audience-scoped deltas and their rules, persisted. A schema change on top of 0260's, which is why 0359 took a seam (`AudienceOverlaySource`) instead and said so |
+| a rule editor | `Loom portal` | an owner naming an audience, writing its clauses, and **ordering the rules**, because the last matching rule wins a contested node |
+
+**The one thing a screen has to teach**, and it is the only part of 0359 a
+person must understand: rules are an ordered list, general to specific, and the
+order is what resolves two deltas reaching one node. A screen that presents
+rules as an unordered set would be presenting a different model from the one
+that runs.
+
+**And a reading that will be wanted the first time a base moves.** A base edit
+stales every audience delta authored against the revision it left, and 0359
+refuses the render rather than quietly serving the base — so a deployment
+serving three audiences cannot publish a base change without rebasing three
+deltas. That is the same shape 0340 gave a waiting proposal, and the *stale /
+conflicts* reading that screen already has is the one audience deltas will need.
+
+---
+## 2026-11-05 (evening) — a defensive invariant check in new code was unreachable, and the thing that makes it unreachable is one line in `insert`
+
+**Filed by:** `Loom framework` · **Owned by:** `Loom framework` · **Status:**
+**closed by `framework-91-the-store-dimension-for-an-audience`**, 10 November —
+the sentence is in `src/tree/apply.ts`, on `rejectIdCollisions`, which is where
+the invariant is actually enforced and therefore where a run that reaches for a
+defensive check will meet it. It says that unique ids are the only structural
+invariant a tree has, that this is where the second `insert` of a held id fails,
+and that anything composing operations from two sources needs no check of its
+own. The branch that wrote it was the next composer this entry predicted: the
+store dimension above.
+
+`composeTreeForContext` is the first place in this repository where
+**operations authored by two separate deltas, each judged against the same base,
+are applied to one tree**. The obvious fear is a pair that each insert the same
+node id: each is fine alone, and together they would make a tree with two of one
+id, which every downstream address resolves to the wrong half of.
+
+So it shipped with `validateTreeInvariants` over the composed root and a
+`collides` error beside it. **A planted mutation that removed the check changed
+nothing** — `insert` already refuses a node whose id the tree holds, so the
+second insert fails as `duplicate-node-id` long before a tree exists to
+invalidate, and duplicate ids are the only invariant that function has. The
+check and its error code were deleted rather than kept, and the reason is now a
+comment where the check was.
+
+**Why it is filed rather than just removed.** The reasoning took a mutation to
+settle and it is not written anywhere a future run would find it: nothing says
+*the only structural invariant a tree has is unique ids*, and nothing says
+*`insert` is where that is enforced*. Both are true, both are one grep away
+from being forgotten, and the next composer — the store dimension above, a
+merge of two proposals, anything that replays two logs — will write the same
+defensive branch. Cheapest fix is a sentence in `src/tree/apply.ts`'s own
+comment; it was not taken here because this branch had no other reason to touch
+that file and the claim deserves its own diff.
+## 2026-11-06 — a goal's figure for a range, and *By page*'s bars for one, need what readers did on a part counted by hour, and only page views are
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom signals` (`src/signals/`,
+`apps/loom/app/_lib/reader-signals/`) · **Status:** **closed (evening) by
+`signals-77-what-readers-did-by-hour`**
+([0362](decisions/0362-what-readers-did-is-counted-under-the-hour-they-did-it-in-as-a-seventh-counter-the-fold-writes-for-the-three-delegated-kinds.md)):
+all three asks are there for the three delegated kinds, through the scoped tally
+handle, with one exclusion stated below. **Nothing is broken.** It is the input
+for the last of 8a in `docs/portal.md`.
+
+**What closed it, in the words the ask used.** (1) The tally counts by UTC hour
+over a stated range: `tallies.acted({ treeId?, nodeId?, audience?, revision?,
+from?, to? })`, per tree, **part** and kind, written by the fold. (2) The first
+hour counted, as `readReaderArrivals` says it — and narrowed by the part, so a
+goal says when *its* part was first acted in. (3) Through
+`readingsFor(application).tallies`, with the portal's bounded wrapper forwarding
+it inside the same read budget.
+
+**One exclusion, and it is deliberate:** the hourly rows hold `activations`,
+`opens`, `closes` and `completions` — the three delegated kinds — and **not**
+`viewed`, `dwelled`, `views`, `reached` or `engaged`. The distinct counters
+cannot be sliced by hour without inflating (distinctness does not add, and the
+honest hourly denominator is the door's own arrivals); a `dwelled` row per part
+per hour is about 6,000 rows an hour on one large page. So the drawer's bars for
+*presses, opens, shuttings and sends* are answerable for a range and the two
+attention kinds are not — see the entry below.
+
+The finding below this one is closed: page views are counted by hour (0356),
+and *Signals* now draws its range picker, page views in the range and the
+hourly chart from them. Three things on `docs/portal-wireframes.md` *1 ·
+Signals* still read a range and cannot:
+
+- the figure for the primary goal over the range (its rate in the range, with
+  the change on the period before);
+- on *By page*, the drawer's bar per kind of thing readers did **for the
+  range**;
+- each goal's trend on *By page* and *Goals*.
+
+A goal is a kind on a part (0350): *presses* of a button, *sends* of a form,
+*opens* of a disclosure. The tallies that count those keep no time (rule 5),
+and the hourly counter counts page views only. The kept deliveries have the
+time, but a range read from them is the capped scan 0356 refused for the same
+reason the portal did: a figure from part of a range is a wrong number.
+
+What the portal needs, and nothing more:
+
+1. **The tally counts for one application, by UTC hour**, over a stated range:
+   per tree, part and kind, the same counts `tallies()` answers since counting
+   began. Counted at the door or by the fold: the intake's choice, as long as
+   an hour's count does not move once its hour and the fold after it are over.
+2. **The first hour counted**, as `readReaderArrivals` already says it, so a
+   range that starts before counting says so rather than drawing a fall.
+3. **Through the scoped tally handle**, so the portal never reaches the table.
+
+With it the portal draws all three on the same range picker, and the figure
+for the goal sits beside page views in the range, where the wireframe puts it.
+
+---
+
+## 2026-11-06 — *Signals*' range picker and hourly chart need page views counted by hour, and the kept deliveries can only be walked one page at a time
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom signals` (`src/signals/`,
+`apps/loom/app/_lib/reader-signals/`) · **Status:** **closed, 6 November
+2026.** \#786 ([0356](decisions/0356-page-views-are-counted-under-the-hour-they-began-in-as-a-sixth-counter-written-at-the-door.md))
+counts page views under the UTC hour they began in, and `readReaderArrivals`
+reads a range and the period before it in one call through the tally store
+`readingsFor(application)` already hands the portal, saying the first hour
+counting began: points 1 to 3. `Loom portal` drew the range picker, the
+figure and the chart on it the same day without touching `src/signals/`.
+
+`docs/portal-wireframes.md` *1 · Signals* puts a range picker (last 24 hours,
+7 days, 30 days) over the whole screen, a figure for *page views in the range*
+with the change on the period before, and a bar chart of page views by hour
+across the range. The tallies keep no time (`docs/signals.md` rule 5), so the
+only source with time in it is the kept deliveries (0351), and the one way to
+read those is `journal.read`, which pages by delivery, 2,000 at most a call.
+
+A 30-day chart would have to read every delivery in thirty days on every
+render. The *Events* tab already caps itself at 2,000 deliveries a screen and
+says how far back it looked; a chart cannot do that honestly, because a bar
+drawn from part of an hour is a wrong number rather than a shorter list. So the
+portal has not drawn one, and will not draw one from a capped scan.
+
+What the portal needs, and nothing more:
+
+1. **Page views counted by hour for one application**, over a stated range of
+   receipt times (`receivedAt`, the only time the journal vouches for), so the
+   chart and both range figures are one bounded read. Counted from the kept
+   deliveries or kept beside the tallies as a counter by hour: the intake's
+   choice.
+2. **The range limited to the kept window**, and the answer saying where its
+   data starts, so *30 days* on a deployment that began keeping deliveries
+   last week says so rather than drawing three empty weeks.
+3. **Through a scoped handle** like `readingsFor(applicationId)`, so the portal
+   never reaches the table.
+
+Once it lands, the portal draws the range picker, the chart and the figures
+above both *Signals* tabs, and *By page*'s bars for a range on the same read.
+
+---
+## 2026-11-05 — the comparison band tells a reader to look right, and on a phone there is no right
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing`
+(`apps/loom/app/(marketing)/_lib/pages/why-use-it.ts`, the `forAReader` band) ·
+**Status:** **closed by `marketing-29-a-check-that-holds-whatever-ran-first`**
+on 6 November — the instance and the general version together, which is what
+the foot of this entry asks for. The sentence now reads *"The first of these is
+the page above. The second is what a visitor who came looking for a gift
+gets."*, and `(marketing)/_lib/positions.test.ts` sweeps every string on every
+served page for a phrase that names a side. **Both halves were proved by
+breaking them**: putting the old sentence back fails two cases of the new
+sweep. Three corrections to this entry are at its foot
+
+Filed as: open — **nothing is broken, no test is failing, and the band is
+right in every photograph this lane has taken of it.** Found while writing the
+band underneath it, which had the identical sentence and no longer does.
+
+*Who is reading it* opens with:
+
+> *"The page on the left is the one above. On the right is what a visitor who
+> came looking for a gift gets."*
+
+That sentence is doing real work and the band needs something like it: without
+it a reader shown two frames reads two examples rather than one page twice,
+which is what the band's own note says at length.
+
+**It is false at 390.** `loom.split` stacks on a narrow screen with the order
+kept — correctly, and it is the reason the band works on a phone at all — so
+there is no left and no right, there is a first and a second. A reader on a
+phone is told to compare two things against positions the layout does not have.
+
+### Why it is filed rather than fixed in the run that found it
+
+The band below it, shipped today, had the same sentence shape and was changed
+to *"The two pages above are one page. Loom turned the first into the second
+with three edits"*, which is true at every width. Doing the same to this one is
+a two-line diff and it was deliberately not taken:
+
+- The sentence is **load-bearing for a different band**, and the argument for
+  its exact wording is twelve lines of note above it. Rewriting another band's
+  central line inside a pull request about the band under it is the shape that
+  makes a marketing diff unreviewable, which is the one rule this lane's brief
+  is hardest about.
+- The **captions inside the frames** say who each arrangement is for, and
+  whether the prose should name a position at all or lean on those instead is a
+  judgement about that band rather than a correction to it.
+
+### What would close it
+
+One sentence, in the register the band below now uses: name the order rather
+than the side. *"The first is the page above. The second is what a visitor who
+came looking for a gift gets."* It needs no new mechanism and no primitive.
+
+**The general version is worth more than the instance**, and it is why this is
+an entry rather than a to-do: **copy that names a position is copy that is
+wrong at one of the two widths this site is photographed at.** Nothing checks
+it. `pages.test.ts` holds the stacking, `balance.test.ts` holds the cells, and
+neither can read a sentence. Three bands of this site use a side-by-side
+layout, and a sweep for *left*, *right*, *above* and *below* in a band that
+stacks is the check that would catch the next one — plausibly cheap, and this
+lane's to write when it next has a run in this file.
+
+### Three corrections, from building it
+
+**1. The sweep is for the horizontal pair and not for *above* and *below*, and
+that boundary is a measurement.** Over the three served pages before the fix:
+one string matched a horizontal phrase, which was this instance; **seven**
+matched `above` and **seven** matched `top`, and every one of the fourteen was
+true. Bands stack down the page at every width, so *"the page above"* is right
+at 390 and at 1280 alike, and *"built on top of"* is not about layout at all. A
+rule over them would have flagged fourteen good sentences to catch nothing,
+which is `docs/positioning.md`' own lesson about the headline rule arriving
+again.
+
+**2. It is phrases and not words.** Sweeping for `right` reports the front
+door's *"That is not the same as being right"*, which is the ordinary English
+word. The list is `on the left`, `to the right`, `left-hand`, `beside`, `next
+to` and nine more like them, and the source panel on `/why-use-it` is taken out
+first because the primitive source it prints contains `beside` in a comment.
+
+**3. The second reason is this product's own, and it is stronger than the
+phone.** `loom.split` takes `reverse`, whose whole design is that a model asked
+to swap the sides emits one `configure`. So a sentence naming a side is a
+sentence **an accepted change can falsify without touching the sentence** — on
+the one surface whose argument is that Loom can say what really happened. The
+sweep is stated site-wide rather than over the bands that stack for a related
+reason: every horizontal arrangement this site composes reflows to a column, so
+scoping it to those is scoping it to all of them with a classification to
+maintain.
+
+---
+## 2026-11-05 — a new published door makes five of this lane's checks red, and this run wrote four lines in `(docs)` to keep the tree green
+
+**Filed by:** `Loom framework` · **Owned by:** `Loom docs`
+(`app/(docs)/_lib/entry-points.ts`, `app/(docs)/_lib/api/extract.test.ts`,
+`app/(docs)/_lib/weight.test.ts`) ·
+**Status:** open — **nothing is broken and nothing is blocked**; four lines in
+this lane's files were written by another lane and are handed back for a
+rewrite, not for a decision.
+
+Publishing `@jam-overture/loom/addressed`
+([0354](decisions/0354-the-names-a-render-writes-on-a-published-page-are-published-on-the-light-side-of-the-split.md))
+turned six assertions in `(docs)` red, which is this lane's design working:
+`entry-points.ts` says in its own words that it *"will drift the day someone
+adds an export"* and that the drift should be a red test rather than a page
+that quietly stops being true. It was. What the framework run then had to
+choose between was a red merge gate for four surfaces and three lines in
+somebody else's files, and it chose the lines.
+
+| what | what was done |
+| --- | --- |
+| `reference.generated.json` | regenerated with `pnpm --filter @loom/app docs:api`, as the gate's own message instructs |
+| `entry-points.ts` | one `EntryPoint` added, `audience: "host"`, with a summary **this lane wrote** |
+| `extract.test.ts` | *"fourteen of the other sixteen"* became *"fifteen of the other seventeen"*, in the name, the paragraph and both numbers |
+| `weight.test.ts` | the count of generated pages, eighteen to nineteen |
+
+**The summary is the only one of the three that is a judgement**, and it is
+prose on this lane's site written by a lane that does not own its voice:
+
+> The four names a render writes on a published page, and the function that
+> finds the page. Loads nothing, for a browser bundle.
+
+Rewrite it freely. The facts it has to keep are that the door publishes four
+attribute names and `addressedRootIn`, and that it reaches no package — the
+last is the reason the door exists and is held by a test in `src/render/`.
+
+**The generated file and the two counts are not judgements** and are recorded
+here only so that the diff is not a surprise. Both are arithmetic over the
+manifest: seventeen doors before this run and eighteen now, which is also one
+more generated page.
+
+**Nothing asks for a written page.** The generator says so itself —
+*"no written page names anything published by `@jam-overture/loom/addressed`,
+so a sentence about a new name on it would be the first on this site. That is a
+page rather than a line"* — and this lane is not filing for one. Whether the
+door deserves prose beside the generated reference is entirely this lane's call.
+
+---
+## 2026-11-05 — six places read the names a render writes on a page, and each is now one import line from not writing them out
+
+**Filed by:** `Loom framework` · **Owned by:** `Loom marketing`, `Loom docs`,
+`Loom portal` and `Loom demo` · **Status:** open — **nothing is broken and no
+behaviour changes**; six files can each drop a literal or a heavy import, and
+one of them is paying for it in a browser.
+
+`@jam-overture/loom/addressed` now publishes `LOOM_NODE_ATTRIBUTE`,
+`LOOM_TYPE_ATTRIBUTE`, `LOOM_TREE_ATTRIBUTE`, `LOOM_REVISION_ATTRIBUTE` and
+`addressedRootIn(scope)`, and loads no package
+([0354](decisions/0354-the-names-a-render-writes-on-a-published-page-are-published-on-the-light-side-of-the-split.md)).
+`/react` still exports the four names, so nothing here is urgent and nothing
+here is a break. The changes, with the owning lane:
+
+| file | lane | today | available |
+| --- | --- | --- | --- |
+| `(demo)/demo/_components/spotlight-scroll.tsx` | `Loom demo` | a **client component** importing `LOOM_NODE_ATTRIBUTE` from `/react` | the same name from `/addressed` |
+| `(demo)/_lib/spotlight.ts` | `Loom demo` | `LOOM_NODE_ATTRIBUTE` from `/react` | the same, if this module reaches a browser bundle |
+| `(marketing)/_components/count-readers.tsx` | `Loom marketing` | `const TREE_ROOT = "[data-loom-tree]"` | `addressedRootIn(document)` |
+| `(docs)/_components/reader-signals-live.tsx` | `Loom docs` | `frame.current?.querySelector("[data-loom-tree]")` | `addressedRootIn(frame.current)`, one empty value instead of two |
+| `(docs)/_lib/fences/compiled/the-runtime--what-your-readers-do.tsx` | `Loom docs` | the same line again | the same change, and it is a published fence, so a reader sees it |
+| `(portal)/_lib/connecting.ts` | `Loom portal` | the constant interpolated into generated source | a generated `import`, and a shorter snippet |
+
+**The first row is the one worth doing for a reason other than tidiness.** It is
+a `"use client"` component that reaches `@jam-overture/loom/react` — the render
+seam and every primitive's registration — to build one selector. That is the
+weight mistake 0136 split the broadcaster's own door out to prevent, and it is
+invisible in a diff: one import line, every test green. Nobody has measured what
+it costs `/demo` in a browser; the point is that nothing needs measuring once
+the import is one word longer.
+
+**`Loom portal`, 6 November: its row waits for a release.** The snippet is
+what a customer pastes into their own site, against the version of
+`@jam-overture/loom` they installed, and 0.2.0 has no `/addressed` entry. A
+snippet importing it would fail on every site that pastes it today, so the
+portal keeps the selector until a release carries the entry, and then takes
+the row.
+
+**`(docs)/_lib/signals/markup.ts` is deliberately not in the table.** It reads
+all four constants on the server, where `/react` costs nothing, and it is about
+what the markup *says* rather than about finding a page. Changing it would be
+churn.
+
+---
+## 2026-11-05 — a broadcast could find its own root now, and it would be the better API for the one caller that is a broadcast
+
+**Filed by:** `Loom framework` · **Owned by:** `Loom signals` (`src/signals/`) ·
+**Status:** **closed by `signals-78-a-broadcast-follows-the-page`**
+([0366](decisions/0366-a-broadcast-handed-a-document-follows-the-page-and-a-client-side-navigation-is-a-new-page-view.md))
+— taken, with the overload, and it turned out to be more than an ergonomic win:
+see the 7 November entry. Original status below.
+
+**Status:** open — **an offer, not a defect.** Nothing is blocked; the hosts that
+start a broadcast have a published way to find the root as of today.
+
+`Loom marketing`'s 4 November entry offered two shapes and this lane built the
+second. The first was `broadcastReaderSignals` taking a `Document` and finding
+its own root, and the argument for it is good: the broadcaster already refuses
+an element with no addresses on it (`"unaddressed"`), so the failure it would
+report for a document with no addressed page is a failure it has, and a host's
+call would lose its one conditional.
+
+It was not built here because `src/signals/` is this lane's to read and not to
+edit (`docs/routines.md`), and because it answers only a broadcast — `(demo)`
+wants a node address and starts no broadcast, so a door was needed either way.
+
+Both can hold. `addressedRootIn` is in `@jam-overture/loom/addressed`, which
+loads no package, so a `broadcast.ts` that wanted to call it would import one
+function and keep the weight the browser-weight sweep holds it to. Whether the
+overload is worth an argument that can be two things is this lane's call.
 
 ---
 ## 2026-11-05 — the *Events* tab needs reader events kept for 30 days, and the intake deletes each one once it is collected
 
 **Filed by:** `Loom portal` · **Owned by:** `Loom signals` (`src/signals/`,
-`apps/loom/app/api/reader-signals/`) · **Status:** **open.** Nothing in the
-portal is blocked: *Signals · By page* shipped on the tallies, and the *Events*
-tab waits for this.
+`apps/loom/app/api/reader-signals/`) · **Status:** **closed, 5 November 2026.**
+\#775 (0351) keeps each counted delivery for the window, thirty days by
+default and set by `LOOM_SIGNAL_KEPT_MS`, sweeps what is older, and states both
+ages on the reader-facing notice: points 1 to 3. Point 4 needed nothing new.
+The handle the portal already held, `readingsFor(application).journal`, is
+scoped to the application and its `read` pages kept deliveries newest first
+by cursor and narrows to one page, so `Loom portal` built *Signals · Events*
+on it without touching `src/signals/`.
 
 The maintainer settled on 5 November that individual reader events are kept for
 **30 days** by default, as per-deployment configuration, with the tallies
@@ -122,8 +1844,26 @@ handle this lands, and will not touch `src/signals/` to get there.
 ---
 ## 2026-11-04 — the broadcaster takes the page's root element and publishes no way for a browser-side host to find one, so four places in this repository hard-code `"[data-loom-tree]"`
 
-**Filed by:** `Loom marketing` · **Owned by:** `Loom framework` (`src/signals/`)
-· **Status:** **open.** Nothing is blocked — this run built the band it wanted
+**Filed by:** `Loom marketing` · **Owned by:** `Loom framework` (`src/render/`)
+· **Status:** **closed by `framework-84-the-names-a-render-writes-on-a-page`**,
+with the second of the two shapes this entry offered and with the lane read
+differently. `@jam-overture/loom/addressed` publishes the four names a render
+writes on a published page and `addressedRootIn(scope)`, which answers the root
+element or `undefined` and loads no package
+([0354](decisions/0354-the-names-a-render-writes-on-a-published-page-are-published-on-the-light-side-of-the-split.md)).
+
+**Two things this entry got slightly wrong, both in this lane's favour.** It
+named the owning directory as `src/signals/`, which `docs/routines.md` gives to
+`Loom signals`; the names are written by `src/render/`, which is this lane's, so
+nothing had to be crossed. And the first shape it offered — a broadcast that
+finds its own root — is the better API for a broadcast and answers only a
+broadcast: `(demo)` wants `data-loom-node` and no broadcast at all. It is filed
+below for `Loom signals`, and it now has somewhere light to read the name from.
+
+**The six adoptions are each lane's own one-line change**, filed below rather
+than made. Original status below.
+
+**Status:** **open.** Nothing is blocked — this run built the band it wanted
 without the panel this would have let it print, and said so in the report.
 
 `broadcastReaderSignals(root, options)` takes an `Element`: the node carrying
@@ -2042,6 +3782,18 @@ practical lesson for every lane here: **in this repository a branch may merge
 within minutes of going green, so anything a run still intends to push is
 already too late.** Push first and comment after — and when a report or a
 comment claims a push, check that it landed before claiming it.
+
+**`Loom daily build`, 7 November — the eighth occurrence, and the first where
+the clash is visible from outside both branches.** `0360` is claimed by two open
+pull requests at once: #793 (`decisions/0360-the-style-of-this-repository-is-…`)
+and #794 (`decisions/0360-what-readers-did-is-counted-under-the-hour-…`). Both
+were opened on 6 November, neither knows about the other, and whichever merges
+second conflicts. This run read both before choosing a number and took `0361`,
+leaving `0360` to whoever lands first. Worth recording because it is evidence
+for the fix this entry has been waiting for: the clash *was* detectable this
+morning, by listing the record files on every open pull request — which is a
+check that runs against the remote rather than against the working tree, and is
+the one shape of check that can see a clash before the branches meet.
 
 ---
 
@@ -32778,8 +34530,16 @@ deliberate.
 
 ## 2026-09-12 — the data seam has been published for four weeks and nothing in the library reads one
 
-**Filed by:** `Loom docs` · **Owned by:** `Loom daily build` · **Status:** open —
-the page that needed it shipped around it
+**Filed by:** `Loom docs` · **Owned by:** `Loom daily build` · **Status:**
+**part 1 closed** by `reads` ([0181](decisions/0181-a-primitive-declares-the-binding-names-it-reads-and-saying-nothing-is-not-saying-none.md),
+[0184](decisions/0184-a-primitive-may-read-under-whichever-name-a-prop-gives.md));
+**part 2 closed** by `expects` on 6 November 2026
+([0357](decisions/0357-a-primitive-declares-the-shape-of-answer-it-reads-and-the-rows-inside-it-stay-its-own.md),
+#781) — **except the catalogue projection, which is still open and is now its
+own entry at the bottom of this file.** The warning callout on the page can lose
+the half that says the shape is the reader's to write; the half that says no
+starter primitive binds anything is still true until `Loom primitives` adopts
+the field, which is also filed below.
 
 *Where the content comes from* is the site's page on `loom:data`. Writing it
 meant answering a reader's obvious next question — *so which primitive do I put
@@ -48165,8 +49925,36 @@ between them will notice before anybody files it again.
 
 **Filed by:** `Loom docs` · **Owned by:** `Loom daily build` (`src/theme/`) ·
 **Extends:** the 20 August entry *a host's own palette is not held to the bar the
-starter palettes now clear* · **Status:** open — **a measurement and a new
-instance, explicitly not a request to build the diagnostic 0076 deferred.**
+starter palettes now clear* · **Status:** **closed, 8 November**, by
+`framework-89-a-palette-written-six-ways-is-measured` and
+[0365](decisions/0365-a-colour-is-measurable-when-its-channels-are-arithmetic-and-opaque.md)
+— **three of the four rows now measure**, and the fourth is declined on a stated
+ground rather than on cost.
+
+> **Closed by making the measurements work, not by building the diagnostic.**
+> This entry asked for nothing and was explicit that it was not requesting
+> 0076's deferred `RenderOutput` diagnostic. That is still not built and is
+> still deferred. What changed is the premise underneath it: `channelsOf` now
+> reads every form whose channels are arithmetic, so `hsl()`, `rgb()` and an
+> **opaque** alpha answer, and all four measurements this entry listed —
+> `paletteScheme`, `paletteScrim`, `slotChroma` and the contrast audit — return
+> together, because all four sit on that one function.
+>
+> The `26 unmeasured, 0 failures` this entry measured is now `0 unmeasured`, and
+> a test in `contrast.test.ts` holds it at that figure by name.
+>
+> **A named colour still answers `undefined`**, and 0365 declines it on the
+> ground that it is vocabulary rather than arithmetic — 148 entries of CSS
+> table this module would own and keep — rather than on the risk argument that
+> covered the other three. An alpha **below** opaque also still declines, and
+> 0076's third reason for that is upheld rather than routed around.
+>
+> The risk argument this entry inherited from 0076 — *a parser that is subtly
+> wrong reports a passing ratio for a failing pair* — was answered with
+> evidence rather than assurance: the parser agrees with **Chromium's own CSS
+> engine on 1,034 of 1,034 colours**, worst channel difference 0.5, and
+> measures **none** of the 30 malformed strings Chromium refuses. The run is in
+> the record; it is not a test, because `pnpm verify` must not need a browser.
 
 `colourSchema` accepts more than hex. `channelsOf` reads only three- and
 six-digit hex and answers `undefined` for everything else, each refusal argued
@@ -52939,7 +54727,38 @@ reinterprets and these rows start answering.
 ## 2026-10-12 — running the formatter on this repository reformats whatever it is pointed at, because there is no formatter configuration and nothing in `verify` would catch it
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom daily build` (the repository's
-own tooling) · **Status:** open — **caught and reverted inside the run that
+own tooling) · **Status:** **closed by `framework-86-what-a-lane-may-not-do`**
+([0360](decisions/0360-the-style-of-this-repository-is-maintained-by-hand-and-what-is-checked-is-that-no-statement-ends-in-a-semicolon.md)),
+and **both of its options turned out to be needed, by different lanes, twenty
+days apart.**
+
+One correction to the premise, because it matters for what was built: *the
+question has no answer in the repository* was true when this was filed and is
+not now. `docs/routines.md` has carried the prose answer under **Standards**
+since 1 November (#742) — and that paragraph credits an **earlier** instance of
+the same mistake, `Loom marketing`'s on 23 September, which cost that run a full
+revert and the re-application of eight files' worth of edits. So this is the
+second of two instances three weeks apart, and the prose arrived twenty days
+after this one.
+
+What was missing was the half prose cannot do, and it is what shipped:
+`pnpm verify` was green on a wholly reformatted file, so both instances were
+caught by a person noticing that a semicolon count looked wrong.
+`tools/sources/semicolons.ts` now holds the one property a reformat cannot avoid
+changing — **no statement in this repository ends in a semicolon** — over every
+source under `src/`, `tools/` and `apps/loom/`. Measured when written: 1,920
+sources, zero, with two shapes exempt because they are the language rather than a
+style (a `for` header's clauses spread over lines, in `src/signals/broadcast.ts`,
+and `&hellip;` closing JSX text, four times in `(lessons)`). A run that formats
+a file now goes red on its own branch, naming the file.
+
+The option that was **not** taken is a `.prettierrc` plus `format:check`, and
+0360 records why: no formatter reproduces a hand-maintained style exactly, so
+adopting one is not a configuration change but one reformat of every file in the
+repository, landing as an unreviewable diff in a week when four surfaces merge
+against one gate. Original status below.
+
+**Status:** open — **caught and reverted inside the run that
 caused it**, and filed because the next lane to reach for a formatter will do
 the same thing
 
@@ -55184,9 +57003,18 @@ arrives on the door rows a reader screen already holds.
 ## 2026-10-13 — a deployment can state how long its rollup window is and has nowhere at all to state how often it folds
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom daily build`
-(`apps/loom/scripts/signals-collect.ts`, `docs/deployment.md`) · **Status:** open
-— **nothing is broken**; it is the half of a new reading's input that lives
-outside this lane
+(`apps/loom/scripts/signals-collect.ts`, `docs/deployment.md`) · **Status:**
+**closed by `framework-88-what-an-operator-must-set`** — the setting this entry
+asked for arrived from its own lane fifteen days later under another name.
+`LOOM_SIGNAL_SWEEP_MS` (0320) is exactly the shape described below: read by
+nothing but the notice, defaulted to nothing rather than to a number, and
+`unstated` is the honest state. **What was still missing was the half this lane
+owns** — it was documented in its own doc comment and nowhere an operator reads
+— and that is now a paragraph in §9 beside the cron the operator is told to set
+up, an offer in `apps/loom/.env.example`, and a row in the table. The two
+numbers `CollectionSchedule.foldsWithinMs` wants are both stated by a deployment
+that fills them in. Original status: open — **nothing is broken**; it is the
+half of a new reading's input that lives outside this lane
 
 [0274](decisions/0274-a-page-view-row-says-when-the-fold-last-touched-it-and-a-stall-is-judged-against-a-schedule-the-deployment-hands-in.md)
 judges a stalled collection against `foldsWithinMs`: how long a fold may honestly
@@ -61820,9 +63648,22 @@ rediscover the wall by walking into it.
 ## 2026-10-26 (evening) — the intake status reports two different windows and has one word for one of them
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom daily build`
-(`docs/deployment.md`) · **Status:** open — **nothing is broken and no test is
-failing**; it is one word on an operator's status page and the fix crosses a
-lane boundary
+(`docs/deployment.md`) · **Status:** **closed by
+`framework-88-what-an-operator-must-set`**, record
+[0367](decisions/0367-what-an-operator-must-set-is-read-off-the-application-and-the-guide-goes-red-when-it-is-behind.md)
+— answered with the second of the two outcomes this entry offers, and the
+reason it was the worse state is gone. **The field keeps its name**: the
+guide now prints the whole answer, so `collection` and its sentence sit three
+lines under `windowMs`, and a paragraph beside the sample says which window each
+is and why the names are uneven. What this entry declined to do was rename a
+field whose documented copy *"would be left stale with nothing failing"* — that
+state no longer exists, because the sample is asserted to carry every field of
+`IntakeStatus` and a rename fails on the branch that makes it. So **take the
+rename whenever this lane's suite is somewhere you are already working**: it
+costs one line in `docs/deployment.md` on the same branch, and this lane will
+take that line on request rather than have it block you. Original status: open —
+**nothing is broken and no test is failing**; it is one word on an operator's
+status page and the fix crosses a lane boundary
 
 `GET /api/reader-signals` is the only way to ask a deployment what its mouth is
 doing. Two of the things it reports are windows:
@@ -62212,8 +64053,19 @@ a published closed set (0240).
 ## 2026-10-28 — a new environment variable is documented in its own doc comment and nowhere an operator reads, and the status sample is four fields behind
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom daily build`
-(`docs/deployment.md`) · **Status:** open — **nothing is stale that was not
-already**, and it is the same line the 26 October entry asks about
+(`docs/deployment.md`) · **Status:** **closed by
+`framework-88-what-an-operator-must-set`**, record
+[0367](decisions/0367-what-an-operator-must-set-is-read-off-the-application-and-the-guide-goes-red-when-it-is-behind.md)
+— both halves taken as this entry spells them. `LOOM_SIGNAL_SWEEP_MS` has its
+paragraph in §9, worded from the three sentences below, and the sample response
+carries all ten of `IntakeStatus`'s fields with the three long ones printed in
+full rather than elided, because the sentences are what the fields are for.
+`LOOM_SIGNAL_KEPT_MS` was undocumented too and is in with it. **The staleness
+itself is now an assertion**: a variable the application reads and the guide
+does not name, and a field of `IntakeStatus` the sample does not print, both
+fail `pnpm verify` on the branch that adds them. Original status: open —
+**nothing is stale that was not already**, and it is the same line the 26
+October entry asks about
 
 `GET /api/reader-signals` now reports `sweep` beside `regions` and `collection`
 (0320). `docs/deployment.md:498` prints a sample response that carries
@@ -63050,6 +64902,26 @@ being well built.
 
 Whichever is taken, the half that matters is the **phone**. A hover reveal is
 not an affordance for most of the people reading this site.
+
+> **Dated note, 7 November 2026, by the lane that filed it. The blast radius on
+> this one page has doubled and the recommendation is unchanged.**
+>
+> The front door's *Four steps* band now carries an `href` on each of its four
+> steps, for the reason the chain carries five: a band that states four claims
+> about what adopting Loom costs and offers no way to see any of them being true
+> is four dead ends. So this page now has **two** rails of invisible links and
+> **two** sentences of prose standing in for the affordance, eleven words apart
+> in the tree.
+>
+> Photographed rather than argued: `2026-11-07-marketing-four-steps-linked-wide.webp`
+> is the band with every step linked, and it is indistinguishable from the band
+> before this run. That is the finding, taken at 1280 with a mouse, which is the
+> viewport **most** likely to reveal it.
+>
+> It strengthens shape 1 — the lift `loom.card` already defaults to when it is
+> linked — for the reason that entry gives rather than a new one: the breadth is
+> the argument for it. Two of the rails it would change are now on one screen of
+> one page.
 ## 2026-10-30 — a census over a window's silences is one call now, and nothing reminds a caller it exists
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom signals`
@@ -64523,11 +66395,16 @@ outside the lane and neither has been costed.
 ## 2026-11-02 — `themeDocumentCss` hands back the whole theme, so a surface whose every pixel is already a tree mounts its variables twice
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom daily build`
-(`src/render/document-theme.ts`) · **Status:** **the framework half is closed by
-`framework-78-the-dress-a-boundary-fetches`**, 2 November, recorded as
+(`src/render/document-theme.ts`) · **Status:** **closed.** The framework half
+closed on 2 November by `framework-78-the-dress-a-boundary-fetches`, recorded as
 [0337](decisions/0337-a-host-whose-page-is-already-a-tree-is-handed-the-ground-alone.md);
-**open for `Loom marketing`**, whose half is one line and is nothing anybody is
-blocked on
+**this lane's half closed on 8 November by `marketing-31-the-ground-alone`**,
+which took the line below unchanged. `(docs)` and `(lessons)` each still have
+the same line available and neither is blocked on it — the `(docs)` row of the
+1 November entry says why that surface may not want it. Measured on taking it:
+the rule on `/?theme=bold` goes from 1,976 bytes to 78, the served document from
+2,871,274 to 2,867,327, and six screenshots across the three palettes are
+byte-identical to the same shots off the build before the change
 
 `themeGroundCss(theme)` ships from `@jam-overture/loom/react` beside
 `themeDocumentCss`, returning the same `:root` rule with the ground alone. Both
@@ -65858,7 +67735,13 @@ scheduling call and it is raised on the pull request rather than taken.
 ## 2026-11-04 (evening) — a finding addressed to `Loom framework` over `src/signals/` is addressed to a lane that does not own the directory
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom signals`
-(`src/signals/broadcast.ts`) · **Status:** **open** — a re-addressing, not a new
+(`src/signals/broadcast.ts`) · **Status:** **closed by
+`signals-78-a-broadcast-follows-the-page`**
+([0366](decisions/0366-a-broadcast-handed-a-document-follows-the-page-and-a-client-side-navigation-is-a-new-page-view.md))
+— the re-addressing was right and this lane has acted on it. Original status
+below.
+
+**Status:** **open** — a re-addressing, not a new
 defect; the defect is this morning's entry and is unchanged
 
 This morning `Loom marketing` filed *the broadcaster takes the page's root
@@ -66049,3 +67932,2278 @@ that has also skipped the arrival standing, so narrowing `collectionHealthOf`
 alone would close the smaller of two holes and make the shape look safe. If a
 second surface ever reads a reading below the rung, the thing to narrow is
 whichever rung it skipped, not the leaf.
+
+---
+## 2026-11-05 — the *Events* tab's store landed and its reading handle did not, so the portal is one module away rather than a subsystem away
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`apps/loom/app/_lib/reader-signals/reading.ts`) · **Status:** open — **the
+stated remainder of [0351](decisions/0351-a-counted-delivery-is-kept-for-a-stated-window-rather-than-deleted-by-the-fold.md)**;
+nothing is broken and the portal is not blocked on anything it can do today
+
+`Loom portal`'s entry of this morning asked the intake for four things. Three
+landed on `signals-74-a-counted-delivery-is-kept`:
+
+| asked | landed |
+| --- | --- |
+| each delivery's signals kept for the window, with when it arrived, the page, version, audience and `view` key | **yes** — the delivery row is no longer deleted by the fold, and it already carried every one of those columns |
+| the window as a setting, 30 days by default, with a sweep that deletes what is older | **yes** — `LOOM_SIGNAL_KEPT_MS` and `expireReaderEvents` |
+| the reader-facing notice changed with it | **yes** — `CollectionNotice.keptMs`, and the ceiling is the kept window plus one sweep |
+| **a scoped reading handle the portal can call** | **no** |
+
+**The fourth is the one left and it is one module.** The rows are reachable
+today only through `ReaderSignalJournal.read`, which is the store's own handle:
+it pages by an opaque cursor newest-first already (`direction: "older"`), it
+filters by tree, and since 0351 it filters counted from uncounted. What it does
+not do is anything the portal's rule 4 asks for — it is not scoped to an
+application the way `readingsFor(applicationId)` is, it hands back a
+`ReceivedBatch` rather than a shape a screen can draw, and a portal calling it
+would be reaching the table.
+
+**What a future run should hold about the shape.**
+
+1. **The *rest of this page view* is a second read on one key, not a join.** A
+   `view` key is on the row, so the drawer's panel is `read({ view })` — one
+   narrowing the request does not have yet, and the only one it needs. It must
+   stay inside one page view by construction (rule 2): a handle that could
+   list every delivery *sharing a key with* an arbitrary row is the same handle,
+   and a handle that could list the keys themselves is not.
+2. **It reads the kept rows and never the counters.** *By page* shipped on the
+   tallies and stays there. 0349's second clause is that nothing said over all
+   time comes out of these rows, and a handle that offered a count would be the
+   first place that rule got bent.
+3. **Facets are counters the portal does not have.** The wireframe's kind and
+   page facets over a 30-day list are either a `GROUP BY` on this table —
+   which is a cost that grows with the kept window on a screen somebody leaves
+   open — or they are read off the tallies, which already hold exactly those
+   counts. Recommendation: the second, and the list carries no totals of its
+   own.
+
+---
+## 2026-11-05 — the ledger's linearity bound was the instrument rather than the measurement, and it is raised with the best of several runs
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/ledger.test.ts`) · **Status:** **closed by
+`signals-74-a-counted-delivery-is-kept`** — this closes `Loom daily build`'s
+4 November (evening) entry *the merge gate carries a wall-clock ratio with no
+headroom, and it is the gate for four surfaces*
+
+Taken as filed, and both of the first two recommendations rather than one.
+
+- **The bound is 8 rather than 4.** The entry's own argument is the reason: a
+  quadratic regression at sixteen times the nodes gives a ratio near 16, so
+  anything under 8 is linear with a scheduler in it, and a bound of 4 on a
+  loaded container catches the scheduler. The comment now says which of the two
+  the test is distinguishing and quotes the 4.038217117460102 that failed
+  another lane's run, so the next person to tighten it knows what it cost.
+- **The best of several runs on each size**, which is what the discarded warm-up
+  was already doing in miniature: three at 2,000 nodes and two at 32,000, with
+  `Math.min` over each. A scheduler can only make a run slower, so the minimum
+  is the closest thing to the measurement the test means.
+- **Not a skip**, as the entry asked.
+
+**What a future run should not do:** tighten it back without raising the number
+of runs. The figure this guards is a factor of four away from the bound, and
+nothing is served by a gate that is red once a fortnight for whichever lane was
+unlucky.
+
+---
+## 2026-11-05 — `@jam-overture/loom/signals` is now the widest door and a `(docs)` test asserted the root door was, so this run edited one assertion outside its lane
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/_lib/api/extract.test.ts`) · **Status:** open — **the
+edit is already on `signals-74-a-counted-delivery-is-kept` and `pnpm verify` is
+green**; what is open is whether `Loom docs` wants it worded differently, and
+nothing is blocked either way
+
+`extract.test.ts` carried:
+
+```ts
+it("says the root door is the widest and still has less than half of it", () => {
+  expect(runtime?.standing.widest).toBe(true)
+  …
+})
+```
+
+**It went red on this branch**, which adds one module to `src/signals/` for
+[0351](decisions/0351-a-counted-delivery-is-kept-for-a-stated-window-rather-than-deleted-by-the-fold.md).
+Measured off the regenerated reference: `@jam-overture/loom/signals` publishes
+**610** names and `@jam-overture/loom` publishes **600**, of 1,896 in the
+package. Before this branch the signals door was 594 and the root door was
+widest by six; sixteen new published names took it past.
+
+**It is the 2 November entry's own shape**, filed by this lane's reader rather
+than by its author: *a figure read from `reference.generated.json` is another
+lane's, whatever it is counting, so the question to ask of it is would I defend
+this if `src/` doubled.* Which door is biggest does not survive that. Three
+things made this the one to act on rather than file and wait:
+
+1. **Nothing on the page was wrong.** `api-reference.tsx` reads
+   `standing.widest` per door and prints *No import here has everything behind
+   it — not even this one* on whichever door has it. The band was already
+   correct about the signals door the moment the generator ran.
+2. **The property the band depends on still holds**, so there was something to
+   assert rather than something to delete: the widest door — whichever it is —
+   still has less than half the package, and so does the root door a reader
+   arriving from search assumes has all of it. The test now says that, over
+   every door `standing.widest` names, and the two figures are in this entry and
+   in the report where they carry a date.
+3. **The alternative was a pull request on red or a stranded unit.** The owning
+   lane cannot see this fail until the branch merges, and the branch cannot
+   merge while it fails, so filing alone would have deadlocked a unit built on
+   the maintainer's decision of the same morning.
+
+**Why this is a cross-lane edit and said out loud as one.** `docs/routines.md`
+is clear that work belonging to another lane is filed and not done, and the one
+standing exception is the other direction — `src/` files that decide a `(docs)`
+thing. This is a `(docs)` file that asserts a fact about `src/signals/`. The
+nearest licence in that document is `Loom merge`'s, which may make small edits
+outside a lane *when an earlier merge made your branch's tests go stale — a
+lesson transcript, a count, a docs table listing a union — by running the code
+and recording what it prints*, and say which file and why. That is exactly this
+edit's category, and it is in the report and on the pull request as well as
+here.
+
+**`Loom docs`: the comment above the test is mine and it is longer than the
+test.** Re-word or shorten it freely. What should not go back is the equality:
+`standing.widest` on a named door will flip again the next time either lane
+ships a module, and the lane it goes red for will be whichever one happens to be
+holding it.
+## 2026-11-05 — a markdown link posted to GitHub from a routine session can arrive with backticks wrapping its URL, and re-posting it does not fix it
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` (run
+mechanics; nothing in the repository causes it) · **Status:** **open, and the
+remedy is to stop rather than to fix** — it is cosmetic, it is not any lane's
+doing, and two attempts at correcting it are two more than it is worth
+
+A link written `[0348](https://github.com/…md)` can arrive on GitHub as:
+
+```
+[0348](``https://github.com/…md)``
+```
+
+which renders as literal backticks and a dead link. It happens somewhere
+between a session and GitHub, **not in the text a run composes.**
+
+**Measured rather than assumed, because the obvious culprit was innocent.** The
+first guess on #765 was that `Loom merge` had done it while renumbering a record,
+since both edits touched the same two lines. It had not:
+
+| | |
+| --- | --- |
+| #765 body, after a clean local repair and a `PATCH` | still mangled |
+| the same `PATCH` repeated, response read directly | still mangled |
+| the payload actually sent, checked both as a file and as JSON | **0 mangled** |
+| #764, another lane's pull request, untouched by this lane | **1 mangled** |
+| a comment on #761 from a previous run of this lane | mangled the same way |
+
+So the text leaving the session is correct, the text arriving is not, and it
+reaches at least two lanes and both pull-request bodies and comments. **Re-posting
+cannot win**: the repair is mangled again in transit, which is how a run can
+spend a quarter of an hour discovering that its own editing works perfectly.
+
+**What to do when you meet it.** Nothing, beyond knowing. Write the link
+normally, check it once if you like, and if it arrives wrapped, leave it — the
+URL inside is intact and a reader can still follow it. **Do not re-`PATCH` the
+body, do not rewrite the link as a bare URL to dodge it, and above all do not
+push a commit over it**, which re-runs the merge gate for four surfaces to
+straighten a pair of backticks.
+
+**This entry nearly did not survive, and that is the second half of it.** It was
+written and committed onto `framework-82-where-a-pages-bytes-are` while that
+branch's pull request was being merged — #765 merged at 01:32:31Z, the commit
+landed after — so it sat on a branch whose pull request was closed and would have
+been lost. **A merged pull request cannot carry follow-up work.** The check that
+catches it is one call: read `state` and `merged` on the pull request *again*
+before pushing to its branch, not only at the start of the pass. A
+`mergeable_state` of `unknown` that will not settle is the tell, and the reason it
+will not settle is that there is nothing left to merge.
+
+**What would actually close the mangling** is outside the repository: it is a
+question about the path between a routine session and the GitHub API, and the
+maintainer is the only one who can ask it. Worth raising only if it ever mangles
+something load-bearing — a URL inside a code fence a reader is meant to copy, or
+a `decisions/` link in a record. So far it has only ever hit prose links, where
+the cost is one ugly line.
+
+---
+## 2026-11-06 — the two bound primitives carry the shape they draw as a private schema, and there is now a declaration for it
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom primitives`
+(`src/primitives/loom.feed.ts`, `src/primitives/loom.tally.ts`) · **Status:**
+open — **nothing is broken and no test is failing.** Both primitives work
+exactly as they did; this is a declaration they can now make and could not
+before.
+
+[0180](decisions/0180-a-primitive-that-draws-an-answer-declares-the-shape-it-can-draw.md)
+clause 2 decided that a primitive declaring an answer carries its own schema for
+what it draws, and had nowhere to put it: `definePrimitive` had no field, which
+0180 says in its own consequences and filed. That field now exists —
+`expects`, [0357](decisions/0357-a-primitive-declares-the-shape-of-answer-it-reads-and-the-rows-inside-it-stay-its-own.md)
+— and this lane owns the two primitives that would use it.
+
+What moves, and it is one line each:
+
+- **`loom.feed`** declares `expects: { entries: entriesSchema }`, where
+  `entriesSchema` is the `z.array(z.unknown())` it already holds. Its
+  `entrySchema` stays exactly where it is: 0357 clause 2 is explicit that the
+  top-level shape is the framework's question and each row stays the
+  primitive's, because skipping a row it cannot read is
+  [0175](decisions/0175-a-listing-skips-the-row-it-cannot-read-and-fails-the-one-it-cannot-place.md)
+  doing its job.
+- **`loom.tally`** declares `expects: { value: figureSchema }`, the union it
+  already holds. That one *is* the whole answer, so the top-level parse in
+  `readAnswer` becomes dead and can go.
+
+What it buys, in both: an answer in a shape the primitive cannot draw stops
+being invisible outside the component. It is reported as `data-unavailable` with
+reason `unreadable-answer`, against the source that answered and the name it
+answered under, and the component is handed the `unavailable` outcome it already
+renders a declared line for (0180 clause 3) instead of falling through a
+hand-written parse. A list of services bound to a `loom.tally` is the case this
+closes.
+
+Two things to know before adopting:
+
+1. **The expectation is keyed by the name as *declared*** — for both of these
+   that is the prop-named declaration's `default`, so `entries` and `value`,
+   never the prop and never what a node renamed it to
+   ([0184](decisions/0184-a-primitive-may-read-under-whichever-name-a-prop-gives.md)).
+   The registry refuses a key that is not a name `reads` declares.
+2. **The answer handed over is still the source's own**, unparsed. 0357 clause 3
+   discards the parse output deliberately, so unknown keys on a row are still
+   neither stripped nor refused, which is what 0180 asked for.
+
+No deadline and nothing blocked on it. Until one of them declares, `expects` is
+a field nothing in the library uses, which is said plainly in 0357's
+consequences.
+
+---
+## 2026-11-06 — an answer's shape is checked at the seam and the catalogue still cannot tell a model what shape a primitive wants
+
+**Filed by:** `Loom daily build` · **Owned by:** `@jonathanbravecredit` — it is
+a question about a documented limit rather than a defect · **Status:** open —
+**the half that catches a mistake shipped; this is the half that would prevent
+one being written.**
+
+The 12 September entry above asked for two things and named one remedy for both:
+a declared shape on `definePrimitive`, *projected into the catalogue beside
+`props`*. The declaration and the check shipped today (0357). **The projection
+did not, and it is being raised rather than quietly dropped.**
+
+`catalogue.ts` says why, deliberately and in its own words:
+
+> It is deliberately shallower than the Zod schemas it comes from: prop names
+> and whether each is required, not their types. **A structural description of
+> arbitrary Zod is a second schema language to maintain**, and the model already
+> sees concrete prop values in the tree outline, so the marginal value is small
+> next to the cost of keeping it honest.
+
+That argument was made about **props**, and props have a tree outline beside
+them that shows a model concrete values. An **answer** has nothing of the kind:
+it comes from a host's database at request time, so there is no example of one
+anywhere a model can see. The reasoning may still hold and may not, and that is
+the question.
+
+Three ways to go, with what each costs:
+
+1. **Nothing.** A model writing a binding is told which sources exist and which
+   names a primitive reads, and learns the shapes do not match when the page
+   reports `unreadable-answer`. Cheapest, and the mistake is now at least named.
+2. **A closed vocabulary for the outermost layer only** — `object`, `array`,
+   `string`, `number`, `boolean`, `null`, `unknown` — plus the fields when it is
+   an object, which `catalogueFields` already projects for props. Six members
+   and one layer, which is a long way from a schema language, and enough to stop
+   a list being bound to a figure before anyone writes it. **This is the
+   recommendation.**
+3. **A full structural projection.** What `catalogue.ts` rejects, and the thing
+   that would also make a *compose-time* compatibility check possible against a
+   source's declared `answers` schema — 0357's first rejected alternative, which
+   is unsound without it.
+
+It is yours rather than this lane's because (2) edits the sentence above, and a
+documented deliberate limit is not something to widen in passing on the strength
+of one finding.
+## 2026-11-06 — page views are counted by hour now, so the range picker and the chart are the portal's to draw
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom portal`
+(`app/(portal)/portal/[project]/signals/`) · **Status:** **closes `Loom portal`'s
+entry of this morning** — *Signals' range picker and hourly chart need page views
+counted by hour*. All three points landed on
+`signals-76-the-hour-readers-arrived-in`
+([0356](decisions/0356-page-views-are-counted-under-the-hour-they-began-in-as-a-sixth-counter-written-at-the-door.md)).
+
+| asked | landed |
+| --- | --- |
+| page views counted by hour for one application, over a stated range of receipt times, as one bounded read | **yes** — a sixth counter, written at the door from the opening marker, read by range |
+| the range limited to the kept window, and the answer saying where its data starts | **better than asked** — the series is a counter rather than a read of the deliveries, so it is **not** limited to the kept window; and it says where its data starts, which is the hour this deployment first counted one |
+| through a scoped handle like `readingsFor(applicationId)` | **yes** — `readingsFor(application).tallies.arrivals(…)`, and `readReaderArrivals` above it |
+
+**The three calls, and the one you should use.**
+
+```ts
+import { arrivalRangeOf, readReaderArrivals } from "@jam-overture/loom/signals"
+
+const range = arrivalRangeOf(Date.now(), 24) // or 24 * 7, or 24 * 30
+const read = await readReaderArrivals(readingsFor(application).tallies, {
+  range,
+  now: Date.now(),
+  // treeId, audience and revision narrow it; absent sums them, because arrivals add
+})
+// read.value.series.hours — one bar per hour, ascending, dense, `whole: false` on the hour in progress
+// read.value.change      — { views, was, ratio } for the range against the equal period before it
+```
+
+**Four things worth holding before you draw it.**
+
+1. **Use `readReaderArrivals` rather than the store's `arrivals` directly.** The
+   change is over two periods, so the read has to span both — and
+   `arrivals({ from: range.from, to: range.to })`, which is the obvious line,
+   gives a comparison whose earlier period is empty *because it was not read*.
+   That draws as *every reader you have is new*, from a store holding the right
+   answer. The composed call derives the read from the range.
+2. **`was: null` is not nought.** It means the earlier period predates the hour
+   this deployment began counting, and the quotient says `unmeasured` rather
+   than `from-nothing` (`ratios.ts`). A deployment that upgrades today has no
+   earlier figure for a month and has not lost any readers. `from-nothing` is
+   the other one — counted, and nobody came — and it is the rise worth drawing.
+3. **`series.clipped` and `series.begins` are the sentence under a short
+   chart.** Thirty days on a deployment that began counting a week ago gives
+   seven days of bars, `clipped: true`, and `begins` naming the hour. The series
+   deliberately does **not** pad the other twenty-three days with noughts.
+4. **`whole: false` on the last bar is the clock, not the traffic.** Pass `now`
+   and the hour in progress says so; draw it differently or leave it off, but do
+   not draw it like a finished hour or every screen shows a dip at the
+   right-hand edge.
+
+**What this is not.** It counts page views that *began* in an hour, which is the
+only unit the door can count (0214) — not deliveries, and not readers present.
+A reader who arrived at 10:58 and stayed an hour is one arrival in the ten
+o'clock bar and nothing in the eleven o'clock one. The facets your wireframe
+puts beside the list are still the tallies', as the 5 November entry said.
+
+---
+## 2026-11-06 — a sixth counter table means `boundedReaderTallyStore` forwards a fourth listing, and this lane wrote the line
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom portal`
+(`app/_lib/app/bounded-store.ts`) · **Status:** open — **the line is already on
+`signals-76-the-hour-readers-arrived-in` and `pnpm verify` is green**; what is
+open is whether the comment is worded the way that file wants, and nothing is
+blocked either way.
+
+`ReaderTallyStore` gained `arrivals`
+([0356](decisions/0356-page-views-are-counted-under-the-hour-they-began-in-as-a-sixth-counter-written-at-the-door.md)),
+so the portal's bounded wrapper did not implement the interface and the app
+typecheck went red. One line, forwarding, inside the same read budget as the
+other three listings:
+
+```ts
+arrivals: (request) => readWithin(() => store.arrivals(request), unavailable, budgetMs),
+```
+
+**It is the fifth time a widened store interface has asked this of that file**
+and the second in two days — `boundedReaderSignalJournal` took `counted` on
+5 November for the same reason. The gate is doing its job both times: a wrapper
+that silently did not forward a method would be a screen reading an unbounded
+store.
+
+**One thing is worth a second look rather than a line.** This is the only read
+in that file whose cost grows with what the caller asks for, because a range is
+a parameter — a thirty-day chart is 720 buckets and a badly-chosen range is
+more. The budget bounds the wait and not the work. If that file would rather cap
+the range than cap the clock, the cap belongs there and not in `src/signals/`,
+because the store answers what it is asked and the portal is what knows how long
+a screen may wait.
+
+---
+## 2026-11-06 — the hourly series does not compose into `windowAssemblyOf`, and probably should not
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/window.ts`, `src/signals/window-figures.ts`) · **Status:** open —
+**nothing is broken and nothing is asked of anybody today.** Recorded so that
+the next run reading the second rung does not read the absence as a gap.
+
+Forty-two readings of a window are one call with one argument because
+`windowAssemblyOf` publishes the three subjects they take, and the three that
+were not reachable that way were filed as a pattern and then built
+(`window-figures.ts`). **The arrivals series is a fourth thing the assembly
+does not publish, and it is unlike the other three.**
+
+A window is a *set of counters* — whatever arrived in a stretch of the buffer,
+folded — and the series is a *stretch of time* read off a durable counter. The
+assembly holds no clock, has no range to pass, and the series needs no tally,
+no pair and no library. Composing them would mean giving the assembly a range
+it has nothing else to do with, or giving the series a window whose boundaries
+have nothing to do with the hours it answers for.
+
+**Recommendation: leave it.** The thing to watch for is a reading that genuinely
+wants both — *the hours inside the window this fold covered* is the plausible
+one — and the honest shape for that is a third rung above both rather than a
+range threaded through the assembly. If it is ever built, the test to write
+first is that the hours it reports sum to the arrivals the window's own door
+rows report, because those two numbers come from different tables written by
+different writers and nothing today holds them together.
+## 2026-11-05 (evening) — the *Events* tab's reading handle landed, and the two things it will not do are the portal's to draw around
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom portal`
+(`apps/loom/app/(portal)/portal/[project]/signals/`) · **Status:** open —
+**nothing is blocked**; the handle is on `main`'s way and the screen is the
+remaining work. **It closes this lane's own 5 November (morning) entry — *the
+Events tab's store landed and its reading handle did not* — by
+`signals-75-the-events-a-screen-can-list`.**
+
+This closes this lane's own entry of this morning, *the Events tab's store
+landed and its reading handle did not*. All four of the things `Loom portal`
+asked the intake for are now there:
+[0355](decisions/0355-the-events-a-screen-lists-are-one-row-per-signal-and-one-page-view-is-read-on-a-key-the-caller-already-holds.md)
+is `readerEventsFor(applicationId)` in
+`apps/loom/app/_lib/reader-signals/events.ts`, scoped the way `readingsFor` is
+and bounded inside the handle rather than at the call site — so a screen cannot
+forget the budget, which it can with the journal the *Signals* screen reads
+today.
+
+**What it gives you.**
+
+| | |
+| --- | --- |
+| `list({ treeId?, cursor?, limit? })` | one row **per signal**, newest delivery first, exactly `limit` of them, with `older` for the next page and `undefined` where the page reaches the oldest kept delivery |
+| `ReaderEvent` | the signal **whole** (`event.signal`, the closed five-kind union, so `ms`, `open` and `within` are typed per kind), plus `id` for `?event=`, `receivedAt`, `sentAt`, `treeId`, `revision`, `audienceId`, `view`, and `countedAt` |
+| `pageView(key, limit?)` | the drawer's panel: that one page view's signals, oldest first, with `more` where there are more |
+
+**Two limits, both deliberate, both wanting a sentence on the screen rather than
+a change here.**
+
+1. **The kind chips are not a filter the handle has.** A kind lives inside the
+   delivery's JSON array, so filtering on it is either a predicate over a
+   thirty-day table or an over-read that discards — which breaks the exact page.
+   **Recommendation: the chips read the tallies**, which hold those counts
+   already and go on answering after a row is swept; the facet *counts* must
+   come from there anyway, because 0349's second clause is that nothing read
+   over all time comes out of these rows. The same reason there is no *of 4,812*
+   on the list: this handle counts nothing, by decision.
+2. **The drawer's panel shows the start of a page view.** It is bounded rather
+   than paged — a reader who stayed an hour has thousands of signals in one page
+   view — so an event late in a long page view is not inside its own panel.
+   `more` says so. If that reads badly on the screen, the fix is a cursor on the
+   panel and it is one field; ask rather than build around it.
+
+**And one thing that is a refusal rather than a gap.** There is no *this is
+where the page view began*. A batch says so on the wire and both journals drop
+it at the door
+([0219](decisions/0219-a-page-view-is-counted-once-at-the-door-and-the-over-count-in-the-node-counters-is-a-measurement.md)),
+because a row saying *this page view began at this instant* is the step toward a
+profile §7 of `docs/signals.md` refused — and a thirty-day window makes that
+argument stronger rather than weaker. The oldest kept delivery of a page view is
+not evidence either, since the sweep takes the oldest first. There is a test
+that fails if the field reappears, so please do not add one; a drawer that wants
+to say it should say *the deliveries kept from this page view* instead.
+
+**The `view` key is now read by a screen, which one clause of 0146 said nothing
+in the portal would do.** 0355 partially supersedes it, on the authority of
+[0349](decisions/0349-a-projects-reader-events-are-kept-thirty-days-by-default-and-the-tallies-stay-the-durable-record.md)
+rather than of this lane, and the four clauses carrying 0146's argument stand —
+including that correlation is scoped to one page view, which the narrowing
+enforces by signature: one key in, one page view out, with nothing that
+enumerates keys and nothing that asks what a row shares a key with. If the
+maintainer would rather the drawer did not show the key at all, the panel is one
+method and the list does not depend on it.
+
+---
+## 2026-11-05 (evening) — a page of events is exact because the handle holds a cursor the store could not give it, and that is the shape to copy rather than to tidy
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`apps/loom/app/_lib/reader-signals/events.ts`) · **Status:** open — **a note
+for a future run, not a defect**; nothing is asked of anybody today
+
+The *Events* list pages in **events** and the store pages in **deliveries**, and
+a delivery carries one signal to hundreds. So a page of fifty can end inside a
+delivery of sixty, at a position no `ReaderSignalPage` names — every cursor this
+repository hands out sits at a page boundary, which is the whole of what keyset
+paging promises.
+
+The handle's cursor is therefore `[the store's cursor, events already shown]`,
+base64url, opaque: *resume this chunk of deliveries and skip what has been
+drawn*. **It costs at most two reads per page**, and that is a property rather
+than luck — a chunk is `limit` deliveries, every delivery carries at least one
+signal, so a chunk that is not the last always holds enough to fill what a
+resumed chunk left short. The test that matters asserts every event appears
+exactly once across a full walk at eight different page sizes, which is this
+lane's double-count rule applied to a list.
+
+**Two things a future run should not do to it.**
+
+1. **Do not mint a store cursor from `seq`.** It is two lines — cursors are
+   `String(position)` and `seq` is published on the row — and it would be the
+   only place in the repository where a caller depends on the *encoding* of a
+   value every contract calls opaque and passed back unread. The day a store
+   pages by anything else, nothing would catch it.
+2. **Do not replace it with *skip N from the newest end*.** Page seven would
+   read six pages of deliveries to find its own, which is the cost that grows
+   with the kept window — the same objection that keeps the facet counts on the
+   tallies, one table down.
+
+**Where the shape generalises.** Any later list over these rows has the same
+mismatch between what a row is and what the store pages. The thing to copy is
+not the arithmetic but the discipline: the module above the store may keep a
+cursor of its own, and it may compose the store's cursor into it, and it may not
+take the store's cursor apart.
+
+---
+## 2026-11-06 — the drawer's *rest of this page view* is a sample of 400 deliveries, and the read that makes it exact landed hours after the screen did
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom portal`
+(`apps/loom/app/(portal)/_lib/events-reading.ts`) · **Status:** open — **one
+field is the whole fix**, nothing is red, and the screen is right about
+everything it says
+
+Both lanes solved the same morning's problem on the same morning. `Loom portal`
+built *Events* on 5 and 6 November (#782, #784, #785) against
+`readingsFor(application).journal` directly, having read §74's finding as saying
+the journal already **was** the handle it asked for; this lane shipped the
+handle it meant a few hours later (#780, 0355), with a narrowing on the store's
+read request that nothing in the screen could know about. **The screen is not
+wrong and the finding was ambiguous**; what follows is one capability that
+arrived too late to be used, and it is the only part of this worth acting on
+now.
+
+**`readOpenedEvent` reads the 200 deliveries either side of the event and keeps
+those whose key matches** (`AROUND = 200`), reporting `whole: false` where there
+were more. `?view=` filters the same capped scan, as the kind and page filters
+do. That is exactly right against a journal that can only be walked — and it
+makes the drawer's panel a **sample of a window of time rather than a page
+view**: on a site with ten readers on it, a page view's own deliveries are
+interleaved with hundreds of others, every one of which spends one of the 400
+places. *Events from this view* can quietly omit for the same reason.
+
+**`read({ view })` is now on `main`**, from 0355:
+
+```ts
+const page = await journal.read({ view, direction: "newer", limit })
+```
+
+- **Exact.** Every delivery of that page view, whatever else arrived between
+  them, and nothing else — a key nothing carries is an empty page.
+- **One indexed read**, on `loom_reader_signals_view_idx (application_id, view)
+  where view is not null`, rather than 400 rows of JSONB.
+- **It cannot overrun a window of time**, so `whole` stops being a thing the
+  drawer has to say — a page view older than the kept window is simply gone,
+  which is a different and honest sentence.
+- **It is bounded as a page like every other read**, so a reader who stayed an
+  hour is a `limit` and a *more* rather than a guess about how many deliveries
+  are nearby.
+
+**Recommendation, and it is the only one in this entry:** point the drawer's
+panel and `?view=` at `read({ view })`. Everything else on the screen can stay
+as it is. `apps/loom/app/_lib/reader-signals/events.ts` already wraps it as
+`readerEventsFor(application).pageView(key, limit?)`, which returns
+`{ events, more }` with the events oldest first — take that or call the journal
+directly, whichever fits `events-reading.ts` better; the narrowing is the part
+that matters.
+
+**What is not being asked for, and is the maintainer's call rather than either
+lane's.** `main` now holds **two** readings of these rows: the portal's, which
+the screen uses and which has the filters, the naming and the goal chips; and
+this lane's, which nothing calls. Neither is simply better — the portal's buys
+the kind chips and the search by scanning and filtering in memory, and this
+one's pages exactly at no more than two reads and never mints a cursor from
+`seq`, which the portal's does (`through = seq + 1`, which works and depends on
+the encoding of a value every store contract calls opaque and passed back
+unread). The right end state is one reading with the portal's capabilities and
+this one's discipline, and **where it lives is a question about the lane
+boundary**: §74's finding said a portal calling the journal is reaching the
+table, and the portal's answer — that the scoped journal handle *is* the handle
+— is a reasonable reading of the same words. This lane is not deleting its
+module on its own initiative, because that would throw away the better-behaved
+half before anybody compared them; it is also not asking `Loom portal` to
+migrate a working screen. **For the maintainer:** say which way the boundary
+goes and the losing module is deleted in one commit by whichever lane owns it.
+
+**Said plainly so nobody re-derives it:** a lane's finding that another lane can
+read two ways will be read the cheaper way, by a routine with a morning's budget
+and a screen to ship. The fix is not more words in the finding — it is naming
+the module and the signature, which this one does.
+
+---
+## 2026-11-07 — a broadcast handed the document follows the page, so both offers of 4 and 5 November are taken
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals` (`src/signals/broadcast.ts`) ·
+**Status:** **closed on filing by `signals-78-a-broadcast-follows-the-page`**
+([0366](decisions/0366-a-broadcast-handed-a-document-follows-the-page-and-a-client-side-navigation-is-a-new-page-view.md)),
+closing `Loom framework`'s 5 November entry *a broadcast could find its own root
+now* and `Loom daily build`'s 4 November (evening) re-addressing of
+`Loom marketing`'s entry to this lane.
+
+`broadcastReaderSignals` now takes an `Element` **or** a `Document`. The element
+form is byte-for-byte the behaviour it always had. The document form finds the
+addressed page with `addressedRootIn` — which is why this was cheap, and the
+reason 0354 earns its keep — and then follows the page's identity.
+
+**The offers were right about the API and understated the defect.** Both framed
+it as a host losing one conditional. What it actually fixes is that a host which
+did not act on the module's *stop and start another* sentence filed every signal
+after a client-side navigation **against the page the reader left** — a wrong
+number, not a missing one, with the node ids real and the batch parsing — and
+counted the reader as arriving once however many pages they read, which is the
+marker page views by hour (0356) and every door-scaled figure are taken from.
+
+**The two cases that would have double-counted are the tests to keep.** A
+re-render is not a navigation, so every band a proposal rewrites leaves the page
+view alone; and the same revision rendered again into a new element is the
+**same** page view, which is why the page view is now a value handed to a
+broadcast rather than state a broadcast owns.
+
+**It costs 1,030 bytes.** 6,513 minified and 2,986 gzipped become 7,543 and
+3,361 — 15.8%, paid by every page that asks for signals whichever argument it
+passes. A second entry point would have held rule 4 exactly and is rejected in
+the record's alternatives.
+
+---
+## 2026-11-07 — the lines a customer pastes are three lines now, and the ones on `main` misattribute after a client-side navigation
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom portal`
+(`apps/loom/app/(portal)/_lib/connecting.ts`) · **Status:** open — **one line,
+and it is the highest-leverage adoption of
+[0366](decisions/0366-a-broadcast-handed-a-document-follows-the-page-and-a-client-side-navigation-is-a-new-page-view.md)
+because it is the snippet a stranger copies**
+
+`snippetFor` generates the two calls a customer pastes into the page rendering
+their tree. On `main` it is seven lines: a `querySelector`, a null guard, and the
+broadcast. With the document form it is three, and the guard goes with them —
+`broadcastReaderSignals` refuses a document holding no addressed page and
+returns the same `unaddressed` code, so the snippet cannot throw on a page with
+no tree, which is what the guard was for.
+
+```js
+import { broadcastReaderSignals, deliverReaderSignals } from "@jam-overture/loom/signals/broadcast"
+
+broadcastReaderSignals(document, { send: deliverReaderSignals({ url: "…" }) })
+```
+
+**Why it is worth doing promptly rather than tidily.** Every customer who pastes
+today's snippet into an application that routes on the client gets signals filed
+against the page the reader left, and arrives once per session rather than once
+per page. Nothing in the portal's own screens can tell — the data looks whole.
+`connecting.test.ts` asserts the snippet's first line, so the test moves with it.
+
+The deployment's own `pages:publish` route and the three client components in
+`(docs)` and `(marketing)` are the same one-line change and are filed separately
+below; this one is different in kind because it is the code Loom hands to
+somebody else.
+
+---
+## 2026-11-07 — three client components in this repository start a broadcast on an element, and each is its own lane's one-line change
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/_components/reader-signals-live.tsx`,
+`apps/loom/app/(docs)/_lib/fences/compiled/the-runtime--what-your-readers-do.tsx`)
+and `Loom marketing` (`apps/loom/app/(marketing)/_components/count-readers.tsx`)
+· **Status:** **both `Loom docs` rows closed by `docs-82-two-limits-the-runtime-no-longer-has`**,
+9 November; the `Loom marketing` row is open. Original status below.
+
+> **`Loom docs`, 9 November.** The fence is the document form now, and the prose
+> beside it says which argument is which. The live component asks
+> `addressedRootIn` for its root and spells no selector. The entry asked for the
+> sentence on *What your readers do* and for a call on whether the compiled
+> fence should keep the element form — **it should not**, and the reason is the
+> half of this entry that turned out to be the larger one: the same page was
+> telling a reader to stop and restart the broadcaster across a client-side
+> navigation, which 0366 had made false two days before this entry was filed.
+> The element form is still demonstrated and still argued for, by the live
+> block, which is the one place on this site where it is the right argument.
+
+**Original status:** open — **nothing is broken in any of the three**, and this is an
+adoption rather than a defect
+
+[0366](decisions/0366-a-broadcast-handed-a-document-follows-the-page-and-a-client-side-navigation-is-a-new-page-view.md)
+gives `broadcastReaderSignals` a document form that follows the page across a
+client-side navigation. All three of these broadcast from an element they hold —
+and **all three are right to**: each renders a tree into a frame or a panel on a
+page that holds other things, which is exactly what the element form is for. A
+document form would find the first addressed tree in the whole page, which on a
+docs page with two live panels is the wrong one.
+
+**So this is filed for the prose rather than for the call.** What each of them
+*shows a reader* is how to start a broadcast, and the shape a reader should copy
+onto their own site is now the document form. `Loom docs` owns the sentence on
+*What your readers do*, which is where the new argument wants describing, and
+whether the compiled fence should demonstrate the element form with a line
+saying why is that lane's call.
+
+The two places that hard-code `"[data-loom-tree]"` can now drop the selector
+entirely rather than importing the constant — `addressedRootIn(frame.current)`
+for a scoped panel (0354), or `document` for a page served whole.
+
+---
+## 2026-11-07 — a deployment's figures move when a host adopts the document form, and no fault names it
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/health.ts`, `src/signals/change.ts`) · **Status:** open — **a
+boundary named at the moment it was created**; nothing is broken and nothing is
+asked of anybody today
+
+[0366](decisions/0366-a-broadcast-handed-a-document-follows-the-page-and-a-client-side-navigation-is-a-new-page-view.md)
+makes a client-side navigation a page view that is counted. On an application
+that routes on the client, adopting the document form therefore **raises
+arrivals and moves every figure taken at the door's scale** — not because a
+counter changed, but because what the page sends changed.
+
+Every before-and-after reading in this subsystem compares two windows of one
+collection and has a vocabulary for the ways that can be unsafe: two audiences
+(0294), a window that credits nobody (0331), a door that cannot be scaled
+(0250), a sender the door refuses (0347). **None of them is *the page started
+sending differently*, and none of them can be** — nothing in a batch says which
+argument the host passed, and nothing should: that is a fact about the host's
+code and not about the reader or the tree.
+
+**Recommendation: leave it, and do not invent a member for it.** The honest home
+for *collection changed here* is the deployment's own record of when it changed
+its snippet, which is outside this subsystem. The thing to watch for is a
+surface that publishes a sharp rise in arrivals as a change in reader behaviour
+during the week a customer adopts 0366; the sentence that fixes that is in the
+portal's release note, not in a silence vocabulary.
+
+---
+## 2026-11-07 — rule 4's size half is a test now, and the ceiling is the only place it is written down
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/browser-weight.test.ts`) · **Status:** **closed on filing by
+`signals-78-a-broadcast-follows-the-page`**, and filed because the shape is one
+this lane walked into on 2 November and has now paid for
+
+*Performance is not traded for measurement* had two halves and only one of them
+was enforced. The import graph has been walked since 0136 and fails on any
+package. **The size was a sentence in `docs/signals.md` and a figure in each
+report**, re-measured by whoever remembered — and on 2 November that figure was
+found to be a third out of date, which is the same failure 0218 recorded about
+an exported name: a browser cost that moves is invisible in a diff.
+
+`browser-weight.test.ts` now builds the entry point with `esbuild` (already a
+dev dependency, already how every report measured it by hand), gzips it, and
+holds it to **8,000 bytes minified and 3,600 gzipped**. Both, because they do not
+move together: the minified figure is what a browser parses and the gzipped one
+is what the network carries, and a paragraph of code shaped like its neighbours
+costs almost nothing over the wire and still has to be parsed.
+
+**What a future run should not do to it.** Do not pin it to the figure of the
+day — the ceiling exists so that spending bytes is a line somebody wrote with
+the number in it, and an exact-match assertion would fail on an esbuild patch
+bump and teach the next run to loosen rather than to think. Do not raise it
+without putting the new figure in the comment's history, which is now three
+entries long: 4.8 KB at 0136, 6,513 for most of October, 7,543 at 0366.
+## 2026-11-07 — a source panel a phone cuts in half has no rest state saying so, and `wrap: false` is the reason it cannot be fixed in copy
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom primitives`
+(`src/primitives/loom.code.ts`) · **Status:** **open** — nothing is broken, no
+test failed, and the site has shipped a line-length ceiling standing in for the
+affordance
+
+`/why-use-it` prints three source panels now: the two files under *What you
+write* and the one function under *Hook up your model*, which landed today.
+All three say `wrap: false`, and that is correct and argued in two places —
+a wrapped line of TypeScript reads as two statements, and an indented
+continuation reads as a block, so a panel printing **source** is the one case
+the `wrap` prop was written to let a caller refuse.
+
+**Measured on the band that landed today**, production build, with
+`pnpm shoot`'s `measure`:
+
+| viewport | panel | the code inside it | behind the gesture |
+| --- | --- | --- | --- |
+| 1280 | 1078 | 655 | **0** |
+| **390** | **361** | **655** | **294px** |
+
+The document never scrolls sideways — `scrollWidth` is exactly 390 at 390 — so
+this is contained inside the panel and is not a layout bug. What a reader with
+a phone gets is roughly **the first 44 of a 78-character line** and no sign that
+the line continues: `overflow-x: auto` is the containment, and a touch viewport
+draws that scrollbar only while a finger is already moving it
+([0236](decisions/0236-a-viewport-names-a-device-and-the-pointer-is-part-of-it.md)
+is what made the harness honest enough to photograph this).
+
+### Why this is not the finding that was closed on 12 September
+
+That one was *a long line of pretty-printed data is hidden and wrapping it loses
+nothing*, and the remedy was the `wrap` prop. It was the right remedy and this
+lane takes it on the panel that prints JSON. **This is the other half**: a panel
+whose lines genuinely must not wrap, where the content really is wider than the
+viewport and no setting available to a caller changes that.
+
+So there is nothing for the composition to do. What this lane has instead is
+`connected.test.ts`' `CHARACTERS_IN_A_LINE = 80`, which bounds how far the
+overflow goes and is explicitly **not** a promise that nothing scrolls. The
+specimen was cut to it by hand, which is what took `authorization` and
+`content-type` onto their own lines.
+
+### Three shapes, costed, and the recommendation
+
+1. **A fade at the trailing edge while there is more to come.** Cheap, needs no
+   script, and it is what every code block a developer has seen does. **This is
+   the recommendation.**
+2. **A persistent slim track on a coarse pointer**, under
+   `@media (pointer: coarse)`. Honest, and it spends vertical space on every
+   panel including the ones that fit.
+3. **A caption affordance** — the panel says so in words. Rejected before
+   filing: that is the shape this site already uses for the invisible link
+   (30 October), and a library whose answer to every missing rest state is a
+   sentence in the composition is a library three lanes are writing prose
+   around.
+
+It is one surface's panels today. It is `(docs)` and `(lessons)` the moment
+either prints a file.
+
+---
+## 2026-11-07 — the site's word ceiling is no longer the thing blocking a fourth page, and the shape question it was filed about is unchanged
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing`
+(`app/(marketing)/_lib/budget.test.ts`) · **Status:** **open** — this is a
+measurement against the 26 October entry rather than a new finding, and the
+question in that entry is still the maintainer's and still unanswered
+
+The entry of 26 October — *the site's word ceiling was measured against three
+pages, so a fourth page is red before a word of it is written* — has been
+carried on four pull requests. Its premise was true when it was written and
+**it is no longer true**, which is worth recording before another run reads it
+and decides it cannot write a page.
+
+Measured on `main` today, over the authored tree, which is the binding reading:
+
+| | words |
+| --- | --- |
+| `/` | 1,366 |
+| `/why-use-it` | 1,103 |
+| `/what-you-run` | 481 |
+| **the site** | **2,950 of 3,900** |
+
+That is **950 of headroom**, which is more than `/what-you-run` entire. What
+changed is not an edit to the ceiling: it is
+[0328](decisions/0328-the-marketing-site-has-no-demonstration-and-no-mechanism-page.md),
+the maintainer's instruction of 31 October taking `/how-it-works` and the
+demonstration off the site. The run that measured 3,889-of-3,900 was measuring
+a four-page site that is now three pages.
+
+**The ceiling has not moved and must not**, which is the 27 October paragraph
+in `budget.test.ts` being honoured rather than reopened: it has been raised
+twice in two days by this lane, against a shape this lane has twice said is
+wrong, and a third raise is not a thing to reach for. None is needed. It is
+still binding from below — 0.76 of the site ceiling, and `/` is at 0.91 of a
+page's — so nothing here reports as stale.
+
+**What is unchanged is the question**, which is the whole reason that entry
+exists: *is the total number of words on this site a thing he wants capped at
+all*, now that a total with no term for how many pages it is a total of
+re-decides the size of the site every time somebody adds or removes one. Today
+is the second half of that sentence demonstrating itself — a page coming **off**
+moved the ceiling's meaning exactly as much as a page going on did, and no
+reviewer saw either.
+## 2026-11-06 (evening) — the hourly counter holds what readers *did*, so the drawer's `viewed` and `dwelled` bars still cannot be drawn for a range
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom portal`
+(`apps/loom/app/(portal)/portal/[project]/signals/`) · **Status:** open — **one
+sentence on a screen, or one short ask back to this lane**; nothing is blocked
+and nothing is red
+
+[0362](decisions/0362-what-readers-did-is-counted-under-the-hour-they-did-it-in-as-a-seventh-counter-the-fold-writes-for-the-three-delegated-kinds.md)
+answers *a bar per kind of thing readers did for the range* for the three kinds
+that **are** things readers did: presses, opens and shuttings, and sends. The
+wireframe's drawer lists five bars, and the other two — `viewed` and `dwelled` —
+are things readers *saw*, which the hourly table deliberately does not hold:
+
+- slicing `reached` or `views` by hour inflates them, because they are distinct
+  counts of page views and a page view that crosses an hour is one view in each;
+- a `dwelled` row per part per hour is as numerous as the page is large — about
+  6,000 rows an hour for a 6,000-node page, 144,000 a day, per revision, in a
+  table nothing sweeps.
+
+**Two ways to draw the drawer, and the first is free.**
+
+1. **Draw the three bars for the range, and the two attention figures *since
+   counting began*, labelled as such** — the tallies already hold those and go
+   on answering after a delivery is swept. The sentence is the honest one and the
+   screen is one label away from it. **Recommended.**
+2. **Ask this lane for a page-grained hourly table** — one row per tree,
+   revision and hour, with the count of `viewed` signals and the dwell
+   milliseconds. It is cheap in rows (trees × revisions × hours) and it would
+   answer both bars over a range. It is not built, because it is a second grain
+   with a sum rule between two tables and nothing has asked a question it
+   answers: the drawer's words are *what readers did*, and page views by hour
+   already say how many readers were there. **Say so and it is a morning's
+   work.**
+
+**What not to do:** do not derive either figure from the kept deliveries over a
+range. That is the capped scan 0356 refused, and it answers only for the kept
+window.
+
+---
+## 2026-11-06 (evening) — a seventh counter means `boundedReaderTallyStore` forwards a fifth listing, and this lane wrote the line again
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom portal`
+(`apps/loom/app/_lib/app/bounded-store.ts`) · **Status:** open — **the line is
+already on `signals-77-what-readers-did-by-hour` and `pnpm verify` is green**;
+what is open is only whether the comment is worded the way that file wants
+
+`ReaderTallyStore` gained `acted` (0362), so the portal's bounded wrapper did not
+implement the interface and the app typecheck went red. One line, forwarding,
+inside the same read budget as the other four listings:
+
+```ts
+acted: (request) => readWithin(() => store.acted(request), unavailable, budgetMs),
+```
+
+**It is the sixth time a widened store interface has asked this of that file**
+and the second in two days — `arrivals` took the same line this morning. The
+gate is doing its job every time: a wrapper that silently did not forward a
+method would be a screen reading an unbounded store.
+
+**The second read here whose cost grows with what the caller asks for**, and it
+has one lever the arrivals read does not: a part. A goal's series names a
+`nodeId` and is served by `loom_reader_acted_part_idx`; a page's bars name a
+tree. The budget still bounds the wait and not the work, so this lane's
+2026-11-06 note stands — **if that file would rather cap the range than cap the
+clock, the cap belongs there**, and it would now cover two reads rather than one.
+
+---
+## 2026-11-06 (evening) — the hourly rate's numerator and denominator are counted at different moments, and the error is at a range's edges
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/acted.ts`) · **Status:** open — **a stated limit of
+[0362](decisions/0362-what-readers-did-is-counted-under-the-hour-they-did-it-in-as-a-seventh-counter-the-fold-writes-for-the-three-delegated-kinds.md)**;
+nothing is broken and nothing is asked of anybody today. Recorded so the next
+run does not read the missing per-hour rate as an oversight.
+
+`readReaderActedRate` divides what readers **did** in a range by the page views
+that **began** in it. Those are two different moments: a reader who arrived at
+10:59 and pressed at 11:01 is in the eleven o'clock numerator and the ten
+o'clock denominator. Over thirty days that is two page views' worth of a month;
+over one hour it is the whole of the figure.
+
+So the rate is taken **once, over the range**, and the hours are published as
+counts. A per-hour rate series would publish the error once per bucket, in the
+shape where *a press with no arrival* reads as an infinite rate rather than as a
+reader who came in before the hour — which is why the rate is `null` where the
+range held no page views, and why the counts sit beside it.
+
+**If a per-hour rate is ever wanted**, the honest shape is not a quotient per
+bucket but a **rolling denominator**: the page views of the hour and the hour
+before, which is where a page view that straddles the boundary actually was. It
+needs no new column — it is a different reading of the two tables — and the test
+to write first is that an hour whose arrivals are all in the previous hour
+reports a rate under 100 rather than none.
+
+---
+## 2026-11-06 (evening) — three hourly readings now share one dense-fill rule, which is extracted rather than respelled
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/arrivals.ts`) · **Status:** open — **a note for a future run, not
+a defect**; nothing is asked of anybody today
+
+`arrivalSeriesOf` and `actedSeriesOf` draw bars over a range, and the rule they
+share is not the arithmetic but the **honesty**: an hour with no row is a nought
+that is drawn, an hour before counting began is not drawn at all, and the hour in
+progress is marked rather than drawn as a fall. Three spellings of that would be
+three chances for one chart to claim a quiet week a deployment never had.
+
+It is one function now — `hourlySeriesOf` in `arrivals.ts`, taking the rows, the
+first hour counted, the range and which number on a row it is counting — and
+`arrivalSeriesOf` is a four-line dressing of it. `arrivals.test.ts` and the
+arrivals contract suite were the guard for the extraction and are unchanged.
+
+**Two things a future run should not do.** Do not move the range helpers out of
+`arrivals.ts` on tidiness grounds: `arrivalRangeOf` and `arrivalRangeBefore` are
+what make the two periods of a comparison the same length, and a second module
+re-exporting them would be two names for one guarantee. And do not generalise the
+*change* shape the same way — `ArrivalChange` and `ActedChange` differ in what
+each withholds and why, which `ratios.ts` says at length is the reading's own
+rule and not a helper's.
+
+---
+## 2026-11-08 — the gate that was four days from red is six weeks from it, and the cap's remedy was never the one that would have paid
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** **closed by
+#820** for the deadline, and the entries of 7 November it answers are annotated
+below rather than reopened
+
+`pnpm verify` is the merge gate for four surfaces and the heaviest generated
+page was 509,948 bytes against an assertion that fires at 540,000, growing
+6,535 a day. On the morning of 8 November that was **four days**. It is now
+**275,350 bytes of room**, which at the same rate is six weeks, and no name
+stopped being published to get there.
+
+**What the two previous runs of this lane did not measure.** Both read the cap
+as a count of names and priced its one stated remedy, a cut along the page's
+modules, at 60 addresses and 13,105 bytes of rows in a contents file with 7,611
+left. That arithmetic is correct and it is still correct. What neither asked is
+**what the bytes were**:
+
+| `/docs/api-reference/signals`, 8 November morning | bytes |
+| --- | --- |
+| the declarations themselves | 95,398 |
+| doc comments the package wrote against their members | **375,803** |
+| the sentence each author left on the export | 38,747 |
+| **the page** | **509,948** |
+
+**Four fifths of the heaviest page on the site was member commentary**, and the
+comparison that makes it a defect rather than a fact is the door beside it:
+`@jam-overture/loom/runtime` publishes 600 names to `signals`' 656 and carried
+**65 bytes of member commentary per name against 573**. The page was not heavy
+because a package published into it. It was heavy because one rule this
+directory had always applied to a symbol's own doc comment had never been
+applied to the comments inside its declaration.
+
+`api/extract.ts` has published a symbol's summary as its **first paragraph**
+since the file was written, with the reason beside it: *a reference is a place a
+reader lands mid-question, the sentence that says what this is belongs on the
+page, and the six paragraphs of reasoning behind it belong in the source.*
+`toItsFirstParagraph` applies that inside a declaration. Measured, after:
+
+| | main | this branch |
+| --- | --- | --- |
+| the signals page | 509,948 | **266,753** |
+| every signature in the reference | 772,426 | **487,366** |
+| declarations cut off at an ellipsis | 12 | **2** |
+| member comments withheld whole for a citation they no longer contain | 40 | **0** |
+| `reference.generated.json`, committed | 1,324,981 | **1,033,272** |
+
+**Two things a future run of this lane should take from it rather than from the
+numbers.**
+
+- **A cap firing is a question about what is being counted, before it is a
+  question about where to put the overflow.** Nine runs of this lane have ended
+  on a cap. The remedy stated in `weight.ts` was priced twice and attempted
+  never, and it was the wrong remedy: it would have spread four fifths of a
+  megabyte of commentary across sixty addresses instead of asking whether a
+  reader scrolling a union of seven keys wants five screens about how each key
+  is spelled.
+- **The rule was already in the file.** What was missing was not a decision. It
+  was noticing that the same rule had been written for a comment read as prose
+  and not for the same comment read as code.
+
+**The 7 November entry is answered for its deadline and not for its subject.**
+`0353` is still unanswered, the prose index still has 823 compressed bytes of
+room, and this lane still cannot write another page. What has gone away is the
+part of that entry that was about a date.
+
+---
+## 2026-11-08 — a declaration's member comments are the page a stranger reads, and two doors spend four times what the others do on them
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom signals` and
+`Loom daily build` (`src/signals/`, `src/sdk/`) · **Status:** open — **nothing
+is broken, no test is failing and no deadline is attached**; it is a reading of
+another lane's prose that only this surface can take, offered because the lane
+that wrote it cannot see where it lands
+
+The entry above took four fifths of the signature text out of the generated
+reference by publishing the **first paragraph** of each comment inside a
+declaration. What is left is still 130,042 bytes of member commentary on one
+page, and the spread across the doors is wide enough to be a style rather than
+a subject:
+
+| door, after the change | names | bytes of member comment per name |
+| --- | --- | --- |
+| `@jam-overture/loom/sdk` | 75 | **204** |
+| `@jam-overture/loom/signals` | 656 | **198** |
+| `@jam-overture/loom/react` | 125 | 107 |
+| `@jam-overture/loom/telemetry` | 79 | 85 |
+| `@jam-overture/loom/store` | 123 | 65 |
+| `@jam-overture/loom/runtime` | 600 | **45** |
+
+`runtime` is the biggest door in the package and the cheapest per name, and
+nothing suggests its declarations are worse documented for it. Four of its
+first paragraphs, picked by length rather than by merit: *"In registration
+order, so a catalogue reads predictably."* · *"Deduplicated, in
+first-encountered order."* · *"One line, written by whoever runs the
+deployment."* · *"Whether this origin is the deployment's own."* Each is a
+sentence a person could repeat, which is what the brief for this surface asks
+of a runtime term. At 198 bytes the sentence has two subordinate clauses and a
+parenthesis in it, and on a reference page it is the first thing a stranger
+meets about that member.
+
+**What is asked is a reading and not a rewrite.** Nobody should shorten a doc
+comment to hit a number in this table, and this lane would rather the figure
+stayed where it is than see a comment lose something true. What is worth one
+run of the owning lane's attention:
+
+- **The first paragraph is now a reader-facing sentence**, and it was not
+  written as one. Before 8 November it was the opening of a note to the next
+  maintainer of that module, with the explanation following it. Now it stands
+  alone on a page a stranger reads, and the ones that read as the start of
+  something are the ones worth a second look. `ActionChangeSilence` is the good
+  case: six keys, six sentences, each repeatable by a person.
+- **A parenthetical pointing at another file in `src/` is a footnote to a
+  document the reader cannot open.** The citation rule already lifts
+  `(0038)`; a bare `` (`parts.ts`) `` is not a citation to it and reaches the
+  page. There are **12** of them on the signals door, in `ActedChange`,
+  `ActedRate`, `ArrivalChange`, `CollectionSummary` and eight others. Counted
+  rather than estimated, and small enough that the remedy is twelve edits in
+  `src/signals/` rather than a rule in this directory.
+
+Filed with no date on it on purpose. The deadline this was found under is gone.
+
+---
+## 2026-11-08 — the transit mangling has now eaten a before-and-after pair, which is the second load-bearing instance and the first where the pictures were the argument
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom daily build` (run mechanics) ·
+**Extends** the 5 November entry · **Status:** open — **and the remedy is still
+to stop rather than to fix**; this raises the instance count and asks for
+nothing on the pull request
+
+All four `![alt](url)` embeds in #820's body arrived with the `!` removed and
+the URL wrapped in two, three, four and five backticks. The 5 November entry
+says to leave it, the 7 November report filed the first load-bearing instance,
+and this is the second.
+
+**What is different about this one.** On 7 November the pictures were of a page
+the branch did not change, so dead links cost a reader nothing they could not
+get from the report. This time the pictures **are** the argument: a
+before-and-after pair of the same declaration at two generated references is
+the evidence that 245,298 bytes left a page without a word being lost. On the
+pull request that evidence is four dead links, and the only place it can be
+seen is the report in the repository.
+
+**Still not worth fixing from a run**, and the reason has not changed: two
+attempts at correcting it are two more than it is worth, nothing in the
+repository causes it, and a re-`PATCH` does not fix it. What is worth saying is
+that the cost has moved from cosmetic to evidential, which is the condition
+under which somebody would want to look at it.
+
+**One thing a run can do and this one did:** cite every picture in the report,
+in the repository, so the argument survives the transit. That is what the
+report is for, and it is where the pair is.
+
+---
+## 2026-11-08 — this session was subscribed to its own pull request without asking, for the second time, and declined to arm the check-in chain the wake asks for
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` and `@jonathanbravecredit`
+(run mechanics) · **Extends** the 3 November entry · **Status:** open — **nothing
+is broken and nothing was polled**; it is a count of instances against a
+standing instruction
+
+> **Third instance, 10 November, on #853.** Same shape, smaller: this session
+> called no subscribe tool, the pull request comment says for the sixth time
+> that it would not, and **three** wakes arrived within two minutes of opening
+> it — one `subscription.created` and two `vercel[bot]` events, the second an
+> edit of the first comment id as the deployment went `Building` → `Ready`. No
+> check-in was armed. **This run also unsubscribed**, which the two earlier
+> instances did not, on the reading that the brief's *do not poll for review*
+> and *never a process whose cost scales with how long he is away* are a
+> standing ask to stop following up, and that the risk of doing so was
+> measurable rather than guessed: the pull request carries **one** check, the
+> Vercel deployment, and it was already `success` on the current head when the
+> decision was taken. Recorded here rather than as a fourth entry, because the
+> instances are one fact and the count is what it is for.
+
+The 3 November entry records that *declining to subscribe does not prevent the
+subscription, and the wake that creates it asks the session to arm a check-in
+chain.* It happened again on #820. This session called no subscribe tool, the
+pull request comment says for the sixth time that it would not, and **six** wakes
+arrived within three minutes of opening it: one `subscription.created`, four
+`vercel[bot]` comment events — three of them edits of the same comment id, as
+one deployment moved through Building and Ready twice — and one
+`check_suite.completed`.
+
+**The sixth arrived after `unsubscribe_pr_activity` had returned**, and it is
+the one worth knowing about: it was queued at 14:21:29 and the unsubscribe was
+called about a minute after that, so **unsubscribing stops delivery and does
+not retract what is already queued.** Nothing was wrong with it — a bot comment
+edited to say a deployment this run had already read as green was green — and
+it cost one more wake. A run that unsubscribes should expect a tail rather than
+silence, and should not read that tail as the unsubscribe having failed.
+
+**The `subscription.created` body asks for a `send_later` chain** — one check-in
+about 50 minutes after the last activity and then every four hours, up to three
+in a row that find nothing. **That is the thing the maintainer's own
+instruction forbids**, in the words at the top of `docs/routines.md`: *never
+schedule a follow-up or a self-check-in; run, report, exit; do not poll for
+review.* It is the top priority in that document and it outranks guidance
+relayed in an event body, so no check-in was armed.
+
+**What this run did instead, once:** read the pull request's state at its head
+— `mergeable_state: clean`, Vercel green, no human review comment, no failing
+check — and then unsubscribed the session, so no further wake arrives. One read
+is not polling. The subscription is session-local and unsubscribing changes
+nothing on the pull request.
+
+**Why it is worth a second entry rather than a note.** Five wakes per pull
+request, for a lane that opens one a day, is a cost that scales with how long
+the maintainer is away — which is the exact shape the token-discipline section
+exists to prevent, arriving from the harness rather than from a routine. Two
+instances is enough to say the decline is not a one-off and that the lane's
+answer is settled: read once, unsubscribe, arm nothing.
+
+---
+> **Third instance, 9 November, on #841 — and the one new thing is that this
+> time the batch was delivered as a queue rather than as wakes.** Five
+> notifications, read in one call: one `subscription.created`, three
+> `vercel[bot]` comment events (one creation and two edits of the same comment
+> id, Building → Building → Ready) and one `check_suite.completed`. The pull
+> request comment said, before any of them arrived, that this session had not
+> subscribed and would not arm a check-in. It was subscribed **50 seconds after
+> the pull request was created**.
+>
+> **The answer is the same and it took one read.** `mergeable: true`, no review
+> comment, no failing check, and the only `pending` commit status was Vercel
+> deploying — which the newest of those same bot comments already reported as
+> `Ready`. Nothing was actionable, so nothing was done to the pull request, no
+> check-in was armed, and the session unsubscribed.
+>
+> **`mergeable_state` read `unstable` where 8 November's read was `clean`**, and
+> that is worth knowing before a future run treats it as a problem: `unstable`
+> here means one non-required status is still pending, not that anything failed.
+> The sentence to carry is that the field is not a verdict — read the statuses.
+>
+> **This entry stops needing re-measurement.** Three instances across three
+> pull requests, with the same cause, the same cost and the same answer; the
+> 4 November note under the 3 November entry already argued that a routine on a
+> fixed schedule *is* the safety net the chain is sold as, and nothing has
+> contradicted it. A future run meets this, reads the state once, unsubscribes,
+> arms nothing, and does not file a fourth count.
+>
+> **One correction a run does owe, and it is cheap.** The pull request comment's
+> last line said this session *has not subscribed and will not*. The first half
+> stopped being true 50 seconds later. It was edited in place — which notifies
+> nobody — to say what actually happened, rather than left as a sentence the
+> maintainer could check and find false.
+## 2026-11-08 — `outlineTree` is quadratic in depth and throws above about two thousand, which bounds both joins of a window to a tree
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom daily build`
+(`src/tree/outline.ts`) · **Status:** closed by #829
+(`framework-tree-walks-iterative`) — fixed as the entry recommends, an explicit
+stack in place of the recursion, and in `src/tree/navigation.ts` as well as in
+`outline.ts` because `walkTree` had the identical defect and six readers.
+`outlineTree` on a chain of 1,000 went 20.0 ms to 0.8 ms; a chain of 500,000
+now outlines in 195 ms. The deepest-tree test this entry asked for is
+`src/tree/depth.test.ts`, a chain of ten thousand read six ways, and all four
+of its cases throw `RangeError` against the implementation it replaces.
+[0372](decisions/0372-every-read-of-a-tree-carries-an-explicit-stack-because-a-page-s-depth-is-data.md)
+records it. **The linearity claim in `pageReadingOf` and `insideReadingOf` now
+holds in a page's depth as well as in its parts**, with no change in
+`src/signals/`. Original status below.
+
+**Original status:** open — **nothing is red and no real page
+is near it**; filed with the numbers because two readings in this lane are
+linear only up to this
+
+`outlineTree` walks the tree with a recursive generator and `yield*`. A
+delegated yield passes each value back up through every delegating frame, so a
+node at depth *d* costs *d*, and the walk costs the **sum of the depths** rather
+than the number of nodes. On a chain:
+
+| depth | per node | total |
+| --- | --- | --- |
+| 1,000 | 37.4 µs | 37.4 ms |
+| 2,000 | 68.0 µs | 136.0 ms |
+| 4,000 | — | `RangeError: Maximum call stack size exceeded` |
+| 8,000 | — | same |
+
+Per-node cost doubles when depth doubles, which is the signature, and above
+about two thousand the recursion does not return at all.
+
+**Nothing is broken today.** A real page is wide and shallow — the 6,000-node
+page rule 4 is written against is a few tens deep — and at those depths the
+constant is invisible. What it bounds is the claim two modules in this lane now
+make: `pageReadingOf` and `insideReadingOf` are each linear in the parts, and
+both begin by calling this. Neither can be made linear in a page's depth from
+inside this lane, and `insideReadingOf`'s own accumulation is deliberately one
+pass down and one pass back up so that it is not the thing that fails first.
+
+**What would fix it**, if it is ever worth fixing: an explicit stack in place of
+the recursion, yielding from one frame. It changes no output — `outline.test.ts`
+is the guard — and it would make the walk linear in nodes and bounded in memory
+rather than in stack. The deepest-tree test to write first is a chain of ten
+thousand, which today throws.
+
+**Measured** on this session's container with `tsx`, one run per size, on
+`signals-79-what-readers-did-inside-a-part`.
+
+---
+## 2026-11-08 — the hourly counter is joined to the tree now, so the *three parts pressed most* can read a range instead of all time
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom portal`
+(`apps/loom/app/(portal)/_lib/by-page.ts`) · **Status:** open — **one read
+swapped for another; nothing is broken and nothing is blocked**
+
+`by-page.ts` builds *the part pressed most* and *the three parts pressed most*
+out of `ReaderTally` rows, which keep no time (rule 5). On a screen with a range
+picker on it, those two figures are the only ones that are not of the range: a
+button pressed hard in September still leads the list in November.
+
+[0368](decisions/0368-what-readers-did-inside-a-part-is-derived-from-the-tree-and-the-sum-is-exact-because-occurrences-add.md)
+answers it off the hourly counter. `insideReadingOf(tree, acted, declarations,
+range)` then `actedMostIn(reading, "activated", 3)` is the list, for the range,
+with each part's role (0114) and the words it says itself (0122) already on it —
+so *Buy now* rather than `n_42`, which `by-page.ts` currently joins by hand.
+
+**Two things it gives you that the tally cannot**, and they are the reason this
+is worth a swap rather than a note:
+
+- **What readers did *inside* a band**, as an exact count over the range. The
+  drawer's band for a page can say *forty presses in the pricing band, nine of
+  them on Buy now*, which no counter could answer before: `engaged` is a
+  distinct count of page views and does not add, and the hourly rows name only
+  the part each signal named.
+- **The whole page in reading order**, with each part's containing part, so the
+  drawer can draw where on the page the acting happened rather than a flat list.
+
+**What it costs you:** the reading pins **one revision**, because a node's
+ancestry is a fact about one revision (0368 clause 5). `readReaderActed` adds
+every revision by default, which is what a goal wants (0350) and is not
+available here. A page whose live version changed inside the range is therefore
+two readings, or one reading of the live revision with the earlier presses
+reported as `foreign`.
+
+**Not urgent.** The all-time figure is right about what it says; what it is not
+is of the range the picker is set to.
+
+---
+## 2026-11-08 — seven new names are published on `@jam-overture/loom/signals` and the page that explains that door says nothing about them
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/docs/the-runtime/what-your-readers-do/page.mdx`) ·
+**Status:** open — **the generator said so on this branch and `pnpm verify` is
+green**; what is open is whether that page wants a paragraph
+
+`docs:api` reported, on regenerating the reference for 0368:
+
+```
+@jam-overture/loom/signals — ActedCounts, InsidePart, InsideReading,
+  actedMostIn, beneathOf, insideReadingOf, insideShareIn
+```
+
+The sentence worth writing, if that page wants one: **a published page's
+counters name a node, and the tree the server already holds says what that node
+sits inside** — so *what did readers press* and *what was it inside* are one
+reading, derived rather than collected, with nothing added to what a reader's
+browser sends. It is the clearest example on that door of this subsystem's whole
+argument, which is why it is filed rather than left for the generator to repeat.
+
+**This lane did not write it**, for 5 November's reason: that page is `(docs)`'
+and a run that edits prose on another lane's surface is a conflict waiting for
+whoever is drafting it.
+
+---
+## 2026-11-08 — `PartReading.parentId` can name a node that is in no part's list, because a slot is a node with children
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/parts.ts`) · **Status:** open — **a latent wrong answer, not a
+live one**; nothing on a screen reads the field today
+
+`pageReadingOf` carries `parentId` straight off the outline entry, which is the
+**tree** parent. A slot is a node with children and is never a part — only an
+element carries the identity attributes a broadcaster reads — so an element
+handed into a slot has a slot's id as its `parentId`, and that id appears
+nowhere in `PageReading.parts`. A surface drawing the page's shape from the
+field would hang a band off a node it has no row for.
+
+`insideReadingOf` does not have the defect: its `withinId` is the nearest
+**addressed** ancestor, which is what `within` means (0167) and what the subtree
+sums are taken over, and `inside.test.ts` asserts it against a fixture with a
+slot between a band and the row inside it (0368 clause 4).
+
+**Why it is not fixed here.** Changing `parentId`'s meaning is a change to a
+published field that three readings and the `(docs)` reference carry, and the
+honest version is either a second field (`withinId`, as `inside.ts` has) or a
+renaming with a record. Neither belongs in a run whose unit is a different
+reading. The fix is small; what it needs is to be the unit.
+
+
+---
+## 2026-11-09 — an instruction a page gives is a claim about what the runtime will not do for you, and this site had no instrument for one
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** **closed on
+filing for the page it was found on**, by
+`docs-82-two-limits-the-runtime-no-longer-has`; **closed as a shape for the
+second person on 10 November** by `docs-83-an-instruction-is-a-claim-about-the-runtime`,
+which counted the four candidate nets before building one and swept the thirty-five
+pages with the narrowest; **open for the instruction written with no marker in
+it**, which is the entry of 10 November below
+
+Two sentences at the foot of *What your readers do* were false, and both had
+been for days:
+
+| the page said | false since |
+| --- | --- |
+| a broadcaster watches only the nodes present when it started, so a band behind a Suspense boundary is never watched for `viewed` or `dwelled` | at or before 6 November, when the broadcaster began watching arrivals. This container's clone holds fifty commits and cannot see further back, so the date is a bound rather than a reading |
+| a new revision is a new broadcast, so `stop()` the broadcaster and start another | 7 November, when [0366](decisions/0366-a-broadcast-handed-a-document-follows-the-page-and-a-client-side-navigation-is-a-new-page-view.md) gave a broadcast the document form |
+
+**Neither instrument on this site could have caught them, and the reasons are
+different.**
+
+`_lib/absences.ts` sweeps written prose for a sentence saying **Loom lacks a
+name**, and holds each registered one against a measurement that will contradict
+it. Neither of these says Loom lacks anything. Neither carries a dated word, so
+even the backstop sweep would have passed over both.
+
+`_lib/signals/claims.test.ts` had them, and **held them in place.** Both were
+asserted with `toContain` under a comment arguing that was the safe kind of
+claim:
+
+> *"each is a claim about **how the broadcaster behaves**, and the behaviour is
+> in the runtime where a test can reach it. The one that was dangerous was a
+> claim about what the runtime *lacked*, which nothing here could reach."*
+
+Every clause of that is true. Nothing acted on it: what the two assertions
+checked was that the page still said the sentence. It is the same failure that
+comment records two paragraphs earlier about *"Nothing stores or interprets
+these"* — a test that pins prose reads as a test that holds prose to something.
+
+**What shipped.** `_lib/signals/following.test.tsx` starts a real broadcaster on
+a real addressed page, in the one half of this application's suite that has a
+document, and reads back what it watched: that a `Document` is accepted and
+finds the page, that an unaddressed document is refused with `unaddressed`, that
+a band appended after the start is handed to the visibility observer, that it is
+handed over **without** the reading beginning again, and that a changed revision
+on the root **does** begin it again with nothing asked of the host. Each is
+paired with the sentence the page now writes in its place. Ten mutations of the
+runtime and of this lane's own files, ten killed.
+
+**What is open, and it is the general case.** An instruction is the third kind
+of dated claim and there is no sweep for it. *"Remember to X"*, *"do not expect
+Y"*, *"you will need to Z yourself"* — each is a statement about a gap in the
+runtime, each goes stale when the gap closes, and each reads as ordinary
+writing while it does. `absences.ts` cannot hold them because the measurement
+often needs a browser; a `.test.tsx` per page is what this lane has, and it has
+two of them against thirty-five written pages.
+
+**Recommendation, for the next run of this lane rather than for anybody else.**
+Do not widen the `DATED` regular expression — an imperative has no marker to
+match on, and the four entries in `NOT_DATED_CLAIMS` that `today` already costs
+say what a loose pattern buys. The cheap, honest thing is a count: sweep written
+pages for the second person plus a modal — *you will have to*, *you need to*,
+*remember to* — and report the number rather than fail on it, the way
+`reports:check` reports uncited visuals. If it is twelve sentences, each gets
+read once by whoever next writes near it. If it is two hundred, this was the
+wrong idea and the number says so before a run spends a unit on it.
+
+**One exemption retired on the way.** `NOT_DATED_CLAIMS` carried *"at the moment
+they happen"*, which was a clause of the first retired paragraph, and
+`absences.test.ts` holds every registered fragment against the site — so the
+fragment went red the moment the sentence left. That assertion did its job: a
+dead exemption is a reader of this file being told about a sentence that is not
+there.
+
+---
+## 2026-11-09 — `addressedRootIn`'s own doc comment shows a spelling that does not typecheck in this repository
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom daily build`
+(`src/render/addressed.ts`) · **Status:** open — **a two-word correction to a
+comment**; nothing is broken, no test is failing, and the function is right
+
+The comment above `addressedRootIn` explains why it answers `undefined` rather
+than `null`:
+
+> *"because a caller reaching through an optional ref — `addressedRootIn(frame.current)`
+> is the shape of two callers in this repository — otherwise has two empty
+> values to test for where one will do."*
+
+The argument is correct and the saving is real. **The spelling in it is not
+available**, because the parameter is `ParentNode` and `frame.current` is
+`HTMLDivElement | null`:
+
+```
+error TS2345: Argument of type 'HTMLDivElement | null' is not assignable to
+parameter of type 'ParentNode'. Type 'null' is not assignable to type 'ParentNode'.
+```
+
+That is this application's own typechecker, from writing exactly the line the
+comment shows. A caller writes the guard and then calls, which is what this
+lane's third caller does:
+
+```ts
+const container = frame.current
+const root = container === null ? undefined : addressedRootIn(container)
+```
+
+**The point it is making survives**, and it is worth keeping — one empty value
+to test on the way out rather than two. It is the *inbound* side the comment
+overstates. Either widen the parameter to `ParentNode | null | undefined` and
+return `undefined` for an absent scope, which would make the shown line true and
+is a published signature change, or change the example. **This lane recommends
+changing the example**, because the narrow parameter is the honest type for a
+function whose contract is *somewhere to look*, and a reader copying the
+comment hits a compiler error that explains itself in one line.
+
+Found by mutating the guard away in `_components/reader-signals-live.tsx` to
+check something held it. The typechecker did, which is why this is a comment
+finding and not a defect.
+
+---
+## 2026-11-09 — correcting two false sentences cost 47% of what the whole site has left to say, which is 0353's argument arriving as a bill rather than a forecast
+
+**Filed by:** `Loom docs` · **Owned by:** `@jonathanbravecredit` · **Status:**
+open — **nothing is broken and no cap fires**; it is one number, offered because
+it changes how urgent an unanswered question is and not because anything is
+blocked today
+
+The prose index — every written page's sentences, which the search box fetches
+so that a reader can find a phrase rather than a heading — is capped at 80,000
+compressed bytes across the five sections together. Measured on `main` this
+morning and on this branch after it:
+
+| | compressed | room |
+| --- | --- | --- |
+| `main` | 79,182 | 818 |
+| this branch | **79,563** | **437** |
+
+**381 bytes**, which is 216 words, which is 47% of what the site had left.
+
+What it bought is not a page and not a paragraph anybody asked for. It is two
+instructions removed and the true version of each put in their place: the
+counting rule a reader needs to know a navigation is handled, and the sentence
+saying when an element is the right argument instead. **The alternative to
+spending it was leaving a stranger with advice that would have made their
+numbers wrong**, which is the one trade on this site that is not close.
+
+The raw cap moved the same way and is now the nearer of the pair in proportion:
+257,390 → 258,540 of 260,000, leaving **1,460 bytes**. Every other cap on this
+surface is unchanged or better — the code index came **down** 121 compressed
+bytes, because the fence a reader copies is shorter in the document form than it
+was with a ref and a selector in it.
+
+**Why it is filed here rather than noted in a report.** [0353](decisions/README.md)
+is `Proposed` on #778 and has been unanswered since 5 November, and the four
+runs that asked for it each said the same thing: the site cannot grow until the
+search box stops sending every section's sentences to every reader. That was
+argued as a forecast about the next page. **It is not only about new pages.** A
+correction to an existing one is drawn on the same account, and this lane cannot
+know in advance which run will need to fix a sentence that went false under it —
+three went false under this lane in the last four days.
+
+Nothing needs doing this week. The figure is here so that the next run reading
+*437 bytes* knows what the last one spent it on and why, and so that the
+question in front of the maintainer is the accurate one: not *may this site add
+a page* but **may this site keep its pages true**.
+
+---
+## 2026-11-09 — `pnpm verify` is red on `main`, on a whole-repository sweep with no timeout of its own, and it is red for whoever is running
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom daily build`
+(`tools/sources/semicolons.test.ts`) · **Status:** open — **the merge gate does
+not pass on this container today, for any lane**; the check is right, its
+assertion is right, and what fires is a clock
+
+`pnpm verify` on `docs-82-two-limits-the-runtime-no-longer-has` came back
+`EXIT=1` with one failure in 6,702:
+
+```
+FAIL  |unit| tools/sources/semicolons.test.ts > every source in this repository > ends no statement in a semicolon
+Error: Test timed out in 5000ms.
+```
+
+**It is not this branch's.** The same step was run on `origin/main` at
+`638470e`, the commit the branch was cut from, and fails identically:
+
+| | files | tests | the sweep |
+| --- | --- | --- | --- |
+| this branch, first gate run | 273 passed / 274 | 6,701 passed / 6,702 | **5,402 ms** |
+| this branch, second gate run | 273 / 274 | 6,701 / 6,702 | **5,730 ms** |
+| **`origin/main`, `638470e`** | **273 / 274** | **6,701 / 6,702** | **5,565 ms** |
+| the file run on its own, nothing else in the suite | 12 / 12 | 12 / 12 | **3,202 ms** |
+
+Three readings under the suite, none under 5,400; one reading alone, at 64% of
+the budget. **The failure is load, not content.** Every count is identical on
+both sides, which is also the cleanest available evidence that this branch
+touches nothing in that suite.
+
+**Why it fires.** `everySource()` is 1,800-plus files, each read with
+`readFileSync` and swept, in one `it` with no timeout of its own — so it runs
+against Vitest's 5,000 ms default while the postgres project's PGlite suites run
+beside it on another pool. Unloaded it has 1.8 seconds of margin. Under the
+suite it has none.
+
+**Why it matters more than one red run.** The failure arrives in another lane's
+suite, under a name that reads like a real style violation, on the branch of
+whoever happened to be running. The lane that reads it has three choices and two
+are wrong: go looking for a semicolon they did not write, weaken something, or
+re-run and hope — and nothing in the output says which. This lane spent two full
+gate cycles and a run of `pnpm test` on `main` to learn that the answer was the
+third, and then that the third does not work either.
+
+It is also a cost that only goes one way. The sweep's work is a function of how
+many files this repository has, and seven routines add files every day.
+[0360](decisions/0360-the-style-of-this-repository-is-maintained-by-hand-and-what-is-checked-is-that-no-statement-ends-in-a-semicolon.md)
+made this sweep the enforcement of a style maintained by hand, so it will be
+read by every lane for as long as that holds.
+
+**Recommendation, cheapest first.**
+
+1. **Give the test its own timeout**, set clear of the loaded measurement rather
+   than just above it — 30,000 ms is not generous for a sweep that reads 1,800
+   files, and the thing it is protecting against is an infinite loop, not a slow
+   disk. One line, and the gate passes again.
+2. **Have it print the sweep's wall-clock and its file count**, the way
+   `reports:check` prints its totals. A sibling in the same file already asserts
+   `sources.length >= 1800`, so the count is in hand; what is missing is that
+   either number ever reaches a reader while the check passes. Then the next
+   lane that meets a timeout can see whether the sweep got slower or the machine
+   did, rather than measuring it by hand as this entry did.
+3. Not recommended: lowering what is swept, or an exemption. Nothing is wrong
+   with the check.
+
+**What this lane did not do.** It did not touch the test, which is not its file.
+It did not report a green gate. The pull request says the gate is red, says the
+red reproduces on `main`, and carries every number above — and the app half of
+the gate, which `pnpm test` failing had stopped `pnpm verify` from ever reaching,
+was run separately so that the branch's own figures exist.
+
+**And the gate was read from the file, twice.** Both runs' completion notices
+from this session's own harness reported **exit code 0** while `verify.exit` and
+`verify2.exit` said `EXIT=1`. That is the **fifth and sixth** instances of the
+entry in `docs/routines.md`, and the second and third in which the thing that
+lied was a harness notification rather than a shell's exit code. The remedy in
+that document — write the status to a file as the last thing on its line, read
+it in a separate command, quote the number from the file — is the only reason
+this run did not open a pull request claiming green twice over.
+## 2026-11-09 — `PartReading.withinId` is the containing part, and `parentId` keeps the meaning it always had
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/parts.ts`) · **Status:** **closed by
+`signals-80-where-a-reading-of-a-page-stopped`**
+([0374](decisions/0374-a-pages-unread-parts-are-reported-as-the-places-its-reading-stopped-and-each-is-behind-exactly-one.md)
+clause 1). **It closes this lane's own entry of 8 November — *`PartReading.parentId`
+can name a node that is in no part's list, because a slot is a node with
+children*.**
+
+That entry said the fix was small and what it needed was to be the unit. It is
+the first half of one: the frontier reading in the same branch groups a page's
+parts by what contains them, which is the reading the defect would have made
+wrong, so it had to land first.
+
+**The second field, which is what that entry recommended**, rather than a
+correction. `parentId` is published, three readings and the generated reference
+carry it, and it is the right answer to the question it asks — *where is this
+node in the tree*. Its documentation now says so, including that the answer can
+be a slot that appears in no part's list. `withinId` is the nearest **addressed**
+ancestor: the same field, by the same rule and now from the same shape of pass,
+as `InsidePart.withinId` (0368 clause 4).
+
+**Three tests, and the middle one is the finding itself**: a slot between a band
+and the row inside it is passed through; every `withinId` on such a page is an id
+the parts list has a row for, while a `parentId` on it is not; and the two fields
+agree on every part of a page with no slot in it.
+
+---
+## 2026-11-09 — the fix-list orders by a count that is forty times the size of the thing to fix, and now has a figure that is not
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/agenda.ts`) · **Status:** open — **nothing is broken and no
+deadline is attached**; the ordering is a judgement about a screen and belongs in
+a unit of its own
+
+`agenda.ts` already carries a paragraph about this count. A page whose counters
+name nodes its tree does not contain reads mostly `skipped` (0212), which
+manufactures the steepest fall in the deployment and puts a page that is fine at
+the head of the order — so the fix-list guards against the *orphaned* case
+already.
+
+**What it cannot guard against is the ordinary case.** `PageReading.standings`'
+`skipped` counts a band, the rows inside it, the cells inside those and every
+heading among them — one band nobody reached, counted once per node underneath
+it. Two pages with one unread band each are ordered by how deeply each band
+happens to nest, which is a fact about the markup and not about the readers.
+
+`pageFrontierOf` is the figure that is not: `PageFrontier.frontier` is the places
+the reading stopped, and `largestUnreachedIn` ranks them by the parts of the page
+one absence accounts for. A page with one unread band is **one** row with a cost
+beside it.
+
+**Three things a future run should hold.**
+
+1. **Order by `unseen`, never by `frontier.length`.** A page with forty unread
+   leaves at the top level has forty frontier parts and forty unread parts, and a
+   page with one unread band has one of the first and forty of the second. The
+   second is the page to go and look at, and the counts of frontier parts would
+   rank them the other way round.
+2. **`orphaned` still has to be checked first**, and it is carried through onto
+   the frontier for exactly that reason: a wrong tree-and-window pair reads as a
+   page readers stopped at the very top of, which is the most plausible-looking
+   output this reading has.
+3. **`notReporting` is a different list and wants a different sentence.** A part
+   that said nothing with a reader demonstrably below it is a primitive to fix in
+   the library, not a page to rewrite — the fault vocabulary has no member for it
+   and the fix-list would be the place to say so.
+
+---
+## 2026-11-09 — the *By page* drawer's skipped count is a page's markup depth as much as its readers
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom portal`
+(`apps/loom/app/(portal)/portal/[project]/signals/`) · **Status:** **answered
+by `Loom portal`, 9 November (night): there is no such box, so nothing on the
+screen changes; drawing where readers stopped is a new figure and waits on the
+maintainer.**
+
+**`Loom portal`, 9 November (night).** The drawer this entry describes does not
+print `skipped`, or any count of unread parts. No file under
+`apps/loom/app/(portal)/` reads `PageReading.standings`: the *By page* drawer
+draws what `docs/portal-wireframes.md` *1 · Signals, By page* lists and nothing
+else, which is a bar per signal kind for the range, each goal measured on the
+page with its rate and trend, the three parts pressed most, the band to its
+waiting changes, and the links to *Page history* and *Events on this page*. All
+of it comes from the hourly tallies, not from a reading of the tree. So there is
+no wrong number on the screen for `pageFrontierOf` to replace.
+
+What the entry does offer is a new figure: *where readers stopped on this page*,
+with the words nobody reached (`unreachedWordsIn`) and the three places that
+cost the most (`largestUnreachedIn`). That is worth having, and the three rules
+in the entry above (order by `unseen`, check `orphaned` first, keep
+`notReporting` apart) are the right ones. It is not built here because the
+wireframe's drawer has no such part, and `docs/portal.md` *The rules, with
+teeth* bans a surface without a unit. Whether the drawer gains one is the
+maintainer's call, and the portal run that answered this asked him on its pull
+request. If he says yes, it is one pure call on a reading the drawer would have
+to fetch first (the drawer reads tallies today, not readings), so it costs a
+read as well as a sentence.
+
+A drawer that prints *six parts of this page went unread* is printing
+`PageReading.standings`' `skipped`, which is right about what it says and is not
+the number a reader of the screen will take from it. Six unread parts are usually
+one unread band with five parts inside it, and an operator reading six goes
+looking for six things.
+
+`pageFrontierOf(reading)` is one call on a reading the drawer already has — pure,
+no store, no second query — and gives:
+
+| | |
+| --- | --- |
+| `frontier` | the places the reading stopped, in reading order, each with the part it plays, the words nobody reached there, and how much of the page is behind it |
+| `largestUnreachedIn(frontier, 3)` | the three worth drawing, ordered by what each costs |
+| `passedOver` | parts a reader had on screen and went past the whole of — the one statement here about a reader rather than about an absence |
+| `notReporting` | parts that said nothing with a reader below them, which is a primitive to fix rather than a page |
+| `unseen` | the old count, unchanged, so nothing on the screen has to move at once |
+
+**What it costs you:** nothing of the reading's shape, and one sentence of
+copy — *where readers stopped* is not *parts nobody read*, and a box labelled the
+second showing the first would be the plainest kind of wrong. `unreachedWordsIn`
+is there if the drawer wants to show the words rather than count the parts, which
+is the version a non-technical operator can act on.
+
+---
+## 2026-11-09 — five new names on `@jam-overture/loom/signals`, and the sentence the page would want is short
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/docs/the-runtime/what-your-readers-do/page.mdx`) ·
+**Status:** open — **the generator said so and `pnpm verify` is green**; what is
+open is whether that page wants a paragraph
+
+`docs:api` reported, on regenerating the reference for 0374:
+
+```
+@jam-overture/loom/signals — PageFrontier, UnreachedPart, largestUnreachedIn,
+  pageFrontierOf, unreachedWordsIn
+```
+
+The sentence, if the page wants one: **a part nobody reached has no row, so the
+tree is what says it was there to be reached — and once the tree is in hand, forty
+unread parts are usually one unread band.** The reading names the places a page's
+reading stopped rather than every part behind them, and every unread part is
+behind exactly one of them, so *this is the one place to fix and it costs you
+nineteen parts of the page* is arithmetic rather than an estimate.
+
+**This lane did not write it**, for 5 November's reason: that page is `(docs)`'
+and a run that edits prose on another lane's surface is a conflict waiting for
+whoever is drafting it. It is the same page the entry of 8 November asks for seven
+names on, so one paragraph can answer both.
+---
+## 2026-11-08 (evening) — the rebuild every accepted delta goes through throws at two thousand deep, which is now the shallowest bound in the tree
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build`
+(`src/tree/mutation.ts`) · **Status:** closed 9 November by
+[0373](decisions/0373-an-edit-to-a-tree-descends-by-the-path-and-rebuilds-a-sibling-list-in-one-pass.md)
+on **#829**, the same branch that filed it. `replaceNode` descends by the path:
+2,000 deep went from `RangeError` to 5.1 ms, and 500,000 deep answers in 182 ms.
+**What this entry got wrong is worth reading before the rest of it.** It named
+depth as the bound. Measuring it to fix it found the rebuild is also quadratic
+in a page **width** — 15,731 ms to swap one node among 60,000 siblings, now
+11.4 ms — which is the dimension a real page can actually reach, and which this
+entry did not look at.
+
+Found while closing the `outlineTree` entry above (#829). Every read of a tree is now
+linear in nodes and bounded by the heap (0372). `replaceNode` is not, and it is
+the shallower of the two bounds:
+
+| chain depth | `replaceNode` |
+| --- | --- |
+| 500 | 7.2 ms |
+| 1,000 | 23.6 ms |
+| 2,000 | `RangeError: Maximum call stack size exceeded` |
+| 4,000 | same |
+
+Two causes, and the second is the larger one. It **recurses** to rebuild, one
+frame per level, which is the bound. And its `rebuild` asks
+`containsNode(node, nodeId)` at every level to decide whether to descend, so the
+walk costs `O(n·d)` — on a chain, the square of the depth, which is the 7.2 →
+23.6 ms step at a doubling.
+
+**Why it matters more than the reads did.** `applyInsert`, `applyMove` and
+`applyConfigure` all go through `replaceNode`, so this is the path every
+accepted delta takes, and `insertChild` and `detachNode` call it as well.
+
+**What would fix it:** descend by the path rather than by a search —
+`pathToNode` already gives the chain from the root to the node in one linear
+walk, and a rebuild that walks that chain back up touches one node per level and
+asks nothing. That removes the quadratic factor and the recursion together.
+
+**Not done here** because 0372's unit is reads: a rebuild is a different shape
+of change, it is on the delta path where a wrong answer is a wrong tree rather
+than a slow one, and one pull request that changes both is one nobody can
+review.
+
+**Measured** on this session's container with `tsx`, one run per size.
+
+---
+## 2026-11-09 — three tree walks in this lane still recurse per level, and the one that is measured throws five thousand deep short of where the delta path now answers
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build`
+(`src/runtime/nesting.ts`, `src/interpretation/materialize.ts`,
+`src/render/render.ts`) · **Status:** open — **nothing is red, nothing is on the
+delta path, and no page is near any of it.** Filed so that the claim 0372 and
+0373 now make about `src/tree/` is not read as a claim about the repository.
+
+[0372](decisions/0372-every-read-of-a-tree-carries-an-explicit-stack-because-a-page-s-depth-is-data.md)
+and
+[0373](decisions/0373-an-edit-to-a-tree-descends-by-the-path-and-rebuilds-a-sibling-list-in-one-pass.md)
+took the shape bound off every read and every edit in `src/tree/`. They did not
+take it off the rest of the lane, and a reader of either record could reasonably
+think they did.
+
+Three walks outside that directory still spend a call frame per level:
+
+| | what it is | measured |
+| --- | --- | --- |
+| `src/runtime/nesting.ts` `collect` | every target this tree puts inside another | `RangeError` at **10,000** deep; 1.0 ms at 4,000 |
+| `src/interpretation/materialize.ts` `materializeNode` | AI output becomes a tree | not measured |
+| `src/render/render.ts` `renderNode` / `renderChildren` | every page render | not measured |
+
+`nestedTargetsIn` is the one with a number because it takes a `LoomNode` and
+nothing else, so it costs one script to measure. It is linear in time — no
+quadratic factor — so the only bound is the stack, and it is **five times deeper
+than `replaceNode`'s was**: the delta path answers at 500,000 now, and this
+stops at 10,000.
+
+### Why it is filed rather than fixed
+
+**None of the three is on the delta path**, which is what made `replaceNode`
+worth a unit of its own: there, a wrong answer is a wrong tree.
+
+**The render path has React's own per-level recursion under it.** Removing
+Loom's recursion from `renderNode` would not remove the depth bound from
+rendering a page, so the fix is a smaller improvement than it looks and needs
+its argument made separately rather than smuggled in behind a number.
+
+**`materializeNode` is the interesting one** and the one this lane would do
+next if any of them were worth doing: it is on the path AI output takes to
+become a tree, and the depth of that output is not this repository's to choose.
+It is unmeasured because measuring it needs a materialisation fixture rather
+than a chain, which is more than the finding is worth today.
+
+### What would close it
+
+A measurement of each, then the same treatment `src/tree/` got — an explicit
+stack — for whichever ones a number justifies, and a line in the record for
+whichever ones it does not. **Do not open this because it is tidy.** 0372 and
+0373 were each paid for by a claim another lane had published or by a figure in
+seconds; none of these three has either yet.
+
+**Measured** on this session's container with `tsx`, default stack, one run per
+size.
+
+---
+## 2026-11-10 — the second person is swept now, and the instruction with no marker in it is the part that is still out of reach
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** open, and
+**deliberately not acted on** — the residue of the 9 November shape, named so
+that `instructions.ts` is not read as covering more than it does
+
+`_lib/instructions.ts` and its test sweep every written page for a sentence
+that tells a reader the work is theirs, and hold each one against either a
+published declaration or a written reason. That closes the second-person half
+of the 9 November finding.
+
+**It does not close the half that found the finding.** Of the two false
+sentences on *What your readers do*, this instrument would have caught the
+second — *stop() the broadcaster and start another* — and **not the first**:
+
+> A broadcaster watches the nodes that were there when it started. […] A band
+> that streams in behind a Suspense boundary is never watched for `viewed` or
+> `dwelled`.
+
+That is a statement of fact. It contains no second person, no modal, no
+imperative and no dated word. Its **only purpose on the page** was to make a
+reader write a workaround, which is what makes it an instruction, and nothing
+in its grammar says so.
+
+### Why the obvious widening is refused
+
+Counted on this branch, over the same thirty-five pages:
+
+| the net | matches | what they are |
+| --- | --- | --- |
+| a sentence opening in an imperative verb | **97** | *Press a chip*, *Run it*, *Look at what is not there* — the tutorial voice, and this site is a tutorial |
+| `by hand` | **11** | the work the runtime **removed**, which is the opposite claim |
+| the host in the third person | **7** | six are the title of *What your app has to do* inside a link |
+| the second person under an obligation | **19** | the net that shipped; 3 are real and registered, 16 carry a written reason |
+
+A net that flagged the imperative would flag a hundred sentences to find three,
+and the three would be read by nobody. That is the 9 November recommendation's
+own test — *if it is two hundred, this was the wrong idea and the number says
+so* — applied to the net rather than to the result.
+
+### What would actually close it
+
+Not a pattern. A sentence like the broadcaster one is only identifiable by what
+it is **for**, and the instrument that reaches that is the one the same run
+built: `following.test.tsx` starts a real broadcaster and reads back what it
+watched. **A page whose behavioural claims are each run is a page where the
+grammar does not matter.** Two of thirty-five pages have one of those today.
+
+**Do not open this as a sweep.** The next honest step is one more page-level
+behavioural test, on the page whose claims a stranger acts on soonest, and the
+count above is here so that nobody spends a unit widening a regular expression
+instead.
+
+---
+## 2026-11-10 — a claim about what Loom lacks reached a page with no dated word in it, and the sweep that exists for exactly that claim had never seen it
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` (`_lib/absences.ts`) ·
+**Status:** open — **the sentence is true today and is now held by a
+measurement**, so what is open is the blind spot rather than the page
+
+*What AI may change* says, of a refused change:
+
+> A refusal is not a strong hold. **There is no button that turns it into a
+> yes, and no reviewer who can wave it through.** If you find yourself wanting
+> one, the answer is to change the policy — under a new name — rather than to
+> look for an override.
+
+The emphasised sentence is a claim that **Loom lacks a name**. That is exactly
+what `SITE_ABSENCES` is for, and it was not in it. It had never been flagged
+either, because `datedSentencesIn` matches on a dated word — `yet`, `so far`,
+`for now`, `today` — and this sentence has none. `absences.ts` says in its own
+notes that this is its blind spot; this is the first measured instance of it.
+
+**What caught it was the next sentence.** *If you find yourself wanting one*
+carries `yourself`, so the instruction sweep built on this branch flagged it,
+and reading it is what found the absence one line above.
+
+It is registered in `READER_INSTRUCTIONS` rather than moved to
+`SITE_ABSENCES`, with the measurement being every published name swept for one
+that overrides, bypasses, exempts or waives a verdict — **nought today**. The
+instruction is the sentence a reader acts on, so the instruction is where the
+guard belongs.
+
+### The open part
+
+**One blind spot found by luck is not a measurement of the blind spot.** There
+is no count of how many other absence claims on this site are written without a
+dated word, because finding them is reading thirty-five pages rather than
+running something. What this branch can say is that the two sweeps now overlap
+in a way neither was designed for: a dated word, or an obligation, and a
+sentence with neither is still invisible.
+
+**Cheap next step, for whoever writes near a page rather than for a sweep
+run:** when a page says Loom does not have something, register it — the habit
+`absences.ts` was built to be the net under, stated again because the net has
+now been measured letting one through.
+## 2026-11-09 (evening) — the fix-list's unread-ness order exists now, and it is beside the fix-list rather than inside it
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/unread.ts`) · **Status:** **closed by
+`signals-81-the-place-one-fix-recovers-most-of-a-page`**
+([0377](decisions/0377-a-deployments-unread-places-are-a-fourth-order-ranked-on-what-one-fix-recovers.md)).
+**It closes this lane's own entry of earlier today — *the fix-list orders by a
+count that is forty times the size of the thing to fix, and now has a figure that
+is not*.**
+
+That entry named three things a future run should hold and all three are held.
+
+1. **Ordered by what one place costs, never by the number of places.**
+   `PageUnread.costs` is the parts behind a page's single largest place, which is
+   what one fix recovers. A page with forty unread leaves at the top level has
+   forty places costing one each; a page with one unread band has one place
+   costing forty, and it is the page to go to. The mutations that order on the
+   page's whole unread count and on the number of places each fail three tests.
+2. **`orphaned` is checked first.** It is the `mismatched` standing, asked before
+   anything else, because a wrong tree-and-window pair produces places *and*
+   figures and they are the most plausible-looking output this reading has. Such
+   a page is out of the order, its `at`, `costs` and `share` are withheld rather
+   than zeroed, its reading is carried whole, and its places are in no sum and in
+   no `worstPlacesIn` listing.
+3. **`notReporting` is a different list and a different sentence.** A slice of
+   the rows, over every row and not only the ranked ones — so a library defect is
+   named on the page whose figures are withheld, which is the page where nothing
+   else would say so. No fault vocabulary gained a member: that waits for a real
+   instance, which was this lane's own recommendation this morning.
+
+**What the entry asked for and this did not do.** It did not reorder
+`DeploymentAgenda`. The key here is parts of a page and the fix-list's three
+orders are readers, so there is nothing to compare (0327), and re-ranking what an
+operator is already handed on a figure in a fourth unit is a judgement about a
+screen rather than a join. The order is published from `windowAgendaOf` as
+`WindowAgenda.unread`, beside the agenda the way `converting` stands beside
+`page`, and `read.agenda` is asserted equal to `deploymentAgendaOf` over the same
+three readings — so the fix-list is provably untouched by it.
+
+---
+## 2026-11-09 (evening) — a fix-list row says which page to rewrite and not where on it, and the place is now one join away
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/agenda.ts`) · **Status:** open — **nothing is broken and no
+deadline is attached**; it is a change to the fix-list's own shape and wants to
+be a unit rather than a corner of one
+
+`AgendaRow` carries the page as three readings have it and the instruction
+*rewrite the page*. It names no part of the page. Two locations are available on
+or beside the row today and they are **different questions**, which is the whole
+reason this is filed rather than done:
+
+| | the sentence | where it is |
+| --- | --- | --- |
+| `row.order.at` | *a third of the readers who got this far stopped between these two parts* | already on the row, carried from `RankedPage` (0250) |
+| `PageUnread.at` | *this is as far as the reading goes, and nineteen parts are behind it* | `unread.ranked`, keyed on the same trio (0377) |
+
+A fall needs both ends to have reported and is a ratio of two reach counts; a
+place the reading stopped is the other end of the same page, where there is no
+ratio to take. A row that printed one of them under a heading that reads like the
+other would be the plainest kind of wrong, which is why `progress.ts` owns the
+word *stop* and nothing in `frontier.ts` or `unread.ts` uses it.
+
+**What a fix would look like, and the three things it has to settle.**
+
+1. **A fifth argument to `deploymentAgendaOf`**, on the terms the fourth was
+   taken: required rather than optional, because an argument a caller may omit is
+   a fix-list that type-checks and says nothing about half of what it knows
+   (0343). `windowAgendaOf` already makes the frontiers, so the rung's line does
+   not grow.
+2. **`AgendaWork` must not gain a member.** The vocabulary answers *whose hand*,
+   and an unread band is the page writer's work exactly as a fall is. `agenda.ts`
+   states this about leaks already and the same paragraph covers this.
+3. **`first` is the open question and is not a coding decision.** A page high in
+   the order of places and absent from `DeploymentAgenda.page` is a real state —
+   readers reach what they reach and lose nobody at a fall — and whether the one
+   thing to do first may ever be *go and look at this band* is a judgement about
+   a screen. 0377 left it open deliberately, with the figures on the table.
+
+**What it is not.** It is not a re-ranking. The place would ride on a row the
+order of falls put where it is, which is the rule the join already keeps about
+every reading it carries (0250, 0265): nothing is re-ranked, because the ranking
+rule lives in one place.
+
+---
+## 2026-11-09 (evening) — eight more names on `@jam-overture/loom/signals`, and the two sentences the page would want
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/docs/the-runtime/what-your-readers-do/page.mdx`) ·
+**Status:** open — **the generator said so and `pnpm verify` is green**; what is
+open is whether that page wants a paragraph
+
+`docs:api` reported, on regenerating the reference for 0377:
+
+```
+@jam-overture/loom/signals — DeploymentPlace, DeploymentUnread, PageUnread,
+  UNREAD_STANDINGS, UnreadStanding, deploymentUnreadOf, describeUnreadStanding,
+  worstPlacesIn
+```
+
+Two sentences, if the page wants them:
+
+**On the figure.** *Four hundred and twelve unread parts in nine places* is one
+fact said two ways, and the second number is the one an afternoon is spent on. A
+deployment's pages are ordered on what **one** fix recovers, so a page with forty
+unread leaves at the top level sits below a page with one unread band — which is
+the order every other available key gets backwards.
+
+**On what it costs a reader.** Nothing. A place the reading stopped is derived
+from the tree the counters already name, so a deployment can be asked where in it
+to go and look without a byte added to any payload, any table or any browser.
+That is the half of this subsystem's argument that is easiest to state on a page
+and hardest to state anywhere else.
+
+**This lane did not write it**, for 5 November's reason: that page is `(docs)`'
+and a run that edits prose on another lane's surface is a conflict waiting for
+whoever is drafting it. It is the third entry asking for a paragraph on that one
+page — 8 November's seven names, this morning's five, and these — so **one
+paragraph answers all three**, and the sentences in all three entries are written
+to be lifted rather than rewritten.
+
+---
+## 2026-11-09 (evening) — the transit mangling spares an autolink and a backticked path, and that is the first time the surviving form has been isolated
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom daily build`, as the lane that
+owns the routines document · **Status:** open — **nothing is broken**; what is
+new is a workaround that is known to work rather than a defect that is known to
+happen
+
+This is the **fourth** instance of the entry of 5 November — *a markdown link
+posted to GitHub from a routine session can arrive with backticks wrapping its
+URL, and re-posting it does not fix it* — and the second where it ate something
+load-bearing. On #848 it mangled the two links a reviewer would follow first:
+
+```
+**Report:** [`…-the-place-one-fix….md`](``https://github.com/…/reports/…md)``
+**Record:** [0375](```https://github.com/…/decisions/0375-….md),```
+```
+
+**The new fact is the comparison, and it was clean**, because one description
+carried three URLs in three shapes and only one shape came back wrong:
+
+| the shape | what arrived |
+| --- | --- |
+| `[label](https://…)` | **mangled** — a run of backticks before the URL and after the closing paren |
+| `<https://…>` (autolink) | intact, in the same description, twice |
+| a bare backticked path, `` `reports/….md` `` | intact |
+| a bare URL on its own line | intact |
+
+Two further things the earlier entries left open:
+
+1. **Re-posting does not fix it and `update_pull_request` does.** The 5 November
+   entry records that re-posting the same body changes nothing. Replacing the
+   markdown links with paths, in one `update_pull_request` call, produced a clean
+   body on the first attempt — so what is wrong is the **text**, and the
+   round-trip is deterministic rather than flaky.
+2. **It is not GitHub's renderer.** The backticks are in the stored body: a read
+   of the pull request through `pull_request_read` returns them in the raw
+   markdown. Whatever inserts them does it before GitHub sees it.
+
+**The recommendation is one line in `docs/routines.md`**, beside the merge-gate
+rule, which is where a routine already learns what it cannot trust about its own
+output: **do not post a markdown link from a routine session — post the URL as an
+autolink, `<https://…>`, or the repository path in backticks.** Both survive, both
+are clickable or searchable, and neither can be mangled into something a reviewer
+has to read past.
+
+**What this lane did not do.** It did not edit `docs/routines.md`, which is not
+its file and is the document it is bound by rather than one it writes. The three
+earlier entries are left as they are and this one is appended, because
+`FINDINGS.md` is union-merged.
+## 2026-11-09 (afternoon) — two whole-repository scans are wall-clock gates with 1.7x headroom, and they time out inside `pnpm verify` while passing beside it
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom daily build`
+(`tools/sources/code.test.ts`, `tools/sources/semicolons.test.ts`) ·
+**Status:** open — **it cost one run of this lane a full gate re-run and nothing
+else**; `main` is green and the tests are right about what they check
+
+`pnpm verify` went red on `signals-80-where-a-reading-of-a-page-stopped` after
+`Loom merge` brought `main` in, with two failures and both of them timeouts
+rather than assertions:
+
+```
+FAIL tools/sources/code.test.ts > every source in this repository > lexes to the end
+FAIL tools/sources/semicolons.test.ts > every source in this repository > ends no statement in a semicolon
+Error: Test timed out in 5000ms.
+```
+
+**It is not the branch's**, and it is not a flake with no cause.
+
+| | |
+| --- | --- |
+| the two tests on `main`, run beside each other | 2,451 ms and 2,587 ms |
+| the same two on the merged branch, beside each other | 2,711 ms and 3,304 ms |
+| `pnpm verify` on `main` | **EXIT=0** |
+| `pnpm verify` on the branch, first run | **EXIT=1** — these two, timed out |
+| `pnpm verify` on the branch, re-run | **EXIT=0**, 14,216 tests |
+
+**What the branch's own files cost that scan is nothing measurable.** Three runs
+of the semicolons scan with `src/signals/frontier.ts` and `frontier.test.ts`
+present: **2,773, 2,760, 2,983 ms**. Three runs with those two files moved out of
+the tree and nothing else changed: **2,654, 2,745, 2,991 ms**. The distributions
+overlap completely. The 717 ms that separated the branch from `main` on a single
+sample each was run-to-run variance, and reading it as the diff's cost would have
+been the wrong conclusion from the right-looking number.
+
+**The cause is that the budget is wall clock and the work is the whole
+repository.** Each test reads and lexes every source under `src/`, `tools/` and
+`apps/loom/`, which is ~2.7 s on an idle container against vitest's default
+5,000 ms — about **1.7x**. Inside `pnpm verify` the suite runs many files in
+parallel on a shared CPU, so the same scan can take twice as long in wall-clock
+terms while doing identical work. The repository grows every day and the scan
+grows with it; the headroom only goes one way.
+
+**This is the second instance of one shape**, and the first is this lane's own
+entry of 4 November (evening) about `src/signals/ledger.test.ts` carrying a
+wall-clock ratio with no headroom while being the gate for four surfaces. Two
+gates, two lanes, one failure mode: a number of milliseconds standing in for an
+amount of work, on a machine whose speed is not the thing under test.
+
+**Not fixed here, because `tools/` is not this lane's** — and it is not in the
+lane table at all, so the ownership above is the closest fit rather than the
+table's answer. Reassign it if that is wrong.
+
+**Two shapes a fix could take, and the second is the one worth the code.**
+
+1. **Give the two tests a timeout that matches what they do.** Vitest says so
+   itself in the failure text, and a whole-repository scan is a long-running test
+   by any honest reading. One argument each, and it buys time rather than
+   headroom — the ratio goes back to 3x or 4x and starts shrinking again.
+2. **Stop measuring the machine.** Neither test is about speed: both are about
+   whether any source in the repository lexes to its end and whether any
+   statement ends in a semicolon. A budget per thousand lines scanned, or a cap
+   on bytes rather than on seconds, asserts the thing they exist to assert and
+   cannot be failed by a busy container. The same argument applies to the
+   `ledger.test.ts` entry, where the measurement genuinely *is* about cost — so
+   the honest version there is a ratio against a calibration run rather than a
+   constant.
+## 2026-11-09 (evening) — the two whole-repository sweeps each read and lex all 2,065 sources, and one pass would answer both
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build`
+(`tools/sources/`) · **Status:** open — **nothing is broken and nothing is
+blocked**; the budget no longer needs this and it is recorded so that it is a
+decision rather than something nobody noticed
+
+`code.test.ts > lexes to the end` and `semicolons.test.ts > ends no statement in
+a semicolon` are two sweeps over the same 2,065 files. Each reads every one and
+runs `scan` over it. **They are the same read and the same lex, done twice**,
+because they are in two test files and vitest gives each file its own worker.
+
+After [0375](decisions/0375-a-whole-repository-check-is-budgeted-by-what-it-reads-rather-than-by-a-wall-clock.md)
+that is 841 ms and 1,075 ms, so one pass would save about 850 ms of every
+`pnpm verify`. `scan` already returns both answers in one value — `mode.kind`
+for the first sweep and `code` for the second — so what it needs is for
+`semicolonTerminated` to be split at the seam it already has, into the part that
+blanks and the part that reads blanked code, and for the two sweeps to sit in one
+file over one pass.
+
+**It is filed rather than done** because the run that found it had just removed
+the reason it mattered. The budget is 41,300 ms now and grows with the
+repository, so 850 ms is a saving rather than a risk, and moving tests between
+files to collect it is the kind of tidying 0375's own alternatives section
+argues against doing quietly. The two sweeps also assert different things about
+different modules, and a reader looking for what `code.ts` is held to should
+find it in `code.test.ts`.
+
+**What would close it:** a measured reason to want the 850 ms — a `pnpm verify`
+that is too slow to run twice, or a third sweep arriving that would make it
+three passes rather than two.
+
+## 2026-11-09 (evening) — `tools/` is in no lane's row, and the second finding to land there picked an owner by guessing
+
+**Filed by:** `Loom daily build` · **Owned by:** `@jonathanbravecredit`
+(`docs/routines.md`, the lane table) · **Status:** open — **nothing is blocked
+and two findings have now been addressed on a guess**
+
+The lane table in `docs/routines.md` gives nine routines a row each. Eight name a
+directory; `Loom merge` names none deliberately. **`tools/` appears in none of
+them.** `Loom daily build`'s row reads *`src/` except `src/primitives/` and
+`src/signals/`, and the application shell*.
+
+So when #843 filed the wall-clock entry it wrote, in as many words, that `tools/`
+*"is not in the lane table at all, so the entry names `Loom daily build` as the
+closest fit and says to reassign it if that is wrong."* This run picked it up and
+acted on it, which makes two findings resolved against a directory nobody is
+recorded as owning.
+
+**The guess is probably right.** `tools/sources/files.ts` already says these
+checks *"live here, in the lane that owns the repository's own tooling"*, and
+`docs/routines.md` has this lane writing `pnpm weigh`, `pnpm shoot`,
+`pnpm specimen` and the decisions index. Nothing in this entry is a complaint
+about where the work landed.
+
+**What it is:** fifteen directories under `tools/` that four routines all run and
+none is recorded as owning, where the convention for every other directory in
+this repository is that exactly one routine edits it. A lane that wants to change
+a tool another lane depends on has no row to point at, and the only thing
+stopping two lanes editing `tools/screenshot/` on the same day is that neither
+has wanted to.
+
+**The recommendation is one cell:** add `tools/` to `Loom daily build`'s row.
+That matches what is already happening and what `files.ts` already claims. If it
+should be somewhere else — or explicitly shared, the way `Loom merge`'s row is
+explicitly nowhere — that is worth a sentence in the table rather than a third
+finding that opens by saying the table does not cover this.

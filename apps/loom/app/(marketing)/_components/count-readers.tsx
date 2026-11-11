@@ -7,7 +7,8 @@ import { useEffect } from "react"
 import { SITE_SIGNAL_TYPES } from "@/app/(marketing)/_lib/readers/asked"
 
 /**
- * The one piece of this site that runs in a browser.
+ * One of the two pieces of this site that run in a browser; the other is
+ * `site-navigation.tsx`, which moves between pages and draws nothing either.
  *
  * Every other thing on these ten pages is a tree built on a server, and that is
  * the site's own argument about itself. This is the exception the argument
@@ -90,7 +91,14 @@ export const CountReaders = ({ url, send }: CountReadersProps) => {
       return
     }
 
-    const started = broadcastReaderSignals(root, {
+    /*
+     * Handed the document rather than the root, as of 8 November: the site
+     * moves between its pages without loading a new document
+     * (`site-navigation.tsx`), and a broadcast handed the document follows the
+     * page, so each page a reader moves to is its own page view rather than
+     * more signals filed against the page they started on.
+     */
+    const started = broadcastReaderSignals(document, {
       types: SITE_SIGNAL_TYPES,
       send: send ?? deliverReaderSignals({ url }),
     })

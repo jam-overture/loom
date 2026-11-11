@@ -37,6 +37,19 @@ const withRetired = (
   retired: ReadonlyMap<NodeId, string>
 ): Result<Applying, TreeError> => mapResult(applied, (root) => ({ root, retired }))
 
+/**
+ * **This is where the only structural invariant a tree has is enforced, and
+ * that it is the only one is the part worth writing down.**
+ * `validateTreeInvariants` checks unique ids and nothing else, so anything that
+ * composes operations from two sources — a composition per audience (0359,
+ * 0376), a merge of two proposals, anything that replays two logs — does not
+ * need a defensive check over what it produced: the second `insert` of an id
+ * the tree already holds fails here, long before there is a tree to invalidate.
+ *
+ * Written here because a run that reaches for that check reaches for it out of a
+ * fear this answers, and the answer took a planted mutation to settle. The
+ * fear, and the removal, are recorded in `audience/compose.ts`.
+ */
 const rejectIdCollisions = (root: LoomNode, incoming: LoomNode): Result<LoomNode, TreeError> => {
   const [internalDuplicate] = duplicateNodeIds(incoming)
   if (internalDuplicate) return err({ code: "duplicate-node-id", nodeId: internalDuplicate })

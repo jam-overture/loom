@@ -188,6 +188,7 @@ describe("defineSource", () => {
       "not-resolved": true,
       "invalid-params": true,
       "invalid-answer": true,
+      "unreadable-answer": true,
       "adapter-threw": true,
       unavailable: true,
       refused: true,

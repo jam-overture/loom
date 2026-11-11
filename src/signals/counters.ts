@@ -1,5 +1,7 @@
 import type { AudienceId } from "../audience/audience.js"
 
+import type { ActedHourCount } from "./acted.js"
+import type { ArrivalHourCount } from "./arrivals.js"
 import type { ReaderRegionCount } from "./region.js"
 import type { FunnelAnswer, FunnelPair, ReaderTally } from "./rollup.js"
 
@@ -53,6 +55,30 @@ export const funnelKey = (answer: FunnelAnswer): string =>
 
 export const regionKey = (count: ReaderRegionCount): string =>
   `${revisionKey(count)} ${count.region}`
+
+/**
+ * A revision and an hour.
+ *
+ * The fourth counter the door writes and the second it composes by hand: one
+ * delivery's openings all carry the same hour, so two of these can only collide
+ * where a delivery opened page views of one revision twice over — which
+ * `openingsOf` has already folded. The key is here anyway, with the other
+ * three, because *today's callers cannot emit a duplicate* is a property of
+ * today's callers (see the note above).
+ */
+export const arrivalKey = (count: ArrivalHourCount): string =>
+  `${revisionKey(count)} ${count.hour}`
+
+/**
+ * A revision, a part and an hour, which is the fifth counter and the second
+ * with a clock in its key (`acted.ts`).
+ *
+ * The hour is last for the reason it is last in the table's primary key: a
+ * reading of one part over a range is a prefix of this, and a reading of one
+ * hour across a page is the index beside it.
+ */
+export const actedKey = (count: ActedHourCount): string =>
+  `${revisionKey(count)} ${count.nodeId} ${count.hour}`
 
 /**
  * The same counter, in one audience (0284).
@@ -125,6 +151,27 @@ export const addFunnelAnswers = (standing: FunnelAnswer, next: FunnelAnswer): Fu
   ...next,
   reached: standing.reached + next.reached,
   converted: standing.converted + next.converted,
+})
+
+/** Page views that began in one hour, added. */
+export const addArrivalCounts = (
+  standing: ArrivalHourCount,
+  next: ArrivalHourCount
+): ArrivalHourCount => ({ ...next, views: standing.views + next.views })
+
+/**
+ * What readers did to one part in one hour, added.
+ *
+ * `type` is the one column that is not a number and the later row wins it,
+ * which is what `SET type = excluded.type` does — so the fold in front of the
+ * driver does not become a third answer.
+ */
+export const addActedCounts = (standing: ActedHourCount, next: ActedHourCount): ActedHourCount => ({
+  ...next,
+  activations: standing.activations + next.activations,
+  opens: standing.opens + next.opens,
+  closes: standing.closes + next.closes,
+  completions: standing.completions + next.completions,
 })
 
 export const addRegionCounts = (

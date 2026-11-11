@@ -335,6 +335,49 @@ export const APPLICATION_ID_MIGRATION: readonly string[] = [
    $$`
 )
 
+/**
+ * The tables a page's audience rules and its per-audience forms are kept in
+ * (0263).
+ *
+ * Its own list for the reason the other four are theirs: a deployment serving
+ * one form of every page has no reason to carry either table, and nothing else
+ * here reads them. A host adds them by adding its `ensure` call on purpose.
+ *
+ * **No backfill and no migration of anything.** Both tables are new, nothing
+ * was ever stored in another shape, and a page with no rows in either is served
+ * exactly as it is today — the base tree, which is what `audiencesFor` answers
+ * for an empty rule list.
+ *
+ * No index beyond the keys. Both reads are a seek on the key's own prefix: the
+ * rules' head is the newest revision under `(application_id, tree_id)`, which
+ * the primary key already orders, and a page's forms are a range under the same
+ * prefix. An index here would be a second copy of the key.
+ */
+export const AUDIENCE_OVERLAY_DDL: readonly string[] = [
+  `CREATE TABLE IF NOT EXISTS loom_audience_rules (
+    application_id text NOT NULL DEFAULT 'app_default',
+    tree_id text NOT NULL,
+    revision integer NOT NULL,
+    rules jsonb NOT NULL,
+    actor text NOT NULL,
+    recorded_at text NOT NULL,
+    PRIMARY KEY (application_id, tree_id, revision)
+  )`,
+  `CREATE TABLE IF NOT EXISTS loom_audience_forms (
+    application_id text NOT NULL DEFAULT 'app_default',
+    tree_id text NOT NULL,
+    audience_id text NOT NULL,
+    delta jsonb NOT NULL,
+    base_revision integer NOT NULL,
+    actor text NOT NULL,
+    authored_at text NOT NULL,
+    PRIMARY KEY (application_id, tree_id, audience_id)
+  )`,
+  /** Locked on creation for the reason the tree store's tables are — see above. */
+  `ALTER TABLE loom_audience_rules ENABLE ROW LEVEL SECURITY`,
+  `ALTER TABLE loom_audience_forms ENABLE ROW LEVEL SECURITY`,
+]
+
 export const ensureTreeStoreSchema = async (db: LoomDatabase): Promise<void> => {
   await runStatements(db, TREE_STORE_DDL)
 }
@@ -383,6 +426,16 @@ export const ensureProjectStoreSchema = async (db: LoomDatabase): Promise<void> 
  */
 export const migrateApplicationIds = async (db: LoomDatabase): Promise<void> => {
   await runStatements(db, APPLICATION_ID_MIGRATION)
+}
+
+/**
+ * Creates the audience dimension's two tables if they are absent. Idempotent,
+ * and separate for the reason the other four are: a deployment that wants to
+ * serve one page to more than one audience gets the tables by adding this call
+ * on purpose.
+ */
+export const ensureAudienceOverlaySchema = async (db: LoomDatabase): Promise<void> => {
+  await runStatements(db, AUDIENCE_OVERLAY_DDL)
 }
 
 const runStatements = async (db: LoomDatabase, statements: readonly string[]): Promise<void> => {

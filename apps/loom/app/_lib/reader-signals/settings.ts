@@ -1,7 +1,10 @@
 import {
+  DEFAULT_READER_EVENT_RETENTION_MS,
   DEFAULT_READER_SIGNAL_WINDOW_MS,
   DEFAULT_REGION_FLOOR,
+  MIN_READER_EVENT_RETENTION_MS,
   MIN_READER_SIGNAL_WINDOW_MS,
+  readerEventRetentionSchema,
   readerSignalWindowSchema,
   regionFloorOf,
 } from "@jam-overture/loom/signals"
@@ -160,7 +163,7 @@ export const describeRegionSettings = (region: RegionSettings): string => {
 export const WINDOW_KEY = "LOOM_SIGNAL_WINDOW_MS"
 
 /**
- * The age a delivery reaches before this deployment counts it and drops it.
+ * The age a delivery reaches before this deployment counts it.
  *
  * **The number is the runtime's and the reading is here**, which is the point
  * of this block: `DEFAULT_READER_SIGNAL_WINDOW_MS` carries the whole argument
@@ -213,9 +216,70 @@ export const describeCollectionWindow = (window: CollectionWindow): string =>
     ? `${WINDOW_KEY} is "${window.given}", which is not a window this runtime will sweep on, so nothing is being counted. ` +
       `It is whole milliseconds and at least ${MIN_READER_SIGNAL_WINDOW_MS}; remove it to sweep on ${DEFAULT_READER_SIGNAL_WINDOW_MS}.`
     : window.state === "set"
-      ? `a delivery is counted into the totals and dropped once it is ${window.windowMs}ms old`
-      : `a delivery is counted into the totals and dropped once it is ${window.windowMs}ms old; ` +
+      ? `a delivery is counted into the totals once it is ${window.windowMs}ms old`
+      : `a delivery is counted into the totals once it is ${window.windowMs}ms old; ` +
         `set ${WINDOW_KEY} to change it`
+
+export const KEPT_KEY = "LOOM_SIGNAL_KEPT_MS"
+
+/**
+ * How long this deployment keeps an individual delivery after counting it.
+ *
+ * **The second window, and the one a reader is actually promised** (0349,
+ * 0351). The window above is the age a delivery is counted at; this is the age
+ * it is deleted at, and until 5 November the two were one number because
+ * counting deleted. The maintainer settled thirty days by default so that a
+ * deployment can look at the deliveries behind its counters rather than only at
+ * the counters — which is what the portal's *Events* tab is — and rule 5 makes
+ * it a deployment's number rather than a constant.
+ *
+ * **The number is the runtime's and the reading is here**, as with the window:
+ * `DEFAULT_READER_EVENT_RETENTION_MS` carries the whole argument for thirty
+ * days in its own doc comment, including the cost — a page view's signals stay
+ * correlatable for as long as this lasts — and `readerEventRetentionSchema` is
+ * the gate, so the floor is read off the runtime's own answer rather than a
+ * second rule about one setting.
+ *
+ * **A value that is not a window is neither**, as everywhere else in this file,
+ * and the consequence is sharper than the collection window's: the expiry sweep
+ * refuses to run on it, so nothing is deleted at all, and the notice publishes
+ * the default — which would then be a ceiling this deployment is not keeping.
+ * That is why it is said out loud rather than quietly replaced.
+ */
+export type KeptWindow =
+  | { readonly state: "default"; readonly keptMs: number }
+  | { readonly state: "set"; readonly keptMs: number }
+  /** The default is carried so a notice has a number to publish; nothing expires on it. */
+  | { readonly state: "unusable"; readonly given: string; readonly keptMs: number }
+
+export const readKeptWindow = (value: string | undefined): KeptWindow => {
+  if (value === undefined || value.trim() === "") {
+    return { state: "default", keptMs: DEFAULT_READER_EVENT_RETENTION_MS }
+  }
+
+  const asked = readerEventRetentionSchema.safeParse({ keptMs: Number(value.trim()) })
+
+  return asked.success
+    ? { state: "set", keptMs: asked.data.keptMs }
+    : { state: "unusable", given: value, keptMs: DEFAULT_READER_EVENT_RETENTION_MS }
+}
+
+/**
+ * One sentence about the kept window, for an operator.
+ *
+ * It names the minimum for the collection window's reason — the ordinary way
+ * this is written wrongly is a units mistake, and `keptMs: 30` means thirty
+ * milliseconds — and it says what an unusable value costs, which is that
+ * nothing is deleted while readers are told a ceiling.
+ */
+export const describeKeptWindow = (kept: KeptWindow): string =>
+  kept.state === "unusable"
+    ? `${KEPT_KEY} is "${kept.given}", which is not a window this runtime will keep deliveries for, so nothing is being deleted. ` +
+      `It is whole milliseconds and at least ${MIN_READER_EVENT_RETENTION_MS}; remove it to keep deliveries for ${DEFAULT_READER_EVENT_RETENTION_MS}.`
+    : kept.state === "set"
+      ? `a counted delivery is kept for ${kept.keptMs}ms from when it arrived, and then deleted`
+      : `a counted delivery is kept for ${kept.keptMs}ms from when it arrived, and then deleted; ` +
+        `set ${KEPT_KEY} to change it`
 
 export const SWEEP_KEY = "LOOM_SIGNAL_SWEEP_MS"
 
@@ -299,6 +363,19 @@ export type IntakeSettings = {
    */
   readonly window: CollectionWindow
   /**
+   * The window this deployment keeps a counted delivery for.
+   *
+   * Read here for the reason the collection window is, and it is the one of the
+   * two that a reader is promised: the ceiling on a notice is this window plus
+   * one sweep (0351).
+   *
+   * **The door does not refuse on it.** A window that cannot be read stops the
+   * expiry sweep and nothing else: refusing batches as well would lose the
+   * deliveries a working sweep could still count and keep once the value is
+   * fixed.
+   */
+  readonly kept: KeptWindow
+  /**
    * How often this deployment's sweep runs, where it has said.
    *
    * Nothing in the application reads it but the notice: the door does not
@@ -320,5 +397,6 @@ export const readIntakeSettings = (
     floor: readRegionFloor(env[REGION_FLOOR_KEY]),
   },
   window: readCollectionWindow(env[WINDOW_KEY]),
+  kept: readKeptWindow(env[KEPT_KEY]),
   sweep: readSweepSchedule(env[SWEEP_KEY]),
 })

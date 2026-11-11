@@ -9,32 +9,41 @@ import { rollUp, type FunnelPair } from "./rollup.js"
 import type { ReaderTallyStore } from "./tally.js"
 
 /**
- * The one operation that empties the buffer.
+ * The one operation that counts the buffer.
  *
  * `journal.ts` can hold batches, `rollup.ts` can fold them and `tally.ts` can
  * keep what the fold produced — and until this module existed nothing joined
  * the three, so a deployment with signals switched on accumulated the largest
  * table it owns and counted none of it.
  *
- * **Counting and forgetting are one call, and that is the design rather than a
- * convenience.** A rollup reports *what this window added* (0147), so a batch
- * counted twice is counted twice forever: there is no idempotence to fall back
- * on and no way to notice afterwards, because the wrong number looks exactly
- * like a busy afternoon. The only defence that does not need durable bookkeeping
- * is for the set of batches rolled up and the set forgotten to be the same set,
- * decided once, in one place. That is this file, and it is why there is no
- * exported `applyReaderSignalRetention` beside it — a function that can forget
- * without counting is the data-loss bug, and one that can count without
- * forgetting is the double-count bug.
+ * **Counting and recording that it happened are one call, and that is the
+ * design rather than a convenience.** A rollup reports *what this window
+ * added* (0147), so a batch counted twice is counted twice forever: there is no
+ * idempotence to fall back on and no way to notice afterwards, because the
+ * wrong number looks exactly like a busy afternoon. The only defence that does
+ * not need durable bookkeeping is for the set of batches rolled up and the set
+ * marked as counted to be the same set, decided once, in one place. That is
+ * this file.
+ *
+ * **Until 5 November the mark was a delete** (0146), and the sentence above
+ * said *forgotten* where it now says *marked*. A delivery is now kept for the
+ * window its deployment states — thirty days by default, so that an operator
+ * can look at individual deliveries rather than only at counters (0349) — and
+ * deleted by a second sweep in `expire.ts`. What did not change is the thing
+ * the invariant protects: this run decides one prefix, counts it, and records
+ * that it counted it, and no other operation may touch that decision. What that
+ * split buys is that the two failures are no longer the same failure. A sweep
+ * that deletes without counting loses deliveries; this cannot delete at all.
  *
  * Nothing schedules it, for the reason nothing schedules telemetry's retention
- * or `auditSnapshot`: when a deployment forgets is an operational choice, and a
- * framework that quietly deleted a host's data on a timer it chose would be
- * making it. A host calls this from a cron route, a deploy hook, or by hand.
+ * or `auditSnapshot`: when a deployment counts is an operational choice, and a
+ * framework that quietly swept a host's data on a timer it chose would be
+ * making it. A host calls this from a cron route, a deploy hook, or by hand,
+ * and calls {@link expireReaderEvents} from the same place.
  *
  * **One run at a time, and the caller is what makes that true.** Two runs over
  * the same ripe prefix both roll it up and both apply; applying is additive
- * (0147), so the counters double and the buffer empties once, leaving nothing
+ * (0147), so the counters double and the prefix is marked once, leaving nothing
  * behind that could say what happened. Nothing here can prevent it — a journal
  * and a store are two handles with no shared transaction between them — so
  * serialising belongs to whatever schedules this. `apps/loom/scripts/
@@ -43,8 +52,8 @@ import type { ReaderTallyStore } from "./tally.js"
  */
 
 /**
- * The window is the age a batch reaches before it is counted and dropped, and
- * it is two arguments pulling opposite ways.
+ * The window is the age a batch reaches before it is counted, and it is two
+ * arguments pulling opposite ways.
  *
  * **Longer is more accurate.** `views` and `reached` count distinct page views,
  * distinctness does not add up, and a page view whose batches straddle two
@@ -62,10 +71,15 @@ import type { ReaderTallyStore } from "./tally.js"
  * allows — the openings waiting are otherwise indistinguishable from the
  * ordinary one-window lag this setting creates (0274).
  *
- * **Shorter is more anonymous.** The raw window is the entire mechanism by
- * which a view key stops existing (0146). The key is opaque, random and
- * correlates nothing outside the buffer, but it correlates that, and the
- * argument for it rests on how briefly it lives.
+ * **Shorter is more anonymous — and since 5 November this is no longer the
+ * window that governs that.** The view key stops existing when the row holding
+ * it is deleted, and that is now the kept window rather than this one
+ * (0349, 0351): a delivery is counted at this age and deleted at the age
+ * `expire.ts` is given. This setting still decides how much over-count a
+ * straddling page view causes, which is the accuracy argument above; what it no
+ * longer decides is how long a page view's signals stay correlatable. That
+ * number is `DEFAULT_READER_EVENT_RETENTION_MS` and the tension in it is
+ * recorded rather than hidden.
  *
  * An hour is long against a page view and short against a day, which is why it
  * is the default rather than a constant: rule 5 of `docs/signals.md` makes the
@@ -165,6 +179,15 @@ export type CollectionSummary = {
   readonly counted: number
   readonly tallies: number
   readonly funnels: number
+  /**
+   * Hourly rows this run wrote for what readers did (`acted.ts`).
+   *
+   * A slice of the tallies rather than a figure beside them: a window in which
+   * nobody pressed, opened or sent anything writes none, however many tallies
+   * it wrote, because the counter holds what readers *did* and a page being on
+   * screen is not one of those.
+   */
+  readonly acted: number
   /** Distinct page views the window held. */
   readonly views: number
   /**
@@ -185,23 +208,26 @@ export type CollectionSummary = {
    */
   readonly redelivered: number
   /**
-   * How old the oldest delivery the scan found was, in milliseconds, at the
-   * instant this run was taken.
+   * How old the oldest **uncounted** delivery the scan found was, in
+   * milliseconds, at the instant this run was taken.
    *
    * A fact about the buffer and about no reader, like every other figure here.
-   * It is free: a scan runs from the oldest end, so the first batch it read is
-   * the oldest one there is, and this is one subtraction over it.
+   * It is free: a scan runs from the oldest uncounted end, so the first batch
+   * it read is the oldest one waiting, and this is one subtraction over it.
    *
    * **The run does the subtraction rather than the caller**, because the
    * caller's clock is not this run's: a surface that read the age against its
    * own `now` would publish a number nothing had measured.
    *
+   * **It is the fold's lag, not the kept window** (0351). It was both while a
+   * counted delivery was deleted in the same breath, which is why
+   * `retentionPromiseOf` used to be handed this outcome; the ceiling readers
+   * are promised is now about deletion, so that reading is handed the expiry
+   * run's own figure and this one answers the question it still owns — how far
+   * behind collection is.
+   *
    * Never absent and always at least the ripeness window: a summary exists only
-   * where something was ripe. What it is for is
-   * {@link retentionPromiseOf} — whether the ceiling the deployment publishes
-   * to its readers is one it keeps. A delivery whose stored instant cannot be
-   * read leaves this not a number, and that reading answers *nothing here can
-   * say* on it rather than *kept*.
+   * where something was ripe.
    */
   readonly oldestMs: number
 }
@@ -210,30 +236,37 @@ export type CollectionOutcome =
   | {
       readonly outcome: "collected"
       readonly summary: CollectionSummary
-      /** Rows the buffer removed. Below `counted` only if something else pruned first. */
-      readonly removed: number
+      /**
+       * Rows this run marked as counted.
+       *
+       * Below `counted` only where something had already marked them — which on
+       * one run at a time is nothing, and is why a figure below the count is
+       * worth seeing rather than a rounding difference.
+       */
+      readonly recorded: number
       /** The scan filled its limit with ripe batches, so another run has work now. */
       readonly more: boolean
     }
   /** Nothing is old enough yet, which is the ordinary answer on a quiet deployment. */
   | { readonly outcome: "nothing-ripe"; readonly waiting: number }
   /**
-   * The counters took the window and the buffer would not drop it.
+   * The counters took the window and the journal would not record it.
    *
    * Its own outcome because it is the one state that gets worse if it is
-   * ignored: the batches are durable in the counters and still in the buffer,
-   * so the next run counts them again. An operator seeing this prunes below the
-   * reported position by hand, or fixes the buffer before the next run.
+   * ignored: the batches are durable in the counters and still unmarked, so the
+   * next run counts them again. An operator seeing this marks the prefix by
+   * hand, or fixes the store before the next run — and must not reach for a
+   * delete, which would lose the deliveries and leave the double-count.
    */
   | {
-      readonly outcome: "counted-not-forgotten"
+      readonly outcome: "counted-not-recorded"
       readonly summary: CollectionSummary
       readonly before: number
       readonly error: ReaderSignalStoreError
     }
-  /** The window was not usable. Nothing was read, counted or deleted. */
+  /** The window was not usable. Nothing was read, counted or marked. */
   | { readonly outcome: "refused"; readonly reason: string }
-  /** Read or write failed before anything became durable. Nothing was deleted. */
+  /** Read or write failed before anything became durable. Nothing was marked. */
   | { readonly outcome: "unavailable"; readonly error: ReaderSignalStoreError }
 
 type Scan =
@@ -246,6 +279,12 @@ type Scan =
  * Every batch from the horizon on is too young to count, and `collectionPlanOf`
  * needs only the first of them to know where the ripe prefix ends — so reading
  * further would be reading the busiest part of the table to throw it away.
+ *
+ * **Uncounted rows only** (0351), which is what makes the oldest end of the
+ * table the oldest *uncounted* delivery rather than the oldest kept one. Without
+ * it this scan would read the whole kept window — thirty days by default — to
+ * reach the handful of rows a run is for, and the cost of collecting would grow
+ * with a setting that has nothing to do with collecting.
  */
 const scanFrom = async (
   journal: ReaderSignalJournal,
@@ -258,6 +297,7 @@ const scanFrom = async (
   while (collected.length < scanLimit) {
     const page = await journal.read({
       direction: "newer",
+      counted: false,
       limit: Math.min(SCAN_PAGE, scanLimit - collected.length),
       ...(cursor ? { cursor } : {}),
     })
@@ -277,11 +317,12 @@ const scanFrom = async (
 }
 
 /**
- * Count a window of the buffer into the durable counters, then drop it.
+ * Count a window of the buffer into the durable counters, then record that it
+ * was counted.
  *
  * The order is the safe one and the reverse is a data-loss bug that looks like
- * a feature working: aggregates first, the buffer second. What that leaves is
- * `counted-not-forgotten`, which is visible and recoverable — the opposite
+ * a feature working: aggregates first, the mark second. What that leaves is
+ * `counted-not-recorded`, which is visible and recoverable — the opposite
  * order's failure is neither.
  */
 export const collectReaderSignals = async (
@@ -359,6 +400,7 @@ export const collectReaderSignals = async (
     counted: plan.ripe.length,
     oldestMs: Date.parse(now) - Date.parse(oldest),
     tallies: folded.reduce((total, { rollup }) => total + rollup.tallies.length, 0),
+    acted: folded.reduce((total, { rollup }) => total + rollup.acted.length, 0),
     funnels: folded.reduce((total, { rollup }) => total + rollup.funnels.length, 0),
     views: folded.reduce((total, { rollup }) => total + rollup.views, 0),
     uncorrelated: folded.reduce((total, { rollup }) => total + rollup.uncorrelated, 0),
@@ -387,25 +429,31 @@ export const collectReaderSignals = async (
       tallies: rollup.tallies,
       funnels: rollup.funnels,
       appearances: rollup.appearances,
+      acted: rollup.acted,
     })),
     now
   )
   if (!applied.ok) return { outcome: "unavailable", error: applied.error }
 
-  const forgotten = await journal.forget({ before: plan.before })
-  if (!forgotten.ok) {
+  /**
+   * The same instant the counters were written with, so one run leaves one
+   * instant across both halves of what it did — and the instant a reading of
+   * the fold's lag is taken against is the instant the fold actually happened.
+   */
+  const recorded = await journal.counted({ before: plan.before, at: now })
+  if (!recorded.ok) {
     return {
-      outcome: "counted-not-forgotten",
+      outcome: "counted-not-recorded",
       summary,
       before: plan.before,
-      error: forgotten.error,
+      error: recorded.error,
     }
   }
 
   return {
     outcome: "collected",
     summary,
-    removed: forgotten.value.removed,
+    recorded: recorded.value.counted,
     more: scanned.full,
   }
 }
@@ -431,17 +479,17 @@ export const describeCollection = (outcome: CollectionOutcome): string => {
         outcome.summary.tallies === 1 ? "tally" : "tallies"
       } over ${outcome.summary.views} ${outcome.summary.views === 1 ? "view" : "views"}${uncorrelated(
         outcome.summary
-      )}${redelivered(outcome.summary)}, and forgot ${outcome.removed}${
+      )}${redelivered(outcome.summary)}, and marked ${outcome.recorded} counted${
         outcome.more ? " — more is waiting" : ""
       }`
     case "nothing-ripe":
       return `nothing old enough to count${
         outcome.waiting === 0 ? "" : `, ${batches(outcome.waiting)} waiting`
       }`
-    case "counted-not-forgotten":
+    case "counted-not-recorded":
       return `counted ${batches(
         outcome.summary.counted
-      )} and could not forget them, so the next run counts them again unless the buffer is pruned below ${
+      )} and could not record it, so the next run counts them again unless they are marked counted below ${
         outcome.before
       }: ${outcome.error.detail}`
     case "refused":
