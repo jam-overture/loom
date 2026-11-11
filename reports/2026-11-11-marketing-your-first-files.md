@@ -245,22 +245,36 @@ command, on the committed tree.
 
 | | files | tests |
 | --- | --- | --- |
-| framework and tools | 280 | 6,821 |
-| application | 474 | 7,634 |
-| | **754** | **14,455** |
+| framework and tools | 280 | **6,821** |
+| application | 474 | **7,639** |
+| | **754** | **14,460** |
 
-**+12 tests and +1 file over `main` at `6d561a3`.** All twelve are the new
-`scaffold.test.ts`. Two existing files changed and neither was weakened: both
-are lists a new thing has to be declared on, and both went red on the run that
-added one, which is what they are for.
+**14,460 pass. Nothing failed, nothing skipped, no test weakened.** The
+framework half is **unchanged to the test** against `main` at `6d561a3`, which
+is the cleanest evidence this branch reaches nothing outside the route group.
+
+**+17 tests and +1 file**, measured by running the application suite on
+`6d561a3` and on this branch rather than by reading another pull request's
+figures: 473 files / 7,622 tests become 474 / 7,639.
+
+- **Twelve** are the new `scaffold.test.ts`.
+- **Five** are `docs-pages.test.ts`, which runs five cases per documentation
+  page this site names and now names one more. They are not decoration: two of
+  them read the guide's own source for the two phrases this site promised, and
+  one holds its heading.
+
+Two existing files changed and neither was weakened. Both are lists a new thing
+has to be declared on, and both went red on the run that added one, which is
+what they are for.
 
 - `balance.test.ts` — `loom.list` classified as read-down rather than a row of
   cells, with its reason, beside `loom.milestone-list`.
 - `pages/pages.test.ts` — the panel census, which has now caught every panel
   this site has grown on the run that grew it, five times out of five.
 
-`findings:check` 1,509 findings, 0 malformed. `reports:check` inside budget.
-`prerender:check` 139 pages, 0 run together.
+`findings:check` **1,508 findings, 0 malformed**. `reports:check` 2,210
+visuals, 153.1MB, none over 1.1MB. `prerender:check` **139 pages, 2,060 text
+junctions, 0 run together**.
 
 # Open questions
 
