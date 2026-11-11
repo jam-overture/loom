@@ -1,29 +1,25 @@
 # 0371. A segment is an audience the site sorts its readers into, and Loom keeps only its rules and its name
 
-**Status:** Proposed
+**Status:** Accepted
 **Date:** 2026-11-09
 **Section:** §5 (portal), the governance and reasoning planes
 
-> **Since this was written (10 November 2026).** [0376](0376-a-pages-audience-rules-are-an-attributed-log-and-its-forms-are-rows.md),
-> Accepted the next day, built 0263's store dimension in the framework:
-> `loom_audience_rules` keeps each **page's** ordered rule list as an
-> append-only, attributed log, and `loom_audience_forms` keeps one form per
-> audience per page. Two clauses below now meet it head on, and this record is
-> left `Proposed` so the maintainer can settle them together:
+> **Accepted on 11 November 2026.** The maintainer: *"Okay to accept."* Two
+> clauses met [0376](0376-a-pages-audience-rules-are-an-attributed-log-and-its-forms-are-rows.md),
+> Accepted on 10 November, which built 0263's store dimension in the framework
+> (`loom_audience_rules`, each **page's** ordered rule list as an append-only,
+> attributed log; `loom_audience_forms`, one form per audience per page). They
+> were settled before acceptance, as the pull request recommended:
 >
-> - **Clause 3** keeps the rules in portal tables, one list per **project**.
->   0376 keeps them in the store, one list per **page** (`tree_id`). The
->   reasonable default is to drop the portal tables and have the editor write
->   through 0376's store (`rules`, `recordRules` with the head revision, so a
->   stale edit is refused, and `history`), offering one list per page with
->   *copy to every page* rather than a second, project-wide copy of the same
->   rules. Piece 1 of clause 7 would then need no table and no `pnpm db:push`.
-> - **Clause 5** sends a segment's change through the Gate. 0376 writes a form
->   straight to a row, unjudged, and files that asymmetry as an open question
->   for the maintainer (`FINDINGS.md`, 10 November, *a form an audience is
->   served is a change a reader sees that no policy judged*). The framework
->   lane recommends leaving forms unjudged; this record's clause 5 is the other
->   answer. Only one of them can stand, and piece 4 waits on it either way.
+> - **Clause 3** now has the portal's editor write through 0376's store rather
+>   than keep rules in portal tables, so there is one copy of the rules, not
+>   two that drift. Piece 1 of clause 7 needs no table and no `pnpm db:push`.
+> - **Clause 5** no longer says whether a segment's form goes through the Gate.
+>   0376 writes a form straight to a row, unjudged, and files that as an open
+>   question for the maintainer (`FINDINGS.md`, 10 November, *a form an
+>   audience is served is a change a reader sees that no policy judged*). Piece
+>   4 of clause 7 is settled by its own record, and that record carries his
+>   answer. Pieces 1 to 3 do not depend on it.
 
 ## Context
 
@@ -93,14 +89,18 @@ sets says whether they have been before. That is exactly the render context
    wireframe's *"never from anything personal"* holds in this form: a key's
    value never leaves the site, and a segment is a group's name, never a
    reader's.
-3. **The portal keeps the rules, in order, per project.** A segment has a name,
-   an `aud_` id minted when it is made, and one or more rules in 0359's shape
-   (a conjunction of clauses, each a key and the values it may hold). The rules
-   are one ordered list for the project, general to specific, and the screen
-   shows and edits that order, because the last matching rule is the one that
-   wins a contested part (0359 clause 3). They are kept in portal tables, as
-   goals are (0350), since 0359 clause 1 puts their authoring and keeping in
-   the portal.
+3. **The portal edits the rules, in order; the framework's store keeps them.**
+   A segment has a name, an `aud_` id minted when it is made, and one or more
+   rules in 0359's shape (a conjunction of clauses, each a key and the values
+   it may hold). The rules are kept where 0376 keeps them: one ordered list per
+   page, general to specific, as an attributed, append-only log. The portal's
+   editor writes through that store (`recordRules` against the head revision,
+   so a stale edit is refused, and `history` for who changed what), offers
+   *copy to every page* for a rule meant for the whole site, and shows and
+   edits the order, because the last matching rule is the one that wins a
+   contested part (0359 clause 3). The portal keeps no second copy of the
+   rules; 0359 clause 1's "kept in the portal" is met by the portal being
+   where they are written and read.
 4. **The rules reach the site through the read door, in the same pull.** The
    door 0358 built answers the project's rules beside its live pages. The
    request still carries no reader and no audience: the site receives every
@@ -108,8 +108,8 @@ sets says whether they have been before. That is exactly the render context
    pull keeps the last rules with the last pages (0358 clause 4).
 5. **A segment's form of a page is accepted changes scoped to it.** A change
    may be *only for: <segment>*. Accepting it adds it to that segment's overlay
-   of the live copy rather than to the copy itself, it goes through the Gate as
-   any other change does, and a newer published version replays it as 0358
+   of the live copy rather than to the copy itself, whether it is judged by the Gate
+   is settled by piece 4's record (see the note above), and a newer published version replays it as 0358
    clause 6 replays every accepted change, dropping and listing what no longer
    fits. A segment whose overlay cannot be applied is refused whole by the
    site's composition (0359 clause 5), so the portal says a dropped change
@@ -125,7 +125,7 @@ sets says whether they have been before. That is exactly the render context
       rules, with what the site must send (the keys, and the `aud_` id it puts
       on its signals) and each segment's page views over the range from the
       counters 0284 already keeps, *none yet* where its site has not named it.
-      Needs a table and `pnpm db:push`.
+      Writes through 0376's store (clause 3), so it needs no table of its own.
    2. The read door answers the rules. The site's pull client sorting readers
       by them and naming the segment on its signals is framework code, a
       finding for `Loom daily build`.
