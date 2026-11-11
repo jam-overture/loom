@@ -218,6 +218,13 @@ export type WindowAgenda<TReason extends string = string> = {
    * untouched by it — because a part is not a reader and the two cannot be
    * ranked against each other (0327, 0377).
    *
+   * **It is also the reading the fix-list's rows carry**, and the same object:
+   * this rung hands it to `deploymentAgendaOf`, so a row's
+   * `AgendaRow.unread` is the row this order published rather than a second
+   * reading of one page (0378). That is what keeps a screen drawing the order
+   * of places and the fix-list over it from holding two answers about one page
+   * — the guarantee the conversion row above is carried under.
+   *
    * Its `duplicated` is nought from here, for the reason the order's is: the
    * assembly never holds two readings of one page.
    */
@@ -312,13 +319,15 @@ export const windowAgendaOf = <TReason extends string = string>(
 
   const arrival = arrivalStandingOf<TReason>(health, turnedAway, instantOf(schedule))
 
+  const unread = deploymentUnreadOf(assembly.readings.pages.map(pageFrontierOf))
+
   return {
     progress,
     order,
     conversion,
     health,
     arrival,
-    unread: deploymentUnreadOf(assembly.readings.pages.map(pageFrontierOf)),
-    agenda: deploymentAgendaOf(order, conversion, health, arrival),
+    unread,
+    agenda: deploymentAgendaOf(order, conversion, health, arrival, unread),
   }
 }

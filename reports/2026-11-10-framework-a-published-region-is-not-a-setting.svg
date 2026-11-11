@@ -1,0 +1,88 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 720" width="1080" height="720" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif">
+  <style>
+    .title { font-size: 21px; font-weight: 650; fill: #0f172a; }
+    .sub { font-size: 13px; fill: #64748b; }
+    .panel-title { font-size: 12px; font-weight: 650; fill: #475569; letter-spacing: 0.09em; }
+    .code { font-size: 11.5px; fill: #334155; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .dim { font-size: 11.5px; fill: #94a3b8; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .note { font-size: 12px; fill: #475569; }
+    .emph { font-size: 12px; font-weight: 650; fill: #0f172a; }
+    .good { font-size: 11.5px; font-weight: 650; fill: #15803d; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .bad { font-size: 11.5px; font-weight: 650; fill: #b91c1c; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .seam { font-size: 11.5px; fill: #7c3aed; font-weight: 650; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .lbl { font-size: 11px; font-weight: 650; fill: #64748b; letter-spacing: 0.04em; }
+  </style>
+  <rect width="1080" height="720" fill="#ffffff"/>
+
+  <text x="60" y="46" class="title">A published region is not a setting of this deployment</text>
+  <text x="60" y="70" class="sub">0379. One file, two parts, two readers &#8212; and the boundary is a line the surface already wrote.</text>
+
+  <!-- THE FILE -->
+  <text x="60" y="116" class="panel-title">app/(marketing)/_lib/wired/page.tsx</text>
+  <rect x="60" y="128" width="500" height="92" rx="6" fill="#f8fafc" stroke="#cbd5e1"/>
+  <text x="76" y="150" class="lbl">WHAT THIS DEPLOYMENT RUNS</text>
+  <text x="76" y="172" class="dim">/** the argument for the panel &#8230; */</text>
+  <text x="76" y="192" class="code">// nothing here reads process.env today</text>
+  <text x="76" y="210" class="note">&#8212; and if it did, it would still be reported</text>
+
+  <!-- the marker -->
+  <rect x="60" y="228" width="500" height="26" rx="4" fill="#f5f3ff" stroke="#7c3aed"/>
+  <text x="76" y="246" class="seam">// &#9472;&#9472; shown on the site &#9472;&#9472;</text>
+
+  <rect x="60" y="262" width="500" height="150" rx="6" fill="#fffbeb" stroke="#f59e0b"/>
+  <text x="76" y="284" class="lbl">WHAT IT PRINTS FOR A VISITOR TO RUN</text>
+  <text x="76" y="306" class="code">const live = startPullingLivePages({</text>
+  <text x="76" y="324" class="code">  deployment: process.env.LOOM_URL ?? "",</text>
+  <text x="76" y="342" class="code">  key: process.env.LOOM_PROJECT_KEY ?? "",</text>
+  <text x="76" y="360" class="code">})</text>
+  <text x="76" y="388" class="note">The file a reader writes, and the one the published</text>
+  <text x="76" y="404" class="note">entry point&#8217;s own example gives.</text>
+
+  <!-- ARROWS to the two readers -->
+  <path d="M 568 186 L 648 186" stroke="#94a3b8" stroke-width="1.5" fill="none" marker-end="url(#a)"/>
+  <path d="M 568 330 L 648 330" stroke="#94a3b8" stroke-width="1.5" fill="none" marker-end="url(#a)"/>
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#94a3b8"/>
+    </marker>
+  </defs>
+
+  <!-- READER 1: the sweep -->
+  <text x="656" y="116" class="panel-title">tools/sources/deployment.ts</text>
+  <rect x="656" y="128" width="364" height="124" rx="6" fill="#f8fafc" stroke="#cbd5e1"/>
+  <text x="672" y="152" class="emph">environmentNames(source)</text>
+  <text x="672" y="174" class="code">codeOnly(source)</text>
+  <text x="672" y="192" class="seam">  .slice(0, publishedFrom(source))</text>
+  <text x="672" y="218" class="note">Holds .env.example to offering every</text>
+  <text x="672" y="234" class="note">variable &#8212; so a specimen&#8217;s must not reach it.</text>
+
+  <rect x="656" y="266" width="364" height="86" rx="6" fill="#f0fdf4" stroke="#86efac"/>
+  <text x="672" y="290" class="lbl">AFTER 0379</text>
+  <text x="672" y="312" class="good">environmentNames(&#8230;) &#8594; []</text>
+  <text x="672" y="334" class="note">24 variables repository-wide, unchanged.</text>
+
+  <rect x="656" y="366" width="364" height="86" rx="6" fill="#fef2f2" stroke="#fca5a5"/>
+  <text x="672" y="390" class="lbl">BEFORE</text>
+  <text x="672" y="412" class="bad">+ [ "LOOM_PROJECT_KEY", "LOOM_URL" ]</text>
+  <text x="672" y="434" class="note">Two cases red; the panel printed an indirection.</text>
+
+  <!-- READER 2 -->
+  <text x="60" y="500" class="panel-title">_lib/wired.ts &#8212; the module that prints the region</text>
+  <rect x="60" y="512" width="500" height="96" rx="6" fill="#f8fafc" stroke="#cbd5e1"/>
+  <text x="76" y="536" class="code">export const SHOWN_MARKER = "// &#9472;&#9472; shown &#8230;"</text>
+  <text x="76" y="558" class="note">Finds the same line, publishes what follows it.</text>
+  <text x="76" y="582" class="emph">Swept: every spelling in the repository must</text>
+  <text x="76" y="598" class="emph">match, and at least one must exist.</text>
+
+  <!-- the properties -->
+  <text x="656" y="500" class="panel-title">WHAT HOLDS IT</text>
+  <rect x="656" y="512" width="364" height="96" rx="6" fill="#f8fafc" stroke="#cbd5e1"/>
+  <text x="672" y="536" class="note">&#8226; a whole line, so a declaration cannot cut</text>
+  <text x="672" y="554" class="note">&#8226; a region, not a file &#8212; code above is ours</text>
+  <text x="672" y="572" class="note">&#8226; one marker per file, swept</text>
+  <text x="672" y="590" class="note">&#8226; 6 mutations planted, 6 killed</text>
+
+  <text x="60" y="652" class="emph">What the exemption cannot hide:</text>
+  <text x="60" y="672" class="note">a real setting moved under a marker and left in .env.example fails <tspan font-style="italic">offers nothing the application has stopped reading</tspan>.</text>
+  <text x="60" y="694" class="note">What it can: a real setting read only under a marker and offered nowhere &#8212; the drift 0367 exists for, reachable one more way.</text>
+</svg>
