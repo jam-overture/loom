@@ -357,7 +357,7 @@ export const sentenceOf = (room: Room): string => {
 
   return room.fits
     ? `${headline} ${comparison}`
-    : `${headline} ${comparison} **A shorter page is not the remedy and nor is a larger cap** — what has to change is how much of this site's prose the search box sends a reader, which is a decision about what the box is rather than about any page. The candidates are measured in decisions/0353.`
+    : `${headline} ${comparison} **A shorter page is not the remedy and nor is a larger cap** — what has to change is how much of this site's prose the search box sends a reader, which is a decision about what the box is rather than about any page. The candidates are measured in decisions/0353, and every saving over the stored words is priced and refused in search/savings.ts.`
 }
 
 /** The sentence for the room a section has, which is the pair the caps use. */

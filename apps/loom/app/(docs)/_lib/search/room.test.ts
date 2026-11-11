@@ -187,26 +187,65 @@ describe("the room this site has for another page", () => {
   /**
    * And the state of the site, which is the thing this unit was written to say.
    *
-   * **It is full.** The bill for all five sections is the cap that binds, in
-   * every section, and the room it leaves is less than the shortest page here —
-   * so `fits` is false and the sentence carries the clause about the remedy.
+   * **This case said *the site is full* and asserted it of `the-runtime`, and
+   * six days later it failed.** Its own comment had said the assertion would
+   * flip when 0353 was answered, and that *the run that lands it has to come
+   * back here and say what the site's state is now*. 0353 has not been
+   * answered. What flipped it was six days of `main`: the bill fell from
+   * 79,414 compressed bytes to **79,339**, which at this site's compression and
+   * bytes-per-word is about 42 words, so the room in *The runtime* went from
+   * 331 to **373** — past the 346 of the shortest page here — and `fits` became
+   * true. The branch's own saving is not the cause and was already inside the
+   * 5 November figure. Where the 75 bytes went is not isolated here and is not
+   * worth isolating: two stale sentences left *What your readers do* on
+   * 9 November and the reference's generated prose grew, and the net of
+   * everything written on this site in six days is 75 bytes.
    *
-   * This assertion **flips when the question in 0353 is answered**, and that is
-   * deliberate rather than a trap: a decision that gives the box more room to
-   * send makes this test fail, and the run that lands it has to come back here
-   * and say what the site's state is now. The alternative — a test that passes
-   * either way — would let the remedy clause outlive the condition it describes
-   * and go on telling runs not to trim a page when trimming is exactly what
-   * would work.
+   * So the state and the property are asserted apart, which is what the first
+   * version should have done. **The property** is `sentenceOf`'s own promise —
+   * the remedy clause appears exactly where a page as short as the shortest one
+   * here would not fit, and nowhere else — and it holds whichever way the
+   * question goes. **The state** is the case below it, and it is the one that
+   * flips.
    */
-  it("says the site is full, until the decision that is not this lane's is taken", () => {
-    const sentence = roomSentence("the-runtime")
-    const room = roomIn("the-runtime")
+  it("carries the remedy clause exactly where a short page would not fit", () => {
+    expect(shortestWrittenPage()).toBeDefined()
 
-    expect(room.binding.cap).toBe(PROSE_TOTAL_GZIP_CAP)
-    expect(room.fits).toBe(false)
-    expect(sentence).toContain("A shorter page is not the remedy")
-    expect(sentence).toContain("decisions/0353")
+    for (const section of docsSections) {
+      const room = roomIn(section.slug)
+      const sentence = roomSentence(section.slug)
+
+      expect(room.binding.cap, section.slug).toBe(PROSE_TOTAL_GZIP_CAP)
+      expect(sentence.includes("A shorter page is not the remedy"), section.slug).toBe(!room.fits)
+      expect(sentence.includes("decisions/0353"), section.slug).toBe(!room.fits)
+      /*
+       * And the other place a run reaching this looks. 0353's candidates change
+       * which bodies travel; `savings.ts` prices the five that change how they
+       * are written, which is the class a run tries first and the class every
+       * figure in it refuses. A sentence that named one and not the other would
+       * send half of them to re-measure what is already measured.
+       */
+      expect(sentence.includes("search/savings.ts"), section.slug).toBe(!room.fits)
+    }
+  })
+
+  /**
+   * **Two of the five sections still cannot take a page as short as the
+   * shortest one on this site**, and the bill for all five is what binds every
+   * one of them.
+   *
+   * This is the case that flips when 0353 is answered, and it is written as a
+   * count rather than as a named section so that it says something about the
+   * site rather than about one rail entry. A decision that gives the box more
+   * room makes it fail, and the run that lands it says what the state is then —
+   * which is what the case this replaced was for, with the part that was really
+   * a property taken out of it.
+   */
+  it("still has sections that cannot take a page as short as its shortest", () => {
+    const full = docsSections.filter((section) => !roomIn(section.slug).fits)
+
+    expect(full.length).toBeGreaterThan(0)
+    expect(full.length).toBeLessThan(docsSections.length)
   })
 
   /**
@@ -218,8 +257,16 @@ describe("the room this site has for another page", () => {
    * advice about a page rather than as the reason the number failed.
    */
   it("says what failed before it says what to do", () => {
-    const sentence = roomSentence("the-runtime")
-    const room = roomIn("the-runtime")
+    /*
+     * The tightest section rather than a named one, because the third clause is
+     * only printed where a short page would not fit and which sections those
+     * are is a fact about the site on the day the test runs.
+     */
+    const tightest = docsSections.reduce((least, section) =>
+      roomIn(section.slug).words < roomIn(least.slug).words ? section : least
+    )
+    const sentence = roomSentence(tightest.slug)
+    const room = roomIn(tightest.slug)
 
     expect(sentence.startsWith("loom: ")).toBe(true)
     expect(sentence.indexOf("against a cap of")).toBeLessThan(sentence.indexOf("room for about"))
