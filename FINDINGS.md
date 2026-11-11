@@ -687,7 +687,14 @@ request and this lane will add the key the moment the field lands.
 ## 2026-11-07 (evening) — the transit mangling has hit something load-bearing: it ate the `!` off three image embeds, and the backtick count escalated across one body
 
 **Filed by:** `Loom docs` · **Owned by:** `Loom daily build` (run mechanics; it
-owns the 5 November entry this extends) · **Status:** open — **the remedy is
+owns the 5 November entry this extends) · **Status:** **closed by `framework-94-read-back-what-you-posted`**
+([0382](decisions/0382-a-routine-reads-back-what-it-posted-because-no-safe-link-length-can-be-computed-in-advance.md)). **This entry is the one that moved it.** It met the
+5 November entry's own trigger for raising the defect, and it is the reason the
+answer is a procedure in `docs/routines.md` rather than a sixth note saying to
+leave it alone. The escalating backtick count it recorded across one body is a
+fixture. Original status below.
+
+**Status:** open — **the remedy is
 still to stop rather than to fix**, and this run followed it. What is new is
 that the 5 November entry's own trigger for raising it with the maintainer has
 now been met.
@@ -10450,6 +10457,13 @@ walk's output, which nothing outside the runtime does today.
 ## 2026-09-21 — three pull request bodies in two days carry the same mangled record link, and the breakage is in how the body is written rather than in what it says
 
 **Filed by:** `Loom framework` · **Owned by:** `Loom daily build` · **Status:**
+**closed by `framework-94-read-back-what-you-posted`** ([0382](decisions/0382-a-routine-reads-back-what-it-posted-because-no-safe-link-length-can-be-computed-in-advance.md)). The **first** entry on this
+defect, and the ``**Added [0179](``…)**`` shape it recorded is one of the
+fixtures `manglingIn` is held to. *Three lanes making one mistake* became seven
+weeks, four lanes, six entries and twenty-nine measurements, which is the
+record's Context. Original status below.
+
+**Status:**
 open — cosmetic, costs a reviewer one click, and worth knowing because it is
 now three lanes making one mistake
 
@@ -42072,6 +42086,15 @@ in it.
 ## 2026-09-23 — the mangled URL is a length threshold and nothing else: 158 characters or more does not survive a pull request body
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` ·
+**Status:** **closed by `framework-94-read-back-what-you-posted`** ([0382](decisions/0382-a-routine-reads-back-what-it-posted-because-no-safe-link-length-can-be-computed-in-advance.md)). This entry is
+the record's evidence: the three incompatible boundary tables are its Context
+and the graveyard is its first rejected alternative. **Nothing here is retracted
+and no boundary is claimed** — 0382 decides that no safe length is computed at
+all, and that a run reads the body back instead, with `pnpm posted` doing the
+looking. The closing advice of this entry, written seven weeks ago, is the
+decision. **It also closes the three later entries of 5, 8 and 9 November.**
+Original status below.
+
 **Status:** open — **measured rather than theorised**, and it supersedes every
 earlier explanation in this file, three of which were mine or this lane's
 
@@ -68095,7 +68118,13 @@ holding it.
 ## 2026-11-05 — a markdown link posted to GitHub from a routine session can arrive with backticks wrapping its URL, and re-posting it does not fix it
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` (run
-mechanics; nothing in the repository causes it) · **Status:** **open, and the
+mechanics; nothing in the repository causes it) · **Status:** **closed by `framework-94-read-back-what-you-posted`**
+([0382](decisions/0382-a-routine-reads-back-what-it-posted-because-no-safe-link-length-can-be-computed-in-advance.md)). *Stop rather than fix* is kept and is clause 4 of the
+record — a body already posted twice is weighed against a reviewer's one click
+rather than corrected reflexively. What is added is that a run now **knows**
+whether it happened, which this entry could not offer. Original status below.
+
+**Status:** **open, and the
 remedy is to stop rather than to fix** — it is cosmetic, it is not any lane's
 doing, and two attempts at correcting it are two more than it is worth
 
@@ -69065,7 +69094,13 @@ Filed with no date on it on purpose. The deadline this was found under is gone.
 ## 2026-11-08 — the transit mangling has now eaten a before-and-after pair, which is the second load-bearing instance and the first where the pictures were the argument
 
 **Filed by:** `Loom docs` · **Owned by:** `Loom daily build` (run mechanics) ·
-**Extends** the 5 November entry · **Status:** open — **and the remedy is still
+**Extends** the 5 November entry · **Status:** **closed by `framework-94-read-back-what-you-posted`**
+([0382](decisions/0382-a-routine-reads-back-what-it-posted-because-no-safe-link-length-can-be-computed-in-advance.md)). The four stripped `!` and the runs of two, three, four and
+five backticks are what `manglingIn` is held to; a reader who meets a sixth
+shape adds it to `tools/posted/mangling.test.ts` rather than filing a seventh
+entry. Original status below.
+
+**Status:** open — **and the remedy is still
 to stop rather than to fix**; this raises the instance count and asks for
 nothing on the pull request
 
@@ -70077,7 +70112,16 @@ to be lifted rather than rewritten.
 ## 2026-11-09 (evening) — the transit mangling spares an autolink and a backticked path, and that is the first time the surviving form has been isolated
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom daily build`, as the lane that
-owns the routines document · **Status:** open — **nothing is broken**; what is
+owns the routines document · **Status:** **closed by `framework-94-read-back-what-you-posted`**
+([0382](decisions/0382-a-routine-reads-back-what-it-posted-because-no-safe-link-length-can-be-computed-in-advance.md)). The line this entry asked for is written — `docs/routines.md`,
+*Posting to GitHub*, beside the merge-gate rule, which is where the entry said it
+belonged. **Its own recommendation is not what shipped, and the fifth instance
+appended to this entry is why:** a short markdown link survived in the body that
+ate two long ones, so *post an autolink, never a markdown link* is kept as a
+precaution (clause 2) rather than as the check. The check is the read-back the
+23 September entry had already landed on. Original status below.
+
+**Status:** open — **nothing is broken**; what is
 new is a workaround that is known to work rather than a defect that is known to
 happen
 
