@@ -224,13 +224,24 @@ chain. **It was not armed**, for the reason that entry and `docs/routines.md`
 both give: on 9 August four such chains ran about 96 cloud sessions a day against
 the routines' three and cost a week's allowance while the maintainer was away.
 
-The three wakes it produced were the subscription itself and two `vercel[bot]`
-deployment comments — *Building*, then the same comment edited to *Ready*. **None
+Every wake it produced was the subscription itself or a `vercel[bot]` deployment
+comment — *Building*, then the same comment edited to *Ready*, then edited back to
+*Building* by this run's own push — plus one `check_suite.completed`. **Not one
 was actionable**, which is the measurement the 24 October entry already made
 twice: eleven wakes in twenty-seven minutes, none actionable.
 
-What the run did with them is read the pull request once against primary sources
-— Vercel green on `7936b61`, no review threads, no merge conflict, nothing
+What the run did with them is read the pull request against primary sources,
+twice and only twice — Vercel green on `7936b61`, then pending on `6b7a662`
+behind a markdown-only diff, no review threads, no merge conflict, nothing
 outstanding — add the now-ready preview URL to the body in the form this change
 recommends, read that edited body back through the API, drop the subscription,
-and stop.
+and stop. It did not wait for the second deployment, because waiting is polling.
+
+**One property is new, and it is why the sentence above counts no wakes.** The
+first draft of this paragraph said *three*. Pushing that number made it five, and
+pushing the correction would have made it seven: a push edits the deployment
+comment, which is itself a wake. **A routine cannot report its own wake count,
+because reporting it produces more of what it is counting** — the subscription is
+the only standing entry in this file whose instance count a run cannot measure
+from the inside. What ends the sequence is the run stopping, not the wakes
+stopping. This is that stop.
