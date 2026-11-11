@@ -344,8 +344,10 @@ describe("where a press lands", () => {
    * when they were written and were never *connected* to the landing, which is
    * the same shape as the six copies of the header's height: nothing goes red
    * when one of them stops agreeing, and what a reader gets is the thing they
-   * asked for in the wrong place. `scroll-mt-[var(…)]` is not a number and is
-   * what the class is.
+   * asked for in the wrong place. `scroll-mt-[var(--press-margin)]` is not a
+   * number and is what the class is — **spelled in full here, and the case
+   * below this one says why an ellipsis in it is not a tidier way to write
+   * it.**
    */
   it("is the only scroll margin any component or layout in the route group names", () => {
     const spelled = componentsAndLayouts().filter((file) =>
@@ -353,6 +355,49 @@ describe("where a press lands", () => {
     )
 
     expect(spelled).toEqual([])
+  })
+
+  /**
+   * **An arbitrary-value class written with an ellipsis in it stops `next dev`
+   * from serving this route group**, and nothing in this repository noticed for
+   * five weeks.
+   *
+   * Tailwind scans source files for things shaped like class names and does not
+   * know a comment from a `className`. The sentence above this test used to
+   * abbreviate the real class by putting an ellipsis where its custom property
+   * goes — so Tailwind generated a rule setting `scroll-margin-top` to a `var`
+   * of an ellipsis, and dev's PostCSS pass refuses it: *Unexpected token
+   * Ident* , on every page in `(docs)`.
+   *
+   * **The abbreviation is not reproduced anywhere in this file**, which is why
+   * the sentence above describes it rather than quoting it. A test that banned
+   * a spelling and then wrote it down would fail on itself — which this one did
+   * on the first run, and is the shortest possible demonstration that the
+   * scanner cannot tell prose from markup.
+   *
+   * **`next build` is green on it**, which is why it survived: the deploys are
+   * built and the gate does not run dev, so the only person who meets it is
+   * somebody running the site locally — and the run that met it was trying to
+   * photograph its own surface.
+   *
+   * The sweep is over **every** source here, tests included, which is the one
+   * place this file deliberately differs from `componentsAndLayouts` above. A
+   * comment is exactly where this happens, because a comment is where somebody
+   * writes a class name loosely.
+   */
+  it("writes no arbitrary-value class with an ellipsis in it, in any source here", () => {
+    const walk = (at: string): readonly string[] =>
+      readdirSync(join(ROUTE_GROUP, at), { withFileTypes: true }).flatMap((entry) =>
+        entry.isDirectory()
+          ? walk(join(at, entry.name))
+          : /\.(?:tsx?|mdx)$/u.test(entry.name)
+            ? [join(at, entry.name)]
+            : []
+      )
+
+    const elided = walk(".").filter((file) => /[\w-]+-\[[^\]]*…[^\]]*\]/u.test(source(file)))
+
+    expect(elided).toEqual([])
   })
 })
 
