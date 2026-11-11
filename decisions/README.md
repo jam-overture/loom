@@ -470,3 +470,6 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0378](0378-a-fix-lists-row-carries-the-place-its-pages-reading-stopped-and-the-fourth-reading-cannot-take-a-row-away.md) | A fix-list's row carries the place its page's reading stopped, and the fourth reading cannot take a row away | Accepted | §5 (reader signals), the counters |
 | [0379](0379-a-file-may-publish-part-of-its-body-as-somebody-elses-code-and-a-check-that-reads-this-deployment-stops-at-the-marker.md) | A file may publish part of its body as somebody else's code, and a check that reads *this* deployment stops at the marker | Accepted | §1, the merge gate |
 | [0380](0380-the-three-walks-outside-src-tree-carry-an-explicit-stack-and-react-was-never-the-bound-on-rendering-a-deep-page.md) | The three walks outside `src/tree/` carry an explicit stack, and React was never the bound on rendering a deep page | Accepted | §2 |
+| 0381 | *No record on this branch* | — | — |
+| 0382 | *No record on this branch* | — | — |
+| [0383](0383-a-reader-keeps-the-pages-they-first-saw-for-a-window-the-project-sets-and-their-browser-holds-one-number-many-readers-share.md) | A reader keeps the pages they first saw for a window the project sets, and their browser holds one number many readers share | Proposed | §1, §5 (portal), the connection plane |
