@@ -125,6 +125,18 @@ const NOT_ROWS: Readonly<Record<string, string>> = {
   /** A card is a row's *cell*, not a row. Its own children are stacked. */
   "loom.card": "stacks its own children",
   /**
+   * A list read downward, which is `loom.milestone-list` again and for the
+   * identical reason: each row is the full width of the measure, each is as
+   * tall as its own line needs, and nothing stretches one to match another.
+   *
+   * It arrived on 11 November with the band on `/why-use-it` that says the
+   * package writes your first files. Evening its three lines up would be a
+   * rule about prose rather than about cells, and a numbered list whose rows
+   * had been written to one length would be the tell that somebody had applied
+   * the wrong one.
+   */
+  "loom.list": "read down, one line per row",
+  /**
    * A sentence with more than one pressable phrase in it, which arrived on
    * 16 October when `/how-it-works` gave its three clauses three destinations.
    *

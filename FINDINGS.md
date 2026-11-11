@@ -8,6 +8,76 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-11-11 — the command that adds a component of your own cannot be printed on this site, because its own grammar is a word the site keeps off every page
+
+**Filed by:** `Loom marketing` · **Owned by:** the maintainer for the one-word
+answer, `Loom primitives` / `Loom daily build` (`src/cli/args.ts`) for the
+expensive one · **Status:** open — **nothing is broken, no test is failing on
+`main`, and the site can now say how to start and cannot say how to continue.**
+
+`app/(marketing)/_lib/scaffold.ts` is the band that shipped today. It prints
+one command:
+
+```bash
+npx loom init
+```
+
+and three lines saying what it leaves behind. **The obvious second line of that
+panel is the command that adds a component of your own**, which is the one a
+reader needs the moment the first has run:
+
+```bash
+npx loom add primitive shop.price-tag
+```
+
+**Written that way the band turns one of this site's own register cases red**,
+on every route, under the maintainer's instruction of 26 September. `primitive`
+is in `copy.ts`' `RESERVED_VOCABULARY`, and `voice.test.ts` is explicit that the
+rule reads source panels:
+
+> *"It is this rule and nothing else: the em-dash rule above still reads the
+> panels, so does `RESERVED_VOCABULARY` over every page, and so does every rule
+> over a panel's `caption`."*
+
+So this is not a string that could be moved somewhere quieter. `uses()` matches
+the whole word and its plural, and the word is the command's **grammar** —
+`parseArguments` refuses anything but `add primitive <type>`.
+
+### Why it was not worked around
+
+Three shapes were available and two of them are somebody else's file:
+
+| | what it would take | why not |
+| --- | --- | --- |
+| **say it in prose instead** | *"one more command adds a part of your own"*, with no panel | this lane's whole discipline for a command is that a reader can paste it; a command named and not printed is the one thing these panels exist not to be |
+| **exempt a published command from the register** | widen `withoutPackageNames` in `voice.test.ts` to cover a command's own grammar | the precedent is real — a package name in the install line is exempt for exactly this reason — and it is **this lane deciding a word he took off the site is allowed back**. A rule is not widened to let a band land. |
+| **rename the subcommand** | `add component`, say, in `src/cli/args.ts` | a published entry point with a documented grammar, taught on `/docs/getting-started/scaffolding-a-project` and transcribed into that page by a harness that runs it. Expensive, and not this lane's call either. |
+
+**The second is the one to look at first** and it is a one-word answer: *may the
+site print a command the package publishes, verbatim, including a word the rest
+of the site keeps off the page?* If yes, the exemption is four lines beside the
+one that already exists for package names and the band grows a second line. If
+no, it stays as it is and nothing is lost except the second command.
+
+### It is the second instance of one shape in three days
+
+The 9 November entry — *the most useful thing the library knows about a page
+cannot be printed on this site, because one of the twenty-two sections is called
+`Pricing`* — is the same thing one layer out: **a published name of this product
+is a word the marketing site is not allowed to say.** That one is a label in a
+table and this one is a command line, which is the sharper of the two: a reader
+can be shown a table that names twenty-one of twenty-two sections, and cannot be
+shown a command with a word missing.
+
+Both are one sentence from the maintainer and neither blocks anything today.
+
+### What shipped against it
+
+The band prints the first command and stops, and `scaffold.test.ts` holds it to
+naming no reserved word — so a later run reaching for the second command finds
+out in the file it is editing rather than from a reviewer three files away.
+
+---
 ## 2026-11-10 — a printed specimen that reads the environment arrives in the deployment sweep as a setting of this deployment, and the panel that would print the real spelling is shaped around it
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom daily build`

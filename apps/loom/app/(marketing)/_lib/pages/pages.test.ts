@@ -14,6 +14,7 @@ import { unhonored } from "../frames"
 import { pageTreeFor, renderTree, SITE_PAGES, treeFor } from "../render"
 import { asRequested } from "../requested"
 import { THE_REPORT } from "../reported"
+import { SCAFFOLD_COMMAND } from "../scaffold"
 import { WIRED_FILES } from "../wired"
 import { WRITTEN_FILES } from "../written"
 
@@ -598,10 +599,17 @@ describe("the panels that print data", () => {
    *
    * **And a fourth time on 10 November**, naming the route *On your own site*
    * prints. `wired.ts` publishes it and it is last in the list because its band
-   * is the last of the four down the page. The pin has now caught every panel
-   * this site has ever grown, on the run that grew it, four times out of four.
+   * is the last of the four down the page.
+   *
+   * **And a fifth time on 11 November**, and this one is a different kind of
+   * panel: a command rather than a module. `SCAFFOLD_COMMAND` is what
+   * *Starting from nothing* prints, it sits between the two written files and
+   * the report because its band sits between theirs on the page, and
+   * `scaffold.test.ts` holds it to being a command the framework's own parser
+   * accepts. The pin has now caught every panel this site has ever grown, on
+   * the run that grew it, five times out of five.
    */
-  it("is the install line, four source panels and the one report, counted rather than assumed", async () => {
+  it("is the install line, five source panels and the one report, counted rather than assumed", async () => {
     const panels = await everyPanel()
     const printed = panels.flatMap((panel) =>
       panel.children.flatMap((child) => (child.kind === "text" ? [child.value] : []))
@@ -610,6 +618,7 @@ describe("the panels that print data", () => {
     expect(printed).toEqual([
       "npm install @jam-overture/loom @jam-overture/loom-primitives",
       ...WRITTEN_FILES.map((file) => file.source),
+      SCAFFOLD_COMMAND,
       THE_REPORT,
       ...CONNECTED_FILES.map((file) => file.source),
       ...WIRED_FILES.map((file) => file.source),
