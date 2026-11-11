@@ -8,7 +8,7 @@
       "files": 100,
       "narrower": [],
       "standing": {
-        "packageNames": 2037,
+        "packageNames": 2040,
         "otherDoors": 18,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -4246,7 +4246,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 2037,
+        "packageNames": 2040,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -4290,7 +4290,7 @@
       "files": 63,
       "narrower": [],
       "standing": {
-        "packageNames": 2037,
+        "packageNames": 2040,
         "otherDoors": 18,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -5243,7 +5243,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 2037,
+        "packageNames": 2040,
         "otherDoors": 18,
         "doorsSharingNothing": 17,
         "widest": false,
@@ -5318,7 +5318,7 @@
       "files": 220,
       "narrower": [],
       "standing": {
-        "packageNames": 2037,
+        "packageNames": 2040,
         "otherDoors": 18,
         "doorsSharingNothing": 17,
         "widest": false,
@@ -5788,7 +5788,7 @@
       "files": 81,
       "narrower": [],
       "standing": {
-        "packageNames": 2037,
+        "packageNames": 2040,
         "otherDoors": 18,
         "doorsSharingNothing": 17,
         "widest": false,
@@ -6876,7 +6876,7 @@
       "files": 38,
       "narrower": [],
       "standing": {
-        "packageNames": 2037,
+        "packageNames": 2040,
         "otherDoors": 18,
         "doorsSharingNothing": 17,
         "widest": false,
@@ -7441,7 +7441,7 @@
       "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 2037,
+        "packageNames": 2040,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -7644,7 +7644,7 @@
       "files": 45,
       "narrower": [],
       "standing": {
-        "packageNames": 2037,
+        "packageNames": 2040,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -8688,7 +8688,7 @@
       "files": 61,
       "narrower": [],
       "standing": {
-        "packageNames": 2037,
+        "packageNames": 2040,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -9067,7 +9067,7 @@
       "files": 45,
       "narrower": [],
       "standing": {
-        "packageNames": 2037,
+        "packageNames": 2040,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -9322,7 +9322,7 @@
       "files": 14,
       "narrower": [],
       "standing": {
-        "packageNames": 2037,
+        "packageNames": 2040,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -9497,7 +9497,7 @@
         }
       ],
       "standing": {
-        "packageNames": 2037,
+        "packageNames": 2040,
         "otherDoors": 18,
         "doorsSharingNothing": 16,
         "widest": true,
@@ -9636,6 +9636,24 @@
               "summary": "The chart, the range's figure and the change on the period before it, in one call against a counter handle."
             },
             {
+              "name": "ActedAgainstHour",
+              "kind": "type",
+              "signature": "type ActedAgainstHour = {\n    /** The instant the hour began (UTC). */\n    readonly hour: number;\n    /** What readers did in this hour, in the kind the reading is of. */\n    readonly count: number;\n    /**\n     * The page views this hour's doings could have come from — **this hour's and\n     * the hour before's** — or `null` where the reading cannot speak for the hour\n     * before.\n     */\n    readonly views: number | null;\n    /** Whether this hour is over and inside the range. Carried from {@link ActedHour.whole}. */\n    readonly whole: boolean;\n};",
+              "summary": "One hour of {@link ActedAgainst}: what readers did in it, and the page views those doings could have come from."
+            },
+            {
+              "name": "ActedAgainst",
+              "kind": "type",
+              "signature": "type ActedAgainst = {\n    /** The range, as the acted series has it. */\n    readonly range: ArrivalRange;\n    /** The kind the numerators are of, as the acted series has it. */\n    readonly kind: ActedKind;\n    /**\n     * One entry per hour of the acted series, ascending and in step with it.\n     */\n    readonly hours: readonly ActedAgainstHour[];\n    /** What readers did inside the range, which is the sum of the hours above. */\n    readonly count: number;\n    /** The first hour the acted scope ever counted, carried through. */\n    readonly begins?: number;\n    /** Whether the range starts before the acted counter did. */\n    readonly clipped: boolean;\n};",
+              "summary": "**What readers did over a range, by hour, against the readers who were there to do it.**"
+            },
+            {
+              "name": "actedAgainstOf",
+              "kind": "function",
+              "signature": "const actedAgainstOf: (acted: ActedSeries, arrivals: ArrivalSeries) => ActedAgainst",
+              "summary": "The two series, paired by hour."
+            },
+            {
               "name": "ActedRate",
               "kind": "type",
               "signature": "type ActedRate = {\n    /**\n     * What readers did per hundred page views in the range, or `null` where there\n     * is no quotient to take.\n     */\n    readonly per100: number | null;\n    /** The same figure for the period before, or `null` on the same terms. */\n    readonly was: number | null;\n    /** The quotient of the two rates, or why there is none (`ratios.ts`). */\n    readonly ratio: Ratio;\n};",
@@ -9644,7 +9662,7 @@
             {
               "name": "ActedRateReading",
               "kind": "type",
-              "signature": "type ActedRateReading = {\n    readonly acted: ActedReading;\n    readonly arrivals: ArrivalReading;\n    readonly rate: ActedRate;\n};",
+              "signature": "type ActedRateReading = {\n    readonly acted: ActedReading;\n    readonly arrivals: ArrivalReading;\n    readonly rate: ActedRate;\n    /**\n     * The two series paired by hour, which is {@link actedAgainstOf} of the two\n     * above.\n     */\n    readonly against: ActedAgainst;\n};",
               "summary": "What readers did over a range, the page views it happened in, and the rate."
             },
             {
@@ -14043,7 +14061,7 @@
       "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 2037,
+        "packageNames": 2040,
         "otherDoors": 18,
         "doorsSharingNothing": 17,
         "widest": false,
@@ -14178,7 +14196,7 @@
       "files": 21,
       "narrower": [],
       "standing": {
-        "packageNames": 2037,
+        "packageNames": 2040,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -14240,7 +14258,7 @@
       "files": 65,
       "narrower": [],
       "standing": {
-        "packageNames": 2037,
+        "packageNames": 2040,
         "otherDoors": 18,
         "doorsSharingNothing": 17,
         "widest": false,
@@ -14814,7 +14832,7 @@
       "files": 43,
       "narrower": [],
       "standing": {
-        "packageNames": 2037,
+        "packageNames": 2040,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -14884,7 +14902,7 @@
       "files": 100,
       "narrower": [],
       "standing": {
-        "packageNames": 2037,
+        "packageNames": 2040,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -15306,7 +15324,7 @@
       "files": 81,
       "narrower": [],
       "standing": {
-        "packageNames": 2037,
+        "packageNames": 2040,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,

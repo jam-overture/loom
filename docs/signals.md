@@ -5197,6 +5197,58 @@ page's reading stopped, which would make *rewrite this page* arrive with *and
 here is where* — and is a change to the fix-list's own shape rather than a corner
 of this run.
 
+### 84. The hour's doings, against the readers who were there · `Loom signals` · **done, 11 November**
+
+§76 and §77 put a clock on two counters, and 0362 clause 9 put a limit on what
+could be divided: *the rate is taken once, over the range, and never per hour.*
+The reason was real and this lane wrote it down the same evening — the numerator
+counts what readers **did** in an hour and the denominator counts page views
+that **began** in one, so a reader who arrived at 10:59 and pressed at 11:01 is
+in the eleven o'clock numerator and the ten o'clock denominator. Over a month
+that is two page views; over an hour it is the whole of the figure. So the hours
+were counts, and *nine presses at eleven o'clock* could not be told apart from
+nine out of five hundred.
+
+**The denominator that reason was about is built**
+([0380](../decisions/0380-an-hours-denominator-is-the-page-views-of-that-hour-and-the-one-before-published-beside-the-count-and-never-summed.md)),
+and the division is **not** — it is
+[0381](../decisions/0381-an-hourly-rate-is-the-quotient-of-the-rolling-pair.md),
+`Proposed`, because clause 9 is accepted and this lane does not narrow an
+accepted clause on its own measurement.
+
+- **The window is two hours wide.** An hour's doings came from readers who
+  arrived in that hour or the one before it, so `actedAgainstOf` in
+  `src/signals/acted.ts` pairs each hour's count with the page views of both.
+  The boundary error is then inside the window instead of across its edge: an
+  hour with five presses and no arrivals of its own is five against the twenty
+  readers who came in the previous hour, rather than five presses from nobody.
+- **It is never added up and there is no total to add.** Every page view is in
+  two denominators on purpose, which is the double count this reading commits
+  deliberately — so twelve hours of ten page views sum to 220 across the pairs
+  and 120 across the range, and the reading carries the first figure nowhere.
+  The range's exact denominator is still `ActedRate`'s, taken once (0158). The
+  numerator does add, because occurrences add (0368), and the asymmetry is why
+  this is a reading of its own rather than two more fields on `ActedSeries`.
+- **A denominator the reading cannot speak for is withheld, never nought.**
+  `views` is `number | null`: `0` is a real nought, and `null` is the earlier
+  hour being one the arrivals series does not reach — the first hour of any
+  range, and every hour before page views were first counted.
+- **It pairs two readings, not two stores**, so the guarantee it needs is the
+  one `readReaderActedRate` already makes: one range, taken once, into both
+  halves. Two series over different ranges degrade to withheld pairs rather than
+  to a denominator about a different stretch of time, and `ActedRateReading`
+  gains `against` so a screen holds one answer about one range from one call.
+
+**What is left and is filed:** the first bar of any range has a count and no
+denominator, because the arrivals reading draws a series over the range it was
+asked for. The remedy available today is a caller asking for a range one hour
+wider; the remedy a screen would want is a shape decision about
+`ArrivalReading` rather than about this reading.
+
+**Nothing reaches a reader's browser.** `broadcast.ts` and its import graph are
+untouched, and the bundle measures **7,543 bytes minified and 3,350 gzipped**,
+which is `main`'s figure.
+
 ## Still not in scope
 
 - **Signal-to-intent derivation** — a signal automatically becoming a
