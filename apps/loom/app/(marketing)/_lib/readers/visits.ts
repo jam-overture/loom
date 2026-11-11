@@ -112,42 +112,42 @@ export const PASSED_THROUGH_SECONDS = 2
 export const SCRIPTED_VISITS: readonly ScriptedVisit[] = [
   { asFarAs: "The opening", stayed: { "The opening": 4 } },
   {
-    asFarAs: "Using it",
-    stayed: { "The opening": 11, "Using it": 26 },
+    asFarAs: "Install it",
+    stayed: { "The opening": 11, "Install it": 26 },
     pressed: ["The opening"],
   },
   {
-    asFarAs: "Using it",
-    stayed: { "The opening": 8, "Using it": 19 },
+    asFarAs: "Install it",
+    stayed: { "The opening": 8, "Install it": 19 },
     pressed: ["The opening"],
   },
-  { asFarAs: "What this is for", stayed: { "The opening": 6, "What this is for": 14 } },
+  { asFarAs: "Every change, in four words", stayed: { "The opening": 6, "Every change, in four words": 14 } },
   {
-    asFarAs: "Using it",
-    stayed: { "The opening": 9, "Using it": 31 },
+    asFarAs: "Install it",
+    stayed: { "The opening": 9, "Install it": 31 },
     pressed: ["The opening"],
   },
   {
     asFarAs: "Questions",
-    stayed: { "The opening": 7, "Using it": 22, Questions: 18 },
+    stayed: { "The opening": 7, "Install it": 22, Questions: 18 },
     pressed: ["The opening"],
     opened: ["Questions"],
   },
   { asFarAs: "The opening", stayed: { "The opening": 3 } },
   {
     asFarAs: "Where it is today",
-    stayed: { "The opening": 10, "Using it": 12, "Where it is today": 9 },
+    stayed: { "The opening": 10, "Install it": 12, "Where it is today": 9 },
   },
   {
     asFarAs: "Keep going",
-    stayed: { "The opening": 8, "Using it": 24, Questions: 21, "Keep going": 16 },
+    stayed: { "The opening": 8, "Install it": 24, Questions: 21, "Keep going": 16 },
     pressed: ["Keep going"],
     opened: ["Questions"],
   },
-  { asFarAs: "What this is for", stayed: { "The opening": 5, "What this is for": 11 } },
+  { asFarAs: "Every change, in four words", stayed: { "The opening": 5, "Every change, in four words": 11 } },
   {
     asFarAs: "Keep going",
-    stayed: { "The opening": 12, "Using it": 17, "Keep going": 13 },
+    stayed: { "The opening": 12, "Install it": 17, "Keep going": 13 },
   },
   {
     asFarAs: "Questions",
@@ -180,14 +180,14 @@ export type FunnelQuestion = {
 /**
  * The one this page asks as a funnel.
  *
- * Of the readers who reached the band that offers a change, how many carried on
- * to the links at the foot of the page. Both ends are `viewed` on a band, which
+ * Of the readers who reached the band that asks for an install, how many carried
+ * on to the links at the foot of the page. Both ends are `viewed` on a band, which
  * is the only end a band can honestly be — and it is a real question the totals
  * cannot answer, because *nine reached the first and two reached the second*
  * does not say whether the two are among the nine.
  */
 export const FUNNEL_QUESTIONS: readonly FunnelQuestion[] = [
-  { from: "Using it", to: "Keep going" },
+  { from: "Install it", to: "Keep going" },
 ]
 
 /**
@@ -202,9 +202,10 @@ export const FUNNEL_QUESTIONS: readonly FunnelQuestion[] = [
  * set up.
  *
  * The band named is the one the front door actually cares about: the one that
- * lets a visitor ask for a change.
+ * asks a visitor to install Loom. It was *Using it* until that band came off the
+ * page on 11 November.
  */
-export const BAND_QUESTION = "Using it"
+export const BAND_QUESTION = "Install it"
 
 /**
  * A band of the page by the name a reader would call it, or a build that stops.

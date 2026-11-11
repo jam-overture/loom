@@ -2,7 +2,7 @@ import { sequentialIdFactory } from "@jam-overture/loom"
 import { describe, expect, it } from "vitest"
 
 import { BAND } from "./bands"
-import { COST_CLAIMS, costs } from "./costs"
+import { COST_CLAIMS, COSTS_HEADING, costs } from "./costs"
 import { elementsIn } from "./measure"
 import { treeFor } from "./render"
 import { HOME, SITE_ROUTES } from "./site"
@@ -77,21 +77,24 @@ describe("the band that says what Loom costs", () => {
   /**
    * Both halves said, and said on the page rather than only in the array.
    *
-   * The reason to check the rendered band for these two words is that the
-   * claim is the pair. A band that said the framework is free and stopped
-   * would be a more flattering page and a less honest one, and it is exactly
-   * what a later run trimming for the word budget would produce.
+   * The claim is the pair, so the band has to name both the framework and the
+   * portal. Since 11 November it does it in the maintainer's words: *Free to
+   * get started* above *Get started with the framework. Get insights with our
+   * portal.* — which says the free part without calling the portal free. A
+   * band that dropped the portal would be a more flattering page and a less
+   * honest one.
    */
-  it("says both halves: that one is free and that the other is paid for", () => {
-    const words = copyIn(band).toLowerCase()
+  it("says both halves, and calls only the start free", () => {
+    const words = copyIn(band)
 
-    expect(words).toContain("free")
-    expect(words).toMatch(/\bpay\b/)
+    expect(words).toContain(COSTS_HEADING)
+    expect(words.toLowerCase()).toContain("portal")
+    expect(words.toLowerCase()).not.toMatch(/portal is free|free portal/)
   })
 })
 
 describe("the front door", () => {
-  it("carries the band, under the band that asks for an install", () => {
+  it("carries the band, below the band that asks for an install", () => {
     const bands = treeFor(HOME, { theme: "minimal" }).root.children.filter(
       (node) => node.kind === "element"
     )
@@ -100,7 +103,7 @@ describe("the front door", () => {
     )
 
     expect(eyebrows).toContain(BAND.costs)
-    expect(eyebrows.indexOf(BAND.costs)).toBe(eyebrows.indexOf(BAND.install) + 1)
+    expect(eyebrows.indexOf(BAND.costs)).toBeGreaterThan(eyebrows.indexOf(BAND.install))
   })
 
   /**

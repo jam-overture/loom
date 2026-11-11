@@ -101,6 +101,11 @@ So the page does not open on a pain. It opens on a thing you can make.
 The front door may say both. Pricing beyond *the framework is free and the
 portal is paid* is not settled and is not this lane's to invent.
 
+**Wording, 11 November (the maintainer's):** the band's eyebrow is *Free to get
+started* and its heading is *Get started with the framework. Get insights with
+our portal.* Do not change it back to *What it costs* or *You pay for the
+portal*.
+
 ## Is it ready
 
 > *"Yes, say the framework is ready."*
@@ -165,15 +170,12 @@ under the hood:
   record*, *When the answer is no*, *Putting it back*, *Who is asking*.
 - **The front door's *Every change, in four words*** (Ask, Check, Record, Undo).
   Moved below the chain on 25 October rather than rewritten.
-- **The front door's *The hard part is answering for what it changed***, which
-  argued the audit case to a reader who had not yet been told what Loom builds.
-  Also moved below the chain on 25 October.
-- **The front door's *What is Loom?* band** answers that question with the
-  governance story. Its heading was *A governance framework for modern
-  AI-enabled adaptive web pages* and is now the plain sentence that had been
-  sitting under it, because the abstract one was the example this lane had put
-  to him. **The band itself is still the governance answer and is still on the
-  list**: whether a page that leads with the chain wants it at all is his.
+- **The front door's *The hard part is answering for what it changed***,
+  *What is Loom?* and *Using it* (*Four steps. Your rules decide.*) bands came
+  off the page on 11 November, at the maintainer's word. The install band moved
+  up under the chain, headed *Just want to get started?*, and the costs band is
+  now *Free to get started* / *Get started with the framework. Get insights
+  with our portal.*
 - **`/what-you-run`** is mostly reassurance about what leaves your server, which
   is an answer to a question a junior developer has not asked yet.
 
