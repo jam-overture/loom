@@ -28,6 +28,15 @@ import { codeOnly } from "./code.js"
  * `NOT_SET_BY_AN_OPERATOR`, which is five names with a reason each — and a new
  * variable is forced either into the example or into that table, where the
  * reason is the thing a reviewer reads.
+ *
+ * ## What this deployment runs, and what it prints for somebody else to run
+ *
+ * A surface may publish part of a file as a stranger's own code, and a file
+ * that does says so on a line of its own. Everything after that line is a
+ * **specimen**: it is compiled here so that nobody is shown code that does not
+ * typecheck, and it is read by a visitor as the file *they* would write. A
+ * variable it names is a setting of their deployment and never of this one, so
+ * the reading below stops at the marker.
  */
 
 /**
@@ -61,6 +70,68 @@ const DIRECT = /process\.env\.([A-Za-z_$][\w$]*)/g
 const LITERAL = /(["'])( *)\1/g
 
 /**
+ * The line a surface writes above the part of a file it publishes.
+ *
+ * Three marketing specimens carry it today and each declares it as
+ * `SHOWN_MARKER` in the module that prints the region. It is spelled here as
+ * well rather than imported, because tooling that reached into a route group
+ * for a constant would make this sweep depend on the surface it is checking —
+ * and `declaredMarkers` below is how the two spellings are held together
+ * instead.
+ *
+ * **It means something only on a line of its own.** The modules that publish a
+ * region also write the marker as a string, to find it, so a reading that took
+ * it from anywhere would cut those modules at their own declaration — and
+ * everything a publishing module really does read would go unreported. That is
+ * the same anchor, for the same reason, as `offered`'s assignment at the start
+ * of a line.
+ */
+export const PUBLISHED_MARKER = "// ── shown on the site ──"
+
+/**
+ * Where a source stops being code this deployment runs.
+ *
+ * The whole length of a file with no published region, which is every file in
+ * this repository but four.
+ */
+export const publishedFrom = (source: string): number => {
+  const lines = source.split("\n")
+  const at = lines.findIndex((line) => line.trimEnd() === PUBLISHED_MARKER)
+
+  return at === -1
+    ? source.length
+    : lines.slice(0, at).reduce((total, line) => total + line.length + 1, 0)
+}
+
+/** The declaration a surface writes to find its own published region. */
+const DECLARED = /\bSHOWN_MARKER = (["'])( *)\1/g
+
+/**
+ * Every spelling of the marker a source declares as a constant.
+ *
+ * The one thing that could make this sweep quietly stop recognising a
+ * specimen: a surface respells its own `SHOWN_MARKER` and the files that carry
+ * it are read as this deployment's code again. So the spellings are read back
+ * off the application and held against the one above, which turns a rename
+ * into a failure on the branch that writes it.
+ *
+ * Read through `codeOnly` by the same trick as `environmentNames` — the scan
+ * keeps a literal's quotes and blanks its body, so the value is the slice at
+ * those offsets in the original. A sentence in a doc comment that quotes the
+ * constant is therefore not a declaration of it.
+ *
+ * **The stated limit**: a surface whose constant is named something else is
+ * invisible here, the same limit and the same reason as a module that exports a
+ * key without reading one.
+ */
+export const declaredMarkers = (source: string): readonly string[] =>
+  [...codeOnly(source).matchAll(DECLARED)].map((match) => {
+    const body = (match.index ?? 0) + match[0].indexOf(match[1] ?? '"') + 1
+
+    return source.slice(body, body + (match[2] ?? "").length)
+  })
+
+/**
  * Every environment variable a source reads.
  *
  * Two spellings, because the application uses both: the name written at the
@@ -77,15 +148,31 @@ const LITERAL = /(["'])( *)\1/g
  * file that reads it, and a future one that is not wants a reader who knows
  * that — the same limit, for the same reason, as the git sweep's argvs written
  * as literals.
+ *
+ * **It reads what this deployment runs, which stops at a published region.**
+ * `codeOnly` already hides a snippet a page prints inside a literal; a
+ * specimen is the same claim one level up, and it is in code rather than in a
+ * literal on purpose, because a snippet in a literal is a snippet nothing
+ * typechecks. A file keeps whatever it reads *above* its marker, so a specimen
+ * module's own settings are still reported and only the part a visitor would
+ * copy is not.
+ *
+ * **What the exemption cannot hide**, which is why it is a marker rather than a
+ * list of names: a real setting moved under a marker and left in
+ * `.env.example` fails *offers nothing the application has stopped reading* on
+ * the branch that moves it. What it can hide is a real setting read only under
+ * a marker and offered nowhere — the same drift this whole module exists for,
+ * reachable one more way, and the reason the marker is anchored to a line and
+ * its spelling is swept.
  */
 export const environmentNames = (source: string): readonly string[] => {
-  const code = codeOnly(source)
+  const own = codeOnly(source).slice(0, publishedFrom(source))
 
-  if (!code.includes("process.env")) return []
+  if (!own.includes("process.env")) return []
 
-  const direct = [...code.matchAll(DIRECT)].map((match) => match[1] ?? "")
+  const direct = [...own.matchAll(DIRECT)].map((match) => match[1] ?? "")
 
-  const named = [...code.matchAll(LITERAL)].map((match) =>
+  const named = [...own.matchAll(LITERAL)].map((match) =>
     source.slice((match.index ?? 0) + 1, (match.index ?? 0) + 1 + (match[2] ?? "").length)
   )
 

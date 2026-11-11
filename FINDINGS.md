@@ -11,7 +11,15 @@ list and it is not a report.
 ## 2026-11-10 — a printed specimen that reads the environment arrives in the deployment sweep as a setting of this deployment, and the panel that would print the real spelling is shaped around it
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom daily build`
-(`tools/sources/deployment.ts`) · **Status:** open — **nothing is broken, no
+(`tools/sources/deployment.ts`) · **Status:** **the sweep half closed
+10 November (evening)** by
+[0379](decisions/0379-a-file-may-publish-part-of-its-body-as-somebody-elses-code-and-a-check-that-reads-this-deployment-stops-at-the-marker.md)
+on #854 — the second shape, the marker the sweep reads, which is the one this
+entry recommended looking at first. `environmentNames` now stops at a published
+region, so the real spelling no longer turns anything red. **Putting it back on
+the panel is `Loom marketing`'s**, in `wired/page.tsx` and `wired/loom.ts`, and
+is filed for them below; the sweep reports the same 24 variables before and
+after, so nothing is waiting on anything else. Originally: **nothing is broken, no
 test is failing on `main`, and one panel on this site prints a spelling one
 step away from the one a reader writes.**
 
@@ -734,6 +742,38 @@ routine of this lane will do what this one did — read, verify once, unsubscrib
 > completed with nothing failed, no review threads), `unsubscribe_pr_activity`
 > was called, and no comment was posted about any of the five. The
 > recommendation stands and is still the maintainer's one word to settle.
+
+> **Third instance, 10 November (evening), on #854 — five wakes in 53 seconds,
+> one session again.**
+>
+> Same five events in the same order, on a run that again never called
+> `subscribe_pr_activity`: the subscription, `vercel[bot]`'s comment, two edits
+> of it as the build went Building → Building → Ready, and
+> `check_suite.completed` with nothing failed. Opened 21:28:36Z, last event
+> 21:29:32Z. **All five queued and handed over in one `ReadNotifications`
+> call.**
+>
+> **So the batching is now two observations rather than one**, on consecutive
+> runs of this lane, twelve hours apart. That is still not enough to say whether
+> it is a harness change or a burst landing inside one turn, but it is no longer
+> a single data point — and both times the bill was one session against the *six
+> a pull request* this entry's last sentence predicted. A lane repeating that
+> figure should measure first.
+>
+> **The conflict is unchanged**, down to the wording: the body asks for the
+> check-in chain, and the brief forbids it. Nothing was armed. Verified once
+> against primary sources — head `5b13b22` matching the check-suite event,
+> `mergeable_state: unstable` and not `dirty` so no conflict, base unmoved at
+> `6d561a3`, one status (Vercel, mid-deploy), no review threads — then
+> `unsubscribe_pr_activity`, and no comment posted about any of the five.
+>
+> **One thing this run got wrong and is recording as such.** Its report's
+> section on this was written *before* the pull request was opened and said
+> there was no subscription to decline, because this run had not asked for one.
+> It was false within three minutes. The report now carries the correction
+> rather than a replacement, because *the subscription arrives whether or not a
+> run expects it* is the whole of what these entries are for, and a run writing
+> that section early will make the same mistake.
 
 ---
 ## 2026-11-07 — the merge gate for four surfaces goes red about 13 November on a documentation cap, and the remedy that cap pre-agrees is measured as unaffordable
@@ -69381,7 +69421,15 @@ a page* but **may this site keep its pages true**.
 ## 2026-11-09 — `pnpm verify` is red on `main`, on a whole-repository sweep with no timeout of its own, and it is red for whoever is running
 
 **Filed by:** `Loom docs` · **Owned by:** `Loom daily build`
-(`tools/sources/semicolons.test.ts`) · **Status:** open — **the merge gate does
+(`tools/sources/semicolons.test.ts`) · **Status:** **closed** by
+[0375](decisions/0375-a-whole-repository-check-is-budgeted-by-what-it-reads-rather-than-by-a-wall-clock.md)
+on #847 — recommendation 1 in the shape the record argues for: not a larger
+constant but a budget per source, so the sweep cannot be failed by a busy
+container and cannot be made to pass by a fast one. `pnpm verify` is **EXIT=0**
+on `main` at `6d561a3`, read out of a file, with this sweep passing. Recommendation
+2 — printing the sweep's wall clock and file count while it passes — **was not
+taken and is not open as part of this entry**; nobody has asked for it since.
+Originally: **the merge gate does
 not pass on this container today, for any lane**; the check is right, its
 assertion is right, and what fires is a clock
 
@@ -69978,11 +70026,54 @@ has to read past.
 its file and is the document it is bound by rather than one it writes. The three
 earlier entries are left as they are and this one is appended, because
 `FINDINGS.md` is union-merged.
+
+### Fifth instance, 10 November (evening), on #854 — and it narrows the rule above rather than confirming it
+
+The same pull request body carried **three** markdown links. Two were mangled and
+one was not, which the table above does not predict:
+
+| what was written | what arrived |
+| --- | --- |
+| `[0379](https://github.com/…/blob/…/decisions/0379-….md)` | ``**``''[0379](…)**,''``` `` — **mangled** |
+| ``[`reports/…md`](https://github.com/…/blob/…/reports/….md)`` | ```` [`…`](````''''…),''''```` ```` — **mangled** |
+| `[Claude Code](https://claude.ai/code/session_…)` | **intact**, in the same body |
+
+So the distinction is **not** markdown link against autolink. A short markdown
+link survived beside two long ones that did not. What the two mangled ones have
+in common and the clean one does not is a **long `github.com/…/blob/…` URL
+naming a file under `decisions/` or `reports/`** — which is the pair of triggers
+the 5 November entry set, met again, and now met *selectively within one body*.
+
+**Two things are new.**
+
+1. **The inserted run is no longer only backticks.** It is backticks *and
+   apostrophes* — ``**``''[0379]`` and ````(````''''https://…),''''````` — where
+   all four earlier instances describe backticks alone. The run also grew: two
+   leading backticks and two apostrophes on the first, four and four on the
+   second, in one body.
+2. **The surviving form held.** Every bare URL on its own line in that body came
+   through clean, as did every backticked path and the whole of the comment
+   posted beside it, which contained no long file link at all.
+
+**The recommendation is unchanged and is now better evidenced:** one line in
+`docs/routines.md` saying a routine posts a repository file as a backticked path
+or a bare URL on its own line, never as a markdown link. **This run did not edit
+the body a third time** — the 5 November entry records that re-posting does not
+fix it, and the cost is a reviewer's one click against a `update_pull_request`
+call that has its own failure mode. The report and the record are named by path
+in the report, which is how `Loom merge` and the maintainer reach them anyway.
 ## 2026-11-09 (afternoon) — two whole-repository scans are wall-clock gates with 1.7x headroom, and they time out inside `pnpm verify` while passing beside it
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom daily build`
 (`tools/sources/code.test.ts`, `tools/sources/semicolons.test.ts`) ·
-**Status:** open — **it cost one run of this lane a full gate re-run and nothing
+**Status:** **closed** by
+[0375](decisions/0375-a-whole-repository-check-is-budgeted-by-what-it-reads-rather-than-by-a-wall-clock.md)
+on #847, which took the second of the two shapes below — the budget is
+`sweepBudget(sources)` now, derived from what the sweep reads rather than from a
+clock, and the scan itself went from 2,290 ms to 688 ms when measuring it found
+the quadratic in `opensRegex`. #847 left this edit for whoever landed #843,
+both have since merged, and the owning lane is closing it here rather than
+leaving it to read as open. Originally: **it cost one run of this lane a full gate re-run and nothing
 else**; `main` is green and the tests are right about what they check
 
 `pnpm verify` went red on `signals-80-where-a-reading-of-a-page-stopped` after
@@ -70112,3 +70203,126 @@ That matches what is already happening and what `files.ts` already claims. If it
 should be somewhere else — or explicitly shared, the way `Loom merge`'s row is
 explicitly nowhere — that is worth a sentence in the table rather than a third
 finding that opens by saying the table does not cover this.
+
+---
+## 2026-11-10 (evening) — the published-names cap has 148 bytes, which is about seven names, and it has already held one branch
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom docs`
+(`app/(docs)/_lib/search/build.test.ts`) and **@jonathanbravecredit for the
+option** · **Status:** open — **`main` is green and the cap is right about what
+it measures**; what is open is that the next lane to publish a handful of names
+takes the merge gate down for all four surfaces, and the remedy is a product
+decision rather than a number
+
+Measured on `main` at `6d561a3`, by this run, independently of the figures
+`Loom merge` posted on #851:
+
+| | spent | cap | room |
+| --- | --- | --- | --- |
+| published names, raw | **39,852** | 40,000 | **148** |
+| published names, gzipped | 11,148 | 12,000 | 852 |
+| per name | 19.041 | 24 | — |
+| table of contents, raw | 52,662 | 60,000 | 7,338 |
+
+2,093 entries at 19.041 bytes each, so **148 bytes is seven more published
+names.** `Loom merge` has already declined to land #851 on it — *the shape of a
+deployment's day*, which publishes sixteen — and reported that `main` passed the
+same test that morning. Three merges on 10 November spent the margin between
+them: #847, then #848's eight names, then #850's thirty across `./store`,
+`./postgres` and `./testing/contracts`. **Thirty of those are this lane's**,
+which is why this entry is filed by the lane that spent them rather than by the
+lane that will trip them.
+
+**This branch spends none of it.** 0379 is a change to `tools/`, which is not
+published, so the names index is byte-for-byte what `main` holds. Stated because
+the 7 November entry asks every lane to know whether it is the one spending the
+headroom, and twice now the answer has been this one.
+
+### Why it is not this lane's to fix
+
+The cap guards a file a reader of the documentation site fetches, and the test's
+own comment is explicit about the asymmetry: *"The runtime's surface. Nobody
+waits for it, and **the count is nobody's here to hold down.**"* The number is
+`Loom docs`' and the growth is everybody else's. Raising it is weakening the
+merge gate, which no lane does unasked; choosing what stops reaching the names
+index is a decision about what the search box is for.
+
+**It is a different cap from #778's.** That pull request measures the 80,000-byte
+**prose** budget and proposes 0353 for it. This is the 40,000-byte **names**
+budget, which no record covers at all — which is itself worth noting, because the
+cap that has 148 bytes is the one with no decision behind it.
+
+### The options, and this lane's recommendation among them
+
+`Loom merge` laid out four on #851 and recommended the second. This lane agrees
+with that ordering and adds one thing to it.
+
+| | what it buys | what it costs |
+| --- | --- | --- |
+| raise 40,000 | nothing measurable today | removes the only signal that the index is full, and no number has been argued for |
+| **narrow what reaches the names index** | real room — the contract and testing surfaces are names nobody searches for | a `Loom docs` unit, and a judgement about the search box |
+| **shard the file per entry point** | the remedy the test's own comment pre-agrees | a unit, and it is already grouped by entry point, so the browser knows which one a reader is on |
+| hold the branches that publish names | nothing | every lane's units, indefinitely |
+
+**The third is the one the file already decided**, in as many words: *"when it
+fires, this file is already grouped by entry point and the browser already knows
+which entry point a reader is looking at, so the answer is to serve them per
+entry point rather than to take the number up again."* That is a remedy written
+down in advance by the lane that owns it, and the cap firing is the condition it
+was written for. The second buys room faster and is a smaller diff; the third is
+what the cap was always going to need.
+
+**What this lane would ask for either way:** that the fix land before another
+lane trips it, because the branch that goes red will be one that has never heard
+of this file, and the failure says `expected 40093 to be less than 40000` with
+nothing in it about who to ask.
+
+---
+## 2026-11-10 (evening) — the marketing panel can print the real spelling again, and putting it back is one revert in two files
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom marketing`
+(`app/(marketing)/_lib/wired/page.tsx`, `app/(marketing)/_lib/wired/loom.ts`) ·
+**Status:** open — **nothing is broken and nothing is urgent**; the constraint
+this lane's tooling put on that panel is gone, and only the lane that owns the
+panel can take the workaround out
+
+Your entry of this morning said the sweep *"has no way to tell a printed
+specimen from a setting this deployment has"*, filed it rather than working
+around it in `tools/`, and took the two values from a configuration module
+instead — one indirection away from the file a reader would write, on the panel
+whose whole value is being exactly that file.
+
+[0379](decisions/0379-a-file-may-publish-part-of-its-body-as-somebody-elses-code-and-a-check-that-reads-this-deployment-stops-at-the-marker.md)
+took the second of your three shapes, which is the one you recommended looking at
+first: `environmentNames` stops at `// ── shown on the site ──`, so everything
+in a published region is a visitor's setting and never this deployment's. Proved
+against the exact spelling from your entry:
+
+```ts
+const live = startPullingLivePages({
+  deployment: process.env.LOOM_URL ?? "",
+  key: process.env.LOOM_PROJECT_KEY ?? "",
+})
+```
+
+read through a marker, reports `[]`.
+
+**Three things worth knowing before you revert it.**
+
+1. **The exemption is the region, not the file.** Whatever `wired/page.tsx`
+   reads *above* its marker is still read as this deployment's setting, which is
+   deliberate — a specimen module is still a module this deployment loads. Only
+   the part a visitor copies is theirs.
+2. **One marker per file**, swept over the repository. A second would make the
+   boundary ambiguous, and a file wanting two published regions wants two files.
+3. **Your `SHOWN_MARKER` constant is now load-bearing outside your lane.** All
+   three declarations in `_lib/` are held to the spelling `tools/` reads, so
+   respelling it fails on the branch that respells it rather than quietly
+   handing your specimens back to the sweep. It is also still three copies of
+   one string, which is yours to keep or collapse — this lane only reads them.
+
+`wired/loom.ts`' docblock and `wired.test.ts`' *reads no environment variable,
+because the sweep cannot tell this from a setting* are the two places that say
+the old reason out loud, so a revert is those plus the two values. **Nothing in
+this change touches your surface** and nothing here is a request for a
+screenshot or a copy change.
