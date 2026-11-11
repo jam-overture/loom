@@ -176,6 +176,22 @@ export const READY_MADE_ANCHOR = "ready-made"
 export const ON_YOUR_SITE_ANCHOR = "on-your-own-site"
 
 /**
+ * The band that says the package writes your first files, which is the fourth
+ * anchor on this site nothing links to.
+ *
+ * Declared for the reason `ALLOWED_ANCHOR`, `READY_MADE_ANCHOR` and
+ * `ON_YOUR_SITE_ANCHOR` above all give, and the reason has not changed: an
+ * anchor buys **addressability**, and this is the surface the maintainer judges
+ * by eye. A band whose middle is a terminal panel is one a pull request comment
+ * wants to send him straight to.
+ *
+ * It is not in `WHY_USE_IT_ANCHOR` below for the same reason those three are
+ * not: that map is the bands of `/why-use-it` **the chain points at**, and the
+ * chain has six links, none of which is this one. `scaffold.ts` has the band.
+ */
+export const SCAFFOLD_ANCHOR = "your-first-files"
+
+/**
  * The bands of `/why-use-it` that the chain points at.
  *
  * **The chain is the site's map as of today**, and that is what these exist

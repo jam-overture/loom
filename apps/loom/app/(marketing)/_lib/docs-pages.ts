@@ -188,6 +188,35 @@ export const DECISION_RECORDS: DocPage = {
 }
 
 /**
+ * The page that teaches the one command this site now prints beside the two
+ * files it writes.
+ *
+ * `scaffold.ts` is the band, and this is the guide it hands over to. The band
+ * shows a reader what one command leaves behind and stops; the page says what
+ * each of the three files is for, prints the scaffolded module in full, and
+ * walks every way the command refuses. That is the division this site has
+ * kept since `INSTALLATION` above: the marketing page carries the claim and
+ * the documentation carries the instruction.
+ *
+ * **Until today nothing on this surface linked to it.** `docs-pages.test.ts`
+ * holds both directions of this list, so the page was reachable from this site
+ * only through the front of the documentation — and a reader who had just been
+ * shown two files to write by hand had no way of finding out that the package
+ * writes one of them.
+ *
+ * `carries` is two quotations rather than two words. The first is the guide's
+ * own sentence about what the command does, which is the claim this site makes
+ * for it; the second is what the guide calls the file this band's second line
+ * is about. A page that stopped saying either is the wrong page to send this
+ * reader to, whatever its command still reads.
+ */
+export const SCAFFOLDING: DocPage = {
+  path: "/docs/getting-started/scaffolding-a-project",
+  heading: "Scaffolding a project",
+  carries: ["One command makes the place and puts three files in it", "the list of what AI may use"],
+}
+
+/**
  * Every documentation page this site names, which is also the whole of what a
  * sweep is allowed to find.
  *
@@ -203,4 +232,5 @@ export const DOC_PAGES: readonly DocPage[] = [
   WHAT_THE_RECORD_HOLDS,
   WHAT_YOUR_APP_DOES,
   DECISION_RECORDS,
+  SCAFFOLDING,
 ]

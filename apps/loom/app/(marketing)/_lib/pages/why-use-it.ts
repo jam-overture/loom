@@ -38,6 +38,7 @@ import {
 import { WIRED_LANGUAGE, YOUR_ROUTE } from "../wired"
 import { siteFooter, siteHeader, siteReadingBand, type ChromeContext } from "../chrome"
 import { readyMadeBand } from "../ready"
+import { scaffoldBand } from "../scaffold"
 import {
   action,
   code,
@@ -1004,6 +1005,14 @@ export const whyUseItPageTree = (context: PageContext): LoomTree => {
         theParts(ids),
         readyMadeBand(ids),
         whatYouWrite(ids),
+        /**
+         * The alternative to the two panels above, directly under them.
+         *
+         * `scaffold.ts` carries the whole argument. The short version is the
+         * order: a reader who has not seen what those two files look like
+         * cannot tell what a command that writes one of them is worth.
+         */
+        scaffoldBand(ids),
         onAPage(ids),
         whatItReports(ids),
         connected(ids),

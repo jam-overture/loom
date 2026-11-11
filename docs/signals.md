@@ -5197,6 +5197,68 @@ page's reading stopped, which would make *rewrite this page* arrive with *and
 here is where* — and is a change to the fix-list's own shape rather than a corner
 of this run.
 
+### 83. The place a fix-list row says to go to · `Loom signals` · **done, 10 November**
+
+§81 built the fourth order
+([0377](../decisions/0377-a-deployments-unread-places-are-a-fourth-order-ranked-on-what-one-fix-recovers.md)):
+a deployment's pages ranked by the parts behind each one's single costliest
+place, beside the fix-list and deliberately not inside it. This lane filed the
+gap the same evening. **`AgendaRow` carries a page as three readings have it and
+the instruction *rewrite the page*, and it names no part of the page** — while
+the figure that says where was one join away and keyed on the same trio.
+
+**Done**
+([0378](../decisions/0378-a-fix-lists-row-carries-the-place-its-pages-reading-stopped-and-the-fourth-reading-cannot-take-a-row-away.md)),
+as a fifth required argument to `deploymentAgendaOf` read onto the rows, with
+nothing added to any payload, table or browser and **no new name published on
+`@jam-overture/loom/signals`.**
+
+- **The place rides on the row.** `AgendaRow.unread` is the `PageUnread` the
+  fourth order published, carried whole and unchanged — the same object, handed
+  in by `windowAgendaOf` from its own `WindowAgenda.unread`, so a screen drawing
+  the order of places and the fix-list over it holds one answer about one page.
+- **The two locations on one row stay two sentences.** `row.order.at` is *a
+  third of the readers who got this far stopped between these two parts* — a
+  ratio of two reach counts, which needs both ends to have reported.
+  `row.unread.at` is *the reading goes no further than here, and nineteen parts
+  are behind it*, which is the other end of the same page, where there is no
+  ratio to take. `progress.ts` keeps the word *stop*.
+- **The fourth reading cannot take a row away, and that asymmetry is the
+  design.** The three readings above decide whether there is a row; this decides
+  whether that row knows where to go. A page the places reading does not name
+  keeps its row with `null` on it, and pages that reading named which no row
+  carries are counted in `unpaired.unread`. A places reading of the wrong window
+  deleting fix-list rows would be the worst failure available to this join.
+- **Nothing else moved, and it is asserted rather than argued.** The same join
+  is built twice — once with the places, once with a places reading of nothing —
+  and every published field but the place on a row and `unpaired.unread` is
+  held identical. `first`, `work` and all four lists are what they were, which
+  keeps 0377's open question open: whether *go and look at this band* may ever
+  be the one thing to do first is a judgement about a screen.
+- **No figure is summed and the published key set is a test.**
+  `DeploymentUnread` already publishes the deployment's places and parts, so a
+  total here would be a second answer to one question (0327) — and the way such
+  a figure arrives is somebody adding one field, so the keys of
+  `DeploymentAgenda` are asserted as a set.
+- **Counted once, on the fourth side too.** A places reading holding one page
+  twice is deduplicated on `readingKeyOf`, the first row stands, and the second
+  is counted in `duplicated` rather than quietly replacing it (0158).
+
+**Nothing reaches a reader's browser.** `broadcast.ts` and its import graph are
+untouched, and the bundle measures **7,543 bytes minified and 3,350 gzipped**,
+which is what it measures on `main`.
+
+**The docs names index did not move either**, which is why this unit was the one
+chosen today: it measures **39,852 of 40,000 bytes** on this branch, the figure
+it measures on `main`, because `PageUnread` has been published since §81 and a
+field is not a name. The pull request before this one from this lane is held on
+exactly that cap.
+
+**What is left and is filed:** whether `DeploymentAgenda.first` may ever name a
+place rather than a fall, which is 0377's question and the maintainer's; and the
+*By page* drawer's two locations, which is the portal's to draw and now has two
+member comments written to be lifted.
+
 ## Still not in scope
 
 - **Signal-to-intent derivation** — a signal automatically becoming a

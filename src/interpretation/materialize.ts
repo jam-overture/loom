@@ -1,6 +1,6 @@
 import type { DeltaId, IdFactory, TreeId } from "../ids.js"
 import { jsonObjectSchema, type JsonObject } from "../json.js"
-import { assertNever, err, ok, reduceResult, type Result } from "../result.js"
+import { assertNever, err, ok, type Result } from "../result.js"
 import type { TreeDelta, TreeOperation } from "../tree/delta.js"
 import type { LoomNode } from "../tree/node.js"
 
@@ -24,15 +24,30 @@ export type MaterializeContext = {
   readonly idFactory: IdFactory
 }
 
+/**
+ * Every item mapped, in order, stopping at the first failure.
+ *
+ * It appends to one array rather than spreading the accumulated values per item
+ * (0380). The spread made this the product of the list's length and itself, on
+ * both lists it is used for. Children of one parent: 8,000 cost 70 ms, 16,000
+ * cost 690 and 32,000 cost 4,704. Operations in one reply: 8,000 cost 61 ms and
+ * 16,000 cost 783. **How long either list is, is the model's choice.**
+ */
 const collectResults = <TItem, TValue>(
   items: readonly TItem[],
   map: (item: TItem) => Result<TValue, string>
-): Result<readonly TValue[], string> =>
-  reduceResult<TItem, readonly TValue[], string>(items, [], (accumulator, item) => {
-    const mapped = map(item)
+): Result<readonly TValue[], string> => {
+  const collected: TValue[] = []
 
-    return mapped.ok ? ok([...accumulator, mapped.value]) : mapped
-  })
+  for (const item of items) {
+    const mapped = map(item)
+    if (!mapped.ok) return mapped
+
+    collected.push(mapped.value)
+  }
+
+  return ok(collected)
+}
 
 const parseJson = (text: string): Result<unknown, string> => {
   try {
@@ -75,28 +90,79 @@ export const decodeProps = (encoded: string): Result<JsonObject, string> => {
   return validated.success ? ok(validated.data) : err("props contain a value that is not JSON")
 }
 
-const materializeNode = (node: DraftNode, idFactory: IdFactory): Result<LoomNode, string> => {
-  switch (node.kind) {
-    case "text":
-      return ok({ kind: "text", id: idFactory.nodeId(), value: node.value })
-    case "element": {
-      const props = decodeProps(node.props)
-      if (!props.ok) return props
+type DraftElement = Extract<DraftNode, { readonly kind: "element" }>
 
-      const children = collectResults(node.children, (child) => materializeNode(child, idFactory))
-      if (!children.ok) return children
+/**
+ * A draft node to read, or an element whose children are now on the finished
+ * stack and which is ready to be built around them.
+ */
+type Step =
+  | { readonly step: "read"; readonly node: DraftNode }
+  | {
+      readonly step: "build"
+      readonly node: DraftElement
+      readonly props: JsonObject
+      readonly children: number
+    }
 
-      return ok({
+/**
+ * A draft becomes a tree without a call frame per level (0380).
+ *
+ * **The order two things happen in is observable, and both are preserved.**
+ * Props are decoded on the way down, so an element with an unreadable bag is
+ * refused before anything below it is looked at and its message is the one the
+ * caller gets. Ids are minted on the way *up* — every child before its parent,
+ * in document order — because that is the order the recursion minted them in
+ * and a node's id is in the delta the proposer gets back.
+ *
+ * The depth of a reply is the model's choice. This answered `RangeError` at two
+ * thousand deep — second-shallowest in the framework, behind the render walk's
+ * thousand, and both outlived 0372 and 0373 by sitting outside `src/tree/`.
+ */
+const materializeNode = (root: DraftNode, idFactory: IdFactory): Result<LoomNode, string> => {
+  const work: Step[] = [{ step: "read", node: root }]
+  const finished: LoomNode[] = []
+
+  for (let next = work.pop(); next !== undefined; next = work.pop()) {
+    if (next.step === "build") {
+      finished.push({
         kind: "element",
         id: idFactory.nodeId(),
-        type: node.type,
-        props: props.value,
-        children: children.value,
+        type: next.node.type,
+        props: next.props,
+        children: finished.splice(finished.length - next.children, next.children),
       })
+      continue
     }
-    default:
-      return assertNever(node, "materializeNode")
+
+    const node = next.node
+
+    switch (node.kind) {
+      case "text":
+        finished.push({ kind: "text", id: idFactory.nodeId(), value: node.value })
+        break
+      case "element": {
+        const props = decodeProps(node.props)
+        if (!props.ok) return props
+
+        work.push({ step: "build", node, props: props.value, children: node.children.length })
+
+        for (let index = node.children.length - 1; index >= 0; index -= 1) {
+          const child = node.children[index]
+          if (child) work.push({ step: "read", node: child })
+        }
+
+        break
+      }
+      default:
+        return assertNever(node, "materializeNode")
+    }
   }
+
+  const built = finished[0]
+
+  /** Unreachable: one node in, one node out, and a failure returned above. */
+  return built ? ok(built) : err("a draft node materialized to nothing")
 }
 
 const materializeOperation = (
