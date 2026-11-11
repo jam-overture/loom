@@ -3,12 +3,14 @@ import Link from "next/link"
 import { currentActor } from "@/app/(portal)/_lib/auth/identity"
 
 import { Breadcrumb } from "./breadcrumb"
+import { FeatureSearch } from "./feature-search"
 import { SignedInAs } from "./signed-in-as"
 
 /**
  * Fixed, 56px, above the rail. Deliberately thin: the wordmark, where a
  * signed-in person is (the projects, then the project the screen is about),
- * and who they are. The portal's status belongs to the screen, not here.
+ * a search for the portal's own screens and features, and who they are. The
+ * portal's status belongs to the screen, not here.
  *
  * "Identity" is now literal. Who you are signed in as is shown on every page,
  * because every change made from here is recorded under that name (0027) — and
@@ -62,6 +64,8 @@ export const TopBarChrome = ({ actor }: { readonly actor: string | null }) => {
       </Link>
 
       {actor !== null && <Breadcrumb />}
+
+      {actor !== null && <FeatureSearch />}
 
       {actor !== null && <SignedInAs actor={actor} />}
     </header>
