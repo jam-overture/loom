@@ -69329,8 +69329,13 @@ there.
 ## 2026-11-09 — `addressedRootIn`'s own doc comment shows a spelling that does not typecheck in this repository
 
 **Filed by:** `Loom docs` · **Owned by:** `Loom daily build`
-(`src/render/addressed.ts`) · **Status:** open — **a two-word correction to a
-comment**; nothing is broken, no test is failing, and the function is right
+(`src/render/addressed.ts`) · **Status:** **closed 11 November** on the branch
+carrying [0380](decisions/0380-the-three-walks-outside-src-tree-carry-an-explicit-stack-and-react-was-never-the-bound-on-rendering-a-deep-page.md),
+by changing the example — the remedy this entry recommended. The note now shows
+`container === null ? undefined : addressedRootIn(container)`, says the saving is
+on the way **out** and not on the way in, and says in as many words that the
+spelling it used to show does not typecheck, so a reader who remembers the old
+note is told why.
 
 The comment above `addressedRootIn` explains why it answers `undefined` rather
 than `null`:
@@ -69706,9 +69711,23 @@ review.
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom daily build`
 (`src/runtime/nesting.ts`, `src/interpretation/materialize.ts`,
-`src/render/render.ts`) · **Status:** open — **nothing is red, nothing is on the
-delta path, and no page is near any of it.** Filed so that the claim 0372 and
-0373 now make about `src/tree/` is not read as a claim about the repository.
+`src/render/render.ts`) · **Status:** **closed 11 November by
+[0380](decisions/0380-the-three-walks-outside-src-tree-carry-an-explicit-stack-and-react-was-never-the-bound-on-rendering-a-deep-page.md)**
+— all three carry an explicit stack and all three answer at 500,000.
+
+> **Closing note, 11 November.** This entry asked for a measurement first and
+> said to treat whichever walk a number justified. The numbers justified all
+> three, and **this entry's ranking was wrong in both directions.**
+> `renderNode` — ranked last, on the argument that React's own per-level
+> recursion would keep the bound anyway — threw at **1,000** deep, the
+> shallowest bound in the framework, on the path every surface takes; and React
+> is not recursive in a way that bounds depth at all, walking 50,000 levels of
+> function components in 135 ms. `materializeNode` threw at **2,000** and was
+> also **quadratic in width** (32,000 children: 4,704 ms → 14.2 ms), which this
+> entry could not see because it had marked it unmeasured. The rule the entry
+> was filed under — *do not open this because it is tidy* — is what made the
+> difference: the run that measured it found a defect the run that filed it had
+> argued itself out of.
 
 [0372](decisions/0372-every-read-of-a-tree-carries-an-explicit-stack-because-a-page-s-depth-is-data.md)
 and
@@ -70205,6 +70224,58 @@ explicitly nowhere — that is worth a sentence in the table rather than a third
 finding that opens by saying the table does not cover this.
 
 ---
+## 2026-11-11 — React's first static render of a deep page drops elements and says nothing, and the second one does not
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build`
+(`src/render/render.ts`, and whichever surface first composes a page this deep) ·
+**Status:** open — **nothing is red, no page in this repository is near it, and
+it is not ours to fix**; filed because it is a silently wrong answer and because
+it was unreachable until today
+
+`renderToStaticMarkup` on a chain of about a thousand React function components
+returns **994** of them on the first call in a fresh process and all **999** on
+the second. Same input, same process, two calls:
+
+```
+depth 999 components: <main count=992  expected=999     ← first call
+depth 999 components: <main count=999  expected=999     ← second call
+depth 999 host tags:  <main count=999  expected=999
+depth 999 host tags:  <main count=999  expected=999
+```
+
+**There is no Loom in that measurement.** It is `createElement` and
+`renderToStaticMarkup`, nothing else — which is how it is known not to be
+[0380](decisions/0380-the-three-walks-outside-src-tree-carry-an-explicit-stack-and-react-was-never-the-bound-on-rendering-a-deep-page.md)'s.
+Plain host elements are correct on every call; only a function component per
+level loses any, which is the shape Loom emits, because a primitive is a
+component.
+
+**What makes it worth an entry rather than a shrug:**
+
+- **The markup is well-formed.** 994 opening tags and 994 closing tags, and
+  stripping the expected forms leaves exactly the leaf text. Nothing throws,
+  nothing warns, and `output.diagnostics` is empty. A reader would get a page
+  five levels shallower than the one that was composed and no signal at all.
+- **How many go missing is not stable** — 992 in one process, 994 in another, 0
+  at 10,000 deep. It reads like a cold-path budget in React's server renderer
+  rather than a fixed limit, which is also why it cannot be asserted against.
+- **It became reachable this morning.** Before 0380 Loom's own walk threw at
+  1,000, so nothing ever handed React a chain this deep. Removing one bound is
+  what exposed the next one, and that is the honest version of 0380's claim: the
+  framework answers at 500,000, and `renderToStaticMarkup` of a deep page is a
+  separate question.
+
+**What 0380 did about it, which is not a fix.** The new guards in
+`src/render/shape.test.ts` count **Loom's own element tree** rather than the
+markup, and ask React only to accept a deep page and reach its leaf. A test that
+rendered twice to get a stable answer would have encoded somebody else's defect
+as this repository's expectation.
+
+**What would close it:** a page in this repository deep enough to meet it, which
+would make it that surface's bug and not a curiosity; or the React version this
+repository pins changing behaviour, which is worth re-measuring on an upgrade.
+Until then there is nothing to do and nobody is blocked. **Measured on this
+session's container**, Node 22, one process per row, `react-dom` as pinned.
 ## 2026-11-10 — the fix-list's rows say where on the page to go now, and the question 0377 left open is left open a second time
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom signals`
