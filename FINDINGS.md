@@ -8,11 +8,11 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
-## 2026-11-11 (evening) — segments are written in the portal now, and no site sorts its readers by them, because the door does not answer the rules and the pull client does not read them
+## 2026-11-11 (evening) — segments are written in the portal now, and no site sorts its readers by them, because the pull client does not read the rules the door answers
 
 **Filed by:** `Loom portal` · **Owned by:** `Loom daily build` (`src/live/`,
 the part a customer's server runs), with the door's half in `Loom portal`'s
-lane · **Status:** open
+lane · **Status:** open (the door's half done 11 November, #866)
 
 [0371](decisions/0371-a-segment-is-an-audience-the-site-sorts-its-readers-into-and-loom-keeps-only-its-rules-and-its-name.md)
 clause 7 builds segments in four pieces. Piece 1 is on `main` with this entry:
@@ -29,6 +29,16 @@ no reader is sorted.
    each page's current rule list beside its live tree (piece 2, the portal's
    half, not built yet; the shape will be the `AudienceRule[]` 0376 stores,
    per page id). The request still carries no reader and no audience (0262).
+
+   *Portal, 11 November, later:* piece 2 is on `main` (#866). The door answers
+   `{ "pages": LoomTree[], "rules": { "treeId": TreeId, "rules": AudienceRule[] }[] }`,
+   one `rules` entry per live page that has a non-empty list, in the pages'
+   order, each list in its order (the later rule wins a contested part). A page
+   with no entry has no rules. Each list parses with `audienceRuleSchema`. Pages
+   and rules come in one answer under one tag and fail together (503), so the
+   client can hold them as one. Today's client reads `{ pages }` and drops
+   `rules`, so the door's half changes nothing a site serves until this half
+   lands.
 2. **Sort each request in the host's process** with `audiencesFor` over the
    context the host builds, and compose with `composeTreeForContext` (0359).
    No rules for a page means the base, exactly as today.

@@ -74,12 +74,15 @@ export const readPageRules = async <P extends RulesFor>(
   pages: readonly P[]
 ): Promise<RulesReading<P>> => {
   type Read = P & { readonly head: AudienceRuleRevision | undefined }
+  type Outcome =
+    | { readonly ok: true; readonly page: Read }
+    | { readonly ok: false; readonly detail: string }
 
   const read = await Promise.all(
-    pages.map(async (page): Promise<Read | string> => {
+    pages.map(async (page): Promise<Outcome> => {
       const treeId = treeIdSchema.safeParse(page.treeId)
 
-      if (!treeId.success) return `${page.treeId} is not a page id`
+      if (!treeId.success) return { ok: false, detail: `${page.treeId} is not a page id` }
 
       const head = await readWithin<AudienceRuleRevision | undefined, AudienceOverlayError>(
         () => store.rules(treeId.data),
@@ -87,15 +90,17 @@ export const readPageRules = async <P extends RulesFor>(
         PORTAL_READ_BUDGET_MS
       )
 
-      return head.ok ? { ...page, head: head.value } : describeAudienceOverlayError(head.error)
+      return head.ok
+        ? { ok: true, page: { ...page, head: head.value } }
+        : { ok: false, detail: describeAudienceOverlayError(head.error) }
     })
   )
 
-  const failed = read.find((entry): entry is string => typeof entry === "string")
+  const failed = read.find((outcome) => !outcome.ok)
 
-  return failed === undefined
-    ? { ok: true, pages: read.filter((entry): entry is Read => typeof entry !== "string") }
-    : { ok: false, detail: failed }
+  return failed === undefined || failed.ok
+    ? { ok: true, pages: read.flatMap((outcome) => (outcome.ok ? [outcome.page] : [])) }
+    : { ok: false, detail: failed.detail }
 }
 
 /** One page's new rules, and the revision they were worked out from. */

@@ -71,6 +71,24 @@ describe("the rules, read and written through 0376's store", () => {
     ])
   })
 
+  it("reads pages by id alone, as the read door asks, keeping whatever else each page carries", async () => {
+    const store = memoryAudienceOverlayStore()
+
+    await writePageRules(
+      store,
+      [{ treeId: "t_pricing", expectedRevision: 0, rules: [rule("phone"), rule("tablet")] }],
+      "owner@example.com",
+      AT
+    )
+
+    const read = await readPageRules(store, [{ treeId: "t_home" }, { treeId: "t_pricing" }])
+
+    expect(read.ok && read.pages.map((page) => [page.treeId, page.head?.rules])).toEqual([
+      ["t_home", undefined],
+      ["t_pricing", [rule("phone"), rule("tablet")]],
+    ])
+  })
+
   it("refuses, on that page alone, an edit of a list somebody changed since it was read", async () => {
     const store = memoryAudienceOverlayStore()
     const stale = await readPageRules(store, PAGES)
