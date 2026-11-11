@@ -12,6 +12,7 @@ import {
   type CollectionHealth,
   type PageHealth,
 } from "./health.js"
+import type { DeploymentUnread, PageUnread } from "./unread.js"
 
 /**
  * Whether the page at the head of a deployment's fix-list is a page to rewrite
@@ -61,6 +62,27 @@ import {
  * Widening the set to a third dimension would give eight combinations over a
  * flat set of four and would rename `both`, which is a change to an accepted
  * vocabulary rather than an addition to it (0330, 0336).
+ *
+ * ## Which page to rewrite, and where on it
+ *
+ * A row said *rewrite the page* and named no part of it. The location an
+ * operator needs was one join away and has been since 0377: the order of places
+ * ranks every page by what one fix recovers, in parts of a page rather than in
+ * readers. So a fourth reading is handed in and **read onto the rows**, and
+ * {@link AgendaRow.unread} carries it whole (0378).
+ *
+ * It changes nothing else, which is the whole of its design. The key is parts
+ * and the three orders are readers, so there is nothing to compare: no list
+ * gains or loses a row, {@link AgendaWork} does not gain a member — an unread
+ * band is the page writer's work exactly as a fall is — and
+ * {@link DeploymentAgenda.first} is untouched, because whether *go and look at
+ * this band* may ever be the one thing to do first is a judgement about a
+ * screen and not a coding decision (0377 left it open deliberately).
+ *
+ * **Nor is anything summed.** `DeploymentUnread` already publishes the
+ * deployment's parts and places, and a second total here would be a second
+ * answer to one question — the refusal 0327 makes, and the one this file
+ * already keeps about every reader figure on a row.
  *
  * ## It publishes no reader count, and that is the rule rather than an omission
  *
@@ -134,6 +156,15 @@ import {
  * silently of the intersection. A row some side does not name is in no list and
  * is counted in {@link DeploymentAgenda.unpaired}, which is nought for every
  * caller that read one window and is the alarm for the one that did not.
+ *
+ * **The fourth reading is the one exception and it is deliberate.** A places
+ * reading of another window cannot take a row out of the fix-list: it is read
+ * onto rows the three above already made, so a page it does not name keeps its
+ * row with `null` where the place would be, and the pages it names that no row
+ * carries are counted in `unpaired.unread`. The asymmetry is the point — losing
+ * a row of the fix-list because a fourth reading was short would be the worst
+ * failure available to this join, and the place is an addition to a row rather
+ * than a condition of one (0378).
  *
  * **The conversion order is taken rather than defaulted**, which costs every
  * caller a line and is the point. The three readings come off one window in
@@ -375,6 +406,32 @@ export type AgendaRow = {
   readonly conversion: LeakingPage
   /** The page as the health reading has it, carried whole and unchanged. */
   readonly health: PageHealth
+  /**
+   * The page as the order of **places** has it, carried whole and unchanged, or
+   * `null` where that order has no reading of this page.
+   *
+   * *Rewrite this page* arrives with *and here is where*:
+   * {@link PageUnread.at} is the one place a fix recovers the most of the page
+   * at, {@link PageUnread.costs} is what it accounts for, and the standing says
+   * why there is no place where there is none (0377).
+   *
+   * **It is not {@link AgendaRow.order}'s `at` with a different name, and no
+   * surface may print one under the other's heading.** The order of falls'
+   * location is *a third of the readers who got this far stopped between these
+   * two parts* — a ratio of two reach counts, which needs both ends to have
+   * reported. This one is *the reading goes no further than here, and nineteen
+   * parts are behind it* — the other end of the same page, where there is no
+   * ratio to take. `progress.ts` owns the word *stop* for the first and nothing
+   * in `frontier.ts` or `unread.ts` uses it for the second.
+   *
+   * **`null` is a short fourth reading and never a page with nothing unread** —
+   * that is `standing` `whole` on a row that is here. A caller holding a places
+   * reading of another window gets `null` on the rows it does not name, counted
+   * in {@link DeploymentAgenda.unpaired}, and a fix-list that is otherwise
+   * exactly what it was: the place joins onto a row and cannot take one away
+   * (0378).
+   */
+  readonly unread: PageUnread | null
 }
 
 /** A deployment's pages, in the two orders that say what to do about them. */
@@ -497,6 +554,17 @@ export type DeploymentAgenda = {
      * order rather than absent from it, so the three page sets match (0333).
      */
     readonly conversion: number
+    /**
+     * Pages the order of places named that no row of this fix-list carries.
+     *
+     * The same claim as the three above it and the **only** direction this
+     * number can take: a page the places order named and the three joined
+     * readings did not is a page with no row to carry it, so it is countable
+     * here and nowhere else. The other direction is on the rows themselves —
+     * {@link AgendaRow.unread} is `null` there, and a caller holding the rows
+     * can count them — because the place cannot remove a row (0378).
+     */
+    readonly unread: number
   }
   /**
    * Readings of a page beyond the first, on any side, which were dropped.
@@ -632,7 +700,8 @@ const subjectOf = (
  *   deploymentReadingOf(progress, window.pageViews),
  *   deploymentConversionOf(windowFunnelsOf(window, assembly).pages),
  *   health,
- *   arrivalStandingOf(health, turnedAway, at)
+ *   arrivalStandingOf(health, turnedAway, at),
+ *   deploymentUnreadOf(assembly.readings.pages.map(pageFrontierOf))
  * )
  * ```
  *
@@ -659,16 +728,44 @@ const subjectOf = (
  * Only {@link ArrivalStanding.standing} is taken. Nothing else on it is needed
  * and a copy of its collected count would be a second answer to a question the
  * rows already answer.
+ *
+ * @param unread The deployment's pages as the order of **places** has them, as
+ * `deploymentUnreadOf` answered it. **Required rather than optional**, on the
+ * terms the three readings above it are (0322, 0343): a fix-list that says
+ * *rewrite this page* and cannot say where on it is the state this lane filed
+ * on 9 November, and an argument a caller may omit is that fix-list
+ * type-checking.
+ *
+ * **It cannot change a row, a list, a count of work or `first`** — it is read
+ * onto rows the three readings above made, and a page it does not name keeps
+ * its row with `null` on it. A deployment that asks nothing to be rewritten and
+ * has a band nobody reads still reads `none` work, because the key here is
+ * parts of a page and the three orders are readers, and there is nothing to
+ * compare (0327, 0377, 0378).
  */
 export const deploymentAgendaOf = (
   order: DeploymentReading,
   conversion: DeploymentConversion,
   health: CollectionHealth,
-  arrival: Pick<ArrivalStanding, "standing"> | null
+  arrival: Pick<ArrivalStanding, "standing"> | null,
+  unread: DeploymentUnread
 ): DeploymentAgenda => {
   const ranked = byKey<RankedPage>([...order.ranked, ...order.unranked])
   const leaks = byKey<LeakingPage>([...conversion.ranked, ...conversion.unranked])
   const states = byKey<PageHealth>(health.pages)
+  /**
+   * The places reading filed the same way as the three above it, and keyed by
+   * the same rule — so two forms of one page take their own places, which are
+   * not each other's (0300), and a hand-built reading holding one page twice is
+   * counted rather than silently preferred.
+   *
+   * `deploymentUnreadOf` deduplicates its own input, so `duplicated` is nought
+   * from every published route. It is added in anyway, on the rule the other
+   * three are here under: a count that has been doubled cannot be undoubled
+   * (0158), and this is the one place that would see it.
+   */
+  const places = byKey<PageUnread>([...unread.ranked, ...unread.unranked])
+  let placed = 0
 
   const rowOf = (page: RankedPage): AgendaRow | null => {
     const key = readingKeyOf(page)
@@ -676,6 +773,16 @@ export const deploymentAgendaOf = (
     const leak = leaks.first.get(key)
 
     if (state === undefined || leak === undefined) return null
+
+    /**
+     * Read onto the row and never required for it. The three readings above
+     * decide whether there is a row; this decides whether that row knows where
+     * on the page to go, and a short fourth reading must not be able to shrink
+     * a fix-list (0378).
+     */
+    const place = places.first.get(key) ?? null
+
+    if (place !== null) placed += 1
 
     const faulted = state.standing === "faulted"
     const fell = page.standing === "ranked"
@@ -693,6 +800,7 @@ export const deploymentAgendaOf = (
       order: page,
       conversion: leak,
       health: state,
+      unread: place,
     }
   }
 
@@ -766,7 +874,8 @@ export const deploymentAgendaOf = (
       order: ranked.first.size - joined.size,
       health: states.first.size - joined.size,
       conversion: leaks.first.size - joined.size,
+      unread: places.first.size - placed,
     },
-    duplicated: ranked.duplicated + leaks.duplicated + states.duplicated,
+    duplicated: ranked.duplicated + leaks.duplicated + states.duplicated + places.duplicated,
   }
 }

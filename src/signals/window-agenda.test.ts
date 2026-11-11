@@ -274,7 +274,16 @@ describe("a deployment's fix-list, read off one window", () => {
     expect(read.unread.ranked.find((row) => row.treeId === TREE)?.costs).toBe(1)
 
     expect(read.agenda).toEqual(
-      deploymentAgendaOf(read.order, read.conversion, read.health, read.arrival)
+      deploymentAgendaOf(read.order, read.conversion, read.health, read.arrival, read.unread)
+    )
+
+    /*
+     * The fourth order is also the reading the rows carry, and the same object:
+     * a screen drawing the order of places and the fix-list over it holds one
+     * answer about one page (0378).
+     */
+    expect(read.agenda.rows.find((row) => row.treeId === OTHER_TREE)?.unread).toBe(
+      read.unread.worst
     )
   })
 
@@ -350,8 +359,8 @@ describe("a deployment's fix-list, read off one window", () => {
     })
   })
 
-  describe("three readings of one window, which is what the join cannot be handed here", () => {
-    it("pairs every page, so nothing is unpaired on any of the three sides", () => {
+  describe("four readings of one window, which is what the join cannot be handed here", () => {
+    it("pairs every page, so nothing is unpaired on any of the four sides", () => {
       const { read } = agendaOf({
         tallies: [
           tally({ audienceId: SKIERS }, "band", 100),
@@ -369,7 +378,7 @@ describe("a deployment's fix-list, read off one window", () => {
         funnels: [funnel({ audienceId: SKIERS }, 100, 10)],
       })
 
-      expect(read.agenda.unpaired).toEqual({ order: 0, health: 0, conversion: 0 })
+      expect(read.agenda.unpaired).toEqual({ order: 0, health: 0, conversion: 0, unread: 0 })
       expect(read.agenda.rows).toHaveLength(3)
       expect(read.agenda.trees).toBe(2)
     })
@@ -379,7 +388,7 @@ describe("a deployment's fix-list, read off one window", () => {
 
       expect(read.conversion.standings.unasked).toBe(1)
       expect(read.conversion.ranked).toEqual([])
-      expect(read.agenda.unpaired).toEqual({ order: 0, health: 0, conversion: 0 })
+      expect(read.agenda.unpaired).toEqual({ order: 0, health: 0, conversion: 0, unread: 0 })
       expect(read.agenda.converting).toEqual([])
     })
 

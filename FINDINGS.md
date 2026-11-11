@@ -70205,6 +70205,141 @@ explicitly nowhere — that is worth a sentence in the table rather than a third
 finding that opens by saying the table does not cover this.
 
 ---
+## 2026-11-10 — the fix-list's rows say where on the page to go now, and the question 0377 left open is left open a second time
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/agenda.ts`) · **Status:** **closed by
+`signals-83-the-place-a-row-says-to-go-to`**
+([0378](decisions/0378-a-fix-lists-row-carries-the-place-its-pages-reading-stopped-and-the-fourth-reading-cannot-take-a-row-away.md)).
+**It closes this lane's own entry of 9 November evening — *a fix-list row says
+which page to rewrite and not where on it, and the place is now one join
+away*.**
+
+That entry named three things a fix would have to settle, and all three are
+settled the way it recommended:
+
+1. **A fifth argument to `deploymentAgendaOf`, required** rather than optional,
+   on the terms the fourth was taken (0343). `windowAgendaOf` already made the
+   frontiers, so the rung's line did not grow — it hands in its own
+   `WindowAgenda.unread`, which means the row carries the same object the
+   published order holds rather than a second reading of one page.
+2. **`AgendaWork` did not gain a member.** An unread band is the page writer's
+   work exactly as a fall is, which is the paragraph `agenda.ts` already had
+   about a leak.
+3. **`first` is untouched**, which is the entry's own reading of what was a
+   coding decision and what was not.
+
+**The one thing the entry did not anticipate, and it is the whole of 0378's
+argument.** The three readings the join already takes are each *required for a
+row* — a page some side does not name has no row at all. Applying that rule to a
+fourth reading would let a places reading of the wrong window **delete rows from
+the fix-list**, which is the worst failure available here: the fix-list is the
+artefact that says there is work. So the fourth reading is required as an
+argument and powerless over a row. A page it does not name keeps its row with
+`null` where the place would be; pages it names that no row carries are counted
+in `unpaired.unread`. The asymmetry is deliberate and is the record's main
+clause.
+
+**What is still open and is still not this lane's to close.** Whether
+`DeploymentAgenda.first` may ever name a place rather than a fall. 0377 left it
+open with the figures on the table; this leaves it there with the place now on
+the row, which is the state in which the question is cheapest to answer — a
+screen can draw both and see which reads better, and nothing has to be rebuilt
+either way.
+
+---
+## 2026-11-10 — a fix-list row now carries two locations, and a drawer that printed one under the other's heading would be the plainest kind of wrong
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom portal`
+(the *By page* drawer) · **Status:** open — **nothing is broken and no test is
+failing**; it is a sentence on a screen that does not exist yet, filed now
+because the two fields arrive together
+
+`AgendaRow` carries two locations as of 0378 and they answer **different
+questions**:
+
+| field | the sentence | what it needs |
+| --- | --- | --- |
+| `row.order.at` | *a third of the readers who got this far stopped between these two parts* | both ends reported; it is a ratio of two reach counts (0250) |
+| `row.unread.at` | *the reading goes no further than here, and nineteen parts are behind it* | nothing beyond it reported at all (0377) |
+
+A fall is a loss between two parts readers reached. A place the reading stopped
+is the other end of the same page, where there is no ratio to take. They can
+name different parts of one page, and on a page with no fall only the second
+exists.
+
+**Two headings, never one.** `progress.ts` owns the word *stop* for the first
+and nothing in `frontier.ts` or `unread.ts` uses it for the second, which is the
+vocabulary this lane keeps in code and cannot keep on a screen. The member
+comments on both fields are written to be lifted.
+
+**Three further things the drawer gets for free**, each already on the carried
+row: `row.unread.standing` says why a page has no place (`whole`, `unread`,
+`unsplit`, `mismatched`) rather than the drawer inferring it from a `null`;
+`row.unread.costs` and `.share` are *what one fix recovers* and *how much of
+this page it is*, which is the pair a small page needs; and
+`row.unread.reading.frontier` is every place on the page in reading order, for a
+drawer that wants more than the worst one.
+
+**And one refusal to carry over.** `row.unread` is `null` where the places
+reading did not name the page, which means **only** that — not that the page has
+nothing unread. That is `standing` `whole` on a row that is there. A drawer that
+read `null` as *nothing unread* would print the comforting half of a pair this
+subsystem has been bitten by four times.
+
+---
+## 2026-11-10 — the docs names index has 148 bytes of headroom, it is a merge gate for four surfaces, and the next lane to publish a handful of names takes it red
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/_lib/search/build.test.ts`) · **Status:** open —
+**`pnpm verify` is green on `main` and this lane has already lost a unit to
+it**; measured twice today, once before this branch and once on it
+
+`build.test.ts > what the index contains > stays small enough to send` holds
+`JSON.stringify(searchNames())` under **40,000 bytes**. Measured on `main` this
+morning and again on this branch:
+
+```
+entries 2093   bytes 39852   headroom 148   gzip 11148 of 12000
+```
+
+**The 148 bytes are nobody's and everybody spends them.** The test's own comment
+says why: *"the count is nobody's here to hold down"*. The names come from
+`reference.generated.json`, so the number moves when **any** lane publishes an
+export, and the cap fires in `(docs)`, where the lane that can fix it has no
+control over what pushed it over.
+
+**It has already cost a unit.** `Loom merge` found it on #851 (this lane's §82):
+sixteen new names took the figure to 40,093 and the merge was discarded. Three
+merges earlier the same day had each spent some of that margin — #847, then
+#848's 8 names, then #850's 30 — so #851 was simply the first to arrive after it
+ran out. That branch is still open on this question.
+
+**What this lane did about it, which is not a fix.** §83 was chosen partly
+because it publishes **no new name**: a field on an already-published type costs
+the index nothing, and the figure on this branch is `main`'s exactly. That is a
+workaround one lane can apply once, not an answer — the next unit that needs a
+new door is back at the same line.
+
+**The four options, as `Loom merge` put them to the maintainer**, with this
+lane's reading of each:
+
+1. **Raise the cap.** One line, and the thing the cap exists to stop. Nobody has
+   argued for a number.
+2. **Narrow what reaches the names index** — publish only the names a doc page
+   cites, or drop the `testing/contracts` and `store` surfaces nobody searches
+   for by name. Real work in `(docs)`, and real room bought back. `Loom merge`
+   recommended this and so does this lane.
+3. **Hold the branches.** Costs other lanes their units for a reason that is not
+   theirs.
+4. **Stop counting the runtime's surface against a docs budget at all**, which
+   is the decision underneath and close to what 0353 asks about its own cap.
+
+**The shard trigger the comment already names is option 2's cheaper half.** The
+file is grouped by entry point and the browser knows which entry point a reader
+is looking at, so serving it per entry point is the remedy the test's own
+docblock prescribes for exactly this moment. Nothing in it needs a product
+decision.
 ## 2026-11-10 (evening) — the published-names cap has 148 bytes, which is about seven names, and it has already held one branch
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom docs`
