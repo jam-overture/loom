@@ -70340,3 +70340,98 @@ reason.
 of the site by title. It is the only candidate that scales, and what it gives up
 is a match on a sentence inside a page the reader is not on. If it is A, that is
 one page of room and the same conversation in a fortnight.
+
+---
+## 2026-11-11 — an ellipsis inside an arbitrary-value class in a comment stopped `next dev` serving the whole `(docs)` route group, for five weeks, with the gate green
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/_lib/chrome.test.ts`) · **Status:** **closed on filing**
+by `docs-78-no-room-for-another-page` — one word in a comment, and a sweep so
+it cannot come back
+
+A docblock in `chrome.test.ts` abbreviated a real Tailwind class by putting an
+ellipsis where its custom property goes. **Tailwind scans source files for
+things shaped like class names and does not know a comment from a
+`className`**, so it generated a rule setting `scroll-margin-top` to a `var` of
+an ellipsis, and dev's PostCSS pass refuses it:
+
+```
+Unexpected token Ident("…")
+./apps/loom/app/(docs)/globals.css:786:28
+  GET /docs 500
+```
+
+**Every page in `(docs)` 500s under `next dev`.** It arrived with #684 and has
+been there since; `git show origin/main` has it today.
+
+### Why nothing caught it
+
+**`next build` is green on it** — measured on this branch, `EXIT=0`, 139
+prerendered pages — and so is `pnpm verify`, which does not run dev. The
+deploys are built, so the previews are right. The only person who meets this is
+somebody running the site locally, and the run that met it was this one, trying
+to photograph its own search box.
+
+That is the same shape as the git-floor entries in `docs/routines.md`: a thing
+that is green on every scheduled run and red in exactly one place — except that
+here the one place is *anybody's* local dev server rather than the maintainer's
+git.
+
+### What it is held by now
+
+A sweep over **every** source in the route group, tests included, for an
+arbitrary-value class with an ellipsis in it. That is the one place
+`chrome.test.ts` deliberately differs from its other sweep, which excludes
+tests on the grounds that *what a test may spell is the subject of the test
+doing the sweeping* — and a comment is exactly where this happens, because a
+comment is where somebody writes a class name loosely.
+
+**The test failed on itself on the first run**, because its own docblock quoted
+the banned spelling while explaining it. The docblock describes it instead now,
+and that failure is the shortest demonstration there is that the scanner cannot
+tell prose from markup.
+
+### For other lanes
+
+`(marketing)`, `(lessons)`, `(demo)` and `(portal)` have their own sources and
+the same scanner. **This sweep covers `(docs)` only** and is not extended into
+another lane's route group. Whether the other four have one is unmeasured here;
+the check is four lines and the recipe is in `chrome.test.ts`.
+
+---
+## 2026-11-11 — running `next dev` in a session leaves type files behind that `pnpm verify` then typechecks, and the gate goes red for a reason the diff cannot explain
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom daily build`
+(`docs/routines.md`, beside the merge-gate rule) · **Status:** open —
+**nothing is broken, it cost this run one gate re-run**, and it will cost the
+next lane that photographs a screen the same unless it is written down
+
+`next dev` writes `.next/dev/types/routes.d.ts` and `.next/dev/types/validator.ts`
+as it discovers routes. A dev server stopped part-way through leaves them
+**truncated**, and `@loom/app`'s verify is `pnpm build && tsc --noEmit && pnpm test`
+— so the next gate typechecks them:
+
+```
+.next/dev/types/routes.d.ts(186,1): error TS1160: Unterminated template literal.
+.next/dev/types/validator.ts(593,1): error TS1434: Unexpected keyword or identifier.
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @loom/app@0.0.1 verify
+```
+
+**Fifteen errors, none of them in a file anybody wrote, and none of them named
+in the diff.** `rm -rf apps/loom/.next` and the gate is green again; `pnpm clean`
+is the published spelling of it.
+
+**Why a lane meets this at all.** Every brief asks for a screenshot, and the
+screen worth photographing is sometimes one that needs the application running
+— this lane's search box is the case today. `docs/routines.md` has the harness
+recipe for *an address* and says nothing about what starting the server does to
+the next gate.
+
+**The recommendation is one line beside the merge-gate rule**: *if you started
+the application in this session, `pnpm clean` before the gate.* It is the same
+shape as the rule already there — the thing that tells you the gate failed is
+not the gate — one step earlier: **the thing that failed the gate was not in
+your diff.**
+
+**Not fixed here**, because `docs/routines.md` is not this lane's file and is
+the document it is bound by rather than one it writes.

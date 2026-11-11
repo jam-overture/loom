@@ -3,9 +3,29 @@
 **Routine:** `Loom docs` · **Branch:** `docs-78-no-room-for-another-page` (pushed
 onto, not branched from) · **Section:** §4c
 
-> **GATE PLACEHOLDER**
+> **The gate is green.** `pnpm install && pnpm verify` — **EXIT=0**, read out
+> of the file the status was written to and not from the harness's notice. 280
+> files / **6,821** framework tests and 475 files / **7,653** application
+> tests, **14,474** in all, 0 failed, 0 skipped.
+>
+> **And the rule in `docs/routines.md` earned its keep, for the fifth time.**
+> The middle of three gate runs came back **`EXIT=2` in the file and exit code
+> 0 in the harness's own completion notice** — the exact disagreement that
+> section is written about, met again without being looked for. The failure was
+> real and it was this run's: fifteen TypeScript errors in
+> `.next/dev/types/*`, left truncated by the `next dev` started to photograph
+> the search box, and typechecked by `@loom/app`'s verify. **Not one of them
+> was in a file anybody wrote and not one was named in the diff.** `pnpm clean`
+> and the third run is the green one above. Filed, because the next lane asked
+> for a screenshot of a running screen meets it too.
 
 ![Five savings priced, and the sentence that refuses all five](2026-11-11-docs-the-savings-that-are-not-there.svg)
+
+**The thing every one of them would spend.** The site's own search box, on this
+branch, answering *no second way in* — four rows, each quoting the sentence that
+answered and marking the reader's own words in it:
+
+![The search box quoting the sentence that answered, with the reader's words marked](2026-11-11-docs-the-savings-that-are-not-there-wide-shown.webp)
 
 ## What this run did, in one paragraph
 
@@ -187,6 +207,40 @@ about 1,200 words and the next one on this lane's queue was costed at 400.
 | sections that cannot take a page that short | **2 of 5** |
 | this site's bytes per word | 5.32 |
 
+## Found while photographing it: `next dev` has not served this route group for five weeks
+
+Taking the screenshot above needed the site running, and `next dev` answered
+**500 on every page in `(docs)`**:
+
+```
+Unexpected token Ident("…")
+./apps/loom/app/(docs)/globals.css:786:28
+```
+
+A docblock in `chrome.test.ts` abbreviated a real Tailwind class by putting an
+ellipsis where its custom property goes. **Tailwind scans source files for
+things shaped like class names and does not know a comment from a
+`className`**, so it generated a rule setting `scroll-margin-top` to a `var` of
+an ellipsis, and dev's PostCSS pass refuses it. It arrived with #684 and is on
+`main` today.
+
+**`next build` is green on it**, measured here rather than assumed — `EXIT=0`,
+139 prerendered pages — which is why nothing caught it: the deploys are built,
+the gate does not run dev, and the only person who meets it is somebody running
+the site locally.
+
+Fixed in one word (the comment names the class in full now), and held by a
+sweep over **every** source in the route group, tests included, for an
+arbitrary-value class with an ellipsis in it. **The sweep failed on itself on
+the first run**, because its own docblock quoted the banned spelling while
+explaining it — which is the shortest demonstration there is that the scanner
+cannot tell prose from markup. `next dev` was then started again and serves
+`/docs/the-runtime/what-the-gate-decides` with **200** and no CSS error.
+
+The other four route groups have their own sources and the same scanner. **This
+sweep covers `(docs)` only** and was not extended into another lane's
+directory; the finding says so and gives the four lines.
+
 ## Decisions taken that were not specified
 
 - **Pushed onto #778 rather than opening `docs-84`.** The reasoning and its cost
@@ -202,6 +256,11 @@ about 1,200 words and the next one on this lane's queue was costed at 400.
   things not to do could read as five things to consider. It is ordered on price
   and every row carries what it costs a reader, so the table makes the argument
   rather than hosting it.
+- **The `next dev` fix was taken in this unit rather than filed.** It is a
+  comment in this lane's own test file, it is one word, and leaving it would
+  mean filing a finding against myself while the thing stayed broken for
+  everybody running the site. The sweep that holds it is four lines and is in
+  the file that already owns what this route group's classes may say.
 - **`marked` was written, measured, and deleted.** `shownInstead` briefly
   returned how many of the reader's words each row could pick out, on the theory
   that a candidate which stops storing a word stops the row showing it. Measured
@@ -247,12 +306,12 @@ held now by being handed three addresses, two of which carry the same words.
 
 **None.** Every file changed is inside `apps/loom/app/(docs)/_lib/search/`, plus
 `decisions/0353`, `decisions/README.md` (regenerated after the merge),
-`FINDINGS.md`, this report and its visual. Nothing in `src/`, nothing in another
+`FINDINGS.md`, this report and its three visuals. Nothing in `src/`, nothing in another
 surface's route group, nothing in `docs/`.
 
 ## Findings
 
-**Two closed on filing, one filed and open.**
+**Three closed on filing, two filed and open.**
 
 - **Closed:** every saving over the stored words is priced, and all five are
   refused by one sentence.
@@ -261,6 +320,13 @@ surface's route group, nothing in `docs/`.
   The general shape is filed with it: *a test that asserts the state of the
   repository belongs in a case of its own, not in the same case as the property
   that holds whichever way the state goes.*
+- **Closed:** an ellipsis inside an arbitrary-value class in a comment stopped
+  `next dev` serving the whole `(docs)` route group, for five weeks, with the
+  gate and the deploys green the whole time.
+- **Open, and owned by `Loom daily build`:** running `next dev` in a session
+  leaves `.next/dev/types/*` behind for the next `tsc --noEmit` to choke on. One
+  line beside the merge-gate rule — *if you started the application in this
+  session, `pnpm clean` before the gate* — and it is not this lane's file.
 - **Open, and owned by the maintainer:** 0353 unanswered for six days, with five
   of this lane's findings behind it and a count of what each is waiting to say.
 
