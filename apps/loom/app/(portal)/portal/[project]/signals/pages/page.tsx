@@ -13,6 +13,8 @@ import {
 import { requireActor, requireRole } from "@/app/(portal)/_lib/auth/identity"
 import { primaryOf } from "@/app/(portal)/_lib/goals/goal"
 import { goalsFor } from "@/app/(portal)/_lib/goals/stores"
+import { readPageStops } from "@/app/(portal)/_lib/page-stops"
+import { portalRegistry } from "@/app/(portal)/_lib/registry"
 import { rangeOf, type SignalsRange } from "@/app/(portal)/_lib/signals-range"
 import { pageCopiesFor } from "@/app/(portal)/_lib/proposing/stores"
 import { single } from "@/app/(portal)/_lib/query"
@@ -36,7 +38,9 @@ import { readPageHourly, readSignals } from "../_lib/reading"
  * costs the badge alone. The goals likewise cost the primary goal's column
  * alone, and the drawer says they could not be read. The drawer reads the
  * page's hourly counters over the range only once it is open, and counters
- * that do not answer cost its range figures alone.
+ * that do not answer cost its range figures alone. Where readers stopped is
+ * read beside them, from the counters of the version the site last published
+ * (`_lib/page-stops.ts`), and costs that part of the drawer alone.
  */
 
 const ByPageScreen = async ({
@@ -103,10 +107,17 @@ const ByPageScreen = async ({
   })
   const address = { base, from, range }
   const opened = openRowOf(rows, opening)
-  const hourly =
+  const [hourly, stops] =
     opened === undefined
-      ? undefined
-      : await readPageHourly(reading.readings, opened.treeId, range, now)
+      ? [undefined, undefined]
+      : await Promise.all([
+          readPageHourly(reading.readings, opened.treeId, range, now),
+          readPageStops(
+            { tallies: boundedReaderTallyStore(reading.readings.tallies) },
+            portalRegistry,
+            reading.published.find(({ tree }) => tree.treeId === opened.treeId)?.tree
+          ),
+        ])
 
   return (
     <SignalsFrame reading={reading} projectId={projectId} tab="pages" rangeHref={rangeHref}>
@@ -121,9 +132,10 @@ const ByPageScreen = async ({
             primaryGoal={goals.ok ? primaryOf(goals.value)?.name : undefined}
             now={now}
           />
-          {opened === undefined || hourly === undefined ? null : (
+          {opened === undefined || hourly === undefined || stops === undefined ? null : (
             <PageDrawerPanel
               drawer={pageDrawerOf(opened, readings, hourly)}
+              stops={stops}
               address={address}
               projectId={projectId}
             />

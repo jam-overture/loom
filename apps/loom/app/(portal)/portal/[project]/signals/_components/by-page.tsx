@@ -12,6 +12,7 @@ import type {
   RangeBars,
 } from "@/app/(portal)/_lib/by-page"
 import { goalRangeWordsOf } from "@/app/(portal)/_lib/goal-range"
+import { wordCountOf, type PageStops } from "@/app/(portal)/_lib/page-stops"
 import { per100Of, readingSentence } from "@/app/(portal)/_lib/goals/goal-view"
 import { positionWords, spanLine, stretchWords } from "@/app/(portal)/_lib/list-span"
 import { rangeLabel, rangeParam, type SignalsRange } from "@/app/(portal)/_lib/signals-range"
@@ -314,6 +315,90 @@ const WhatReadersDid = ({ drawer, range }: { drawer: PageDrawer; range: SignalsR
   )
 }
 
+const plural = (n: number, one: string, many: string): string =>
+  n === 1 ? `1 ${one}` : `${count(n)} ${many}`
+
+/** What is said in place of the reading, where it cannot be drawn. */
+const stopsRefusalOf = (stops: Exclude<PageStops, { kind: "read" }>): string => {
+  switch (stops.kind) {
+    case "unpublished":
+      return "The site has not published this page, so there is no version to read where readers stopped against."
+    case "unreadable":
+      return "Where readers stopped could not be read just now."
+    case "two-forms":
+      return "This page is served in more than one form, and the readers of each stop in different places, so no one answer is drawn."
+    case "mismatched":
+      return `Readers were counted on ${plural(stops.orphaned, "part", "parts")} this version does not have, so the counts and the page do not belong together and nothing is drawn rather than something wrong.`
+    case "unopened":
+      return `No page view of version ${stops.version} has been counted yet.`
+  }
+}
+
+/**
+ * Where reading stopped on the version the site last published: how many
+ * places, how much of the page they cost, the three that cost the most, and
+ * the words nobody reached one click away. Parts that were on a reader's
+ * screen without saying so are named apart, because they are not a reader
+ * going no further.
+ */
+const WhereReadersStopped = ({ stops }: { stops: PageStops }) => (
+  <section className="flex flex-col gap-2">
+    <h3 className="text-xs font-medium">Where readers stopped</h3>
+    {stops.kind !== "read" ? (
+      <p className="text-ink-muted text-xs">{stopsRefusalOf(stops)}</p>
+    ) : stops.places === 0 ? (
+      <p className="text-xs">
+        No part of version {stops.version} went unreached, over{" "}
+        {plural(stops.views, "page view", "page views")} since it was first counted.
+      </p>
+    ) : (
+      <>
+        <p className="text-xs">
+          On version {stops.version}, over {plural(stops.views, "page view", "page views")} since it
+          was first counted, reading stopped in {plural(stops.places, "place", "places")}, and{" "}
+          {count(stops.unseen)} of its {plural(stops.parts, "part", "parts")} went unreached.
+        </p>
+        <ol className="m-0 flex list-decimal flex-col gap-1 pl-5 text-xs">
+          {stops.costliest.map((part) => (
+            <li key={part.nodeId}>
+              <PartLabel part={part} />{" "}
+              <span className="text-ink-muted">
+                {plural(part.unseen, "part unreached", "parts unreached")}
+              </span>
+            </li>
+          ))}
+        </ol>
+        {stops.words.length === 0 ? null : (
+          <details className="text-xs">
+            <summary className="text-ink-muted cursor-pointer text-[11px]">
+              The words nobody reached ({plural(wordCountOf(stops.words), "word", "words")})
+            </summary>
+            <ul className="m-0 flex list-none flex-col gap-1 p-0 pt-2">
+              {stops.words.map((passage, at) => (
+                <li key={at}>{passage}</li>
+              ))}
+            </ul>
+          </details>
+        )}
+      </>
+    )}
+    {stops.kind !== "read" || stops.notReporting.length === 0 ? null : (
+      <p className="text-ink-muted text-[11px]">
+        {plural(stops.notReporting.length, "part was", "parts were")} on a reader&apos;s screen
+        without saying so, so {stops.notReporting.length === 1 ? "it is" : "they are"} not counted
+        as a place readers stopped:{" "}
+        {stops.notReporting.map((part, at) => (
+          <span key={part.nodeId}>
+            {at === 0 ? "" : ", "}
+            <PartLabel part={part} />
+          </span>
+        ))}
+        .
+      </p>
+    )}
+  </section>
+)
+
 const waitingSentence = (waiting: number): string =>
   waiting === 1
     ? "1 change for this page waits for review."
@@ -321,10 +406,12 @@ const waitingSentence = (waiting: number): string =>
 
 export const PageDrawerPanel = ({
   drawer,
+  stops,
   address,
   projectId,
 }: {
   drawer: PageDrawer
+  stops: PageStops
   address: ByPageAddress
   projectId: string
 }) => (
@@ -365,6 +452,8 @@ export const PageDrawerPanel = ({
           </ol>
         )}
       </section>
+
+      <WhereReadersStopped stops={stops} />
 
       <GoalsOnPage goals={drawer.goals} projectId={projectId} range={address.range} />
 
