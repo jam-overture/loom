@@ -30,10 +30,18 @@ reader needs the moment the first has run:
 npx loom add primitive shop.price-tag
 ```
 
-**Written that way the band turns one of this site's own register cases red**,
-on every route, under the maintainer's instruction of 26 September. `primitive`
-is in `copy.ts`' `RESERVED_VOCABULARY`, and `voice.test.ts` is explicit that the
-rule reads source panels:
+**Written that way the band turns two of `voice.test.ts`' cases red.** Measured
+on this branch by putting the second line into the panel and running the file:
+
+```
+× every page of this site > /why-use-it never says primitive
+× the panels that print source > say no word to a stranger that the rest of
+  the site may not say
+```
+
+`primitive` is in `copy.ts`' `RESERVED_VOCABULARY`, under the maintainer's
+instruction of 26 September, and `voice.test.ts` is explicit that the rule
+reads source panels:
 
 > *"It is this rule and nothing else: the em-dash rule above still reads the
 > panels, so does `RESERVED_VOCABULARY` over every page, and so does every rule
