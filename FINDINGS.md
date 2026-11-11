@@ -70207,3 +70207,136 @@ That matches what is already happening and what `files.ts` already claims. If it
 should be somewhere else — or explicitly shared, the way `Loom merge`'s row is
 explicitly nowhere — that is worth a sentence in the table rather than a third
 finding that opens by saying the table does not cover this.
+
+---
+## 2026-11-11 — every saving over the stored words is priced now, and all five are refused by one sentence: a body is shown as well as matched
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/_lib/search/savings.ts`) · **Status:** **closed on
+filing** by `docs-78-no-room-for-another-page` — the class is priced, in a
+module a test holds, and is in 0353's alternatives
+
+[0353](decisions/0353-the-search-box-sends-a-reader-the-sentences-of-their-own-section-and-the-rest-of-the-site-by-title.md)
+priced four candidates and every one of them changes **which bodies travel**.
+It priced none of the class anybody reaching a full index tries first: **make
+the stored words smaller.** Five shapes of it are now registered, applied to
+the real words of all thirty-five pages, and priced off the live index.
+
+| the saving | the bill | room | what it costs a reader |
+| --- | --- | --- | --- |
+| a repeated **body** stored once | 79,339 | **373** | nothing, and it buys nothing |
+| a repeated **sentence** stored once | 79,146 | 483 | the row, on eighteen of nineteen doors |
+| lower-casing the stored words | 77,863 | 1,208 | the excerpt's capitals |
+| dropping the punctuation | 75,273 | 2,674 | the excerpt's punctuation |
+| dropping the commonest function words | **60,352** | **11,114** | the excerpt as a sentence at all |
+
+**One sentence refuses all five, and it is the reason worth keeping: a body is
+not only matched, it is shown.** `match.ts` cuts a window out of `entry.body`,
+marks the reader's own words in it and puts that on the screen as the row's
+excerpt. So every byte stored is a byte that may end up in front of somebody,
+and a saving that normalises the words buys its bytes out of the one thing a
+result row has to be. Run rather than asserted: each candidate's words go into
+a real index through the published `withProse` and a real query comes back
+through `searchDocs` with the excerpt that candidate would have shown.
+
+**Two figures are worth having even from somebody who agrees with the refusal.**
+
+- **Deduplicating is worth nothing.** The nineteen reference pages repeat seven
+  *sentences*, not their bodies — no two bodies on this site are byte-identical
+  — and taking a fifteenth of the stored text out (16,598 bytes) buys **110
+  words**, because gzip has already been paid for the repetition and gives back
+  a back-reference rather than a sentence. This is the first thing a run reaching
+  the cap proposes and it is the one that buys least.
+- **Price and harm run together.** The candidate that buys thirty times the rest
+  is the one that takes the small words out of every sentence this site would
+  quote back to a reader. The registry is ordered on price so that the table
+  reads that way.
+
+### What is not closed by it
+
+**Nothing here recovers the room**, which is the point: the class was priced in
+order to be refused with a number rather than with an opinion. What recovers
+room is still 0353, and 0353 is still `Proposed`.
+
+---
+## 2026-11-11 — a test that said "the site is full" went stale in six days, and its own comment had promised it could only flip when the question was answered
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/_lib/search/room.test.ts`) · **Status:** **closed on
+filing** — the property and the state are two cases now; the shape is filed
+because it is not about this test
+
+`room.test.ts` asserted, of *The runtime*, that `roomIn(…).fits` is `false` —
+the site cannot take a page as short as its own shortest. Its comment said the
+assertion **flips when the question in 0353 is answered**, and that *the run
+that lands it has to come back here and say what the site's state is now*.
+
+**0353 has not been answered and the assertion flipped anyway.** Six days of
+`main` took the bill from 79,414 compressed bytes to 79,339 — 75 bytes, about
+42 words at this site's compression and bytes-per-word — and the room in *The
+runtime* went from 331 words to **373**, past the 346 of the shortest page.
+Where those 75 bytes went is not isolated and is not worth isolating: two stale
+sentences left *What your readers do* on 9 November, the reference's generated
+prose grew, and the net of everything written on this site in six days is 75
+bytes.
+
+**The shape, which is the part worth filing.** The case bundled two different
+claims and the comment only noticed one of them:
+
+- **A property**: `sentenceOf` prints its third clause exactly where a page as
+  short as the shortest here would not fit. True whichever way 0353 goes, and
+  the thing the clause's own docblock promises.
+- **A state**: this site is full. True on 5 November, 60% true today — two of
+  the five sections still cannot take a 346-word page and three now can.
+
+Bundled, the property went untested the moment the state moved, and the failure
+read as *the measurement is broken* rather than as *the site changed*. They are
+two cases now: the property swept over all five sections, and the state as a
+count of sections rather than a named one, so that it says something about the
+site rather than about one rail entry.
+
+**The general version, for any lane:** *a test that asserts the state of the
+repository should say so in a case of its own, and should not be the same case
+as the property that holds whichever way the state goes.* A comment predicting
+when an assertion will flip is not a substitute, because it cannot predict the
+other reason.
+
+---
+## 2026-11-11 — 0353 has been unanswered for six days and five of this lane's open findings are behind it
+
+**Filed by:** `Loom docs` · **Owned by:** `@jonathanbravecredit` ·
+**Status:** open — **nothing is broken and the gate is green**; what is open is
+one word, and the queue it holds up is now long enough to be worth a count
+
+[#778](https://github.com/jam-overture/loom/pull/778) has carried `0353` as
+`Proposed` since 5 November. It asks which of four candidates the search box
+should become, and the pull request says *one word is enough*.
+
+**What is behind it**, all owned by this lane and all needing prose this site
+cannot afford to write:
+
+| filed | the page that is missing a sentence | costed at |
+| --- | --- | --- |
+| 4 Nov | `@jam-overture/loom/cli` publishes twenty-five names and no written page says one of them | ~400 words |
+| 4 Nov | seven telemetry names appear only in the generated reference | — |
+| 8 Nov | seven new names on `@jam-overture/loom/signals` | — |
+| 9 Nov | five more | — |
+| 9 Nov | eight more, with the two sentences written to be lifted | — |
+
+The three signals entries are one paragraph between them and the signals lane
+wrote the sentences. **The room is 326 to 373 words depending on the section.**
+One paragraph would fit and would leave the site with nothing, which is why no
+run has written it: the next lane's page would then be red, and the gate is the
+merge gate for four surfaces rather than one.
+
+**What this entry adds to the pull request's own ask:** the class of remedies a
+run would reach for instead is now priced and refused (entry above), so there
+is no cheaper thing left to try. The honest statement of the position is that
+**this lane can keep building instruments indefinitely and cannot write a
+sentence**, and four of the last five units have been instruments for that
+reason.
+
+**Recommendation unchanged: C** — the reader's own section's sentences, the rest
+of the site by title. It is the only candidate that scales, and what it gives up
+is a match on a sentence inside a page the reader is not on. If it is A, that is
+one page of room and the same conversation in a fortnight.

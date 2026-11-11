@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 700" width="1080" height="700" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif">
+  <style>
+    .title { font-size: 21px; font-weight: 650; fill: #0f172a; }
+    .sub { font-size: 13px; fill: #64748b; }
+    .panel-title { font-size: 12px; font-weight: 650; fill: #475569; letter-spacing: 0.09em; }
+    .net { font-size: 13.5px; font-weight: 650; fill: #334155; }
+    .eg { font-size: 11.5px; fill: #94a3b8; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .val { font-size: 12px; fill: #334155; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .hit { font-size: 12px; font-weight: 650; fill: #b91c1c; }
+    .note { font-size: 11.5px; fill: #64748b; }
+    .legend { font-size: 12px; fill: #475569; }
+    .quote { font-size: 12px; fill: #334155; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .foot { font-size: 12.5px; fill: #0f172a; font-weight: 650; }
+  </style>
+  <rect width="1080" height="700" fill="#ffffff"/>
+  <text x="72" y="48" class="title">Five ways to make the search index smaller, priced — and the one sentence that refuses all five</text>
+  <text x="72" y="72" class="sub">Each applied to the real words of all thirty-five pages and priced off the live index. Room is for a page in The runtime, 11 November 2026.</text>
+  <rect x="72" y="94" width="13" height="13" rx="2.5" fill="#cbd5e1"/>
+  <text x="92" y="105" class="legend">words of room it would leave the next page — the site has 373 today</text>
+  <text x="72" y="150" class="panel-title">WHAT EACH SAVING BUYS, AND WHAT IT SPENDS IT OUT OF</text>
+  <text x="72" y="192" class="net">a repeated body stored once</text>
+  <text x="72" y="211" class="eg">no two bodies on this site are identical</text>
+  <rect x="452" y="178" width="18.8" height="26" rx="3" fill="#cbd5e1"/>
+  <text x="480.8" y="197" class="val">373 words</text>
+  <text x="452" y="222" class="note">bill 79,339 gzipped · costs the reader: nothing — and it buys nothing</text>
+  <text x="72" y="264" class="net">a repeated sentence stored once</text>
+  <text x="72" y="283" class="eg">a fifteenth of the stored text, 16,598 bytes</text>
+  <rect x="452" y="250" width="24.3" height="26" rx="3" fill="#cbd5e1"/>
+  <text x="486.3" y="269" class="val">483 words</text>
+  <text x="452" y="294" class="note">bill 79,146 gzipped · costs the reader: the row: eighteen doors stop answering</text>
+  <text x="72" y="336" class="net">lower-casing the stored words</text>
+  <text x="72" y="355" class="eg">the Gate → the gate</text>
+  <rect x="452" y="322" width="60.9" height="26" rx="3" fill="#cbd5e1"/>
+  <text x="522.9" y="341" class="val">1,208 words</text>
+  <text x="452" y="366" class="note">bill 77,863 gzipped · costs the reader: the excerpt's capitals</text>
+  <text x="72" y="408" class="net">dropping the punctuation</text>
+  <text x="72" y="427" class="eg">a shop. “Change… → a shop Change…</text>
+  <rect x="452" y="394" width="134.7" height="26" rx="3" fill="#cbd5e1"/>
+  <text x="596.7" y="413" class="val">2,674 words</text>
+  <text x="452" y="438" class="note">bill 75,273 gzipped · costs the reader: the excerpt's punctuation</text>
+  <text x="72" y="480" class="net">dropping the commonest function words</text>
+  <text x="72" y="499" class="eg">a quarter of every stored sentence</text>
+  <rect x="452" y="466" width="560.0" height="26" rx="3" fill="#cbd5e1"/>
+  <text x="1022.0" y="485" class="val">11,114 words</text>
+  <text x="452" y="510" class="note">bill 60,352 gzipped · costs the reader: the excerpt, as a sentence at all</text>
+  <text x="72" y="550" class="panel-title">WHAT THE LARGEST ONE WOULD SHOW A READER WHO TYPED “no second way in”</text>
+  <text x="72" y="580" class="note">today</text>
+  <text x="140" y="580" class="quote">A confirmation is not a way past the Gate. When a person says yes, the change is judged again —…</text>
+  <text x="72" y="604" class="note">instead</text>
+  <text x="140" y="604" class="quote">confirmation way past Gate. When person says yes, change judged again — policy resolved again…</text>
+  <text x="72" y="646" class="foot">A body is not only matched. It is shown — so every saving over the stored words buys its bytes out of the row a reader reads.</text>
+  <text x="72" y="668" class="note">Which leaves the four candidates in 0353: they change which bodies travel, not how they are written. Priced in _lib/search/savings.ts.</text>
+</svg>
