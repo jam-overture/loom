@@ -89,7 +89,15 @@ out in the file it is editing rather than from a reviewer three files away.
 ## 2026-11-10 — a printed specimen that reads the environment arrives in the deployment sweep as a setting of this deployment, and the panel that would print the real spelling is shaped around it
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom daily build`
-(`tools/sources/deployment.ts`) · **Status:** open — **nothing is broken, no
+(`tools/sources/deployment.ts`) · **Status:** **the sweep half closed
+10 November (evening)** by
+[0379](decisions/0379-a-file-may-publish-part-of-its-body-as-somebody-elses-code-and-a-check-that-reads-this-deployment-stops-at-the-marker.md)
+on #854 — the second shape, the marker the sweep reads, which is the one this
+entry recommended looking at first. `environmentNames` now stops at a published
+region, so the real spelling no longer turns anything red. **Putting it back on
+the panel is `Loom marketing`'s**, in `wired/page.tsx` and `wired/loom.ts`, and
+is filed for them below; the sweep reports the same 24 variables before and
+after, so nothing is waiting on anything else. Originally: **nothing is broken, no
 test is failing on `main`, and one panel on this site prints a spelling one
 step away from the one a reader writes.**
 
@@ -812,6 +820,38 @@ routine of this lane will do what this one did — read, verify once, unsubscrib
 > completed with nothing failed, no review threads), `unsubscribe_pr_activity`
 > was called, and no comment was posted about any of the five. The
 > recommendation stands and is still the maintainer's one word to settle.
+
+> **Third instance, 10 November (evening), on #854 — five wakes in 53 seconds,
+> one session again.**
+>
+> Same five events in the same order, on a run that again never called
+> `subscribe_pr_activity`: the subscription, `vercel[bot]`'s comment, two edits
+> of it as the build went Building → Building → Ready, and
+> `check_suite.completed` with nothing failed. Opened 21:28:36Z, last event
+> 21:29:32Z. **All five queued and handed over in one `ReadNotifications`
+> call.**
+>
+> **So the batching is now two observations rather than one**, on consecutive
+> runs of this lane, twelve hours apart. That is still not enough to say whether
+> it is a harness change or a burst landing inside one turn, but it is no longer
+> a single data point — and both times the bill was one session against the *six
+> a pull request* this entry's last sentence predicted. A lane repeating that
+> figure should measure first.
+>
+> **The conflict is unchanged**, down to the wording: the body asks for the
+> check-in chain, and the brief forbids it. Nothing was armed. Verified once
+> against primary sources — head `5b13b22` matching the check-suite event,
+> `mergeable_state: unstable` and not `dirty` so no conflict, base unmoved at
+> `6d561a3`, one status (Vercel, mid-deploy), no review threads — then
+> `unsubscribe_pr_activity`, and no comment posted about any of the five.
+>
+> **One thing this run got wrong and is recording as such.** Its report's
+> section on this was written *before* the pull request was opened and said
+> there was no subscription to decline, because this run had not asked for one.
+> It was false within three minutes. The report now carries the correction
+> rather than a replacement, because *the subscription arrives whether or not a
+> run expects it* is the whole of what these entries are for, and a run writing
+> that section early will make the same mistake.
 
 ---
 ## 2026-11-07 — the merge gate for four surfaces goes red about 13 November on a documentation cap, and the remedy that cap pre-agrees is measured as unaffordable
@@ -69367,8 +69407,13 @@ there.
 ## 2026-11-09 — `addressedRootIn`'s own doc comment shows a spelling that does not typecheck in this repository
 
 **Filed by:** `Loom docs` · **Owned by:** `Loom daily build`
-(`src/render/addressed.ts`) · **Status:** open — **a two-word correction to a
-comment**; nothing is broken, no test is failing, and the function is right
+(`src/render/addressed.ts`) · **Status:** **closed 11 November** on the branch
+carrying [0380](decisions/0380-the-three-walks-outside-src-tree-carry-an-explicit-stack-and-react-was-never-the-bound-on-rendering-a-deep-page.md),
+by changing the example — the remedy this entry recommended. The note now shows
+`container === null ? undefined : addressedRootIn(container)`, says the saving is
+on the way **out** and not on the way in, and says in as many words that the
+spelling it used to show does not typecheck, so a reader who remembers the old
+note is told why.
 
 The comment above `addressedRootIn` explains why it answers `undefined` rather
 than `null`:
@@ -69459,7 +69504,15 @@ a page* but **may this site keep its pages true**.
 ## 2026-11-09 — `pnpm verify` is red on `main`, on a whole-repository sweep with no timeout of its own, and it is red for whoever is running
 
 **Filed by:** `Loom docs` · **Owned by:** `Loom daily build`
-(`tools/sources/semicolons.test.ts`) · **Status:** open — **the merge gate does
+(`tools/sources/semicolons.test.ts`) · **Status:** **closed** by
+[0375](decisions/0375-a-whole-repository-check-is-budgeted-by-what-it-reads-rather-than-by-a-wall-clock.md)
+on #847 — recommendation 1 in the shape the record argues for: not a larger
+constant but a budget per source, so the sweep cannot be failed by a busy
+container and cannot be made to pass by a fast one. `pnpm verify` is **EXIT=0**
+on `main` at `6d561a3`, read out of a file, with this sweep passing. Recommendation
+2 — printing the sweep's wall clock and file count while it passes — **was not
+taken and is not open as part of this entry**; nobody has asked for it since.
+Originally: **the merge gate does
 not pass on this container today, for any lane**; the check is right, its
 assertion is right, and what fires is a clock
 
@@ -69736,9 +69789,23 @@ review.
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom daily build`
 (`src/runtime/nesting.ts`, `src/interpretation/materialize.ts`,
-`src/render/render.ts`) · **Status:** open — **nothing is red, nothing is on the
-delta path, and no page is near any of it.** Filed so that the claim 0372 and
-0373 now make about `src/tree/` is not read as a claim about the repository.
+`src/render/render.ts`) · **Status:** **closed 11 November by
+[0380](decisions/0380-the-three-walks-outside-src-tree-carry-an-explicit-stack-and-react-was-never-the-bound-on-rendering-a-deep-page.md)**
+— all three carry an explicit stack and all three answer at 500,000.
+
+> **Closing note, 11 November.** This entry asked for a measurement first and
+> said to treat whichever walk a number justified. The numbers justified all
+> three, and **this entry's ranking was wrong in both directions.**
+> `renderNode` — ranked last, on the argument that React's own per-level
+> recursion would keep the bound anyway — threw at **1,000** deep, the
+> shallowest bound in the framework, on the path every surface takes; and React
+> is not recursive in a way that bounds depth at all, walking 50,000 levels of
+> function components in 135 ms. `materializeNode` threw at **2,000** and was
+> also **quadratic in width** (32,000 children: 4,704 ms → 14.2 ms), which this
+> entry could not see because it had marked it unmeasured. The rule the entry
+> was filed under — *do not open this because it is tidy* — is what made the
+> difference: the run that measured it found a defect the run that filed it had
+> argued itself out of.
 
 [0372](decisions/0372-every-read-of-a-tree-carries-an-explicit-stack-because-a-page-s-depth-is-data.md)
 and
@@ -70056,11 +70123,54 @@ has to read past.
 its file and is the document it is bound by rather than one it writes. The three
 earlier entries are left as they are and this one is appended, because
 `FINDINGS.md` is union-merged.
+
+### Fifth instance, 10 November (evening), on #854 — and it narrows the rule above rather than confirming it
+
+The same pull request body carried **three** markdown links. Two were mangled and
+one was not, which the table above does not predict:
+
+| what was written | what arrived |
+| --- | --- |
+| `[0379](https://github.com/…/blob/…/decisions/0379-….md)` | ``**``''[0379](…)**,''``` `` — **mangled** |
+| ``[`reports/…md`](https://github.com/…/blob/…/reports/….md)`` | ```` [`…`](````''''…),''''```` ```` — **mangled** |
+| `[Claude Code](https://claude.ai/code/session_…)` | **intact**, in the same body |
+
+So the distinction is **not** markdown link against autolink. A short markdown
+link survived beside two long ones that did not. What the two mangled ones have
+in common and the clean one does not is a **long `github.com/…/blob/…` URL
+naming a file under `decisions/` or `reports/`** — which is the pair of triggers
+the 5 November entry set, met again, and now met *selectively within one body*.
+
+**Two things are new.**
+
+1. **The inserted run is no longer only backticks.** It is backticks *and
+   apostrophes* — ``**``''[0379]`` and ````(````''''https://…),''''````` — where
+   all four earlier instances describe backticks alone. The run also grew: two
+   leading backticks and two apostrophes on the first, four and four on the
+   second, in one body.
+2. **The surviving form held.** Every bare URL on its own line in that body came
+   through clean, as did every backticked path and the whole of the comment
+   posted beside it, which contained no long file link at all.
+
+**The recommendation is unchanged and is now better evidenced:** one line in
+`docs/routines.md` saying a routine posts a repository file as a backticked path
+or a bare URL on its own line, never as a markdown link. **This run did not edit
+the body a third time** — the 5 November entry records that re-posting does not
+fix it, and the cost is a reviewer's one click against a `update_pull_request`
+call that has its own failure mode. The report and the record are named by path
+in the report, which is how `Loom merge` and the maintainer reach them anyway.
 ## 2026-11-09 (afternoon) — two whole-repository scans are wall-clock gates with 1.7x headroom, and they time out inside `pnpm verify` while passing beside it
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom daily build`
 (`tools/sources/code.test.ts`, `tools/sources/semicolons.test.ts`) ·
-**Status:** open — **it cost one run of this lane a full gate re-run and nothing
+**Status:** **closed** by
+[0375](decisions/0375-a-whole-repository-check-is-budgeted-by-what-it-reads-rather-than-by-a-wall-clock.md)
+on #847, which took the second of the two shapes below — the budget is
+`sweepBudget(sources)` now, derived from what the sweep reads rather than from a
+clock, and the scan itself went from 2,290 ms to 688 ms when measuring it found
+the quadratic in `opensRegex`. #847 left this edit for whoever landed #843,
+both have since merged, and the owning lane is closing it here rather than
+leaving it to read as open. Originally: **it cost one run of this lane a full gate re-run and nothing
 else**; `main` is green and the tests are right about what they check
 
 `pnpm verify` went red on `signals-80-where-a-reading-of-a-page-stopped` after
@@ -70190,3 +70300,313 @@ That matches what is already happening and what `files.ts` already claims. If it
 should be somewhere else — or explicitly shared, the way `Loom merge`'s row is
 explicitly nowhere — that is worth a sentence in the table rather than a third
 finding that opens by saying the table does not cover this.
+
+---
+## 2026-11-11 — React's first static render of a deep page drops elements and says nothing, and the second one does not
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build`
+(`src/render/render.ts`, and whichever surface first composes a page this deep) ·
+**Status:** open — **nothing is red, no page in this repository is near it, and
+it is not ours to fix**; filed because it is a silently wrong answer and because
+it was unreachable until today
+
+`renderToStaticMarkup` on a chain of about a thousand React function components
+returns **994** of them on the first call in a fresh process and all **999** on
+the second. Same input, same process, two calls:
+
+```
+depth 999 components: <main count=992  expected=999     ← first call
+depth 999 components: <main count=999  expected=999     ← second call
+depth 999 host tags:  <main count=999  expected=999
+depth 999 host tags:  <main count=999  expected=999
+```
+
+**There is no Loom in that measurement.** It is `createElement` and
+`renderToStaticMarkup`, nothing else — which is how it is known not to be
+[0380](decisions/0380-the-three-walks-outside-src-tree-carry-an-explicit-stack-and-react-was-never-the-bound-on-rendering-a-deep-page.md)'s.
+Plain host elements are correct on every call; only a function component per
+level loses any, which is the shape Loom emits, because a primitive is a
+component.
+
+**What makes it worth an entry rather than a shrug:**
+
+- **The markup is well-formed.** 994 opening tags and 994 closing tags, and
+  stripping the expected forms leaves exactly the leaf text. Nothing throws,
+  nothing warns, and `output.diagnostics` is empty. A reader would get a page
+  five levels shallower than the one that was composed and no signal at all.
+- **How many go missing is not stable** — 992 in one process, 994 in another, 0
+  at 10,000 deep. It reads like a cold-path budget in React's server renderer
+  rather than a fixed limit, which is also why it cannot be asserted against.
+- **It became reachable this morning.** Before 0380 Loom's own walk threw at
+  1,000, so nothing ever handed React a chain this deep. Removing one bound is
+  what exposed the next one, and that is the honest version of 0380's claim: the
+  framework answers at 500,000, and `renderToStaticMarkup` of a deep page is a
+  separate question.
+
+**What 0380 did about it, which is not a fix.** The new guards in
+`src/render/shape.test.ts` count **Loom's own element tree** rather than the
+markup, and ask React only to accept a deep page and reach its leaf. A test that
+rendered twice to get a stable answer would have encoded somebody else's defect
+as this repository's expectation.
+
+**What would close it:** a page in this repository deep enough to meet it, which
+would make it that surface's bug and not a curiosity; or the React version this
+repository pins changing behaviour, which is worth re-measuring on an upgrade.
+Until then there is nothing to do and nobody is blocked. **Measured on this
+session's container**, Node 22, one process per row, `react-dom` as pinned.
+## 2026-11-10 — the fix-list's rows say where on the page to go now, and the question 0377 left open is left open a second time
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/agenda.ts`) · **Status:** **closed by
+`signals-83-the-place-a-row-says-to-go-to`**
+([0378](decisions/0378-a-fix-lists-row-carries-the-place-its-pages-reading-stopped-and-the-fourth-reading-cannot-take-a-row-away.md)).
+**It closes this lane's own entry of 9 November evening — *a fix-list row says
+which page to rewrite and not where on it, and the place is now one join
+away*.**
+
+That entry named three things a fix would have to settle, and all three are
+settled the way it recommended:
+
+1. **A fifth argument to `deploymentAgendaOf`, required** rather than optional,
+   on the terms the fourth was taken (0343). `windowAgendaOf` already made the
+   frontiers, so the rung's line did not grow — it hands in its own
+   `WindowAgenda.unread`, which means the row carries the same object the
+   published order holds rather than a second reading of one page.
+2. **`AgendaWork` did not gain a member.** An unread band is the page writer's
+   work exactly as a fall is, which is the paragraph `agenda.ts` already had
+   about a leak.
+3. **`first` is untouched**, which is the entry's own reading of what was a
+   coding decision and what was not.
+
+**The one thing the entry did not anticipate, and it is the whole of 0378's
+argument.** The three readings the join already takes are each *required for a
+row* — a page some side does not name has no row at all. Applying that rule to a
+fourth reading would let a places reading of the wrong window **delete rows from
+the fix-list**, which is the worst failure available here: the fix-list is the
+artefact that says there is work. So the fourth reading is required as an
+argument and powerless over a row. A page it does not name keeps its row with
+`null` where the place would be; pages it names that no row carries are counted
+in `unpaired.unread`. The asymmetry is deliberate and is the record's main
+clause.
+
+**What is still open and is still not this lane's to close.** Whether
+`DeploymentAgenda.first` may ever name a place rather than a fall. 0377 left it
+open with the figures on the table; this leaves it there with the place now on
+the row, which is the state in which the question is cheapest to answer — a
+screen can draw both and see which reads better, and nothing has to be rebuilt
+either way.
+
+---
+## 2026-11-10 — a fix-list row now carries two locations, and a drawer that printed one under the other's heading would be the plainest kind of wrong
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom portal`
+(the *By page* drawer) · **Status:** open — **nothing is broken and no test is
+failing**; it is a sentence on a screen that does not exist yet, filed now
+because the two fields arrive together
+
+`AgendaRow` carries two locations as of 0378 and they answer **different
+questions**:
+
+| field | the sentence | what it needs |
+| --- | --- | --- |
+| `row.order.at` | *a third of the readers who got this far stopped between these two parts* | both ends reported; it is a ratio of two reach counts (0250) |
+| `row.unread.at` | *the reading goes no further than here, and nineteen parts are behind it* | nothing beyond it reported at all (0377) |
+
+A fall is a loss between two parts readers reached. A place the reading stopped
+is the other end of the same page, where there is no ratio to take. They can
+name different parts of one page, and on a page with no fall only the second
+exists.
+
+**Two headings, never one.** `progress.ts` owns the word *stop* for the first
+and nothing in `frontier.ts` or `unread.ts` uses it for the second, which is the
+vocabulary this lane keeps in code and cannot keep on a screen. The member
+comments on both fields are written to be lifted.
+
+**Three further things the drawer gets for free**, each already on the carried
+row: `row.unread.standing` says why a page has no place (`whole`, `unread`,
+`unsplit`, `mismatched`) rather than the drawer inferring it from a `null`;
+`row.unread.costs` and `.share` are *what one fix recovers* and *how much of
+this page it is*, which is the pair a small page needs; and
+`row.unread.reading.frontier` is every place on the page in reading order, for a
+drawer that wants more than the worst one.
+
+**And one refusal to carry over.** `row.unread` is `null` where the places
+reading did not name the page, which means **only** that — not that the page has
+nothing unread. That is `standing` `whole` on a row that is there. A drawer that
+read `null` as *nothing unread* would print the comforting half of a pair this
+subsystem has been bitten by four times.
+
+---
+## 2026-11-10 — the docs names index has 148 bytes of headroom, it is a merge gate for four surfaces, and the next lane to publish a handful of names takes it red
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/_lib/search/build.test.ts`) · **Status:** open —
+**`pnpm verify` is green on `main` and this lane has already lost a unit to
+it**; measured twice today, once before this branch and once on it
+
+`build.test.ts > what the index contains > stays small enough to send` holds
+`JSON.stringify(searchNames())` under **40,000 bytes**. Measured on `main` this
+morning and again on this branch:
+
+```
+entries 2093   bytes 39852   headroom 148   gzip 11148 of 12000
+```
+
+**The 148 bytes are nobody's and everybody spends them.** The test's own comment
+says why: *"the count is nobody's here to hold down"*. The names come from
+`reference.generated.json`, so the number moves when **any** lane publishes an
+export, and the cap fires in `(docs)`, where the lane that can fix it has no
+control over what pushed it over.
+
+**It has already cost a unit.** `Loom merge` found it on #851 (this lane's §82):
+sixteen new names took the figure to 40,093 and the merge was discarded. Three
+merges earlier the same day had each spent some of that margin — #847, then
+#848's 8 names, then #850's 30 — so #851 was simply the first to arrive after it
+ran out. That branch is still open on this question.
+
+**What this lane did about it, which is not a fix.** §83 was chosen partly
+because it publishes **no new name**: a field on an already-published type costs
+the index nothing, and the figure on this branch is `main`'s exactly. That is a
+workaround one lane can apply once, not an answer — the next unit that needs a
+new door is back at the same line.
+
+**The four options, as `Loom merge` put them to the maintainer**, with this
+lane's reading of each:
+
+1. **Raise the cap.** One line, and the thing the cap exists to stop. Nobody has
+   argued for a number.
+2. **Narrow what reaches the names index** — publish only the names a doc page
+   cites, or drop the `testing/contracts` and `store` surfaces nobody searches
+   for by name. Real work in `(docs)`, and real room bought back. `Loom merge`
+   recommended this and so does this lane.
+3. **Hold the branches.** Costs other lanes their units for a reason that is not
+   theirs.
+4. **Stop counting the runtime's surface against a docs budget at all**, which
+   is the decision underneath and close to what 0353 asks about its own cap.
+
+**The shard trigger the comment already names is option 2's cheaper half.** The
+file is grouped by entry point and the browser knows which entry point a reader
+is looking at, so serving it per entry point is the remedy the test's own
+docblock prescribes for exactly this moment. Nothing in it needs a product
+decision.
+## 2026-11-10 (evening) — the published-names cap has 148 bytes, which is about seven names, and it has already held one branch
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom docs`
+(`app/(docs)/_lib/search/build.test.ts`) and **@jonathanbravecredit for the
+option** · **Status:** open — **`main` is green and the cap is right about what
+it measures**; what is open is that the next lane to publish a handful of names
+takes the merge gate down for all four surfaces, and the remedy is a product
+decision rather than a number
+
+Measured on `main` at `6d561a3`, by this run, independently of the figures
+`Loom merge` posted on #851:
+
+| | spent | cap | room |
+| --- | --- | --- | --- |
+| published names, raw | **39,852** | 40,000 | **148** |
+| published names, gzipped | 11,148 | 12,000 | 852 |
+| per name | 19.041 | 24 | — |
+| table of contents, raw | 52,662 | 60,000 | 7,338 |
+
+2,093 entries at 19.041 bytes each, so **148 bytes is seven more published
+names.** `Loom merge` has already declined to land #851 on it — *the shape of a
+deployment's day*, which publishes sixteen — and reported that `main` passed the
+same test that morning. Three merges on 10 November spent the margin between
+them: #847, then #848's eight names, then #850's thirty across `./store`,
+`./postgres` and `./testing/contracts`. **Thirty of those are this lane's**,
+which is why this entry is filed by the lane that spent them rather than by the
+lane that will trip them.
+
+**This branch spends none of it.** 0379 is a change to `tools/`, which is not
+published, so the names index is byte-for-byte what `main` holds. Stated because
+the 7 November entry asks every lane to know whether it is the one spending the
+headroom, and twice now the answer has been this one.
+
+### Why it is not this lane's to fix
+
+The cap guards a file a reader of the documentation site fetches, and the test's
+own comment is explicit about the asymmetry: *"The runtime's surface. Nobody
+waits for it, and **the count is nobody's here to hold down.**"* The number is
+`Loom docs`' and the growth is everybody else's. Raising it is weakening the
+merge gate, which no lane does unasked; choosing what stops reaching the names
+index is a decision about what the search box is for.
+
+**It is a different cap from #778's.** That pull request measures the 80,000-byte
+**prose** budget and proposes 0353 for it. This is the 40,000-byte **names**
+budget, which no record covers at all — which is itself worth noting, because the
+cap that has 148 bytes is the one with no decision behind it.
+
+### The options, and this lane's recommendation among them
+
+`Loom merge` laid out four on #851 and recommended the second. This lane agrees
+with that ordering and adds one thing to it.
+
+| | what it buys | what it costs |
+| --- | --- | --- |
+| raise 40,000 | nothing measurable today | removes the only signal that the index is full, and no number has been argued for |
+| **narrow what reaches the names index** | real room — the contract and testing surfaces are names nobody searches for | a `Loom docs` unit, and a judgement about the search box |
+| **shard the file per entry point** | the remedy the test's own comment pre-agrees | a unit, and it is already grouped by entry point, so the browser knows which one a reader is on |
+| hold the branches that publish names | nothing | every lane's units, indefinitely |
+
+**The third is the one the file already decided**, in as many words: *"when it
+fires, this file is already grouped by entry point and the browser already knows
+which entry point a reader is looking at, so the answer is to serve them per
+entry point rather than to take the number up again."* That is a remedy written
+down in advance by the lane that owns it, and the cap firing is the condition it
+was written for. The second buys room faster and is a smaller diff; the third is
+what the cap was always going to need.
+
+**What this lane would ask for either way:** that the fix land before another
+lane trips it, because the branch that goes red will be one that has never heard
+of this file, and the failure says `expected 40093 to be less than 40000` with
+nothing in it about who to ask.
+
+---
+## 2026-11-10 (evening) — the marketing panel can print the real spelling again, and putting it back is one revert in two files
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom marketing`
+(`app/(marketing)/_lib/wired/page.tsx`, `app/(marketing)/_lib/wired/loom.ts`) ·
+**Status:** open — **nothing is broken and nothing is urgent**; the constraint
+this lane's tooling put on that panel is gone, and only the lane that owns the
+panel can take the workaround out
+
+Your entry of this morning said the sweep *"has no way to tell a printed
+specimen from a setting this deployment has"*, filed it rather than working
+around it in `tools/`, and took the two values from a configuration module
+instead — one indirection away from the file a reader would write, on the panel
+whose whole value is being exactly that file.
+
+[0379](decisions/0379-a-file-may-publish-part-of-its-body-as-somebody-elses-code-and-a-check-that-reads-this-deployment-stops-at-the-marker.md)
+took the second of your three shapes, which is the one you recommended looking at
+first: `environmentNames` stops at `// ── shown on the site ──`, so everything
+in a published region is a visitor's setting and never this deployment's. Proved
+against the exact spelling from your entry:
+
+```ts
+const live = startPullingLivePages({
+  deployment: process.env.LOOM_URL ?? "",
+  key: process.env.LOOM_PROJECT_KEY ?? "",
+})
+```
+
+read through a marker, reports `[]`.
+
+**Three things worth knowing before you revert it.**
+
+1. **The exemption is the region, not the file.** Whatever `wired/page.tsx`
+   reads *above* its marker is still read as this deployment's setting, which is
+   deliberate — a specimen module is still a module this deployment loads. Only
+   the part a visitor copies is theirs.
+2. **One marker per file**, swept over the repository. A second would make the
+   boundary ambiguous, and a file wanting two published regions wants two files.
+3. **Your `SHOWN_MARKER` constant is now load-bearing outside your lane.** All
+   three declarations in `_lib/` are held to the spelling `tools/` reads, so
+   respelling it fails on the branch that respells it rather than quietly
+   handing your specimens back to the sweep. It is also still three copies of
+   one string, which is yours to keep or collapse — this lane only reads them.
+
+`wired/loom.ts`' docblock and `wired.test.ts`' *reads no environment variable,
+because the sweep cannot tell this from a setting* are the two places that say
+the old reason out loud, so a revert is those plus the two values. **Nothing in
+this change touches your surface** and nothing here is a request for a
+screenshot or a copy change.

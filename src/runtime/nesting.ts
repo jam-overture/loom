@@ -48,43 +48,58 @@ export type NestedTarget = {
 
 type Enclosing = { readonly id: NodeId; readonly type: PrimitiveType } | null
 
-const collect = (
-  node: LoomNode,
-  enclosing: Enclosing,
-  isInteractive: InteractivePredicate,
-  found: NestedTarget[]
-): void => {
-  const target = node.kind === "element" && isInteractive(node) ? node : null
+/** A node still to read, and the nearest target above it when it is reached. */
+type Pending = { readonly node: LoomNode; readonly enclosing: Enclosing }
 
-  if (target && enclosing) {
-    found.push({
-      nodeId: target.id,
-      type: target.type,
-      ancestorId: enclosing.id,
-      ancestorType: enclosing.type,
-    })
-  }
-
-  /**
-   * The *nearest* enclosing target, not the outermost. Three deep is two faults
-   * rather than one, and a reviewer told about each pair that touches can read
-   * the chain off the tree; told only about the ends, they cannot.
-   *
-   * Slot nodes are descended without being targets themselves — a region
-   * projected into a linked card sits inside it exactly as a child does.
-   */
-  const below: Enclosing = target ? { id: target.id, type: target.type } : enclosing
-
-  for (const child of childrenOf(node)) collect(child, below, isInteractive, found)
-}
-
-/** Every target this tree puts inside another, in document order. */
+/**
+ * Every target this tree puts inside another, in document order.
+ *
+ * The walk carries an **explicit stack** and is not recursive (0380): a page's
+ * depth is data, and this read answered `RangeError` rather than a fault list
+ * at ten thousand deep while every read and edit in `src/tree/` answered at
+ * five hundred thousand (0372, 0373). The deeper a tree is, the less likely
+ * anyone is to have found the pair by eye, so this is the read whose answer
+ * matters most exactly where it used to stop having one.
+ *
+ * Children are pushed in reverse so the pop order is the document order the
+ * recursion gave, which is the order a fault list is read in.
+ */
 export const nestedTargetsIn = (
   root: LoomNode,
   isInteractive: InteractivePredicate
 ): readonly NestedTarget[] => {
   const found: NestedTarget[] = []
-  collect(root, null, isInteractive, found)
+  const pending: Pending[] = [{ node: root, enclosing: null }]
+
+  for (let reached = pending.pop(); reached !== undefined; reached = pending.pop()) {
+    const { node, enclosing } = reached
+    const target = node.kind === "element" && isInteractive(node) ? node : null
+
+    if (target && enclosing) {
+      found.push({
+        nodeId: target.id,
+        type: target.type,
+        ancestorId: enclosing.id,
+        ancestorType: enclosing.type,
+      })
+    }
+
+    /**
+     * The *nearest* enclosing target, not the outermost. Three deep is two
+     * faults rather than one, and a reviewer told about each pair that touches
+     * can read the chain off the tree; told only about the ends, they cannot.
+     *
+     * Slot nodes are descended without being targets themselves — a region
+     * projected into a linked card sits inside it exactly as a child does.
+     */
+    const below: Enclosing = target ? { id: target.id, type: target.type } : enclosing
+    const children = childrenOf(node)
+
+    for (let index = children.length - 1; index >= 0; index -= 1) {
+      const child = children[index]
+      if (child) pending.push({ node: child, enclosing: below })
+    }
+  }
 
   return found
 }
