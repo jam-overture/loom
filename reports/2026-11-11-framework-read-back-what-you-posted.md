@@ -214,5 +214,23 @@ else.
 
 ## What this run did not do
 
-It did not poll, arm a check-in, or schedule anything. It opened one pull
-request, against `main`, read its body back, and stopped.
+It did not poll, arm a check-in, or schedule anything.
+
+**It did not subscribe itself to its pull request, and the harness subscribed it
+anyway** — seconds after #864 was opened, which is the **fifth** consecutive
+instance of the standing entry in `FINDINGS.md` and the fourth in which the
+subscription body asked the session to arm a recurring `send_later` check-in
+chain. **It was not armed**, for the reason that entry and `docs/routines.md`
+both give: on 9 August four such chains ran about 96 cloud sessions a day against
+the routines' three and cost a week's allowance while the maintainer was away.
+
+The three wakes it produced were the subscription itself and two `vercel[bot]`
+deployment comments — *Building*, then the same comment edited to *Ready*. **None
+was actionable**, which is the measurement the 24 October entry already made
+twice: eleven wakes in twenty-seven minutes, none actionable.
+
+What the run did with them is read the pull request once against primary sources
+— Vercel green on `7936b61`, no review threads, no merge conflict, nothing
+outstanding — add the now-ready preview URL to the body in the form this change
+recommends, read that edited body back through the API, drop the subscription,
+and stop.
