@@ -8,6 +8,40 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-11-11 (evening) — segments are written in the portal now, and no site sorts its readers by them, because the door does not answer the rules and the pull client does not read them
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom daily build` (`src/live/`,
+the part a customer's server runs), with the door's half in `Loom portal`'s
+lane · **Status:** open
+
+[0371](decisions/0371-a-segment-is-an-audience-the-site-sorts-its-readers-into-and-loom-keeps-only-its-rules-and-its-name.md)
+clause 7 builds segments in four pieces. Piece 1 is on `main` with this entry:
+*Segments* on a project's rail writes each page's ordered rule list through
+0376's store (`recordRules` against the head revision; `aud_<word>` ids, one
+word per segment). Its consequence says the pull client must read and apply
+the rules, *"filed as a finding when this record is accepted"*; this is that
+finding. Until it is closed every segment says *None yet* and the screen says
+no reader is sorted.
+
+### What the client must do, and nothing more
+
+1. **Take the rules from the same pull** (0371 clause 4). The door will answer
+   each page's current rule list beside its live tree (piece 2, the portal's
+   half, not built yet; the shape will be the `AudienceRule[]` 0376 stores,
+   per page id). The request still carries no reader and no audience (0262).
+2. **Sort each request in the host's process** with `audiencesFor` over the
+   context the host builds, and compose with `composeTreeForContext` (0359).
+   No rules for a page means the base, exactly as today.
+3. **Name the audience on the signals** of a reader sorted into one, as 0284's
+   `aud_` id; a reader in none sends none (`aud_everyone`).
+4. **A failed pull keeps the last rules with the last pages** (0358 clause 4),
+   never rules from one pull beside pages from another.
+
+The portal files the door's half (piece 2) as its own next piece; this entry
+only asks that the client's shape for clause 1 be agreed before either half is
+written, so the two land together.
+
+---
 ## 2026-11-11 — the command that adds a component of your own cannot be printed on this site, because its own grammar is a word the site keeps off every page
 
 **Filed by:** `Loom marketing` · **Owned by:** the maintainer for the one-word

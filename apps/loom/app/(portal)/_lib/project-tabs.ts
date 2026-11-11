@@ -19,8 +19,7 @@ export type ProjectTab = NavItem & {
  *
  * Each answers one question (`docs/portal-wireframes.md`, *The chrome*), and
  * a tab is drawn only for a screen that is built, so the rail grows with the
- * plan rather than pointing at routes that 404. *Segments* is not here: it
- * has no unit yet (9), and a rail item for it would be a surface without one.
+ * plan rather than pointing at routes that 404.
  *
  * - **Signals** first, because *is anything arriving* is the question a
  *   person opens a project to ask, and it is where the project's own address
@@ -29,6 +28,9 @@ export type ProjectTab = NavItem & {
  *   (0329), with a count of what waits.
  * - **Pages**, what is live and whether each change helped (0312, 8c).
  * - **Goals**, what the project is trying to get readers to do (0350).
+ * - **Segments**, which groups of readers the site sorts its readers into
+ *   (0371), last of the screens a person works in, as the wireframe's rail
+ *   lists it.
  * - Then, below the divider, **Connect your site** (the key, the snippet, the
  *   publish key) and **Settings** (everything an owner changes).
  */
@@ -37,6 +39,7 @@ export const projectTabs = (projectId: string): readonly ProjectTab[] => [
   { label: "For review", href: `/portal/${projectId}/review`, group: "work", counts: "waiting" },
   { label: "Pages", href: `/portal/${projectId}/pages`, group: "work" },
   { label: "Goals", href: `/portal/${projectId}/goals`, group: "work" },
+  { label: "Segments", href: `/portal/${projectId}/segments`, group: "work" },
   { label: "Connect your site", href: `/portal/${projectId}/connect`, group: "setup" },
   { label: "Settings", href: `/portal/${projectId}/settings`, group: "setup" },
 ]
