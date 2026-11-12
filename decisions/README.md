@@ -477,5 +477,5 @@ Everything above this line is prose a person wrote, and stays that way.
 | 0385 | *No record on this branch* | — | — |
 | 0386 | *No record on this branch* | — | — |
 | 0387 | *No record on this branch* | — | — |
-| 0388 | *No record on this branch* | — | — |
+| [0388](0388-a-routine-reads-back-what-it-posted-because-no-safe-link-length-can-be-computed-in-advance.md) | A routine reads back what it posted, because no safe link length can be computed in advance | Accepted | §1, how a run reports |
 | [0389](0389-a-range-of-hours-is-folded-into-its-days-and-into-the-hours-of-a-readers-day-where-the-mean-is-the-only-comparable-figure.md) | A range of hours is folded into its days and into the hours of a reader's day, where the mean is the only comparable figure | Accepted | §5 (reader signals), the counters |
