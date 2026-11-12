@@ -6,6 +6,7 @@ import {
   producePlainly,
   produceReadBack,
 } from "@/app/(docs)/_lib/signals/page"
+import { produceOrdered, produceStopped } from "@/app/(docs)/_lib/signals/stopped"
 
 /**
  * The produced blocks on *What your readers do*.
@@ -327,6 +328,132 @@ export const ReadingABatchBack = () => {
           </tbody>
         </table>
       </div>
+    </Panel>
+  )
+}
+
+/**
+ * Where the reading of this page's own example tree stopped.
+ *
+ * The figures are the runtime's arithmetic over the tree at the top of this
+ * page and this site's own registry — `stopped.ts` says which half of this is
+ * constructed and why it has to be. The caption carries the two numbers the
+ * prose is about, side by side and never added: *parts nobody reached* is the
+ * figure a screen would reach for, and *places the reading stopped* is the one
+ * somebody's afternoon is spent on.
+ *
+ * The words are here rather than summarised because they are the thing a
+ * reader of the real version would act on. A list of node ids would prove the
+ * same arithmetic and tell an operator nothing; the sentences nobody got to are
+ * what makes *one place, this much of the page* mean something.
+ */
+export const WhereTheReadingStopped = () => {
+  const reading = produceStopped()
+
+  return (
+    <Panel
+      caption={`${reading.title}: ${reading.unseen} of ${reading.parts} parts went unreached, in ${reading.places} place${reading.places === 1 ? "" : "s"}`}
+    >
+      <div className="overflow-x-auto">
+        <table className="w-full border-collapse text-sm">
+          <Head columns={["Where it stopped", "Parts behind it", "What one fix recovers"]} />
+          <tbody>
+            {reading.stops.map((stop) => (
+              <tr key={stop.type} className="border-edge border-b" data-stop={stop.type}>
+                <Cell>
+                  <span className="bg-surface-sunken text-ink rounded-full px-2 py-0.5 font-mono text-xs">
+                    {stop.type}
+                  </span>
+                </Cell>
+                <Cell>{stop.beneath}</Cell>
+                <Cell>
+                  <strong className="text-ink">{stop.unseen}</strong> parts
+                </Cell>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <div className="border-edge border-t px-3 py-3">
+        <p className="text-ink m-0 text-xs">
+          Nothing was collected for this reading. These trees have no readers, so the window is
+          constructed — every reader reached the opening band and stopped — and every figure in it is
+          the runtime&rsquo;s own arithmetic over the tree at the top of this page.
+        </p>
+        <p className="text-ink-muted m-0 mt-2 text-xs">
+          The words nobody reached, in reading order:
+        </p>
+        <ul className="text-ink-muted m-0 mt-2 flex list-none flex-col gap-1 p-0 text-xs">
+          {reading.words.map((word) => (
+            <li key={word} className="m-0">
+              “{word}”
+            </li>
+          ))}
+        </ul>
+      </div>
+    </Panel>
+  )
+}
+
+/**
+ * Two pages of one deployment, ordered by what one fix recovers and then by the
+ * count of unread parts, so a reader can see the two answers disagree.
+ *
+ * Both orders are printed because the argument is a comparison and a single
+ * order is not one. The one the runtime publishes is first; the other is the
+ * one every obvious key produces, and it is the whole reason `unread.ts` ranks
+ * on `costs` instead.
+ */
+export const WhatOneFixRecovers = () => {
+  const ordered = produceOrdered()
+
+  return (
+    <Panel
+      caption={`One deployment: ${ordered.unseen} parts nobody reached, in ${ordered.stops} places across ${ordered.byCost.length} pages`}
+    >
+      <div className="overflow-x-auto">
+        <table className="w-full border-collapse text-sm">
+          <Head columns={["Order", "Page", "Unread parts", "Places", "One fix recovers"]} />
+          <tbody>
+            {[
+              { key: "by what one fix recovers", rows: ordered.byCost, published: true },
+              { key: "by parts nobody reached", rows: ordered.byParts, published: false },
+            ]
+              .flatMap((order) => order.rows.map((row, at) => ({ order, row, at })))
+              .map(({ order, row, at }) => (
+                <tr
+                  key={`${order.key}-${row.example}`}
+                  className="border-edge border-b last:border-b-0"
+                  data-order={order.key}
+                  data-rank={at + 1}
+                >
+                  <Cell>
+                    {at === 0 ? (
+                      <span
+                        className={`rounded-full px-2 py-0.5 text-xs ${order.published ? "bg-surface-sunken text-ink" : "bg-warning-surface text-warning-ink"}`}
+                      >
+                        {order.published ? order.key : `${order.key} — not the order`}
+                      </span>
+                    ) : (
+                      ""
+                    )}
+                  </Cell>
+                  <Cell>{row.title}</Cell>
+                  <Cell>{row.unseen}</Cell>
+                  <Cell>{row.places}</Cell>
+                  <Cell>
+                    <strong className="text-ink">{row.costs === null ? "—" : row.costs}</strong>
+                  </Cell>
+                </tr>
+              ))}
+          </tbody>
+        </table>
+      </div>
+      <p className="border-edge text-ink m-0 border-t px-3 py-3 text-xs">
+        {ordered.byCost[0] === undefined || ordered.byParts[0] === undefined
+          ? "One page, so the two orders cannot disagree."
+          : `Both orders are over the same ${ordered.byCost.length} pages. Ranked on what one fix recovers, ${ordered.byCost[0].title} is first and an afternoon there recovers ${ordered.byCost[0].costs ?? 0} parts of a page. Ranked on unread parts, ${ordered.byParts[0].title} is first — ${ordered.byParts[0].places} separate places, each worth ${ordered.byParts[0].costs ?? 0}.`}
+      </p>
     </Panel>
   )
 }
