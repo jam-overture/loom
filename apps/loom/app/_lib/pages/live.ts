@@ -1,5 +1,5 @@
-import type { LoomTree, Result } from "@jam-overture/loom"
-import type { Application, ApplicationId } from "@jam-overture/loom/store"
+import type { LoomTree, Result, TreeId } from "@jam-overture/loom"
+import type { Application, ApplicationId, AudienceRule } from "@jam-overture/loom/store"
 
 import { ingestKeySchema, type IngestKeyStore } from "@/app/_lib/reader-signals/keys"
 
@@ -18,6 +18,14 @@ import { bearerOf } from "./receive"
  * would put Loom back in the render path that 0262 keeps it out of. That is
  * enforced here rather than promised by the client.
  *
+ * **It answers each page's audience rules beside the pages** (0371 clause 4):
+ * `{ pages, rules }`, where `rules` holds one entry per live page that has a
+ * rule list, `{ treeId, rules }`, the list in its order, as 0376's store keeps
+ * it. A page with no entry is served as it is to every reader. The site gets
+ * every rule and sorts each reader itself, so the request still names nobody.
+ * Pages and rules are read in one answer and fail together: a site must never
+ * hold rules from one pull beside pages from another.
+ *
  * **It answers with an entity tag.** A server pulling on a short interval
  * mostly asks for what it already holds, and `If-None-Match` lets it be told
  * so in a few bytes.
@@ -35,6 +43,11 @@ export type ReadDoor = {
   readonly livePagesOf: (
     application: ApplicationId
   ) => Promise<Result<readonly LoomTree[], { readonly detail: string }>>
+  /** The current rule list of each of the pages, or why they cannot all be read. */
+  readonly rulesOf: (
+    application: ApplicationId,
+    pages: readonly TreeId[]
+  ) => Promise<Result<readonly PageRulesHead[], { readonly detail: string }>>
   /**
    * Told of every answer a site took, `200` and `304` alike, after it is
    * answered: whether a site pulls is what tells a person whether *Accept*
@@ -44,6 +57,26 @@ export type ReadDoor = {
   readonly pulled: (pull: SitePull) => void
   readonly now: () => number
 }
+
+/** One page's rules as its store holds them: `undefined` where nobody wrote any. */
+export type PageRulesHead = {
+  readonly treeId: TreeId
+  readonly rules: readonly AudienceRule[] | undefined
+}
+
+/** One page's rule list in the door's answer. */
+export type LiveRules = { readonly treeId: TreeId; readonly rules: readonly AudienceRule[] }
+
+/**
+ * The `rules` of the answer: the pages with a list to sort readers by, in the
+ * pages' order. A page with none, or whose list was emptied, has no entry,
+ * because both mean the same thing to a site, and one spelling keeps the tag
+ * still while nothing a reader could be served has changed.
+ */
+export const liveRulesOf = (heads: readonly PageRulesHead[]): readonly LiveRules[] =>
+  heads.flatMap(({ treeId, rules }) =>
+    rules === undefined || rules.length === 0 ? [] : [{ treeId, rules }]
+  )
 
 /** A pull is always checked with the door, and kept by the site rather than anything between. */
 const REVALIDATE = { "cache-control": "private, no-cache" } as const
@@ -110,7 +143,14 @@ export const serveLivePages = async (request: Request, door: ReadDoor): Promise<
 
   if (!pages.ok) return answer(503, `live pages are unavailable: ${pages.error.detail}`)
 
-  const body = JSON.stringify({ pages: pages.value })
+  const rules = await door.rulesOf(
+    named.value,
+    pages.value.map((page) => page.treeId)
+  )
+
+  if (!rules.ok) return answer(503, `live pages are unavailable: ${rules.error.detail}`)
+
+  const body = JSON.stringify({ pages: pages.value, rules: liveRulesOf(rules.value) })
   const tag = await entityTagOf(body)
   const headers = { ...REVALIDATE, etag: tag }
 

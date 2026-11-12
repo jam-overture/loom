@@ -15,6 +15,11 @@ import { primaryOf } from "@/app/(portal)/_lib/goals/goal"
 import { goalsFor } from "@/app/(portal)/_lib/goals/stores"
 import { readPageStops } from "@/app/(portal)/_lib/page-stops"
 import { portalRegistry } from "@/app/(portal)/_lib/registry"
+import {
+  audienceOfPick,
+  SEGMENT_PARAM,
+  segmentAsked,
+} from "@/app/(portal)/_lib/segments/segment-pick"
 import { rangeOf, type SignalsRange } from "@/app/(portal)/_lib/signals-range"
 import { pageCopiesFor } from "@/app/(portal)/_lib/proposing/stores"
 import { single } from "@/app/(portal)/_lib/query"
@@ -40,7 +45,10 @@ import { readPageHourly, readSignals } from "../_lib/reading"
  * page's hourly counters over the range only once it is open, and counters
  * that do not answer cost its range figures alone. Where readers stopped is
  * read beside them, from the counters of the version the site last published
- * (`_lib/page-stops.ts`), and costs that part of the drawer alone.
+ * (`_lib/page-stops.ts`), and costs that part of the drawer alone. A segment
+ * (`?segment=`) narrows the list, the drawer's range and where readers
+ * stopped to its readers (0371 clause 6); the changes waiting are the
+ * project's, since a change is not yet for one segment (piece 4).
  */
 
 const ByPageScreen = async ({
@@ -62,23 +70,36 @@ const ByPageScreen = async ({
   await requireRole(projectId)
 
   const range = rangeOf(single(query.range))
+  const segment = segmentAsked(single(query[SEGMENT_PARAM]))
+  const audience = audienceOfPick(segment)
   const from = single(query.from)
   const opening = single(query.page)
   const now = Date.now()
-  const reading = await readSignals(projectId, range, now)
+  const reading = await readSignals(projectId, range, now, segment)
   const rangeHref = (next: SignalsRange) =>
-    byPageHref({ base, from, range: next }, { from, page: opening })
+    byPageHref({ base, from, range: next, segment }, { from, page: opening })
+  /** Another segment is another list, so it starts again from the newest page. */
+  const segmentHref = (next: string | undefined) =>
+    byPageHref({ base, from: undefined, range, segment: segmentAsked(next) }, { page: opening })
 
   if (!drawsTab(reading)) {
     return (
-      <SignalsFrame reading={reading} projectId={projectId} tab="pages" rangeHref={rangeHref} />
+      <SignalsFrame
+        reading={reading}
+        projectId={projectId}
+        tab="pages"
+        rangeHref={rangeHref}
+        segmentHref={segmentHref}
+      />
     )
   }
 
   const { applicationId } = reading.application
 
   const [tallies, waiting, copies, goals] = await Promise.all([
-    boundedReaderTallyStore(reading.readings.tallies).tallies(),
+    boundedReaderTallyStore(reading.readings.tallies).tallies(
+      audience === undefined ? {} : { audience }
+    ),
     holdsFor(applicationId).waiting(),
     readWithin(() => pageCopiesFor(applicationId).list(), unavailable, PORTAL_READ_BUDGET_MS),
     readWithin(() => goalsFor(applicationId).list(), unavailable, PORTAL_READ_BUDGET_MS),
@@ -91,6 +112,7 @@ const ByPageScreen = async ({
         projectId={projectId}
         tab="pages"
         rangeHref={rangeHref}
+        segmentHref={segmentHref}
       />
     )
   }
@@ -105,22 +127,29 @@ const ByPageScreen = async ({
     ...readings,
     waiting: waiting.ok && copies.ok ? waitingByPage(waiting.value.held, copies.value) : undefined,
   })
-  const address = { base, from, range }
+  const address = { base, from, range, segment }
   const opened = openRowOf(rows, opening)
   const [hourly, stops] =
     opened === undefined
       ? [undefined, undefined]
       : await Promise.all([
-          readPageHourly(reading.readings, opened.treeId, range, now),
+          readPageHourly(reading.readings, opened.treeId, range, now, audience),
           readPageStops(
             { tallies: boundedReaderTallyStore(reading.readings.tallies) },
             portalRegistry,
-            reading.published.find(({ tree }) => tree.treeId === opened.treeId)?.tree
+            reading.published.find(({ tree }) => tree.treeId === opened.treeId)?.tree,
+            audience
           ),
         ])
 
   return (
-    <SignalsFrame reading={reading} projectId={projectId} tab="pages" rangeHref={rangeHref}>
+    <SignalsFrame
+      reading={reading}
+      projectId={projectId}
+      tab="pages"
+      rangeHref={rangeHref}
+      segmentHref={segmentHref}
+    >
       {rows.length === 0 ? (
         <p className="text-ink-muted text-xs">No page view has been counted yet.</p>
       ) : (

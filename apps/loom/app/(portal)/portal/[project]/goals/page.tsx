@@ -4,6 +4,7 @@ import { notFound } from "next/navigation"
 import { projectIdSchema } from "@jam-overture/loom/store"
 
 import { Screen } from "@/app/(portal)/_components/screen"
+import { SegmentPicker, SegmentUncounted } from "@/app/(portal)/_components/segment-picker"
 import { StateNotice } from "@/app/(portal)/_components/state-notice"
 import { readAccepted } from "@/app/(portal)/_lib/accepted/reading"
 import { requireActor, requireRole } from "@/app/(portal)/_lib/auth/identity"
@@ -34,7 +35,18 @@ import {
   type RangeFigure,
   type SignalsRange,
 } from "@/app/(portal)/_lib/signals-range"
+import { single } from "@/app/(portal)/_lib/query"
 import { EVERY_CHANGE, reviewHrefOf } from "@/app/(portal)/_lib/review-filter"
+import {
+  audienceRulesFor,
+  readSegmentWords,
+  rulesPagesOf,
+} from "@/app/(portal)/_lib/segments/rules"
+import {
+  audienceOfPick,
+  SEGMENT_PARAM,
+  segmentAsked,
+} from "@/app/(portal)/_lib/segments/segment-pick"
 import { portalApplications, portalProjects } from "@/app/(portal)/_lib/store"
 import { plainMoment } from "@/app/(portal)/_lib/when"
 import { holdsFor } from "@/app/(portal)/_lib/write"
@@ -74,6 +86,12 @@ import { GoalForm } from "./_components/goal-form"
  * **The *New goal* drawer previews** what the goal being made would have
  * counted over the same 7 days, from those counters folded into totals by page
  * and part, worked out in the browser as the owner picks.
+ *
+ * **A segment** (`?segment=`, unit 9 piece 3) narrows both figures to its
+ * readers (0371 clause 6), and a segment nothing has been counted under says
+ * so in place of the list. The changes waiting and shipped stay the project's,
+ * since no change is for one segment until piece 4. *New goal* reads every
+ * reader: a goal is the project's, whichever readers the list was showing.
  */
 
 /** The range *Goals* measures each goal over: the wireframe's *7-day rate with its trend*. */
@@ -315,6 +333,13 @@ const GoalsPage = async ({
 
   const now = Date.now()
   const week = arrivalRangeFor(GOALS_RANGE, now)
+  const closed =
+    project.ok && (project.value.closedAt !== undefined || application?.closedAt !== undefined)
+  const owner = mayAdminister(role) && !closed
+  const adding = owner && query.goal === "new"
+  const segment = adding ? undefined : segmentAsked(single(query[SEGMENT_PARAM]))
+  const audience = audienceOfPick(segment)
+  const narrowed = audience === undefined ? {} : { audience }
 
   const [goals, published, pageViews, tallies, held, hourly, accepted] =
     application === undefined || signals === undefined
@@ -330,12 +355,20 @@ const GoalsPage = async ({
             unavailable,
             PORTAL_READ_BUDGET_MS
           ),
-          boundedReaderTallyStore(signals.tallies).pageViews(),
-          boundedReaderTallyStore(signals.tallies).tallies(),
+          boundedReaderTallyStore(signals.tallies).pageViews(narrowed),
+          boundedReaderTallyStore(signals.tallies).tallies(narrowed),
           holdsFor(application.applicationId).waiting(),
-          readGoalCounters(boundedReaderTallyStore(signals.tallies), goalSpanOf(week)),
+          readGoalCounters(boundedReaderTallyStore(signals.tallies), goalSpanOf(week), narrowed),
           readAccepted(projectId, now),
         ])
+
+  const offered =
+    application === undefined || published?.ok !== true
+      ? undefined
+      : await readSegmentWords(
+          audienceRulesFor(application.applicationId),
+          rulesPagesOf(published.value)
+        )
 
   const waitingIntents =
     held?.ok === true ? held.value.held.map((change) => change.intent.intentId) : undefined
@@ -348,10 +381,13 @@ const GoalsPage = async ({
           PORTAL_READ_BUDGET_MS
         )
 
-  const closed =
-    project.ok && (project.value.closedAt !== undefined || application?.closedAt !== undefined)
-  const owner = mayAdminister(role) && !closed
-  const adding = owner && query.goal === "new"
+  const segmentHref = (word: string | undefined) => {
+    const asked = segmentAsked(word)
+
+    return asked === undefined
+      ? `/portal/${projectId}/goals`
+      : `/portal/${projectId}/goals?${SEGMENT_PARAM}=${asked}`
+  }
 
   const body = (() => {
     if (!project.ok || !applications.ok) {
@@ -417,15 +453,35 @@ const GoalsPage = async ({
           : undefined,
     }
 
+    const picker = adding ? null : (
+      <SegmentPicker pick={{ word: segment, offered }} hrefOf={segmentHref} />
+    )
+
+    if (segment !== undefined && pageViews?.ok === true && pageViews.value.length === 0) {
+      return (
+        <div className="flex flex-col gap-4">
+          {picker}
+          <SegmentUncounted
+            word={segment}
+            projectId={projectId}
+            everyoneHref={segmentHref(undefined)}
+          />
+        </div>
+      )
+    }
+
     return (
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
         <div className="flex min-w-0 flex-1 flex-col gap-3">
+          {picker}
           <GoalList readings={readings} projectId={projectId} owner={owner} />
           <p className="text-ink-muted m-0 text-xs">
             Each rate is per 100 page views on the pages the goal covers, over the last 7 days
             against the 7 days before, and since this project&rsquo;s pages were first counted,
-            across every version. Loom proposes each change toward one goal: the changes counted
-            here are those waiting for review, and those accepted that went live on your site.
+            across every version
+            {segment === undefined ? "" : `, among the readers your site sorts into ${segment}`}.
+            Loom proposes each change toward one goal: the changes counted here are those waiting
+            for review, and those accepted that went live on your site.
           </p>
           {accepted?.kind === "read" && accepted.reach.kind === "never" && (
             <p className="text-ink-muted m-0 text-xs">

@@ -117,6 +117,83 @@ every time, and quote the number from it in the report. Written here rather than
 any lane's code because it is a thing a **run** does, not a thing the repository
 contains.
 
+## Posting to GitHub
+
+**A markdown link you post can come back with characters welded onto it, and
+there is no length you can compute in advance that avoids it.** The second half
+is the part that costs runs, because four lanes have each tried to compute one.
+
+A pull request body posted from a routine session can arrive with a run of
+backticks — and, since 10 November, apostrophes — wrapping a URL. The run is in
+the **stored** body: a read through the API returns it in the raw markdown, so
+whatever inserts it does so before GitHub sees it. **Re-posting the same text
+changes nothing.** Replacing the text, in one `update_pull_request` call,
+produces a clean body on the first attempt, so the round-trip is deterministic
+rather than flaky. Where the wrapping happens is still not known, and nobody
+should spend a run finding out.
+
+The 23 September entry's own running count reaches **twenty-three read-backs**
+by 6 October, and four later instances are entries of their own. From four lanes
+over seven weeks, they
+agree that **URL length moves the outcome** and agree on nothing else:
+
+| the body | survived | mangled |
+| --- | --- | --- |
+| #378 | 157 | 158 |
+| #390 | markdown links of 145, 146, 146, 147 | 151, 156, 168, 169, 170, 172 |
+| #423 | 114, 124 | 150, 152, 162, 188 |
+
+No constant fits all three, and the one reading that does is that the limit is
+**the tail of some other budget the whole body spends** — #423's body is the
+longest and has the lowest boundary. Five explanations that each lasted exactly
+one measurement are written into the 23 September entry as a graveyard, three of
+them the framework lane's own. Read it before proposing a sixth.
+
+So the rule is about **form and procedure**, not about a number.
+
+**Write a repository file as a backticked path.** `` `decisions/0379-….md` `` and
+`` `reports/2026-11-10-….md` `` have survived every measurement, they are
+searchable, and `Loom merge` and the maintainer reach a record by path anyway. A
+record's filename alone runs to 89 characters, so **a record is cited by number
+with its path in a code span and is never linked.** A report linked as a bare URL
+on its own line carries its images by relative path and meets no boundary at all.
+
+**The forms that have never been mangled**, in order of how often they have been
+measured: a backticked repository path, an autolink `<https://…>`, a bare URL on
+its own line, and a short markdown link. The shortest lever on a long URL is a
+commit permalink prefix — `…/blob/e084184/`, 49 characters — rather than a branch
+name, which runs to 44 characters on its own and cannot be shortened after a push.
+
+**Then read it back, because the form is a precaution and the read-back is the
+check.** It is one call, it is how every one of those read-backs exists,
+and it is the only thing that has ever been reliable. `pnpm posted` is that half
+written down:
+
+```bash
+# read the body back through the API, write it to a file, then:
+pnpm posted body.md
+```
+
+```
+body.md  3 URLs, 4 mangled
+  line 3: "``''" before the link's opening bracket — https://github.com/…/0379-….md
+  line 3: "''``" after the closing parenthesis — https://github.com/…/0379-….md
+```
+
+It fetches nothing and it is **not** in `pnpm verify` — the text it reads is
+never committed, so there is nothing on a branch for a gate to check. It exits
+non-zero when it finds something.
+
+**Fix it by replacing the text, not by posting it again.** And when a body has
+already been posted twice, weigh the second `update_pull_request` against a
+reviewer's one click: on #854 the run left it, named the report and the record by
+path in the body, and said so.
+
+Written here rather than in any lane's code because it is a thing a **run** does.
+Six entries asked for it over seven weeks; three were filed by a lane that then
+said in as many words that it had not written this section because
+`docs/routines.md` is not its file. It is `Loom daily build`'s.
+
 ## The git every machine has
 
 **The floor is git 2.15**, and it is the maintainer's machine. A routine runs in
@@ -327,6 +404,10 @@ It never closes a pull request, deletes a branch, or schedules anything.
 9. Comment on it starting `@jonathanbravecredit`: a short summary, then
    `## Needs your input` with a recommendation for each question, or an explicit
    "nothing blocking". Keep it short — detail belongs in the report.
+10. **Read the body and the comment back through the API and run `pnpm posted`
+    over them.** *Posting to GitHub* above is why: a link you wrote can be
+    stored with characters welded onto it, no safe length can be computed in
+    advance, and re-posting the same text does not fix it.
 
 From the first rendered primitive onward, **include the deployed preview URL**,
 and a screenshot once there is a page worth looking at.
