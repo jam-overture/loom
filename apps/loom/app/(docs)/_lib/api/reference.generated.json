@@ -8,7 +8,7 @@
       "files": 100,
       "narrower": [],
       "standing": {
-        "packageNames": 2037,
+        "packageNames": 2040,
         "otherDoors": 18,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -4246,7 +4246,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 2037,
+        "packageNames": 2040,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -4290,7 +4290,7 @@
       "files": 63,
       "narrower": [],
       "standing": {
-        "packageNames": 2037,
+        "packageNames": 2040,
         "otherDoors": 18,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -5243,7 +5243,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 2037,
+        "packageNames": 2040,
         "otherDoors": 18,
         "doorsSharingNothing": 17,
         "widest": false,
@@ -5318,7 +5318,7 @@
       "files": 220,
       "narrower": [],
       "standing": {
-        "packageNames": 2037,
+        "packageNames": 2040,
         "otherDoors": 18,
         "doorsSharingNothing": 17,
         "widest": false,
@@ -5788,7 +5788,7 @@
       "files": 81,
       "narrower": [],
       "standing": {
-        "packageNames": 2037,
+        "packageNames": 2040,
         "otherDoors": 18,
         "doorsSharingNothing": 17,
         "widest": false,
@@ -6876,7 +6876,7 @@
       "files": 38,
       "narrower": [],
       "standing": {
-        "packageNames": 2037,
+        "packageNames": 2040,
         "otherDoors": 18,
         "doorsSharingNothing": 17,
         "widest": false,
@@ -7441,7 +7441,7 @@
       "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 2037,
+        "packageNames": 2040,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -7644,7 +7644,7 @@
       "files": 45,
       "narrower": [],
       "standing": {
-        "packageNames": 2037,
+        "packageNames": 2040,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -8688,7 +8688,7 @@
       "files": 61,
       "narrower": [],
       "standing": {
-        "packageNames": 2037,
+        "packageNames": 2040,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -9067,7 +9067,7 @@
       "files": 45,
       "narrower": [],
       "standing": {
-        "packageNames": 2037,
+        "packageNames": 2040,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -9322,7 +9322,7 @@
       "files": 14,
       "narrower": [],
       "standing": {
-        "packageNames": 2037,
+        "packageNames": 2040,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -9484,7 +9484,7 @@
       "slug": "signals",
       "types": "./dist/signals/index.d.ts",
       "requires": [],
-      "files": 85,
+      "files": 86,
       "narrower": [
         {
           "specifier": "@jam-overture/loom/signals/broadcast",
@@ -9497,7 +9497,7 @@
         }
       ],
       "standing": {
-        "packageNames": 2037,
+        "packageNames": 2040,
         "otherDoors": 18,
         "doorsSharingNothing": 16,
         "widest": true,
@@ -12730,6 +12730,31 @@
           ]
         },
         {
+          "module": "signals/part-pace",
+          "title": "Part pace",
+          "summary": "Whether the readers who reach **one part** have time for what it says, across every page it stands on.",
+          "symbols": [
+            {
+              "name": "describePartPaceSilence",
+              "kind": "function",
+              "signature": "const describePartPaceSilence: (silence: KindPaceSilence) => string",
+              "summary": "One line per silence, for a surface saying why one part has no pace."
+            },
+            {
+              "name": "PartPace",
+              "kind": "type",
+              "signature": "type PartPace = {\n    readonly nodeId: NodeId;\n    /**\n     * What the part is, as the **first** reading holding it has it, and `null`\n     * where no reading holds it at all.\n     */\n    readonly type: PrimitiveType | null;\n    /** What part it plays, as the same reading has it; `null` where its type declared none. */\n    readonly role: PrimitiveRole | null;\n    /**\n     * Types a later reading had this node as, where the first reading's answer\n     * stands.\n     */\n    readonly typeDisagreed: readonly PrimitiveType[];\n    /** Readings that hold the part at all, after duplicates are dropped. */\n    readonly placements: number;\n    /** Placements in the figures: reached, and saying something counted. */\n    readonly counted: number;\n    /** Why the rest have no pace of their own. The counts add to `placements − counted`. */\n    readonly silences: Readonly<Record<PaceSilence, number>>;\n    /**\n     * Every placement by its own page's verdict, which is the census view of the\n     * same set.\n     */\n    readonly standings: Readonly<Record<PaceStanding, number>>;\n    /** Revisions bearing a counted placement. */\n    readonly pages: number;\n    /** Distinct trees across them, which is pages rather than versions of pages. */\n    readonly trees: number;\n    /** Counted placements whose words are a floor, because a type in them declares no `copy`. */\n    readonly floored: number;\n    /**\n     * Counted placements that are their page's root.\n     */\n    readonly whole: number;\n    /**\n     * Page views that reached a counted placement, at each page's own door scale,\n     * counted once per page it stands on.\n     */\n    readonly readers: number | null;\n    /**\n     * Time on screen across the counted placements, added, exactly as the rows\n     * hold it.\n     */\n    readonly dwellMs: number;\n    /**\n     * The time its words take the readers who reached it: `readers × wordsWithin\n     * × msPerWord`, added over the counted placements.\n     */\n    readonly needMs: number | null;\n    /**\n     * `dwellMs ÷ readers`: **the time the typical reader who reached this part\n     * had there**, which is the figure a goal's screen asks for.\n     */\n    readonly spentMs: number | null;\n    /** `needMs − dwellMs` where positive: the reading time its readers did not have. Nought where they had enough, `null` under a silence. */\n    readonly shortMs: number | null;\n    /** `dwellMs ÷ needMs`. `1` is exactly time enough. `null` under a silence. */\n    readonly pace: number | null;\n    /** The verdict, by `paceStandingOf` — so a floor can hold up anything but `skimmed`. */\n    readonly standing: PaceStanding;\n    /** Why there is no verdict, and `null` where there is one. */\n    readonly silence: KindPaceSilence | null;\n    /**\n     * Of {@link readers}, those on a page the door could not scale, so no\n     * straddle correction was applied to them.\n     */\n    readonly unscaled: number;\n    /**\n     * The pages bearing a counted placement that the door could not scale, by\n     * tree and newest revision first.\n     */\n    readonly unscaledPages: readonly UnscaledPage[];\n    /**\n     * Readings of a revision beyond the first, which were dropped.\n     */\n    readonly duplicated: number;\n    /** Door rows for one revision beyond the first, which were ignored. */\n    readonly duplicatedRows: number;\n    /** The costing rate that was applied, which is the default unless one was given. */\n    readonly wordsPerMinute: number;\n};",
+              "summary": "One part, against the time its readers had for what it says, across the pages it stands on."
+            },
+            {
+              "name": "partPaceOf",
+              "kind": "function",
+              "signature": "const partPaceOf: (nodeId: NodeId, readings: readonly PageReading[], rows: readonly StoredPageViews[], options?: LibraryPaceOptions) => PartPace",
+              "summary": "Whether the readers who reach one part have time for what it says."
+            }
+          ]
+        },
+        {
           "module": "signals/parts",
           "title": "Parts",
           "summary": "What a counter is about, joined on the server from what the page already knows.",
@@ -14043,7 +14068,7 @@
       "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 2037,
+        "packageNames": 2040,
         "otherDoors": 18,
         "doorsSharingNothing": 17,
         "widest": false,
@@ -14178,7 +14203,7 @@
       "files": 21,
       "narrower": [],
       "standing": {
-        "packageNames": 2037,
+        "packageNames": 2040,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -14240,7 +14265,7 @@
       "files": 65,
       "narrower": [],
       "standing": {
-        "packageNames": 2037,
+        "packageNames": 2040,
         "otherDoors": 18,
         "doorsSharingNothing": 17,
         "widest": false,
@@ -14814,7 +14839,7 @@
       "files": 43,
       "narrower": [],
       "standing": {
-        "packageNames": 2037,
+        "packageNames": 2040,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -14884,7 +14909,7 @@
       "files": 100,
       "narrower": [],
       "standing": {
-        "packageNames": 2037,
+        "packageNames": 2040,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -15306,7 +15331,7 @@
       "files": 81,
       "narrower": [],
       "standing": {
-        "packageNames": 2037,
+        "packageNames": 2040,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,

@@ -70654,3 +70654,111 @@ because the sweep cannot tell this from a setting* are the two places that say
 the old reason out loud, so a revert is those plus the two values. **Nothing in
 this change touches your surface** and nothing here is a request for a
 screenshot or a copy change.
+
+---
+## 2026-11-12 — *Stays on it* is answerable now, since counting began, and the range version is the one that costs rows
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom portal`
+(`apps/loom/app/(portal)/portal/[project]/signals/`, the *Goals* screen) ·
+**Status:** open — **the figure exists and nothing is blocked**; what is open is
+one screen's wording and one choice you may not need to make
+
+`docs/portal.md` has said *Stays on it waits on time on a part being counted per
+reader* twice since 8 November. It waits on nothing now.
+[0381](decisions/0381-a-parts-pace-across-pages-is-one-pooled-quotient-and-a-goals-part-is-a-reading-of-its-own.md)
+publishes `partPaceOf`, which takes a node id, the readings of the pages a goal
+covers and the deployment's page-view rows, and answers
+**`PartPace.spentMs` — the time the typical reader who reached this part had
+there**, pooled across every page it stands on.
+
+**What you hand it is the answer to *which pages*.** A goal naming pages hands
+in those pages' readings; a goal naming none hands in every page it can read. A
+reading with no row for the node costs nothing but a count, so there is no need
+to work out in advance which pages have the part.
+
+**Three things the row says that a screen should not re-derive.**
+
+1. **`spentMs` is `null` under a silence and that is not nought.** Four states,
+   each with a sentence of its own in `describePartPaceSilence`: the part stands
+   on none of the pages read, nowhere it stands reported a view, its words could
+   not be counted, or it says nothing that takes time to read. *Nobody was seen
+   on it* and *they had no time on it* are different answers, and a nought drawn
+   for the first is the one wrong thing available here.
+2. **`standing` is `skimmed`, `paced`, `lingered` or `unknown`, and only
+   `skimmed` is a safe claim** (0230, unchanged). A floor in the words holds up
+   every verdict but that one, which is why `pace` can be `null` while
+   `placements` is not.
+3. **`standings` counts the pages' own verdicts.** A part that is `paced` across
+   the deployment can be `skimmed` on one page, and that count is where a screen
+   would see it — but **which** page is not published. See below.
+
+**It is a figure since counting began, not over a range**, and that is a stated
+limit of
+[0362](decisions/0362-what-readers-did-is-counted-under-the-hour-they-did-it-in-as-a-seventh-counter-the-fold-writes-for-the-three-delegated-kinds.md)
+rather than an omission: the hourly table holds what readers **did**, and dwell
+is a thing readers *saw*. The *Goals* list already draws both idioms — a 7-day
+rate with what the goal counted since counting began beneath it — so this sits
+beside the second of those with no new sentence needed.
+
+**If you want it over a range, the ask is a part-grained hourly dwell counter**,
+and it is the expensive one this lane priced on 6 November: about 6,000 rows an
+hour for a 6,000-node page, per revision, in a table nothing sweeps. Say so and
+it is a decision of its own; nothing in 0381 forecloses it.
+
+---
+## 2026-11-12 — one part on nine pages has nine verdicts, and which page it is skimmed on is a second reading
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/part-pace.ts`) · **Status:** open — **nothing is broken and
+nothing is asked of anybody today.** Recorded so the next run does not read the
+absence as a gap
+
+`PartPace` publishes `standings`, so a screen can say *this part is paced across
+your pages and skimmed on two of them*. **It cannot say which two.** The per-page
+rows are computed inside `partPaceOf` — one `PacedPart` per reading, with its own
+pace, its own verdict and its own door — and then summed away.
+
+**Why it is not published here.** *How long do readers stay on this part* and
+*which page is it skimmed on* are two questions, and the second one has a shape
+of its own to settle: it wants a row per page with the tree, the revision and
+that page's own figures, ordered by something, and the ordering is the whole
+decision — by the reading time missing, as a deployment's falls are ordered
+(0221), or by the pace, which would let a page one reader hurried past head the
+list. Publishing the rows without settling that would be publishing a list whose
+order a screen invents.
+
+**What a future run should hold if it builds it.** The rows already exist and
+cost nothing extra to keep: the loop holds `paced.parts.find(...)` per reading,
+and each row's `readers` are already on that page's own door scale. The test to
+write first is that the per-page `dwellMs` sum to `PartPace.dwellMs` and the
+per-page scaled `readers` to `PartPace.readers`, because those two numbers are
+the only thing tying the breakdown to the figure above it.
+
+---
+## 2026-11-12 — this branch spends 50 of the names index's 148 bytes, and leaves 98
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom docs`
+(`app/(docs)/_lib/search/build.test.ts`) and **@jonathanbravecredit for the
+option** · **Status:** open — **`pnpm verify` is green and the cap is not
+tripped**; this narrows the entries of 10 November rather than closing them
+
+Measured on this branch, by the same arithmetic those entries used:
+
+| | spent | cap | room |
+| --- | --- | --- | --- |
+| published names, raw, `main` | 39,852 | 40,000 | 148 |
+| published names, raw, this branch | **39,902** | 40,000 | **98** |
+| per name | 19.037 | 24 | — |
+
+**Three names, 50 bytes, and the unit was shaped around the number.** The
+silence vocabulary a part's pace needs is the same four states a kind's pace
+has, so `KindPaceSilence` is reused as values and no `PartPaceSilence`,
+`PART_PACE_SILENCES` or `meaningOfPartPaceSilence` landed with it — which is
+three names and about 57 bytes this reading would otherwise have cost. Stated
+because the entry of 7 November asks every lane to know whether it is the one
+spending the headroom, and this time it is.
+
+**98 bytes is about five names.** #851 is still held on this cap with sixteen,
+and #859 is open against it. This lane will go on choosing units it can publish
+cheaply, but the next reading that needs a vocabulary of its own cannot be one
+of them.
