@@ -1,8 +1,11 @@
 # 0385. A reader two segments match is counted in the last one's, and the page carries it to its signals
 
-**Status:** Proposed
+**Status:** Accepted
 **Date:** 2026-11-12
 **Section:** §2 — Composition Runtime; the reasoning plane (signals)
+
+> **Accepted on 12 November 2026.** The maintainer, on the choice that a reader
+> two segments match is counted in the last one's: *"Okay, sounds good."*
 
 ## Context
 

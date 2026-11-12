@@ -53,7 +53,7 @@ written, so the two land together.
 
 *Client half, 12 November:* built on `claude/project-thread-ev3p4q` under
 [0385](decisions/0385-a-reader-two-segments-match-is-counted-in-the-last-ones-and-the-page-carries-it-to-its-signals.md)
-(Proposed). Points 1 and 4: `LivePages.rules`, read from the same answer and
+(Accepted 12 November). Points 1 and 4: `LivePages.rules`, read from the same answer and
 moved only with the pages. Point 2: `segmentOf(held, page, context)` answers
 the **last** matching rule's segment; nothing is composed yet, because the door
 answers no forms until piece 4. Point 3: `RenderOptions.audience` writes
