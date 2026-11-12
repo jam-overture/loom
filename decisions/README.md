@@ -471,4 +471,10 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0379](0379-a-file-may-publish-part-of-its-body-as-somebody-elses-code-and-a-check-that-reads-this-deployment-stops-at-the-marker.md) | A file may publish part of its body as somebody else's code, and a check that reads *this* deployment stops at the marker | Accepted | §1, the merge gate |
 | [0380](0380-the-three-walks-outside-src-tree-carry-an-explicit-stack-and-react-was-never-the-bound-on-rendering-a-deep-page.md) | The three walks outside `src/tree/` carry an explicit stack, and React was never the bound on rendering a deep page | Accepted | §2 |
 | 0381 | *No record on this branch* | — | — |
-| [0382](0382-a-routine-reads-back-what-it-posted-because-no-safe-link-length-can-be-computed-in-advance.md) | A routine reads back what it posted, because no safe link length can be computed in advance | Accepted | §1, how a run reports |
+| 0382 | *No record on this branch* | — | — |
+| 0383 | *No record on this branch* | — | — |
+| 0384 | *No record on this branch* | — | — |
+| 0385 | *No record on this branch* | — | — |
+| 0386 | *No record on this branch* | — | — |
+| 0387 | *No record on this branch* | — | — |
+| [0388](0388-a-routine-reads-back-what-it-posted-because-no-safe-link-length-can-be-computed-in-advance.md) | A routine reads back what it posted, because no safe link length can be computed in advance | Accepted | §1, how a run reports |

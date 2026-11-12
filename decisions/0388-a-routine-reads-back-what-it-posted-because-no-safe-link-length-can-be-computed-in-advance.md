@@ -1,4 +1,4 @@
-# 0382. A routine reads back what it posted, because no safe link length can be computed in advance
+# 0388. A routine reads back what it posted, because no safe link length can be computed in advance
 
 **Status:** Accepted
 **Date:** 2026-11-11

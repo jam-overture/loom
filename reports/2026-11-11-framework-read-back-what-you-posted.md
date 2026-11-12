@@ -3,7 +3,7 @@
 **`Loom daily build`, 11 November 2026, evening run.**
 Branch `framework-94-read-back-what-you-posted`, cut from `origin/main` at
 `18b72f5`. Record
-[0382](../decisions/0382-a-routine-reads-back-what-it-posted-because-no-safe-link-length-can-be-computed-in-advance.md),
+[0388](../decisions/0388-a-routine-reads-back-what-it-posted-because-no-safe-link-length-can-be-computed-in-advance.md),
 `Accepted`. `pnpm verify` **EXIT=0**, read out of the file in its own command.
 
 ![Three bodies, three incompatible boundaries, and the read-back that replaces them](2026-11-11-framework-read-back-what-you-posted.svg)
@@ -166,7 +166,12 @@ junctions, 0 run together. `decisions:index` regenerated; it notes **0381** as a
 hole, which under 0097 is a note rather than a failure — it is claimed by #856.
 
 **Numbering.** `main` holds up to 0380. #856 claims 0381 as a `Proposed` record,
-so this took **0382**.
+so this took **0382** — and so, nine minutes later, did #865, from `Loom signals`.
+Two open branches numbering one record is not a merge conflict, because they are
+different files: it is a `pnpm decisions:index` clash on `main` the moment the
+second of them lands, which is the merge gate for four surfaces. The run of
+12 November renumbered **this** record to **0388**, the next free number on
+`main` and on every open branch, and left #865 alone.
 
 **Ten mutations planted on the detector by hand, ten killed** — but four of them
 survived the first sweep, and that is the part worth reading. The four were
@@ -203,7 +208,7 @@ else.
    directory under it. **Recommendation: add `tools/` to `Loom daily build`'s
    row.** One cell. This run did not write it, because the lane table is the
    document a routine is bound by rather than one it assigns itself rows in.
-2. **Where the wrapping happens is still unknown**, and 0382 decides that it
+2. **Where the wrapping happens is still unknown**, and 0388 decides that it
    stays unknown. Four lanes have spent part of a run on it. The read-back costs
    one call; the investigation has no bound. If the maintainer wants it chased,
    it is a unit rather than a corner of one.
