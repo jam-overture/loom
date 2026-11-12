@@ -474,7 +474,7 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0382](0382-a-part-that-reported-nothing-with-a-reader-below-it-is-an-eighth-collection-fault-and-it-reaches-both-ranking-keys.md) | A part that reported nothing with a reader below it is an eighth collection fault, and it reaches both ranking keys | Accepted | §5 (reader signals), the counters |
 | 0383 | *No record on this branch* | — | — |
 | 0384 | *No record on this branch* | — | — |
-| 0385 | *No record on this branch* | — | — |
+| [0385](0385-a-reader-two-segments-match-is-counted-in-the-last-ones-and-the-page-carries-it-to-its-signals.md) | A reader two segments match is counted in the last one's, and the page carries it to its signals | Accepted | §2 (signals) |
 | 0386 | *No record on this branch* | — | — |
 | 0387 | *No record on this branch* | — | — |
 | [0388](0388-a-routine-reads-back-what-it-posted-because-no-safe-link-length-can-be-computed-in-advance.md) | A routine reads back what it posted, because no safe link length can be computed in advance | Accepted | §1, how a run reports |

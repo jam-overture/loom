@@ -8,7 +8,7 @@
       "files": 100,
       "narrower": [],
       "standing": {
-        "packageNames": 2053,
+        "packageNames": 2056,
         "otherDoors": 18,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -4246,7 +4246,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 2053,
+        "packageNames": 2056,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -4287,10 +4287,10 @@
           "reach": "loaded"
         }
       ],
-      "files": 63,
+      "files": 64,
       "narrower": [],
       "standing": {
-        "packageNames": 2053,
+        "packageNames": 2056,
         "otherDoors": 18,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -4303,7 +4303,7 @@
           {
             "specifier": "@jam-overture/loom/addressed",
             "slug": "addressed",
-            "names": 4
+            "names": 5
           }
         ],
         "collisions": []
@@ -4684,15 +4684,21 @@
               "summary": ""
             },
             {
+              "name": "LOOM_AUDIENCE_ATTRIBUTE",
+              "kind": "value",
+              "signature": "const LOOM_AUDIENCE_ATTRIBUTE = \"data-loom-audience\"",
+              "summary": ""
+            },
+            {
               "name": "EditableAttributes",
               "kind": "type",
-              "signature": "type EditableAttributes = {\n    readonly [LOOM_NODE_ATTRIBUTE]: string;\n    readonly [LOOM_TYPE_ATTRIBUTE]: string;\n    /** Root element only — see `editableAttributes`. */\n    readonly [LOOM_TREE_ATTRIBUTE]?: string;\n    readonly [LOOM_REVISION_ATTRIBUTE]?: string;\n};",
+              "signature": "type EditableAttributes = {\n    readonly [LOOM_NODE_ATTRIBUTE]: string;\n    readonly [LOOM_TYPE_ATTRIBUTE]: string;\n    /** Root element only — see `editableAttributes`. */\n    readonly [LOOM_TREE_ATTRIBUTE]?: string;\n    readonly [LOOM_REVISION_ATTRIBUTE]?: string;\n    /** Root element only, and only when the page was served to a segment. */\n    readonly [LOOM_AUDIENCE_ATTRIBUTE]?: string;\n};",
               "summary": ""
             },
             {
               "name": "editableAttributes",
               "kind": "function",
-              "signature": "const editableAttributes: (node: ElementNode, tree?: LoomTree) => EditableAttributes",
+              "signature": "const editableAttributes: (node: ElementNode, tree?: LoomTree, audience?: AudienceId) => EditableAttributes",
               "summary": "The root element additionally carries the tree it belongs to and the revision it was rendered from, which is exactly the pair an `EditIntent` needs as its base. A portal can author an intent from the DOM alone, and an intent authored against a stale render names the stale revision rather than silently claiming the current one."
             }
           ]
@@ -4964,7 +4970,7 @@
             {
               "name": "RenderOptions",
               "kind": "type",
-              "signature": "type RenderOptions = {\n    readonly resolver: PrimitiveResolver;\n    /**\n     * Absent means props are not checked against declared schemas. A registry\n     * built by §4's SDK satisfies both this and `resolver`, so wiring the same\n     * object into both is the ordinary case.\n     */\n    readonly validator?: PropsValidator;\n    /**\n     * Absent means the tree's theme is not resolved and nothing is mounted, and\n     * a tree that names one says so in a diagnostic. Supplying a registry is what\n     * bounds the palettes, font packs and style presets a proposal may name.\n     */\n    readonly themes?: ThemeRegistry;\n    /**\n     * Absent means the tree's bindings are not answered, and a tree that declares\n     * one says so in a diagnostic. Resolution is async and rendering is not, so it\n     * happens before the walk — `renderRequest` does it, and a caller driving\n     * `renderLoomTree` itself resolves with `resolveTreeData` first.\n     */\n    readonly data?: DataResolution;\n    /**\n     * Absent means the tree's submissions are not answered, and a tree that names\n     * an endpoint says so in a diagnostic. Resolution may do IO — minting a token\n     * usually does — so it happens before the walk, the same way data does;\n     * `renderRequest` does it, and a caller driving `renderLoomTree` itself\n     * resolves with `resolveTreeSubmissions` first.\n     */\n    readonly submissions?: SubmissionResolution;\n    /**\n     * The origins this deployment is willing to frame. Absent means every\n     * framable prop is refused, and each one says so in a diagnostic — the seam\n     * fails closed, because the registry *is* the allowlist and a deployment that\n     * has not written one has not agreed to run anybody's script inside its\n     * pages.\n     */\n    readonly origins?: FrameOriginRegistry;\n    /**\n     * The host's answer for the strings primitives declared — a dictionary, in the\n     * language this deployment serves. Absent means the declared strings render as\n     * their authors wrote them, which is what an untranslated deployment wants and\n     * needs no wiring: the renderer reads declarations off `resolver` when that\n     * resolver is a registry. `textResolverFor` builds one of these from a\n     * registry and a dictionary.\n     */\n    readonly text?: TextResolver;\n    /** Off by default: decoration is opt-in per request, never ambient. */\n    readonly editMode?: boolean;\n    /**\n     * Stamp each element's identity on the markup without anything else edit mode\n     * means, so a published page can say which node a reader saw or clicked.\n     */\n    readonly addressed?: boolean;\n    readonly slots?: SlotContent;\n    /**\n     * How the mounted theme reaches the elements: as the `var()` references\n     * primitives write, or as the values those references stand for.\n     */\n    readonly themeValues?: \"variables\" | \"literals\";\n};",
+              "signature": "type RenderOptions = {\n    readonly resolver: PrimitiveResolver;\n    /**\n     * Absent means props are not checked against declared schemas. A registry\n     * built by §4's SDK satisfies both this and `resolver`, so wiring the same\n     * object into both is the ordinary case.\n     */\n    readonly validator?: PropsValidator;\n    /**\n     * Absent means the tree's theme is not resolved and nothing is mounted, and\n     * a tree that names one says so in a diagnostic. Supplying a registry is what\n     * bounds the palettes, font packs and style presets a proposal may name.\n     */\n    readonly themes?: ThemeRegistry;\n    /**\n     * Absent means the tree's bindings are not answered, and a tree that declares\n     * one says so in a diagnostic. Resolution is async and rendering is not, so it\n     * happens before the walk — `renderRequest` does it, and a caller driving\n     * `renderLoomTree` itself resolves with `resolveTreeData` first.\n     */\n    readonly data?: DataResolution;\n    /**\n     * Absent means the tree's submissions are not answered, and a tree that names\n     * an endpoint says so in a diagnostic. Resolution may do IO — minting a token\n     * usually does — so it happens before the walk, the same way data does;\n     * `renderRequest` does it, and a caller driving `renderLoomTree` itself\n     * resolves with `resolveTreeSubmissions` first.\n     */\n    readonly submissions?: SubmissionResolution;\n    /**\n     * The origins this deployment is willing to frame. Absent means every\n     * framable prop is refused, and each one says so in a diagnostic — the seam\n     * fails closed, because the registry *is* the allowlist and a deployment that\n     * has not written one has not agreed to run anybody's script inside its\n     * pages.\n     */\n    readonly origins?: FrameOriginRegistry;\n    /**\n     * The host's answer for the strings primitives declared — a dictionary, in the\n     * language this deployment serves. Absent means the declared strings render as\n     * their authors wrote them, which is what an untranslated deployment wants and\n     * needs no wiring: the renderer reads declarations off `resolver` when that\n     * resolver is a registry. `textResolverFor` builds one of these from a\n     * registry and a dictionary.\n     */\n    readonly text?: TextResolver;\n    /** Off by default: decoration is opt-in per request, never ambient. */\n    readonly editMode?: boolean;\n    /**\n     * Stamp each element's identity on the markup without anything else edit mode\n     * means, so a published page can say which node a reader saw or clicked.\n     */\n    readonly addressed?: boolean;\n    /**\n     * The segment the site's server sorted this reader into, when it sorted them\n     * into one — what `segmentOf` from `@jam-overture/loom/live` answers.\n     */\n    readonly audience?: AudienceId;\n    readonly slots?: SlotContent;\n    /**\n     * How the mounted theme reaches the elements: as the `var()` references\n     * primitives write, or as the values those references stand for.\n     */\n    readonly themeValues?: \"variables\" | \"literals\";\n};",
               "summary": ""
             },
             {
@@ -5001,7 +5007,7 @@
             {
               "name": "RenderRequest",
               "kind": "type",
-              "signature": "type RenderRequest = {\n    readonly treeId: TreeId;\n    /** Decoration is a property of the request, so one process can serve both. */\n    readonly editMode: boolean;\n    /**\n     * Identity on a published page's markup, so reader signals can name the node\n     * they are about. Off when absent.\n     */\n    readonly addressed?: boolean;\n    /** Opaque host context — audience, locale, flags — passed through to the source. */\n    readonly context?: JsonObject;\n};",
+              "signature": "type RenderRequest = {\n    readonly treeId: TreeId;\n    /** Decoration is a property of the request, so one process can serve both. */\n    readonly editMode: boolean;\n    /**\n     * Identity on a published page's markup, so reader signals can name the node\n     * they are about. Off when absent.\n     */\n    readonly addressed?: boolean;\n    /**\n     * The segment the site's server sorted this reader into, written on an\n     * addressed page's root so its signals are filed under it. See\n     * `RenderOptions.audience`.\n     */\n    readonly audience?: AudienceId;\n    /** Opaque host context — audience, locale, flags — passed through to the source. */\n    readonly context?: JsonObject;\n};",
               "summary": ""
             },
             {
@@ -5243,7 +5249,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 2053,
+        "packageNames": 2056,
         "otherDoors": 18,
         "doorsSharingNothing": 17,
         "widest": false,
@@ -5251,7 +5257,7 @@
           {
             "specifier": "@jam-overture/loom/react",
             "slug": "react",
-            "names": 4
+            "names": 5
           }
         ],
         "collisions": []
@@ -5298,6 +5304,12 @@
               "kind": "value",
               "signature": "const LOOM_REVISION_ATTRIBUTE = \"data-loom-revision\"",
               "summary": ""
+            },
+            {
+              "name": "LOOM_AUDIENCE_ATTRIBUTE",
+              "kind": "value",
+              "signature": "const LOOM_AUDIENCE_ATTRIBUTE = \"data-loom-audience\"",
+              "summary": ""
             }
           ]
         }
@@ -5318,7 +5330,7 @@
       "files": 220,
       "narrower": [],
       "standing": {
-        "packageNames": 2053,
+        "packageNames": 2056,
         "otherDoors": 18,
         "doorsSharingNothing": 17,
         "widest": false,
@@ -5788,7 +5800,7 @@
       "files": 81,
       "narrower": [],
       "standing": {
-        "packageNames": 2053,
+        "packageNames": 2056,
         "otherDoors": 18,
         "doorsSharingNothing": 17,
         "widest": false,
@@ -6876,7 +6888,7 @@
       "files": 38,
       "narrower": [],
       "standing": {
-        "packageNames": 2053,
+        "packageNames": 2056,
         "otherDoors": 18,
         "doorsSharingNothing": 17,
         "widest": false,
@@ -7441,7 +7453,7 @@
       "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 2053,
+        "packageNames": 2056,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -7644,7 +7656,7 @@
       "files": 45,
       "narrower": [],
       "standing": {
-        "packageNames": 2053,
+        "packageNames": 2056,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -8688,7 +8700,7 @@
       "files": 61,
       "narrower": [],
       "standing": {
-        "packageNames": 2053,
+        "packageNames": 2056,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -9067,7 +9079,7 @@
       "files": 45,
       "narrower": [],
       "standing": {
-        "packageNames": 2053,
+        "packageNames": 2056,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -9319,10 +9331,10 @@
       "slug": "live",
       "types": "./dist/live/index.d.ts",
       "requires": [],
-      "files": 14,
+      "files": 16,
       "narrower": [],
       "standing": {
-        "packageNames": 2053,
+        "packageNames": 2056,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -9338,8 +9350,8 @@
             {
               "name": "LivePages",
               "kind": "type",
-              "signature": "type LivePages = {\n    /** The live pages, by the id of the page each one is. */\n    readonly pages: ReadonlyMap<TreeId, LoomTree>;\n    /** The entity tag the door gave for exactly these pages, if it gave one. */\n    readonly tag: string | undefined;\n    /** When the door last answered, whether it answered pages or `304`. */\n    readonly pulledAt: number | undefined;\n    /** When these pages arrived, which is older than `pulledAt` after a `304`. */\n    readonly freshAt: number | undefined;\n    /** Failed pulls since the last one the door answered. Zero while current. */\n    readonly failures: number;\n};",
-              "summary": "What a pull leaves behind: the pages, the tag that names them, and enough of the last outcome to say whether the site is current."
+              "signature": "type LivePages = {\n    /** The live pages, by the id of the page each one is. */\n    readonly pages: ReadonlyMap<TreeId, LoomTree>;\n    /**\n     * Each live page's segment rules, in the order the portal set. A page with\n     * none is absent, and every reader of it is in no segment.\n     */\n    readonly rules: ReadonlyMap<TreeId, readonly AudienceRule[]>;\n    /** The entity tag the door gave for exactly these pages, if it gave one. */\n    readonly tag: string | undefined;\n    /** When the door last answered, whether it answered pages or `304`. */\n    readonly pulledAt: number | undefined;\n    /** When these pages arrived, which is older than `pulledAt` after a `304`. */\n    readonly freshAt: number | undefined;\n    /** Failed pulls since the last one the door answered. Zero while current. */\n    readonly failures: number;\n};",
+              "summary": "What a pull leaves behind: the pages, the rules that sort their readers, the tag that names both, and enough of the last outcome to say whether the site is current."
             },
             {
               "name": "NO_LIVE_PAGES",
@@ -9352,6 +9364,12 @@
               "kind": "function",
               "signature": "const livePageOf: (held: LivePages, page: TreeId) => LoomTree | undefined",
               "summary": "The live page for this page id, or `undefined` to render the page as built."
+            },
+            {
+              "name": "segmentOf",
+              "kind": "function",
+              "signature": "const segmentOf: (held: LivePages, page: TreeId, context: JsonObject | undefined) => AudienceId | undefined",
+              "summary": "The segment this reader of this page is in, or `undefined` for none — which is `aud_everyone`, and is what a page with no rules answers for every reader."
             },
             {
               "name": "livePagesHeld",
@@ -9391,10 +9409,16 @@
               "summary": "Why a pull did not move what the server holds."
             },
             {
+              "name": "LivePageRules",
+              "kind": "type",
+              "signature": "type LivePageRules = {\n    readonly treeId: TreeId;\n    readonly rules: readonly AudienceRule[];\n};",
+              "summary": "One page's segment rules as the door answers them: the page, and its list in the order the portal set."
+            },
+            {
               "name": "SitePullOutcome",
               "kind": "type",
-              "signature": "type SitePullOutcome = {\n    readonly kind: \"fresh\";\n    readonly pages: readonly LoomTree[];\n    readonly tag: string | undefined;\n} | {\n    readonly kind: \"unchanged\";\n} | {\n    readonly kind: \"failed\";\n    readonly failure: SitePullFailure;\n};",
-              "summary": "What one pull did: brought pages, confirmed the ones held, or failed."
+              "signature": "type SitePullOutcome = {\n    readonly kind: \"fresh\";\n    readonly pages: readonly LoomTree[];\n    readonly rules: readonly LivePageRules[];\n    readonly tag: string | undefined;\n} | {\n    readonly kind: \"unchanged\";\n} | {\n    readonly kind: \"failed\";\n    readonly failure: SitePullFailure;\n};",
+              "summary": "What one pull did: brought pages and their rules, confirmed the ones held, or failed."
             },
             {
               "name": "PullFetch",
@@ -9497,7 +9521,7 @@
         }
       ],
       "standing": {
-        "packageNames": 2053,
+        "packageNames": 2056,
         "otherDoors": 18,
         "doorsSharingNothing": 16,
         "widest": true,
@@ -14146,7 +14170,7 @@
       "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 2053,
+        "packageNames": 2056,
         "otherDoors": 18,
         "doorsSharingNothing": 17,
         "widest": false,
@@ -14281,7 +14305,7 @@
       "files": 21,
       "narrower": [],
       "standing": {
-        "packageNames": 2053,
+        "packageNames": 2056,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -14343,7 +14367,7 @@
       "files": 65,
       "narrower": [],
       "standing": {
-        "packageNames": 2053,
+        "packageNames": 2056,
         "otherDoors": 18,
         "doorsSharingNothing": 17,
         "widest": false,
@@ -14917,7 +14941,7 @@
       "files": 43,
       "narrower": [],
       "standing": {
-        "packageNames": 2053,
+        "packageNames": 2056,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -14987,7 +15011,7 @@
       "files": 100,
       "narrower": [],
       "standing": {
-        "packageNames": 2053,
+        "packageNames": 2056,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -15409,7 +15433,7 @@
       "files": 81,
       "narrower": [],
       "standing": {
-        "packageNames": 2053,
+        "packageNames": 2056,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,

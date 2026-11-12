@@ -1,3 +1,4 @@
+import type { AudienceId } from "../audience/audience.js"
 import type { DataRegistry } from "../data/adapter.js"
 import { resolveTreeData } from "../data/resolve.js"
 import type { FrameOriginRegistry } from "../frame/origin.js"
@@ -38,6 +39,12 @@ export type RenderRequest = {
    * they are about. Off when absent (0136).
    */
   readonly addressed?: boolean
+  /**
+   * The segment the site's server sorted this reader into, written on an
+   * addressed page's root so its signals are filed under it. See
+   * `RenderOptions.audience`.
+   */
+  readonly audience?: AudienceId
   /** Opaque host context — audience, locale, flags — passed through to the source. */
   readonly context?: JsonObject
 }
@@ -160,6 +167,7 @@ export const renderRequest = async (
     resolver: dependencies.resolver,
     editMode: request.editMode,
     ...(request.addressed ? { addressed: true } : {}),
+    ...(request.audience === undefined ? {} : { audience: request.audience }),
     ...(dependencies.validator ? { validator: dependencies.validator } : {}),
     ...(dependencies.themes ? { themes: dependencies.themes } : {}),
     ...(data ? { data } : {}),

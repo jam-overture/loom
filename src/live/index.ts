@@ -17,8 +17,11 @@
  *   `DEFAULT_FIRST_WAIT_MS`. Every pull after that runs beside requests, on a
  *   timer, and no reader waits on it.
  * - **Loom never learns who a reader is.** The request carries the project's
- *   key and the tag of what is held, and nothing else; selection for an
- *   audience (0263) happens afterwards, here, against pages already held.
+ *   key and the tag of what is held, and nothing else. The door answers every
+ *   page's segment rules beside the pages (0371), and sorting a reader into a
+ *   segment happens afterwards, here, against rules already held: `segmentOf`
+ *   reads the context the host's server built and answers a segment's name,
+ *   and nothing about the reader leaves the process.
  * - **A failed pull costs freshness, never the page** (0358 clause 4). Every
  *   way a pull can fail leaves the last pages whole, and a server with none
  *   renders every page as it was built.
@@ -33,8 +36,17 @@
  * })
  *
  * // wherever a page is rendered, with the tree the site was built with
- * const tree = livePageOf(await live.ready(), builtTree.treeId) ?? builtTree
+ * const held = await live.ready()
+ * const tree = livePageOf(held, builtTree.treeId) ?? builtTree
+ *
+ * // what this server knows about the request, in the keys the segments' rules read
+ * const audience = segmentOf(held, builtTree.treeId, { device: "phone", returning: true })
+ *
+ * renderLoomTree(tree, { resolver, addressed: true, audience })
  * ```
+ *
+ * The page's signals are filed under the segment it was rendered for (0284):
+ * the root carries it, and the broadcaster reads it from there.
  */
 
 export {
@@ -42,6 +54,7 @@ export {
   livePageOf,
   livePagesHeld,
   NO_LIVE_PAGES,
+  segmentOf,
   type LivePages,
 } from "./pages.js"
 export {
@@ -51,6 +64,7 @@ export {
   livePagesUrlOf,
   pullLivePages,
   withPullOutcome,
+  type LivePageRules,
   type PullFetch,
   type PullLivePagesOptions,
   type SitePullFailure,
