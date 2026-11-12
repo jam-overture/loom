@@ -8,7 +8,7 @@
       "files": 100,
       "narrower": [],
       "standing": {
-        "packageNames": 2040,
+        "packageNames": 2056,
         "otherDoors": 18,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -4246,7 +4246,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 2040,
+        "packageNames": 2056,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -4290,7 +4290,7 @@
       "files": 64,
       "narrower": [],
       "standing": {
-        "packageNames": 2040,
+        "packageNames": 2056,
         "otherDoors": 18,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -5249,7 +5249,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 2040,
+        "packageNames": 2056,
         "otherDoors": 18,
         "doorsSharingNothing": 17,
         "widest": false,
@@ -5330,7 +5330,7 @@
       "files": 220,
       "narrower": [],
       "standing": {
-        "packageNames": 2040,
+        "packageNames": 2056,
         "otherDoors": 18,
         "doorsSharingNothing": 17,
         "widest": false,
@@ -5800,7 +5800,7 @@
       "files": 81,
       "narrower": [],
       "standing": {
-        "packageNames": 2040,
+        "packageNames": 2056,
         "otherDoors": 18,
         "doorsSharingNothing": 17,
         "widest": false,
@@ -6888,7 +6888,7 @@
       "files": 38,
       "narrower": [],
       "standing": {
-        "packageNames": 2040,
+        "packageNames": 2056,
         "otherDoors": 18,
         "doorsSharingNothing": 17,
         "widest": false,
@@ -7453,7 +7453,7 @@
       "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 2040,
+        "packageNames": 2056,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -7656,7 +7656,7 @@
       "files": 45,
       "narrower": [],
       "standing": {
-        "packageNames": 2040,
+        "packageNames": 2056,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -8700,7 +8700,7 @@
       "files": 61,
       "narrower": [],
       "standing": {
-        "packageNames": 2040,
+        "packageNames": 2056,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -9079,7 +9079,7 @@
       "files": 45,
       "narrower": [],
       "standing": {
-        "packageNames": 2040,
+        "packageNames": 2056,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -9334,7 +9334,7 @@
       "files": 16,
       "narrower": [],
       "standing": {
-        "packageNames": 2040,
+        "packageNames": 2056,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -9508,7 +9508,7 @@
       "slug": "signals",
       "types": "./dist/signals/index.d.ts",
       "requires": [],
-      "files": 85,
+      "files": 86,
       "narrower": [
         {
           "specifier": "@jam-overture/loom/signals/broadcast",
@@ -9521,7 +9521,7 @@
         }
       ],
       "standing": {
-        "packageNames": 2040,
+        "packageNames": 2056,
         "otherDoors": 18,
         "doorsSharingNothing": 16,
         "widest": true,
@@ -11445,7 +11445,7 @@
             {
               "name": "CollectionFault",
               "kind": "type",
-              "signature": "type CollectionFault =\n/**\n * The window's counters hold readers of this revision and there is no\n * page-view row at the door for it.\n */\n\"door-unscaled\"\n/**\n * The door row is there, something counted readers of this revision — a\n * rollup's appearances, or the counters themselves — and nothing has ever\n * said a page view *began*.\n */\n | \"openings-unmarked\"\n/**\n * The revision's distinct counts are inflated past\n * {@link COUNTS_INFLATED_ABOVE}.\n */\n | \"counts-inflated\"\n/**\n * Page views of this revision are waiting to be folded and the last fold of\n * it was longer ago than the deployment said its collection takes.\n */\n | \"collection-stalled\"\n/**\n * The window holds uses of this page and credits none of them to a reader.\n */\n | \"actions-uncredited\"\n/**\n * Counters filed under this tree and revision that name nodes the tree does\n * not contain, or the same row handed in twice.\n */\n | \"rows-mishandled\"\n/**\n * The window holds two audiences' counters for this page and the reading was\n * taken of neither.\n */\n | \"audiences-mixed\";",
+              "signature": "type CollectionFault =\n/**\n * The window's counters hold readers of this revision and there is no\n * page-view row at the door for it.\n */\n\"door-unscaled\"\n/**\n * The door row is there, something counted readers of this revision — a\n * rollup's appearances, or the counters themselves — and nothing has ever\n * said a page view *began*.\n */\n | \"openings-unmarked\"\n/**\n * The revision's distinct counts are inflated past\n * {@link COUNTS_INFLATED_ABOVE}.\n */\n | \"counts-inflated\"\n/**\n * Page views of this revision are waiting to be folded and the last fold of\n * it was longer ago than the deployment said its collection takes.\n */\n | \"collection-stalled\"\n/**\n * The window holds uses of this page and credits none of them to a reader.\n */\n | \"actions-uncredited\"\n/**\n * A part of this page reported nothing while a part **inside it** reported\n * being reached.\n */\n | \"parts-unreporting\"\n/**\n * Counters filed under this tree and revision that name nodes the tree does\n * not contain, or the same row handed in twice.\n */\n | \"rows-mishandled\"\n/**\n * The window holds two audiences' counters for this page and the reading was\n * taken of neither.\n */\n | \"audiences-mixed\";",
               "summary": "Something wrong with what a deployment is collecting, rather than a quiet window."
             },
             {
@@ -11511,7 +11511,7 @@
             {
               "name": "PageHealth",
               "kind": "type",
-              "signature": "type PageHealth = {\n    readonly treeId: TreeId;\n    readonly revision: number;\n    /**\n     * The audience this row is about, or `null` where the reading named none.\n     */\n    readonly audienceId: AudienceId | null;\n    readonly standing: HealthStanding;\n    /**\n     * Every fault, in the order {@link COLLECTION_FAULTS} publishes them, which is\n     * the order they are worth reading in: the one that costs the denominator\n     * first, the three that are the deployment's, then the caller's.\n     */\n    readonly faults: readonly CollectionFault[];\n    /**\n     * The window's view floor, carried through from the reading unchanged.\n     */\n    readonly views: number;\n    /**\n     * Page views counted at the door, exact, or `null` where this revision has no\n     * row.\n     */\n    readonly arrivals: number | null;\n    /** The same page views as the rollups saw them, or `null` with no row. */\n    readonly appearances: number | null;\n    /** This revision's own straddle rate, or `null` where nothing has opened. */\n    readonly inflation: number | null;\n    /**\n     * Openings no rollup has folded yet, which is a figure and never a fault here.\n     */\n    readonly pending: number;\n    /**\n     * When a rollup last folded a window holding page views of this revision, or\n     * `null` where nothing attests one — including every revision with no door\n     * row at all.\n     */\n    readonly foldedAt: string | null;\n    /** Counters naming nodes this revision does not contain. */\n    readonly orphaned: number;\n    /** Node counters and door rows handed in more than once, added. */\n    readonly doubled: number;\n};",
+              "signature": "type PageHealth = {\n    readonly treeId: TreeId;\n    readonly revision: number;\n    /**\n     * The audience this row is about, or `null` where the reading named none.\n     */\n    readonly audienceId: AudienceId | null;\n    readonly standing: HealthStanding;\n    /**\n     * Every fault, in the order {@link COLLECTION_FAULTS} publishes them, which is\n     * the order they are worth reading in: the one that costs the denominator\n     * first, the four that are the deployment's, then the caller's.\n     */\n    readonly faults: readonly CollectionFault[];\n    /**\n     * The window's view floor, carried through from the reading unchanged.\n     */\n    readonly views: number;\n    /**\n     * Page views counted at the door, exact, or `null` where this revision has no\n     * row.\n     */\n    readonly arrivals: number | null;\n    /** The same page views as the rollups saw them, or `null` with no row. */\n    readonly appearances: number | null;\n    /** This revision's own straddle rate, or `null` where nothing has opened. */\n    readonly inflation: number | null;\n    /**\n     * Openings no rollup has folded yet, which is a figure and never a fault here.\n     */\n    readonly pending: number;\n    /**\n     * When a rollup last folded a window holding page views of this revision, or\n     * `null` where nothing attests one — including every revision with no door\n     * row at all.\n     */\n    readonly foldedAt: string | null;\n    /** Counters naming nodes this revision does not contain. */\n    readonly orphaned: number;\n    /** Node counters and door rows handed in more than once, added. */\n    readonly doubled: number;\n    /**\n     * Parts that reported nothing while a part inside them reported being\n     * reached, which is what `parts-unreporting` is raised on.\n     */\n    readonly unreporting: number;\n};",
               "summary": "One revision of one page, and what is wrong with what was collected about it."
             },
             {
@@ -13231,6 +13231,109 @@
           ]
         },
         {
+          "module": "signals/rhythm",
+          "title": "Rhythm",
+          "summary": "**The two ways a month of hours can be drawn, and the one of them that is a question nothing else here asks.**",
+          "symbols": [
+            {
+              "name": "ARRIVAL_DAY_MS",
+              "kind": "value",
+              "signature": "const ARRIVAL_DAY_MS = 86400000",
+              "summary": "A day, in the unit the counters are kept in. The prefix is `ARRIVAL_HOUR_MS`'."
+            },
+            {
+              "name": "HOURS_IN_DAY",
+              "kind": "value",
+              "signature": "const HOURS_IN_DAY = 24",
+              "summary": "How many hours a day of these counters has, which is what a shape has bars."
+            },
+            {
+              "name": "RhythmOptions",
+              "kind": "type",
+              "signature": "type RhythmOptions = {\n    /**\n     * Whole hours to add to UTC before the day is cut and its hours are named.\n     */\n    readonly offsetHours?: number;\n};",
+              "summary": "What either fold may be told, which is where the reader's midnight is."
+            },
+            {
+              "name": "DayBucket",
+              "kind": "type",
+              "signature": "type DayBucket = {\n    /** The instant the day began, at this series' offset. */\n    readonly day: number;\n    /** What was counted in it, partial hours included. */\n    readonly count: number;\n    /** How many of its twenty-four hours the series could speak for. */\n    readonly hours: number;\n    /** Whether all twenty-four are present and every one of them over. */\n    readonly whole: boolean;\n};",
+              "summary": "One day of a range, which is one bar."
+            },
+            {
+              "name": "DaySeries",
+              "kind": "type",
+              "signature": "type DaySeries = {\n    /** The range the series was taken over, carried through unchanged. */\n    readonly range: ArrivalRange;\n    /**\n     * One entry per day, ascending, dense.\n     */\n    readonly days: readonly DayBucket[];\n    /** The sum over the days, which is the sum over the hours they were folded from. */\n    readonly count: number;\n    /** The offset the days were cut at, in whole hours from UTC. */\n    readonly offsetHours: number;\n    /** Whether the range begins before counting did, carried through from the series. */\n    readonly clipped: boolean;\n    /** How many of the days above are not whole, which is the two edges and whatever a clock cut. */\n    readonly partial: number;\n};",
+              "summary": "An hourly series folded into its days."
+            },
+            {
+              "name": "DayHour",
+              "kind": "type",
+              "signature": "type DayHour = {\n    /** The hour of the day, 0 to 23, at this shape's offset. */\n    readonly hour: number;\n    /** How many days contributed a whole hour here. */\n    readonly days: number;\n    /** What was counted in those hours, which is nought where no day could speak. */\n    readonly count: number;\n    /**\n     * The mean over the days that could speak for this hour.\n     */\n    readonly perDay?: number;\n};",
+              "summary": "One hour of the day, over every day of a range."
+            },
+            {
+              "name": "DayShapeSilence",
+              "kind": "type",
+              "signature": "type DayShapeSilence =\n/** Nothing has ever been counted in this scope, so the series it folds is empty. */\n\"unmeasured\"\n/**\n * The range holds hours and not one of them is over.\n */\n | \"unsettled\";",
+              "summary": "Why a shape has nothing to say about any hour of the day."
+            },
+            {
+              "name": "DayShape",
+              "kind": "type",
+              "signature": "type DayShape = {\n    /** Twenty-four entries, ascending from hour 0. */\n    readonly hours: readonly DayHour[];\n    /** What was counted into the shape: the range's whole hours, summed. */\n    readonly count: number;\n    /**\n     * What the range counted and the shape left out, because the hour was not over.\n     */\n    readonly incomplete: number;\n    /** How many days contributed any whole hour at all. */\n    readonly days: number;\n    /**\n     * Whether every hour of the day rests on the same number of days.\n     */\n    readonly even: boolean;\n    /** The offset the hours were named at, in whole hours from UTC. */\n    readonly offsetHours: number;\n    /** Why there is nothing to read, where there is nothing. */\n    readonly silence?: DayShapeSilence;\n};",
+              "summary": "The hours of a reader's day on this deployment, over whatever range was read."
+            },
+            {
+              "name": "daySeriesOf",
+              "kind": "function",
+              "signature": "const daySeriesOf: <Hour extends SeriesHour>(series: HourlyReading<Hour>, count: (hour: Hour) => number, options?: RhythmOptions) => DaySeries",
+              "summary": "An hourly series folded into its days."
+            },
+            {
+              "name": "dayShapeOf",
+              "kind": "function",
+              "signature": "const dayShapeOf: <Hour extends SeriesHour>(series: HourlyReading<Hour>, count: (hour: Hour) => number, options?: RhythmOptions) => DayShape",
+              "summary": "The hours of the day a series' whole hours fell in."
+            },
+            {
+              "name": "arrivalDaysOf",
+              "kind": "function",
+              "signature": "const arrivalDaysOf: (series: ArrivalSeries, options?: RhythmOptions) => DaySeries",
+              "summary": "Page views by day, from the series a surface already drew by hour."
+            },
+            {
+              "name": "actedDaysOf",
+              "kind": "function",
+              "signature": "const actedDaysOf: (series: ActedSeries, options?: RhythmOptions) => DaySeries",
+              "summary": "What readers did, by day, in the kind the series is of."
+            },
+            {
+              "name": "arrivalDayShapeOf",
+              "kind": "function",
+              "signature": "const arrivalDayShapeOf: (series: ArrivalSeries, options?: RhythmOptions) => DayShape",
+              "summary": "When readers arrive, over every day the range could speak for."
+            },
+            {
+              "name": "actedDayShapeOf",
+              "kind": "function",
+              "signature": "const actedDayShapeOf: (series: ActedSeries, options?: RhythmOptions) => DayShape",
+              "summary": "When readers do a thing, over every day the range could speak for."
+            },
+            {
+              "name": "busiestHoursIn",
+              "kind": "function",
+              "signature": "const busiestHoursIn: (shape: DayShape, most?: number) => readonly DayHour[]",
+              "summary": "The hours of the day with the most, busiest first."
+            },
+            {
+              "name": "quietestHoursIn",
+              "kind": "function",
+              "signature": "const quietestHoursIn: (shape: DayShape, fewest?: number) => readonly DayHour[]",
+              "summary": "The hours of the day with the least, quietest first."
+            }
+          ]
+        },
+        {
           "module": "signals/rollup",
           "title": "Rollup",
           "summary": "Many views, folded into the durable artefact: per-node-per-revision counters, and the funnel pairs a deployment asked about.",
@@ -14067,7 +14170,7 @@
       "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 2040,
+        "packageNames": 2056,
         "otherDoors": 18,
         "doorsSharingNothing": 17,
         "widest": false,
@@ -14202,7 +14305,7 @@
       "files": 21,
       "narrower": [],
       "standing": {
-        "packageNames": 2040,
+        "packageNames": 2056,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -14264,7 +14367,7 @@
       "files": 65,
       "narrower": [],
       "standing": {
-        "packageNames": 2040,
+        "packageNames": 2056,
         "otherDoors": 18,
         "doorsSharingNothing": 17,
         "widest": false,
@@ -14838,7 +14941,7 @@
       "files": 43,
       "narrower": [],
       "standing": {
-        "packageNames": 2040,
+        "packageNames": 2056,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -14908,7 +15011,7 @@
       "files": 100,
       "narrower": [],
       "standing": {
-        "packageNames": 2040,
+        "packageNames": 2056,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -15330,7 +15433,7 @@
       "files": 81,
       "narrower": [],
       "standing": {
-        "packageNames": 2040,
+        "packageNames": 2056,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
