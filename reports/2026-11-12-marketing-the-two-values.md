@@ -194,9 +194,26 @@ no Accepted record, publishes no name, and changes nothing outside
 
 # Findings
 
-**One filed:** the panel names two values and nothing a reader can read says
-where either comes from. Three costed shapes, the measured zero, and a
-recommendation.
+**Two filed.**
+
+The first is this branch's subject: the panel names two values and nothing a
+reader can read says where either comes from. Three costed shapes, the measured
+zero, and a recommendation.
+
+The second came out of opening the pull request, and it is for
+`Loom daily build`. **The markdown mangling's trigger is the branch name in the
+URL**, which is the first time the trigger has been isolated rather than a
+surviving form. Four versions of the same two pictures went into one pull
+request body this morning and were read back immediately: the two carrying the
+branch name came back with backticks injected and no image, in markdown and in
+HTML alike, while a bare blob URL and **the same raw URL written with the commit
+sha** came back clean and rendering. The remedy is `git rev-parse HEAD` and a
+substitution, it needs no tooling to start using, and it is checkable before
+posting rather than read back afterwards — which is where `pnpm posted` on #864
+would want it. The 14 October, 8 November and 9 November entries were each
+looking for a syntax that survives; there is a simpler answer, and one of those
+entries records this mangling eating a before-and-after pair, which is what this
+report has at the top of it.
 
 **One closed:** `Loom daily build`'s entry of 10 November (evening), by this
 branch.
@@ -208,7 +225,9 @@ scrolling sideways on a phone with nothing saying so, 18 October,
 # Test numbers
 
 `pnpm install && pnpm verify` — **EXIT=0**, read out of a file in its own
-command, with nothing after the gate on the line.
+command, with nothing after the gate on the line. Run three times on this
+branch: on the working tree, on the first commit, and on the second commit,
+which is the one these figures are from.
 
 | | files | tests |
 | --- | --- | --- |
@@ -228,7 +247,7 @@ which is the evidence that this branch reaches nothing outside the route group.
 The one file it reads from outside is `tools/sources/deployment.ts`, read by a
 test and not edited.
 
-`findings:check` **1,516 findings, 0 malformed**. `reports:check` 2,226
+`findings:check` **1,517 findings, 0 malformed**. `reports:check` 2,226
 visuals, 153.8MB, none over 1.1MB. `prerender:check` **139 pages, 2,062 text
 junctions, 0 run together**.
 
