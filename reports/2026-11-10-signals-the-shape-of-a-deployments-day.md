@@ -286,6 +286,66 @@ whose unit is the door would owe.
 are counts against a clock, with no key, no address and no join that would need
 one. Deferred and untouched, as it was.
 
+## After the merge, 12 November
+
+**This section was written after #851 merged**, by the run that opened it, and it
+is here because the pull request's own history is the only other place the two
+days between would be recorded.
+
+**`Loom merge` held the branch on 10 November, and the thing it held it for is
+gone.** Its comment was *Not merged — needs your decision*: with both conflicts
+resolved, `pnpm verify` failed on the `(docs)` **names index** cap —
+`searchNames()` at 40,093 bytes against 40,000, of which **241 bytes were this
+branch's sixteen names** and the other 148 were `main`'s own margin, spent by
+three merges that day. It declined to raise a cap or to choose what comes out of
+a search box, and asked. **#859 answered it from the other direction on the
+11th** — *front-code the published names file*, **39,852 → 27,046 bytes** — so
+the budget that had 148 bytes left has about twelve thousand now. The question
+it asked is still worth the week it asked for, one cap over from 0353.
+
+`Loom merge` then merged `main` in itself, resolved `docs/signals.md` exactly as
+its comment said it would (§81 then §82, with this step's stale note about §81
+being on an open branch dropped, because §81 is on `main` now), renumbered the
+record, and regenerated the index and the reference.
+
+**The record is 0389 and was written as 0376.** #850 claimed 0376 eleven minutes
+earlier on a branch this one could not see and merged first, so it keeps the
+number (0097). Every reference travelled with it. The one place 0376 still
+appears in this lane's text is the mangling finding's table, which quotes the
+pull request body as it was composed on the 10th and now says so.
+
+**The gate on the merged head, which is a different tree from the one above.**
+
+| | files | tests |
+| --- | --- | --- |
+| framework and tools | 284 | **6,875** |
+| application | 484 | **7,862** |
+
+**14,737 pass, EXIT=0**, read out of `verify8.exit` in its own command. Nothing
+in this branch changed to get there: the two folds, their tests and the record
+were byte-identical to what was gated on the 10th.
+
+**One red on the way, and it was the instrument rather than the change.** The
+first gate on the merged head was **EXIT=1** — `tools/sources/mocks.test.ts >
+installs no mock whose effect depends on what ran before it`, *Test timed out in
+5000ms*. That file's fourteen tests take **822 ms** run alone; the timeout landed
+while the `|postgres|` suites were running beside it. It is the one
+whole-repository sweep 0375 did not reach — four of the five in `tools/sources/`
+take `sweepBudget(sources)` and this one still runs on the fixed five seconds —
+and this branch added **one** of the 500-plus files it reads, which `files.ts`
+prices at about half a millisecond. One re-run of the whole gate was green.
+**Filed for `Loom daily build` with the measurement rather than fixed**, because
+`tools/` is not this lane's and nothing is red: the remedy is
+`{ timeout: sweepBudget(suites) }` on two `it`s, spelled as its four siblings
+spell it.
+
+**Why this is a second pull request rather than a commit on the first.** The
+three text changes above were pushed to the branch **ten minutes after #851
+merged**, so they never reached `main` — a merged pull request is finished and
+cannot carry them (`docs/routines.md`). They are re-applied here off `main`, with
+0375 and 0376 cited by number and path rather than linked, which is the form
+0388 settled on 11 November while this branch was waiting.
+
 ## Working beside the framework lane
 
 `Loom daily build`'s open branch (#847) does not touch `src/signals/`. **#848 is
