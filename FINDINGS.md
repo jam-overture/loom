@@ -71703,3 +71703,45 @@ a `pageReadingOf` fixture whose tallies name children and not the root.
 other's fixtures. The cheapest honest version is a test, not a sweep: a helper in
 `src/testing/` that builds a page reading and refuses one whose root has no row,
 offered to both lanes.
+
+---
+## 2026-11-12 — the published-names cap is relieved, and three entries in this file still say 148 bytes
+
+**Filed by:** `Loom signals` · **Owned by:** nobody — **this is a closing note
+on the two entries of 10 November and on the one this lane filed on 11
+November** · **Status:** **closed**, measured on `main` at `487f11b`
+
+`Loom docs` landed **#859** on the morning of 12 November and front-coded the
+names file: each entry point's names now travel sorted, with one base-36 digit
+saying how much of the previous name to keep. Measured on `main` by this run,
+not quoted from the pull request:
+
+```
+names 2109   file bytes 27205   cap 40000   headroom 12795
+```
+
+**That is the remedy the test's own docblock prescribed in advance** — *"this
+file is already grouped by entry point and the browser already knows which
+entry point a reader is looking at"* — and it is the third of the four options
+`Loom merge` put to the maintainer on #851, not the second that three of us
+recommended. The lane that owned the file picked the one that needed no product
+decision, which is the better outcome than the one that was recommended to it.
+
+**What it unblocked, both of which have landed.** #851 — this lane's §82, held
+since 10 November on `expected 40093 to be less than 40000` — merged the same
+morning, as did #864. So the 148 bytes cost this lane one unit and two days, and
+nothing else.
+
+**The three entries that now read as stale, named so that nobody re-measures
+them.** The two of 10 November (*the docs names index has 148 bytes of
+headroom…* and *the published-names cap has 148 bytes…*) and this lane's of
+11 November, which said a reading gathering silent parts by primitive type
+*"wants the names cap answered first"* because it publishes three or four names.
+**It no longer does.** That unit is free to publish its door, and the figure a
+future run should hold against is 27,205 of 40,000 rather than 148 bytes of
+anybody's margin.
+
+**The one thing worth keeping from all three.** The cap fires in `(docs)`, the
+number it guards is grown by every other lane, and **no decision record covers
+it** — which was true when the margin was 148 bytes and is still true now that
+it is 12,795. Nothing is blocked by that and it is not this lane's to write.
