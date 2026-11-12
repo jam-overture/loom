@@ -19,8 +19,9 @@
 
 import { z } from "zod"
 
+import { audienceRuleSchema, type AudienceRule } from "../audience/rule.js"
 import { ceilingOf, describeCeiling, withCeiling } from "../deadline.js"
-import type { TreeId } from "../ids.js"
+import { treeIdSchema, type TreeId } from "../ids.js"
 import { err, ok, type Result } from "../result.js"
 import { describeTreeError } from "../tree/errors.js"
 import { parseTree, type LoomTree } from "../tree/tree.js"
@@ -47,11 +48,21 @@ export type SitePullFailure = {
   readonly status?: number
 }
 
-/** What one pull did: brought pages, confirmed the ones held, or failed. */
+/**
+ * One page's segment rules as the door answers them: the page, and its list in
+ * the order the portal set (0371).
+ */
+export type LivePageRules = {
+  readonly treeId: TreeId
+  readonly rules: readonly AudienceRule[]
+}
+
+/** What one pull did: brought pages and their rules, confirmed the ones held, or failed. */
 export type SitePullOutcome =
   | {
       readonly kind: "fresh"
       readonly pages: readonly LoomTree[]
+      readonly rules: readonly LivePageRules[]
       readonly tag: string | undefined
     }
   | { readonly kind: "unchanged" }
@@ -142,8 +153,22 @@ export const livePagesUrlOf = (deployment: string): Result<URL, SitePullFailure>
   return ok(url)
 }
 
-/** The envelope the door answers. The trees inside are parsed one at a time. */
-const answerSchema = z.object({ pages: z.array(z.unknown()) })
+/**
+ * The envelope the door answers. The trees inside are parsed one at a time, so
+ * a refusal can say which page could not be read.
+ *
+ * `rules` is optional because a door from before 0371 answers none, and a site
+ * pulling from one has no segments — which is true of it rather than a guess.
+ */
+const answerSchema = z.object({
+  pages: z.array(z.unknown()),
+  rules: z.array(z.unknown()).optional(),
+})
+
+const pageRulesSchema = z.object({
+  treeId: treeIdSchema,
+  rules: z.array(audienceRuleSchema),
+})
 
 const refusals: Readonly<Record<number, string>> = {
   401: "the project key was not accepted: it is not a key this deployment issued, it has been replaced, or it is a publish key",
@@ -155,11 +180,54 @@ const unreadable = (detail: string): SitePullOutcome => ({
   failure: { reason: "unreadable", detail, status: 200 },
 })
 
+/**
+ * The rules the door answered, read against the pages it answered beside them.
+ *
+ * **Any list that cannot be read refuses the whole answer**, rather than
+ * dropping that page's rules. A page whose rules were dropped files every
+ * reader under `aud_everyone`, which is a segment's page views quietly counted
+ * as everybody's — the number that looks right for ever (0284). Keeping the
+ * last whole answer instead is what an unreadable page already does.
+ *
+ * Rules for a page the answer does not hold, and two lists for one page, are
+ * refused for the same reason two pages under one id are: the answer has no
+ * single reading.
+ */
+const readRules = (
+  answered: readonly unknown[],
+  pages: ReadonlySet<TreeId>
+): Result<readonly LivePageRules[], string> => {
+  const read: LivePageRules[] = []
+  const seen = new Set<TreeId>()
+
+  for (const [index, entry] of answered.entries()) {
+    const where = `rule list ${index + 1} of ${answered.length}`
+    const parsed = pageRulesSchema.safeParse(entry)
+
+    if (!parsed.success) {
+      const [issue] = parsed.error.issues
+      const at = issue === undefined ? "" : ` (${issue.path.join(".") || "the entry"}: ${issue.message})`
+
+      return err(`${where} is not a page's segment rules this version can read${at}`)
+    }
+
+    const { treeId } = parsed.data
+
+    if (!pages.has(treeId)) return err(`${where} is for a page the answer does not hold: ${treeId}`)
+    if (seen.has(treeId)) return err(`${where} repeats a page already answered: ${treeId}`)
+
+    seen.add(treeId)
+    read.push(parsed.data)
+  }
+
+  return ok(read)
+}
+
 const readPages = async (answer: Response): Promise<SitePullOutcome> => {
   const body = await answer.json().catch(() => undefined)
   const envelope = answerSchema.safeParse(body)
 
-  if (!envelope.success) return unreadable("the answer was not `{ pages: [...] }`")
+  if (!envelope.success) return unreadable("the answer was not `{ pages: [...], rules: [...] }`")
 
   const pages: LoomTree[] = []
   const seen = new Set<TreeId>()
@@ -185,7 +253,11 @@ const readPages = async (answer: Response): Promise<SitePullOutcome> => {
     pages.push(parsed.value)
   }
 
-  return { kind: "fresh", pages, tag: answer.headers.get("etag") ?? undefined }
+  const rules = readRules(envelope.data.rules ?? [], seen)
+
+  if (!rules.ok) return unreadable(rules.error)
+
+  return { kind: "fresh", pages, rules: rules.value, tag: answer.headers.get("etag") ?? undefined }
 }
 
 /**
@@ -292,7 +364,8 @@ export const pullLivePages = async (
  * A failed pull returns the pages untouched with one more failure against them,
  * which is clause 4 of the decision behind the pull (0358) as a line of code:
  * freshness is what is lost, never the page. A tag moves only with the pages it
- * names, so what is sent back as `If-None-Match` always describes what is held.
+ * names, so what is sent back as `If-None-Match` always describes what is held,
+ * and the rules move only with the pages they sort readers of (0371 clause 4).
  */
 export const withPullOutcome = (
   held: LivePages,
@@ -302,12 +375,11 @@ export const withPullOutcome = (
   if (outcome.kind === "failed") return { ...held, failures: held.failures + 1 }
   if (outcome.kind === "unchanged") return { ...held, pulledAt: at, failures: 0 }
 
-  const pages = new Map<TreeId, LoomTree>()
-
-  for (const page of outcome.pages) pages.set(page.treeId, page)
-
   return {
-    pages,
+    pages: new Map(outcome.pages.map((page) => [page.treeId, page])),
+    rules: new Map(
+      outcome.rules.filter(({ rules }) => rules.length > 0).map(({ treeId, rules }) => [treeId, rules])
+    ),
     tag: outcome.tag,
     pulledAt: at,
     freshAt: at,

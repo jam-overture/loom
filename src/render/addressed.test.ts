@@ -3,11 +3,13 @@
 import { renderToStaticMarkup } from "react-dom/server"
 import { afterEach, describe, expect, it } from "vitest"
 
+import { audienceIdSchema, DEFAULT_AUDIENCE_ID } from "../audience/audience.js"
 import { sampleTree } from "../testing/fixtures.js"
 import { testPrimitiveResolver } from "../testing/primitives.js"
 
 import {
   addressedRootIn,
+  LOOM_AUDIENCE_ATTRIBUTE,
   LOOM_NODE_ATTRIBUTE,
   LOOM_REVISION_ATTRIBUTE,
   LOOM_TREE_ATTRIBUTE,
@@ -54,6 +56,40 @@ describe("the names a render writes on a published page", () => {
 
   it("are absent from a page that did not ask to be addressed, which is what makes them worth finding", () => {
     expect(plainMarkup()).not.toContain(LOOM_TREE_ATTRIBUTE)
+  })
+})
+
+describe("the segment a published page was served to (0371)", () => {
+  const phone = audienceIdSchema.parse("aud_phone")
+  const servedTo = (audience: typeof phone): Element => {
+    const markup = renderToStaticMarkup(
+      renderLoomTree(sampleTree().tree, { resolver: testPrimitiveResolver, addressed: true, audience }).element
+    )
+
+    document.body.innerHTML = markup
+
+    return addressedRootIn(document) as Element
+  }
+
+  it("is written on the root of an addressed page, and on nothing under it", () => {
+    const root = servedTo(phone)
+
+    expect(root.getAttribute(LOOM_AUDIENCE_ATTRIBUTE)).toBe(phone)
+    expect(document.querySelectorAll(`[${LOOM_AUDIENCE_ATTRIBUTE}]`)).toHaveLength(1)
+  })
+
+  /** Saying nothing already means every reader (0284), so nothing is said. */
+  it("is not written for every reader, nor for a page served to no segment", () => {
+    expect(servedTo(DEFAULT_AUDIENCE_ID).hasAttribute(LOOM_AUDIENCE_ATTRIBUTE)).toBe(false)
+    expect(addressedMarkup()).not.toContain(LOOM_AUDIENCE_ATTRIBUTE)
+  })
+
+  it("is not written on a page that did not ask to be addressed", () => {
+    const markup = renderToStaticMarkup(
+      renderLoomTree(sampleTree().tree, { resolver: testPrimitiveResolver, audience: phone }).element
+    )
+
+    expect(markup).not.toContain(LOOM_AUDIENCE_ATTRIBUTE)
   })
 })
 

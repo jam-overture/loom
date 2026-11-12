@@ -1,0 +1,36 @@
+{
+  "baseUrl": "http://localhost:3000",
+  "outDir": "reports",
+  "shots": [
+    {
+      "path": "/why-use-it#on-your-own-site",
+      "out": "2026-11-12-marketing-the-two-values-minimal",
+      "viewport": "wide",
+      "waitFor": "#on-your-own-site",
+      "clip": "#on-your-own-site",
+      "measure": ["#on-your-own-site", "#on-your-own-site pre", "text=This is the whole of a route in a Next.js app."]
+    },
+    {
+      "path": "/why-use-it?theme=editorial#on-your-own-site",
+      "out": "2026-11-12-marketing-the-two-values-editorial",
+      "viewport": "wide",
+      "waitFor": "#on-your-own-site",
+      "clip": "#on-your-own-site"
+    },
+    {
+      "path": "/why-use-it?theme=bold#on-your-own-site",
+      "out": "2026-11-12-marketing-the-two-values-bold",
+      "viewport": "wide",
+      "waitFor": "#on-your-own-site",
+      "clip": "#on-your-own-site"
+    },
+    {
+      "path": "/why-use-it#on-your-own-site",
+      "out": "2026-11-12-marketing-the-two-values-phone",
+      "viewport": "phone",
+      "waitFor": "#on-your-own-site",
+      "clip": "#on-your-own-site",
+      "measure": ["#on-your-own-site pre"]
+    }
+  ]
+}
