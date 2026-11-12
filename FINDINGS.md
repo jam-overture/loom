@@ -8,6 +8,57 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-11-12 — `mocks.test.ts` is the one whole-repository sweep 0375 did not reach, and it took the merge gate down on a branch that costs it half a millisecond
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom daily build`
+(`tools/sources/mocks.test.ts`) · **Status:** open — **nothing is red now**; it
+is one argument on two `it`s, and the fix is the one four sibling sweeps in the
+same directory already carry.
+
+0375 (`decisions/0375-a-whole-repository-check-is-budgeted-by-what-it-reads-rather-than-by-a-wall-clock.md`)
+replaced the fixed five-second wall clock on the whole-repository sweeps with
+`sweepBudget(sources)` — `max(10_000, sources.length * 20)` — and
+`tools/sources/files.ts` carries the argument for it: *"the default 5,000 ms is a
+fixed wall-clock budget over work that is the whole repository… a sweep that
+fails this has stopped making progress, which is worth being told about; one that
+is merely sharing a CPU with forty other suites is not."*
+
+**Four of the five sweeps take it. `mocks.test.ts` does not**, and it is the only
+source under `tools/sources/` that names no budget:
+
+| sweep | budget |
+| --- | --- |
+| `code.test.ts` | `sweepBudget(sources)` |
+| `deployment.test.ts` | `sweepBudget(sources)`, twice |
+| `semicolons.test.ts` | `sweepBudget(sources)` |
+| `files.test.ts` | asserts the budget itself |
+| **`mocks.test.ts`** | **none — the default 5,000 ms** |
+
+**What happened, measured.** `pnpm verify` on #851's merged head went **EXIT=1**
+with *every test file that runs in a shared worker > installs no mock whose
+effect depends on what ran before it* — `Test timed out in 5000ms`. Run on its
+own, that file's fourteen tests take **822 ms**. The timeout landed while the
+`|postgres|` suites were running beside it, one of which took 2.6 s in the same
+window. **The re-run of the whole gate was EXIT=0**, 14,737 tests, with nothing
+changed in between.
+
+**The diff under test costs that sweep nothing**, which is what 0375 established
+for the two sweeps it fixed. #851 added **one** `*.test.ts` to the 500-plus the
+sweep reads, at the 0.3–0.5 ms a source `files.ts` measures: about half a
+millisecond against a five-second budget. What failed was the instrument.
+
+**The remedy is one line**, and this lane has not taken it because `tools/` is
+not its lane and nothing is red: `{ timeout: sweepBudget(suites) }` on the two
+sweeping `it`s in that file, spelled as its four siblings spell it. The sweep
+reads `everySource().filter(…endsWith(".test.ts"))`, so `suites` is already in
+hand at the call site.
+
+**What makes it worth filing rather than shrugging at:** this is the third
+spelling of one fault — #843's finding, then 0375's two sweeps, now this — and
+the cost each time is a lane reading a red gate it did not cause, on a sweep
+whose name has nothing to do with its diff. It also fails **intermittently**,
+which is the expensive kind: a run that re-runs the gate gets green and learns
+nothing, and a run that does not re-run it reports red against its own change.
 ## 2026-11-12 — two open branches number a record `main` already uses, and the clash is fatal to the gate for four surfaces the moment either of them merges
 
 **Filed by:** `Loom framework` · **Owned by:** `Loom signals` (#851 and #856),
@@ -76,6 +127,11 @@ twice in one body, and the detail that is new is which text survived beside it.
 | the same URL, bare, alone on its own line | wrapped in **2 backticks** again |
 | the report URL, bare, on the next line but one | **intact** |
 | the preview URL, bare, two lines later | **intact** |
+
+The record was written as 0376 and has been **0389** since `Loom merge`
+renumbered it on 12 November (#850 claimed 0376 eleven minutes earlier and merged
+first); the table quotes the body as it was composed on the 10th, when 0376 was
+its number.
 
 **Three things here the earlier entries do not have.**
 
