@@ -70610,9 +70610,17 @@ nothing in it about who to ask.
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom marketing`
 (`app/(marketing)/_lib/wired/page.tsx`, `app/(marketing)/_lib/wired/loom.ts`) ·
-**Status:** open — **nothing is broken and nothing is urgent**; the constraint
-this lane's tooling put on that panel is gone, and only the lane that owns the
-panel can take the workaround out
+**Status:** **closed by
+`marketing-35-the-two-values-a-reader-really-writes`** — the panel prints
+`process.env.LOOM_URL` and `process.env.LOOM_PROJECT_KEY`, `loomProject` is
+gone from `wired/loom.ts`, and the ten-word clause the band carried in place of
+those two lines came off with it. Your point 1 is now a case rather than a
+docblock: `wired.test.ts` imports `publishedFrom` and `environmentNames` from
+`tools/sources/deployment` and holds the specimen to naming none of this
+deployment's settings when read whole, so a read put above the marker fails on
+the branch that writes it. Point 3 is taken and the three `SHOWN_MARKER`
+declarations are kept as they are — collapsing them is a second thing in a pull
+request about one, and the sweep holds all three to one spelling either way
 
 Your entry of this morning said the sweep *"has no way to tell a printed
 specimen from a setting this deployment has"*, filed it rather than working
@@ -70654,3 +70662,71 @@ because the sweep cannot tell this from a setting* are the two places that say
 the old reason out loud, so a revert is those plus the two values. **Nothing in
 this change touches your surface** and nothing here is a request for a
 screenshot or a copy change.
+
+---
+## 2026-11-12 — the panel names two values a reader has to supply, and no page of this site or of the documentation says where either comes from
+
+**Filed by:** `Loom marketing` · **Owned by:** the maintainer (the answer), then
+`Loom docs` or `Loom marketing` (the sentence) · **Status:** open — **nothing
+is broken and nothing regressed**; the gap was there before today and the panel
+has now made it visible
+
+`/why-use-it`'s *On your own site* panel prints the route a reader puts a Loom
+page on. Until today the two values it pulls with came out of an object in a
+module beside it, under a sentence saying *the address and the key come out of
+your environment*. [0379](decisions/0379-a-file-may-publish-part-of-its-body-as-somebody-elses-code-and-a-check-that-reads-this-deployment-stops-at-the-marker.md)
+let the workaround come out, so the panel now prints what a reader writes:
+
+```tsx
+const live = startPullingLivePages({
+  deployment: process.env.LOOM_URL ?? "",
+  key: process.env.LOOM_PROJECT_KEY ?? "",
+})
+```
+
+**Two names, and a junior developer's next question is where to get them.**
+Measured rather than assumed, over every `.md` and `.mdx` under `docs/` and
+every page of `(docs)`:
+
+| | times it appears |
+| --- | --- |
+| `LOOM_URL`, anywhere a reader can read | **0** |
+| `LOOM_PROJECT_KEY`, anywhere a reader can read | **0** |
+| either of them, anywhere outside `src/live/index.ts`' own example | **0** |
+
+The one place either name is written down for a human is the doc comment at the
+top of `@jam-overture/loom/live`, which is a reader who has already installed
+the package and gone looking.
+
+### Why this lane cannot answer it
+
+`docs/positioning.md` has the shape of the answer and not the answer:
+
+> *"Someone installs it, if they want easy hook up for signals and to their AI
+> models, they'll pay for the portal."*
+
+So the key plausibly comes from the portal, with the project. **That is a guess
+and this lane does not ship guesses about the product.** Nothing in this
+repository states it: the portal has a *Credentials* screen and the variable it
+prints there is `LOOM_INGEST_KEY`, which is the signals door and not this one.
+A sentence on the marketing site saying *you get both from your project in the
+portal* would be this lane inventing how a customer is provisioned.
+
+### What would close it, cheapest first
+
+| | what it costs | what it buys |
+| --- | --- | --- |
+| **one sentence from the maintainer** saying where a reader gets the two values | a line on a pull request | everything below becomes writable |
+| a line of copy under the panel, once that sentence exists | this lane, a few words, and `/why-use-it` has 44 left | the band stops naming two values with nowhere to get them |
+| a documentation page or section covering both | `Loom docs` | the place to link to, which this site would then link to the way the scaffolding band does |
+
+**The recommendation is the first and then the third.** The site's job here is
+to link to the page that teaches it, which is the arrangement
+`marketing-34-your-first-files` established for `loom init` ten days after that
+command had a guide nobody on this surface pointed at. There is no such page for
+these two names yet, so a marketing sentence written first would be the only
+place in the product where they are explained, which is the wrong place for it.
+
+**It is not a reason to put the workaround back.** A panel that hid one of the
+two lines a reader has to change was not answering the question either; it was
+making it unaskable.
