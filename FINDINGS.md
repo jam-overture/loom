@@ -11,9 +11,21 @@ list and it is not a report.
 ## 2026-11-12 — `mocks.test.ts` is the one whole-repository sweep 0375 did not reach, and it took the merge gate down on a branch that costs it half a millisecond
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom daily build`
-(`tools/sources/mocks.test.ts`) · **Status:** open — **nothing is red now**; it
-is one argument on two `it`s, and the fix is the one four sibling sweeps in the
-same directory already carry.
+(`tools/sources/mocks.test.ts`) · **Status:** **closed by
+`framework-96-a-sweeps-budget-is-inherited`** — the argument is on the
+`describe` rather than on the two `it`s, so the next sweep written into that
+block inherits it; `tools/sources/budgets.ts` catches the other half, a file
+that names no budget at all. Recorded as
+[0390](decisions/0390-a-whole-repository-sweep-names-its-budget-on-the-block-that-holds-it.md).
+
+> **This entry was right about the fault and about the remedy**, and the one
+> thing it could not see is that its own premise — *nothing is red now* — was
+> the test 0375 had already set and the one that failed. Idle headroom is not
+> headroom: the two sweeps are 388 ms and 310 ms on an idle container, about 6x
+> under the default, which is what "not close to its budget" looked like three
+> days before it went red. So the fix is not only the one line this entry asked
+> for; the budget moved up to the block, where a fourth sweep cannot be written
+> without it.
 
 0375 (`decisions/0375-a-whole-repository-check-is-budgeted-by-what-it-reads-rather-than-by-a-wall-clock.md`)
 replaced the fixed five-second wall clock on the whole-repository sweeps with
