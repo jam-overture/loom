@@ -55,8 +55,9 @@ No decision record added. No table, no column, no `pnpm db:push`.
   pages, pooled across every page with the part, *unread*, *unplaced*).
 - `time-on-it.test.tsx`: 4 tests (verdict shown, no verdict for *unknown*, a
   silence said, counters unreadable).
-- `pnpm verify`: see the pull request description for the numbers on the
-  merged head.
+- `pnpm verify` exit 0: the package 285 files, 6,970 tests passed (2
+  skipped); the app 487 files, 7,889 tests passed; findings, reports and
+  prerender checks clean.
 - The screenshot is the row's component rendered with sample figures and the
   portal's stylesheet, not the live deployment.
 
