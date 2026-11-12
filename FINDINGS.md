@@ -70823,7 +70823,7 @@ A producer on this branch computed five things and a component drew four of them
 The fifth was `worstPlacesIn` — the order over the places themselves, across a
 deployment's pages — and nothing on the page read it.
 
-**Fourteen tests passed over it.** It was found by mutation: taking the number of
+**The twelve tests there were then passed over it.** It was found by mutation: taking the number of
 places shown from four to one changed no assertion, because the only consumer of
 the field was the producer's own return type.
 

@@ -5,9 +5,10 @@
 
 > **The gate is green.** `pnpm install && pnpm verify` — **EXIT=0**, read out
 > of the file the status was written to rather than off a notification.
-> GATE_TESTS tests, 0 failed, 0 skipped. Sixteen mutations planted, sixteen
-> killed; two survived a first pass and each one changed the code rather than
-> the test.
+> 283 files / **6,850** framework tests and 484 files / **7,865** application
+> tests, **14,715** in all, 0 failed, 0 skipped. **Eighteen mutations planted,
+> eighteen killed**; three survived a first pass and each one changed the code
+> rather than the test.
 
 ![The section as a reader meets it: two produced blocks, and not one figure typed into the prose](2026-11-12-docs-a-count-of-parts-section.webp)
 
@@ -24,7 +25,9 @@ readings, and the page that explains that door said nothing about any of them.**
 No run had written it, and the reason is in this lane's own comment on #778 of
 11 November: *"I can keep building instruments indefinitely and cannot write a
 sentence."* Four of the last five units were instruments, because the prose
-budget had 331 words of room for every page the site will ever add.
+index is nearly full: #778 put it at about 331 words of room for every page the
+site will ever add on 5 November, and this run measured **431 compressed bytes**
+on `main` this morning.
 
 **This run wrote the sentence.** It cost 266 of the 431 compressed bytes the
 prose index had left, which is said plainly here and filed as the first of three
@@ -109,10 +112,16 @@ does not repeat it and it is the only place a reader learns it.
   `expected 80038 to be less than 80000` on the first sentence it wrote. The
   argument moved into the two blocks and the heading, where it costs the prose
   index nothing.
-- **The figures are not in the prose, and that is now a test.** `states no
-  figure, because every figure in it is produced` fails on any digit in the
-  section's body. It is the cheapest guard in the file and it would have caught
-  the first draft, which opened with the word *seven*.
+- **The figures are not in the prose, and that is now two tests, because one
+  was not enough.** `states no figure, because every figure in it is produced`
+  fails on any digit in the section's body — and **it would not have caught the
+  first draft**, whose heading was *Seven unread parts can be one thing to fix*.
+  This site spells its numbers out, so that rule is a floor rather than the
+  guard. The one figure the shipped prose does state in words — *a heading, two
+  questions and a link* — is held against the tree by a second case that spells
+  the tree's own count and looks for that word in the prose, so a third question
+  in the example catalogue takes the page red. **A number spelled out is a
+  number**, and the digits rule had to be told so.
 - **Three export names are in the prose and the other ten are not.**
   `prose.ts` elides backticked spans, so naming `pageFrontierOf`,
   `deploymentUnreadOf` and `worstPlacesIn` cost 33 bytes — and it puts this page
@@ -133,9 +142,11 @@ does not repeat it and it is the only place a reader learns it.
 ## The gate was red first, and both failures were mine
 
 The first gate run came back **EXIT=1** — read out of the file, against a
-harness notification that said exit code 0, which is the fourth instance of the
-thing *Reading the merge gate* is about and the first this lane has met in that
-exact spelling.
+harness notification that said exit code 0 — the **fifth** instance of the
+thing *Reading the merge gate* is about, and the second in the spelling the
+4 November entry describes: a background task whose completion notice reports
+the status of the wrapping subshell, whose last command is the `echo` that
+succeeded. The file said `EXIT=1` and it was right.
 
 **One failure was mechanical.** Adding two imports to the page moved every line
 below them, and `_lib/fences/compiled/the-runtime--what-your-readers-do.tsx`
@@ -168,12 +179,12 @@ this run do it**, because the 1 October entry says the sweep reads `decisions/`,
 
 ## Mutations
 
-**Sixteen planted, sixteen killed.** Two survived the first pass.
+**Eighteen planted, eighteen killed.** Three survived the first pass.
 
 **The first is the one worth reading.** Taking the number of places shown from
-four to one changed no assertion, because `worstPlacesIn`' output had no
+four to one changed no assertion, because `worstPlacesIn`'s output had no
 consumer: the producer computed it, the component drew four other things, and
-fourteen tests passed over dead data that typechecks. The general version is
+the twelve tests there were then passed over dead data that typechecks. The general version is
 that **a mutation to a constant finds a field nobody draws, and nobody plants
 mutations in constants** — a constant does not look like logic. The remedy is a
 line: mutate every constant in a producer, not only its predicates.
@@ -189,7 +200,15 @@ reads exactly like a surviving mutation. It was retried against a `grep` for the
 mutated text and killed five tests deep. *A mutation you did not confirm landed
 is not a mutation*, and the confirmation is one `grep`.
 
-The other fourteen covered the partition invariant, the two window rules, the
+**The third survivor found a hole in its own fix.** Changing *two questions* in
+the prose to *three* killed nothing — **after** the second figures case had been
+written, because that case held the **tree** (which really has two) and nothing
+tied the sentence to it. The case now spells the tree's own count and looks for
+that word in the prose, so the page and the example cannot drift apart in either
+direction. A test written in answer to a hole is not the same thing as a test
+that closes it.
+
+The other fifteen covered the partition invariant, the two window rules, the
 sort direction of both orders, the walk passing through slots, slots being
 counted as parts, the stated view count going to zero, the constructed-window
 disclosure, and three sentences of the prose itself.
@@ -214,7 +233,7 @@ than the intent.
 
 ## Findings
 
-**Two closed, three filed.**
+**Two closed, four filed.**
 
 - **Closed:** 9 November's five names on `@jam-overture/loom/signals`
   (`PageFrontier`, `UnreachedPart`, `largestUnreachedIn`, `pageFrontierOf`,
@@ -236,8 +255,19 @@ than the intent.
   to fix it by retyping produced sentences into prose.
 - **Filed and closed in the same run:** `worstPlacesIn` computed and drawn
   nowhere, and the mutation shape that finds it.
+- **Filed:** lesson 28's citation sweep reads `apps/` as well as `decisions/`,
+  `src/` and `tools/`, and the 1 October entry a lane reads when that failure
+  lands says it does not. This run's three bad citations were in `apps/`, and
+  the entry nearly argued it out of looking there.
 
 ## Token discipline
 
+**How this report's figures were checked.** The gate above ran on the tree at
+the commit before this file, which is the only order in which a report can quote
+its own gate. The changes after it are this report and the ledger, and
+`pnpm findings:check` and `pnpm reports:check` — the two parts of `pnpm verify`
+that read them — were re-run over the final tree and are both green. Nothing
+under `apps/`, `src/` or `tools/` moved after the gate.
+
 **This session is not subscribed to its pull request and no check-in is armed.**
-Seventh time this lane has said so. Run, report, exit.
+Eighth time this lane has said so. Run, report, exit.
