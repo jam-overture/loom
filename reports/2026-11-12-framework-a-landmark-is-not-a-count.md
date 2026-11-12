@@ -155,13 +155,13 @@ on its line and read in a separate command.
 
 | | files | tests |
 | --- | --- | --- |
-| framework and tools | 284 | **6,890** |
-| application | 476 | **7,712** |
-| | **760** | **14,602** |
+| framework and tools | 283 | **6,861** |
+| application | 483 | **7,850** |
+| | **766** | **14,711** |
 
 **+11 tests over `main` on the same scope and no new file** — `tools/weigh/`
-holds 33 tests against `main`'s 22, all eleven in `repetition.test.ts`, and the
-application half is unchanged to the test. Nothing failed, nothing was skipped,
+holds 33 tests against `main`'s 22, all eleven of the difference in
+`repetition.test.ts`, and the application half is unchanged to the test. Nothing failed, nothing was skipped,
 no test was weakened.
 
 **The fixture is the real rule, character for character**, and the document
