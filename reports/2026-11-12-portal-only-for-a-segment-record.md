@@ -59,8 +59,9 @@ All three are listed as reversible defaults for the maintainer to confirm.
 
 ## Tests
 
-No code changed. `pnpm verify` ran on the branch (numbers in the pull request
-comment); the record has its seven sections and an *Alternatives considered*
+No code changed. `pnpm verify` exit 0: the package 283 files, 6,848 tests passed
+(2 skipped); the app 483 files, 7,850 tests passed. The first run caught the
+record citing 0385, which is not on `main`, so it cites #870 instead. The record has its seven sections and an *Alternatives considered*
 over 100 words.
 
 ## Toward the wireframe

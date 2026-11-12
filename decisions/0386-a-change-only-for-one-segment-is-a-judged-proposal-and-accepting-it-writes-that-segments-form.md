@@ -13,7 +13,7 @@ through [0376](0376-a-pages-audience-rules-are-an-attributed-log-and-its-forms-a
 store (#863), the read door answers those rules beside the live pages (#866),
 and a segment picker narrows *Signals*, *By page* and *Goals* to one segment's
 readers (#868). The pull client that sorts a site's readers by the rules and
-names the segment on their signals is on #870 (0385, Proposed), in the
+names the segment on their signals is on pull request #870 (Proposed there), in the
 framework's lane.
 
 Piece 4 is what is left of the wireframe's *6 · Segments*
