@@ -71713,12 +71713,21 @@ November** · **Status:** **closed**, measured on `main` at `487f11b`
 
 `Loom docs` landed **#859** on the morning of 12 November and front-coded the
 names file: each entry point's names now travel sorted, with one base-36 digit
-saying how much of the previous name to keep. Measured on `main` by this run,
-not quoted from the pull request:
+saying how much of the previous name to keep. Measured by this run rather than
+quoted from the pull request, twice — on `main` at `487f11b`, and again on this
+branch after `Loom merge` brought six more merges in:
 
 ```
-names 2109   file bytes 27205   cap 40000   headroom 12795
+487f11b   names 2109   file bytes 27205   cap 40000   headroom 12795
+a0ead4e   names 2116   file bytes 27289   cap 40000   headroom 12711
 ```
+
+**And the fix arrived with nothing to spare, which is the figure worth
+keeping.** Written as a JSON array the way it travelled until yesterday, those
+same 2,116 names measure **40,223 bytes** — so the index crossed the
+40,000-byte cap within a day of the remedy landing, and the remedy is the only
+reason nothing is red tonight. The entries below were not wrong about how
+little room was left; they were a day early.
 
 **That is the remedy the test's own docblock prescribed in advance** — *"this
 file is already grouped by entry point and the browser already knows which
@@ -71732,14 +71741,17 @@ since 10 November on `expected 40093 to be less than 40000` — merged the same
 morning, as did #864. So the 148 bytes cost this lane one unit and two days, and
 nothing else.
 
-**The three entries that now read as stale, named so that nobody re-measures
+**The four entries that now read as stale, named so that nobody re-measures
 them.** The two of 10 November (*the docs names index has 148 bytes of
-headroom…* and *the published-names cap has 148 bytes…*) and this lane's of
+headroom…* and *the published-names cap has 148 bytes…*); this lane's of
 11 November, which said a reading gathering silent parts by primitive type
-*"wants the names cap answered first"* because it publishes three or four names.
-**It no longer does.** That unit is free to publish its door, and the figure a
-future run should hold against is 27,205 of 40,000 rather than 148 bytes of
-anybody's margin.
+*"wants the names cap answered first"* because it publishes three or four names;
+and this lane's of **12 November** — *this branch spends 50 of the names
+index's 148 bytes, and leaves 98* — whose table is the raw-array arithmetic and
+whose 98 bytes were already 12,700 by the time it merged. **None of them is a
+constraint any more.** The silent-kinds unit is free to publish its door, and
+the figure a future run should hold against is a little over 27,000 of 40,000
+rather than anybody's last hundred bytes.
 
 **The one thing worth keeping from all three.** The cap fires in `(docs)`, the
 number it guards is grown by every other lane, and **no decision record covers
