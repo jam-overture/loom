@@ -233,7 +233,7 @@ than the intent.
 
 ## Findings
 
-**Two closed, four filed.**
+**Two closed, five filed.**
 
 - **Closed:** 9 November's five names on `@jam-overture/loom/signals`
   (`PageFrontier`, `UnreachedPart`, `largestUnreachedIn`, `pageFrontierOf`,
@@ -255,6 +255,11 @@ than the intent.
   to fix it by retyping produced sentences into prose.
 - **Filed and closed in the same run:** `worstPlacesIn` computed and drawn
   nowhere, and the mutation shape that finds it.
+- **Filed:** the two spellings the GitHub link mangling was known to spare —
+  an autolink and a bare URL — were both mangled in this pull request's
+  **comment**, while a markdown link in its **body** came through intact. That
+  inverts the 10 November table, and the surface is the only variable that
+  moved. The line `docs/routines.md` is being asked for would not have helped.
 - **Filed:** lesson 28's citation sweep reads `apps/` as well as `decisions/`,
   `src/` and `tools/`, and the 1 October entry a lane reads when that failure
   lands says it does not. This run's three bad citations were in `apps/`, and
@@ -266,7 +271,8 @@ than the intent.
 the commit before this file, which is the only order in which a report can quote
 its own gate. The changes after it are this report and the ledger, and
 `pnpm findings:check` and `pnpm reports:check` — the two parts of `pnpm verify`
-that read them — were re-run over the final tree and are both green. Nothing
+that read them — were re-run over the final tree and are both green (1,520
+findings, 0 malformed; 2,225 visuals, none over budget). Nothing
 under `apps/`, `src/` or `tools/` moved after the gate.
 
 **This session is not subscribed to its pull request and no check-in is armed.**

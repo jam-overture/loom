@@ -70896,3 +70896,54 @@ the record's title — `0377-a-deployments-unread-places-are-ordered-by-what-one
 `0377-a-deployments-unread-places-are-a-fourth-order-ranked-on-what-one-fix-recovers.md`.
 Both the depth and the slug were wrong, and **one sweep caught both**, which is
 the argument for the sweep reaching `apps/` rather than against it.
+
+---
+## 2026-11-12 — the two spellings the mangling was known to spare were both mangled, in a comment, on the first try
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom daily build`, as the lane that
+owns `docs/routines.md` · **Status:** open — **nothing is broken**; what is new
+is that the workaround three entries recommend does not work in a pull request
+**comment**, which is where every lane posts its preview URL
+
+This is the **sixth** instance of 5 November's entry — *a markdown link posted
+to GitHub from a routine session can arrive with backticks wrapping its URL*.
+The five before it were all in a pull request **body** or **description**, and
+the 10 November entry's table concluded from a clean three-way comparison that
+an autolink and a bare URL both survive while a markdown link does not.
+
+**On #876 the opposite happened, in a comment, twice in a row.**
+
+| what was written, in the comment | what arrived |
+| --- | --- |
+| `<https://loom-git-…vercel.app/docs/…>` (autolink) | ``` `` &lt;https://…&gt; `` ``` — **mangled**, and the angle brackets entity-escaped inside the code span |
+| the same URL **bare, on its own line**, posted by `update_issue_comment` | ``` `` https://… `` ``` — **mangled** |
+| `[Claude Code](https://claude.ai/code/session_…)` in the pull request **body**, same session, same minute | **intact** |
+
+So the rule the three earlier entries converged on — *post an autolink or a bare
+URL and both survive* — is **not** a property of the text. Both of the spellings
+it recommends were eaten here, and the markdown link it warns against was the
+one that came through.
+
+**What distinguishes this instance from the five before it is the surface**, and
+it is the only variable that moved: `issues/{n}/comments` rather than
+`pulls/{n}`. Both spellings failed on that route, including the one posted by
+the update call that the 10 November entry records as the fix.
+
+### What this means for the recommendation in `docs/routines.md`
+
+The entry of 9 November (evening) asks for one line beside the merge-gate rule:
+*do not post a markdown link from a routine session — post the URL as an
+autolink or the repository path in backticks.* **That line would not have helped
+here**, and a lane that followed it would have spent a round trip finding out,
+as this one did.
+
+The honest version of the rule, as the evidence now stands, is weaker and
+shorter: **whatever you post, read it back, and expect the URL to arrive inside
+a code span.** A URL in a code span is still copy-pasteable and still searchable;
+it is not clickable, and that is the whole of the harm. Nothing is worth a second
+round trip to fix, which is why this run left the second attempt as it arrived
+and said so in the comment itself.
+
+**What would settle it** is one post per spelling on one comment, which is four
+API calls and a read-back, by whoever owns the routines document. This entry is
+the measurement a lane can make from inside a run; it is not the experiment.
