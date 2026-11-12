@@ -52,9 +52,13 @@ const element = (
   children,
 })
 
-/** Two siblings, so reading has somewhere to stop, and an ask at the end of them. */
+/**
+ * Two siblings, so reading has somewhere to stop, and an ask at the end of
+ * them. The first holds a part of its own, so one stop can cost more of the
+ * page than another and the fourth order has something to rank.
+ */
 const PAGE = element("page", "loom.page", {}, [
-  element("band", "loom.section", { body: "a word" }),
+  element("band", "loom.section", { body: "a word" }, [element("note", "loom.text", {})]),
   element("cta", "loom.button", {}),
 ])
 
@@ -182,9 +186,15 @@ const agendaOf = (
   }
 }
 
-/** One page whose readers stop between its two parts and whose ask leaks. */
+/**
+ * One page whose readers stop between its two parts and whose ask leaks.
+ *
+ * The page itself reports, as a page whose bands are being read must: a part
+ * that said nothing with a reader below it is a sender defect and faults the
+ * whole page (0382), which this fixture is not about.
+ */
 const FALLING: Partial<ReaderWindow> = {
-  tallies: [tally({}, "band", 100), tally({}, "cta", 20)],
+  tallies: [tally({}, "page", 100), tally({}, "band", 100), tally({}, "cta", 20)],
   pageViews: [door({}, 200)],
   funnels: [funnel({}, 100, 10)],
 }
@@ -221,8 +231,10 @@ describe("a deployment's fix-list, read off one window", () => {
   it("keeps both live revisions of a page in the fix-list", () => {
     const { read } = agendaOf({
       tallies: [
+        tally({ revision: 1 }, "page", 100),
         tally({ revision: 1 }, "band", 100),
         tally({ revision: 1 }, "cta", 20),
+        tally({ revision: 2 }, "page", 100),
         tally({ revision: 2 }, "band", 100),
         tally({ revision: 2 }, "cta", 90),
       ],
@@ -260,9 +272,10 @@ describe("a deployment's fix-list, read off one window", () => {
   it("ranks the places in parts of a page and leaves the fix-list untouched", () => {
     const { read } = agendaOf({
       tallies: [
+        tally({}, "page", 100),
         tally({}, "band", 100),
         tally({}, "cta", 20),
-        tally({ treeId: OTHER_TREE }, "band", 5),
+        tally({ treeId: OTHER_TREE }, "page", 5),
       ],
       pageViews: [door({}, 200), door({ treeId: OTHER_TREE }, 10)],
       funnels: [funnel({}, 100, 10)],
@@ -363,10 +376,13 @@ describe("a deployment's fix-list, read off one window", () => {
     it("pairs every page, so nothing is unpaired on any of the four sides", () => {
       const { read } = agendaOf({
         tallies: [
+          tally({ audienceId: SKIERS }, "page", 100),
           tally({ audienceId: SKIERS }, "band", 100),
           tally({ audienceId: SKIERS }, "cta", 20),
+          tally({ audienceId: RIDERS }, "page", 100),
           tally({ audienceId: RIDERS }, "band", 100),
           tally({ audienceId: RIDERS }, "cta", 90),
+          tally({ treeId: OTHER_TREE }, "page", 50),
           tally({ treeId: OTHER_TREE }, "band", 50),
           tally({ treeId: OTHER_TREE }, "cta", 10),
         ],
@@ -394,7 +410,7 @@ describe("a deployment's fix-list, read off one window", () => {
 
     it("holds a page the window has no tree for out of the fix-list, as the assembly does", () => {
       const { assembly, read } = agendaOf({
-        tallies: [tally({ treeId: OTHER_TREE, revision: 9 }, "band", 10)],
+        tallies: [tally({ treeId: OTHER_TREE, revision: 9 }, "page", 10)],
         pageViews: [door({ treeId: OTHER_TREE, revision: 9 }, 10)],
       })
 
