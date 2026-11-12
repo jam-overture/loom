@@ -2,8 +2,11 @@ import type { ActedReadRequest, ArrivalRange, ReaderTallyStore } from "@jam-over
 
 import type { GoalCounters } from "./goal-range"
 
-/** What the counters are narrowed to: a page, a part, both, or neither. */
-export type CounterScope = Pick<ActedReadRequest, "treeId" | "nodeId">
+/**
+ * What the counters are narrowed to: a page, a part, both, or neither, and an
+ * audience (a segment, 0371 clause 6) or every reader.
+ */
+export type CounterScope = Pick<ActedReadRequest, "treeId" | "nodeId" | "audience">
 
 /**
  * The hourly counters a goal's figure for a range is worked out from, read in
@@ -18,7 +21,9 @@ export type CounterScope = Pick<ActedReadRequest, "treeId" | "nodeId">
  * `scope` narrows both reads the way the counters allow: to one page (a
  * drawer), to one part (a single goal), or to neither (every goal on the
  * project at once, which `goalRangeOf` then filters to each goal's part and
- * pages). When counting began is always the project's, whatever the scope: a
+ * pages). An audience narrows both reads to one segment's readers, and the
+ * page views' first hour is then the segment's, so a segment named on its
+ * signals last week reads as counted from then. When counting began is always the project's, whatever the scope: a
  * part first pressed last week does not mean the project counted nothing
  * before it, and `countingBeginsOf` takes the later of the two.
  *
@@ -30,9 +35,13 @@ export const readGoalCounters = async (
   span: ArrivalRange,
   scope: CounterScope = {}
 ): Promise<Omit<GoalCounters, "parts"> | undefined> => {
-  const { treeId } = scope
+  const { treeId, audience } = scope
   const [arrivals, acted, actedBegins] = await Promise.all([
-    tallies.arrivals(treeId === undefined ? span : { treeId, ...span }),
+    tallies.arrivals({
+      ...(treeId === undefined ? {} : { treeId }),
+      ...(audience === undefined ? {} : { audience }),
+      ...span,
+    }),
     tallies.acted({ ...scope, ...span }),
     /** A read of one empty instant, whose answer carries the first hour whatever was asked. */
     tallies.acted({ from: span.from, to: span.from }),

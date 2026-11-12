@@ -26,6 +26,7 @@ import {
 } from "@/app/(portal)/_lib/events"
 import type { OpenedEvent } from "@/app/(portal)/_lib/events-reading"
 import { spanLine, stretchWords } from "@/app/(portal)/_lib/list-span"
+import { SEGMENT_PARAM } from "@/app/(portal)/_lib/segments/segment-pick"
 import { rangeParam } from "@/app/(portal)/_lib/signals-range"
 import { SIGNAL_KINDS } from "@/app/(portal)/_lib/vocabulary"
 import { plainMoment } from "@/app/(portal)/_lib/when"
@@ -170,6 +171,9 @@ export const EventFacets = ({
         {filter.kind === undefined ? null : <input type="hidden" name="kind" value={filter.kind} />}
         {filter.view === undefined ? null : <input type="hidden" name="view" value={filter.view} />}
         {range === undefined ? null : <input type="hidden" name="range" value={range} />}
+        {filter.segment === undefined ? null : (
+          <input type="hidden" name={SEGMENT_PARAM} value={filter.segment} />
+        )}
         {filter.live ? <input type="hidden" name="live" value={LIVE_ON} /> : null}
         <button type="submit" className="border-edge-subtle rounded border px-2 py-1">
           Show
@@ -438,6 +442,7 @@ export const EventDrawerPanel = ({
                 page: undefined,
                 view: event.view,
                 search: undefined,
+                segment: address.filter.segment,
                 live: address.filter.live,
                 range: address.filter.range,
               })}

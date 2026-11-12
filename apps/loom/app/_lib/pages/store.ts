@@ -8,6 +8,7 @@ import { portalDatabase } from "@/app/(portal)/_lib/database"
 import { followSite } from "@/app/(portal)/_lib/proposing/follow-site"
 import { livePages } from "@/app/(portal)/_lib/proposing/live"
 import { followsItsSite, pageCopiesFor } from "@/app/(portal)/_lib/proposing/stores"
+import { audienceRulesFor, readPageRules } from "@/app/(portal)/_lib/segments/rules"
 import { governedPagesFor } from "@/app/(portal)/_lib/write"
 import { appApplications } from "@/app/_lib/app/store"
 import { appIngestKeys } from "@/app/_lib/reader-signals/key-store"
@@ -98,7 +99,8 @@ export const appPublishDoor: PublishDoor = {
 
 /**
  * The read door's stores (0358 clause 3): the project's key, what its site
- * published, and the copies Loom's accepted changes are on, read with the
+ * published, the copies Loom's accepted changes are on, and each page's
+ * audience rules (0371 clause 4), read with the
  * screens' budget, since a pull is a read and must answer even when a store is
  * slow.
  */
@@ -124,6 +126,17 @@ export const appReadDoor: ReadDoor = {
     )
 
     return live.ok ? live : err({ detail: live.error.detail })
+  },
+  /** Through the store the *Segments* screen writes, so the site gets what a person saved (0371 clause 3). */
+  rulesOf: async (application, pages) => {
+    const read = await readPageRules(
+      audienceRulesFor(application),
+      pages.map((treeId) => ({ treeId }))
+    )
+
+    return read.ok
+      ? ok(read.pages.map((page) => ({ treeId: page.treeId, rules: page.head?.rules })))
+      : err({ detail: read.detail })
   },
   /**
    * After the answer, inside the same invocation. A record that fails is not

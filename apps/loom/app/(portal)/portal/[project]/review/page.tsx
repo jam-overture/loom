@@ -10,6 +10,9 @@ import { Screen } from "@/app/(portal)/_components/screen"
 import { StateNotice } from "@/app/(portal)/_components/state-notice"
 import { requireActor, requireRole } from "@/app/(portal)/_lib/auth/identity"
 import { roleThatCanAccept } from "@/app/(portal)/_lib/auth/roles"
+import { expectationOf, expectationRangeOf } from "@/app/(portal)/_lib/expectation"
+import { readGoalCounters } from "@/app/(portal)/_lib/goal-counters"
+import type { Goal, GoalId } from "@/app/(portal)/_lib/goals/goal"
 import { drawHeld } from "@/app/(portal)/_lib/held-change"
 import { requestPartsOf } from "@/app/(portal)/_lib/proposing/brief"
 import { nextLookOf, type NextLook } from "@/app/(portal)/_lib/proposing/next-look"
@@ -31,9 +34,10 @@ import type { QueueRow } from "@/app/(portal)/_lib/queue"
 import { governedPagesFor } from "@/app/(portal)/_lib/write"
 import { modelKeyOf } from "@/app/_lib/models/store"
 import { PORTAL_READ_BUDGET_MS } from "@/app/_lib/app/bounded"
-import { readWithin, unavailable } from "@/app/_lib/app/bounded-store"
+import { boundedReaderTallyStore, readWithin, unavailable } from "@/app/_lib/app/bounded-store"
+import { readingsFor } from "@/app/_lib/reader-signals/intake"
 
-import { ChangeDrawer } from "./_components/change-drawer"
+import { ChangeDrawer, type GoalStanding } from "./_components/change-drawer"
 import { NextLookLine } from "./_components/next-look-line"
 import { ReviewCard, ReviewGaps } from "./_components/review-card"
 import { TurnedDownLine } from "./_components/turned-down-line"
@@ -75,12 +79,47 @@ const readNextLook = async (
     : undefined
 }
 
+/**
+ * Where the goal a change serves stands on its page over the last 14 days,
+ * from the page's hourly counters, for *What it expects*. A goal no longer
+ * among the project's (or none named) is not read, and costs no read; goals or counters that did not answer cost
+ * those lines alone.
+ */
+const readStanding = async (
+  application: ApplicationId,
+  pageId: string,
+  goalId: GoalId | null,
+  goals: readonly Goal[] | undefined,
+  now: number
+): Promise<GoalStanding> => {
+  const page = treeIdSchema.safeParse(pageId)
+
+  if (goals === undefined || !page.success) return { kind: "unreadable" }
+
+  const goal = goals.find((each) => each.goalId === goalId)
+
+  if (goal === undefined) return { kind: "unplaced" }
+
+  const range = expectationRangeOf(now)
+  const read = await readGoalCounters(
+    boundedReaderTallyStore(readingsFor(application).tallies),
+    range,
+    { treeId: page.data, nodeId: goal.nodeId }
+  )
+
+  return read === undefined
+    ? { kind: "unreadable" }
+    : { kind: "read", goal, expectation: expectationOf(goal.kind, range, read) }
+}
+
 /** The drawer for one waiting change: the page before and after it, read when it opens. */
 const OpenChange = async ({
   application,
   row,
   held,
   goalsRead,
+  goals,
+  now,
   projectId,
   close,
 }: {
@@ -88,13 +127,16 @@ const OpenChange = async ({
   readonly row: QueueRow
   readonly held: HeldProposal
   readonly goalsRead: boolean
+  readonly goals: readonly Goal[] | undefined
+  readonly now: number
   readonly projectId: string
   readonly close: string
 }) => {
   const parts = requestPartsOf(row.asked)
-  const [drawn, lastTurnedDown] = await Promise.all([
+  const [drawn, lastTurnedDown, standing] = await Promise.all([
     drawHeld(governedPagesFor(application), held, row.standing),
     parts.again === null ? null : lastTurnedDownOn(application, row.pageId),
+    readStanding(application, row.pageId, row.goalId, goals, now),
   ])
 
   return (
@@ -105,6 +147,7 @@ const OpenChange = async ({
       lastTurnedDown={lastTurnedDown}
       acceptedBy={roleThatCanAccept(held.disposition.stakes)}
       goalsRead={goalsRead}
+      standing={standing}
       projectId={projectId}
       close={close}
     />
@@ -271,6 +314,8 @@ const ForReviewPage = async ({
             row={openRow}
             held={openHeld}
             goalsRead={goalsRead}
+            goals={goals}
+            now={now}
             projectId={projectId}
             close={close}
           />

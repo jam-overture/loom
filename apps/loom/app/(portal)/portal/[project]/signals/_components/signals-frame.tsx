@@ -3,6 +3,7 @@ import type { ReactNode } from "react"
 
 import { Screen } from "@/app/(portal)/_components/screen"
 import { FilterChips } from "@/app/(portal)/_components/filter-chips"
+import { SegmentPicker, SegmentUncounted } from "@/app/(portal)/_components/segment-picker"
 import { StateNotice } from "@/app/(portal)/_components/state-notice"
 import { goalFigureOf } from "@/app/(portal)/_lib/goal-range"
 import { lastArrivalFigureOf } from "@/app/(portal)/_lib/last-arrival"
@@ -15,6 +16,7 @@ import {
   SIGNALS_RANGES,
   type SignalsRange,
 } from "@/app/(portal)/_lib/signals-range"
+import { SEGMENT_PARAM, type SegmentHref } from "@/app/(portal)/_lib/segments/segment-pick"
 import type { TurnedAway } from "@/app/(portal)/_lib/turned-away"
 
 import type { SignalsReading } from "../_lib/reading"
@@ -22,14 +24,16 @@ import type { SignalsReading } from "../_lib/reading"
 import { RangeChart } from "./range-chart"
 
 /**
- * What both *Signals* tabs share: the heading, the range picker, the figures
+ * What both *Signals* tabs share: the heading, the range and segment pickers, the figures
  * (the primary goal's among them once the project has one, and the last
  * arrival with its site and page), page views by hour, what was turned away,
  * and the two tabs (`docs/portal-wireframes.md`, *1 · Signals*).
  *
  * The tab's own list is handed in and drawn only once something has arrived:
  * a store that did not answer, a project with no single site, and a project
- * nothing has reached yet are each said here, once, for both tabs.
+ * nothing has reached yet are each said here, once, for both tabs. So is a
+ * segment nothing has been counted under (0371 clause 6), with the picker
+ * still drawn so a person can go back to everyone.
  */
 
 export type SignalsTab = "events" | "pages"
@@ -57,19 +61,26 @@ const Figure = ({
   </div>
 )
 
-const refusedFigure = (turnedAway: TurnedAway | undefined) =>
-  turnedAway === undefined
-    ? {
-        value: "Not available",
-        note: "This deployment could not read what it turned away.",
-      }
-    : {
-        value: turnedAway.refused.toLocaleString("en-GB"),
-        note:
-          turnedAway.refused === 0
-            ? "Nothing sent with this project's key has been turned away."
-            : "Sent with this project's key and turned away. The reasons are below.",
-      }
+/** A delivery is turned away before it is filed under any audience, so this is every reader's. */
+const EVERY_READER = " Every reader's: nothing turned away is filed under a segment."
+
+const refusedFigure = (turnedAway: TurnedAway | undefined, segmented: boolean) => {
+  const figure =
+    turnedAway === undefined
+      ? {
+          value: "Not available",
+          note: "This deployment could not read what it turned away.",
+        }
+      : {
+          value: turnedAway.refused.toLocaleString("en-GB"),
+          note:
+            turnedAway.refused === 0
+              ? "Nothing sent with this project's key has been turned away."
+              : "Sent with this project's key and turned away. The reasons are below.",
+        }
+
+  return segmented ? { ...figure, note: figure.note + EVERY_READER } : figure
+}
 
 const TurnedAwayList = ({ turnedAway }: { turnedAway: TurnedAway | undefined }) =>
   turnedAway === undefined || turnedAway.lines.length === 0 ? null : (
@@ -106,7 +117,10 @@ const Figures = ({
       <Figure {...rangeFigureOf(reading.hourly, reading.range, arrivals.opened)} />
       {goal === undefined ? null : <Figure {...goal} />}
       <Figure {...last} />
-      <Figure label="Turned away" {...refusedFigure(turnedAway)} />
+      <Figure
+        label="Turned away"
+        {...refusedFigure(turnedAway, reading.segment.word !== undefined)}
+      />
     </div>
   )
 }
@@ -138,27 +152,33 @@ const TABS: readonly {
   { tab: "pages", label: "By page", href: (projectId) => `/portal/${projectId}/signals/pages` },
 ]
 
-/** A tab's address, keeping the range so moving between tabs does not reset it. */
-const tabHref = (path: string, range: SignalsRange): string => {
-  const kept = rangeParam(range)
+/** A tab's address, keeping the range and the segment so moving between tabs resets neither. */
+const tabHref = (path: string, range: SignalsRange, segment: string | undefined): string => {
+  const kept = new URLSearchParams(
+    Object.entries({ range: rangeParam(range), [SEGMENT_PARAM]: segment }).flatMap(
+      ([key, value]) => (value === undefined ? [] : [[key, value]])
+    )
+  ).toString()
 
-  return kept === undefined ? path : `${path}?range=${kept}`
+  return kept === "" ? path : `${path}?${kept}`
 }
 
 const Tabs = ({
   projectId,
   current,
   range,
+  segment,
 }: {
   projectId: string
   current: SignalsTab
   range: SignalsRange
+  segment: string | undefined
 }) => (
   <nav aria-label="Signals" className="border-edge-subtle flex gap-4 border-b text-sm">
     {TABS.map(({ tab, label, href }) => (
       <Link
         key={tab}
-        href={tabHref(href(projectId), range)}
+        href={tabHref(href(projectId), range, segment)}
         aria-current={tab === current ? "page" : undefined}
         className={`-mb-px border-b-2 pb-2 no-underline ${
           tab === current
@@ -177,12 +197,14 @@ const Body = ({
   projectId,
   tab,
   rangeHref,
+  segmentHref,
   children,
 }: {
   reading: SignalsReading
   projectId: string
   tab: SignalsTab
   rangeHref: RangeHref
+  segmentHref: SegmentHref
   children?: ReactNode
 }) => {
   if (reading.state === "failed") {
@@ -199,6 +221,22 @@ const Body = ({
         This project does not hold exactly one site, so nothing can be filed under it. Tell whoever
         runs this deployment.
       </StateNotice>
+    )
+  }
+
+  const { segment } = reading
+  const picker = <SegmentPicker pick={segment} hrefOf={segmentHref} />
+
+  if (reading.arrivals.latest === undefined && segment.word !== undefined) {
+    return (
+      <div className="flex flex-col gap-6">
+        {picker}
+        <SegmentUncounted
+          word={segment.word}
+          projectId={projectId}
+          everyoneHref={segmentHref(undefined)}
+        />
+      </div>
     )
   }
 
@@ -224,14 +262,17 @@ const Body = ({
 
   return (
     <div className="flex flex-col gap-6">
-      <RangePicker current={reading.range} hrefOf={rangeHref} />
+      <div className="flex flex-col gap-2">
+        <RangePicker current={reading.range} hrefOf={rangeHref} />
+        {picker}
+      </div>
       <Figures reading={reading} projectId={projectId} />
       {reading.hourly === undefined ? null : (
         <RangeChart chart={rangeChartOf(reading.hourly.series, reading.range)} />
       )}
       <TurnedAwayList turnedAway={reading.turnedAway} />
       <div className="flex flex-col gap-4">
-        <Tabs projectId={projectId} current={tab} range={reading.range} />
+        <Tabs projectId={projectId} current={tab} range={reading.range} segment={segment.word} />
         {children}
       </div>
     </div>
@@ -243,12 +284,14 @@ export const SignalsFrame = ({
   projectId,
   tab,
   rangeHref,
+  segmentHref,
   children,
 }: {
   reading: SignalsReading
   projectId: string
   tab: SignalsTab
   rangeHref: RangeHref
+  segmentHref: SegmentHref
   children?: ReactNode
 }) => {
   const project = reading.project
@@ -269,7 +312,13 @@ export const SignalsFrame = ({
         )}
       </div>
 
-      <Body reading={reading} projectId={projectId} tab={tab} rangeHref={rangeHref}>
+      <Body
+        reading={reading}
+        projectId={projectId}
+        tab={tab}
+        rangeHref={rangeHref}
+        segmentHref={segmentHref}
+      >
         {children}
       </Body>
     </Screen>

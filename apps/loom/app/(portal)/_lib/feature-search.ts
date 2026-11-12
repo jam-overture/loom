@@ -125,6 +125,21 @@ export const FEATURES: readonly Feature[] = [
     path: "/goals?goal=new",
   },
   {
+    name: "Segments",
+    does: "Groups of readers your site sorts its readers into, and the rules that sort them.",
+    words: ["audience", "group", "cohort", "device", "mobile", "returning", "rules", "targeting"],
+    scope: "project",
+    path: "/segments",
+  },
+  {
+    name: "New segment",
+    on: "Segments",
+    does: "Name a group of readers and the conditions that put a reader in it.",
+    words: ["add segment", "create segment", "new audience"],
+    scope: "project",
+    path: "/segments?segment=new",
+  },
+  {
     name: "Connect your site",
     does: "Everything your site needs to send readers' signals and take Loom's changes.",
     words: [
