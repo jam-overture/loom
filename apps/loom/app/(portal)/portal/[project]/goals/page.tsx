@@ -27,7 +27,7 @@ import {
   type PageChoice,
 } from "@/app/(portal)/_lib/goals/goal-view"
 import { shippedByGoalOf } from "@/app/(portal)/_lib/going-live"
-import { goalStayOf, goalStaySentence, type GoalStay } from "@/app/(portal)/_lib/goals/goal-stay"
+import { goalStayOf, type GoalStay } from "@/app/(portal)/_lib/goals/goal-stay"
 import { waitingByGoalOf } from "@/app/(portal)/_lib/goals/serving"
 import { goalsFor, proposalGoalsFor } from "@/app/(portal)/_lib/goals/stores"
 import { readGoalCounters } from "@/app/(portal)/_lib/goal-counters"
@@ -57,7 +57,6 @@ import {
   segmentAsked,
 } from "@/app/(portal)/_lib/segments/segment-pick"
 import { portalApplications, portalProjects } from "@/app/(portal)/_lib/store"
-import { plainPace } from "@/app/(portal)/_lib/vocabulary"
 import { plainMoment } from "@/app/(portal)/_lib/when"
 import { holdsFor } from "@/app/(portal)/_lib/write"
 import { PORTAL_READ_BUDGET_MS } from "@/app/_lib/app/bounded"
@@ -68,6 +67,7 @@ import { readingsFor } from "@/app/_lib/reader-signals/intake"
 
 import { GoalControls } from "./_components/goal-controls"
 import { GoalForm } from "./_components/goal-form"
+import { TimeOnIt } from "./_components/time-on-it"
 
 /**
  * *Goals* (8b of `docs/portal.md`, *3 · Goals* of the wireframes, 0350): what
@@ -199,31 +199,6 @@ const LastSevenDays = ({ goal, readings }: { goal: Goal; readings: Readings }) =
       <span className="block text-xs">{week.note}</span>
       {since}
     </>
-  )
-}
-
-/** How long readers who reached the goal's part kept it on screen, and what that time means. */
-const TimeOnIt = ({ stay }: { stay: GoalStay | undefined }) => {
-  if (stay === undefined) {
-    return (
-      <span className="text-ink-muted mt-1 block text-[11px]">
-        Time on screen could not be read just now.
-      </span>
-    )
-  }
-
-  const verdict =
-    stay.kind === "read" && stay.standing !== "unknown" ? plainPace(stay.standing) : undefined
-
-  return (
-    <span className="text-ink-muted mt-1 block text-[11px]">
-      {goalStaySentence(stay)}
-      {verdict !== undefined && (
-        <span className="block" title={verdict.meaning}>
-          {verdict.label}
-        </span>
-      )}
-    </span>
   )
 }
 
