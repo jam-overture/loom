@@ -8,6 +8,168 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-11-10 — the transit mangling has eaten a `decisions/` link, which is one of the two triggers the 5 November entry set for raising it
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom daily build` (run mechanics;
+it owns the 5 and 7 November entries this extends) · **Status:** open — **one
+instance, recorded against a trigger that entry set itself**; nothing is broken
+in the repository and the remedy is still the one it names.
+
+The 5 November entry closes: *"Worth raising only if it ever mangles something
+load-bearing — a URL inside a code fence a reader is meant to copy, or a
+`decisions/` link in a record."* The 7 November entry met the first half of that
+(it ate the `!` off three image embeds). **This is the second half**, on #851,
+twice in one body, and the detail that is new is which text survived beside it.
+
+| as composed | as it arrived |
+| --- | --- |
+| `Record [0376](…-comparable-figure.md), `Accepted`` | the link wrapped in **2 backticks**, so it renders as code and does not open |
+| the same URL, bare, alone on its own line | wrapped in **2 backticks** again |
+| the report URL, bare, on the next line but one | **intact** |
+| the preview URL, bare, two lines later | **intact** |
+
+**Three things here the earlier entries do not have.**
+
+1. **It is a `decisions/` URL**, which is the trigger. A record a reviewer cannot
+   open from the pull request is the one link in a Loom pull request body that
+   has to work, because the record is where the argument is.
+2. **Rewriting it did not avoid it.** The first body had the link inline before a
+   comma and a backticked word; the second had the same URL alone on a line, in a
+   list, with nothing adjacent to confuse anything. **Both were wrapped.** So it
+   is not the inline context.
+3. **Two bare URLs in the same list, a line or two below, came through clean.**
+   The mangled one is the longest token in the body by some margin (158
+   characters, 23 hyphens); the two that survived are 118 and 92. That is one
+   observation and not a rule, but it is the first instance where the same body
+   shows both outcomes, which is what makes it worth writing down.
+
+**Nothing is asked and the remedy is unchanged** — stop rather than fix, per the 5
+November entry. What this lane did was leave the mangled link in place rather
+than edit the body a third time, and add the record and the report as plain
+paths in the pull request comment, which arrive unharmed. A run that needs a
+record link to work in a body should expect to spell it as a path rather than a
+URL.
+
+---
+## 2026-11-10 — a new silence set is published and is not in the census, because its second member is a condition no reading has needed
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/silences.ts`) · **Status:** open — **nothing is broken, nothing is
+red, and nothing is asked of anybody**; a limit written down by the run that
+created it, so the next one does not have to rediscover why.
+
+§82 publishes `DayShapeSilence`, two members, on `DayShape.silence`:
+`unmeasured` where nothing was ever counted in the scope, and `unsettled` where
+the range holds hours and not one of them is over.
+[`silences.ts`](src/signals/silences.ts) is the census
+([0240](decisions/0240-a-silence-is-a-condition-and-a-subject-and-the-two-names-for-one-state-were-not-synonyms.md))
+that maps every member of every silence set in this subsystem onto a condition
+and a subject, and **this set is not in it.** No test fails: the census is a
+hand-written table and nothing sweeps for a set that is missing from it.
+
+**`unmeasured` would map cleanly.** It is the same condition the other sets spell
+`nothing-measured`, and the condition behind it is `no-window-folded` or its
+neighbour — this scope has never counted anything — said of a fold rather than of
+a window.
+
+**`unsettled` is the one that stops it being mechanical.** It is *the range holds
+buckets and no bucket in it is finished*, which is a statement about a **clock**
+and not about a window, a row, a vocabulary or a filing rule — and
+`SILENCE_CONDITIONS`' nineteen members are all one of those four. Adding a
+twentieth is an edit to the closed set 0240's table is published over, in the
+module the 9 October entry in this file already records a limit in. That is a decision
+record rather than a line, and it should be taken by a run whose unit is the
+census — with the other clocked readings in hand, because `rhythm.ts` is the
+first reading here whose silence can be *about time* and it will not be the last:
+the hourly series' own `clipped` and `begins` are the same kind of statement, and
+they are published as fields rather than as silences today.
+
+**What a future run should hold.** The honest options are three, and this lane's
+preference is the second: register `unmeasured` alone and leave the set half in
+(no — a half-mapped set is worse than an unmapped one, by this module's own
+argument); take the census as a unit, add the condition, and map both (**yes**);
+or rename `unsettled` to reach for an existing condition (no — it would be one
+word for two states, which is the fault that 9 October entry is about).
+
+---
+## 2026-11-10 — the thirty-day range the portal already offers can be drawn by day, and there is a second chart in the same reading
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom portal`
+(`apps/loom/app/(portal)/portal/[project]/signals/`) · **Status:** open —
+**nothing is wrong on the screen today**; two figures are available that were
+not, and one of them is a chart the wireframe asks for and cannot draw honestly.
+
+[`portal-wireframes.md`](docs/portal-wireframes.md) *1 · Signals* offers a range
+picker of **last 24 hours, 7 days, 30 days** over *a bar chart of page views by
+hour across the range*. The first is 24 bars. **The third is 720.**
+
+§82 of [`docs/signals.md`](docs/signals.md) landed the fold
+([0389](decisions/0389-a-range-of-hours-is-folded-into-its-days-and-into-the-hours-of-a-readers-day-where-the-mean-is-the-only-comparable-figure.md)),
+in `src/signals/rhythm.ts`, published from `@jam-overture/loom/signals`. Both
+calls are pure functions of the series the screen already fetches through
+`readReaderArrivals` — no second query, no new store method, no migration.
+
+| | |
+| --- | --- |
+| `arrivalDaysOf(series)` | the same range as one bar per day, dense, with a day the range or the clock cut short marked rather than dropped |
+| `arrivalDayShapeOf(series)` | twenty-four bars whatever the range: what a reader's day looks like on this deployment |
+| `busiestHoursIn(shape, 3)` | *your readers are here at 09:00, 10:00 and 14:00* |
+| `quietestHoursIn(shape, 3)` | the hours a change could go out in without anybody reading the page as it moves |
+| `actedDaysOf` / `actedDayShapeOf` | the same two folds of what readers did, in one kind — the goal figure's series |
+
+**Three things a screen drawing these has to hold, and the reading publishes each
+of them rather than leaving it to be worked out.**
+
+1. **Draw `perDay` on the shape, never `count`.** A range is hour-aligned and
+   almost never a whole number of days, so the hours of the day do not rest on
+   the same number of days — *last 7 days* read at 09:30 holds eight 09:00s and
+   seven 03:00s. `DayShape.even` is `false` whenever that is so, which is almost
+   always. The totals would rank the hours by where the range ended.
+2. **An hour of the day with no `perDay` is not a quiet hour.** It is an hour
+   this range holds no finished instance of. `quietestHoursIn` will not name one;
+   a chart drawing a bar of nought there would say the opposite of what is true.
+3. **A `DayBucket` with `whole: false` is the range's edge or the clock**, not a
+   quiet Sunday. It carries its count and `hours` (how many of its twenty-four
+   the series could speak for), so the honest drawing is the bar with a *so far*
+   on it rather than a gap.
+
+**The offset is the one thing this cannot decide.** Both folds take
+`offsetHours` and publish the one they were taken at; UTC is the default because
+that is what the counters hold. A deployment whose readers are in one country has
+its whole day shifted — a nine-o'clock peak in California arrives as a 17:00 bar
+— and **which offset a project's screen draws is configuration rather than a
+reading**, so it is the portal's question or the maintainer's and not this lane's
+to answer. A half-hour zone is not nameable from hour buckets at all.
+
+---
+## 2026-11-10 — sixteen more names on `@jam-overture/loom/signals` with no prose, and the sentence the page would want is two lines
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom docs`
+(`app/(docs)/docs/the-runtime/what-your-readers-do/page.mdx`) · **Status:**
+open — **the generator said so and `pnpm verify` is green**; nothing is red and
+nothing is blocked.
+
+§82 publishes sixteen names from `src/signals/rhythm.ts`: `ARRIVAL_DAY_MS`,
+`HOURS_IN_DAY`, `RhythmOptions`, `DayBucket`, `DaySeries`, `DayHour`,
+`DayShape`, `DayShapeSilence`, `daySeriesOf`, `dayShapeOf`, `arrivalDaysOf`,
+`actedDaysOf`, `arrivalDayShapeOf`, `actedDayShapeOf`, `busiestHoursIn`,
+`quietestHoursIn`. The generator's own words: *"`@jam-overture/loom/signals`'
+prose is all on one page, What your readers do, so a sentence about a new name on
+it goes there and there is nothing to decide."*
+
+**This is the fourth entry asking for a paragraph on that one page** — 8
+November's seven names, 9 November's five, #848's eight and these sixteen — and
+one paragraph answers all four. The sentences are here to be lifted rather than
+rewritten:
+
+> A month of hours is 720 bars. Folded by day it is 30, and folded by the hour
+> of the day it is 24 — *when your readers are here, and when nobody is*. Both
+> are read off the series you already have, and the hours of the day are
+> compared by a mean per day, because a range is almost never a whole number of
+> days.
+
+**Nothing is asked by a date**, and if the page would rather carry one sentence
+for all four entries than four, that is the better page.
 ## 2026-11-11 (evening) — segments are written in the portal now, and no site sorts its readers by them, because the pull client does not read the rules the door answers
 
 **Filed by:** `Loom portal` · **Owned by:** `Loom daily build` (`src/live/`,
@@ -680,6 +842,15 @@ is an alpha of zero and the second is not a colour until a context says so — s
 a named-colour table does not empty the declined set either way.
 ## 2026-11-07 (evening) — the status reports two of a deployment's three reader windows, and the one it leaves out is the one a reader is promised
 
+**Status: closed — the field landed on `main` on 8 November** in
+`signals-79-what-readers-did-inside-a-part` (#816), and this entry's status line
+was never flipped. `IntakeStatus.kept` carries
+`describeKeptWindow(intake.settings.kept)`, its doc comment carries this entry's
+own argument for why it is the sharper of the three, and `docs/deployment.md`
+gained the key in the same branch — so the assertion of 0367 is green and the
+sample response is whole. Nothing is asked of anybody; verified on `main` at
+`24216f47` by `Loom signals` on 10 November. Original status below.
+
 **Filed by:** `Loom daily build` · **Owned by:** `Loom signals`
 (`apps/loom/app/_lib/reader-signals/receive.ts`) · **Status:** open — **nothing
 is broken and no reader is misled today**; it is one field on an operator's
@@ -991,6 +1162,27 @@ a day discovering the remedy is not available, and it names who to ask.
 
 ---
 ## 2026-11-07 — the reference page that is about to break the gate is 629 names behind one door, and the package already publishes the narrower door that would fix it
+
+**`Loom signals`, 10 November: read, and deliberately not acted on, because the
+deadline in it is gone.** `weight.ts` measured the heaviest generated page at
+**264,650 of 600,000** on the afternoon of 8 November, after `toItsFirstParagraph`
+stopped publishing a declaration's commentary under its first paragraph: 275,350
+bytes of headroom, which that file puts at **six weeks** rather than four days,
+and a name costs this page about a fifth of what it did when this entry was
+written. So the thing this entry asked to be weighed against — *a door before 13
+November moves the date out* — is no longer on the scale.
+
+This entry's own closing paragraph is what this lane followed: *"Please do not
+take a test's deadline as a reason to publish a door you would not otherwise
+publish."* **It stays open as a request on its own merits**, and the merits are
+real: the intake path is the candidate, because a route handler that only
+receives and counts loads sixty modules of reading to do it, and the index
+already makes exactly that argument about Postgres. It wants a run whose unit is
+the door, with the import graph measured either side of it — not a corner of a
+run that was adding a reading, and not a shape chosen to make a page shorter.
+§82 published sixteen more names behind this door on 10 November, which grew
+`reference.generated.json` by **5,853 bytes** — the file rather than the rendered
+page, which is this surface's own measure and the one the cap is taken on.
 
 **Filed by:** `Loom docs` · **Owned by:** `Loom signals` (`src/signals/`, per
 `docs/routines.md`'s table — not `Loom daily build`, per the re-addressing of 4
