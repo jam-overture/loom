@@ -51,6 +51,17 @@ The portal files the door's half (piece 2) as its own next piece; this entry
 only asks that the client's shape for clause 1 be agreed before either half is
 written, so the two land together.
 
+*Client half, 12 November:* built on `claude/project-thread-ev3p4q` under
+[0384](decisions/0384-a-reader-two-segments-match-is-counted-in-the-last-ones-and-the-page-carries-it-to-its-signals.md)
+(Proposed). Points 1 and 4: `LivePages.rules`, read from the same answer and
+moved only with the pages. Point 2: `segmentOf(held, page, context)` answers
+the **last** matching rule's segment; nothing is composed yet, because the door
+answers no forms until piece 4. Point 3: `RenderOptions.audience` writes
+`data-loom-audience` on an addressed root and the broadcaster files every batch
+under it. This entry closes when that merges **and a site wires it**: loomjs.org
+does not pass a context or an audience yet (`app/(marketing)/_lib/live.ts`),
+which is `Loom marketing`'s three lines.
+
 ---
 ## 2026-11-11 — the command that adds a component of your own cannot be printed on this site, because its own grammar is a word the site keeps off every page
 

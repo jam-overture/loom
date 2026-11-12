@@ -1,5 +1,6 @@
 import { createElement, Fragment, type CSSProperties, type ReactNode } from "react"
 
+import { DEFAULT_AUDIENCE_ID, type AudienceId } from "../audience/audience.js"
 import { parseBindings } from "../data/binding.js"
 import { NO_DATA, type DataResolution, type NodeData } from "../data/resolution.js"
 import type { FrameOriginRegistry } from "../frame/origin.js"
@@ -163,6 +164,16 @@ export type RenderOptions = {
    * the addresses an event about a reader has to carry (0136).
    */
   readonly addressed?: boolean
+  /**
+   * The segment the site's server sorted this reader into, when it sorted them
+   * into one (0371) — what `segmentOf` from `@jam-overture/loom/live` answers.
+   *
+   * Written on the root of an addressed page so its reader signals are filed
+   * under that segment (0284), and nowhere else: it changes no node and no
+   * prop. Absent, or `aud_everyone`, writes nothing, which is every page as it
+   * was before segments.
+   */
+  readonly audience?: AudienceId
   readonly slots?: SlotContent
   /**
    * How the mounted theme reaches the elements: as the `var()` references
@@ -207,6 +218,8 @@ type RenderContext = {
   readonly editMode: boolean
   /** Identity on the markup for a published page. See `RenderOptions.addressed`. */
   readonly addressed: boolean
+  /** Written on the root beside its identity. See `RenderOptions.audience`. */
+  readonly audience: AudienceId | undefined
   readonly slots: SlotContent
   readonly tree: LoomTree
   /** Mounted on the root element, and nowhere else. */
@@ -398,7 +411,11 @@ const renderContextFor = (
     ...(submit ? { submit } : {}),
     ...(anchor ? { anchor } : {}),
     ...(context.editMode || context.addressed
-      ? { editable: editableAttributes(node, isRoot ? context.tree : undefined) }
+      ? {
+          editable: isRoot
+            ? editableAttributes(node, context.tree, context.audience)
+            : editableAttributes(node),
+        }
       : {}),
     ...(theme ? { theme } : {}),
   }
@@ -1179,6 +1196,7 @@ const renderFrom = (
     validator: options.validator,
     editMode: options.editMode ?? false,
     addressed: options.addressed ?? false,
+    audience: options.audience === DEFAULT_AUDIENCE_ID ? undefined : options.audience,
     slots: options.slots ?? {},
     tree,
     theme: theme ? themeStyle(theme, rampFor(options)) : undefined,
