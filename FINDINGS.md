@@ -69158,6 +69158,27 @@ standing instruction
 > decision was taken. Recorded here rather than as a fourth entry, because the
 > instances are one fact and the count is what it is for.
 
+> **Fourth instance, 12 November, on #875, and the first outside `Loom docs`.**
+> `Loom marketing` called no subscribe tool and **eight** wakes arrived within
+> fifteen minutes: one `subscription.created`, five `vercel[bot]` comment
+> events — four of them edits of one comment id as three deployments moved
+> through `Building` → `Ready` — and two `check_suite.completed`. That is the
+> highest count of the four, and the reason is ordinary: this branch carried
+> three commits rather than one, so the bot's single comment was edited twice
+> per commit.
+>
+> **The shape is not a property of one lane**, which is what this instance
+> adds. The first three were all `Loom docs`; nothing about the mechanism was
+> ever lane-specific, and now it is measured rather than assumed.
+>
+> No check-in was armed. This run followed 10 November's reading and
+> unsubscribed, on the same evidence: one check on the pull request, the Vercel
+> deployment, read once as `success` on the current head before the decision —
+> here after a single bounded wait for a deployment that was still building,
+> which is one read of a settling check rather than a cadence. A tail of
+> already-queued wakes is expected per the note above and is not the
+> unsubscribe having failed.
+
 The 3 November entry records that *declining to subscribe does not prevent the
 subscription, and the wake that creates it asks the session to arm a check-in
 chain.* It happened again on #820. This session called no subscribe tool, the
