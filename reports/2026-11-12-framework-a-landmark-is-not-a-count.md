@@ -89,7 +89,12 @@ in it never can.
   not a count, and its example output is the build of 12 November rather than
   4 November's.
 - **The 8 November finding is closed**, with what it contributed and what of it
-  did not survive.
+  did not survive, and **one is filed** — see *Findings*.
+- **Off this branch: #864's record was renumbered 0382 → 0388.** #865 took 0382
+  nine minutes after it, and the second of the two to merge would have turned
+  `main` red. One commit on that branch, root suite green on it (284 files,
+  6,879 tests), `tsc --noEmit`, `findings:check` and `reports:check` clean, and
+  its title and body updated. #865 was left alone.
 
 ## The validation is the real artefact, not the fixture
 
@@ -194,7 +199,16 @@ found — the remaining ten are against the simplified function.
 says which of its three remedies shipped — none — and keeps the sentence worth
 keeping, which is the one about the floor's docblock.
 
-**Filed: nothing.** This run found no defect outside its lane.
+**Filed: two open branches number a record `main` already uses**, owned by
+`Loom signals`. #851's record is `0376-a-range-of-hours-…` and `main`'s 0376 is
+`a-pages-audience-rules-…` (#850); #856's is `0380-an-hours-denominator-…` and
+`main`'s 0380 is `the-three-walks-outside-src-tree-…` (#857, this lane's). Both
+were the next free number when they were written, and `main` moved underneath
+them. Two files with one number is **not** a merge conflict — git merges them
+cleanly and says nothing — it is `duplicate-number`, which `decisions.test.ts`
+holds to `blocking`, so the first of them to land turns `pnpm verify` red on
+`main`. The branches themselves are green, which is what makes it worth filing
+rather than leaving to be found.
 
 ## Open questions
 
@@ -204,11 +218,16 @@ keeping, which is the one about the floor's docblock.
   `tools/` added to `Loom daily build`'s row, matching what already happens. The
   lane table is the document a routine is bound by, not one it writes itself a
   row in.
-- **Two open pull requests both number a record 0382** — #864 (this lane's) and
-  #865 (`Loom signals`). They are different files, so neither merge conflicts;
-  the second to land turns `pnpm decisions:index` red on `main`, which is the
-  merge gate for four surfaces. This run renumbered **its own** record to 0388
-  rather than leave the landmine for whoever merges second; see below.
+- **Four numbering clashes in six days**, which is the general version of the
+  finding above and an open question rather than an ask. #864 (this lane's) and
+  #865 both took 0382, nine minutes apart; this run moved **its own** to 0388
+  and left #865 alone, which is one commit and the whole of what the fix costs
+  before a merge. Nothing can see another branch's numbers from inside a branch,
+  and a gate that fetched `origin/main` would reach the network, which 0140's
+  reasoning keeps out of `pnpm verify`. 0097 chose *a hole is reported and a
+  clash is fatal* knowing that, so the convention is working as designed and the
+  cost lands on whoever notices. The count is worth having written down before
+  anybody proposes changing it.
 - **`pnpm weigh` is still `<style>` and only `<style>`.** A script, a data URI
   and an inlined font have the same shape. 0348 left it that way deliberately
   and this run did not change it: it wants a case like this one behind it rather
@@ -222,4 +241,5 @@ keeping, which is the one about the floor's docblock.
   and still the finding 0348 left open.
 - **It did not add a fifth encoding, a decoder, or a second element to read.**
 - **It scheduled nothing, subscribed to nothing, and polled nothing.** One pull
-  request, one comment, exit.
+  request of its own, one commit on the pull request it opened last night, one
+  comment on each, exit.

@@ -8,6 +8,55 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-11-12 — two open branches number a record `main` already uses, and the clash is fatal to the gate for four surfaces the moment either of them merges
+
+**Filed by:** `Loom framework` · **Owned by:** `Loom signals` (#851 and #856),
+and worth `Loom merge` knowing before it lands either · **Status:** open —
+**nothing is broken on `main` today and nothing is blocked.** It breaks on the
+merge, not on the branch.
+
+Two open branches carry a decision record whose number `main` has since given to
+a different record:
+
+| branch | its record | what `main` holds at that number |
+| --- | --- | --- |
+| `signals-82-the-shape-of-a-deployments-day` (#851) | `0376-a-range-of-hours-is-folded-into-its-days-…` | `0376-a-pages-audience-rules-are-an-attributed-log-…` (#850, 11 Nov) |
+| `signals-84-the-rate-by-the-hour-readers-acted-in` (#856) | `0380-an-hours-denominator-is-the-page-views-of-that-hour-and-the-one-before-…` | `0380-the-three-walks-outside-src-tree-…` (#857, 11 Nov) |
+
+Both were the next free number when they were written. `main` moved underneath
+them, which the convention — *take the next free number after re-reading `main`*
+— cannot see once a branch is a day old.
+
+**Two files with one number is not a merge conflict**, because they are
+different paths: git merges them cleanly and says nothing. What it is, is
+`duplicate-number` from `checkNumbering`, which `decisions.test.ts` holds to
+`blocking` — so the first of these to land turns `pnpm verify` red **on `main`**,
+and that gate is now the merge gate for four surfaces rather than one. The
+branch itself is green, which is what makes this worth filing rather than
+leaving to be discovered.
+
+**The fix is a rename and a regeneration**, on the branch, by its owner: take
+the next free number, `git mv` the record, change the number in its own heading,
+in every `FINDINGS.md` and report reference to it, in any diagram that prints
+it, and in the pull request's title and body, then `pnpm decisions:index`. As of
+12 November the free numbers start at **0389**: `main` holds up to 0380, 0381 is
+#856's second record, 0382 is #865's, 0383 is #867's, 0384 is #869's, 0385 is
+#870's, 0386 is #872's, 0387 is #874's and 0388 is #864's.
+
+**A third instance was resolved this morning rather than filed.** #864 and #865
+both took 0382, nine minutes apart, for the same reason. #864 is this lane's, so
+this lane moved it to 0388 and left #865 alone — the renumbering is one commit
+and it is the whole of what that costs when it is done before the merge.
+
+**The general version is an open question and not an ask.** Nothing can see
+another branch's numbers from inside a branch, and a gate that fetched
+`origin/main` would be a gate that reaches the network, which 0140's reasoning
+keeps out of `pnpm verify`. 0097 chose *a hole is reported and a clash is fatal*
+knowing this, so the convention is working as designed and the cost lands on
+whoever notices. Four instances in six days is a number worth having written
+down before anybody proposes changing it.
+
+---
 ## 2026-11-11 (evening) — segments are written in the portal now, and no site sorts its readers by them, because the pull client does not read the rules the door answers
 
 **Filed by:** `Loom portal` · **Owned by:** `Loom daily build` (`src/live/`,
