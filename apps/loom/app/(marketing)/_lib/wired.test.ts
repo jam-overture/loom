@@ -7,6 +7,8 @@ import type { ReactNode } from "react"
 import { renderToStaticMarkup } from "react-dom/server"
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest"
 
+import { environmentNames, publishedFrom } from "../../../../../tools/sources/deployment"
+
 import { SHOWN_MARKER, THE_TWO_CALLS, WIRED_FILES, WIRED_LANGUAGE, YOUR_ROUTE } from "./wired"
 import { BUILT_HEADING } from "./wired/loom"
 
@@ -61,24 +63,78 @@ describe("the code this site prints under on your own site", () => {
 
   /**
    * The copy under the panel calls `??` *the whole fallback*, which is 0361
-   * clause 2's own word for it. One in the file is what makes that literal.
+   * clause 2's own word for it.
+   *
+   * **What holds that is no longer a count.** Until today one `??` in the file
+   * was the whole assertion, and it was only true because the two values the
+   * panel pulls with came out of an object rather than off the environment.
+   * There are three now, so the case names each of them: the one the copy is
+   * about, and the two defaults that make a read of a variable nobody has set
+   * a string. A fourth, or a second deciding which page a reader gets, is the
+   * failure this stops — and it is a stronger case than the count was, because
+   * the count would have passed on any single `??` anywhere in the file.
    */
-  it("takes the whole of its fallback from one `??`", () => {
-    expect([...YOUR_ROUTE.source.matchAll(/\?\?/g)]).toHaveLength(1)
-    expect(YOUR_ROUTE.source).toContain("?? homePage")
+  it("accounts for every `??` in the file, and one of them decides the page", () => {
+    const occurrences = (needle: string): number => YOUR_ROUTE.source.split(needle).length - 1
+
+    const accounted = [
+      'deployment: process.env.LOOM_URL ?? ""',
+      'key: process.env.LOOM_PROJECT_KEY ?? ""',
+      "livePageOf(await live.ready(), homePage.treeId) ?? homePage",
+    ]
+
+    for (const one of accounted) expect(occurrences(one)).toBe(1)
+
+    expect(occurrences("??")).toBe(accounted.length)
   })
 
   /**
-   * And the panel reads no environment variable, which is not a style choice:
-   * `tools/sources/deployment.ts` would take the read as a nineteenth setting
-   * of this deployment. `wired/loom.ts` carries the whole of it, this is the
-   * half that cannot drift back, and the entry in `FINDINGS.md` is what would
-   * let the panel print the spelling a reader actually writes.
+   * **The panel reads the two values off the environment, by the names the
+   * published entry point reads**, and this case said the opposite until today.
+   *
+   * It had to: `tools/sources/deployment.ts` reads every variable the
+   * application's code names and could not tell a printed specimen from a
+   * setting the Loom site has, so the two reads arrived in that sweep as two
+   * settings of this deployment. 0379 stops the sweep at the marker and the
+   * workaround came out. `wired/loom.ts` has the history.
+   *
+   * What is held here is the spelling a reader copies. The half that would
+   * drift back silently — the sweep's own reading of this file — is the case
+   * below, which runs the sweep rather than describing it.
    */
-  it("reads no environment variable, because the sweep cannot tell this from a setting", () => {
-    expect(YOUR_ROUTE.source).not.toContain("process.env")
-    expect(YOUR_ROUTE.source).toContain("deployment: loomProject.url")
-    expect(YOUR_ROUTE.source).toContain("key: loomProject.key")
+  it("reads the address and the key off the environment, by their published names", () => {
+    expect(YOUR_ROUTE.source).toContain('deployment: process.env.LOOM_URL ?? ""')
+    expect(YOUR_ROUTE.source).toContain('key: process.env.LOOM_PROJECT_KEY ?? ""')
+    expect(YOUR_ROUTE.source).not.toContain("loomProject")
+  })
+
+  /**
+   * **And the sweep agrees, which is the half a sentence cannot hold.**
+   *
+   * 0379's exemption is the *region* and not the file: whatever
+   * `wired/page.tsx` reads above its marker is still read as a setting of this
+   * deployment, and a read put there would make the Loom site owe two
+   * variables it does not have. Nothing is above the marker today.
+   *
+   * So this runs `tools/sources/deployment.ts`' own two functions over the
+   * specimen the way the sweep does — cut at `publishedFrom`, then
+   * `environmentNames` over what is left — and holds the answer at none. It
+   * fails on the branch that moves the marker, drops it, or reads a variable
+   * above it, rather than on another lane's branch three days later.
+   *
+   * The two reads below the marker are asserted to be there as well, so this
+   * cannot pass by the region being empty. Sorted, because what the sweep
+   * returns is in its own order and this case is about which names it found.
+   */
+  it("names no setting of this deployment, read the way the sweep reads it", () => {
+    const text = readFileSync(join(HERE, YOUR_ROUTE.from), "utf8")
+
+    expect(environmentNames(text.slice(0, publishedFrom(text)))).toEqual([])
+    expect(environmentNames(text)).toEqual([])
+    expect([...environmentNames(publishedRegionOf(YOUR_ROUTE.from))].sort()).toEqual([
+      "LOOM_PROJECT_KEY",
+      "LOOM_URL",
+    ])
   })
 
   /** It is a React component, so the panel says `tsx` rather than `ts`. */
@@ -167,16 +223,16 @@ describe("the budget this panel is kept to", () => {
  *
  * ## Nothing is mocked, and the one hazard is handled rather than hoped about
  *
- * The specimen takes its deployment and its key at module scope, so the test
- * has to write them before `wired/page.tsx` evaluates. This suite's node pool
+ * The specimen reads its deployment and its key at module scope, so the test
+ * has to set them before `wired/page.tsx` evaluates. This suite's node pool
  * runs with `isolate: false` — a module an earlier file loaded is **not**
  * re-evaluated, which is the hazard this lane filed on 6 November and
  * `apps/loom/vitest.config.ts` has a section about. `vi.resetModules()` is the
  * remedy that file names, and `served` below uses it.
  *
  * **And the belt is checked by a brace.** If the import were served from a warm
- * cache the loop would have been built with no deployment, so no request would
- * reach the server — and `asked the door with the key it was configured with`
+ * cache the loop would have been built with whatever the environment held when
+ * some other file first loaded the panel, so no request would reach the server — and `asked the door with the key it was configured with`
  * fails. The failure mode of a stale module here is red rather than a quiet
  * green, which is the property the 6 November entry asks for and the one a mock
  * cannot have.
@@ -240,22 +296,41 @@ describe("a route wired the way this panel shows", () => {
   /**
    * The page as the specimen serves it, pointed at the door this file answers.
    *
-   * `vi.resetModules()` first, then this module, then the panel's own: both get
-   * a fresh evaluation out of one registry, so the configuration written here
-   * is the configuration `wired/page.tsx` reads as it evaluates. Nothing is
-   * mocked and nothing depends on which file the suite loaded first.
+   * `vi.resetModules()` first, then the panel's own module: it gets a fresh
+   * evaluation, so the environment written here is the environment
+   * `wired/page.tsx` reads as it evaluates. Nothing is mocked and nothing
+   * depends on which file the suite loaded first.
+   *
+   * **It writes the two variables and puts them back**, which is one step
+   * shorter than it was: until today the panel took its deployment from a
+   * mutable object in `wired/loom.ts`, so this imported that module to write to
+   * it. The variables are restored in a `finally`, because a suite that leaves
+   * `LOOM_URL` set would hand it to whatever file runs next in this pool —
+   * `isolate: false` means the process is shared, and that is the same hazard
+   * the module cache one below is about.
    */
   const served = async (deployment: string, key: string): Promise<string> => {
-    vi.resetModules()
+    const before = {
+      url: process.env.LOOM_URL,
+      key: process.env.LOOM_PROJECT_KEY,
+    }
 
-    const config = await import("./wired/loom")
+    process.env.LOOM_URL = deployment
+    process.env.LOOM_PROJECT_KEY = key
 
-    config.loomProject.url = deployment
-    config.loomProject.key = key
+    try {
+      vi.resetModules()
 
-    const route = (await import("./wired/page")) as { default: () => Promise<ReactNode> }
+      const route = (await import("./wired/page")) as { default: () => Promise<ReactNode> }
 
-    return renderToStaticMarkup(await route.default())
+      return renderToStaticMarkup(await route.default())
+    } finally {
+      if (before.url === undefined) delete process.env.LOOM_URL
+      else process.env.LOOM_URL = before.url
+
+      if (before.key === undefined) delete process.env.LOOM_PROJECT_KEY
+      else process.env.LOOM_PROJECT_KEY = before.key
+    }
   }
 
   it("serves the page Loom answered with rather than the one the code built", async () => {
