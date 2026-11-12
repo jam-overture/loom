@@ -465,9 +465,31 @@ lines of `nodes.ts` helpers.
 ## 2026-11-08 — `pnpm weigh` reported a 78-byte rule as 33,150 bytes repeated, because for a short text the landmark it counts by can be an ordinary CSS property name
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom daily build`
-(`tools/weigh/repetition.ts`) · **Status:** open — **the number is wrong in the
-direction the module promises it cannot be.** Nothing is blocked; this lane read
-the count, disbelieved it, counted by hand and reported the hand count.
+(`tools/weigh/repetition.ts`) · **Status:** **closed by
+`framework-95-a-landmark-is-not-a-count`** (0387), 12 November — **the hand
+count is the reading now.** On the build of 12 November the same rule on the
+same page reads *78 bytes carried 2 times, at least 78 bytes repeated*, where
+that morning it read *carried 346 times*; `/why-use-it`'s 79-byte rule reads 2
+where it read 386. The 47,981-byte stylesheet beside them still reads 43 copies
+and at least 2,015,202 bytes — 0348's figure, unchanged to the byte, because a
+fix that quieted this instrument's one load-bearing reading would not have been
+one.
+
+**None of the three remedies offered below is what shipped.** The first two
+cannot be computed: finding a text's copies is the question being asked, and a
+copy is not findable verbatim, which is 0348's whole premise. The third was
+measured not to catch this one — the floor is 8 and the offending token is 16. A
+fourth did: a copy is a **sequence** of up to six of the text's landmarks, in
+the text's order, each between one and six times as far from the one before as
+the text puts it, and each occurring once inside the span. The clause that does
+the work is the last one, because the span a pair of landmarks is otherwise
+satisfied by is one copy's tail and the next copy's head.
+
+**The sentence this entry will be read for is the one about the floor's own
+docblock**: against a document that is mostly CSS, the tokens that are both long
+and common are exactly the property names, which is the one corpus this tool is
+always pointed at. It is now 0387's argument and a paragraph in
+`docs/routines.md`.
 
 `repetition.ts` counts copies of a text by its **landmark**: the longest
 escape-safe token the text contains exactly once, which is the right instrument
