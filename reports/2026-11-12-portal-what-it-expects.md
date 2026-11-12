@@ -64,7 +64,9 @@ is already settled (0350, 0356, the 5 November measuring rules).
   share, and the words).
 - `change-drawer.test.tsx`: 10 tests, two new (the figures and band shown and
   no prediction; unreadable and removed goals).
-- `pnpm verify`: see the pull request description for the run's numbers.
+- `pnpm verify` exit 0: the package 283 files, 6,848 tests passed (2 skipped);
+  the app 483 files, 7,850 tests passed; findings, reports and prerender checks
+  clean.
 - The screenshot is the drawer rendered from its component with sample
   figures and the portal's stylesheet, not the live deployment.
 
