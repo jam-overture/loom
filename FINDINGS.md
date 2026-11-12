@@ -70730,3 +70730,61 @@ place in the product where they are explained, which is the wrong place for it.
 **It is not a reason to put the workaround back.** A panel that hid one of the
 two lines a reader has to change was not answering the question either; it was
 making it unaskable.
+
+---
+## 2026-11-12 — the mangling's trigger is the branch name in the URL, and the same URL written with the commit sha goes through clean
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom daily build`
+(`tools/` — the `pnpm posted` work on #864 is where this belongs) · **Status:**
+open — **the remedy is one substitution any lane can make today**, and it costs
+nothing to adopt before anything is built
+
+Four forms of the same two pictures were posted to one pull request body in one
+session this morning, each read back from GitHub immediately after. **This is
+the first time the thing that triggers the mangling has been isolated rather
+than the thing that survives it.**
+
+| what was posted | what came back |
+| --- | --- |
+| `![before](https://raw.githubusercontent.com/.../marketing-35-the-two-values-a-reader-really-writes/reports/….webp)` | `[before](``` https://… ```)` — backticks injected, the `!` dropped, **no image** |
+| `<img src="https://raw.githubusercontent.com/.../marketing-35-…-writes/reports/….webp" width="430" />` | `&lt;img src="`` https://… ``  width="430" />` — the tag escaped and the URL backticked, **no image** |
+| a bare `https://github.com/jam-overture/loom/blob/marketing-35-…-writes/reports/….md` | **clean** |
+| `![before](https://raw.githubusercontent.com/jam-overture/loom/c3c41ac32fc16d7ce8d6ace3b995589d75168945/reports/….webp)` | **clean, and the image renders** |
+
+The last two rows are the measurement. Rows 1, 2 and 4 are the *same file* at
+the same path in the same repository, posted in the same minute, differing only
+in what sits between the repository name and `reports/`.
+
+### What it says
+
+- **The branch name is the trigger, not the raw host, not the markdown image
+  syntax, and not the length of the URL.** Row 4 is the longest URL of the four
+  and it is the one that came back whole. Rows 1 and 2 differ in syntax and
+  mangle identically.
+- **It is not the markdown form.** `<img>` is not markdown and was mangled the
+  same way, which rules out an explanation that lives in a markdown parser.
+- **Escaping it is not available.** The 14 October entry measured 177 mangled
+  against 121 clean in one body with the same syntax throughout, and the 8
+  November entry records a before-and-after pair eaten by it. Both were looking
+  for a syntax that survives. There is a simpler answer: **do not put the branch
+  name in the URL.**
+
+### The remedy, and it needs no tooling to start using
+
+`git rev-parse HEAD`, and write the sha where the branch name would go. Both
+`raw.githubusercontent.com/<owner>/<repo>/<sha>/…` and
+`github.com/<owner>/<repo>/blob/<sha>/…` work, and a sha is better for a report
+anyway — a branch URL in a merged pull request stops resolving once the branch
+is deleted, and these pictures are the argument the pull request was making.
+
+**For `pnpm posted` (#864):** this is a rule that can be checked before posting
+rather than read back afterwards. A body containing
+`raw.githubusercontent.com/<owner>/<repo>/<anything that is not 40 hex
+characters>/` is a body that is about to lose its pictures.
+
+### What this does not explain
+
+Why a branch name triggers it, and whether every branch name does or only ones
+of a certain shape. Three of this lane's own recent branches are long and
+hyphenated; nothing here isolates which property matters. The remedy does not
+need the answer, which is why it is worth adopting before anyone finds it.
