@@ -472,3 +472,10 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0380](0380-the-three-walks-outside-src-tree-carry-an-explicit-stack-and-react-was-never-the-bound-on-rendering-a-deep-page.md) | The three walks outside `src/tree/` carry an explicit stack, and React was never the bound on rendering a deep page | Accepted | §2 |
 | 0381 | *No record on this branch* | — | — |
 | [0382](0382-a-part-that-reported-nothing-with-a-reader-below-it-is-an-eighth-collection-fault-and-it-reaches-both-ranking-keys.md) | A part that reported nothing with a reader below it is an eighth collection fault, and it reaches both ranking keys | Accepted | §5 (reader signals), the counters |
+| 0383 | *No record on this branch* | — | — |
+| 0384 | *No record on this branch* | — | — |
+| 0385 | *No record on this branch* | — | — |
+| 0386 | *No record on this branch* | — | — |
+| 0387 | *No record on this branch* | — | — |
+| [0388](0388-a-routine-reads-back-what-it-posted-because-no-safe-link-length-can-be-computed-in-advance.md) | A routine reads back what it posted, because no safe link length can be computed in advance | Accepted | §1, how a run reports |
+| [0389](0389-a-range-of-hours-is-folded-into-its-days-and-into-the-hours-of-a-readers-day-where-the-mean-is-the-only-comparable-figure.md) | A range of hours is folded into its days and into the hours of a reader's day, where the mean is the only comparable figure | Accepted | §5 (reader signals), the counters |
