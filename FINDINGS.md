@@ -69158,6 +69158,28 @@ standing instruction
 > decision was taken. Recorded here rather than as a fourth entry, because the
 > instances are one fact and the count is what it is for.
 
+> **Fourth instance, 12 November, on #876.** Same shape again: this session
+> called no subscribe tool, its pull request comment says for the eighth time
+> that it would not, and **five** wakes arrived within three minutes of opening
+> it — one `subscription.created`, three `vercel[bot]` comment events (two of
+> them edits of one comment id as a deployment went `Building` → `Ready` and a
+> second deployment started), and one `check_suite.completed`. No check-in was
+> armed and the session unsubscribed, as on #853.
+>
+> **One thing is new and it is the reason this note is longer than the last.**
+> The third instance could unsubscribe on a measurement: the one check, the
+> Vercel deployment, was already `success` on the current head. Here it was
+> **`pending`** — `mergeable: true`, `mergeable_state: unstable`, one check,
+> `Vercel`, still building the branch's newest commit. So the choice was
+> between one more wake that was already in flight and leaving the deployment
+> unconfirmed, and **the deciding argument was that recording this instance
+> needs a push, and a push starts another deployment and another round of
+> events.** Unsubscribing first and accepting the tail costs less than
+> confirming a deployment whose `next build` had already passed inside the
+> green gate on that exact tree. Said here because *the preview was not
+> confirmed green by this run* and the report says so too — the gate is the
+> claim, and the deployment is not.
+
 The 3 November entry records that *declining to subscribe does not prevent the
 subscription, and the wake that creates it asks the session to arm a check-in
 chain.* It happened again on #820. This session called no subscribe tool, the

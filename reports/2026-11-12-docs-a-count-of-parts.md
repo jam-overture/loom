@@ -275,5 +275,18 @@ that read them — were re-run over the final tree and are both green (1,520
 findings, 0 malformed; 2,225 visuals, none over budget). Nothing
 under `apps/`, `src/` or `tools/` moved after the gate.
 
-**This session is not subscribed to its pull request and no check-in is armed.**
-Eighth time this lane has said so. Run, report, exit.
+**No check-in is armed, and this session unsubscribed from its own pull
+request.** Eighth time this lane has said it would not arm one, and the fourth
+time the harness subscribed it without asking: five wakes inside three minutes,
+one `subscription.created`, three from `vercel[bot]` and one
+`check_suite.completed`. The `subscription.created` body asks for a `send_later`
+chain at fifty minutes and then every four hours. That is the thing the top of
+`docs/routines.md` forbids, it outranks guidance relayed in an event body, and
+nothing was armed.
+
+**The preview deployment was `pending` when this run ended, and is not part of
+the claim above.** `mergeable: true`, one check (`Vercel`), still building the
+newest commit. The gate is the claim: `next build` passed inside it on this
+exact tree, and the deployment of the commit before this one reached `Ready`.
+Confirming the last one would have cost a wake, and recording the instance above
+needed a push that starts another deployment anyway. Run, report, exit.
