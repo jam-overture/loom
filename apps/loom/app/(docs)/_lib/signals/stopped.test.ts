@@ -142,6 +142,44 @@ describe("the order over a deployment", () => {
     }
   })
 
+  /**
+   * The sharpest place across the deployment, which the block names and which a
+   * screen would open with. It is the top page's own largest place — anything
+   * else would mean the two orders had been drawn from different readings — and
+   * its share is what says whether one afternoon is worth spending.
+   */
+  it("names the sharpest place across the deployment, with its share", () => {
+    const ordered = produceOrdered()
+    const places = ordered.places
+
+    expect(places.length).toBeGreaterThan(1)
+    expect(places[0]?.example).toBe(ordered.byCost[0]?.example)
+    expect(places[0]?.unseen).toBe(ordered.byCost[0]?.costs)
+    expect(places.map((place) => place.unseen)).toEqual(
+      [...places.map((place) => place.unseen)].sort((left, right) => right - left)
+    )
+    expect(places[0]?.share ?? 0).toBeGreaterThan(0)
+    expect(places.reduce((total, place) => total + place.share, 0)).toBeLessThanOrEqual(1)
+  })
+
+  /**
+   * The captions and the sentence under them name the pages the way the
+   * catalogue names them, not the way a url does. A reader of this block has
+   * never heard of `a-page-a-reader-scrolls`, and the caption is the first
+   * thing they read.
+   */
+  it("names the pages the way a reader would", () => {
+    for (const row of produceOrdered().byCost) {
+      expect(row.title).not.toBe(row.example)
+      expect(row.title).toMatch(/^[A-Z]/)
+    }
+
+    const reading = produceStopped()
+
+    expect(reading.title).not.toBe(reading.example)
+    expect(reading.title).toMatch(/^[A-Z]/)
+  })
+
   /** Places add up to the deployment's unread parts, across the pages in the order. */
   it("adds the places across the deployment", () => {
     const ordered = produceOrdered()

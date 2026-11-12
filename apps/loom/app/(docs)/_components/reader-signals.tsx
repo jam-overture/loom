@@ -449,11 +449,21 @@ export const WhatOneFixRecovers = () => {
           </tbody>
         </table>
       </div>
-      <p className="border-edge text-ink m-0 border-t px-3 py-3 text-xs">
-        {ordered.byCost[0] === undefined || ordered.byParts[0] === undefined
-          ? "One page, so the two orders cannot disagree."
-          : `Both orders are over the same ${ordered.byCost.length} pages. Ranked on what one fix recovers, ${ordered.byCost[0].title} is first and an afternoon there recovers ${ordered.byCost[0].costs ?? 0} parts of a page. Ranked on unread parts, ${ordered.byParts[0].title} is first — ${ordered.byParts[0].places} separate places, each worth ${ordered.byParts[0].costs ?? 0}.`}
-      </p>
+      <div className="border-edge border-t px-3 py-3">
+        <p className="text-ink m-0 text-xs">
+          {ordered.byCost[0] === undefined || ordered.byParts[0] === undefined
+            ? "One page, so the two orders cannot disagree."
+            : `Both orders are over the same ${ordered.byCost.length} pages. Ranked on what one fix recovers, ${ordered.byCost[0].title} is first and an afternoon there recovers ${ordered.byCost[0].costs ?? 0} parts of a page. Ranked on unread parts, ${ordered.byParts[0].title} is first — ${ordered.byParts[0].places} separate places, each worth ${ordered.byParts[0].costs ?? 0}.`}
+        </p>
+        {ordered.places[0] === undefined ? null : (
+          <p className="text-ink-muted m-0 mt-2 text-xs" data-worst-place={ordered.places[0].example}>
+            The sharpest place in the deployment is in {ordered.places[0].title}, and it is{" "}
+            {Math.round(ordered.places[0].share * 100)}% of every unread part across both pages —
+            which is the figure that says whether going and looking at one page is worth an
+            afternoon at all.
+          </p>
+        )}
+      </div>
     </Panel>
   )
 }
