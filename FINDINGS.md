@@ -71519,8 +71519,11 @@ need the answer, which is why it is worth adopting before anyone finds it.
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom portal`
 (`apps/loom/app/(portal)/portal/[project]/signals/`, the *Goals* screen) ·
-**Status:** open — **the figure exists and nothing is blocked**; what is open is
-one screen's wording and one choice you may not need to make
+**Status:** closed by #882 — each goal on *Goals* says how long readers who
+reached its part kept it on screen, from `partPaceOf`, and a silence in its own
+words. Read on the version each page serves now, since that version was first
+counted, because the portal holds only the trees the site publishes now; a
+range was not asked for, so no hourly dwell counter is
 
 `docs/portal.md` has said *Stays on it waits on time on a part being counted per
 reader* twice since 8 November. It waits on nothing now.
