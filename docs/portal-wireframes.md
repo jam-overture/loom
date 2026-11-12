@@ -264,6 +264,14 @@ change. It is defined only from what a batch already says, never from anything
 personal (`docs/signals.md` rule 1, and the deferral of per-reader identity).
 It needs its own decision record before any of it is built.
 
+**Since built** ([0371](../decisions/0371-a-segment-is-an-audience-the-site-sorts-its-readers-into-and-loom-keeps-only-its-rules-and-its-name.md),
+Accepted 11 November): *Segments* on the rail, the read door answering each
+page's rules, and the segment filter, a *Segment* picker under the range on
+*Signals* and above the list on *Goals* (`?segment=`), which narrows every
+figure to that segment's readers and says *Nothing has been counted for
+<segment> yet* until the site names it. The split on *Page history* and *only
+for: <segment>* are piece 4, which waits on its own record.
+
 ---
 
 ## Build order

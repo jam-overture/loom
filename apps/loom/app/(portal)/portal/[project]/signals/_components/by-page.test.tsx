@@ -31,7 +31,12 @@ const NOW = Date.parse("2026-11-05T15:00:00.000Z")
 
 const UNOPENED: PageStops = { kind: "unopened", version: 2 }
 
-const address = { base: "/portal/prj_a/signals/pages", from: undefined, range: "24h" as const }
+const address = {
+  base: "/portal/prj_a/signals/pages",
+  from: undefined,
+  segment: undefined,
+  range: "24h" as const,
+}
 
 describe("By page", () => {
   it("shows each page by its published name with its id, and by its id alone otherwise", () => {
@@ -422,6 +427,24 @@ describe("the drawer for one page", () => {
     )
   })
 
+  it("keeps the segment on the page's events and on the way back to the list", () => {
+    render(
+      <PageDrawerPanel
+        stops={UNOPENED}
+        drawer={drawer}
+        address={{ ...address, segment: "phone" }}
+        projectId="prj_a"
+      />
+    )
+
+    expect(screen.getByRole("link", { name: "Events on this page" }).getAttribute("href")).toBe(
+      "/portal/prj_a/signals?on=t_home&segment=phone"
+    )
+    expect(screen.getByRole("link", { name: "Close" }).getAttribute("href")).toBe(
+      "/portal/prj_a/signals/pages?segment=phone"
+    )
+  })
+
   it("offers no screen of the page's own where the site has not published it, and still its events", () => {
     render(
       <PageDrawerPanel
@@ -444,7 +467,12 @@ describe("the drawer for one page", () => {
 })
 
 describe("Where readers stopped", () => {
-  const address = { base: "/portal/prj_a/signals/pages", from: undefined, range: "24h" as const }
+  const address = {
+    base: "/portal/prj_a/signals/pages",
+    from: undefined,
+    segment: undefined,
+    range: "24h" as const,
+  }
   const drawer: PageDrawer = {
     row: row("t_home", { name: "Welcome" }),
     range: { kind: "unreadable" },
