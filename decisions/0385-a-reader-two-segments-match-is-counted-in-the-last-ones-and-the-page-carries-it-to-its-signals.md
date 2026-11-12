@@ -1,4 +1,4 @@
-# 0384. A reader two segments match is counted in the last one's, and the page carries it to its signals
+# 0385. A reader two segments match is counted in the last one's, and the page carries it to its signals
 
 **Status:** Proposed
 **Date:** 2026-11-12

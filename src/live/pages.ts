@@ -89,7 +89,7 @@ export const livePageOf = (held: LivePages, page: TreeId): LoomTree | undefined 
  * segment's name, which the host stamps on the page it renders so the page's
  * signals are filed under it (0284).
  *
- * **One segment, the last rule that matches** (0384). A batch names one
+ * **One segment, the last rule that matches** (0385). A batch names one
  * audience, so a reader two rules match is counted in one segment rather than
  * in both, which would count one page view twice wherever segments are added
  * up. The last rule is the one the portal orders general to specific, and the

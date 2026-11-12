@@ -473,4 +473,5 @@ Everything above this line is prose a person wrote, and stays that way.
 | 0381 | *No record on this branch* | — | — |
 | 0382 | *No record on this branch* | — | — |
 | 0383 | *No record on this branch* | — | — |
-| [0384](0384-a-reader-two-segments-match-is-counted-in-the-last-ones-and-the-page-carries-it-to-its-signals.md) | A reader two segments match is counted in the last one's, and the page carries it to its signals | Proposed | §2 (signals) |
+| 0384 | *No record on this branch* | — | — |
+| [0385](0385-a-reader-two-segments-match-is-counted-in-the-last-ones-and-the-page-carries-it-to-its-signals.md) | A reader two segments match is counted in the last one's, and the page carries it to its signals | Proposed | §2 (signals) |

@@ -94,7 +94,7 @@ describe("the segment a reader is in, sorted in the site's process (0371 clause 
   /**
    * A batch names one audience, so a reader in two segments is counted in one:
    * the last rule's, which is the specific one and the one that wins a
-   * contested part (0359 clause 3, 0384).
+   * contested part (0359 clause 3, 0385).
    */
   it("names the last matching rule's segment when two match", () => {
     const both = { device: "phone", source: "search" }
