@@ -5390,15 +5390,22 @@ and no assertion weakened.
 
 **Nothing reaches a reader's browser.** `broadcast.ts` and its import graph are
 untouched, and the bundle measures **7,543 bytes minified and 3,350 gzipped**,
-which is what it measures on `main`. The docs names index is byte-for-byte
-`main`'s at **39,852 of 40,000**, which is why this unit was the one chosen
-today — the cap has 148 bytes and they are nobody's.
+which is what it measures on `main`.
+
+**It publishes no name, and that is why it was the unit chosen that evening.**
+The published-names index had **148 bytes of headroom** under its 40,000-byte
+cap — about seven names, and they were nobody's to hold down — and this lane had
+already lost §82 to it. A member of a closed union and a field on a published
+type are neither of them names, so the figure on this branch was `main`'s byte
+for byte. **The cap is no longer the constraint:** `Loom docs` front-coded the
+file the next morning (#859), which took it to **27,205 bytes of 40,000 with
+2,109 names in it**, so the next unit here is free to publish a door.
 
 **What is left and is filed:** *which of your components are silent*, the same
 defect gathered by primitive type rather than by page, which is the sentence the
-9 November entry reaches for and is a unit of its own — it publishes several
-names onto an index with 148 bytes left, and it answers a question nobody can
-ask until a deployment knows it has the defect at all.
+9 November entry reaches for and is a unit of its own. It answers a question
+nobody can ask until a deployment knows it has the defect at all, and the names
+index it would publish onto has room now.
 
 ## Still not in scope
 
