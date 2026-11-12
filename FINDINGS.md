@@ -71335,3 +71335,68 @@ a `pageReadingOf` fixture whose tallies name children and not the root.
 other's fixtures. The cheapest honest version is a test, not a sweep: a helper in
 `src/testing/` that builds a page reading and refuses one whose root has no row,
 offered to both lanes.
+
+---
+## 2026-11-12 (evening) — the entry above merged with a byte figure that was already false, and this is what the cap cost a design while it was tight
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`docs/signals.md` §86,
+[0381](decisions/0381-a-parts-pace-across-pages-is-one-pooled-quotient-and-a-goals-part-is-a-reading-of-its-own.md),
+`reports/2026-11-12-signals-how-long-readers-stay-on-one-part.md`) ·
+**Status:** **closed on filing** for the figures, which are corrected in the
+plan and in the record; **open as a note** about the one thing worth keeping
+from it
+
+**This supersedes the entry immediately above it** — *this branch spends 50 of
+the names index's 148 bytes, and leaves 98* — which is left standing rather than
+rewritten, because it merged and something may have read it.
+
+### What was wrong
+
+`signals-86` was cut on the morning of 12 November, when the published-names
+index had **148 bytes** of headroom. Its three names were measured at **50** of
+them, leaving 98, and that figure reached four places: §86 of the plan, 0381's
+consequences, the report, and the entry above.
+
+**#859 front-coded the names file and merged while the branch sat.** The branch
+was corrected on itself — but **#873 had already merged by the time the
+correction was pushed**, so the correction went to a branch whose pull request
+was closed and `main` took the stale figure in all four places. Remeasured on
+`main` at `ce27bca2`:
+
+| | spent | cap | room | entries |
+| --- | --- | --- | --- | --- |
+| front-coded names file, `main` at `e20d0b41` | 27,262 | 40,000 | 12,738 | 2,113 |
+| front-coded names file, with §86's three names | **27,289** | 40,000 | **12,711** | 2,116 |
+| per name | 12.90 | 24 | — | — |
+
+**27 bytes, not 50, and 12,711 left, not 98.** The plan and the record now say
+so. The report of that run is **left as it stands**, because a report is the
+record of a run and not a live document; this entry is where its one wrong
+number is corrected.
+
+### The process half, which is the part that will happen again
+
+A branch that corrects itself after its pull request has merged corrects
+nothing. There was no signal available to this lane that #873 had merged — the
+merge event and the push crossed — and the lesson is the cheap one: **before
+pushing a correction to a branch, read whether its pull request is still open.**
+Two commits' worth of true figures sat on a closed branch for twenty minutes
+while `main` carried the false ones.
+
+### What the cap cost a design while it was tight, which is worth keeping
+
+`partPaceOf` wanted a silence vocabulary of its own: `PartPaceSilence`,
+`PART_PACE_SILENCES`, `describePartPaceSilence` and a twenty-third `meaningOf`
+with its entry in `SILENCE_VOCABULARIES`. It publishes `KindPaceSilence`'s four
+values instead.
+
+**That was the right call and the cap was not the reason.** A second name for
+each of four identical states needs a second closed set and a second mapping to
+keep in step with it, which is three places to drift apart in. But the 57 bytes
+are what made the choice look obvious on the morning it was made — and **a lane
+choosing its published vocabulary by what the docs search index can afford is
+exactly the failure the two entries of 10 November were filed about.** It
+happened once, here, to this lane, and it is written down rather than quietly
+unwound. 12,711 bytes is about a thousand names at the front-coded rate; this
+lane goes back to choosing units by what they answer.
