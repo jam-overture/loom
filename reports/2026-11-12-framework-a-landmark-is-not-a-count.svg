@@ -1,0 +1,103 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 700" width="1080" height="700" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif">
+  <style>
+    .title { font-size: 21px; font-weight: 650; fill: #0f172a; }
+    .sub { font-size: 13px; fill: #64748b; }
+    .panel-title { font-size: 12px; font-weight: 650; fill: #475569; letter-spacing: 0.09em; }
+    .note { font-size: 12px; fill: #475569; }
+    .mono { font-size: 11.5px; fill: #334155; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .tick { font-size: 10.5px; fill: #94a3b8; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .bad { font-size: 12px; font-weight: 650; fill: #b91c1c; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .ok { font-size: 12px; font-weight: 650; fill: #15803d; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .rowhead { font-size: 10px; font-weight: 650; fill: #64748b; letter-spacing: 0.04em; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .emph { font-size: 12.5px; font-weight: 650; fill: #0f172a; }
+  </style>
+
+  <rect width="1080" height="700" fill="#ffffff" />
+
+  <text class="title" x="40" y="46">A landmark is not a count</text>
+  <text class="sub" x="40" y="68">`/?theme=bold`, the build of 12 November: 2,327,766 bytes, and one 78-byte rule somewhere inside it</text>
+
+  <!-- band 1: the document strip -->
+  <text class="panel-title" x="40" y="108">THE DOCUMENT, AND WHERE THE TWO LANDMARKS OF `:root { background-color … color-scheme }` FALL</text>
+
+  <rect x="40" y="124" width="1000" height="34" rx="4" fill="#f1f5f9" stroke="#e2e8f0" />
+  <text class="tick" x="46" y="176">0</text>
+  <text class="tick" x="990" y="176">2,327,766</text>
+
+  <g stroke="#b91c1c" stroke-width="1.6" opacity="0.75">
+    <line x1="52" y1="124" x2="52" y2="158" /><line x1="63" y1="124" x2="63" y2="158" />
+    <line x1="79" y1="124" x2="79" y2="158" /><line x1="96" y1="124" x2="96" y2="158" />
+    <line x1="121" y1="124" x2="121" y2="158" /><line x1="140" y1="124" x2="140" y2="158" />
+    <line x1="158" y1="124" x2="158" y2="158" /><line x1="177" y1="124" x2="177" y2="158" />
+    <line x1="199" y1="124" x2="199" y2="158" /><line x1="218" y1="124" x2="218" y2="158" />
+    <line x1="241" y1="124" x2="241" y2="158" /><line x1="259" y1="124" x2="259" y2="158" />
+    <line x1="283" y1="124" x2="283" y2="158" /><line x1="301" y1="124" x2="301" y2="158" />
+    <line x1="324" y1="124" x2="324" y2="158" /><line x1="342" y1="124" x2="342" y2="158" />
+    <line x1="366" y1="124" x2="366" y2="158" /><line x1="385" y1="124" x2="385" y2="158" />
+    <line x1="408" y1="124" x2="408" y2="158" /><line x1="427" y1="124" x2="427" y2="158" />
+    <line x1="450" y1="124" x2="450" y2="158" /><line x1="469" y1="124" x2="469" y2="158" />
+    <line x1="492" y1="124" x2="492" y2="158" /><line x1="511" y1="124" x2="511" y2="158" />
+    <line x1="534" y1="124" x2="534" y2="158" /><line x1="553" y1="124" x2="553" y2="158" />
+    <line x1="576" y1="124" x2="576" y2="158" /><line x1="595" y1="124" x2="595" y2="158" />
+    <line x1="618" y1="124" x2="618" y2="158" /><line x1="637" y1="124" x2="637" y2="158" />
+    <line x1="660" y1="124" x2="660" y2="158" /><line x1="679" y1="124" x2="679" y2="158" />
+    <line x1="702" y1="124" x2="702" y2="158" /><line x1="721" y1="124" x2="721" y2="158" />
+    <line x1="744" y1="124" x2="744" y2="158" /><line x1="763" y1="124" x2="763" y2="158" />
+    <line x1="786" y1="124" x2="786" y2="158" /><line x1="805" y1="124" x2="805" y2="158" />
+    <line x1="828" y1="124" x2="828" y2="158" /><line x1="847" y1="124" x2="847" y2="158" />
+    <line x1="870" y1="124" x2="870" y2="158" /><line x1="889" y1="124" x2="889" y2="158" />
+    <line x1="912" y1="124" x2="912" y2="158" /><line x1="931" y1="124" x2="931" y2="158" />
+    <line x1="954" y1="124" x2="954" y2="158" /><line x1="973" y1="124" x2="973" y2="158" />
+  </g>
+
+  <g stroke="#15803d" stroke-width="3">
+    <line x1="58" y1="118" x2="58" y2="164" />
+    <line x1="979" y1="118" x2="979" y2="164" />
+  </g>
+
+  <text class="bad" x="40" y="200">background-color — 346 occurrences</text>
+  <text class="note" x="300" y="200">the token the rule holds once, and the 48KB library stylesheet holds eight times per copy</text>
+  <text class="ok" x="40" y="222">color-scheme — 2 occurrences</text>
+  <text class="note" x="300" y="222">the second landmark, and the hand count: the document carries the rule twice</text>
+
+  <!-- band 2: the two spans -->
+  <text class="panel-title" x="40" y="276">WHAT A COPY IS: TWO LANDMARKS IN THE TEXT'S ORDER, 47 TO 282 CHARACTERS APART, EACH ONCE IN THE SPAN</text>
+
+  <rect x="40" y="294" width="1000" height="86" rx="6" fill="#fef2f2" stroke="#fecaca" />
+  <text class="mono" x="60" y="320">…outline-offset: 7px; }  ›  background-color  ›  …&#92;u003c/style&#92;u003e…push([1,"  ›  background-color  ›  color-scheme…</text>
+  <text class="tick" x="60" y="340">the stylesheet's last rule</text>
+  <text class="tick" x="400" y="340">the span: 175 characters</text>
+  <text class="tick" x="700" y="340">the rule's own payload copy</text>
+  <text class="bad" x="60" y="366">not a copy — the span carries `background-color` twice, so it is one copy's tail and the next one's head</text>
+
+  <rect x="40" y="396" width="1000" height="86" rx="6" fill="#f0fdf4" stroke="#bbf7d0" />
+  <text class="mono" x="60" y="422">…push([1,"  ›  background-color: #0a0a0a;\n  color: #f5f5f5;\n  ›  color-scheme: dark;\n}…</text>
+  <text class="tick" x="60" y="442">49 characters apart, where the text puts them 47 apart and an escape may stretch to 282</text>
+  <text class="ok" x="60" y="468">a copy — each landmark once in the span, in the text's order, at a distance an encoding can account for</text>
+
+  <!-- band 3: the readings -->
+  <text class="panel-title" x="40" y="536">THE READING, ON THE SAME TWO ARTEFACTS</text>
+
+  <line x1="40" y1="550" x2="1040" y2="550" stroke="#e2e8f0" />
+  <text class="rowhead" x="40" y="570">SUBJECT</text>
+  <text class="rowhead" x="470" y="570">ON `main`</text>
+  <text class="rowhead" x="700" y="570">THIS BRANCH</text>
+  <text class="rowhead" x="920" y="570">THE TRUTH</text>
+
+  <text class="mono" x="40" y="596">`/?theme=bold`  ·  the 78-byte rule</text>
+  <text class="bad" x="470" y="596">346 copies · 26,910 bytes</text>
+  <text class="ok" x="700" y="596">2 copies · 78 bytes</text>
+  <text class="mono" x="920" y="596">2</text>
+
+  <text class="mono" x="40" y="620">`/why-use-it`  ·  its 79-byte rule</text>
+  <text class="bad" x="470" y="620">386 copies · 30,415 bytes</text>
+  <text class="ok" x="700" y="620">2 copies · 79 bytes</text>
+  <text class="mono" x="920" y="620">2</text>
+
+  <text class="mono" x="40" y="644">`/why-use-it`  ·  the library stylesheet</text>
+  <text class="mono" x="470" y="644">48 copies · 2,255,107 bytes</text>
+  <text class="mono" x="700" y="644">48 copies · 2,255,107 bytes</text>
+  <text class="mono" x="920" y="644">—</text>
+
+  <text class="emph" x="40" y="678">The reading worth keeping does not move: 0348's figure, unchanged to the byte.</text>
+</svg>

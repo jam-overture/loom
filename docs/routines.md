@@ -783,10 +783,14 @@ pnpm weigh http://127.0.0.1:3000/why-use-it      # or a response saved to a file
 ```
 
 ```
-/why-use-it  2,491,320 bytes
-    style  47,981 bytes  carried 43 times  at least 2,015,202 bytes repeated (81% of the document)
-    style  2,255 bytes  carried 4 times  at least 6,765 bytes repeated (0% of the document)
+/why-use-it  2,793,071 bytes
+    style  47,981 bytes  carried 48 times  at least 2,255,107 bytes repeated (81% of the document)
+    style  79 bytes  carried 2 times  at least 79 bytes repeated (0% of the document)
 ```
+
+(The build of 12 November. The first line is the reading the instrument was
+written for and has not moved since 0348 took it; the second is the line 0387
+corrected, and it read *carried 386 times* that morning.)
 
 **It prints the number and does not judge it**, which is
 [0213](../decisions/0213-the-harness-reads-a-box-it-prints-the-number-and-the-judgement-stays-in-the-report.md)
@@ -805,10 +809,23 @@ carrying `href` and `precedence` and deduplicates it correctly, so a page's
 markup holds the library stylesheet exactly **once** — while the RSC flight
 payload holds it once per primitive that emitted it, JSON-escaped, sharing no
 long substring with the element it came from. So the unit of measurement is a
-**landmark**: the longest run of letters, digits, dots, underscores and hyphens
-that the text contains exactly once, which is what no escaping rewrites. The
-saving reported is `(copies - 1)` times the text's own length — provably under
-the truth, because escaping only ever grows a copy.
+**landmark**: a run of letters, digits, dots, underscores and hyphens that the
+text contains exactly once, which is what no escaping rewrites. The saving
+reported is `(copies - 1)` times the text's own length — provably under the
+truth, because escaping only ever grows a copy.
+
+**And why one landmark is not a count** —
+[0387](../decisions/0387-a-landmark-is-not-a-count-and-a-copy-is-a-sequence-of-them-at-the-distances-the-text-puts-them-at.md),
+after `pnpm weigh` reported a 78-byte rule as carried 426 times on a document
+that held it twice. A token the text contains once is still a token the rest of
+the document may contain hundreds of times, and against a page that is mostly
+CSS the tokens that are both long and common are exactly the property names:
+that rule's landmark was `background-color`. **A copy is therefore a sequence**
+— up to six of the text's landmarks, in the text's order, each between one and
+six times as far from the one before as the text puts it, and each occurring
+once inside the span. A text with only one landmark reads *not counted* rather
+than a number. If you read a figure here and disbelieve it, that is a finding
+and the hand count belongs in it.
 
 ## Standards
 

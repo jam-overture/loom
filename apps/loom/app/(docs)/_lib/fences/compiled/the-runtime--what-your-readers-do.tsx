@@ -15,7 +15,7 @@ import { collectReaderSignals, parseReaderSignalBatch } from "@jam-overture/loom
 
 import { journal, registry, tallies, themes, tree } from "../context/the-runtime--what-your-readers-do"
 
-// page.mdx:130 — a program
+// page.mdx:132 — a program
 const rendered = renderLoomTree(tree, {
   resolver: registry,
   validator: registry,
@@ -23,7 +23,7 @@ const rendered = renderLoomTree(tree, {
   addressed: true,
 })
 
-// page.mdx:152 — a program
+// page.mdx:154 — a program
 "use client"
 
 export const Measured = () => {
@@ -47,8 +47,8 @@ export const Measured = () => {
   return null
 }
 
-// page.mdx:246 — the inside of an object literal
-const objectAtLine246 = {
+// page.mdx:248 — the inside of an object literal
+const objectAtLine248 = {
 kinds: ["viewed", "dwelled", "activated"],
 types: {
   dwelled: ["loom.section", "loom.hero"],
@@ -56,7 +56,7 @@ types: {
 },
 }
 
-// page.mdx:277 — a program
+// page.mdx:279 — a program
 export const POST = async (request: Request): Promise<Response> => {
   const read = parseReaderSignalBatch(await request.json())
 
@@ -73,9 +73,9 @@ export const POST = async (request: Request): Promise<Response> => {
   return new Response(null, { status: 204 })
 }
 
-// page.mdx:329 — a program
+// page.mdx:331 — a program
 /** Folds every batch old enough to be safe to count, adds it to the counters,
  * and forgets exactly the batches it counted. */
 const collected = await collectReaderSignals(journal, tallies)
 
-export { rendered, objectAtLine246, collected, renderLoomTree, broadcastReaderSignals, useEffect, parseReaderSignalBatch, collectReaderSignals }
+export { rendered, objectAtLine248, collected, renderLoomTree, broadcastReaderSignals, useEffect, parseReaderSignalBatch, collectReaderSignals }
