@@ -54,7 +54,13 @@ const journalOf = async (
   return journal
 }
 
-const ALL: EventFilter = { kind: undefined, page: undefined, view: undefined, search: undefined }
+const ALL: EventFilter = {
+  kind: undefined,
+  page: undefined,
+  view: undefined,
+  search: undefined,
+  segment: undefined,
+}
 
 /** Nothing published, so a part and a page are found by their ids and kinds. */
 const UNNAMED = namingOf([])

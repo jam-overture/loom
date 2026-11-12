@@ -14,6 +14,7 @@ import {
 import { readEventPage, readOpenedEvent } from "@/app/(portal)/_lib/events-reading"
 import { primaryFirst } from "@/app/(portal)/_lib/goals/goal"
 import { goalsFor } from "@/app/(portal)/_lib/goals/stores"
+import { segmentAsked } from "@/app/(portal)/_lib/segments/segment-pick"
 import type { SignalsRange } from "@/app/(portal)/_lib/signals-range"
 import { PORTAL_READ_BUDGET_MS } from "@/app/_lib/app/bounded"
 import { boundedReaderSignalJournal, readWithin, unavailable } from "@/app/_lib/app/bounded-store"
@@ -55,12 +56,21 @@ const EventsScreen = async ({
   await requireRole(projectId)
 
   const now = Date.now()
-  const reading = await readSignals(projectId, query.range, now)
+  const reading = await readSignals(projectId, query.range, now, query.segment)
   const rangeHref = (range: SignalsRange) => eventsHref(base, { ...query, range })
+  /** Another segment is another list, so the cursor and the open event go with it. */
+  const segmentHref = (segment: string | undefined) =>
+    eventsHref(base, { ...query, segment: segmentAsked(segment) })
 
   if (!drawsTab(reading))
     return (
-      <SignalsFrame reading={reading} projectId={projectId} tab="events" rangeHref={rangeHref} />
+      <SignalsFrame
+        reading={reading}
+        projectId={projectId}
+        tab="events"
+        rangeHref={rangeHref}
+        segmentHref={segmentHref}
+      />
     )
 
   const journal = boundedReaderSignalJournal(reading.readings.journal)
@@ -82,6 +92,7 @@ const EventsScreen = async ({
         projectId={projectId}
         tab="events"
         rangeHref={rangeHref}
+        segmentHref={segmentHref}
       />
     )
   }
@@ -103,7 +114,13 @@ const EventsScreen = async ({
       : goalsCountedBy(shown.event, primaryFirst(goals.value)).map((goal) => goal.name)
 
   return (
-    <SignalsFrame reading={reading} projectId={projectId} tab="events" rangeHref={rangeHref}>
+    <SignalsFrame
+      reading={reading}
+      projectId={projectId}
+      tab="events"
+      rangeHref={rangeHref}
+      segmentHref={segmentHref}
+    >
       <EventFacets
         address={address}
         pages={eventPagesOf(

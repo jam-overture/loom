@@ -12,13 +12,22 @@ describe("a project's rail", () => {
       "/portal/prj_shop/review",
       "/portal/prj_shop/pages",
       "/portal/prj_shop/goals",
+      "/portal/prj_shop/segments",
       "/portal/prj_shop/connect",
       "/portal/prj_shop/settings",
     ])
   })
 
   it("puts the screens that set the project up after the ones a person works in", () => {
-    expect(tabs.map((tab) => tab.group)).toEqual(["work", "work", "work", "work", "setup", "setup"])
+    expect(tabs.map((tab) => tab.group)).toEqual([
+      "work",
+      "work",
+      "work",
+      "work",
+      "work",
+      "setup",
+      "setup",
+    ])
   })
 
   it("counts what waits on For review and nowhere else", () => {

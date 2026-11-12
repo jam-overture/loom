@@ -190,7 +190,10 @@ const ConnectPage = async ({ params }: { params: Promise<{ project: string }> })
 
     return (
       <div className="flex max-w-3xl flex-col gap-4">
-        <section className="border-edge-subtle bg-surface-base flex flex-col gap-3 rounded-lg border p-4">
+        <section
+          id="snippet"
+          className="border-edge-subtle bg-surface-base flex flex-col gap-3 rounded-lg border scroll-mt-20 p-4"
+        >
           <h2 className="text-sm font-medium tracking-tight">Paste this into your site</h2>
           <p className="text-ink-muted text-xs">
             Put it in the script that runs on the page Loom renders. It watches what readers do and
@@ -210,7 +213,10 @@ const ConnectPage = async ({ params }: { params: Promise<{ project: string }> })
           </div>
         </section>
 
-        <section className="border-edge-subtle bg-surface-base flex flex-col gap-3 rounded-lg border p-4">
+        <section
+          id="key"
+          className="border-edge-subtle bg-surface-base flex flex-col gap-3 rounded-lg border scroll-mt-20 p-4"
+        >
           <h2 className="text-sm font-medium tracking-tight">The key</h2>
           <KeyField value={key} label="Copy the key" />
           <p className="text-ink-muted text-xs">
@@ -233,7 +239,10 @@ const ConnectPage = async ({ params }: { params: Promise<{ project: string }> })
           )}
         </section>
 
-        <section className="border-edge-subtle bg-surface-base flex flex-col gap-3 rounded-lg border p-4">
+        <section
+          id="publish"
+          className="border-edge-subtle bg-surface-base flex flex-col gap-3 rounded-lg border scroll-mt-20 p-4"
+        >
           <h2 className="text-sm font-medium tracking-tight">Publish your pages</h2>
           <p className="text-ink-muted text-xs">
             Have your build send the pages your site serves, as{" "}
