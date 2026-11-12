@@ -470,12 +470,12 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0378](0378-a-fix-lists-row-carries-the-place-its-pages-reading-stopped-and-the-fourth-reading-cannot-take-a-row-away.md) | A fix-list's row carries the place its page's reading stopped, and the fourth reading cannot take a row away | Accepted | §5 (reader signals), the counters |
 | [0379](0379-a-file-may-publish-part-of-its-body-as-somebody-elses-code-and-a-check-that-reads-this-deployment-stops-at-the-marker.md) | A file may publish part of its body as somebody else's code, and a check that reads *this* deployment stops at the marker | Accepted | §1, the merge gate |
 | [0380](0380-the-three-walks-outside-src-tree-carry-an-explicit-stack-and-react-was-never-the-bound-on-rendering-a-deep-page.md) | The three walks outside `src/tree/` carry an explicit stack, and React was never the bound on rendering a deep page | Accepted | §2 |
-| 0381 | *No record on this branch* | — | — |
+| [0381](0381-a-parts-pace-across-pages-is-one-pooled-quotient-and-a-goals-part-is-a-reading-of-its-own.md) | A part's pace across pages is one pooled quotient, and a goal's part is a reading of its own | Accepted | §5 (reader signals), the counters |
 | [0382](0382-a-part-that-reported-nothing-with-a-reader-below-it-is-an-eighth-collection-fault-and-it-reaches-both-ranking-keys.md) | A part that reported nothing with a reader below it is an eighth collection fault, and it reaches both ranking keys | Accepted | §5 (reader signals), the counters |
 | 0383 | *No record on this branch* | — | — |
 | 0384 | *No record on this branch* | — | — |
-| 0385 | *No record on this branch* | — | — |
+| [0385](0385-a-reader-two-segments-match-is-counted-in-the-last-ones-and-the-page-carries-it-to-its-signals.md) | A reader two segments match is counted in the last one's, and the page carries it to its signals | Accepted | §2 (signals) |
 | 0386 | *No record on this branch* | — | — |
-| 0387 | *No record on this branch* | — | — |
+| [0387](0387-a-landmark-is-not-a-count-and-a-copy-is-a-sequence-of-them-at-the-distances-the-text-puts-them-at.md) | A landmark is not a count, and a copy is a sequence of them at the distances the text puts them at | Accepted | §1 (process) |
 | [0388](0388-a-routine-reads-back-what-it-posted-because-no-safe-link-length-can-be-computed-in-advance.md) | A routine reads back what it posted, because no safe link length can be computed in advance | Accepted | §1, how a run reports |
 | [0389](0389-a-range-of-hours-is-folded-into-its-days-and-into-the-hours-of-a-readers-day-where-the-mean-is-the-only-comparable-figure.md) | A range of hours is folded into its days and into the hours of a reader's day, where the mean is the only comparable figure | Accepted | §5 (reader signals), the counters |

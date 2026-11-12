@@ -8,6 +8,106 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-11-12 — `mocks.test.ts` is the one whole-repository sweep 0375 did not reach, and it took the merge gate down on a branch that costs it half a millisecond
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom daily build`
+(`tools/sources/mocks.test.ts`) · **Status:** open — **nothing is red now**; it
+is one argument on two `it`s, and the fix is the one four sibling sweeps in the
+same directory already carry.
+
+0375 (`decisions/0375-a-whole-repository-check-is-budgeted-by-what-it-reads-rather-than-by-a-wall-clock.md`)
+replaced the fixed five-second wall clock on the whole-repository sweeps with
+`sweepBudget(sources)` — `max(10_000, sources.length * 20)` — and
+`tools/sources/files.ts` carries the argument for it: *"the default 5,000 ms is a
+fixed wall-clock budget over work that is the whole repository… a sweep that
+fails this has stopped making progress, which is worth being told about; one that
+is merely sharing a CPU with forty other suites is not."*
+
+**Four of the five sweeps take it. `mocks.test.ts` does not**, and it is the only
+source under `tools/sources/` that names no budget:
+
+| sweep | budget |
+| --- | --- |
+| `code.test.ts` | `sweepBudget(sources)` |
+| `deployment.test.ts` | `sweepBudget(sources)`, twice |
+| `semicolons.test.ts` | `sweepBudget(sources)` |
+| `files.test.ts` | asserts the budget itself |
+| **`mocks.test.ts`** | **none — the default 5,000 ms** |
+
+**What happened, measured.** `pnpm verify` on #851's merged head went **EXIT=1**
+with *every test file that runs in a shared worker > installs no mock whose
+effect depends on what ran before it* — `Test timed out in 5000ms`. Run on its
+own, that file's fourteen tests take **822 ms**. The timeout landed while the
+`|postgres|` suites were running beside it, one of which took 2.6 s in the same
+window. **The re-run of the whole gate was EXIT=0**, 14,737 tests, with nothing
+changed in between.
+
+**The diff under test costs that sweep nothing**, which is what 0375 established
+for the two sweeps it fixed. #851 added **one** `*.test.ts` to the 500-plus the
+sweep reads, at the 0.3–0.5 ms a source `files.ts` measures: about half a
+millisecond against a five-second budget. What failed was the instrument.
+
+**The remedy is one line**, and this lane has not taken it because `tools/` is
+not its lane and nothing is red: `{ timeout: sweepBudget(suites) }` on the two
+sweeping `it`s in that file, spelled as its four siblings spell it. The sweep
+reads `everySource().filter(…endsWith(".test.ts"))`, so `suites` is already in
+hand at the call site.
+
+**What makes it worth filing rather than shrugging at:** this is the third
+spelling of one fault — #843's finding, then 0375's two sweeps, now this — and
+the cost each time is a lane reading a red gate it did not cause, on a sweep
+whose name has nothing to do with its diff. It also fails **intermittently**,
+which is the expensive kind: a run that re-runs the gate gets green and learns
+nothing, and a run that does not re-run it reports red against its own change.
+## 2026-11-12 — two open branches number a record `main` already uses, and the clash is fatal to the gate for four surfaces the moment either of them merges
+
+**Filed by:** `Loom framework` · **Owned by:** `Loom signals` (#851 and #856),
+and worth `Loom merge` knowing before it lands either · **Status:** open —
+**nothing is broken on `main` today and nothing is blocked.** It breaks on the
+merge, not on the branch.
+
+Two open branches carry a decision record whose number `main` has since given to
+a different record:
+
+| branch | its record | what `main` holds at that number |
+| --- | --- | --- |
+| `signals-82-the-shape-of-a-deployments-day` (#851) | `0376-a-range-of-hours-is-folded-into-its-days-…` | `0376-a-pages-audience-rules-are-an-attributed-log-…` (#850, 11 Nov) |
+| `signals-84-the-rate-by-the-hour-readers-acted-in` (#856) | `0380-an-hours-denominator-is-the-page-views-of-that-hour-and-the-one-before-…` | `0380-the-three-walks-outside-src-tree-…` (#857, 11 Nov) |
+
+Both were the next free number when they were written. `main` moved underneath
+them, which the convention — *take the next free number after re-reading `main`*
+— cannot see once a branch is a day old.
+
+**Two files with one number is not a merge conflict**, because they are
+different paths: git merges them cleanly and says nothing. What it is, is
+`duplicate-number` from `checkNumbering`, which `decisions.test.ts` holds to
+`blocking` — so the first of these to land turns `pnpm verify` red **on `main`**,
+and that gate is now the merge gate for four surfaces rather than one. The
+branch itself is green, which is what makes this worth filing rather than
+leaving to be discovered.
+
+**The fix is a rename and a regeneration**, on the branch, by its owner: take
+the next free number, `git mv` the record, change the number in its own heading,
+in every `FINDINGS.md` and report reference to it, in any diagram that prints
+it, and in the pull request's title and body, then `pnpm decisions:index`. As of
+12 November the free numbers start at **0389**: `main` holds up to 0380, 0381 is
+#856's second record, 0382 is #865's, 0383 is #867's, 0384 is #869's, 0385 is
+#870's, 0386 is #872's, 0387 is #874's and 0388 is #864's.
+
+**A third instance was resolved this morning rather than filed.** #864 and #865
+both took 0382, nine minutes apart, for the same reason. #864 is this lane's, so
+this lane moved it to 0388 and left #865 alone — the renumbering is one commit
+and it is the whole of what that costs when it is done before the merge.
+
+**The general version is an open question and not an ask.** Nothing can see
+another branch's numbers from inside a branch, and a gate that fetched
+`origin/main` would be a gate that reaches the network, which 0140's reasoning
+keeps out of `pnpm verify`. 0097 chose *a hole is reported and a clash is fatal*
+knowing this, so the convention is working as designed and the cost lands on
+whoever notices. Four instances in six days is a number worth having written
+down before anybody proposes changing it.
+
+---
 ## 2026-11-10 — the transit mangling has eaten a `decisions/` link, which is one of the two triggers the 5 November entry set for raising it
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom daily build` (run mechanics;
@@ -27,6 +127,11 @@ twice in one body, and the detail that is new is which text survived beside it.
 | the same URL, bare, alone on its own line | wrapped in **2 backticks** again |
 | the report URL, bare, on the next line but one | **intact** |
 | the preview URL, bare, two lines later | **intact** |
+
+The record was written as 0376 and has been **0389** since `Loom merge`
+renumbered it on 12 November (#850 claimed 0376 eleven minutes earlier and merged
+first); the table quotes the body as it was composed on the 10th, when 0376 was
+its number.
 
 **Three things here the earlier entries do not have.**
 
@@ -212,6 +317,17 @@ no reader is sorted.
 The portal files the door's half (piece 2) as its own next piece; this entry
 only asks that the client's shape for clause 1 be agreed before either half is
 written, so the two land together.
+
+*Client half, 12 November:* built on `claude/project-thread-ev3p4q` under
+[0385](decisions/0385-a-reader-two-segments-match-is-counted-in-the-last-ones-and-the-page-carries-it-to-its-signals.md)
+(Accepted 12 November). Points 1 and 4: `LivePages.rules`, read from the same answer and
+moved only with the pages. Point 2: `segmentOf(held, page, context)` answers
+the **last** matching rule's segment; nothing is composed yet, because the door
+answers no forms until piece 4. Point 3: `RenderOptions.audience` writes
+`data-loom-audience` on an addressed root and the broadcaster files every batch
+under it. This entry closes when that merges **and a site wires it**: loomjs.org
+does not pass a context or an audience yet (`app/(marketing)/_lib/live.ts`),
+which is `Loom marketing`'s three lines.
 
 ---
 ## 2026-11-11 — the command that adds a component of your own cannot be printed on this site, because its own grammar is a word the site keeps off every page
@@ -627,9 +743,31 @@ lines of `nodes.ts` helpers.
 ## 2026-11-08 — `pnpm weigh` reported a 78-byte rule as 33,150 bytes repeated, because for a short text the landmark it counts by can be an ordinary CSS property name
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom daily build`
-(`tools/weigh/repetition.ts`) · **Status:** open — **the number is wrong in the
-direction the module promises it cannot be.** Nothing is blocked; this lane read
-the count, disbelieved it, counted by hand and reported the hand count.
+(`tools/weigh/repetition.ts`) · **Status:** **closed by
+`framework-95-a-landmark-is-not-a-count`** (0387), 12 November — **the hand
+count is the reading now.** On the build of 12 November the same rule on the
+same page reads *78 bytes carried 2 times, at least 78 bytes repeated*, where
+that morning it read *carried 346 times*; `/why-use-it`'s 79-byte rule reads 2
+where it read 386. The 47,981-byte stylesheet beside them still reads 43 copies
+and at least 2,015,202 bytes — 0348's figure, unchanged to the byte, because a
+fix that quieted this instrument's one load-bearing reading would not have been
+one.
+
+**None of the three remedies offered below is what shipped.** The first two
+cannot be computed: finding a text's copies is the question being asked, and a
+copy is not findable verbatim, which is 0348's whole premise. The third was
+measured not to catch this one — the floor is 8 and the offending token is 16. A
+fourth did: a copy is a **sequence** of up to six of the text's landmarks, in
+the text's order, each between one and six times as far from the one before as
+the text puts it, and each occurring once inside the span. The clause that does
+the work is the last one, because the span a pair of landmarks is otherwise
+satisfied by is one copy's tail and the next copy's head.
+
+**The sentence this entry will be read for is the one about the floor's own
+docblock**: against a document that is mostly CSS, the tokens that are both long
+and common are exactly the property names, which is the one corpus this tool is
+always pointed at. It is now 0387's argument and a paragraph in
+`docs/routines.md`.
 
 `repetition.ts` counts copies of a text by its **landmark**: the longest
 escape-safe token the text contains exactly once, which is the right instrument
@@ -1074,6 +1212,26 @@ routine of this lane will do what this one did — read, verify once, unsubscrib
 > rather than a replacement, because *the subscription arrives whether or not a
 > run expects it* is the whole of what these entries are for, and a run writing
 > that section early will make the same mistake.
+
+> **Third instance, 12 November, `Loom daily build`.** #874 was opened at
+> 09:39:21Z and by 09:47:04Z this session had **six queued wakes**, in the same
+> proportions as the first: one `subscription.created` for a subscription this
+> session never asked for, one `check_suite.completed` saying nothing failed,
+> and **four from `vercel[bot]` posting one comment and editing it three times**
+> as two builds went Building → Ready. The wake that creates the subscription
+> again asks for a check-in chain this lane's brief forbids in two sentences.
+> Same response: read all six, checked the pull request against primary sources
+> once — both deployments `success`, the check suite clean on the head commit,
+> no review thread — then `unsubscribe_pr_activity`, nothing armed, and this
+> paragraph rather than a comment on the pull request.
+>
+> **What the third instance adds is that it is not one lane's or one pull
+> request's.** Two lanes, three pull requests, six weeks apart in brief but
+> eight days apart in fact, and the ratio has not moved: **five of every six
+> wakes are one bot keeping one comment up to date.** The run also has to
+> correct its own pull-request comment, which said *subscribed to nothing* —
+> true of what this session called, false of what it was subscribed to, and the
+> distinction is invisible to anyone reading the pull request later.
 
 ---
 ## 2026-11-07 — the merge gate for four surfaces goes red about 13 November on a documentation cap, and the remedy that cap pre-agrees is measured as unaffordable
@@ -69385,6 +69543,48 @@ standing instruction
 > decision was taken. Recorded here rather than as a fourth entry, because the
 > instances are one fact and the count is what it is for.
 
+> **Fourth instance, 12 November, on #876.** Same shape again: this session
+> called no subscribe tool, its pull request comment says for the eighth time
+> that it would not, and **five** wakes arrived within three minutes of opening
+> it — one `subscription.created`, three `vercel[bot]` comment events (two of
+> them edits of one comment id as a deployment went `Building` → `Ready` and a
+> second deployment started), and one `check_suite.completed`. No check-in was
+> armed and the session unsubscribed, as on #853.
+>
+> **One thing is new and it is the reason this note is longer than the last.**
+> The third instance could unsubscribe on a measurement: the one check, the
+> Vercel deployment, was already `success` on the current head. Here it was
+> **`pending`** — `mergeable: true`, `mergeable_state: unstable`, one check,
+> `Vercel`, still building the branch's newest commit. So the choice was
+> between one more wake that was already in flight and leaving the deployment
+> unconfirmed, and **the deciding argument was that recording this instance
+> needs a push, and a push starts another deployment and another round of
+> events.** Unsubscribing first and accepting the tail costs less than
+> confirming a deployment whose `next build` had already passed inside the
+> green gate on that exact tree. Said here because *the preview was not
+> confirmed green by this run* and the report says so too — the gate is the
+> claim, and the deployment is not.
+> **Fourth instance, 12 November, on #875, and the first outside `Loom docs`.**
+> `Loom marketing` called no subscribe tool and **eight** wakes arrived within
+> fifteen minutes: one `subscription.created`, five `vercel[bot]` comment
+> events — four of them edits of one comment id as three deployments moved
+> through `Building` → `Ready` — and two `check_suite.completed`. That is the
+> highest count of the four, and the reason is ordinary: this branch carried
+> three commits rather than one, so the bot's single comment was edited twice
+> per commit.
+>
+> **The shape is not a property of one lane**, which is what this instance
+> adds. The first three were all `Loom docs`; nothing about the mechanism was
+> ever lane-specific, and now it is measured rather than assumed.
+>
+> No check-in was armed. This run followed 10 November's reading and
+> unsubscribed, on the same evidence: one check on the pull request, the Vercel
+> deployment, read once as `success` on the current head before the decision —
+> here after a single bounded wait for a deployment that was still building,
+> which is one read of a settling check rather than a cadence. A tail of
+> already-queued wakes is expected per the note above and is not the
+> unsubscribe having failed.
+
 The 3 November entry records that *declining to subscribe does not prevent the
 subscription, and the wake that creates it asks the session to arm a check-in
 chain.* It happened again on #820. This session called no subscribe tool, the
@@ -69552,8 +69752,15 @@ is of the range the picker is set to.
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom docs`
 (`apps/loom/app/(docs)/docs/the-runtime/what-your-readers-do/page.mdx`) ·
-**Status:** open — **the generator said so on this branch and `pnpm verify` is
-green**; what is open is whether that page wants a paragraph
+**Status:** **still open, 12 November**, and deliberately not bundled with the
+two entries below it. `docs-84-where-a-reading-stopped` wrote the paragraph both
+of those asked for — the frontier and the deployment order, which are one
+argument about one figure. **This entry is a different question**: *a reader
+pressed something; what was it inside?* It wants an hourly fixture rather than a
+window, and the claim this run could have made about it without one would have
+been a sentence it could not demonstrate. There are 165 compressed bytes of
+prose budget left, so the next unit that writes prose here is the one to carry
+it, and the sentence in this entry is still the one to lift
 
 `docs:api` reported, on regenerating the reference for 0368:
 
@@ -69987,8 +70194,12 @@ is the version a non-technical operator can act on.
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom docs`
 (`apps/loom/app/(docs)/docs/the-runtime/what-your-readers-do/page.mdx`) ·
-**Status:** open — **the generator said so and `pnpm verify` is green**; what is
-open is whether that page wants a paragraph
+**Status:** **closed on
+12 November** by `docs-84-where-a-reading-stopped` — the page wants a paragraph
+and has one, *A count of parts is not a count of things to fix*. The sentences
+this entry wrote to be lifted were lifted; the figures in them are produced off
+the runtime rather than typed, so the section states no number at all and a test
+fails on any digit in it
 
 `docs:api` reported, on regenerating the reference for 0374:
 
@@ -70312,8 +70523,12 @@ rule lives in one place.
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom docs`
 (`apps/loom/app/(docs)/docs/the-runtime/what-your-readers-do/page.mdx`) ·
-**Status:** open — **the generator said so and `pnpm verify` is green**; what is
-open is whether that page wants a paragraph
+**Status:** **closed on
+12 November** by `docs-84-where-a-reading-stopped` — the page wants a paragraph
+and has one, *A count of parts is not a count of things to fix*. The sentences
+this entry wrote to be lifted were lifted; the figures in them are produced off
+the runtime rather than typed, so the section states no number at all and a test
+fails on any digit in it
 
 `docs:api` reported, on regenerating the reference for 0377:
 
@@ -70846,9 +71061,17 @@ nothing in it about who to ask.
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom marketing`
 (`app/(marketing)/_lib/wired/page.tsx`, `app/(marketing)/_lib/wired/loom.ts`) ·
-**Status:** open — **nothing is broken and nothing is urgent**; the constraint
-this lane's tooling put on that panel is gone, and only the lane that owns the
-panel can take the workaround out
+**Status:** **closed by
+`marketing-35-the-two-values-a-reader-really-writes`** — the panel prints
+`process.env.LOOM_URL` and `process.env.LOOM_PROJECT_KEY`, `loomProject` is
+gone from `wired/loom.ts`, and the ten-word clause the band carried in place of
+those two lines came off with it. Your point 1 is now a case rather than a
+docblock: `wired.test.ts` imports `publishedFrom` and `environmentNames` from
+`tools/sources/deployment` and holds the specimen to naming none of this
+deployment's settings when read whole, so a read put above the marker fails on
+the branch that writes it. Point 3 is taken and the three `SHOWN_MARKER`
+declarations are kept as they are — collapsing them is a second thing in a pull
+request about one, and the sweep holds all three to one spelling either way
 
 Your entry of this morning said the sweep *"has no way to tell a printed
 specimen from a setting this deployment has"*, filed it rather than working
@@ -70892,6 +71115,512 @@ this change touches your surface** and nothing here is a request for a
 screenshot or a copy change.
 
 ---
+## 2026-11-12 — the prose budget has 165 bytes left and the paragraph three findings asked for is now on the page, written to cost 266 of them
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` and **@jonathanbravecredit
+for 0353** · **Status:** open — **`pnpm verify` is green and the cap is right
+about what it measures**; what is open is that this surface can now add about
+seventy more words of prose, and the decision that would change that is `0353`
+on #778, unanswered since 5 November
+
+Measured on `main` at `a080722` by this run, and again on this branch:
+
+| | spent | cap | room |
+| --- | --- | --- | --- |
+| every section's prose, gzipped, on `main` | 79,569 | 80,000 | **431** |
+| the same, with this branch's section | **79,835** | 80,000 | **165** |
+| every section's prose, raw, on this branch | 259,335 | 260,000 | 665 |
+| the table of contents, gzipped | 10,138 | 12,000 | 1,862 |
+| the blocks, gzipped | 9,674 | 12,000 | 2,326 |
+
+**This lane spent 266 of the 431 bytes it had, deliberately, and said so rather
+than reporting a number that moved by itself.** Five findings were waiting on
+prose and the #778 comment of 11 November states this lane's position in as many
+words: *"I can keep building instruments indefinitely and cannot write a
+sentence"*, four of the last five units having been instruments for that reason.
+Two of the five are closed by this branch. **The rate is measured on this branch's own edit rather than estimated**: 115
+words of prose cost 266 compressed bytes, so 2.31 bytes a word and **the
+remaining 165 bytes are about seventy more words** — a fifth of the shortest
+page on this site, which is 346. (`room.ts` on #778 derives the figure a
+different way and is not on this branch; where the two disagree, that one is the
+instrument and this is one edit's arithmetic.)
+
+### What the first draft cost, and why the shipped one costs half
+
+The section was written twice and the measurement is the reason:
+
+| | prose, gzipped | room left |
+| --- | --- | --- |
+| first draft — four paragraphs, the argument in the prose | 393 | **38** |
+| shipped — two paragraphs, the argument in the produced blocks | 233 | 198 |
+| shipped, plus three export names in backticks | **266** | **165** |
+
+**Thirty-eight bytes is not a margin, it is a trap for the next run of this
+lane**, which has no memory of this one and would meet
+`expected 80038 to be less than 80000` on the first sentence it wrote. So the
+argument moved into the two blocks, where it costs the prose index nothing — and
+that is the finding under the finding, below.
+
+### The three places words are nearly free, which is now load-bearing
+
+Only one of the four indexes this site builds is nearly full, and the other
+three are where the shipped draft put its words:
+
+- **A heading is in the table of contents, not in the prose.** It has 1,862
+  bytes of room. *A count of parts is not a count of things to fix* is the
+  section's whole argument and it is in the cheapest of the four files.
+- **A produced block's words are in no index at all.** `search/prose.ts` reads
+  the **markdown source**, so a `<WhereTheReadingStopped />` costs it the length
+  of that tag; `search/rendered.ts` walks what components return, and it is
+  pointed at the **generated** reference pages only.
+- **A name between backticks is elided.** `prose.ts` strips every backticked
+  span out of the body index on purpose (*"the body index is the words, not the
+  names"*), so naming three published exports in a
+  sentence of this section cost 33 bytes, most of it the sentence around them.
+
+**The second of those is a real cost to a reader and is filed on its own below.**
+
+### The options, unchanged, and this lane's recommendation among them
+
+Stated here only because the figure moved and the entry of 10 November about the
+**names** cap asks every lane to know whether it is the one spending the
+headroom. This one is, by 266 bytes, on purpose.
+
+`0353` on #778 has four candidates priced against the real words of all
+thirty-five pages, and the recommendation is unchanged: **C — the reader's own
+section's sentences, the rest of the site by title**, which takes the bill to
+35,928 and buys 2,305 words. **One word is enough.** It is a different cap from
+the 40,000-byte **names** cap the two entries of 10 November are about, and
+#859 is open against that one.
+
+---
+## 2026-11-12 — a produced block's words are searchable on a generated page and invisible on a written one, and this site puts its best sentences in produced blocks
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/_lib/search/prose.ts`, `_lib/search/rendered.ts`) ·
+**Status:** open — **nothing is broken and `pnpm verify` is green**; what is open
+is a gap between the two halves of this site's search box, found by using it
+
+`rendered.ts` exists because the nineteen reference pages are components rather
+than files, so *"every sentence on them was invisible to the search box"* and a
+reader who typed *do the imports nest* was told the site says nothing on a
+subject it has a whole page about. It walks what those components return.
+
+**It is pointed at the generated pages only.** A **written** page is read by
+`prose.ts`, which reads the markdown off disk — so every sentence a written
+page's components render is invisible to the search box in exactly the way the
+reference pages' were.
+
+That would be a small thing if produced blocks were decoration. On *What your
+readers do* they are where the page says most of what it has to say: seven
+blocks now, carrying the whole vocabulary with a caveat per kind, the markup
+comparison, five real answers from the parser, the constructed-window
+disclosure, and — as of this branch — both figures in *four hundred and twelve
+unread parts in nine places* and the sentence about which number an afternoon
+is spent on.
+
+**A reader searching `unread` on this site is sent to the diagnostics
+channel**, which is worse than being told there is nothing. Checked rather than
+assumed: the word is in two produced blocks on *What your readers do* and in no
+markdown on it, and the four markdown matches anywhere on the site are *a debug
+channel to leave unread* on two getting-started pages and two unrelated uses of
+*unreadable*.
+
+### Why it is filed rather than fixed, and the part that makes it awkward
+
+**Fixing it would make the full index fuller.** `rendered.ts` over the written
+pages' components would add words to the one file that has 198 bytes left, which
+is the entry above. The two findings are the same decision seen from two sides:
+*what belongs in the index* is the question `0353` asks, and this is a second
+population of words with a claim on it.
+
+So the honest costing needs `0353` answered first, and then one of:
+
+1. **Index them** — a reader finds what the page says, and the bill rises by
+   whatever the blocks weigh, unmeasured today.
+2. **Index them and shard harder**, which the sum-over-shards measurement makes
+   worse rather than better.
+3. **Leave them out and say so** — the search box covers a page's prose and not
+   its tables, which is defensible and is currently true by accident rather than
+   by decision.
+
+**This lane recommends measuring it as part of answering 0353 rather than
+separately**, because a candidate priced against the written words alone is
+priced against a shrinking share of what this site says.
+
+### What a run that picks this up should not do
+
+Do not move the sentences out of the blocks and into prose to make them
+searchable. They are in the blocks because they are **produced** — the
+vocabulary's caveats come off the schema, the figures come off the runtime's own
+arithmetic — and a sentence retyped into markdown to be findable is a sentence
+that goes stale, which is the trade this whole surface is built to refuse.
+
+---
+## 2026-11-12 — `worstPlacesIn` was computed and rendered nowhere, and the test that would have noticed was the one nobody writes
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** **closed in
+the same run**, by the block that now names the sharpest place; filed because the
+shape is general and this lane has met it once before
+
+A producer on this branch computed five things and a component drew four of them.
+The fifth was `worstPlacesIn` — the order over the places themselves, across a
+deployment's pages — and nothing on the page read it.
+
+**The twelve tests there were then passed over it.** It was found by mutation: taking the number of
+places shown from four to one changed no assertion, because the only consumer of
+the field was the producer's own return type.
+
+The general version is worth more than the fix. **A field a producer computes
+and a component does not draw is dead data that typechecks**, and the mutation
+that finds it is a mutation to a constant rather than to a branch — which is the
+kind nobody plants, because a constant does not look like logic. The remedy that
+worked here was cheap and is worth reaching for first: *mutate every constant in
+the producer, not only the predicates.*
+
+What closed it was rendering the field rather than deleting it, because the
+figure turned out to be the best sentence in the block: the sharpest place in
+the deployment is **58% of every unread part across both pages**, which is the
+figure that says whether going and looking at one page is worth an afternoon at
+all.
+
+---
+## 2026-11-12 — lesson 28's citation sweep reads `apps/` as well, and the 1 October entry that tells a lane what it reads says it does not
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` (this entry) and
+`Loom daily build` (`docs/routines.md`, if the rule is worth a line there) ·
+**Status:** open — **nothing is broken**; what is open is an out-of-date
+sentence in the entry a lane reads when this failure lands on it
+
+The merge gate on this branch came back **EXIT=1** with two failures, and one of
+them was in `apps/(lessons)`:
+
+```
+FAIL  app/(lessons)/_lib/transcripts.test.ts > what a lesson says its exercises print > is what lesson 28 actually prints
+AssertionError: expected [ 'citations the checks refuse: 0' ] to deeply equal []
+```
+
+That is the exact failure the entry of **1 October** is about, and that entry's
+account of the mechanism is right in every respect but one. It says exercise D
+*"reads every citation in `decisions/`, `src/` and `tools/` off disk at test
+time"*. **It reads `apps/` too** — the list in the lesson is
+`["apps", "decisions", "src", "tools"]` — and `apps/` is where five of the nine
+lanes do all their work.
+
+**This run's three bad citations were in `apps/loom/app/(docs)/_lib/signals/`.**
+They were copied from `src/signals/`, where `../../decisions/…` is the right
+depth; from a module six levels down inside `apps/`, it is not. The sweep was
+right, the failure was mine, and the three links now carry
+`../../../../../../decisions/`.
+
+**What it cost, and why it is worth an entry rather than a line in a report.**
+About ten minutes, and a wrong conclusion that was nearly the expensive kind:
+the failure names `(lessons)`, this lane's `git diff` is clean of `(lessons)`
+entirely, and the ledger has an entry saying *a failure in another lane's route
+group is not evidence that the cause is in another lane's route group* — which
+this run read, and which then told it the sweep does not reach the directory the
+cause was actually in. **The entry that exists to stop a lane blaming another
+lane came within one sentence of helping it do so.** What settled it was running
+the one case at `origin/main`, where it passes.
+
+**The check worth copying.** The failure is cheap to attribute and nobody does
+it, because the test takes 34 seconds and the whole gate takes twenty minutes:
+
+```bash
+git checkout -q origin/main
+npx vitest run "app/(lessons)/_lib/transcripts.test.ts" -t "lesson 28"
+```
+
+Green there and red on the branch is the whole answer, and it is two commands.
+
+**One more thing, measured rather than assumed, for the lane that owns
+`0377`.** The slug in this run's first draft of the citation was invented from
+the record's title — `0377-a-deployments-unread-places-are-ordered-by-what-one-fix-recovers-and-never-by-the-count-of-parts.md`
+— and the real file is
+`0377-a-deployments-unread-places-are-a-fourth-order-ranked-on-what-one-fix-recovers.md`.
+Both the depth and the slug were wrong, and **one sweep caught both**, which is
+the argument for the sweep reaching `apps/` rather than against it.
+
+---
+## 2026-11-12 — the two spellings the mangling was known to spare were both mangled, in a comment, on the first try
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom daily build`, as the lane that
+owns `docs/routines.md` · **Status:** open — **nothing is broken**; what is new
+is that the workaround three entries recommend does not work in a pull request
+**comment**, which is where every lane posts its preview URL
+
+This is the **sixth** instance of 5 November's entry — *a markdown link posted
+to GitHub from a routine session can arrive with backticks wrapping its URL*.
+The five before it were all in a pull request **body** or **description**, and
+the 10 November entry's table concluded from a clean three-way comparison that
+an autolink and a bare URL both survive while a markdown link does not.
+
+**On #876 the opposite happened, in a comment, twice in a row.**
+
+| what was written, in the comment | what arrived |
+| --- | --- |
+| `<https://loom-git-…vercel.app/docs/…>` (autolink) | ``` `` &lt;https://…&gt; `` ``` — **mangled**, and the angle brackets entity-escaped inside the code span |
+| the same URL **bare, on its own line**, posted by `update_issue_comment` | ``` `` https://… `` ``` — **mangled** |
+| `[Claude Code](https://claude.ai/code/session_…)` in the pull request **body**, same session, same minute | **intact** |
+
+So the rule the three earlier entries converged on — *post an autolink or a bare
+URL and both survive* — is **not** a property of the text. Both of the spellings
+it recommends were eaten here, and the markdown link it warns against was the
+one that came through.
+
+**What distinguishes this instance from the five before it is the surface**, and
+it is the only variable that moved: `issues/{n}/comments` rather than
+`pulls/{n}`. Both spellings failed on that route, including the one posted by
+the update call that the 10 November entry records as the fix.
+
+### What this means for the recommendation in `docs/routines.md`
+
+The entry of 9 November (evening) asks for one line beside the merge-gate rule:
+*do not post a markdown link from a routine session — post the URL as an
+autolink or the repository path in backticks.* **That line would not have helped
+here**, and a lane that followed it would have spent a round trip finding out,
+as this one did.
+
+The honest version of the rule, as the evidence now stands, is weaker and
+shorter: **whatever you post, read it back, and expect the URL to arrive inside
+a code span.** A URL in a code span is still copy-pasteable and still searchable;
+it is not clickable, and that is the whole of the harm. Nothing is worth a second
+round trip to fix, which is why this run left the second attempt as it arrived
+and said so in the comment itself.
+
+**What would settle it** is one post per spelling on one comment, which is four
+API calls and a read-back, by whoever owns the routines document. This entry is
+the measurement a lane can make from inside a run; it is not the experiment.
+## 2026-11-12 — the panel names two values a reader has to supply, and no page of this site or of the documentation says where either comes from
+
+**Filed by:** `Loom marketing` · **Owned by:** the maintainer (the answer), then
+`Loom docs` or `Loom marketing` (the sentence) · **Status:** open — **nothing
+is broken and nothing regressed**; the gap was there before today and the panel
+has now made it visible
+
+`/why-use-it`'s *On your own site* panel prints the route a reader puts a Loom
+page on. Until today the two values it pulls with came out of an object in a
+module beside it, under a sentence saying *the address and the key come out of
+your environment*. [0379](decisions/0379-a-file-may-publish-part-of-its-body-as-somebody-elses-code-and-a-check-that-reads-this-deployment-stops-at-the-marker.md)
+let the workaround come out, so the panel now prints what a reader writes:
+
+```tsx
+const live = startPullingLivePages({
+  deployment: process.env.LOOM_URL ?? "",
+  key: process.env.LOOM_PROJECT_KEY ?? "",
+})
+```
+
+**Two names, and a junior developer's next question is where to get them.**
+Measured rather than assumed, over every `.md` and `.mdx` under `docs/` and
+every page of `(docs)`:
+
+| | times it appears |
+| --- | --- |
+| `LOOM_URL`, anywhere a reader can read | **0** |
+| `LOOM_PROJECT_KEY`, anywhere a reader can read | **0** |
+| either of them, anywhere outside `src/live/index.ts`' own example | **0** |
+
+The one place either name is written down for a human is the doc comment at the
+top of `@jam-overture/loom/live`, which is a reader who has already installed
+the package and gone looking.
+
+### Why this lane cannot answer it
+
+`docs/positioning.md` has the shape of the answer and not the answer:
+
+> *"Someone installs it, if they want easy hook up for signals and to their AI
+> models, they'll pay for the portal."*
+
+So the key plausibly comes from the portal, with the project. **That is a guess
+and this lane does not ship guesses about the product.** Nothing in this
+repository states it: the portal has a *Credentials* screen and the variable it
+prints there is `LOOM_INGEST_KEY`, which is the signals door and not this one.
+A sentence on the marketing site saying *you get both from your project in the
+portal* would be this lane inventing how a customer is provisioned.
+
+### What would close it, cheapest first
+
+| | what it costs | what it buys |
+| --- | --- | --- |
+| **one sentence from the maintainer** saying where a reader gets the two values | a line on a pull request | everything below becomes writable |
+| a line of copy under the panel, once that sentence exists | this lane, a few words, and `/why-use-it` has 44 left | the band stops naming two values with nowhere to get them |
+| a documentation page or section covering both | `Loom docs` | the place to link to, which this site would then link to the way the scaffolding band does |
+
+**The recommendation is the first and then the third.** The site's job here is
+to link to the page that teaches it, which is the arrangement
+`marketing-34-your-first-files` established for `loom init` ten days after that
+command had a guide nobody on this surface pointed at. There is no such page for
+these two names yet, so a marketing sentence written first would be the only
+place in the product where they are explained, which is the wrong place for it.
+
+**It is not a reason to put the workaround back.** A panel that hid one of the
+two lines a reader has to change was not answering the question either; it was
+making it unaskable.
+
+---
+## 2026-11-12 — the mangling's trigger is the branch name in the URL, and the same URL written with the commit sha goes through clean
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom daily build`
+(`tools/` — the `pnpm posted` work on #864 is where this belongs) · **Status:**
+open — **the remedy is one substitution any lane can make today**, and it costs
+nothing to adopt before anything is built
+
+Four forms of the same two pictures were posted to one pull request body in one
+session this morning, each read back from GitHub immediately after. **This is
+the first time the thing that triggers the mangling has been isolated rather
+than the thing that survives it.**
+
+| what was posted | what came back |
+| --- | --- |
+| `![before](https://raw.githubusercontent.com/.../marketing-35-the-two-values-a-reader-really-writes/reports/….webp)` | `[before](``` https://… ```)` — backticks injected, the `!` dropped, **no image** |
+| `<img src="https://raw.githubusercontent.com/.../marketing-35-…-writes/reports/….webp" width="430" />` | `&lt;img src="`` https://… ``  width="430" />` — the tag escaped and the URL backticked, **no image** |
+| a bare `https://github.com/jam-overture/loom/blob/marketing-35-…-writes/reports/….md` | **clean** |
+| `![before](https://raw.githubusercontent.com/jam-overture/loom/c3c41ac32fc16d7ce8d6ace3b995589d75168945/reports/….webp)` | **clean, and the image renders** |
+
+The last two rows are the measurement. Rows 1, 2 and 4 are the *same file* at
+the same path in the same repository, posted in the same minute, differing only
+in what sits between the repository name and `reports/`.
+
+### What it says
+
+- **The branch name is the trigger, not the raw host, not the markdown image
+  syntax, and not the length of the URL.** Row 4 is the longest URL of the four
+  and it is the one that came back whole. Rows 1 and 2 differ in syntax and
+  mangle identically.
+- **It is not the markdown form.** `<img>` is not markdown and was mangled the
+  same way, which rules out an explanation that lives in a markdown parser.
+- **Escaping it is not available.** The 14 October entry measured 177 mangled
+  against 121 clean in one body with the same syntax throughout, and the 8
+  November entry records a before-and-after pair eaten by it. Both were looking
+  for a syntax that survives. There is a simpler answer: **do not put the branch
+  name in the URL.**
+
+### The remedy, and it needs no tooling to start using
+
+`git rev-parse HEAD`, and write the sha where the branch name would go. Both
+`raw.githubusercontent.com/<owner>/<repo>/<sha>/…` and
+`github.com/<owner>/<repo>/blob/<sha>/…` work, and a sha is better for a report
+anyway — a branch URL in a merged pull request stops resolving once the branch
+is deleted, and these pictures are the argument the pull request was making.
+
+**For `pnpm posted` (#864):** this is a rule that can be checked before posting
+rather than read back afterwards. A body containing
+`raw.githubusercontent.com/<owner>/<repo>/<anything that is not 40 hex
+characters>/` is a body that is about to lose its pictures.
+
+### What this does not explain
+
+Why a branch name triggers it, and whether every branch name does or only ones
+of a certain shape. Three of this lane's own recent branches are long and
+hyphenated; nothing here isolates which property matters. The remedy does not
+need the answer, which is why it is worth adopting before anyone finds it.
+## 2026-11-12 — *Stays on it* is answerable now, since counting began, and the range version is the one that costs rows
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom portal`
+(`apps/loom/app/(portal)/portal/[project]/signals/`, the *Goals* screen) ·
+**Status:** open — **the figure exists and nothing is blocked**; what is open is
+one screen's wording and one choice you may not need to make
+
+`docs/portal.md` has said *Stays on it waits on time on a part being counted per
+reader* twice since 8 November. It waits on nothing now.
+[0381](decisions/0381-a-parts-pace-across-pages-is-one-pooled-quotient-and-a-goals-part-is-a-reading-of-its-own.md)
+publishes `partPaceOf`, which takes a node id, the readings of the pages a goal
+covers and the deployment's page-view rows, and answers
+**`PartPace.spentMs` — the time the typical reader who reached this part had
+there**, pooled across every page it stands on.
+
+**What you hand it is the answer to *which pages*.** A goal naming pages hands
+in those pages' readings; a goal naming none hands in every page it can read. A
+reading with no row for the node costs nothing but a count, so there is no need
+to work out in advance which pages have the part.
+
+**Three things the row says that a screen should not re-derive.**
+
+1. **`spentMs` is `null` under a silence and that is not nought.** Four states,
+   each with a sentence of its own in `describePartPaceSilence`: the part stands
+   on none of the pages read, nowhere it stands reported a view, its words could
+   not be counted, or it says nothing that takes time to read. *Nobody was seen
+   on it* and *they had no time on it* are different answers, and a nought drawn
+   for the first is the one wrong thing available here.
+2. **`standing` is `skimmed`, `paced`, `lingered` or `unknown`, and only
+   `skimmed` is a safe claim** (0230, unchanged). A floor in the words holds up
+   every verdict but that one, which is why `pace` can be `null` while
+   `placements` is not.
+3. **`standings` counts the pages' own verdicts.** A part that is `paced` across
+   the deployment can be `skimmed` on one page, and that count is where a screen
+   would see it — but **which** page is not published. See below.
+
+**It is a figure since counting began, not over a range**, and that is a stated
+limit of
+[0362](decisions/0362-what-readers-did-is-counted-under-the-hour-they-did-it-in-as-a-seventh-counter-the-fold-writes-for-the-three-delegated-kinds.md)
+rather than an omission: the hourly table holds what readers **did**, and dwell
+is a thing readers *saw*. The *Goals* list already draws both idioms — a 7-day
+rate with what the goal counted since counting began beneath it — so this sits
+beside the second of those with no new sentence needed.
+
+**If you want it over a range, the ask is a part-grained hourly dwell counter**,
+and it is the expensive one this lane priced on 6 November: about 6,000 rows an
+hour for a 6,000-node page, per revision, in a table nothing sweeps. Say so and
+it is a decision of its own; nothing in 0381 forecloses it.
+
+---
+## 2026-11-12 — one part on nine pages has nine verdicts, and which page it is skimmed on is a second reading
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/part-pace.ts`) · **Status:** open — **nothing is broken and
+nothing is asked of anybody today.** Recorded so the next run does not read the
+absence as a gap
+
+`PartPace` publishes `standings`, so a screen can say *this part is paced across
+your pages and skimmed on two of them*. **It cannot say which two.** The per-page
+rows are computed inside `partPaceOf` — one `PacedPart` per reading, with its own
+pace, its own verdict and its own door — and then summed away.
+
+**Why it is not published here.** *How long do readers stay on this part* and
+*which page is it skimmed on* are two questions, and the second one has a shape
+of its own to settle: it wants a row per page with the tree, the revision and
+that page's own figures, ordered by something, and the ordering is the whole
+decision — by the reading time missing, as a deployment's falls are ordered
+(0221), or by the pace, which would let a page one reader hurried past head the
+list. Publishing the rows without settling that would be publishing a list whose
+order a screen invents.
+
+**What a future run should hold if it builds it.** The rows already exist and
+cost nothing extra to keep: the loop holds `paced.parts.find(...)` per reading,
+and each row's `readers` are already on that page's own door scale. The test to
+write first is that the per-page `dwellMs` sum to `PartPace.dwellMs` and the
+per-page scaled `readers` to `PartPace.readers`, because those two numbers are
+the only thing tying the breakdown to the figure above it.
+
+---
+## 2026-11-12 — this branch spends 50 of the names index's 148 bytes, and leaves 98
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom docs`
+(`app/(docs)/_lib/search/build.test.ts`) and **@jonathanbravecredit for the
+option** · **Status:** open — **`pnpm verify` is green and the cap is not
+tripped**; this narrows the entries of 10 November rather than closing them
+
+Measured on this branch, by the same arithmetic those entries used:
+
+| | spent | cap | room |
+| --- | --- | --- | --- |
+| published names, raw, `main` | 39,852 | 40,000 | 148 |
+| published names, raw, this branch | **39,902** | 40,000 | **98** |
+| per name | 19.037 | 24 | — |
+
+**Three names, 50 bytes, and the unit was shaped around the number.** The
+silence vocabulary a part's pace needs is the same four states a kind's pace
+has, so `KindPaceSilence` is reused as values and no `PartPaceSilence`,
+`PART_PACE_SILENCES` or `meaningOfPartPaceSilence` landed with it — which is
+three names and about 57 bytes this reading would otherwise have cost. Stated
+because the entry of 7 November asks every lane to know whether it is the one
+spending the headroom, and this time it is.
+
+**98 bytes is about five names.** #851 is still held on this cap with sixteen,
+and #859 is open against it. This lane will go on choosing units it can publish
+cheaply, but the next reading that needs a vocabulary of its own cannot be one
+of them.
 ## 2026-11-11 (evening) — the fault vocabulary has a member for a silent part now, and what it can see is a fraction of what it names
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom signals`
