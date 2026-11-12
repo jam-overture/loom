@@ -97,16 +97,29 @@ const tally = (
   ...counters,
 })
 
-/** One page of bands, each reached by the readers given, with no row where nobody reached one. */
+/**
+ * One page of bands, each reached by the readers given, with no row where
+ * nobody reached one.
+ *
+ * **The stack holding the bands reports too**, with the readers of the band
+ * most of them reached. Without it this fixture is a page whose outermost part
+ * was on a reader's screen and said nothing, which is `parts-unreporting` on
+ * every page of every deployment built here — a sender defect the fixture was
+ * modelling by accident, and the fault that names it is the one unit that
+ * noticed (0382).
+ */
 const reading = (
   treeId: TreeId,
   revision: number,
   reached: readonly number[],
   extra: readonly ReaderTally[] = []
-): PageReading =>
-  pageReadingOf(
+): PageReading => {
+  const top = Math.max(0, ...reached)
+
+  return pageReadingOf(
     treeOf(treeId, revision, reached.length),
     [
+      ...(top > 0 ? [tally(treeId, revision, "page", { views: top, reached: top })] : []),
       ...reached.flatMap((count, at) =>
         count > 0 ? [tally(treeId, revision, `band${at + 1}`, { views: count, reached: count })] : []
       ),
@@ -114,26 +127,24 @@ const reading = (
     ],
     NOTHING_DECLARED
   )
+}
 
 /** A page readers leave: a hundred reach the first band and forty the second. */
 const leaky = (treeId: TreeId, revision = 1): PageReading => reading(treeId, revision, [100, 40])
 
 /**
- * The same page with its outermost part reported on and a band nobody reached.
+ * The same page with a band nobody reached.
  *
  * A fall **and** a place the reading stopped, which is the row this join exists
  * to make: a hundred readers reach the first band, forty the second, and the
- * third is behind where every reading of the page got to. The root is given a
- * row of its own because a page whose outermost part reported nothing has one
- * stop — itself — and that is a different fact from a band going unread (0374).
+ * third is behind where every reading of the page got to. The outermost part
+ * reports, as it does on every page this fixture builds, because a page whose
+ * outermost part reported nothing has one stop — itself — and that is a
+ * different fact from a band going unread (0374), as well as a sender defect
+ * (0382).
  */
 const stopping = (treeId: TreeId, revision = 1): PageReading =>
-  reading(
-    treeId,
-    revision,
-    [100, 40, 0],
-    [tally(treeId, revision, "page", { views: 100, reached: 100 })]
-  )
+  reading(treeId, revision, [100, 40, 0])
 
 /**
  * A page whose second band holds two cells and whose readers never reached it.
@@ -173,6 +184,33 @@ const mishandled = (treeId: TreeId, revision = 1): PageReading =>
   reading(treeId, revision, [100, 40], [tally(treeId, revision, "ghost", { views: 9, reached: 9 })])
 
 /**
+ * A page whose band says nothing while the cell inside it reports being
+ * reached — a reader was below a part that never said it was on screen, which
+ * is the sender defect the fix-list had no sentence for (0382).
+ */
+const silentBand = (treeId: TreeId): PageReading =>
+  pageReadingOf(
+    {
+      treeId,
+      schemaVersion: TREE_SCHEMA_VERSION,
+      revision: 1,
+      root: {
+        kind: "element",
+        id: nodeId("page"),
+        type: primitiveType("loom.stack"),
+        props: {},
+        children: [band("band1"), { ...band("band2"), children: [band("cell1")] }],
+      },
+    },
+    [
+      tally(treeId, 1, "page", { views: 100, reached: 100 }),
+      tally(treeId, 1, "band1", { views: 100, reached: 100 }),
+      tally(treeId, 1, "cell1", { views: 100, reached: 100 }),
+    ],
+    NOTHING_DECLARED
+  )
+
+/**
  * The same leaky page, with presses nobody is credited for — which is a sender
  * that does not walk its ancestry, and spends a counter no fall is made of.
  */
@@ -180,6 +218,7 @@ const uncredited = (treeId: TreeId, revision = 1): PageReading =>
   pageReadingOf(
     treeOf(treeId, revision, 2),
     [
+      tally(treeId, revision, "page", { views: 100, reached: 100 }),
       tally(treeId, revision, "band1", { views: 100, reached: 100 }),
       tally(treeId, revision, "band2", { views: 40, reached: 40, activations: 7 }),
     ],
@@ -481,6 +520,34 @@ describe("deploymentAgendaOf", () => {
     expect(agenda.contested[0]?.order.readers).toBe(60)
   })
 
+  /**
+   * The row this join was asked for on 9 November: *a part that said nothing
+   * with a reader demonstrably below it is a primitive to fix in the library,
+   * not a page to rewrite, and the fault vocabulary has no member for it.* It
+   * has one now, so the page leaves the order of falls it would have led and
+   * arrives as collection work with a sentence about senders (0382).
+   */
+  it("sends an operator to repair a silent part rather than to rewrite the page it is on", () => {
+    const agenda = agendaOf([silentBand(TREE)], [exact(TREE, 1, 100)])
+
+    expect(agenda.rows[0]?.health.faults).toEqual(["parts-unreporting"])
+    expect(agenda.rows[0]?.health.unreporting).toBe(1)
+    expect(agenda.rows[0]?.work).toBe("collection")
+    expect(agenda.page).toEqual([])
+    expect(agenda.collection.map(named)).toEqual([named({ treeId: TREE, revision: 1 })])
+    expect(agenda.first?.work).toBe("collection")
+
+    /**
+     * The fall it would have led with is a total fall into a part a reader was
+     * below, which is the manufactured sharpest fall this withdrawal exists
+     * for — and it travels with the row, so the figure that moved the page is
+     * the figure an operator is shown.
+     */
+    expect(agenda.contested.map(named)).toEqual([named({ treeId: TREE, revision: 1 })])
+    expect(agenda.contested[0]?.spoiled).toBe(true)
+    expect(agenda.contested[0]?.order.standing).toBe("ranked")
+  })
+
   it("keeps a page whose sender credits no action in the order, because a fall is made of another counter", () => {
     const agenda = agendaOf([uncredited(TREE)], [exact(TREE, 1, 100)])
 
@@ -591,12 +658,12 @@ describe("deploymentAgendaOf", () => {
   })
 
   it("drops a page a caller handed in twice on either side, and says how many it dropped", () => {
-    const order = deploymentReadingOf([readingProgressOf(leaky(TREE))], [exact(TREE, 1, 100)])
-    const health = collectionHealthOf([leaky(TREE)], [exact(TREE, 1, 100)])
+    const order = deploymentReadingOf([readingProgressOf(stopping(TREE))], [exact(TREE, 1, 100)])
+    const health = collectionHealthOf([stopping(TREE)], [exact(TREE, 1, 100)])
 
-    const leaking = asksNothing([leaky(TREE)], [exact(TREE, 1, 100)])
+    const leaking = asksNothing([stopping(TREE)], [exact(TREE, 1, 100)])
 
-    const unread = places([leaky(TREE)])
+    const unread = places([stopping(TREE)])
 
     const doubledOrder = deploymentAgendaOf(
       { ...order, ranked: [...order.ranked, ...order.ranked] },
@@ -707,6 +774,7 @@ describe("deploymentAgendaOf", () => {
     const skiers = pageReadingOf(
       treeOf(TREE, 1, 2),
       [
+        { ...tally(TREE, 1, "page", { views: 100, reached: 100 }), audienceId: SKIERS },
         { ...tally(TREE, 1, "band1", { views: 100, reached: 100 }), audienceId: SKIERS },
         { ...tally(TREE, 1, "band2", { views: 40, reached: 40 }), audienceId: SKIERS },
       ],
@@ -716,6 +784,7 @@ describe("deploymentAgendaOf", () => {
     const riders = pageReadingOf(
       treeOf(TREE, 1, 2),
       [
+        { ...tally(TREE, 1, "page", { views: 900, reached: 900 }), audienceId: RIDERS },
         { ...tally(TREE, 1, "band1", { views: 900, reached: 900 }), audienceId: RIDERS },
         { ...tally(TREE, 1, "band2", { views: 880, reached: 880 }), audienceId: RIDERS },
       ],

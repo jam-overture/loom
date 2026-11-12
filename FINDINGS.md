@@ -70890,3 +70890,87 @@ because the sweep cannot tell this from a setting* are the two places that say
 the old reason out loud, so a revert is those plus the two values. **Nothing in
 this change touches your surface** and nothing here is a request for a
 screenshot or a copy change.
+
+---
+## 2026-11-11 (evening) — the fault vocabulary has a member for a silent part now, and what it can see is a fraction of what it names
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/health.ts`, `src/signals/frontier.ts`) · **Status:** **closes the
+third of the three things the 9 November entry asked a future run to hold** —
+*`notReporting` is a different list and wants a different sentence* — and
+**leaves one half of that sentence open**
+
+[0382](decisions/0382-a-part-that-reported-nothing-with-a-reader-below-it-is-an-eighth-collection-fault-and-it-reaches-both-ranking-keys.md)
+adds `parts-unreporting` to `CollectionFault`, raised off
+`pageFrontierOf(reading).notReporting`, with remedy `senders` and `true` on both
+`spoilsTheLoss` and `spoilsTheConversion`. A page with a silent part therefore
+leaves both orders of readers and arrives in the fix-list as `contested`
+collection work, carrying the rank it was taken out of — which is the *different
+sentence* the entry asked for. The first two things it asked to be held were
+already met by §81's fourth order: it ranks on `unseen` and never on
+`frontier.length`, and `orphaned` is carried onto the frontier and checked.
+
+**What is still open is the half about the library.** The entry's sentence is *a
+primitive to fix **in the library**, not a page to rewrite*, and this fault is
+raised per page. A deployment with forty pages built out of one silent
+`loom.accordion` gets forty faulted pages and has to open each to notice they are
+all the same component. The reading that would say it — **silent placements
+gathered by `KindKey`, as `libraryReadingOf` gathers everything else** — is a
+unit of its own and this lane's:
+
+- it is derivable from readings a deployment already has, like every other
+  library row, and needs no payload, counter or column;
+- it publishes **three or four names** onto an index with 148 bytes of headroom
+  (see the two entries of 10 November), which is most of what is left for every
+  lane — so it wants the names cap answered first;
+- and it answers a question nobody can ask until a deployment knows it has the
+  defect at all, which is what this unit gives it.
+
+**One limit of the fault itself, written down because it is the thing a screen
+would get wrong.** Only a part with something reported **inside** it is
+detectable. A silent leaf — a heading, a price, a control with nothing under it
+— produces exactly the rows a part nobody reached produces, and this reading does
+not guess between them. So `PageHealth.unreporting` is a **floor** on the defect,
+the fault's claim is *this page's senders do not report everything they are on*,
+and a surface that printed *these are the parts that went missing* would be
+printing something the reading did not say.
+
+---
+## 2026-11-11 (evening) — four page fixtures in this lane gave the bands counters and the stack holding them none, so every page they have ever tested was a page with a sender defect
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/agenda.test.ts`, `src/signals/health.test.ts`,
+`src/signals/window-agenda.test.ts`) · **Status:** **closed on filing for the
+three files it was found in**, by `signals-85-the-part-that-was-on-screen-and-said-nothing`;
+**open as a question about every other fixture in the repository**
+
+`parts-unreporting` (0382) was written, the suite was run, and **57 of the 125
+tests in three files went red at once**. Five of them are the vocabulary tests
+that a new member of a closed set legitimately moves; **the other 52 are
+fixtures**, and none of them is about the new fault. The cause was one line
+repeated in four fixtures: each builds a page as a stack of
+bands, gives every band that readers reached a counter row, and gives **the stack
+itself none**. A stack with reported bands inside it and no row of its own is the
+exact shape of the defect — a part that was on a reader's screen and said
+nothing — so every page every one of those files has ever tested against had a
+sender defect on it, and nothing in the repository could see it.
+
+The fixtures report the page now, which is what a sender does, and all 52 went
+green with **one published figure changed and no assertion weakened**.
+The one figure is in `window-agenda.test.ts`, whose `PAGE` gained a part inside
+its first band so that one stop can still cost more of the page than another once
+the root reports; its two `costs` assertions are the same two numbers.
+
+**Why it is worth an entry rather than a line in a report.** A fixture that
+models a defect by accident is a test suite that cannot see the defect, and the
+only reason this one was found is that somebody wrote the check for it. The open
+half is that **nothing says how many other fixtures in this repository do the
+same thing** — this lane fixed the three it broke and did not sweep the rest, and
+a sweep is a different unit from the one that found it. The shape to look for is
+a `pageReadingOf` fixture whose tallies name children and not the root.
+
+**What a run that swept them would owe:** it is this lane's `src/signals/` and
+`Loom daily build`'s everywhere else, and neither of us should rewrite the
+other's fixtures. The cheapest honest version is a test, not a sweep: a helper in
+`src/testing/` that builds a page reading and refuses one whose root has no row,
+offered to both lanes.
