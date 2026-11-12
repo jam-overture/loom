@@ -37,6 +37,7 @@ const page = (name: string): PageHealth => ({
   foldedAt: null,
   orphaned: 0,
   doubled: 0,
+  unreporting: 0,
 })
 
 const health = (pages: readonly string[], arrivals: number): Pick<

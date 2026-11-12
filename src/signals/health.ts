@@ -4,6 +4,7 @@ import type { TreeId } from "../ids.js"
 
 import { pageActionOf } from "./action.js"
 import { readingKeyOf } from "./audiences.js"
+import { pageFrontierOf } from "./frontier.js"
 import { pageViewsFor, type RevisionPageViews, type StoredPageViews } from "./page-views.js"
 import type { PageReading } from "./parts.js"
 
@@ -38,12 +39,12 @@ import type { PageReading } from "./parts.js"
  * ## A fault is named by what it costs, and the remedy is named only where the
  * rows determine one
  *
- * The six faults here are not six shapes of missing data; they are six
+ * The eight faults here are not eight shapes of missing data; they are eight
  * different things to go and do, and the reason to report them together is that
  * a person looking at a reader screen cannot tell them apart from the figures.
  * {@link remedyOf} publishes which of four hands each one falls to — the pages,
  * the configuration, the caller — and `undetermined` where the rows genuinely do
- * not say, which is one fault out of six and is better than inventing one of
+ * not say, which is one fault out of eight and is better than inventing one of
  * three causes.
  *
  * ## What a fault costs is the page's arrivals, and a page is counted once
@@ -246,6 +247,31 @@ export type CollectionFault =
    */
   | "actions-uncredited"
   /**
+   * A part of this page reported nothing while a part **inside it** reported
+   * being reached.
+   *
+   * A reader was demonstrably below it, so it was on a screen and did not say
+   * so. The usual cause is a primitive that does not spread the identity
+   * attributes a broadcaster reads — the failure `sdk/conformance.ts` exists to
+   * catch — and a sender switched on part-way through a release is the other.
+   * Taken from {@link pageFrontierOf} rather than spelled a second time, on the
+   * rule `actions-uncredited` is here under (0242).
+   *
+   * **It is a fault about a *primitive* and not about a page**, which is what
+   * makes it worth a member of its own rather than a line on a page reading. A
+   * part that is never reached is a page to rewrite; a part that is reached and
+   * silent is a component to fix, and every placement of that component in the
+   * deployment is wrong in the same way while reading as a page readers skip.
+   *
+   * **What is detectable is a fraction of what is wrong.** A silent part is
+   * only visible here when something *inside* it reported, so a silent leaf —
+   * a heading, a price, a control with nothing under it — is indistinguishable
+   * from a part nobody reached. The fault therefore says *this page has senders
+   * that do not report*, which is a statement about every figure on it, and not
+   * *these are the parts that went missing*.
+   */
+  | "parts-unreporting"
+  /**
    * Counters filed under this tree and revision that name nodes the tree does
    * not contain, or the same row handed in twice.
    *
@@ -284,6 +310,7 @@ export const COLLECTION_FAULTS: readonly CollectionFault[] =
     "counts-inflated",
     "collection-stalled",
     "actions-uncredited",
+    "parts-unreporting",
     "rows-mishandled",
     "audiences-mixed",
   ])
@@ -301,6 +328,8 @@ export const describeCollectionFault = (fault: CollectionFault): string => {
       return "page views of this version have been waiting longer than a fold is meant to take"
     case "actions-uncredited":
       return "readers acted on this page and no reader was credited with acting inside anything"
+    case "parts-unreporting":
+      return "parts of this page were on a reader's screen and said nothing, so this page's senders are not reporting everything they are on"
     case "rows-mishandled":
       return "rows were handed in that this version cannot account for, or handed in twice"
     case "audiences-mixed":
@@ -319,7 +348,7 @@ export type FaultRemedy =
   /**
    * Nothing the rows can name.
    *
-   * One fault out of seven, and it is the honest answer rather than a gap: a
+   * One fault out of eight, and it is the honest answer rather than a gap: a
    * missing door row is an old sender, an expired row or a hand-built counter,
    * and inventing one of the three is worse than naming none.
    */
@@ -344,6 +373,8 @@ export const remedyOf = (fault: CollectionFault): FaultRemedy => {
     case "collection-stalled":
       return "configuration"
     case "actions-uncredited":
+      return "senders"
+    case "parts-unreporting":
       return "senders"
     case "rows-mishandled":
       return "caller"
@@ -372,7 +403,7 @@ export const remedyOf = (fault: CollectionFault): FaultRemedy => {
  *
  * A fault spoils every **rate** on its page, which is what makes the health
  * reading worth ranking by headcount. It does not follow that it spoils *this*
- * figure, and two of the seven plainly do not:
+ * figure, and two of the eight plainly do not:
  *
  * - **`counts-inflated` is already corrected for.** The key the order is on is
  *   `lost ÷ (1 + inflation)`, and the inflation comes off the door row, where
@@ -386,7 +417,7 @@ export const remedyOf = (fault: CollectionFault): FaultRemedy => {
  * repair a sender when what the rows said was *four hundred readers stop here*,
  * and it would be the over-caution that makes a verdict worth ignoring.
  *
- * ## Why three of the five cannot be seen today
+ * ## Why three of the six cannot be seen today
  *
  * `door-unscaled`, `openings-unmarked` and `audiences-mixed` are `true` here and
  * **cannot co-occur with a rank**, because the order already refuses those
@@ -402,7 +433,7 @@ export const remedyOf = (fault: CollectionFault): FaultRemedy => {
  * short window is corrected for here and manufactures the loss there. Neither
  * answer may be read off the other.
  *
- * The two that can be seen are the two worth seeing. `rows-mishandled` is a
+ * The three that can be seen are the three worth seeing. `rows-mishandled` is a
  * tree and a window that do not belong together, which leaves most of the page
  * reading `skipped` — so it manufactures the steepest fall in the deployment and
  * puts the page at the head of the order (0212). `collection-stalled` reads a
@@ -410,6 +441,18 @@ export const remedyOf = (fault: CollectionFault): FaultRemedy => {
  * has, so the loss is of one window and the scale is of another; it understates
  * rather than overstates, which makes a stalled page's rank a floor on its
  * trouble rather than a measure of it.
+ *
+ * `parts-unreporting` is `rows-mishandled`'s shape arrived at from the other
+ * direction, and it is **not** read off the analogy. A fall is between two
+ * siblings on `reached`, and a part that never reports has a `reached` of
+ * nought while readers were demonstrably below it — so the fall into it is
+ * total, and a total fall is the sharpest fall a page can have. The ranking key
+ * is the deployment's sharpest fall, so one silent part is enough to put a page
+ * the readers were perfectly happy with at the head of the order. The wider
+ * reason is the one on the member itself: the parts this fault can see are the
+ * containers, a silent leaf is indistinguishable from a part nobody reached,
+ * and *this page's senders do not report everything they are on* is a statement
+ * about every `reached` count on it.
  */
 export const spoilsTheLoss = (fault: CollectionFault): boolean => {
   switch (fault) {
@@ -423,6 +466,8 @@ export const spoilsTheLoss = (fault: CollectionFault): boolean => {
       return true
     case "actions-uncredited":
       return false
+    case "parts-unreporting":
+      return true
     case "rows-mishandled":
       return true
     case "audiences-mixed":
@@ -471,7 +516,7 @@ export const spoilsTheLoss = (fault: CollectionFault): boolean => {
  *   second end asks for `activated` on a control is answered from the control's
  *   own signal, so the fault cannot touch it.
  *
- * ## The four that transfer, and why
+ * ## The five that transfer, and why
  *
  * `door-unscaled` leaves the loss with no scale to be comparable on;
  * `openings-unmarked` leaves it with no denominator; `audiences-mixed` reads one
@@ -494,11 +539,24 @@ export const spoilsTheLoss = (fault: CollectionFault): boolean => {
  * understates, so a stalled page's place is a floor on its trouble rather than a
  * measure of it.
  *
+ * `parts-unreporting` is `true`, and the argument is **weaker here than it is
+ * for a fall** — which is why it is written down rather than carried over. A
+ * funnel end is satisfied by the node a signal names and the kind it is, so a
+ * silent end makes `converted` nought and manufactures a total loss exactly as
+ * it manufactures a total fall. But what this fault can actually see is a part
+ * with something reported *inside* it, and a funnel's ends are usually controls
+ * with nothing inside them, so the end itself is rarely the part that is named.
+ * It is `true` on the member's own wider claim instead: a page with one
+ * container that does not report has senders that do not report, every silent
+ * leaf on it is invisible, and an end that never fired is indistinguishable
+ * from an end nobody reached.
+ *
  * ## Which can be seen on a ranked page
  *
- * Three, where a fall has two: `counts-inflated`, `collection-stalled` and
- * `rows-mishandled`. The extra one is the fault a fall is explicitly safe from,
- * which is the whole reason this answer could not be transferred.
+ * Four, where a fall has three: `counts-inflated`, `collection-stalled`,
+ * `rows-mishandled` and `parts-unreporting`. The extra one is the fault a fall
+ * is explicitly safe from, which is the whole reason this answer could not be
+ * transferred.
  */
 export const spoilsTheConversion = (fault: CollectionFault): boolean => {
   switch (fault) {
@@ -512,6 +570,8 @@ export const spoilsTheConversion = (fault: CollectionFault): boolean => {
       return true
     case "actions-uncredited":
       return false
+    case "parts-unreporting":
+      return true
     case "rows-mishandled":
       return true
     case "audiences-mixed":
@@ -584,7 +644,7 @@ export type PageHealth = {
   /**
    * Every fault, in the order {@link COLLECTION_FAULTS} publishes them, which is
    * the order they are worth reading in: the one that costs the denominator
-   * first, the three that are the deployment's, then the caller's.
+   * first, the four that are the deployment's, then the caller's.
    *
    * Empty on every standing but `faulted`.
    */
@@ -631,6 +691,22 @@ export type PageHealth = {
   readonly orphaned: number
   /** Node counters and door rows handed in more than once, added. */
   readonly doubled: number
+  /**
+   * Parts that reported nothing while a part inside them reported being
+   * reached, which is what `parts-unreporting` is raised on.
+   *
+   * A count of **parts of the tree** and never of readers, so it is never
+   * ranked and never added to an arrival count — the figure that says how bad
+   * a faulted page is stays {@link PageHealth.arrivals}, here as everywhere
+   * else. It is published beside the fault for the reason `orphaned` and
+   * `doubled` are: *your senders are not reporting* is a verdict, and *on one
+   * part of this page* and *on nineteen* are two different mornings.
+   *
+   * **It is a floor on the defect and not a measure of it.** Only a part with
+   * something reported inside it can be seen from the counters, so a silent
+   * leaf is counted nowhere here and reads as a part nobody reached.
+   */
+  readonly unreporting: number
 }
 
 /** What a deployment is collecting, and what is wrong with it. */
@@ -807,6 +883,18 @@ const healthOf = (
   }
   if (stalled(door, schedule)) faults.push("collection-stalled")
   if (pageActionOf(reading).unwalked) faults.push("actions-uncredited")
+
+  /**
+   * Taken from the frontier rather than spelled again, on the rule
+   * `actions-uncredited` is taken from `pageActionOf` under (0242): a fault
+   * vocabulary written in two places is this subsystem's commonest defect, and
+   * *a part that reported nothing with a reader below it* is a sentence
+   * `frontier.ts` already owns. One more linear pass over the page's parts,
+   * which is the bound every reading here is held to.
+   */
+  const unreporting = pageFrontierOf(reading).notReporting.length
+
+  if (unreporting > 0) faults.push("parts-unreporting")
   if (reading.orphaned.length > 0 || doubled > 0) faults.push("rows-mishandled")
   if (reading.audienceId === null && reading.audiences.length > 1) faults.push("audiences-mixed")
 
@@ -833,6 +921,7 @@ const healthOf = (
     foldedAt: door?.foldedAt ?? null,
     orphaned: reading.orphaned.length,
     doubled,
+    unreporting,
   }
 }
 
