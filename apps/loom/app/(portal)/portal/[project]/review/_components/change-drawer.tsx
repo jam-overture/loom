@@ -5,7 +5,12 @@ import { GoalChip } from "@/app/(portal)/_components/goal-chip"
 import { OutlinePair } from "@/app/(portal)/_components/outline-pair"
 import type { Role } from "@/app/(portal)/_lib/auth/roles"
 import type { HeldDrawn } from "@/app/(portal)/_lib/held-change"
-import { MEASURING_DAYS, MIN_VIEWS_A_SIDE } from "@/app/(portal)/_lib/measuring"
+import {
+  expectationWords,
+  measuredSentence,
+  type Expectation,
+} from "@/app/(portal)/_lib/expectation"
+import type { Goal } from "@/app/(portal)/_lib/goals/goal"
 import type { RequestParts } from "@/app/(portal)/_lib/proposing/brief"
 import type { TurnedDown } from "@/app/(portal)/_lib/proposing/turned-down"
 import type { QueueRow } from "@/app/(portal)/_lib/queue"
@@ -67,13 +72,46 @@ const TurnedDownBand = ({
   </Band>
 )
 
-/** What it expects: no predicted effect yet, and how it will be measured once live. */
-const expectation = (row: QueueRow, goalsRead: boolean): string => {
-  if (!goalsRead)
-    return "Which goal this change serves cannot be read here, so neither can what it would be measured on."
-  if (row.goal === null) return "It names no goal, so once it is live it is not measured."
+/**
+ * Where the change's goal stands on its page, read when the drawer opens:
+ * `unplaced` where the goal it serves is no longer one of the project's, and
+ * `unreadable` where the goals or the page's counters did not answer.
+ */
+export type GoalStanding =
+  | {
+      readonly kind: "read"
+      readonly goal: Pick<Goal, "name" | "kind">
+      readonly expectation: Expectation
+    }
+  | { readonly kind: "unplaced" }
+  | { readonly kind: "unreadable" }
 
-  return `Loom does not predict an effect yet. Once it is live it is measured on “${row.goal}” for the ${MEASURING_DAYS} days after against the ${MEASURING_DAYS} days before, and needs ${MIN_VIEWS_A_SIDE.toLocaleString("en-GB")} page views each side before it says whether it helped.`
+/** What it expects: where its goal stands, the band a result has to leave, and how it is measured. */
+const expectation = (
+  row: QueueRow,
+  goalsRead: boolean,
+  standing: GoalStanding
+): readonly string[] => {
+  if (!goalsRead)
+    return [
+      "Which goal this change serves cannot be read here, so neither can what it would be measured on.",
+    ]
+  if (row.goal === null) return ["It names no goal, so once it is live it is not measured."]
+
+  switch (standing.kind) {
+    case "read":
+      return expectationWords(standing.goal, standing.expectation)
+    case "unplaced":
+      return [
+        `“${row.goal}” is no longer one of the project's goals, so where it stands on this page is not read here.`,
+        measuredSentence(row.goal),
+      ]
+    case "unreadable":
+      return [
+        `Where “${row.goal}” stands on this page could not be read. Try again in a moment.`,
+        measuredSentence(row.goal),
+      ]
+  }
 }
 
 /**
@@ -85,7 +123,8 @@ const expectation = (row: QueueRow, goalsRead: boolean): string => {
  * change proposed for an older version that still fits, or one turned down
  * before and proposed again, 0340 and 0341; red for one that no longer fits);
  * the page before and after as two outlines; why Loom proposes it, what it
- * expects, what is at stake and who may accept it; and the answers, with a
+ * expects (where its goal stands on the page and the band a result has to
+ * leave, never a predicted effect), what is at stake and who may accept it; and the answers, with a
  * line on what each does next.
  */
 export const ChangeDrawer = ({
@@ -95,6 +134,7 @@ export const ChangeDrawer = ({
   lastTurnedDown,
   acceptedBy,
   goalsRead,
+  standing,
   projectId,
   close,
 }: {
@@ -106,6 +146,8 @@ export const ChangeDrawer = ({
   /** The least role that may accept a change of its stake. */
   readonly acceptedBy: Role
   readonly goalsRead: boolean
+  /** Where the goal it serves stands on its page now. */
+  readonly standing: GoalStanding
   readonly projectId: string
   /** *For review* without the drawer, every filter kept. */
   readonly close: string
@@ -154,7 +196,11 @@ export const ChangeDrawer = ({
       </Section>
 
       <Section title="What it expects">
-        <p className="m-0 text-xs">{expectation(row, goalsRead)}</p>
+        {expectation(row, goalsRead, standing).map((words) => (
+          <p key={words} className="m-0 text-xs">
+            {words}
+          </p>
+        ))}
       </Section>
 
       <Section title="At stake">

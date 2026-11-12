@@ -38,7 +38,7 @@ the portal every day.
 | What an operator can look at, delivery by delivery | one row per signal the deployment still keeps, newest first, in exact pages, with the rest of one page view beside any of them ([0355](../decisions/0355-the-events-a-screen-lists-are-one-row-per-signal-and-one-page-view-is-read-on-a-key-the-caller-already-holds.md)) — the handle the *Events* tab is drawn from, which counts nothing, names no page and cannot be asked which page views exist |
 | What readers did inside a part | every addressed node of one revision, with what readers did **to** it and what they did **inside** it over a range ([0368](../decisions/0368-what-readers-did-inside-a-part-is-derived-from-the-tree-and-the-sum-is-exact-because-occurrences-add.md)) — derived from the tree rather than from the payload, so *forty presses in the pricing band last Tuesday* costs no byte anywhere, and exact because one signal wrote one row on one node |
 | When readers arrived | page views counted under the hour they began in as well as in total ([0356](../decisions/0356-page-views-are-counted-under-the-hour-they-began-in-as-a-sixth-counter-written-at-the-door.md)), written at the door in the same transaction as the total — so a chart by hour sums to the count drawn beside it, and a reading over a range says where its data starts |
-| What a reader's day looks like | a range of hours folded two ways ([0376](../decisions/0376-a-range-of-hours-is-folded-into-its-days-and-into-the-hours-of-a-readers-day-where-the-mean-is-the-only-comparable-figure.md)) — into its **days**, so the thirty-day range the wireframe offers is thirty bars rather than seven hundred and twenty, and into the **hours of the day**, so *when are my readers here* and *when can a change go out* are answerable. Read-time, nothing stored, and the hours of the day are compared by a mean per day, because a range is almost never a whole number of days and the totals would rank them by where it ended |
+| What a reader's day looks like | a range of hours folded two ways ([0389](../decisions/0389-a-range-of-hours-is-folded-into-its-days-and-into-the-hours-of-a-readers-day-where-the-mean-is-the-only-comparable-figure.md)) — into its **days**, so the thirty-day range the wireframe offers is thirty bars rather than seven hundred and twenty, and into the **hours of the day**, so *when are my readers here* and *when can a change go out* are answerable. Read-time, nothing stored, and the hours of the day are compared by a mean per day, because a range is almost never a whole number of days and the totals would rank them by where it ended |
 | Which page a change helped and which it hurt | every page's sharpest movement in each direction, at the later window's door scale ([0291](../decisions/0291-a-deployments-change-is-two-orders-at-the-doors-scale-because-a-page-has-no-net-movement.md)), as two orders rather than one — because a page the change both helped and hurt has no net |
 | What a change did to the funnel | the rate bracketed by each window's own ceiling, with a counterfactual saying which half moved ([0288](../decisions/0288-a-change-to-a-funnel-is-two-shares-that-factor-and-a-difference-of-two-floors-is-a-bracket.md)), so a rollup window a deployment shortened cannot read as a collapse |
 | How much of what it says gets read | words readers reached against the words the window can speak for ([0235](../decisions/0235-how-much-of-a-page-gets-read-is-a-share-of-words-that-partition-it-and-the-typical-reader-is-a-ceiling.md), [0287](../decisions/0287-a-share-of-a-pages-words-is-a-share-of-the-words-the-window-can-speak-for-and-spoken-for-is-one-predicate.md)), with the passages nobody saw — and no share at all where nothing reports reach |
@@ -71,6 +71,7 @@ the portal every day.
 | Whether readers have time for a kind of part | the time on screen across its places against the time its words take the readers who met them ([0325](../decisions/0325-a-kinds-pace-is-a-pooled-ratio-over-its-outermost-placements-and-an-unscaled-page-is-kept.md)) — a pooled ratio and never a mean of ratios, the outermost placement standing for the ones inside it, and a page the door cannot scale kept rather than refused, because the missing correction only makes a kind read as more skimmed |
 | What a window could not answer, and what each reason cost it | the states its readings are in, as a condition and a subject, with the readings each took and the pages each cost ([0324](../decisions/0324-what-a-window-could-not-answer-is-a-census-over-its-silences-and-a-page-is-counted-once.md)) — a page counted once however many of its readings report one state, no total over the states because one page is in as many as it has reasons, and a page's own row with a denominator, because *nine of nine readings silent* is a page to fix and *one of nine* is a page that works |
 | Whether the page to fix first is a page to fix | the order of pages held against the faults in the collection, as two orders and the overlap between them ([0330](../decisions/0330-the-page-to-fix-first-is-not-the-page-to-fix-when-its-own-fault-made-the-fall.md)) — because a tree and a window that do not belong together manufacture the steepest fall in the deployment, and *rewrite this page* was then the wrong errand; with no reader count over it, the two orders being in two units |
+| Where in a deployment to go and look | every page's largest unread place, as a fourth order ranked on what one fix recovers ([0377](../decisions/0377-a-deployments-unread-places-are-a-fourth-order-ranked-on-what-one-fix-recovers.md)) — because a page with forty unread leaves outranks a page with one unread band on every other key, and the second is the page to go to; with *four hundred and twelve unread parts in nine places* said as two figures that are never added, the places across the whole deployment in one list, and the fix-list's own first row untouched, the two keys being readers and parts |
 | Arrivals | one batch of a page view says it opened one, which is how a region is counted once per reader, and how page views are counted exactly |
 | Whether a funnel question still names anything | each end looked up in the revision, with what is withheld decided per figure ([0238](../decisions/0238-a-funnel-end-the-revision-no-longer-has-is-a-standing-and-what-is-withheld-is-per-figure.md)) |
 | What a change did | two readings compared, pair by pair, as shares and never counts ([0224](../decisions/0224-a-before-and-after-reading-compares-two-shares-and-a-pair-the-change-dissolved-is-an-answer.md)) — which is also *this week against last week* |
@@ -5131,11 +5132,73 @@ is a judgement about a screen; the *By page* drawer's skipped count, which is th
 portal's to draw; and five new names on `@jam-overture/loom/signals` with no
 prose, which is `Loom docs`'.
 
-### 82. The shape of a deployment's day · `Loom signals` · **done, 10 November**
+### 81. The place one fix recovers the most of a page at · `Loom signals` · **done, 9 November**
 
-> **§81 is on an open branch** (#848, *the place one fix recovers the most of a
-> page at*) and is not on `main` yet, which is why the numbers here skip one.
-> Nothing in this step reads anything that step added.
+§80 made one page's unread parts readable as **the places its reading stopped**
+([0374](../decisions/0374-a-pages-unread-parts-are-reported-as-the-places-its-reading-stopped-and-each-is-behind-exactly-one.md)),
+because `skipped` counts a band, the rows inside it and every heading among them
+— forty parts about one place to fix. **That reading is per page and the question
+is not.** This lane filed the gap the same day: the fix-list has no order over
+unread-ness at all, and the only figure available to put one on was the count the
+frontier was built to replace, so two pages with one unread band each would be
+ordered by how deeply each band happens to nest.
+
+**Done**
+([0377](../decisions/0377-a-deployments-unread-places-are-a-fourth-order-ranked-on-what-one-fix-recovers.md)),
+as a fourth deployment-scale order beside the fix-list, in its own unit, derived
+from readings that already exist.
+
+- **The key is what one fix recovers.** `deploymentUnreadOf` in
+  `src/signals/unread.ts` ranks each page on the parts behind its single
+  costliest place — not on the page's whole unread count, and not on how many
+  places it has, both of which put forty leaves costing one each above one band
+  costing forty. The precedent is 0250, which ranks a page by its **steepest**
+  fall and not by everything it loses. Ties fall to the share of the page one
+  place hides.
+- **Both figures are published and neither is added into the other.** *Four
+  hundred and twelve unread parts in nine places* is the sentence: `unseen` is
+  the first number, `places` the second, and the second is the one an afternoon
+  is spent on.
+- **Five standings, and only one means what an empty reading looks like.** A
+  page nobody opened, a page every part of which was reached, a window read as
+  neither of two forms, and a wrong tree-and-window pair all produce an empty or
+  plausible reading. They are asked in the order the wrong answers are
+  comforting in — `mismatched`, then `unsplit`, then `unread`, and only then is
+  `whole` allowed.
+- **A page off the order has its figures withheld rather than zeroed**, and its
+  reading carried whole, so every place it has is findable where it was taken
+  (0301, 0326). The sums are over the ranked rows for the same reason.
+- **`worstPlacesIn` is the question the per-page reading could not be asked**:
+  every place across the deployment, worst first, each carrying the page it is
+  on — *where in this deployment is the one place worth going to*, over nine
+  pages rather than one opened at a time.
+- **`notReporting` is a slice over every row and a different sentence.** A part a
+  reader was demonstrably below that said nothing about itself is a primitive to
+  fix in the library, and it is named on the page whose figures are withheld,
+  which is the page where nothing else would say so. No fault vocabulary gains a
+  member for it.
+- **It does not reach the fix-list.** `DeploymentAgenda.first` is untouched: the
+  key is parts of a page and the fix-list's three orders are readers, so there is
+  nothing to compare (0327). It is published from `windowAgendaOf` as
+  `WindowAgenda.unread`, beside the agenda the way `converting` stands beside
+  `page`.
+
+**Also in this step:** `PageFrontier` carries `audienceId` and `audiences` now,
+from the page reading unchanged and on the terms `ReadingProgress` carries them.
+Without the first, an order over frontiers counts a deployment's second form of a
+page as its first handed in twice (0158, 0300); without the second, a window read
+as neither form is indistinguishable from a page nobody opened.
+
+**Nothing reaches a reader's browser.** `broadcast.ts` and its import graph are
+untouched, and the bundle measures **7,543 bytes minified and 3,350 gzipped**,
+which is what it measures on `main`.
+
+**What is left and is filed:** whether an `AgendaRow` should carry the place a
+page's reading stopped, which would make *rewrite this page* arrive with *and
+here is where* — and is a change to the fix-list's own shape rather than a corner
+of this run.
+
+### 82. The shape of a deployment's day · `Loom signals` · **done, 10 November**
 
 §76 put a clock on the page-view counter
 ([0356](../decisions/0356-page-views-are-counted-under-the-hour-they-began-in-as-a-sixth-counter-written-at-the-door.md))
@@ -5151,7 +5214,7 @@ picker of **last 24 hours, 7 days, 30 days**. The first is 24 bars. The third is
 time, in a route group, by whoever is drawing the chart that week.
 
 **Done**
-([0376](../decisions/0376-a-range-of-hours-is-folded-into-its-days-and-into-the-hours-of-a-readers-day-where-the-mean-is-the-only-comparable-figure.md)),
+([0389](../decisions/0389-a-range-of-hours-is-folded-into-its-days-and-into-the-hours-of-a-readers-day-where-the-mean-is-the-only-comparable-figure.md)),
 as two read-time folds of a series a caller already holds — no store, no clock,
 no new table, nothing added to any payload.
 
@@ -5204,6 +5267,67 @@ no file in this branch, and the bundle measures what it measures on `main`.
 fold by the day of the week, which is the same machinery and which nothing on a
 wireframe asks for yet; and sixteen new names on `@jam-overture/loom/signals`
 with no prose, which is `Loom docs`'.
+### 83. The place a fix-list row says to go to · `Loom signals` · **done, 10 November**
+
+§81 built the fourth order
+([0377](../decisions/0377-a-deployments-unread-places-are-a-fourth-order-ranked-on-what-one-fix-recovers.md)):
+a deployment's pages ranked by the parts behind each one's single costliest
+place, beside the fix-list and deliberately not inside it. This lane filed the
+gap the same evening. **`AgendaRow` carries a page as three readings have it and
+the instruction *rewrite the page*, and it names no part of the page** — while
+the figure that says where was one join away and keyed on the same trio.
+
+**Done**
+([0378](../decisions/0378-a-fix-lists-row-carries-the-place-its-pages-reading-stopped-and-the-fourth-reading-cannot-take-a-row-away.md)),
+as a fifth required argument to `deploymentAgendaOf` read onto the rows, with
+nothing added to any payload, table or browser and **no new name published on
+`@jam-overture/loom/signals`.**
+
+- **The place rides on the row.** `AgendaRow.unread` is the `PageUnread` the
+  fourth order published, carried whole and unchanged — the same object, handed
+  in by `windowAgendaOf` from its own `WindowAgenda.unread`, so a screen drawing
+  the order of places and the fix-list over it holds one answer about one page.
+- **The two locations on one row stay two sentences.** `row.order.at` is *a
+  third of the readers who got this far stopped between these two parts* — a
+  ratio of two reach counts, which needs both ends to have reported.
+  `row.unread.at` is *the reading goes no further than here, and nineteen parts
+  are behind it*, which is the other end of the same page, where there is no
+  ratio to take. `progress.ts` keeps the word *stop*.
+- **The fourth reading cannot take a row away, and that asymmetry is the
+  design.** The three readings above decide whether there is a row; this decides
+  whether that row knows where to go. A page the places reading does not name
+  keeps its row with `null` on it, and pages that reading named which no row
+  carries are counted in `unpaired.unread`. A places reading of the wrong window
+  deleting fix-list rows would be the worst failure available to this join.
+- **Nothing else moved, and it is asserted rather than argued.** The same join
+  is built twice — once with the places, once with a places reading of nothing —
+  and every published field but the place on a row and `unpaired.unread` is
+  held identical. `first`, `work` and all four lists are what they were, which
+  keeps 0377's open question open: whether *go and look at this band* may ever
+  be the one thing to do first is a judgement about a screen.
+- **No figure is summed and the published key set is a test.**
+  `DeploymentUnread` already publishes the deployment's places and parts, so a
+  total here would be a second answer to one question (0327) — and the way such
+  a figure arrives is somebody adding one field, so the keys of
+  `DeploymentAgenda` are asserted as a set.
+- **Counted once, on the fourth side too.** A places reading holding one page
+  twice is deduplicated on `readingKeyOf`, the first row stands, and the second
+  is counted in `duplicated` rather than quietly replacing it (0158).
+
+**Nothing reaches a reader's browser.** `broadcast.ts` and its import graph are
+untouched, and the bundle measures **7,543 bytes minified and 3,350 gzipped**,
+which is what it measures on `main`.
+
+**The docs names index did not move either**, which is why this unit was the one
+chosen today: it measures **39,852 of 40,000 bytes** on this branch, the figure
+it measures on `main`, because `PageUnread` has been published since §81 and a
+field is not a name. The pull request before this one from this lane is held on
+exactly that cap.
+
+**What is left and is filed:** whether `DeploymentAgenda.first` may ever name a
+place rather than a fall, which is 0377's question and the maintainer's; and the
+*By page* drawer's two locations, which is the portal's to draw and now has two
+member comments written to be lifted.
 
 ## Still not in scope
 

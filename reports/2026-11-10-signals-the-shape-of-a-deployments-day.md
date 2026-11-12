@@ -2,7 +2,7 @@
 
 **`Loom signals`, 10 November 2026, morning run.**
 Branch `signals-82-the-shape-of-a-deployments-day`. Record
-[0376](../decisions/0376-a-range-of-hours-is-folded-into-its-days-and-into-the-hours-of-a-readers-day-where-the-mean-is-the-only-comparable-figure.md),
+[0389](../decisions/0389-a-range-of-hours-is-folded-into-its-days-and-into-the-hours-of-a-readers-day-where-the-mean-is-the-only-comparable-figure.md),
 `Accepted`. `pnpm verify` **EXIT=0**, read out of a file in its own command, on
 the committed tree. Pull request
 [#851](https://github.com/jam-overture/loom/pull/851); preview
@@ -121,14 +121,18 @@ wireframe asks for it, and a fold nobody draws is dead code. Named in the plan's
 
 ## Records added
 
-**0376**, `Accepted` — *a range of hours is folded into its days and into the
+**0389**, `Accepted` — *a range of hours is folded into its days and into the
 hours of a reader's day, where the mean is the only comparable figure.* Seven
 clauses, seven rejected alternatives. It contradicts no accepted record and
 touches neither the tree schema nor the delta model, so it is not architectural.
 
-**Numbered 0376, which is free on `main` and on every open branch.** `main`
-carries 0374 as its highest; **0375 is claimed by two open branches at once**
-(#847 and #848) and 0371 by #834, so 0376 is the first number nothing has taken.
+**Written as 0376, and renumbered to 0389 by `Loom merge` on 12 November.**
+When this branch was cut `main` carried 0374 as its highest; **0375 was claimed
+by two open branches at once** (#847 and #848) and 0371 by #834, so 0376 looked
+free from here. #850 claimed it eleven minutes earlier on a branch this one
+could not see, and merged first, so it keeps the number (0097). 0377 to 0380
+have since landed on `main` and 0381 to 0388 are claimed by eight open branches,
+which made 0389 the next free number.
 
 ## Real test numbers
 

@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 700" width="1080" height="700" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif">
+  <style>
+    .title { font-size: 21px; font-weight: 650; fill: #0f172a; }
+    .sub { font-size: 13px; fill: #64748b; }
+    .panel-title { font-size: 12px; font-weight: 650; fill: #475569; letter-spacing: 0.09em; }
+    .row { font-size: 11.5px; fill: #334155; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .rowhead { font-size: 11px; font-weight: 650; fill: #64748b; letter-spacing: 0.04em; }
+    .note { font-size: 12px; fill: #475569; }
+    .emph { font-size: 12px; font-weight: 650; fill: #0f172a; }
+    .good { font-size: 11.5px; font-weight: 650; fill: #15803d; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .warn { font-size: 11.5px; font-weight: 650; fill: #b45309; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .seam { font-size: 11.5px; fill: #7c3aed; font-weight: 650; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+  </style>
+  <rect width="1080" height="700" fill="#ffffff"/>
+
+  <text x="72" y="48" class="title">A page&#8217;s audience rules are a log; its forms are rows</text>
+  <text x="72" y="72" class="sub">0376. The two tables under the seam 0359 clause 6 declared instead of a schema, and the one read that makes the log a record.</text>
+
+  <!-- LEFT: the rules log -->
+  <text x="72" y="124" class="panel-title">loom_audience_rules &#8212; APPENDED, ATTRIBUTED, THE WHOLE ORDERED LIST</text>
+  <rect x="72" y="138" width="440" height="152" rx="6" fill="#faf5ff" stroke="#d8b4fe"/>
+  <text x="88" y="160" class="rowhead">REVISION   RULES (IN ORDER)              ACTOR</text>
+  <line x1="88" y1="168" x2="496" y2="168" stroke="#d8b4fe"/>
+  <text x="88" y="188" class="row">1          [aud_eu]                      person:ana</text>
+  <text x="88" y="210" class="row">2          [aud_eu, aud_uk]              person:ben</text>
+  <text x="88" y="232" class="row">3          [aud_uk, aud_eu]              person:ben</text>
+  <text x="88" y="262" class="note">Revision 3 is the same two rules reordered, and it is an edit:</text>
+  <text x="88" y="280" class="note">the order is the precedence, so a reorder changes who sees what.</text>
+
+  <text x="72" y="322" class="emph">history() is part of the contract, not a convenience.</text>
+  <text x="72" y="342" class="note">The first draft kept every revision and no read reached past the head. A planted mutation that</text>
+  <text x="72" y="360" class="note">overwrote the log instead of appending to it <tspan font-weight="650">changed nothing any caller could see</tspan> &#8212; the revision</text>
+  <text x="72" y="378" class="note">numbers come off the head either way. 15 contract tests became 19, and the mutation died.</text>
+
+  <!-- RIGHT: the forms rows -->
+  <text x="568" y="124" class="panel-title">loom_audience_forms &#8212; ONE ROW PER AUDIENCE, REPLACED IN PLACE</text>
+  <rect x="568" y="138" width="440" height="152" rx="6" fill="#f0fdf4" stroke="#86efac"/>
+  <text x="584" y="160" class="rowhead">AUDIENCE   BASE_REVISION   DELTA        AUTHORED</text>
+  <line x1="584" y1="168" x2="992" y2="168" stroke="#86efac"/>
+  <text x="584" y="188" class="row">aud_eu     4               jsonb        10 Nov 09:00</text>
+  <text x="584" y="210" class="row">aud_uk     3               jsonb        08 Nov 17:20</text>
+  <text x="584" y="240" class="note">base_revision is the one denormalised column, and it is</text>
+  <text x="584" y="258" class="note">why <tspan class="row">forms()</tspan> can say which form is behind the page</text>
+  <text x="584" y="276" class="note">without loading a single delta.</text>
+
+  <text x="568" y="322" class="emph">A form is a document, not an event.</text>
+  <text x="568" y="342" class="note">A base edit stales every audience delta, so rebasing one is the</text>
+  <text x="568" y="360" class="note">ordinary thing that happens to it. A log of every rebase would</text>
+  <text x="568" y="378" class="note">record drafting rather than deciding. No delete, either: an</text>
+  <text x="568" y="396" class="note">audience stops being served by leaving the rules.</text>
+
+  <!-- BOTTOM: the two paths, which is the filed question -->
+  <line x1="72" y1="432" x2="1008" y2="432" stroke="#e2e8f0"/>
+  <text x="72" y="462" class="panel-title">WHAT BUILDING IT PUT SIDE BY SIDE &#8212; FILED AS A QUESTION, NOT ANSWERED HERE</text>
+
+  <rect x="72" y="480" width="440" height="168" rx="6" fill="#f8fafc" stroke="#cbd5e1"/>
+  <text x="88" y="504" class="emph">a change to the base</text>
+  <text x="88" y="528" class="row">proposal  &#8594;  Gate  &#8594;  disposition  &#8594;  log</text>
+  <text x="88" y="552" class="good">judged under a recorded policy</text>
+  <text x="88" y="574" class="note">Leaves a revision, a proposal, a disposition and a</text>
+  <text x="88" y="592" class="note">fingerprint. <tspan class="row">judgedUnder</tspan> says which rules judged it.</text>
+  <text x="88" y="624" class="note">0033, 0200.</text>
+
+  <rect x="568" y="480" width="440" height="168" rx="6" fill="#fffbeb" stroke="#fcd34d"/>
+  <text x="584" y="504" class="emph">a change to one audience&#8217;s form</text>
+  <text x="584" y="528" class="row">setForm  &#8594;  row  &#8594;  composed at the next request</text>
+  <text x="584" y="552" class="warn">nothing judges it</text>
+  <text x="584" y="574" class="note">Leaves the actor and the stamp on the row. Both columns</text>
+  <text x="584" y="592" class="note">are what their own records decided &#8212; a form is</text>
+  <text x="584" y="610" class="note">deliberately not a revision (0359 clause 4) &#8212; and they</text>
+  <text x="584" y="628" class="note">reach a reader the same way.</text>
+
+  <text x="72" y="678" class="seam">audienceOverlaySourceFromStore</text>
+  <text x="298" y="678" class="note">satisfies the seam. A deployment with no rules is served exactly what it is served today.</text>
+</svg>

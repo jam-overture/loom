@@ -1,7 +1,12 @@
 import { render, screen } from "@testing-library/react"
-import { describe, expect, it } from "vitest"
+import { describe, expect, it, vi } from "vitest"
 
 import { TopBarChrome } from "./topbar"
+
+vi.mock("next/navigation", () => ({
+  usePathname: () => "/portal",
+  useRouter: () => ({ push: vi.fn() }),
+}))
 
 /**
  * The wordmark was a `<span>` for two months and a finding for one week.
@@ -64,5 +69,16 @@ describe("TopBarChrome", () => {
 
     expect(screen.getByText("reviewer@example.com")).toBeTruthy()
     expect(screen.getByRole("button", { name: "sign out" })).toBeTruthy()
+  })
+
+  it("carries the search for the portal's features once somebody is signed in, and not before", () => {
+    const { unmount } = render(<TopBarChrome actor={null} />)
+
+    expect(screen.queryByRole("search")).toBeNull()
+    unmount()
+
+    render(<TopBarChrome actor="reviewer@example.com" />)
+
+    expect(screen.getByRole("combobox", { name: "Search the portal" })).toBeTruthy()
   })
 })

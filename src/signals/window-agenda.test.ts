@@ -10,8 +10,11 @@ import { TREE_SCHEMA_VERSION, type LoomTree } from "../tree/tree.js"
 import {
   collectionHealthOf,
   DEFAULT_REGION_FLOOR,
+  deploymentAgendaOf,
   deploymentConversionOf,
   deploymentReadingOf,
+  deploymentUnreadOf,
+  pageFrontierOf,
   readingProgressOf,
   treesIn,
   arrivalStandingOf,
@@ -231,6 +234,59 @@ describe("a deployment's fix-list, read off one window", () => {
     expect(read.agenda.trees).toBe(1)
   })
 
+  /**
+   * The fourth order, made here under the rung's own rule: `pageFrontierOf` is
+   * one call over the assembly's own readings, so a caller asked to hand it in
+   * would be writing the line this rung exists to write.
+   */
+  it("reads the places reading stopped off the same readings the orders were ranked from", () => {
+    const { assembly, read } = agendaOf(FALLING)
+
+    expect(read.unread).toEqual(
+      deploymentUnreadOf(assembly.readings.pages.map(pageFrontierOf))
+    )
+    expect(read.unread.duplicated).toBe(0)
+    expect(read.unread.ranked).toHaveLength(1)
+    expect(read.unread.ranked.map((row) => row.reading)).toEqual(
+      assembly.readings.pages.map(pageFrontierOf)
+    )
+  })
+
+  /**
+   * Its key is parts of a page and the fix-list's three are readers, so the two
+   * can name different pages and the fourth order does not get to re-rank what
+   * an operator is already handed (0327, 0377).
+   */
+  it("ranks the places in parts of a page and leaves the fix-list untouched", () => {
+    const { read } = agendaOf({
+      tallies: [
+        tally({}, "band", 100),
+        tally({}, "cta", 20),
+        tally({ treeId: OTHER_TREE }, "band", 5),
+      ],
+      pageViews: [door({}, 200), door({ treeId: OTHER_TREE }, 10)],
+      funnels: [funnel({}, 100, 10)],
+    })
+
+    expect(read.agenda.first?.treeId).toBe(TREE)
+    expect(read.unread.worst?.treeId).toBe(OTHER_TREE)
+    expect(read.unread.worst?.costs).toBe(2)
+    expect(read.unread.ranked.find((row) => row.treeId === TREE)?.costs).toBe(1)
+
+    expect(read.agenda).toEqual(
+      deploymentAgendaOf(read.order, read.conversion, read.health, read.arrival, read.unread)
+    )
+
+    /*
+     * The fourth order is also the reading the rows carry, and the same object:
+     * a screen drawing the order of places and the fix-list over it holds one
+     * answer about one page (0378).
+     */
+    expect(read.agenda.rows.find((row) => row.treeId === OTHER_TREE)?.unread).toBe(
+      read.unread.worst
+    )
+  })
+
   it("reads the conversion order off the funnel answers handed in", () => {
     const { funnels, read } = agendaOf(FALLING)
 
@@ -303,8 +359,8 @@ describe("a deployment's fix-list, read off one window", () => {
     })
   })
 
-  describe("three readings of one window, which is what the join cannot be handed here", () => {
-    it("pairs every page, so nothing is unpaired on any of the three sides", () => {
+  describe("four readings of one window, which is what the join cannot be handed here", () => {
+    it("pairs every page, so nothing is unpaired on any of the four sides", () => {
       const { read } = agendaOf({
         tallies: [
           tally({ audienceId: SKIERS }, "band", 100),
@@ -322,7 +378,7 @@ describe("a deployment's fix-list, read off one window", () => {
         funnels: [funnel({ audienceId: SKIERS }, 100, 10)],
       })
 
-      expect(read.agenda.unpaired).toEqual({ order: 0, health: 0, conversion: 0 })
+      expect(read.agenda.unpaired).toEqual({ order: 0, health: 0, conversion: 0, unread: 0 })
       expect(read.agenda.rows).toHaveLength(3)
       expect(read.agenda.trees).toBe(2)
     })
@@ -332,7 +388,7 @@ describe("a deployment's fix-list, read off one window", () => {
 
       expect(read.conversion.standings.unasked).toBe(1)
       expect(read.conversion.ranked).toEqual([])
-      expect(read.agenda.unpaired).toEqual({ order: 0, health: 0, conversion: 0 })
+      expect(read.agenda.unpaired).toEqual({ order: 0, health: 0, conversion: 0, unread: 0 })
       expect(read.agenda.converting).toEqual([])
     })
 

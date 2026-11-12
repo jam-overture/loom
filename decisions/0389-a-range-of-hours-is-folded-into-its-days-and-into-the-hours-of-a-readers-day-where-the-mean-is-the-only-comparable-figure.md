@@ -1,8 +1,17 @@
-# 0376. A range of hours is folded into its days and into the hours of a reader's day, where the mean is the only comparable figure
+# 0389. A range of hours is folded into its days and into the hours of a reader's day, where the mean is the only comparable figure
 
 **Status:** Accepted
 **Date:** 2026-11-10
 **Section:** §5 (reader signals), the counters
+
+> **Renumbered on 2026-11-12**, from 0376, by `Loom merge`. `main` had meanwhile
+> accepted a different 0376 — *a page's audience rules are an attributed log and
+> its forms are rows* (#850) — and two records sharing a number is fatal
+> ([0097](0097-a-hole-in-the-numbering-is-reported-and-a-clash-is-fatal.md)).
+> #850 was opened eleven minutes earlier and merged first, so it keeps the
+> number. 0377 to 0380 are on `main` and 0381 to 0388 are claimed by eight open
+> branches, which makes 0389 the next free number. Nothing in this record
+> changed but its number; references on this branch were updated with it.
 
 ## Context
 

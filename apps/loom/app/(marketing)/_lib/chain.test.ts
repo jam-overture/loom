@@ -111,8 +111,7 @@ describe("the chain on the front door", () => {
 
   /**
    * It is the first band under the opening, which is the whole of what changed
-   * on 25 October. The governance bands are all still on this page and all of
-   * them are below it.
+   * on 25 October. Since 11 November the install band follows it directly.
    */
   it("is the first thing a visitor meets after the headline", () => {
     /**
@@ -129,12 +128,8 @@ describe("the chain on the front door", () => {
 
     expect(sections[0]).toBe(BAND.chain)
 
-    /** And the governance bands are all still here, below it. */
-    const governance = [BAND.whatIsIt, BAND.problems]
-
-    for (const band of governance) {
-      expect(sections.indexOf(band)).toBeGreaterThan(sections.indexOf(BAND.chain))
-    }
+    /** And the ask is directly under it, as of 11 November. */
+    expect(sections[1]).toBe(BAND.install)
   })
 })
 

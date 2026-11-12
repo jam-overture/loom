@@ -5,11 +5,13 @@ import { readPageCode } from "./code"
 import { generatedPageWords } from "./generated"
 import { readPageHeadings } from "./headings"
 import {
+  encodeSearchNames,
   namesToEntries,
   type SearchCode,
   type SearchEntry,
   type SearchIndex,
   type SearchNames,
+  type SearchNamesFile,
   type SearchProse,
   type TravellingIndex,
 } from "./model"
@@ -143,14 +145,22 @@ const headingEntries = (): readonly SearchEntry[] =>
  * also the cheapest of the four files to carry a thousand of anything, because
  * what is written down is a name and not an address: `namesToEntries` rebuilds
  * the address in the browser from the same two functions the reference pages
- * use, so the scheme is stated once and the file is 20 KB instead of 138.
+ * use, so the scheme is stated once.
+ *
+ * In alphabetical order rather than the reference's, because that is the order
+ * the file travels in — `searchNamesFile` front-codes each list, which only
+ * pays when a name sits next to the ones it shares a beginning with — and the
+ * entries this file builds have to be the ones a browser rebuilds from it.
  */
 export const searchNames = (): SearchNames => ({
   entryPoints: apiEntries.map((entry) => ({
     specifier: entry.specifier,
-    names: entry.groups.flatMap((group) => group.symbols.map((symbol) => symbol.name)),
+    names: entry.groups.flatMap((group) => group.symbols.map((symbol) => symbol.name)).sort(),
   })),
 })
+
+/** The names as the route serves them: each entry point's list on one line. */
+export const searchNamesFile = (): SearchNamesFile => encodeSearchNames(searchNames())
 
 /**
  * Every published export, by name, and deliberately without its summary.

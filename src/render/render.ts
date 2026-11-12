@@ -262,8 +262,15 @@ type RenderContext = {
   readonly collect: (diagnostic: RenderDiagnostic) => void
 }
 
-const renderChildren = (children: readonly LoomNode[], context: RenderContext): ReactNode =>
-  children.length === 0 ? null : children.map((child) => renderNode(child, context))
+/**
+ * A list of nodes, each walked from its own root.
+ *
+ * The `.map` is one level and spends no frame per level; each `renderSubtree`
+ * carries its own stack. Only a decorative copy starts a list this way now — a
+ * node's own children are rendered by the walk that reached it.
+ */
+const renderNodeList = (children: readonly LoomNode[], context: RenderContext): ReactNode =>
+  children.length === 0 ? null : children.map((child) => renderSubtree(child, context))
 
 const isRootNode = (node: ElementNode, context: RenderContext): boolean =>
   node.id === context.tree.root.id
@@ -286,25 +293,39 @@ type ElementBody = {
   readonly slots: SlotChildren
 }
 
-const renderElementBody = (node: ElementNode, context: RenderContext): ElementBody => {
+/** A child already rendered, and the node it came from, so a slot keeps its name. */
+type RenderedChild = { readonly from: LoomNode; readonly element: ReactNode }
+
+/**
+ * The children this element receives, split the way its primitive takes them.
+ *
+ * It renders nothing. The walk has already rendered every child by the time
+ * this runs (0380), and what is left is the routing — which is why the slot
+ * rules above are a statement about `from.kind` rather than about recursion.
+ */
+const elementBodyFrom = (node: ElementNode, rendered: readonly RenderedChild[]): ElementBody => {
   if (!node.children.some((child) => child.kind === "slot")) {
-    return { children: renderChildren(node.children, context), slots: NO_SLOTS }
+    return {
+      children: rendered.length === 0 ? null : rendered.map((child) => child.element),
+      slots: NO_SLOTS,
+    }
   }
 
   const slots: Record<string, ReactNode> = Object.create(null) as Record<string, ReactNode>
   const rest: ReactNode[] = []
 
-  for (const child of node.children) {
-    if (child.kind !== "slot") {
-      rest.push(renderNode(child, context))
+  for (const child of rendered) {
+    if (child.from.kind !== "slot") {
+      rest.push(child.element)
       continue
     }
 
-    const placed = renderNode(child, context)
-    const existing = slots[child.name]
+    const existing = slots[child.from.name]
 
-    slots[child.name] =
-      existing === undefined ? placed : [...(Array.isArray(existing) ? existing : [existing]), placed]
+    slots[child.from.name] =
+      existing === undefined
+        ? child.element
+        : [...(Array.isArray(existing) ? existing : [existing]), child.element]
   }
 
   return { children: rest.length === 0 ? null : rest, slots: Object.freeze(slots) }
@@ -337,7 +358,7 @@ const decorativeChildrenFor = (
 
   return () => {
     if (!rendered) {
-      copy = renderChildren(node.children, {
+      copy = renderNodeList(node.children, {
         ...context,
         editMode: false,
         addressed: false,
@@ -828,7 +849,23 @@ const reportUnreadReservedProps = (
   }
 }
 
-const renderElement = (node: ElementNode, context: RenderContext): ReactNode => {
+/**
+ * What is left of an element once everything that does not need its children is
+ * decided: the function that builds it around them.
+ */
+type ElementAssembly = (body: ElementBody) => ReactNode
+
+/**
+ * Everything about an element that is settled before its children are walked,
+ * returned as the assembly that finishes it — or `null` where the node is
+ * omitted and its subtree is never walked at all.
+ *
+ * The split is at the seam `renderElementBody` used to sit on (0380). It is
+ * what lets the walk be a loop: the order props are validated in and anchors
+ * are claimed in is document order, which this preserves by running on the way
+ * down, and the element itself is built on the way up.
+ */
+const prepareElement = (node: ElementNode, context: RenderContext): ElementAssembly | null => {
   const primitive: LoomPrimitive | undefined = context.resolver.resolve(node.type)
 
   /**
@@ -898,54 +935,148 @@ const renderElement = (node: ElementNode, context: RenderContext): ReactNode => 
 
   reportUnplacedSlots(node, context)
 
-  const body = renderElementBody(node, context)
+  return (body) => {
+    const rendered = {
+      loom: renderContextFor(
+        node,
+        body.slots,
+        data,
+        submit,
+        frames,
+        anchor,
+        text,
+        behaviours,
+        context
+      ),
+      props,
+      children: body.children,
+    }
 
-  const rendered = {
-    loom: renderContextFor(
-      node,
-      body.slots,
-      data,
-      submit,
-      frames,
-      anchor,
-      text,
-      behaviours,
-      context
-    ),
-    props,
-    children: body.children,
+    return context.literals
+      ? literalThemeElement(primitive, context.literals, node.id, rendered)
+      : createElement(primitive, { key: node.id, ...rendered })
   }
-
-  return context.literals
-    ? literalThemeElement(primitive, context.literals, node.id, rendered)
-    : createElement(primitive, { key: node.id, ...rendered })
 }
 
 /**
- * A slot is a projection point, not a box. It renders its projected content, or
- * its own children as the fallback when the host projected nothing, and adds no
- * element of its own in either case.
+ * A slot is a projection point, not a box: it adds no element of its own
+ * whether it carries what the host projected or its own children as the
+ * fallback. Which of the two it carries is decided in the walk, because only
+ * the fallback has children to render first.
  */
-const renderSlot = (node: SlotNode, context: RenderContext): ReactNode => {
-  /** Own-property only, for the reason given in `staticPrimitiveResolver`. */
-  const projected = Object.hasOwn(context.slots, node.name)
-    ? context.slots[node.name]
-    : renderChildren(node.children, context)
+const slotFragment = (node: SlotNode, projected: ReactNode): ReactNode =>
+  createElement(Fragment, { key: node.id }, projected)
 
-  return createElement(Fragment, { key: node.id }, projected)
+/**
+ * A node still to read, or a parent whose children are now on the finished
+ * stack and which is ready to be built around them.
+ */
+type RenderStep =
+  | { readonly step: "read"; readonly node: LoomNode }
+  | {
+      readonly step: "build"
+      readonly node: ElementNode
+      readonly assemble: ElementAssembly
+      readonly children: number
+    }
+  | { readonly step: "fill"; readonly node: SlotNode; readonly children: number }
+
+const readChildren = (work: RenderStep[], children: readonly LoomNode[]): void => {
+  /** Reversed, so the pop order is the document order the recursion gave. */
+  for (let index = children.length - 1; index >= 0; index -= 1) {
+    const child = children[index]
+    if (child) work.push({ step: "read", node: child })
+  }
 }
 
-const renderNode = (node: LoomNode, context: RenderContext): ReactNode => {
-  switch (node.kind) {
-    case "element":
-      return renderElement(node, context)
-    case "text":
-      return node.value
-    case "slot":
-      return renderSlot(node, context)
-    default:
-      return assertNever(node, "renderNode")
+/**
+ * One subtree, rendered with an **explicit stack** and no call frame per level
+ * (0380).
+ *
+ * Until this was a loop, a page of a thousand elements threw
+ * `RangeError: Maximum call stack size exceeded` — on **every** render, and at
+ * the shallowest depth anything in the framework stopped at. React is not the
+ * reason that bound existed: its own server renderer walks fifty thousand
+ * levels in 135 ms, so what stopped a deep page was this function.
+ *
+ * Nothing about the output moves. Elements are prepared on the way down, in
+ * document order, which is what the anchor ledger and the diagnostic order
+ * depend on; they are built on the way up, around children that are already
+ * `ReactNode`s. A node the renderer omits is pushed as `null` and its subtree
+ * is never read, which is how a subtree under an unknown primitive stays silent
+ * rather than raising a diagnostic per node.
+ */
+const renderSubtree = (root: LoomNode, context: RenderContext): ReactNode => {
+  const work: RenderStep[] = [{ step: "read", node: root }]
+  const finished: RenderedChild[] = []
+
+  /** The last `count` children, taken off the stack in document order. */
+  const take = (count: number): readonly RenderedChild[] =>
+    finished.splice(finished.length - count, count)
+
+  for (let next = work.pop(); next !== undefined; next = work.pop()) {
+    switch (next.step) {
+      case "build":
+        finished.push({
+          from: next.node,
+          element: next.assemble(elementBodyFrom(next.node, take(next.children))),
+        })
+        continue
+      case "fill": {
+        const fallback = take(next.children)
+
+        finished.push({
+          from: next.node,
+          element: slotFragment(
+            next.node,
+            fallback.length === 0 ? null : fallback.map((child) => child.element)
+          ),
+        })
+        continue
+      }
+      case "read":
+        break
+      default:
+        return assertNever(next, "renderSubtree")
+    }
+
+    const node = next.node
+
+    switch (node.kind) {
+      case "text":
+        finished.push({ from: node, element: node.value })
+        break
+      case "slot":
+        /** Own-property only, for the reason given in `staticPrimitiveResolver`. */
+        if (Object.hasOwn(context.slots, node.name)) {
+          finished.push({ from: node, element: slotFragment(node, context.slots[node.name]) })
+          break
+        }
+
+        work.push({ step: "fill", node, children: node.children.length })
+        readChildren(work, node.children)
+        break
+      case "element": {
+        const assemble = prepareElement(node, context)
+
+        if (!assemble) {
+          finished.push({ from: node, element: null })
+          break
+        }
+
+        work.push({ step: "build", node, assemble, children: node.children.length })
+        readChildren(work, node.children)
+        break
+      }
+      default:
+        return assertNever(node, "renderSubtree")
+    }
   }
+
+  const rendered = finished[0]
+
+  /** Unreachable: one node in, one element out, and every branch pushes one. */
+  return rendered ? rendered.element : null
 }
 
 /**
@@ -1043,7 +1174,7 @@ const renderFrom = (
     collect({ code: "theme-values-unmounted", nodeId: tree.root.id })
   }
 
-  const element = renderNode(from, {
+  const element = renderSubtree(from, {
     resolver: options.resolver,
     validator: options.validator,
     editMode: options.editMode ?? false,

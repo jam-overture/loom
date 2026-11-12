@@ -94,10 +94,24 @@ export const COST_CLAIMS: readonly CostClaim[] = [
 ]
 
 /**
- * The band, under the install command and above the band of ways in.
+ * The heading, in the maintainer's words of 11 November.
  *
- * **Under the install command** because the question is *what is this going to
- * cost me*, and a reader asks it the moment they are shown something to run.
+ * It read *The framework is free. You pay for the portal.* He asked for the
+ * band to say what each half gives a reader rather than which half sends a
+ * bill: the eyebrow above it says *Free to get started*, and this says what the
+ * framework and the portal are each for. Nothing past the two authorised claims
+ * is added; the portal is still the part that is not free, said by the eyebrow
+ * rather than by the word *pay*.
+ */
+export const COSTS_HEADING = "Get started with the framework. Get insights with our portal."
+
+/**
+ * The band, below the install command and above the band of ways in.
+ *
+ * **Below the install command** because the question is *what is this going to
+ * cost me*, and a reader asks it once they are shown something to run. Since
+ * 11 November the install band sits under the chain and this band stays near
+ * the foot of the page, so the command is still above it.
  * **Above the ways in** because the portal is one of the four cards there, and
  * a reader who meets that card having already been told what the portal is for
  * presses it for the right reason.
@@ -110,20 +124,15 @@ export const COST_CLAIMS: readonly CostClaim[] = [
  * nowhere to put a third thing.
  */
 export const costs = (ids: IdFactory): LoomNode =>
-  section(
-    ids,
-    { width: "wide", eyebrow: BAND.costs },
-    "The framework is free. You pay for the portal.",
-    [
-      buildElement(ids, {
-        type: "loom.feature-grid",
-        props: { columns: "two", density: "tight" },
-        children: COST_CLAIMS.map(({ what, body }) =>
-          buildElement(ids, {
-            type: "loom.feature",
-            props: { title: what, body, surface: "plain" },
-          })
-        ),
-      }),
-    ]
-  )
+  section(ids, { width: "wide", eyebrow: BAND.costs }, COSTS_HEADING, [
+    buildElement(ids, {
+      type: "loom.feature-grid",
+      props: { columns: "two", density: "tight" },
+      children: COST_CLAIMS.map(({ what, body }) =>
+        buildElement(ids, {
+          type: "loom.feature",
+          props: { title: what, body, surface: "plain" },
+        })
+      ),
+    }),
+  ])

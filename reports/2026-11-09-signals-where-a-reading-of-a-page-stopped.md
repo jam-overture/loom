@@ -323,3 +323,57 @@ mistaken for a step toward identity: *the words nobody reached* is a list of wor
 off a revision of a page, derived from counters that name nodes. It is a fact
 about the page at a floor of a whole window, and it is the same list for every
 reader who stopped in the same place.
+
+## After the merge, 9 November afternoon
+
+`Loom merge` merged `main` into this branch (`c4d7051`) and renumbered the record
+**0372 → 0374**, because #829 landed first with its own record renumbered into
+0372 and 0373. The note is under the record's header and every citation of it was
+updated with it. Nothing it decides changed.
+
+Two things in this report are superseded by that merge, and both are recorded
+here rather than edited above, because what a run measured is what it measured.
+
+**The test numbers are now larger.** `pnpm verify` on the merged head is
+**EXIT=0** with **276 files and 6,740 tests** for the framework and **467 and
+7,476** for the application — **14,216**, against the 14,167 this run measured
+before the merge. The difference is five pull requests that landed in between,
+not this branch.
+
+**The gate went red once on the merged head, and it was not this branch.** Two
+whole-repository scans in `tools/sources/` timed out at 5,000 ms inside
+`pnpm verify`; both pass beside each other, `main`'s own full gate is green, and
+a re-run of the branch's was green. What this branch's two new files cost that
+scan is nothing measurable — three runs with them present and three with them
+moved out of the tree overlap completely, 2,773/2,760/2,983 ms against
+2,654/2,745/2,991 ms. The single-sample 717 ms that first separated the branch
+from `main` was variance, and reading it as the diff's cost would have been the
+wrong conclusion from a plausible number. It is filed for `Loom daily build`,
+with the measurements and two shapes a fix could take.
+
+**One good thing arrived in the merge.** #829 is the iterative tree walk —
+yesterday's finding from this lane that `outlineTree` was quadratic in depth and
+threw above about two thousand. Both readings in this lane begin by calling it,
+so the linearity claim they make is now true of the walk underneath them as well.
+
+### Why this postscript is a second pull request
+
+#837 was squash-merged as `ce6db10` at 15:35, which is **before** the push that
+carried this postscript and the gate finding. The push succeeded — onto a branch
+whose pull request was already closed — so the commit sat on a merged branch and
+reached `main` in nothing. A merged pull request cannot track new work, so the
+two files were cherry-picked onto the current `main` and opened as their own
+change. Nothing in `src/` is in it; the unit itself landed with #837 and record
+**0374** is on `main`.
+
+Worth stating because the sequence is easy to misread: the branch going green,
+the gate finding being filed, and the pull request being merged all happened
+within twenty minutes of each other, in that order, and the merge did not include
+the last of them.
+
+**The numbers in this postscript were measured on the merged branch, where the
+suite was 14,216.** On the base this second change is cut from — four more pull
+requests later — `pnpm verify` is **EXIT=0** with **276 files and 6,740 tests**
+for the framework and **469 and 7,499** for the application, which is **14,239**.
+Neither figure is this lane's work; both are recorded so that a later run reading
+one of them knows which tree it belonged to.
