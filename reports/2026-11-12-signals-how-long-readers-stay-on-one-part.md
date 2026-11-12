@@ -111,6 +111,20 @@ and what is left of the fix-list ordering entry is a judgement about a screen.
 **+1 file and +28 tests**, all of them `src/signals/part-pace.test.ts`. The
 application suite is untouched. Nothing was skipped and nothing failed.
 
+**Run again on the merged head** after `Loom merge` brought `main` in, with
+`main`'s own figure taken the same way — **EXIT=0**, and the delta is the same
+one:
+
+| | files | tests |
+| --- | --- | --- |
+| framework, `main` at `e20d0b41` | 285 | 6,933 |
+| framework, merged head | **286** | **6,961** |
+| application, `main` | 483 | 7,850 |
+| application, merged head | 484 | 7,862 |
+
+The application suite gained a file and twelve tests from the five pull requests
+that merged, not from this one.
+
 **Six mutations, run against the new suite.** Five were caught on the first
 pass; the sixth was not, and a test was written for it:
 
@@ -185,8 +199,8 @@ files (regenerated).
 **Afterwards, five pull requests merged while this one was open** — #859, #851,
 #864, #865 and #870 — and `Loom merge` merged `main` into this branch and
 regenerated both generated files. On the merged head: `pnpm verify` **EXIT=0**
-again, the names cap is relieved rather than tight, **0381 is still the free
-number** (`main` holds 0380, 0382, 0385, 0388 and 0389), and §85 is now on
+again (figures above), the names cap is relieved rather than tight, **0381 is
+still the free number** (`main` holds 0380, 0382, 0385, 0388 and 0389), and §85 is now on
 `main` above this §86 with §84 still on #856, which is an ordering `Loom merge`
 settles. The three byte claims this report, 0381 and the plan made about the old
 cap were corrected on the branch rather than left to merge false.
