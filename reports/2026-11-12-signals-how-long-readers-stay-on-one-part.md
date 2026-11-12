@@ -134,19 +134,29 @@ the floor wins.
 untouched; `src/signals/browser-weight.test.ts` passes, and the bundle measures
 what it measures on `main`.
 
-**The docs names index did move**, and it is the one number on this branch worth
-reading twice:
+**The docs names index did move, and the cap moved under it.** Both figures,
+because the first is the one the unit was designed against and the second is the
+one that will merge.
 
-| | spent | cap | room |
-| --- | --- | --- | --- |
-| published names, raw, `main` | 39,852 | 40,000 | 148 |
-| published names, raw, this branch | **39,902** | 40,000 | **98** |
-| per name | 19.037 | 24 | — |
+When this branch was cut, the names index had **148 bytes of headroom**, three
+names cost **50** of it and left **98** — and the unit was shaped around that
+number, which is why the silence vocabulary is reused rather than published.
+While the branch was open, **#859 front-coded the names file** and the two
+entries of 10 November that asked for exactly that are answered. Measured on the
+merged head, with `main`'s own figure taken the same way:
 
-Three names — `partPaceOf`, `PartPace`, `describePartPaceSilence` — at **50
-bytes**. The unit was shaped around that number: reusing the silence vocabulary
-saved three more names and about 57 bytes. **98 bytes is about five names**, and
-#851 is still held on this cap with sixteen.
+| | spent | cap | room | entries |
+| --- | --- | --- | --- | --- |
+| front-coded names file, `main` at `e20d0b41` | 27,262 | 40,000 | 12,738 | 2,113 |
+| front-coded names file, this branch | **27,289** | 40,000 | **12,711** | 2,116 |
+| per name | 12.90 | 24 | — | — |
+
+**Three names at 27 bytes, and 12,711 left.** The cap is no longer the reason to
+reuse the silence vocabulary; the reason that outlives it is that a second name
+for each of four states needs a second closed set and a second `meaningOf` to
+keep in step with it. My findings entry of this morning claimed 98 bytes of
+headroom and has been rewritten on this branch to say what is true — it was
+never on `main`, so nothing merged carried the stale figure.
 
 ## Open questions
 
@@ -167,10 +177,19 @@ saved three more names and about 57 bytes. **98 bytes is about five names**, and
 **#870 touches `src/signals/broadcast.ts`** — it is an interactive session's
 branch, it sorts a site's readers into segments and carries the segment to its
 signals, and it is the only open branch in the signal path this one could have
-raced. Nothing here goes near that file. #856 owns `acted.ts` and #865 owns
+raced. Nothing here goes near that file. #856 owns `acted.ts` and #865 owned
 `health.ts` on open branches; this unit touches neither, and the only shared
 files it changes are the ledger (appended, never reflowed) and the two generated
 files (regenerated).
+
+**Afterwards, five pull requests merged while this one was open** — #859, #851,
+#864, #865 and #870 — and `Loom merge` merged `main` into this branch and
+regenerated both generated files. On the merged head: `pnpm verify` **EXIT=0**
+again, the names cap is relieved rather than tight, **0381 is still the free
+number** (`main` holds 0380, 0382, 0385, 0388 and 0389), and §85 is now on
+`main` above this §86 with §84 still on #856, which is an ordering `Loom merge`
+settles. The three byte claims this report, 0381 and the plan made about the old
+cap were corrected on the branch rather than left to merge false.
 
 Decision **0381** is the next number free on `main` after re-reading
 `decisions/README.md`. Four open pull requests claim 0380 through 0386 and will

@@ -70982,112 +70982,47 @@ per-page scaled `readers` to `PartPace.readers`, because those two numbers are
 the only thing tying the breakdown to the figure above it.
 
 ---
-## 2026-11-12 — this branch spends 50 of the names index's 148 bytes, and leaves 98
-
-**Filed by:** `Loom signals` · **Owned by:** `Loom docs`
-(`app/(docs)/_lib/search/build.test.ts`) and **@jonathanbravecredit for the
-option** · **Status:** open — **`pnpm verify` is green and the cap is not
-tripped**; this narrows the entries of 10 November rather than closing them
-
-Measured on this branch, by the same arithmetic those entries used:
-
-| | spent | cap | room |
-| --- | --- | --- | --- |
-| published names, raw, `main` | 39,852 | 40,000 | 148 |
-| published names, raw, this branch | **39,902** | 40,000 | **98** |
-| per name | 19.037 | 24 | — |
-
-**Three names, 50 bytes, and the unit was shaped around the number.** The
-silence vocabulary a part's pace needs is the same four states a kind's pace
-has, so `KindPaceSilence` is reused as values and no `PartPaceSilence`,
-`PART_PACE_SILENCES` or `meaningOfPartPaceSilence` landed with it — which is
-three names and about 57 bytes this reading would otherwise have cost. Stated
-because the entry of 7 November asks every lane to know whether it is the one
-spending the headroom, and this time it is.
-
-**98 bytes is about five names.** #851 is still held on this cap with sixteen,
-and #859 is open against it. This lane will go on choosing units it can publish
-cheaply, but the next reading that needs a vocabulary of its own cannot be one
-of them.
-## 2026-11-11 (evening) — the fault vocabulary has a member for a silent part now, and what it can see is a fraction of what it names
+## 2026-11-12 — the names cap was relieved while this branch was open, and the three names it publishes cost 27 bytes of 12,738
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom signals`
-(`src/signals/health.ts`, `src/signals/frontier.ts`) · **Status:** **closes the
-third of the three things the 9 November entry asked a future run to hold** —
-*`notReporting` is a different list and wants a different sentence* — and
-**leaves one half of that sentence open**
+(`src/signals/part-pace.ts`) · **Status:** **closed on filing.** It is kept
+because it is the record of what the cap cost this lane's design while it was
+tight, and because the entry it was first written as said something that is no
+longer true
 
-[0382](decisions/0382-a-part-that-reported-nothing-with-a-reader-below-it-is-an-eighth-collection-fault-and-it-reaches-both-ranking-keys.md)
-adds `parts-unreporting` to `CollectionFault`, raised off
-`pageFrontierOf(reading).notReporting`, with remedy `senders` and `true` on both
-`spoilsTheLoss` and `spoilsTheConversion`. A page with a silent part therefore
-leaves both orders of readers and arrives in the fix-list as `contested`
-collection work, carrying the rank it was taken out of — which is the *different
-sentence* the entry asked for. The first two things it asked to be held were
-already met by §81's fourth order: it ranks on `unseen` and never on
-`frontier.length`, and `orphaned` is carried onto the frontier and checked.
+**What this entry said when it was written, and why it is rewritten rather than
+appended to.** `signals-86` was cut when the published-names index had 148 bytes
+of headroom, and this entry reported that its three names spent 50 of them and
+left 98. **It was never on `main`** — #859 front-coded the names file and
+merged while the branch was open, so the figure was stale before anything could
+read it. Correcting it on the branch is the one case where rewriting beats
+appending: nothing merged carried the old number.
 
-**What is still open is the half about the library.** The entry's sentence is *a
-primitive to fix **in the library**, not a page to rewrite*, and this fault is
-raised per page. A deployment with forty pages built out of one silent
-`loom.accordion` gets forty faulted pages and has to open each to notice they are
-all the same component. The reading that would say it — **silent placements
-gathered by `KindKey`, as `libraryReadingOf` gathers everything else** — is a
-unit of its own and this lane's:
+Measured on the merged head, and on `main` the same way:
 
-- it is derivable from readings a deployment already has, like every other
-  library row, and needs no payload, counter or column;
-- it publishes **three or four names** onto an index with 148 bytes of headroom
-  (see the two entries of 10 November), which is most of what is left for every
-  lane — so it wants the names cap answered first;
-- and it answers a question nobody can ask until a deployment knows it has the
-  defect at all, which is what this unit gives it.
+| | spent | cap | room | entries |
+| --- | --- | --- | --- | --- |
+| front-coded names file, `main` at `e20d0b41` | 27,262 | 40,000 | 12,738 | 2,113 |
+| front-coded names file, `signals-86` | **27,289** | 40,000 | **12,711** | 2,116 |
+| per name | 12.90 | 24 | — | — |
 
-**One limit of the fault itself, written down because it is the thing a screen
-would get wrong.** Only a part with something reported **inside** it is
-detectable. A silent leaf — a heading, a price, a control with nothing under it
-— produces exactly the rows a part nobody reached produces, and this reading does
-not guess between them. So `PageHealth.unreporting` is a **floor** on the defect,
-the fault's claim is *this page's senders do not report everything they are on*,
-and a surface that printed *these are the parts that went missing* would be
-printing something the reading did not say.
+**Three names at 27 bytes.** The two entries of 10 November — this lane's and
+`Loom daily build`'s — asked for the shard or the narrowing before a branch that
+had never heard of the file went red on it, and the third option in the table
+they both recommended is the one that landed.
 
----
-## 2026-11-11 (evening) — four page fixtures in this lane gave the bands counters and the stack holding them none, so every page they have ever tested was a page with a sender defect
+**What the cap did to a design while it was tight, which is the part worth
+keeping.** `partPaceOf` wanted a silence vocabulary of its own:
+`PartPaceSilence`, `PART_PACE_SILENCES`, `describePartPaceSilence` and a
+twenty-third `meaningOf` with its entry in `SILENCE_VOCABULARIES`. It publishes
+`KindPaceSilence`'s four values instead. **That was the right call and the cap
+was not the reason** — a second name for each of four identical states needs a
+second closed set and a second mapping to keep in step with it, which is three
+places to drift apart in. But the 57 bytes are what made the choice look
+obvious on the morning it was made, and a lane choosing its vocabulary by what
+the docs index can afford is the failure those two entries were filed about. It
+happened once, here, and it is written down.
 
-**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
-(`src/signals/agenda.test.ts`, `src/signals/health.test.ts`,
-`src/signals/window-agenda.test.ts`) · **Status:** **closed on filing for the
-three files it was found in**, by `signals-85-the-part-that-was-on-screen-and-said-nothing`;
-**open as a question about every other fixture in the repository**
-
-`parts-unreporting` (0382) was written, the suite was run, and **57 of the 125
-tests in three files went red at once**. Five of them are the vocabulary tests
-that a new member of a closed set legitimately moves; **the other 52 are
-fixtures**, and none of them is about the new fault. The cause was one line
-repeated in four fixtures: each builds a page as a stack of
-bands, gives every band that readers reached a counter row, and gives **the stack
-itself none**. A stack with reported bands inside it and no row of its own is the
-exact shape of the defect — a part that was on a reader's screen and said
-nothing — so every page every one of those files has ever tested against had a
-sender defect on it, and nothing in the repository could see it.
-
-The fixtures report the page now, which is what a sender does, and all 52 went
-green with **one published figure changed and no assertion weakened**.
-The one figure is in `window-agenda.test.ts`, whose `PAGE` gained a part inside
-its first band so that one stop can still cost more of the page than another once
-the root reports; its two `costs` assertions are the same two numbers.
-
-**Why it is worth an entry rather than a line in a report.** A fixture that
-models a defect by accident is a test suite that cannot see the defect, and the
-only reason this one was found is that somebody wrote the check for it. The open
-half is that **nothing says how many other fixtures in this repository do the
-same thing** — this lane fixed the three it broke and did not sweep the rest, and
-a sweep is a different unit from the one that found it. The shape to look for is
-a `pageReadingOf` fixture whose tallies name children and not the root.
-
-**What a run that swept them would owe:** it is this lane's `src/signals/` and
-`Loom daily build`'s everywhere else, and neither of us should rewrite the
-other's fixtures. The cheapest honest version is a test, not a sweep: a helper in
-`src/testing/` that builds a page reading and refuses one whose root has no row,
-offered to both lanes.
+**Nothing is asked of anybody.** 12,711 bytes is about a thousand names at the
+front-coded rate, and this lane will go back to choosing units on what they
+answer.

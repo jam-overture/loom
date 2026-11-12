@@ -5440,10 +5440,12 @@ any wire and nothing in a reader's browser.**
   this; only the sentence is part-shaped, in `describePartPaceSilence`.
 
 **Three names reach `@jam-overture/loom/signals`** — `partPaceOf`, `PartPace`
-and `describePartPaceSilence` — which is **50 bytes of the docs names index's
-148 of headroom, measured, leaving 98.** The silence vocabulary was reused
-precisely so the number stayed that small; see the open finding of 10 November,
-which this branch narrows rather than closes.
+and `describePartPaceSilence`. They were costed against a names index with 148
+bytes of headroom and the unit was shaped around that; **#859 front-coded the
+file while this branch was open**, so the measured cost is **27 bytes of 12,738,
+leaving 12,711**. The silence vocabulary is still reused, now for the reason
+that outlives the cap: a second name for each of four states would need a second
+closed set and a second `meaningOf` to keep in step with it.
 
 **Nothing reaches a reader's browser.** `broadcast.ts` and its import graph are
 untouched, and the bundle measures what it measures on `main`.

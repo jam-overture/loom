@@ -96,10 +96,12 @@ twenty-third reading taken out of the server-side join of
 - `readers` is a weight and not a headcount: a reader who met the part on two
   pages is two of them, as 0256 already says of a kind's.
 - **Three names reach `@jam-overture/loom/signals`** — `partPaceOf`,
-  `PartPace`, `describePartPaceSilence` — which is 50 bytes of the docs names
-  index's 148 of headroom, leaving 98. The silence vocabulary is reused
-  precisely so that a twenty-third `meaningOf` and its closed set do not land
-  with it.
+  `PartPace`, `describePartPaceSilence` — which is **27 bytes of the docs names
+  index's 12,738 of headroom, leaving 12,711**. They were costed against the 148
+  bytes that index had when this was written; #859 front-coded the file before
+  it merged. The silence vocabulary is reused for the reason that outlives the
+  cap rather than the one that motivated it: a twenty-third `meaningOf` and its
+  closed set are two more places for two names of one state to drift apart.
 - A per-page breakdown is **not** published. One part on nine pages has nine
   verdicts and `standings` counts them, but which page the part is skimmed on is
   a second question with a second shape, and nothing has asked it.
@@ -117,7 +119,8 @@ twenty-third reading taken out of the server-side join of
 - **A twenty-third silence vocabulary.** Rejected: four states already named,
   and a second name for each would need a second `meaningOf`, a second closed
   set and a second entry in `SILENCE_VOCABULARIES` — three places for the two
-  to drift apart in, for no state a screen could not already phrase.
+  to drift apart in, for no state a screen could not already phrase. The bytes
+  it also saved were a reason of the week it was written and are no longer one.
 - **An hourly dwell counter per part, so the figure takes a range.** Not taken
   here. It is about 6,000 rows an hour for a 6,000-node page, per revision, in a
   table nothing sweeps — the cost this lane's entry of 6 November priced and
