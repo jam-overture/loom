@@ -71811,3 +71811,125 @@ anybody's margin.
 number it guards is grown by every other lane, and **no decision record covers
 it** — which was true when the margin was 148 bytes and is still true now that
 it is 12,795. Nothing is blocked by that and it is not this lane's to write.
+
+---
+## 2026-11-12 (evening) — which page a part is skimmed on is published, and the term it is ranked by is the one that must never be added
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/part-pace.ts`) · **Status:** **closes this lane's own entry of
+earlier today** — *one part on nine pages has nine verdicts, and which page it
+is skimmed on is a second reading* — by
+`signals-87-which-page-a-part-is-skimmed-on`
+([0390](decisions/0390-a-parts-pages-are-a-second-order-ranked-on-the-reading-time-its-readers-did-not-have.md)).
+**One half of it is left open below, for a surface rather than for this lane.**
+
+That entry named the ordering as the whole decision and one test to write first.
+Both are taken the way it recommended.
+
+1. **Ordered by the reading time its readers did not have**, not by the pace.
+   `PartPace.ranked` is the counted pages by `shortMs`, most first, then the
+   lower pace, then by tree and newest revision first; `worst` is the head and
+   `unranked` is every placement with no figures, by page, each carrying its
+   silence. The figure that settles it is in the test: a band four hundred
+   readers had a second of, where its words take five, is short of 1,600 seconds
+   at a pace of **0.2**, and the same band on a page one reader hurried past is
+   short of 4.9 at a pace of **0.02**. Ranking on the rate publishes the second
+   page as the one to go to.
+2. **The sums tie, term by term.** `readers`, `dwellMs` and `needMs` over
+   `ranked` are `PartPace`'s three exactly, asserted on integer fixtures so the
+   equality is exact however the rows are ordered, and asserted again with one
+   reading handed in twice.
+
+**What the entry did not anticipate, and it is the half worth keeping: the
+ranking key does not add.** A row's `shortMs` is its own page's, and the pooled
+`PartPace.shortMs` lets a page readers lingered on pay for a page they skimmed —
+so the rows sum to **at least** the figure above them, and are equal to it only
+where no page had time to spare. The fixture that says so plainly: one page
+readers lingered on for a million milliseconds beside one they skimmed in ten
+thousand publishes `shortMs: 0` over rows summing to 40,000. Both numbers are
+true. It is the same shape #856 is open on and is worth naming once rather than
+re-deriving a third time: **a figure taken over pooled sums and the same figure
+taken per page are two readings, and a maximum of sums is not a sum of
+maxima.** It is documented on the field, ranked on, and tested as not adding.
+
+**And one that was a surprise in the building.** A part whose words are a floor
+and whose readers stayed longer than the counted words take has **no publishable
+pooled figure at all** — `readers`, `needMs`, `spentMs`, `shortMs` and `pace` are
+all withheld — while every one of its rows has figures. The breakdown is then
+the only thing on the reading that says which page to go and fix the declaration
+on, so the rows are kept rather than withheld with the sums. The invariant above
+is therefore *the rows add to those three wherever those three are published*,
+which is written on `ranked` and has a test of its own.
+
+### The half left open, and it is a sentence rather than a shape
+
+**Owned by `Loom portal`** (the *Goals* screen), **status: open, nothing is
+broken.** The screen landed this morning (#882) saying *how long readers stay on
+this part* with a silence in its own words. It can now also say **which page**,
+and it draws neither the breakdown nor the count of verdicts.
+
+What it can read, with nothing left to derive:
+
+| | the sentence |
+| --- | --- |
+| `standings` | *paced across your pages, skimmed on two of them* |
+| `ranked` | *and the two are /pricing and /tour* |
+| `worst` | *start with /pricing: its readers were short of twenty-six minutes between them* |
+
+**Two things a screen must not do with these rows**, both of them written on the
+fields and both of them the kind of thing a surface does by default: do not add
+`shortMs` across the rows and print the total beside `PartPace.shortMs`, and do
+not compare a row's `pace` to a threshold — read `standing`, which is the page's
+own reading's verdict and is what `standings` counted.
+
+---
+## 2026-11-12 (evening) — the broadcaster has 148 bytes of its 8,000 left, and the plan's figure was 309 bytes stale within nine minutes of being written
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/broadcast.ts`, `docs/signals.md`) · **Status:** open — **nothing
+is red**, the ceiling holds, and the figure is corrected on this branch. It is
+filed because the headroom is now small enough that the next change to the
+broadcaster has to be designed around it, and because the way the figure went
+false is the third instance today of one fault.
+
+**Measured by the gate's own method** — `esbuild` minified, `gzipSync` at level
+9, the spelling `browser-weight.test.ts` holds the ceiling with:
+
+| | measured | ceiling | left |
+| --- | --- | --- | --- |
+| minified | **7,852** | 8,000 | **148** |
+| gzipped | **3,458** | 3,600 | **142** |
+
+`docs/signals.md`' *Browser cost* row said **7,543 and 3,350, measured 9
+November**, which is what §82, §83 and §85 each quoted truthfully on their own
+day. It went false at **08:59 on 12 November**, when #870 — an interactive
+session's branch — taught the broadcaster to carry a reader's segment
+(`0385`) and spent **309 bytes minified and 108 gzipped**. §86 merged at 09:08
+repeating the old figure, which is nine minutes, and the same race as #879's
+names-index correction and #877's: a branch measures `main`, something lands in
+the signal path, and the branch's own figure is false before it merges.
+
+**Two things worth holding, and neither is a reproach to #870.**
+
+1. **0385 records no byte figure at all**, and this lane's standing rule is that
+   anything running in a reader's browser is measured in bytes before it is
+   proposed. The spend was legitimate and the gate was green; what is missing is
+   the number, in the record and in the plan's row, which is the only place a
+   later run would look. An interactive session is not bound by this lane's
+   standards, which is exactly why the row is this lane's to keep true — and it
+   was not.
+2. **148 bytes is about one paragraph of `broadcast.ts`.** §78 spent 1,030 on
+   purpose and argued for them (0366); 0385 spent 309. The ceiling was raised
+   once, from nothing to 8,000, when the size half of rule 4 became a test on 7
+   November, and raising it again is a decision and not a fix — the number is
+   *what every page that asks for signals downloads*. **A run that finds itself
+   wanting more than 148 bytes should price the raise and say so, not raise it in
+   the diff that needs it.**
+
+**What would stop the staleness rather than fix this instance:** the figure lives
+in two places, the gate's ceiling and this plan's row, and only one of them can
+fail. A check that reads the measured bundle and asserts the plan's row quotes
+it would make the row a tested figure rather than a remembered one — the same
+move that turned rule 4's size half from a sentence into a test. It is a
+`tools/` check and `tools/` is in no lane's row, which the 9 November entry
+already says; this lane is not taking it unasked.
