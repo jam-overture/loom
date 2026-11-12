@@ -119,6 +119,15 @@ describe("the order over a deployment", () => {
    * printing. The page the count puts first is the page whose places are worth
    * least one at a time — so an order on the count is not merely different, it
    * is wrong in the one direction an operator would act on.
+   *
+   * **If this case goes red, the remedy is another pair of examples and never
+   * the arithmetic.** The second tree is the starter library's pricing band, so
+   * how many leaves it has and how deeply they sit is `Loom primitives`' to
+   * change — and a band restructured into a few deep groups would stop
+   * out-counting the first page, which would leave the block printing two
+   * orders that agree and a page arguing they do not. That is a demonstration
+   * that has stopped demonstrating, which is exactly the failure this site
+   * wants red rather than quiet.
    */
   it("would send an afternoon to the page where it buys least", () => {
     const ordered = produceOrdered()

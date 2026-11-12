@@ -15,7 +15,8 @@ import { docsExamples } from "@/app/(docs)/_lib/examples/catalogue"
 import { docsRegistry } from "@/app/(docs)/_lib/loom/registry"
 
 /**
- * What *Where a reading stopped* prints, worked out rather than typed.
+ * What *A count of parts is not a count of things to fix* prints, worked out
+ * rather than typed.
  *
  * **The plain version.** The page above this block has already said what a
  * reader's browser sends: a node and a kind, and nothing else. This block is
@@ -28,11 +29,11 @@ import { docsRegistry } from "@/app/(docs)/_lib/loom/registry"
  * - `pageFrontierOf` reads one page as **the places its reading stopped** — a
  *   part nobody reached whose container was reached — with everything beneath
  *   each one counted as what that single fix recovers
- *   ([0374](../../decisions/0374-a-pages-unread-parts-are-reported-as-the-places-its-reading-stopped-and-each-is-behind-exactly-one.md)).
+ *   ([0374](../../../../../../decisions/0374-a-pages-unread-parts-are-reported-as-the-places-its-reading-stopped-and-each-is-behind-exactly-one.md)).
  * - `deploymentUnreadOf` puts those readings in an order over a deployment's
  *   pages, ranked on what one fix recovers rather than on how many parts went
  *   unread
- *   ([0377](../../decisions/0377-a-deployments-unread-places-are-ordered-by-what-one-fix-recovers-and-never-by-the-count-of-parts.md)).
+ *   ([0377](../../../../../../decisions/0377-a-deployments-unread-places-are-a-fourth-order-ranked-on-what-one-fix-recovers.md)).
  *
  * ## The window is constructed, and the page says so
  *
@@ -66,7 +67,7 @@ const PLACES_SHOWN = 4
  * A part is an **element**: a slot is a node with children and is never a part,
  * and neither is a run of text, which is why this walk collects one kind of
  * node and counts the rest only as a way through
- * ([0368](../../decisions/0368-what-readers-did-inside-a-part-is-derived-from-the-tree-and-the-sum-is-exact-because-occurrences-add.md)
+ * ([0368](../../../../../../decisions/0368-what-readers-did-inside-a-part-is-derived-from-the-tree-and-the-sum-is-exact-because-occurrences-add.md)
  * clause 4).
  */
 type Part = {
