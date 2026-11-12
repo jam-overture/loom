@@ -476,6 +476,6 @@ Everything above this line is prose a person wrote, and stays that way.
 | 0384 | *No record on this branch* | — | — |
 | [0385](0385-a-reader-two-segments-match-is-counted-in-the-last-ones-and-the-page-carries-it-to-its-signals.md) | A reader two segments match is counted in the last one's, and the page carries it to its signals | Accepted | §2 (signals) |
 | 0386 | *No record on this branch* | — | — |
-| 0387 | *No record on this branch* | — | — |
+| [0387](0387-a-landmark-is-not-a-count-and-a-copy-is-a-sequence-of-them-at-the-distances-the-text-puts-them-at.md) | A landmark is not a count, and a copy is a sequence of them at the distances the text puts them at | Accepted | §1 (process) |
 | [0388](0388-a-routine-reads-back-what-it-posted-because-no-safe-link-length-can-be-computed-in-advance.md) | A routine reads back what it posted, because no safe link length can be computed in advance | Accepted | §1, how a run reports |
 | [0389](0389-a-range-of-hours-is-folded-into-its-days-and-into-the-hours-of-a-readers-day-where-the-mean-is-the-only-comparable-figure.md) | A range of hours is folded into its days and into the hours of a reader's day, where the mean is the only comparable figure | Accepted | §5 (reader signals), the counters |

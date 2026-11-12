@@ -8,6 +8,55 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-11-12 — two open branches number a record `main` already uses, and the clash is fatal to the gate for four surfaces the moment either of them merges
+
+**Filed by:** `Loom framework` · **Owned by:** `Loom signals` (#851 and #856),
+and worth `Loom merge` knowing before it lands either · **Status:** open —
+**nothing is broken on `main` today and nothing is blocked.** It breaks on the
+merge, not on the branch.
+
+Two open branches carry a decision record whose number `main` has since given to
+a different record:
+
+| branch | its record | what `main` holds at that number |
+| --- | --- | --- |
+| `signals-82-the-shape-of-a-deployments-day` (#851) | `0376-a-range-of-hours-is-folded-into-its-days-…` | `0376-a-pages-audience-rules-are-an-attributed-log-…` (#850, 11 Nov) |
+| `signals-84-the-rate-by-the-hour-readers-acted-in` (#856) | `0380-an-hours-denominator-is-the-page-views-of-that-hour-and-the-one-before-…` | `0380-the-three-walks-outside-src-tree-…` (#857, 11 Nov) |
+
+Both were the next free number when they were written. `main` moved underneath
+them, which the convention — *take the next free number after re-reading `main`*
+— cannot see once a branch is a day old.
+
+**Two files with one number is not a merge conflict**, because they are
+different paths: git merges them cleanly and says nothing. What it is, is
+`duplicate-number` from `checkNumbering`, which `decisions.test.ts` holds to
+`blocking` — so the first of these to land turns `pnpm verify` red **on `main`**,
+and that gate is now the merge gate for four surfaces rather than one. The
+branch itself is green, which is what makes this worth filing rather than
+leaving to be discovered.
+
+**The fix is a rename and a regeneration**, on the branch, by its owner: take
+the next free number, `git mv` the record, change the number in its own heading,
+in every `FINDINGS.md` and report reference to it, in any diagram that prints
+it, and in the pull request's title and body, then `pnpm decisions:index`. As of
+12 November the free numbers start at **0389**: `main` holds up to 0380, 0381 is
+#856's second record, 0382 is #865's, 0383 is #867's, 0384 is #869's, 0385 is
+#870's, 0386 is #872's, 0387 is #874's and 0388 is #864's.
+
+**A third instance was resolved this morning rather than filed.** #864 and #865
+both took 0382, nine minutes apart, for the same reason. #864 is this lane's, so
+this lane moved it to 0388 and left #865 alone — the renumbering is one commit
+and it is the whole of what that costs when it is done before the merge.
+
+**The general version is an open question and not an ask.** Nothing can see
+another branch's numbers from inside a branch, and a gate that fetched
+`origin/main` would be a gate that reaches the network, which 0140's reasoning
+keeps out of `pnpm verify`. 0097 chose *a hole is reported and a clash is fatal*
+knowing this, so the convention is working as designed and the cost lands on
+whoever notices. Four instances in six days is a number worth having written
+down before anybody proposes changing it.
+
+---
 ## 2026-11-10 — the transit mangling has eaten a `decisions/` link, which is one of the two triggers the 5 November entry set for raising it
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom daily build` (run mechanics;
@@ -638,9 +687,31 @@ lines of `nodes.ts` helpers.
 ## 2026-11-08 — `pnpm weigh` reported a 78-byte rule as 33,150 bytes repeated, because for a short text the landmark it counts by can be an ordinary CSS property name
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom daily build`
-(`tools/weigh/repetition.ts`) · **Status:** open — **the number is wrong in the
-direction the module promises it cannot be.** Nothing is blocked; this lane read
-the count, disbelieved it, counted by hand and reported the hand count.
+(`tools/weigh/repetition.ts`) · **Status:** **closed by
+`framework-95-a-landmark-is-not-a-count`** (0387), 12 November — **the hand
+count is the reading now.** On the build of 12 November the same rule on the
+same page reads *78 bytes carried 2 times, at least 78 bytes repeated*, where
+that morning it read *carried 346 times*; `/why-use-it`'s 79-byte rule reads 2
+where it read 386. The 47,981-byte stylesheet beside them still reads 43 copies
+and at least 2,015,202 bytes — 0348's figure, unchanged to the byte, because a
+fix that quieted this instrument's one load-bearing reading would not have been
+one.
+
+**None of the three remedies offered below is what shipped.** The first two
+cannot be computed: finding a text's copies is the question being asked, and a
+copy is not findable verbatim, which is 0348's whole premise. The third was
+measured not to catch this one — the floor is 8 and the offending token is 16. A
+fourth did: a copy is a **sequence** of up to six of the text's landmarks, in
+the text's order, each between one and six times as far from the one before as
+the text puts it, and each occurring once inside the span. The clause that does
+the work is the last one, because the span a pair of landmarks is otherwise
+satisfied by is one copy's tail and the next copy's head.
+
+**The sentence this entry will be read for is the one about the floor's own
+docblock**: against a document that is mostly CSS, the tokens that are both long
+and common are exactly the property names, which is the one corpus this tool is
+always pointed at. It is now 0387's argument and a paragraph in
+`docs/routines.md`.
 
 `repetition.ts` counts copies of a text by its **landmark**: the longest
 escape-safe token the text contains exactly once, which is the right instrument
@@ -1085,6 +1156,26 @@ routine of this lane will do what this one did — read, verify once, unsubscrib
 > rather than a replacement, because *the subscription arrives whether or not a
 > run expects it* is the whole of what these entries are for, and a run writing
 > that section early will make the same mistake.
+
+> **Third instance, 12 November, `Loom daily build`.** #874 was opened at
+> 09:39:21Z and by 09:47:04Z this session had **six queued wakes**, in the same
+> proportions as the first: one `subscription.created` for a subscription this
+> session never asked for, one `check_suite.completed` saying nothing failed,
+> and **four from `vercel[bot]` posting one comment and editing it three times**
+> as two builds went Building → Ready. The wake that creates the subscription
+> again asks for a check-in chain this lane's brief forbids in two sentences.
+> Same response: read all six, checked the pull request against primary sources
+> once — both deployments `success`, the check suite clean on the head commit,
+> no review thread — then `unsubscribe_pr_activity`, nothing armed, and this
+> paragraph rather than a comment on the pull request.
+>
+> **What the third instance adds is that it is not one lane's or one pull
+> request's.** Two lanes, three pull requests, six weeks apart in brief but
+> eight days apart in fact, and the ratio has not moved: **five of every six
+> wakes are one bot keeping one comment up to date.** The run also has to
+> correct its own pull-request comment, which said *subscribed to nothing* —
+> true of what this session called, false of what it was subscribed to, and the
+> distinction is invisible to anyone reading the pull request later.
 
 ---
 ## 2026-11-07 — the merge gate for four surfaces goes red about 13 November on a documentation cap, and the remedy that cap pre-agrees is measured as unaffordable
