@@ -28,6 +28,19 @@ import {
  * belong to a catalogue another unit of work edits.
  */
 
+const SECTION_ANCHOR = "a-count-of-parts-is-not-a-count-of-things-to-fix"
+
+/** The words of the section this file is about, as the search box reads them. */
+const sectionProse = (): string => {
+  const body = readPageProse("the-runtime", "what-your-readers-do").get(SECTION_ANCHOR)
+
+  if (body === undefined) {
+    throw new Error(`loom: what-your-readers-do has no section at #${SECTION_ANCHOR}`)
+  }
+
+  return body
+}
+
 describe("where a reading stopped", () => {
   /**
    * The reason the section exists. The page's own example tree, read over a
@@ -199,18 +212,6 @@ describe("the order over a deployment", () => {
 })
 
 describe("the section on the page", () => {
-  const ANCHOR = "a-count-of-parts-is-not-a-count-of-things-to-fix"
-
-  const sectionProse = (): string => {
-    const body = readPageProse("the-runtime", "what-your-readers-do").get(ANCHOR)
-
-    if (body === undefined) {
-      throw new Error(`loom: what-your-readers-do has no section at #${ANCHOR}`)
-    }
-
-    return body
-  }
-
   /**
    * **The rule this page runs on, as a test rather than as a habit.** A figure
    * in a paragraph is true on the day somebody types it; the example trees
@@ -222,6 +223,27 @@ describe("the section on the page", () => {
    */
   it("states no figure, because every figure in it is produced", () => {
     expect(sectionProse()).not.toMatch(/\d/)
+  })
+
+  /**
+   * **The one figure the prose does state, in words rather than in digits.**
+   * *One band nobody scrolled to holds a heading, two questions and a link* is
+   * a claim about the example tree, and the case above it cannot see it: that
+   * one forbids `2` and this site writes *two*.
+   *
+   * So the sentence is held here against the tree instead. A third question in
+   * the catalogue's example takes this red, which is the whole of what the
+   * digits rule is for — and it is the reason that rule is a floor and not the
+   * guard. **A number spelled out is a number.**
+   */
+  it("holds the one sentence that counts the band's contents", () => {
+    const reading = produceStopped()
+    const asked = reading.words.filter((word) => word.trim().endsWith("?")).length
+    const spelled = ["no", "one", "two", "three", "four", "five", "six", "seven"][asked]
+
+    expect(reading.words).toContain("Before you order")
+    expect(reading.words).toContain("Send a question")
+    expect(sectionProse()).toContain(`${spelled} questions`)
   })
 
   /**
