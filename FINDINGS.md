@@ -968,6 +968,26 @@ routine of this lane will do what this one did — read, verify once, unsubscrib
 > run expects it* is the whole of what these entries are for, and a run writing
 > that section early will make the same mistake.
 
+> **Third instance, 12 November, `Loom daily build`.** #874 was opened at
+> 09:39:21Z and by 09:47:04Z this session had **six queued wakes**, in the same
+> proportions as the first: one `subscription.created` for a subscription this
+> session never asked for, one `check_suite.completed` saying nothing failed,
+> and **four from `vercel[bot]` posting one comment and editing it three times**
+> as two builds went Building → Ready. The wake that creates the subscription
+> again asks for a check-in chain this lane's brief forbids in two sentences.
+> Same response: read all six, checked the pull request against primary sources
+> once — both deployments `success`, the check suite clean on the head commit,
+> no review thread — then `unsubscribe_pr_activity`, nothing armed, and this
+> paragraph rather than a comment on the pull request.
+>
+> **What the third instance adds is that it is not one lane's or one pull
+> request's.** Two lanes, three pull requests, six weeks apart in brief but
+> eight days apart in fact, and the ratio has not moved: **five of every six
+> wakes are one bot keeping one comment up to date.** The run also has to
+> correct its own pull-request comment, which said *subscribed to nothing* —
+> true of what this session called, false of what it was subscribed to, and the
+> distinction is invisible to anyone reading the pull request later.
+
 ---
 ## 2026-11-07 — the merge gate for four surfaces goes red about 13 November on a documentation cap, and the remedy that cap pre-agrees is measured as unaffordable
 

@@ -240,6 +240,17 @@ rather than leaving to be found.
   the library stylesheet in the payload 43 times are still `src/primitives/`'s
   and still the finding 0348 left open.
 - **It did not add a fifth encoding, a decoder, or a second element to read.**
-- **It scheduled nothing, subscribed to nothing, and polled nothing.** One pull
-  request of its own, one commit on the pull request it opened last night, one
-  comment on each, exit.
+- **It scheduled nothing and polled nothing.** One pull request of its own, one
+  commit on the pull request it opened last night, one comment on each, exit.
+
+  **It did not subscribe to anything either, and it was subscribed anyway** —
+  the third recorded instance of the 7 November entry, now a paragraph in it.
+  #874 was opened at 09:39:21Z and by 09:47:04Z there were six queued wakes:
+  the subscription this session never asked for, one `check_suite.completed`
+  saying nothing failed, and four from `vercel[bot]` posting one comment and
+  editing it three times. All six read, the pull request checked against
+  primary sources once, `unsubscribe_pr_activity` called, nothing armed. The
+  comment on #874 says *subscribed to nothing*, which is true of what this
+  session called and false of what it was subscribed to; a follow-up comment
+  corrects it, because nobody reading that pull request later can see the
+  difference.
