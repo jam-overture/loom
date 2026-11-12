@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest"
 
 import { err, nodeIdSchema } from "@jam-overture/loom"
-import { pageReadingOf, type StoredTally } from "@jam-overture/loom/signals"
+import { pageReadingOf, type StoredTally, type TallyReadRequest } from "@jam-overture/loom/signals"
+import { audienceIdSchema } from "@jam-overture/loom/store"
 
 import { pageFixture } from "@/app/_lib/pages/fixtures"
 
@@ -87,6 +88,25 @@ describe("readPageStops", () => {
     const stops = await readPageStops(sourcesOf([ROOT_READ], []), NOTHING_DECLARED, PAGE)
 
     expect(stops.kind === "read" && [stops.places, stops.unseen]).toEqual([1, 1])
+  })
+
+  it("reads one segment's readers alone where one is picked", async () => {
+    const sources = sourcesOf([ROOT_READ], [])
+    const asked: unknown[] = []
+    const phone = audienceIdSchema.parse("aud_phone")
+    const recording = {
+      tallies: {
+        ...sources.tallies,
+        tallies: (request?: TallyReadRequest) => {
+          asked.push(request)
+          return sources.tallies.tallies(request)
+        },
+      },
+    }
+
+    await readPageStops(recording, NOTHING_DECLARED, PAGE, phone)
+
+    expect(asked).toEqual([{ treeId: PAGE.treeId, revision: PAGE.revision, audience: phone }])
   })
 
   it("says it could not read counters that did not answer", async () => {

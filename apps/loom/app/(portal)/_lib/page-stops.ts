@@ -1,4 +1,5 @@
 import type { LoomTree } from "@jam-overture/loom"
+import type { AudienceId } from "@jam-overture/loom/store"
 import {
   largestUnreachedIn,
   pageFrontierOf,
@@ -120,11 +121,17 @@ export const pageStopsOf = (readings: readonly PageReading[], tree: LoomTree): P
 export const readPageStops = async (
   sources: ReaderWindowSources,
   declarations: PartDeclarations,
-  tree: LoomTree | undefined
+  tree: LoomTree | undefined,
+  /** A segment's readers alone (0371 clause 6), or every reader. */
+  audience?: AudienceId
 ): Promise<PageStops> => {
   if (tree === undefined) return { kind: "unpublished" }
 
-  const window = await readReaderWindow(sources, { treeId: tree.treeId, revision: tree.revision })
+  const window = await readReaderWindow(sources, {
+    treeId: tree.treeId,
+    revision: tree.revision,
+    ...(audience === undefined ? {} : { audience }),
+  })
 
   if (!window.ok) return { kind: "unreadable" }
 

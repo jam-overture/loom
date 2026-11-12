@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 
-import { err } from "@jam-overture/loom"
+import { err, treeIdSchema } from "@jam-overture/loom"
 import {
   audienceIdSchema,
   memoryAudienceOverlayStore,
@@ -9,7 +9,7 @@ import {
 } from "@jam-overture/loom/store"
 
 import { planSave } from "./editing"
-import { readPageRules, writePageRules } from "./rules"
+import { readPageRules, readSegmentWords, writePageRules } from "./rules"
 
 const rule = (word: string): AudienceRule => ({
   audienceId: audienceIdSchema.parse(`aud_${word}`),
@@ -126,6 +126,35 @@ describe("the rules, read and written through 0376's store", () => {
       ok: false,
       detail: "not a page is not a page id",
     })
+  })
+
+  it("names each segment once, alphabetically, for the picker, and none where the rules cannot be read", async () => {
+    const store = memoryAudienceOverlayStore()
+    const home = treeIdSchema.parse("t_home")
+    const pricing = treeIdSchema.parse("t_pricing")
+
+    expect(await readSegmentWords(store, PAGES)).toEqual([])
+
+    await store.recordRules(home, {
+      rules: [rule("search"), rule("phone")],
+      actor: "owner@example.com",
+      recordedAt: AT,
+      expectedRevision: 0,
+    })
+    await store.recordRules(pricing, {
+      rules: [rule("phone")],
+      actor: "owner@example.com",
+      recordedAt: AT,
+      expectedRevision: 0,
+    })
+
+    expect(await readSegmentWords(store, PAGES)).toEqual(["phone", "search"])
+    expect(
+      await readSegmentWords(
+        { ...store, rules: async () => err({ code: "unavailable", detail: "down" }) },
+        PAGES
+      )
+    ).toBeUndefined()
   })
 
   it("counts a write the store refused for any other reason as failed", async () => {

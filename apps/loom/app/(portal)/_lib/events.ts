@@ -14,6 +14,8 @@ import type { PublishedPage } from "@/app/_lib/pages/published"
 import type { Goal } from "./goals/goal"
 import { pageNameOf } from "./page-name"
 import { namesInTree, nounOf } from "./part-name"
+import type { SegmentWord } from "./segments/segment"
+import { SEGMENT_PARAM, segmentAsked } from "./segments/segment-pick"
 import { rangeOf, rangeParam, type SignalsRange } from "./signals-range"
 
 /**
@@ -128,6 +130,12 @@ export type EventFilter = {
   readonly view: string | undefined
   /** Words to find in the part or the page, as {@link searchOf} keeps them. */
   readonly search: string | undefined
+  /**
+   * The segment whose readers' events these are (0371 clause 6): the deliveries
+   * the site filed under its `aud_` id. The picker sits above both tabs, so the
+   * list narrows with the figures over it.
+   */
+  readonly segment: SegmentWord | undefined
 }
 
 /** Longer than any part's name a person would type, short enough to keep an address readable. */
@@ -229,6 +237,7 @@ export const eventQueryOf = (
     page: parsedOr(treeIdSchema, one("on")),
     view: parsedOr(viewKeySchema, one("view")),
     search: searchOf(one("q")),
+    segment: segmentAsked(one(SEGMENT_PARAM)),
     live: one("live") === LIVE_ON && place === undefined,
     range: rangeOf(one("range")),
     place,
@@ -238,9 +247,10 @@ export const eventQueryOf = (
 
 /** The search needs the site's words for its parts and pages, which only `naming` has. */
 export const matchesFilter =
-  ({ kind, page, view, search }: EventFilter, naming: Naming) =>
+  ({ kind, page, view, search, segment }: EventFilter, naming: Naming) =>
   (event: ReaderEvent): boolean =>
     (kind === undefined || event.signal.kind === kind) &&
+    (segment === undefined || event.audienceId === `aud_${segment}`) &&
     (page === undefined || event.treeId === page) &&
     (view === undefined || event.view === view) &&
     (search === undefined || matchesSearch(search, naming)(event))
@@ -263,6 +273,7 @@ export const eventsHref = (
       view: view.view,
       q: view.search,
       range: rangeParam(view.range),
+      [SEGMENT_PARAM]: view.segment,
       live: view.live && place === undefined ? LIVE_ON : undefined,
       ...(place === undefined ? {} : { [PLACE_PARAM[place.towards]]: eventKeyOf(place.from) }),
       event: more.event,

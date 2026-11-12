@@ -4,7 +4,7 @@ import {
   type StoredPageViews,
 } from "@jam-overture/loom/signals"
 import { treeIdSchema } from "@jam-overture/loom"
-import type { Application, Project, ProjectId } from "@jam-overture/loom/store"
+import type { Application, AudienceId, Project, ProjectId } from "@jam-overture/loom/store"
 
 import { arrivalsOf, type Arrivals } from "@/app/(portal)/_lib/arrivals"
 import { readGoalCounters } from "@/app/(portal)/_lib/goal-counters"
@@ -14,6 +14,13 @@ import { pageChoicesOf, partsByPageOf } from "@/app/(portal)/_lib/goals/goal-vie
 import type { PageHourly } from "@/app/(portal)/_lib/page-range"
 import { goalsFor } from "@/app/(portal)/_lib/goals/stores"
 import { arrivalRangeFor, type SignalsRange } from "@/app/(portal)/_lib/signals-range"
+import {
+  audienceRulesFor,
+  readSegmentWords,
+  rulesPagesOf,
+} from "@/app/(portal)/_lib/segments/rules"
+import type { SegmentWord } from "@/app/(portal)/_lib/segments/segment"
+import { audienceOfPick, type SegmentPick } from "@/app/(portal)/_lib/segments/segment-pick"
 import { portalApplications, portalProjects } from "@/app/(portal)/_lib/store"
 import { turnedAwayOf, type TurnedAway } from "@/app/(portal)/_lib/turned-away"
 import { PORTAL_READ_BUDGET_MS } from "@/app/_lib/app/bounded"
@@ -52,6 +59,16 @@ import { readingsFor, type Readings } from "@/app/_lib/reader-signals/intake"
  * goal draws no figure, and goals or counters that do not answer cost that
  * figure alone.
  *
+ * **A segment** (`?segment=`, unit 9 piece 3) narrows every counter read
+ * here to its audience (0371 clause 6): the page views, the hours, the
+ * primary goal's figure, and the drawer's range on *By page*. The journal's
+ * newest delivery is not read for one, because a delivery of any reader would
+ * say when *someone* last arrived: the last arrival is then the segment's own
+ * last counted page view. What the door turned away is never filed under an
+ * audience, so it stays the project's and the frame says so. The segments
+ * offered are read from the rules after the published pages, and a failure to
+ * read them costs the picker's offer alone.
+ *
  * The journal is read on the portal's budget here rather than in `intake.ts`,
  * because the door writes through the same handles and a write cut off by a
  * screen's budget would lose a reader's batch.
@@ -73,6 +90,7 @@ export type SignalsReading =
       readonly turnedAway: TurnedAway | undefined
       readonly published: readonly PublishedPage[]
       readonly goal: PrimaryGoalReading
+      readonly segment: SegmentPick
     }
 
 type Tallies = ReturnType<typeof boundedReaderTallyStore>
@@ -88,7 +106,8 @@ const readPrimaryGoal = async (
   goals: readonly Goal[] | undefined,
   published: readonly PublishedPage[],
   range: SignalsRange,
-  now: number
+  now: number,
+  audience: AudienceId | undefined
 ): Promise<PrimaryGoalReading> => {
   if (goals === undefined) return { kind: "unreadable" }
 
@@ -97,7 +116,10 @@ const readPrimaryGoal = async (
   if (goal === undefined) return { kind: "none" }
 
   const asked = arrivalRangeFor(range, now)
-  const counters = await readGoalCounters(tallies, goalSpanOf(asked), { nodeId: goal.nodeId })
+  const counters = await readGoalCounters(tallies, goalSpanOf(asked), {
+    nodeId: goal.nodeId,
+    ...(audience === undefined ? {} : { audience }),
+  })
 
   return counters === undefined
     ? { kind: "unreadable" }
@@ -114,7 +136,8 @@ const readPrimaryGoal = async (
 export const readSignals = async (
   projectId: ProjectId,
   range: SignalsRange,
-  now: number
+  now: number,
+  segment: SegmentWord | undefined
 ): Promise<SignalsReading> => {
   const [project, applications] = await Promise.all([
     portalProjects.get(projectId),
@@ -131,11 +154,15 @@ export const readSignals = async (
 
   const readings = readingsFor(application.applicationId)
   const tallies = boundedReaderTallyStore(readings.tallies)
+  const audience = audienceOfPick(segment)
+  const narrowed = audience === undefined ? {} : { audience }
 
   const [pageViews, newest, hourly, refusals, published, goals] = await Promise.all([
-    tallies.pageViews(),
-    boundedReaderSignalJournal(readings.journal).read({ direction: "older", limit: 1 }),
-    readReaderArrivals(tallies, { range: arrivalRangeFor(range, now), now }),
+    tallies.pageViews(narrowed),
+    audience === undefined
+      ? boundedReaderSignalJournal(readings.journal).read({ direction: "older", limit: 1 })
+      : ({ ok: true, value: { batches: [] } } as const),
+    readReaderArrivals(tallies, { range: arrivalRangeFor(range, now), now, ...narrowed }),
     readWithin(() => readings.refusals.read(), unavailable, PORTAL_READ_BUDGET_MS),
     readWithin(
       () => publishedPagesFor(application.applicationId).list(),
@@ -152,6 +179,12 @@ export const readSignals = async (
   if (!pageViews.ok || !newest.ok) return { state: "failed", project: project.value }
 
   const pages = published.ok ? published.value : []
+  const [goal, offered] = await Promise.all([
+    readPrimaryGoal(tallies, goals.ok ? goals.value : undefined, pages, range, now, audience),
+    published.ok
+      ? readSegmentWords(audienceRulesFor(application.applicationId), rulesPagesOf(pages))
+      : undefined,
+  ])
 
   return {
     state: "read",
@@ -164,14 +197,16 @@ export const readSignals = async (
     hourly: hourly.ok ? hourly.value : undefined,
     turnedAway: refusals.ok ? turnedAwayOf(refusals.value) : undefined,
     published: pages,
-    goal: await readPrimaryGoal(tallies, goals.ok ? goals.value : undefined, pages, range, now),
+    goal,
+    segment: { word: segment, offered },
   }
 }
 
 /**
  * One page's hourly counters over the range and the period before it, for the
  * drawer on *By page*: its page views, what readers did to any part of it, and
- * when the project first counted anything readers did. Read only when a
+ * when the project first counted anything readers did, for the segment's
+ * audience where one is picked. Read only when a
  * drawer is open, and a figure the drawer can do without: counters that do
  * not answer, or a page id they could not be asked about, cost the range's
  * figures alone.
@@ -180,7 +215,8 @@ export const readPageHourly = async (
   readings: Readings,
   page: string,
   range: SignalsRange,
-  now: number
+  now: number,
+  audience: AudienceId | undefined
 ): Promise<PageHourly> => {
   const treeId = treeIdSchema.safeParse(page)
 
@@ -190,7 +226,7 @@ export const readPageHourly = async (
   const counters = await readGoalCounters(
     boundedReaderTallyStore(readings.tallies),
     goalSpanOf(asked),
-    { treeId: treeId.data }
+    { treeId: treeId.data, ...(audience === undefined ? {} : { audience }) }
   )
 
   return counters === undefined ? { kind: "unreadable" } : { kind: "read", range: asked, counters }

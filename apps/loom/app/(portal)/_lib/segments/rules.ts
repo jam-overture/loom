@@ -17,6 +17,8 @@ import type { PublishedPage } from "@/app/_lib/pages/published"
 import { portalDatabase } from "../database"
 import { pageLabelOf, pageChoicesOf } from "../goals/goal-view"
 
+import { segmentsOf } from "./segment"
+
 /**
  * One application's audience rules, read and written through 0376's store
  * (0371 clause 3): Postgres when one is configured and memory when not,
@@ -101,6 +103,24 @@ export const readPageRules = async <P extends RulesFor>(
   return failed === undefined || failed.ok
     ? { ok: true, pages: read.flatMap((outcome) => (outcome.ok ? [outcome.page] : [])) }
     : { ok: false, detail: failed.detail }
+}
+
+/**
+ * The words of the project's segments, for a screen that offers them (the
+ * segment picker, `segment-pick.ts`): every audience any page's rules name,
+ * alphabetically. `undefined` where the rules could not be read, so the
+ * picker can say it has nothing to offer rather than that there is nothing.
+ */
+export const readSegmentWords = async (
+  store: AudienceOverlayStore,
+  pages: readonly { readonly treeId: string }[]
+): Promise<readonly string[] | undefined> => {
+  const read = await readPageRules(
+    store,
+    pages.map(({ treeId }) => ({ treeId, name: treeId }))
+  )
+
+  return read.ok ? segmentsOf(read.pages).map((segment) => segment.word) : undefined
 }
 
 /** One page's new rules, and the revision they were worked out from. */
