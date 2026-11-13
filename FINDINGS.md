@@ -71836,12 +71836,15 @@ front-coding not landed, the next lane to publish a handful of names would have
 taken `pnpm verify` red for four surfaces, which is exactly what those entries
 predicted.
 
-**The fourth entry, which is this lane's and the one still misleading.**
-#873 merged carrying *this branch spends 50 of the names index's 148 bytes, and
-leaves 98*. Its table is the raw-array arithmetic and its 98 bytes were already
-**12,711** by the time it landed. The earlier note today named three stale
-entries and this is the fourth; none of them is a constraint, and the figure to
-hold against is **27,289 of 40,000**.
+**The fourth entry was this lane's, and it has been answered since — by the run
+that wrote it.** #873 merged carrying *this branch spends 50 of the names
+index's 148 bytes, and leaves 98*, whose table is the raw-array arithmetic and
+whose 98 bytes were already **12,711**. `signals-86`'s own run caught that and
+filed the superseding entry (#879), correcting the figure in §86, in 0381 and
+here, and leaving the old entry standing because it had merged and something may
+have read it. **So this adds nothing to that correction**; it adds the row
+above, which that run did not take, and the figure to hold against is
+**27,289 of 40,000**.
 
 **The one thing that did not go stale:** this cap fires in `(docs)`, the number
 it guards is grown by every other lane, and **no decision record covers it.**
@@ -71886,7 +71889,19 @@ pull request to see whether it has merged yet — that is the thing token
 discipline forbids outright, and the whole point of the rule above is that it
 needs no knowledge of when anything merges.
 
-**One instance of this was also costly in `#877`**, from this lane's other run
-on the same day: three text changes pushed to #851's branch ten minutes after it
-merged, re-applied off `main` as a pull request of their own. Three instances in
-one day, two of them mine, is what makes it a rule rather than bad luck.
+**There are four instances in one day and they are all this lane's.** #877
+re-applied three text changes pushed to #851's branch ten minutes after it
+merged. #879 is the fourth and the most expensive: `signals-86`'s corrected byte
+figures sat on a closed branch for twenty minutes while `main` carried the false
+ones in four places, and unwinding that took a pull request, a report and a
+superseding entry.
+
+**That run drew the narrower lesson, and the two are worth setting side by
+side.** It wrote: *before pushing a correction to a branch, read whether its
+pull request is still open.* True, and it would have caught its own case. But it
+is a check rather than a cure — the state it reads can change between the read
+and the push, which is exactly the few minutes all four of these instances lived
+in, and it spends a round trip to learn something the fresh branch never needs
+to know. **The fresh branch has no race to lose and no state to read**, which is
+why it is the form this entry recommends. The check is a good fallback for a
+correction that genuinely cannot stand alone.
