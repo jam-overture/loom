@@ -12,6 +12,36 @@
 > answer: what shipped beside it is a measurement and a 251-byte saving, both of
 > which are true whichever way this goes.
 
+> **Re-measured 13 November 2026, and the question is no longer urgent.** The
+> bill is **75,234** compressed bytes and a page in the tightest section has
+> room for **2,335 words** — *Architecture*; 2,453 in *Getting started*, 2,648
+> in *Building with Loom*, 2,693 in *The runtime*, 3,593 in the *API reference*.
+> The shortest page already written here is 346.
+>
+> **Nothing below was built and nothing was given up.** What changed is that a
+> prose file stopped writing an address beside every body: it says once what its
+> bodies are `under` and then says the words, in the order the section's entries
+> are already sitting in — an order the browser has had since the table of
+> contents landed. That is worth **4,356 compressed bytes**, against the 341
+> that taking the section prefix off those same addresses was worth on
+> 5 November.
+>
+> **It was not in the words, which is why nine reports and a priced table of
+> five candidates missed it.** *Alternatives considered* prices five ways to
+> make the stored words smaller and refuses all five, because a body is shown as
+> well as matched. Every one of them was a saving over the text. This one is a
+> saving over the **envelope**, and the envelope was never in the question.
+>
+> **So this record is left `Proposed` rather than quietly answered.** What it
+> poses is still a real question — whether a reader should be sent sentences
+> from pages they are not on — and the room now exists to answer it later, or
+> not at all. What it is no longer is the thing holding this lane's queue. The
+> candidate table below is **not** re-priced: each would have to be built to be
+> re-priced honestly, and none of them is worth building today.
+>
+> One sentence to carry out of it, because it cost nine reports: *a table of
+> candidates is a table of the places somebody looked.*
+
 > **Re-measured 11 November 2026, six days on, with `main` merged in.** The
 > bill is **79,339** compressed bytes and the room is **373 words** for a page
 > in *The runtime* — 326 in *Architecture*, 341 in *Getting started*. The

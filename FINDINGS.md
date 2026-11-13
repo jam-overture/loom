@@ -72132,3 +72132,106 @@ anybody's margin.
 number it guards is grown by every other lane, and **no decision record covers
 it** — which was true when the margin was 148 bytes and is still true now that
 it is 12,795. Nothing is blocked by that and it is not this lane's to write.
+
+## 2026-11-13 — the prose cap is relieved, and a table of candidates is a table of the places somebody looked
+
+**Filed by:** `Loom docs` · **Owned by:** `@jonathanbravecredit` (0353, which is
+still `Proposed` and still his) · **Status:** **closes the 12 November entry
+about 165 bytes, and the four entries behind it**, measured on this branch
+
+The search index's prose files stopped writing an address beside every body.
+A file says once what its bodies are `under` and then says the words, in the
+order the section's entries are already sitting in — an order the browser has
+had since the table of contents landed.
+
+```
+prose  79,590 → 75,234 gzipped of 80,000     saved 4,356
+raw   254,057 → 240,860 of 260,000           saved 13,197
+room      373 → 2,335 words in the tightest section (the shortest page here is 346)
+```
+
+**This lane spent nine reports and a priced table of five candidates on the
+wrong axis.** `savings.ts` prices five ways to make the stored *words* smaller
+and refuses all five, correctly, because a body is shown as well as matched.
+0353's four candidates are four ways to send *fewer words*. Every one of them
+is a saving over the text, and the text was never where the slack was: 272
+addresses, 4,005 compressed bytes of them, in a file whose reader already holds
+every one.
+
+**The 5 November version of this same move is why it is worth an entry rather
+than a line in a report.** That day a prose file stopped writing the section at
+the front of each key and kept the rest: 341 bytes, and the module's own
+docblock called it *small, which is stated here rather than left to be inferred
+from the absence of a number*. The rest of the key was worth **4,356**. The
+lane that measured the prefix and moved on had the whole saving under its hand
+and stopped at an eighth of it — because the sentence it was working from was
+*the browser knows the section*, when the true one was *the browser has the
+list*.
+
+**What is open and what is not.** The cap is not open: no section of this site
+now fails to take a page as short as its shortest, and the four entries that
+said otherwise (12 November's 165 bytes, 11 November's 373 words, and the two
+of 10 November about this lane's queue) are closed by it. **0353 is open and is
+not this lane's to close.** It asks whether a reader should be sent sentences
+from pages they are not on, which is still a real question about what the box
+is; what it is no longer is the thing holding the queue. Its candidate table is
+deliberately not re-priced — each would have to be built to be re-priced
+honestly, and none is worth building today.
+
+**The one sentence to carry out of it.** *A table of candidates is a table of
+the places somebody looked.* Five priced savings and four lettered alternatives
+read as a search that had been exhaustive, and what they were was thorough
+inside one axis. The question that would have found this is not *which of these
+is cheapest* but *what else is in the file*.
+
+## 2026-11-13 — four branches that could not fire, and the two mutations that found them cost nothing to plant
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** **closed in
+the same run**; filed because the shape is general and this lane has now met it
+twice
+
+Sixteen mutations, sixteen killed, six survivors on the first pass. Two wanted
+a test. **Four wanted a deletion**, which is the part worth writing down:
+
+| what survived | why it could not fire |
+| --- | --- |
+| the empty-body clause in `withProse` | the five files partition the entries, so a body only ever arrives for an entry in the file it came in |
+| the `kind === "export"` check beside it | it guarded a name's address colliding with a heading's, which this site does not have |
+| the empty-body filter in `room.ts` | everything downstream joins the bodies and counts words |
+| the fallback to an entry's own body in `savings.ts` | `storedAs` answers for every body it is given, and is given every entry |
+
+Each read as a rule — *empties are special*, *names might collide*, *a candidate
+may rewrite only some pages* — and none of them was one. The export check was
+replaced by the invariant that makes it unnecessary, as a case in
+`build.test.ts` that fails if an anchor scheme changes; the other three are
+simply gone.
+
+**The general version, which is the 12 November entry's seen from the other
+side.** That entry said *a mutation to a constant finds a field nobody draws*.
+This one says **a mutation to a guard finds a rule nobody has**. Both are found
+by mutating the thing that does not look like logic, and in both cases the fix
+that looked right — write a test — was the wrong one. A test over a branch that
+cannot fire is a test that cannot fail.
+
+## 2026-11-13 — `withProse` threw, and one file that did not line up took the whole search box down
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** **closed on
+filing**, by the refusal that replaced the throw
+
+The positional shape needs a guard: one body per entry is the only thing holding
+the words to their addresses, so a file carrying a different number of them has
+every body after the first gap on the wrong page. It was written as a `throw`,
+and the component's own suite answered within one run — **33 of its 41 cases
+failed with `<body><div /></body>`**. A reader who had been searching titles
+since the contents file landed lost those too, because one of the four files
+that arrive afterwards did not fit.
+
+It refuses the file and returns the index as it arrived now. The reader loses
+that section's sentence band and keeps everything they already had, and
+`build.test.ts` is where the mismatch is loud.
+
+**What is worth keeping is where the argument came from.** It was not reasoned
+to; it was a fixture that had not been updated, failing in the way the real
+thing would fail. **A guard that runs in a browser is a guard whose failure mode
+a reader experiences**, and the question to ask of one is not *is this
+unreachable* but *what does a reader see on the day it is reached*.
