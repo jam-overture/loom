@@ -270,7 +270,9 @@ page's rules, and the segment filter, a *Segment* picker under the range on
 *Signals* and above the list on *Goals* (`?segment=`), which narrows every
 figure to that segment's readers and says *Nothing has been counted for
 <segment> yet* until the site names it. The split on *Page history* and *only
-for: <segment>* are piece 4, which waits on its own record.
+for: <segment>* are piece 4, whose record is
+[0386](../decisions/0386-a-change-only-for-one-segment-is-a-judged-proposal-and-accepting-it-writes-that-segments-form.md)
+(Accepted 13 November).
 
 ---
 
