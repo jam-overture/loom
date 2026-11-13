@@ -1,0 +1,118 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 720" width="1080" height="720" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif">
+  <style>
+    .title { font-size: 21px; font-weight: 650; fill: #0f172a; }
+    .sub { font-size: 13px; fill: #64748b; }
+    .panel-title { font-size: 12px; font-weight: 650; fill: #475569; letter-spacing: 0.09em; }
+    .note { font-size: 12px; fill: #475569; }
+    .mono { font-size: 11.5px; fill: #334155; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .mono-dim { font-size: 11px; fill: #94a3b8; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .tick { font-size: 10.5px; fill: #94a3b8; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .bad { font-size: 11.5px; font-weight: 650; fill: #b91c1c; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .ok { font-size: 11.5px; font-weight: 650; fill: #15803d; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .rowhead { font-size: 10px; font-weight: 650; fill: #64748b; letter-spacing: 0.04em; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .emph { font-size: 12.5px; font-weight: 650; fill: #0f172a; }
+  </style>
+
+  <rect width="1080" height="720" fill="#ffffff" />
+
+  <text class="title" x="40" y="46">A sweep's budget is inherited</text>
+  <text class="sub" x="40" y="68">`tools/sources/mocks.test.ts` reads 651 suites. Idle it costs 698 ms; it was held to 5,000 ms, and under a shared CPU that was not enough.</text>
+
+  <!-- Panel A: the work against the two budgets -->
+  <rect x="40" y="92" width="600" height="258" fill="#f8fafc" stroke="#e2e8f0" />
+  <text class="panel-title" x="60" y="118">THE WORK, AND THE TWO BUDGETS IT HAS BEEN HELD TO</text>
+
+  <!-- 5,000 ms marker -->
+  <line x1="240" y1="134" x2="240" y2="276" stroke="#b91c1c" stroke-width="1.5" stroke-dasharray="4 3" />
+  <text class="bad" x="244" y="146">default 5,000 ms</text>
+  <!-- 13,020 ms marker -->
+  <line x1="480" y1="134" x2="480" y2="276" stroke="#15803d" stroke-width="1.5" />
+  <text class="ok" x="484" y="146">budget 13,020 ms</text>
+
+  <text class="mono" x="60" y="172">installs no mock whose effect depends…</text>
+  <rect x="60" y="180" width="11.6" height="13" fill="#334155" />
+  <text class="mono-dim" x="78" y="191">388 ms</text>
+  <line x1="62" y1="208" x2="234" y2="208" stroke="#b91c1c" stroke-width="1" stroke-dasharray="2 2" />
+  <polygon points="236,208 229,205 229,211" fill="#b91c1c" />
+  <text class="bad" x="244" y="212">shared CPU → timed out at 5,000</text>
+
+  <text class="mono" x="60" y="238">contains at least one file using the pattern…</text>
+  <rect x="60" y="246" width="9.3" height="13" fill="#334155" />
+  <text class="mono-dim" x="76" y="257">310 ms</text>
+
+  <line x1="60" y1="276" x2="620" y2="276" stroke="#cbd5e1" />
+  <text class="tick" x="56" y="292">0</text>
+  <text class="tick" x="228" y="292">5k</text>
+  <text class="tick" x="378" y="292">10k</text>
+  <text class="tick" x="466" y="292">13k</text>
+  <text class="note" x="60" y="320">`sweepBudget(651 suites)` = 13,020 ms. The two bars are 6x under the</text>
+  <text class="note" x="60" y="338">default, which is what “not close to its budget” looked like three days before.</text>
+
+  <!-- Panel B: where the budget is named -->
+  <rect x="660" y="92" width="380" height="258" fill="#f8fafc" stroke="#e2e8f0" />
+  <text class="panel-title" x="680" y="118">WHERE IT IS NAMED</text>
+
+  <text class="rowhead" x="680" y="146">BEFORE</text>
+  <text class="mono" x="680" y="166">describe("every test file…")</text>
+  <text class="bad" x="952" y="166">none</text>
+  <text class="mono-dim" x="696" y="184">it(installs no mock…)</text>
+  <text class="bad" x="910" y="184">5,000 ms</text>
+  <text class="mono-dim" x="696" y="202">it(contains at least one…)</text>
+  <text class="bad" x="910" y="202">5,000 ms</text>
+
+  <line x1="680" y1="218" x2="1020" y2="218" stroke="#e2e8f0" />
+
+  <text class="rowhead" x="680" y="242">AFTER</text>
+  <text class="mono" x="680" y="262">describe("…", { timeout: sweepBudget(suites) })</text>
+  <text class="ok" x="680" y="280">13,020 ms</text>
+  <text class="mono-dim" x="696" y="298">it(installs no mock…)</text>
+  <text class="ok" x="910" y="298">inherited</text>
+  <text class="mono-dim" x="696" y="316">it(contains at least one…)</text>
+  <text class="ok" x="910" y="316">inherited</text>
+  <text class="emph" x="696" y="334">the next sweep written here</text>
+  <text class="ok" x="910" y="334">inherited</text>
+
+  <!-- Panel C: the check -->
+  <rect x="40" y="374" width="1000" height="314" fill="#f8fafc" stroke="#e2e8f0" />
+  <text class="panel-title" x="60" y="400">THE CHECK: A SUITE THAT TAKES THE SHARED LIST NAMES A BUDGET FOR IT</text>
+
+  <text class="mono" x="60" y="430">651 `*.test.ts` swept</text>
+  <text class="mono" x="300" y="430">6 import `everySource`</text>
+  <text class="ok" x="560" y="430">0 name no budget</text>
+
+  <text class="rowhead" x="60" y="466">IN SCOPE, NAMED RATHER THAN COUNTED</text>
+  <text class="mono-dim" x="60" y="488">tools/sources/budgets.test.ts</text>
+  <text class="ok" x="300" y="488">on the describe</text>
+  <text class="mono-dim" x="60" y="508">tools/sources/mocks.test.ts</text>
+  <text class="ok" x="300" y="508">on the describe — this branch</text>
+  <text class="mono-dim" x="60" y="528">tools/sources/code.test.ts</text>
+  <text class="ok" x="300" y="528">on the it — 0375</text>
+  <text class="mono-dim" x="60" y="548">tools/sources/deployment.test.ts</text>
+  <text class="ok" x="300" y="548">on two its — 0375</text>
+  <text class="mono-dim" x="60" y="568">tools/sources/semicolons.test.ts</text>
+  <text class="ok" x="300" y="568">on the it — 0375</text>
+  <text class="mono-dim" x="60" y="588">tools/sources/files.test.ts</text>
+  <text class="ok" x="300" y="588">asserts the budget itself</text>
+
+  <text class="rowhead" x="60" y="624">OUT OF SCOPE, DELIBERATELY</text>
+  <text class="mono-dim" x="60" y="646">(portal)/every-screen.test.ts</text>
+  <text class="note" x="300" y="646">one route group, read at collection — 832 ms, another lane's</text>
+  <text class="mono-dim" x="60" y="666">tools/git/portability.test.ts</text>
+  <text class="note" x="300" y="666">own walker, no lexing, 15 tests in 72 ms</text>
+
+  <line x1="700" y1="454" x2="700" y2="676" stroke="#e2e8f0" />
+  <text class="rowhead" x="724" y="466">PLANTED AND KILLED</text>
+  <text class="mono-dim" x="724" y="488">budget off the describe</text>
+  <text class="ok" x="968" y="488">killed</text>
+  <text class="mono-dim" x="724" y="508">describe budget set to 1 ms</text>
+  <text class="ok" x="968" y="508">killed</text>
+  <text class="mono-dim" x="724" y="528">exact name → startsWith</text>
+  <text class="ok" x="968" y="528">killed</text>
+  <text class="mono-dim" x="724" y="548">strings/comments not blanked</text>
+  <text class="ok" x="968" y="548">killed</text>
+  <text class="mono-dim" x="724" y="568">budget check short-circuited</text>
+  <text class="ok" x="968" y="568">killed</text>
+  <text class="note" x="724" y="604">The 1 ms mutation is the proof the block</text>
+  <text class="note" x="724" y="622">hands its budget to both sweeps: both</text>
+  <text class="note" x="724" y="640">failed with `Test timed out in 1ms`.</text>
+</svg>

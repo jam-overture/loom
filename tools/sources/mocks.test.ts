@@ -4,7 +4,7 @@ import { join } from "node:path"
 import { describe, expect, it } from "vitest"
 
 import { codeOnly } from "./code.js"
-import { everySource, relative, ROOT } from "./files.js"
+import { everySource, relative, ROOT, sweepBudget } from "./files.js"
 import { orderDependentMocks } from "./mocks.js"
 
 const calls = (source: string): readonly string[] =>
@@ -97,9 +97,23 @@ describe("the isolation the .test.tsx exclusion rests on", () => {
 const sharedWorkerSuites = (): readonly string[] =>
   everySource().filter((path) => path.endsWith(".test.ts"))
 
-describe("every test file that runs in a shared worker", () => {
-  const suites = sharedWorkerSuites()
+const suites = sharedWorkerSuites()
 
+/**
+ * The budget is on the block rather than on the two sweeps inside it.
+ *
+ * This file was the one whole-repository sweep 0375 did not reach, and the
+ * default 5,000 ms it was left on turned the merge gate red under load on a
+ * branch that added one source to the 651 it reads — about half a millisecond
+ * of work. On an idle container the two sweeps below are 388 ms and 310 ms.
+ *
+ * Naming it here rather than on each `it` is what stops the next sweep written
+ * into this block from being the fourth instance: Vitest hands a block's
+ * timeout to every test inside it, so a sweep added below inherits the budget
+ * without having to ask for it. `tools/sources/budgets.ts` catches the other
+ * half, a file that names no budget at all.
+ */
+describe("every test file that runs in a shared worker", { timeout: sweepBudget(suites) }, () => {
   it("is found at all, so an empty sweep cannot pass silently", () => {
     expect(suites.length).toBeGreaterThanOrEqual(500)
   })
