@@ -1,3 +1,4 @@
+import type { AudienceId } from "../audience/audience.js"
 import type { NodeId, TreeId } from "../ids.js"
 import type { PrimitiveType } from "../primitive-type.js"
 import type { PrimitiveRole } from "../role.js"
@@ -13,8 +14,9 @@ import {
   type PaceSilence,
   type PaceStanding,
 } from "./pace.js"
-import { pageViewsFor, type StoredPageViews } from "./page-views.js"
+import { pageViewsFor, type RevisionOf, type StoredPageViews } from "./page-views.js"
 import type { PageReading } from "./parts.js"
+import type { ReachSilence } from "./reach.js"
 
 /**
  * Whether the readers who reach **one part** have time for what it says, across
@@ -67,6 +69,21 @@ import type { PageReading } from "./parts.js"
  * reading in twice — which is what {@link PartPace.duplicated} counts and the
  * one error that would be permanent if it were let through (0158).
  *
+ * ## Which page it is skimmed on is the same rows, kept rather than summed away
+ *
+ * The pooled quotient is one number about nine pages, and `standings` says *and
+ * skimmed on two of them* without saying which two. The per-page rows were
+ * always there — the loop reads each page's own pace, its own words and its own
+ * door, and threw them away — so publishing them costs an array and no further
+ * arithmetic
+ * ([0390](../../decisions/0390-a-parts-pages-are-a-second-order-ranked-on-the-reading-time-its-readers-did-not-have.md)).
+ *
+ * The decision in it is the **order**, and it is this subsystem's ordinary one:
+ * the pages are ranked on the reading time their readers did not have, a
+ * magnitude in reader-milliseconds, rather than on the pace, a rate. A page one
+ * reader hurried past has the worst rate in the deployment and is not the page
+ * to go to (0250, 0377).
+ *
  * ## The silences are a kind's four, as values
  *
  * {@link KindPaceSilence} unchanged, and reused rather than respelled for the
@@ -95,6 +112,95 @@ export const describePartPaceSilence = (silence: KindPaceSilence): string => {
     case "wordless":
       return "it says nothing that takes time to read"
   }
+}
+
+/**
+ * One page a part stands on, with that page's own figures.
+ *
+ * {@link PartPace} answers *how long do readers stay on this part* with one
+ * pooled quotient over every page it stands on, and publishes `standings` —
+ * so a screen can say *paced across your pages and skimmed on two of them* and
+ * **cannot say which two**. These are the two rows, and nothing extra was
+ * computed to get them: `partPaceOf` already reads each page's own pace, its
+ * own words and its own door, and summed them away
+ * ([0390](../../decisions/0390-a-parts-pages-are-a-second-order-ranked-on-the-reading-time-its-readers-did-not-have.md)).
+ *
+ * Every figure here is the one the page's own reading holds, at that page's own
+ * door scale (0250) — not a share of the figure above it. The terms that add do
+ * add: `ranked`'s `readers`, `dwellMs` and `needMs` are exactly
+ * {@link PartPace}'s three, which is the only thing tying this breakdown to the
+ * figure it breaks down.
+ */
+export type PacedPlace = {
+  readonly treeId: TreeId
+  readonly revision: number
+  /** The audience this page's counters are of, as the reading has it; `null` where nothing said. */
+  readonly audienceId: AudienceId | null
+  /**
+   * Page views that reached the part here, at this page's own door scale.
+   *
+   * **Not a count of people and deliberately not rounded into one** (0256), for
+   * the reason {@link PartPace.readers} is not: it is a scaled page-view count,
+   * and two pages' are added without either being rounded first.
+   */
+  readonly readers: number
+  /** Time on screen here, summed across every view in the window, exactly as the rows hold it. */
+  readonly dwellMs: number
+  /** The words this placement puts on screen: its own and its subtree's, which is the denominator's input. */
+  readonly wordsWithin: number
+  /** Whether {@link wordsWithin} is a floor rather than a count, because something in it declares no `copy` (0122). */
+  readonly floored: boolean
+  /** Whether the part is this page's root, so its words are every word the page says. */
+  readonly whole: boolean
+  /**
+   * Why no straddle correction was applied to this page's readers, and `null`
+   * where one was.
+   *
+   * A page the door cannot scale is kept rather than refused, and the
+   * correction it is missing only ever moves its pace **down**, towards the one
+   * safe verdict — so this row can rank too low and never too high.
+   */
+  readonly unscaled: ReachSilence | null
+  /** `readers × wordsWithin × msPerWord`: the time its words take the readers who reached it here. `null` under a silence. */
+  readonly needMs: number | null
+  /** `dwellMs ÷ readers`: the time the typical reader who reached it here had. `null` under a silence. */
+  readonly spentMs: number | null
+  /**
+   * `needMs − dwellMs` where positive: the reading time this page's readers did
+   * not have. The ranking key of {@link PartPace.ranked}, and `null` under a
+   * silence.
+   *
+   * **It does not add**, and it is the one term here that does not: the rows'
+   * `shortMs` sum to at least {@link PartPace.shortMs} and are equal to it only
+   * where no page had time to spare, because a page whose readers lingered pays
+   * for a page whose readers skimmed in the pooled figure and pays for nothing
+   * here. Both figures are true and the difference is the whole reason this
+   * breakdown is worth drawing — but a surface adding these rows up has
+   * published a number the reading above it contradicts.
+   */
+  readonly shortMs: number | null
+  /** `dwellMs ÷ needMs`. `1` is exactly time enough. `null` under a silence. */
+  readonly pace: number | null
+  /** This page's own verdict, by `paceStandingOf` — so one page can be `skimmed` while the part is `paced`. */
+  readonly standing: PaceStanding
+  /** Why this page has no figures, and `null` where it has them. */
+  readonly silence: PaceSilence | null
+}
+
+/**
+ * A placement with figures of its own, which is every row of
+ * {@link PartPace.ranked} and no row of {@link PartPace.unranked}.
+ *
+ * Published as a type of its own so a screen drawing the order does not
+ * null-check four fields that an ordered row cannot be missing: a row is in
+ * `ranked` *because* it has a reading time to be short of.
+ */
+export type MeasuredPlace = PacedPlace & {
+  readonly needMs: number
+  readonly spentMs: number
+  readonly shortMs: number
+  readonly pace: number
+  readonly silence: null
 }
 
 /** One part, against the time its readers had for what it says, across the pages it stands on. */
@@ -186,7 +292,15 @@ export type PartPace = {
    * answers.
    */
   readonly spentMs: number | null
-  /** `needMs − dwellMs` where positive: the reading time its readers did not have. Nought where they had enough, `null` under a silence. */
+  /**
+   * `needMs − dwellMs` where positive: the reading time its readers did not
+   * have. Nought where they had enough, `null` under a silence.
+   *
+   * Taken over the pooled sums, so a page whose readers lingered pays for a page
+   * whose readers skimmed. The per-page figures on {@link PartPace.ranked} are
+   * each page's own and are **not** addable to this one; see
+   * {@link PacedPlace.shortMs}.
+   */
   readonly shortMs: number | null
   /** `dwellMs ÷ needMs`. `1` is exactly time enough. `null` under a silence. */
   readonly pace: number | null
@@ -219,6 +333,47 @@ export type PartPace = {
   readonly duplicated: number
   /** Door rows for one revision beyond the first, which were ignored. */
   readonly duplicatedRows: number
+  /**
+   * Every page the part is **counted** on, by the reading time its readers did
+   * not have, most first (0390).
+   *
+   * Then the lower pace, then by tree id and newest revision first, so two
+   * pages that cost the same do not reorder on a refresh. The key is
+   * {@link PacedPlace.shortMs}, which is a magnitude in reader-milliseconds
+   * rather than a rate: *which page is this part skimmed on* asked of a pace
+   * would put a page one reader hurried past above a page four hundred readers
+   * skimmed, and the second is the page to go to.
+   *
+   * `ranked.length` is {@link counted}, and the rows' `readers`, `dwellMs` and
+   * `needMs` add to {@link PartPace.readers}, {@link PartPace.dwellMs} and
+   * {@link PartPace.needMs} exactly — wherever those three are published. A
+   * part whose pooled pace is withheld keeps its rows, because the pages are
+   * then the only thing on the reading that says where to go and look.
+   *
+   * Each row's {@link PacedPlace.standing} is its page's own verdict and agrees
+   * with {@link standings} by construction; its {@link PacedPlace.shortMs} is
+   * its page's own and is the one term that does not add.
+   */
+  readonly ranked: readonly MeasuredPlace[]
+  /**
+   * Every other page it stands on, by tree id and newest revision first.
+   *
+   * A placement with no figures of its own, each carrying the
+   * {@link PacedPlace.silence} saying why — and **none of its terms is in the
+   * sums above**, which is not a rounding: a `wordless` placement can hold real
+   * time on screen that no quotient can use, and adding it to `dwellMs` would
+   * put time in a numerator whose denominator refused it.
+   *
+   * `ranked.length + unranked.length` is {@link placements}.
+   */
+  readonly unranked: readonly PacedPlace[]
+  /**
+   * The head of the order: the one page of this part to go and look at.
+   *
+   * `null` where no page is counted, which is exactly where {@link silence} is
+   * not.
+   */
+  readonly worst: MeasuredPlace | null
   /** The costing rate that was applied, which is the default unless one was given. */
   readonly wordsPerMinute: number
 }
@@ -236,9 +391,23 @@ const NO_SILENCES: Readonly<Record<PaceSilence, number>> = Object.freeze({
   wordless: 0,
 })
 
-/** Tree id, then newest revision first, which is the order the page-view rows are read in. */
-const byPage = (one: UnscaledPage, other: UnscaledPage): number =>
+/**
+ * Tree id, then newest revision first, which is the order the page-view rows
+ * are read in — and the last key of every list this module publishes, so two
+ * pages that cost the same do not reorder on a refresh.
+ */
+const byRevision = (one: RevisionOf, other: RevisionOf): number =>
   one.treeId.localeCompare(other.treeId) || other.revision - one.revision
+
+/**
+ * Most reading time missing, then the lower pace, then by page (0390).
+ *
+ * Both keys are the row's own, and the second is only ever reached by pages
+ * whose readers had time enough — `shortMs` is nought exactly where `pace` is
+ * at least `1`, so the tie-break ranks the pages nearest to being short.
+ */
+const byTimeMissing = (one: MeasuredPlace, other: MeasuredPlace): number =>
+  other.shortMs - one.shortMs || one.pace - other.pace || byRevision(one, other)
 
 const MS_PER_MINUTE = 60_000
 
@@ -310,6 +479,8 @@ export const partPaceOf = (
   const disagreed = new Set<PrimitiveType>()
   const standings: Record<PaceStanding, number> = { ...NO_STANDINGS }
   const silences: Record<PaceSilence, number> = { ...NO_SILENCES }
+  const ranked: MeasuredPlace[] = []
+  const unranked: PacedPlace[] = []
 
   let type: PrimitiveType | null = null
   let role: PrimitiveRole | null = null
@@ -365,6 +536,32 @@ export const partPaceOf = (
 
     standings[part.standing] += 1
 
+    const scaled = door.silence === null ? atDoorScale(part.readers, door) : part.readers
+
+    /**
+     * What this page is, before it is known whether it has figures — the half
+     * of a row that both lists carry, and the half that is the same question
+     * either way.
+     *
+     * `standing` is the page's **own** reading's verdict and never one
+     * re-derived from the row's `pace` below. The two quotients agree
+     * mathematically and need not agree in their last float place, and
+     * `standings` counts this one — so a breakdown of *skimmed on two of them*
+     * that recomputed the verdict could name three pages or one (0390).
+     */
+    const where = {
+      treeId: reading.treeId,
+      revision: reading.revision,
+      audienceId: reading.audienceId,
+      readers: scaled,
+      dwellMs: part.dwellMs,
+      wordsWithin: part.wordsWithin,
+      floored: part.floored,
+      whole: part.depth === 0,
+      unscaled: door.silence,
+      standing: part.standing,
+    }
+
     if (part.pace === null) {
       /**
        * A part with no pace always carries the reason it has none, because
@@ -372,11 +569,21 @@ export const partPaceOf = (
        * with no pace is always one. The fallback is the type system's and not a
        * state.
        */
-      silences[part.silence ?? "unreached"] += 1
+      const silence = part.silence ?? "unreached"
+
+      silences[silence] += 1
+      unranked.push({ ...where, needMs: null, spentMs: null, shortMs: null, pace: null, silence })
       continue
     }
 
-    const scaled = door.silence === null ? atDoorScale(part.readers, door) : part.readers
+    /**
+     * The page's own terms, in the reader-milliseconds the sums are in — never
+     * `PacedPart.needMs`, which is one reader's. Taking the row's figures off
+     * the same two products the sums are made of is what makes the breakdown
+     * add up to the figure above it, which is the only thing tying the two
+     * together.
+     */
+    const placeNeedMs = scaled * part.wordsWithin * msPerWord
 
     counted += 1
     trees.add(reading.treeId)
@@ -385,7 +592,16 @@ export const partPaceOf = (
     whole += part.depth === 0 ? 1 : 0
     readers += scaled
     dwellMs += part.dwellMs
-    needMs += scaled * part.wordsWithin * msPerWord
+    needMs += placeNeedMs
+
+    ranked.push({
+      ...where,
+      needMs: placeNeedMs,
+      spentMs: part.dwellMs / scaled,
+      shortMs: Math.max(0, placeNeedMs - part.dwellMs),
+      pace: part.dwellMs / placeNeedMs,
+      silence: null,
+    })
 
     if (door.silence !== null) {
       unscaled += scaled
@@ -402,6 +618,7 @@ export const partPaceOf = (
    * with one has a denominator: `needMs` is nought exactly when `counted` is.
    */
   const pace = counted === 0 ? null : dwellMs / needMs
+  const order = [...ranked].sort(byTimeMissing)
   const standing = paceStandingOf(pace, floored > 0)
   const silence = silenceOf(placements, counted, silences, standing)
   const measured = silence === null
@@ -428,9 +645,12 @@ export const partPaceOf = (
     standing,
     silence,
     unscaled,
-    unscaledPages: [...unscaledPages].sort(byPage),
+    unscaledPages: [...unscaledPages].sort(byRevision),
     duplicated,
     duplicatedRows,
+    ranked: order,
+    unranked: [...unranked].sort(byRevision),
+    worst: order[0] ?? null,
     wordsPerMinute,
   }
 }
