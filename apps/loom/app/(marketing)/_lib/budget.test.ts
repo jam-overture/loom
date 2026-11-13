@@ -119,6 +119,31 @@ const MOST_WORDS_IN_A_PLAIN_BAND = 120
 /** One cell of a run: a card, a rung, a question and its answer. */
 const MOST_WORDS_IN_A_CELL = 110
 
+/**
+ * The types that are a **list of cells** rather than a cell, when one turns up
+ * as the cell of some outer run.
+ *
+ * A run is two or more siblings of one type, which usually means cells of a
+ * row. It can also mean **two containers side by side**, and the front door's
+ * questions band became one on 13 November: two `loom.faq-list`s in a
+ * `loom.grid`, because a single list in two columns stretched a closed question
+ * to the height of the open one beside it (`questions.test.ts` has the
+ * measurement).
+ *
+ * A column of three questions is not something a reader meets in one go, so the
+ * ceiling above is the wrong instrument for it. **Nothing stops being checked
+ * by this.** The questions themselves are the cells of the run *inside* each
+ * list and are held to the same 110 they always were; the band as a whole is
+ * held to `MOST_WORDS_IN_A_BAND`, which is the rule that is actually about
+ * two columns of questions adding up to too much.
+ *
+ * It is a named list rather than *any cell that holds a run of its own*,
+ * because that generalisation would quietly stop checking a wordy card the day
+ * somebody gave it two paragraphs. A container has to be put here on purpose,
+ * and the case below holds each of them to still being a container.
+ */
+const A_LIST_RATHER_THAN_A_CELL: readonly string[] = ["loom.faq-list"]
+
 /** A whole band, however it is laid out. */
 const MOST_WORDS_IN_A_BAND = 300
 
@@ -303,7 +328,9 @@ describe("the site has a copy budget, and every part of it is inside one", () =>
     "%s: no one cell of a run asks for more than a cell's worth of reading",
     (path, route) => {
       for (const band of bandsOf(pageOf(route))) {
-        for (const run of runsIn(band)) {
+        for (const run of runsIn(band).filter(
+          (run) => !A_LIST_RATHER_THAN_A_CELL.includes(run.cell)
+        )) {
           expect(
             Math.max(...run.words),
             `${describeBand(path, band)} — ${run.container} of ${run.cell} [${run.words.join(", ")}]`
@@ -344,7 +371,17 @@ describe("the site has a copy budget, and every part of it is inside one", () =>
   it("every ceiling is a ceiling something on this site is near", () => {
     const bands = allBands()
     const plain = bands.filter(({ band }) => isPlain(band)).map(({ band }) => wordsIn(band))
-    const cells = bands.flatMap(({ band }) => runsIn(band).flatMap((run) => run.words))
+    /**
+     * The same filter the cell ceiling itself applies, because a ceiling has to
+     * be measured against the thing it is held over. Without it the widest
+     * *cell* on this site reads as a column of three questions, which is a
+     * figure no assertion in this file is about.
+     */
+    const cells = bands.flatMap(({ band }) =>
+      runsIn(band)
+        .filter((run) => !A_LIST_RATHER_THAN_A_CELL.includes(run.cell))
+        .flatMap((run) => run.words)
+    )
 
     const nearest: Readonly<Record<string, readonly [number, number]>> = {
       "a plain band": [Math.max(...plain), MOST_WORDS_IN_A_PLAIN_BAND],
@@ -362,6 +399,44 @@ describe("the site has a copy budget, and every part of it is inside one", () =>
         widest / ceiling,
         `${what}: widest is ${widest} against a ceiling of ${ceiling} — either the ceiling is too high to mean anything, or the copy it was set for is gone`
       ).toBeGreaterThanOrEqual(A_CEILING_IS_BINDING_ABOVE)
+    }
+  })
+
+  /**
+   * And a type exempted for being a list of cells has to still be one.
+   *
+   * `A_LIST_RATHER_THAN_A_CELL` takes a container out of the cell ceiling on
+   * the grounds that its own contents are checked one level down. That is only
+   * true while it *has* contents of that shape: a `loom.faq-list` holding one
+   * question is a cell wearing a list's name, and it would be exempt from the
+   * ceiling with nothing underneath it checked instead.
+   *
+   * So every one of them that turns up as a cell on this site is held to
+   * holding a run of its own, and the words in that run are what the ceiling
+   * above reads.
+   */
+  it("exempts a container from the cell ceiling only while its own cells are checked", () => {
+    const exempted = allBands().flatMap(({ route, band }) =>
+      runsIn(band)
+        .filter((run) => A_LIST_RATHER_THAN_A_CELL.includes(run.cell))
+        .flatMap((run) => run.cells.map((cell) => ({ route, cell })))
+    )
+
+    expect(exempted.length).toBeGreaterThan(0)
+
+    for (const { route, cell } of exempted) {
+      const within = runsIn(cell)
+
+      expect(
+        within.length,
+        `${route} — a ${cell.type} is exempt from the cell ceiling for being a list of cells, and this one holds no run for the ceiling to read`
+      ).toBeGreaterThan(0)
+
+      for (const run of within) {
+        expect(Math.max(...run.words), `${route} — ${cell.type} of ${run.cell}`).toBeLessThanOrEqual(
+          MOST_WORDS_IN_A_CELL
+        )
+      }
     }
   })
 

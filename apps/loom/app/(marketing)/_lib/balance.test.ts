@@ -1,4 +1,4 @@
-import type { LoomTree } from "@jam-overture/loom"
+import type { JsonObject, LoomTree } from "@jam-overture/loom"
 import { describe, expect, it } from "vitest"
 
 import { runsIn } from "./measure"
@@ -103,8 +103,19 @@ const NOT_ROWS: Readonly<Record<string, string>> = {
    * wide — and the copy is written to the spans. `pages.test.ts` holds *that*
    * ratio, which is the opposite rule and the right one for this band. */
   "loom.mosaic": "cells are deliberately unequal widths",
-  /** A closed question is one line whatever its answer weighs, and how tall an
-   * open one is belongs to the reader. */
+  /**
+   * A closed question is one line whatever its answer weighs, and how tall an
+   * open one is belongs to the reader.
+   *
+   * **True of a list read downward and false of the same primitive in two
+   * columns**, which is what this exemption did not say until 13 November and
+   * what the front door's questions band cost. `columns: "two"` makes it a CSS
+   * grid, five questions become five cells in three rows, and a grid row is as
+   * tall as the tallest cell in it — so the question beside an open one is a
+   * 51px question in a 172px box with its own rule 121px below the words it
+   * belongs to. `ONLY_WHILE_ONE_COLUMN` below is the exemption's own condition,
+   * stated where a test can read it.
+   */
   "loom.faq-list": "rows open and close",
   /** A rail read downward. Each rung is the full width of the band, so no rung
    * is stretched to match another. */
@@ -178,6 +189,60 @@ const NOT_ROWS: Readonly<Record<string, string>> = {
 }
 
 /**
+ * The exemptions that hold **only while the container is a single column**.
+ *
+ * Every entry in `NOT_ROWS` is a claim about a layout, and three of them say
+ * the same thing in different words: *read down, one per row*. That claim is a
+ * claim about the container's **props** and not about its type. A
+ * `loom.faq-list` is read down; a `loom.faq-list` with `columns: "two"` is a
+ * grid of cells stretched to a common height, which is this file's subject
+ * exactly.
+ *
+ * So the site is held to not setting a second column on any of them. It is a
+ * refusal rather than a measurement on purpose: the cells of these containers
+ * **change height after the page has loaded**, and no word count taken at
+ * render time can see a question that is about to open. There is no threshold
+ * that would have caught the band this was written for.
+ *
+ * The way to have two columns of questions is two lists beside each other,
+ * which is what the front door does now, and the grid holding them says
+ * `align: "start"` so neither is stretched.
+ *
+ * **One of the five below can be given a second column today and the other
+ * four cannot**, and they are all named anyway. `loom.faq-list` is the only one
+ * whose props declare `columns`; the rest are `.strict()` schemas that would
+ * refuse the key, so for those this is a claim nothing can currently break.
+ * That is the point of writing it down. The exemption each of them has is *the
+ * run is read downward*, and the day one of them grows a second column the
+ * exemption stops being true, which is precisely what happened to the one that
+ * already had the prop.
+ */
+const ONLY_WHILE_ONE_COLUMN: readonly string[] = [
+  "loom.faq-list",
+  "loom.milestone-list",
+  "loom.list",
+  "loom.comparison-table",
+  "loom.table",
+]
+
+/** Whether a container's props put its children in more than one column. */
+const laidOutInColumns = (props: JsonObject): boolean =>
+  props["columns"] !== undefined && props["columns"] !== "one"
+
+/**
+ * Whether a run is a row for this file's purposes: cells across equal columns,
+ * each stretched to the tallest.
+ *
+ * **The `align` half is the other thing a type cannot tell you.** A grid is a
+ * row because it stretches, and a grid that says `align: "start"` does not:
+ * every cell is as tall as its own content and nothing carries a difference.
+ * So a `loom.grid` holding two lists of questions is correctly not a row, while
+ * the same primitive holding four cards still is.
+ */
+const isRow = (run: { readonly container: string; readonly props: JsonObject }): boolean =>
+  ROWS.includes(run.container) && run.props["align"] !== "start"
+
+/**
  * How far apart two cards in one row may be, in words.
  *
  * **A difference rather than a ratio, and that is the whole of why this rule
@@ -205,6 +270,7 @@ const MOST_A_ROW_MAY_DIFFER = WORDS_PER_LINE * LINES_OF_RAG_ALLOWED
 type Row = {
   readonly route: string
   readonly container: string
+  readonly props: JsonObject
   readonly cell: string
   readonly words: readonly number[]
 }
@@ -218,6 +284,7 @@ const rowsOf = (page: LoomTree, route: string): readonly Row[] =>
   runsIn(page.root).map((run) => ({
     route,
     container: run.container,
+    props: run.props,
     cell: run.cell,
     words: run.words,
   }))
@@ -250,9 +317,7 @@ describe("a row of cards says about the same amount in each card", () => {
   it.each(SITE_ROUTES.map((route) => [route.path, route] as const))(
     "%s: no card in a row is left holding the difference as empty space",
     (_path, route) => {
-      for (const row of rowsOf(pageOf(route), route.path).filter((found) =>
-        ROWS.includes(found.container)
-      )) {
+      for (const row of rowsOf(pageOf(route), route.path).filter(isRow)) {
         const spread = Math.max(...row.words) - Math.min(...row.words)
 
         expect(spread, describeRow(row)).toBeLessThanOrEqual(MOST_A_ROW_MAY_DIFFER)
@@ -271,7 +336,7 @@ describe("a row of cards says about the same amount in each card", () => {
    * difference of two lines is a thing that could happen.
    */
   it("is measuring a row big enough for the rule to mean anything", () => {
-    const measured = allRows().filter((row) => ROWS.includes(row.container))
+    const measured = allRows().filter(isRow)
     const substantial = measured.filter(
       (row) => row.words.length >= 3 && Math.max(...row.words) > MOST_A_ROW_MAY_DIFFER
     )
@@ -299,6 +364,52 @@ describe("a row of cards says about the same amount in each card", () => {
     ]
 
     expect(unclassified, `add each to ROWS or to NOT_ROWS with its reason`).toEqual([])
+  })
+
+  /**
+   * The exemptions are conditional, and this is the condition.
+   *
+   * **It is the case that would have caught the front door's questions band**,
+   * which drew a 121px hole under a closed question from the day it was given a
+   * second column until 13 November, with every assertion in this file green
+   * the whole time. The band was a `loom.faq-list`, `loom.faq-list` is in
+   * `NOT_ROWS`, and the reason written beside it — *rows open and close* — is
+   * true of the primitive and false of the prop the band set.
+   *
+   * So this does not measure anything. A disclosure that opens is taller than
+   * it was a moment ago and no reading taken at render time knows by how much,
+   * so the only honest rule is that the site does not put one in a shared grid
+   * row at all.
+   */
+  it("sets no second column on a container it exempts for being read downward", () => {
+    const inColumns = allRows()
+      .filter((row) => ONLY_WHILE_ONE_COLUMN.includes(row.container))
+      .filter((row) => laidOutInColumns(row.props))
+      .map(
+        (row) =>
+          `${row.route} — ${row.container} with columns: ${JSON.stringify(row.props["columns"])}`
+      )
+
+    expect(
+      inColumns,
+      `each of these is exempt from this file for being read down one row at a time, ` +
+        `and a second column makes it a grid of cells stretched to a common height. ` +
+        `Two of them side by side in a loom.grid with align: "start" is the way to two columns.`
+    ).toEqual([])
+  })
+
+  /**
+   * And the condition cannot quietly stop applying to anything.
+   *
+   * `ONLY_WHILE_ONE_COLUMN` names three containers. If none of them is on the
+   * site any more, the case above passes by having nothing to look at — which
+   * is the failure the *is measuring a row big enough* case above exists to
+   * prevent for the measurement half, written again for the refusal half.
+   */
+  it("is watching a container that could have a second column set on it", () => {
+    const watched = allRows().filter((row) => ONLY_WHILE_ONE_COLUMN.includes(row.container))
+
+    expect(watched.length).toBeGreaterThan(0)
   })
 
   /**

@@ -71811,3 +71811,115 @@ anybody's margin.
 number it guards is grown by every other lane, and **no decision record covers
 it** — which was true when the margin was 148 bytes and is still true now that
 it is 12,795. Nothing is blocked by that and it is not this lane's to write.
+
+---
+## 2026-11-13 — a two-column `loom.faq-list` is a grid of equal-height cells, so the question beside an open one is a 51px question in a 172px box
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom primitives`
+(`src/primitives/loom.faq-list.ts`) · **Status:** open — **nothing is red and
+nothing on this site is wrong now**; the marketing band worked around it the
+same day, and the workaround is two elements where one would do
+
+`loom.faq-list` lays its children out with
+
+```ts
+display: "grid",
+gridTemplateColumns:
+  given.columns === "two" ? "repeat(auto-fit, minmax(min(100%, 22rem), 1fr))" : "1fr",
+```
+
+and sets no `align-items`, so it takes the grid default of `stretch`. **A grid
+row is as tall as the tallest cell in it**, and a question that opens is taller
+than the one beside it by however long its answer is.
+
+### What that drew, measured on a production build at 1280
+
+The front door's questions band: five questions, `columns: "two"`, the first one
+`open` so that a reader arrives at an answer rather than five headings.
+
+| | its box | its content | empty |
+| --- | --- | --- | --- |
+| *Can the AI write code into my page?* (open) | 172px | 172px | 0 |
+| *What stops a bad change from landing?* (closed, beside it) | 172px | 51px | **121px** |
+
+That is the band as the page loads, before a reader does anything. `loom.faq`
+draws a rule along the bottom of its box, so the rule belonging to the closed
+question sits 121px under the words it belongs to, which reads as a question
+whose answer failed to render.
+
+**And it moves under the reader**, which is the half that cannot be designed
+around. Pressing *Is this a page builder?* in the left column took *What happens
+when a change is wrong?* in the right column from 51px to 145px: **94px of empty
+space opened inside a closed question by a press on the other side of the
+page.**
+
+### The remedy, and this lane has an opinion on it
+
+`alignItems: "start"` on that grid, which is one line and changes nothing for a
+one-column list. A row of equal-height cells is the right default for a row of
+cards, where the cells are read across and a short one looks broken; a column of
+disclosures is read **down**, nothing in it is compared to the thing beside it,
+and the height of an open answer is the reader's business rather than the
+layout's.
+
+`loom.faq-list`'s own prop comment already says the two cases are different —
+*"Two columns suit a long list; one keeps a reading measure."* The long list is
+exactly the case where an open answer is tallest.
+
+**Worth checking whether any sibling has the same shape**, which this lane has
+not done because it is not its directory: any container whose children can
+change height after the page has loaded and which lays them out in a stretched
+grid has this defect, and `loom.faq-list` is the one this site happened to use.
+
+### What shipped against it today
+
+The band is two `loom.faq-list`s, three questions and two, side by side in a
+`loom.grid` with `align: "start"` — so each list is read downward, which is the
+arrangement that was never broken, and the grid holding the two columns does not
+stretch them to each other either. `marketing-36-the-hole-beside-the-open-question`
+has the measurements and the pictures.
+
+**It is a workaround and it is marked as one.** `home.ts`' note on the band says
+in as many words that when this entry is met the band goes back to being one
+list, so the run that fixes the primitive can find the two elements that exist
+only because of it.
+
+**And it costs a phone 27px**, which is the second half of this entry.
+`loom.grid`'s `gap` is one value for rows and columns, so the space holding the
+two lists apart at 1280 is also the space between them once they stack. At 390
+the band is one column of five questions with a **27px break between the
+second and the third** — two rules with nothing between them, where before there
+was a continuous run of ruled rows. Measured: the third question starts at y 4489
+where it used to start at 4462.
+
+That is a smaller blemish than a rule floating 121px under its question and this
+lane took the trade knowingly, but it is a blemish, and **it exists only because
+of the workaround.** Nothing in the library offers a column gap that is not also
+a row gap once the columns stack — `loom.split` makes the same call with
+`gap: space(5)` on its wrapping flex — so there is no spelling of two columns in
+this lane that does not have it. Fixing `loom.faq-list` removes the second
+element and the seam with it.
+
+### Why nothing on this site caught it, which is the part worth reading
+
+`(marketing)/_lib/balance.test.ts` is a whole file about this exact failure —
+*"a card that says less than its neighbour carries the difference as empty
+space, and the empty space is at the bottom, under the last line, where a reader
+reads it as a card that is missing something."* It ran green over this band every
+day since the band got its second column, for two reasons that are the same
+reason:
+
+1. **It classifies a run by its container's type**, and `loom.faq-list` is on
+   its exempt list with the reason *rows open and close*. That reason is true of
+   a list read downward and false of the same primitive with `columns` set. One
+   type, two layouts, and the classification could not see the prop.
+2. **Its instrument is a word count**, and a question that opens says a
+   different amount from one moment to the next. No reading taken at render time
+   knows how tall a `<details>` is about to be, so there was no threshold that
+   would have reported this band.
+
+Both halves are closed on this site by the branch above — the run now carries
+its container's props, and the exemption is conditional on there being one
+column — but that is a rule about what **this site** may compose. **Every other
+host of `loom.faq-list` still gets the hole by setting a documented prop**, which
+is why this is filed here rather than only fixed there.
