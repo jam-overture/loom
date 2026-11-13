@@ -1,6 +1,6 @@
 # The simulation — readers we wrote, a loop we can run in an afternoon
 
-**Status: a plan, nothing built.** Decided in shape by
+**Status: S1 built; the rest is a plan.** Decided in shape by
 [0384](../decisions/0384-a-simulation-runs-looms-own-loop-in-one-process-on-a-clock-it-moves-and-its-readers-never-reach-a-real-project.md)
 (Accepted 13 November 2026). Each milestone below is one pull request, and none starts before the
 one above it is on `main`.
@@ -135,7 +135,7 @@ Each is one pull request. The first two use no model and spend nothing.
 
 | # | Milestone | What it proves | Needs |
 | --- | --- | --- | --- |
-| S1 | **The world.** `tools/simulate/world`: personas, seeded randomness, a reader's walk of a tree's reading order into `ReaderSignalBatch`es that parse with `parseReaderSignalBatch`, and the exact true effect of a change between two trees. Pure, tested. | Personas behave differently from one another, and the batches are ones the door accepts. | — |
+| S1 | **The world.** `tools/simulate/world`: personas, seeded randomness, a reader's walk of a tree's reading order into `ReaderSignalBatch`es that parse with `parseReaderSignalBatch`, and the exact true effect of a change between two trees. Pure, tested. **Done** (13 November): `tools/simulate/` has `draw.ts` (a draw named by its path, so no draw shifts another), `page.ts` (bands and the features the rules read), `persona.ts` and `world.ts` (the five personas, weekday and drift, and a held-out world), `readers.ts` (one batch per band, the goal done with exactly the chance the rules add up to) and `effect.ts` (the true effect, with the same days' readers on both pages). | Personas behave differently from one another, and the batches are ones the door accepts. | — |
 | S2 | **The loop without a model.** A virtual clock, PGlite, the real door, counters, goals and `measuring.ts`. Changes are planted by hand: one known to help, one known to hurt, one that changes nothing. `pnpm simulate` prints a report. | How often *Helped*, *Hurt* and *No clear change* are right, and what drift does to them. This is useful on its own. | — |
 | S3 | **The Claude baseline.** The real proposer (`proposeFor`, the interpreter, the Gate, the answer path, the pull), with a "Simulation" member pressing *Accept* on what the Gate holds. A call budget stops the run before it spends more than it was given. | The share of changes that truly help, the share the verdict calls *Helped*, what the interpreter and the Gate refused, and cost per change. | The maintainer's key and budget (*Calls*, 2), and the sim's accept and revert rules (*Calls*, 3). |
 | S4 | **The browser check.** A few personas driven through Playwright on a rendered page, with the real broadcast, compared with S1's synthetic batches for the same page and seed. | S1 sends what a browser sends. | — |
