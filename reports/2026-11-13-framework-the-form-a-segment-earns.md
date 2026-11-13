@@ -226,6 +226,34 @@ bytes spare as of #859, so there was room.
   measures it. Filed with an explicit *do not build a bound before there is a
   number*.
 
+## The subscription, again
+
+#886 was opened at 09:38:45Z. By 09:40:06Z this session had **three queued
+wakes**: one `subscription.created` for a subscription **this session never
+called `subscribe_pr_activity` for**, and two from `vercel[bot]` posting one
+comment and editing it once as the build went Building → Ready. The first of
+them asks for a safety-net check-in chain, which this lane's brief forbids in
+two sentences.
+
+Same response as the three instances before it, which is this lane's settled
+practice rather than a judgement made fresh: read all three, check the pull
+request against primary sources **once** — `mergeable_state: clean`, the one
+check run `success`, no review thread, no non-bot comment but this session's
+own — then `unsubscribe_pr_activity`, **nothing armed**, and a paragraph in
+`FINDINGS.md` rather than a comment on the pull request.
+
+Two figures in the 7 November entry moved and are corrected there: the ratio is
+**two of every three** wakes here rather than five of six, because this
+repository now runs one check and no `check_suite.completed` arrived — so *six
+wakes a pull request* is the wrong number to quote. And all three were handed
+over in **one** `ReadNotifications` call, which is the second observation of
+the batching the 10 November instance could not confirm from one: **one session
+billed, not three.**
+
+The conflict itself is four instances old and unchanged. The brief cannot stop
+the subscription being created, and the subscription cannot make this lane arm
+a check-in. The maintainer is the only one who can settle which rule wins.
+
 ## Open questions
 
 1. **Whether a form is judged by the Gate is still open, and this record

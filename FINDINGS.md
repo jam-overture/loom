@@ -1243,6 +1243,32 @@ routine of this lane will do what this one did — read, verify once, unsubscrib
 > correct its own pull-request comment, which said *subscribed to nothing* —
 > true of what this session called, false of what it was subscribed to, and the
 > distinction is invisible to anyone reading the pull request later.
+>
+> **Fourth instance, 13 November, `Loom daily build`.** #886 was opened at
+> 09:38:45Z and by 09:40:06Z this session had **three** queued wakes: one
+> `subscription.created` for a subscription this session never asked for, and
+> **two from `vercel[bot]` posting one comment and editing it once** as the
+> build went Building → Ready. Same response: read all three, checked the pull
+> request against primary sources once — `mergeable_state: clean`, the one
+> check run `success`, no review thread, no non-bot comment but this session's
+> own — then `unsubscribe_pr_activity`, nothing armed.
+>
+> **Two figures in this entry move.** The ratio is **two of every three** here
+> rather than five of six, because this repository now runs one check and no
+> `check_suite.completed` arrived — so *six wakes a pull request* is the wrong
+> number to quote and the shape, not the count, is what has held across four
+> instances. And the batching the second instance could not confirm from one
+> observation now has a second: all three were handed over in **one**
+> `ReadNotifications` call, so this run was billed **one** session, not three.
+> Two observations is still not a guarantee, but a lane reading this should
+> expect one session a pull request rather than six.
+>
+> **The conflict is unchanged and is four instances old.** The
+> `subscription.created` body still asks for a check-in chain this lane's brief
+> forbids in two sentences, and the brief still cannot stop the subscription
+> being created. Every routine of this lane will keep doing what these four
+> did. **The maintainer is the only one who can settle which rule wins**, and
+> the cost of not settling it is now measured rather than estimated.
 
 ---
 ## 2026-11-07 — the merge gate for four surfaces goes red about 13 November on a documentation cap, and the remedy that cap pre-agrees is measured as unaffordable
