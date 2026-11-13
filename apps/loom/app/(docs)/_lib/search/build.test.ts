@@ -11,6 +11,7 @@ import {
   searchCode,
   searchContents,
   searchNames,
+  searchNamesFile,
   searchProse,
   searchProseFor,
 } from "./build"
@@ -46,7 +47,7 @@ const index = buildSearchIndex()
 const arrived = () => parseSearchIndex(JSON.parse(JSON.stringify(searchContents())))
 
 /** The names file the same way: serialized, sent, parsed. */
-const arrivedNames = () => parseSearchNames(JSON.parse(JSON.stringify(searchNames())))
+const arrivedNames = () => parseSearchNames(JSON.parse(JSON.stringify(searchNamesFile())))
 
 const hrefs = new Set(docsOrder.map((entry) => entry.href))
 
@@ -383,6 +384,12 @@ describe("what the index contains", () => {
    * `namesToEntries` rebuilds every address on arrival. The 118 KB that went
    * away was `/docs/api-reference/runtime#s-` written out a thousand times.
    *
+   * By 11 November the names had doubled to 2,093 and the file stood at
+   * 39,852 bytes, 148 under the total below. The remedy was the same kind
+   * again — stop writing down what the reader can work out — so each entry
+   * point's names now travel **sorted and front-coded on one line**, and the
+   * quotes, commas and shared beginnings went; `names.ts` has the details.
+   *
    * ### Which cap is whose
    *
    * The **contents** cap is this lane's in both directions: it moves when this
@@ -410,7 +417,7 @@ describe("what the index contains", () => {
     const bytes = (json: string): number => Buffer.byteLength(json, "utf8")
 
     const contents = JSON.stringify(searchContents())
-    const names = JSON.stringify(searchNames())
+    const names = JSON.stringify(searchNamesFile())
     const code = JSON.stringify(searchCode())
 
     // What a reader waits for, and now the only thing they wait for: this
@@ -523,7 +530,7 @@ describe("what the index contains", () => {
    * test here would still pass.
    */
   it("writes down names rather than addresses", () => {
-    expect(JSON.stringify(searchNames())).not.toContain("/docs/api-reference/")
+    expect(JSON.stringify(searchNamesFile())).not.toContain("/docs/api-reference/")
   })
 
   /**

@@ -79,4 +79,10 @@ export const addressedRootIn = (scope: ParentNode): Element | undefined => {
   return scope.querySelector(`[${LOOM_TREE_ATTRIBUTE}]`) ?? undefined
 }
 
-export { LOOM_NODE_ATTRIBUTE, LOOM_REVISION_ATTRIBUTE, LOOM_TREE_ATTRIBUTE, LOOM_TYPE_ATTRIBUTE } from "./editable.js"
+export {
+  LOOM_AUDIENCE_ATTRIBUTE,
+  LOOM_NODE_ATTRIBUTE,
+  LOOM_REVISION_ATTRIBUTE,
+  LOOM_TREE_ATTRIBUTE,
+  LOOM_TYPE_ATTRIBUTE,
+} from "./editable.js"

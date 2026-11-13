@@ -32,12 +32,13 @@ the portal every day.
 | Content | **none** — no text, no URLs, no typed values, nothing about the reader |
 | Configuration | the host's argument, never a prop in the tree |
 | Default | off; an unaddressed render is byte-identical |
-| Browser cost | **7,543 bytes** minified, **3,350 gzipped**, measured 9 November by the gate itself; `src/signals/browser-weight.test.ts` fails if an import reaches a package, and now also if the bundle passes 8,000 minified or 3,600 gzipped. The 3,361 this row carried from 7 November was the same bundle measured through `gzip -9` on the command line, which writes the file's name into the header — the gate's `gzipSync` is the figure to quote, because it is the one that can fail |
+| Browser cost | **7,852 bytes** minified, **3,458 gzipped**, measured 12 November (evening) by the gate itself, which leaves **148 bytes of the 8,000 and 142 of the 3,600**. This row read 7,543 and 3,350 from 9 November and went false on 12 November at 08:59, when #870 taught the broadcaster to carry a reader's segment (0385) and spent 309 minified and 108 gzipped with no figure in that pull request or its record; the ceiling held, so nothing said so. `src/signals/browser-weight.test.ts` fails if an import reaches a package, and now also if the bundle passes 8,000 minified or 3,600 gzipped. The 3,361 this row carried from 7 November was the same bundle measured through `gzip -9` on the command line, which writes the file's name into the header — the gate's `gzipSync` is the figure to quote, because it is the one that can fail |
 | What a broadcast follows | the page, when it is handed the `Document` ([0366](../decisions/0366-a-broadcast-handed-a-document-follows-the-page-and-a-client-side-navigation-is-a-new-page-view.md)) — a client-side navigation ends one page view and opens another with its own arrival, a re-render leaves the page view alone, and the same revision rendered again continues it; handed an `Element` it reads that element's tree and revision once, as it always has |
 | How long a delivery lives | two windows since 5 November: counted once it is ripe, **kept for 30 days by default** and then deleted ([0349](../decisions/0349-a-projects-reader-events-are-kept-thirty-days-by-default-and-the-tallies-stay-the-durable-record.md), [0351](../decisions/0351-a-counted-delivery-is-kept-for-a-stated-window-rather-than-deleted-by-the-fold.md)) — and nothing deletes a delivery no fold has counted, so a deployment whose collection stopped keeps rather than loses them |
 | What an operator can look at, delivery by delivery | one row per signal the deployment still keeps, newest first, in exact pages, with the rest of one page view beside any of them ([0355](../decisions/0355-the-events-a-screen-lists-are-one-row-per-signal-and-one-page-view-is-read-on-a-key-the-caller-already-holds.md)) — the handle the *Events* tab is drawn from, which counts nothing, names no page and cannot be asked which page views exist |
 | What readers did inside a part | every addressed node of one revision, with what readers did **to** it and what they did **inside** it over a range ([0368](../decisions/0368-what-readers-did-inside-a-part-is-derived-from-the-tree-and-the-sum-is-exact-because-occurrences-add.md)) — derived from the tree rather than from the payload, so *forty presses in the pricing band last Tuesday* costs no byte anywhere, and exact because one signal wrote one row on one node |
 | When readers arrived | page views counted under the hour they began in as well as in total ([0356](../decisions/0356-page-views-are-counted-under-the-hour-they-began-in-as-a-sixth-counter-written-at-the-door.md)), written at the door in the same transaction as the total — so a chart by hour sums to the count drawn beside it, and a reading over a range says where its data starts |
+| What a reader's day looks like | a range of hours folded two ways ([0389](../decisions/0389-a-range-of-hours-is-folded-into-its-days-and-into-the-hours-of-a-readers-day-where-the-mean-is-the-only-comparable-figure.md)) — into its **days**, so the thirty-day range the wireframe offers is thirty bars rather than seven hundred and twenty, and into the **hours of the day**, so *when are my readers here* and *when can a change go out* are answerable. Read-time, nothing stored, and the hours of the day are compared by a mean per day, because a range is almost never a whole number of days and the totals would rank them by where it ended |
 | Which page a change helped and which it hurt | every page's sharpest movement in each direction, at the later window's door scale ([0291](../decisions/0291-a-deployments-change-is-two-orders-at-the-doors-scale-because-a-page-has-no-net-movement.md)), as two orders rather than one — because a page the change both helped and hurt has no net |
 | What a change did to the funnel | the rate bracketed by each window's own ceiling, with a counterfactual saying which half moved ([0288](../decisions/0288-a-change-to-a-funnel-is-two-shares-that-factor-and-a-difference-of-two-floors-is-a-bracket.md)), so a rollup window a deployment shortened cannot read as a collapse |
 | How much of what it says gets read | words readers reached against the words the window can speak for ([0235](../decisions/0235-how-much-of-a-page-gets-read-is-a-share-of-words-that-partition-it-and-the-typical-reader-is-a-ceiling.md), [0287](../decisions/0287-a-share-of-a-pages-words-is-a-share-of-the-words-the-window-can-speak-for-and-spoken-for-is-one-predicate.md)), with the passages nobody saw — and no share at all where nothing reports reach |
@@ -5197,6 +5198,75 @@ page's reading stopped, which would make *rewrite this page* arrive with *and
 here is where* — and is a change to the fix-list's own shape rather than a corner
 of this run.
 
+### 82. The shape of a deployment's day · `Loom signals` · **done, 10 November**
+
+§76 put a clock on the page-view counter
+([0356](../decisions/0356-page-views-are-counted-under-the-hour-they-began-in-as-a-sixth-counter-written-at-the-door.md))
+and §77 put one on what readers did
+([0362](../decisions/0362-what-readers-did-is-counted-under-the-hour-they-did-it-in-as-a-seventh-counter-the-fold-writes-for-the-three-delegated-kinds.md)).
+Both are read as a dense hourly series over a range, under one honesty rule
+spelled once in `hourlySeriesOf`.
+
+**An hour is the unit the counter holds and not the unit a screen can draw.**
+[`portal-wireframes.md`](portal-wireframes.md) *1 · Signals* offers a range
+picker of **last 24 hours, 7 days, 30 days**. The first is 24 bars. The third is
+**720** — and a surface that buckets them itself is that rule spelled a third
+time, in a route group, by whoever is drawing the chart that week.
+
+**Done**
+([0389](../decisions/0389-a-range-of-hours-is-folded-into-its-days-and-into-the-hours-of-a-readers-day-where-the-mean-is-the-only-comparable-figure.md)),
+as two read-time folds of a series a caller already holds — no store, no clock,
+no new table, nothing added to any payload.
+
+- **`daySeriesOf` is the picker's third option, drawn.** Thirty bars, dense, with
+  a day the range or the clock cut short **marked rather than dropped**: it keeps
+  its count, says how many of its twenty-four hours the series could speak for,
+  and the sum over the days equals the sum over the hours in every range.
+- **`dayShapeOf` is a question no counter here had been asked.** Every 09:00 of a
+  range summed together is what a reader's day looks like on this deployment —
+  *when are my readers here*, and *when can a change go out without anybody
+  reading the page as it moves*. Twenty-four bars whatever the range.
+- **The mean per day is the key, and the totals are the plausible-false
+  figure.** A range is hour-aligned and almost never a whole number of days, so
+  the hours of the day do not rest on the same number of days: *last 7 days* read
+  at 09:30 holds eight 09:00s and seven 03:00s. `DayHour.perDay` is what
+  `busiestHoursIn` ranks on, `days` and `count` are published beside it, and
+  `DayShape.even` says whether the raw counts may be compared at all. **The
+  mutation that ranks by the total survived the first sweep of this module's
+  tests**, which is the evidence that the wrong key is invisible rather than
+  obviously wrong.
+- **An hour of the day no day could speak for is withheld and never nought.**
+  *Nobody reads this page at 03:00* and *this range holds no finished 03:00* are
+  one bar apart and opposite answers, and `quietestHoursIn` **will not name an
+  unobserved hour** — which is the one way this reading could recommend a deploy
+  window off the absence of evidence rather than evidence of absence.
+- **Only whole hours reach the shape, and the arithmetic closes.** The hour in
+  progress is kept out of the mean and out of the day count, and what it held is
+  published as `incomplete`, so `count + incomplete` is the figure the series
+  publishes for the range.
+- **Counts add and days do not.** An hour handed over twice adds its count twice
+  and is one hour of one day either way, because a denominator that counted a day
+  twice is a mean permanently half what it should be (0158). The input is a
+  **series** and not a store's rows, and `whole` is the field no row carries, so
+  the mistake does not typecheck.
+- **The offset is whole hours from UTC and is not a time zone.** A nine-o'clock
+  peak in California arrives in these buckets as 17:00, so both readings take an
+  offset and publish the one they were taken at. A half-hour zone is not nameable
+  from hour buckets at all, and a zone that observes summer time is an hour out
+  for part of the range — stated rather than papered over.
+- **No floor, and the reason is not the region counter's reason.** A region bucket
+  is floored because a place and a handful of views is a person
+  ([0214](../decisions/0214-where-readers-are-is-a-floored-bucket-counted-at-the-door-and-a-page-view-says-when-it-began.md));
+  neither fold narrows anything the hourly series does not already narrow, both
+  are strictly coarser than it, and no bucket here names anywhere or anybody.
+
+**Nothing reaches a reader's browser.** `broadcast.ts` and its import graph hold
+no file in this branch, and the bundle measures what it measures on `main`.
+
+**What is left and is filed:** the two charts are the portal's to draw; a third
+fold by the day of the week, which is the same machinery and which nothing on a
+wireframe asks for yet; and sixteen new names on `@jam-overture/loom/signals`
+with no prose, which is `Loom docs`'.
 ### 83. The place a fix-list row says to go to · `Loom signals` · **done, 10 November**
 
 §81 built the fourth order
@@ -5258,6 +5328,269 @@ exactly that cap.
 place rather than a fall, which is 0377's question and the maintainer's; and the
 *By page* drawer's two locations, which is the portal's to draw and now has two
 member comments written to be lifted.
+
+### 85. The part that was on a reader's screen and said nothing · `Loom signals` · **done, 11 November**
+
+§80 gave a page's reading a frontier and, with it, `PageFrontier.notReporting`:
+**parts that said nothing while a part inside them said it was reached.** A
+reader was demonstrably below such a part, so it was on a screen and did not say
+so, and `frontier.ts` has called it *a defect rather than a reading* since the
+day it landed. **Nothing acted on it.** This lane filed the gap on 9 November in
+as many words — *`notReporting` is a different list and wants a different
+sentence; a part that said nothing with a reader demonstrably below it is a
+primitive to fix in the library, not a page to rewrite, and the fault vocabulary
+has no member for it.*
+
+**Done**
+([0382](../decisions/0382-a-part-that-reported-nothing-with-a-reader-below-it-is-an-eighth-collection-fault-and-it-reaches-both-ranking-keys.md)),
+as an eighth member of `CollectionFault` with nothing added to any payload,
+table or browser and **no new name published on
+`@jam-overture/loom/signals`** — a member of a closed union and a field on a
+published type are neither of them names.
+
+- **Raised from the frontier rather than spelled again.** `healthOf` reads
+  `pageFrontierOf(reading).notReporting.length` exactly as it reads
+  `pageActionOf(reading).unwalked` for `actions-uncredited` (0242). Its remedy
+  is `senders` and it is published beside that fault, the two being the ones
+  the join to the tree reveals and the same hand answers for.
+- **It reaches both ranking keys, and the fall is the sharper half.** A fall is
+  between two siblings on `reached`; a part that never reports has a `reached`
+  of nought while readers were below it, so the fall into it is total — and a
+  total fall is the sharpest fall a page can have. **One silent part is enough
+  to put a page readers were perfectly happy with at the head of the fix-list.**
+  So the page leaves both orders and arrives as `contested` collection work,
+  carrying the rank it was taken out of. The conversion half is argued
+  separately in the record, because it is the weaker of the two.
+- **What it can see is a fraction of what it names, and the member says so.**
+  Only a part with something reported *inside* it is detectable, so a silent
+  leaf is indistinguishable from a part nobody reached. The claim is therefore
+  *this page's senders do not report everything they are on* — about every
+  `reached` count on the page — and never *these are the parts that went
+  missing*. `PageHealth.unreporting` is published as a floor on the defect for
+  the same reason.
+- **A mishandled row is not suppressed by it, nor it by a mishandled row.** A
+  tree and a window that do not belong together can manufacture this fault as
+  readily as they manufacture a fall (0212), and both are published in the
+  vocabulary's own order. A page can have both for unrelated reasons, and
+  hiding a real sender defect behind a caller's mistake is the worse error.
+- **Counted once.** A caller concatenating two reads of one page gets one row,
+  one `unreporting` figure and `duplicated` 1, because a count that has been
+  doubled cannot be undoubled (0158).
+
+**The finding inside the unit, which is the part worth reading twice.** Every
+page fixture in `agenda.test.ts`, `health.test.ts` and `window-agenda.test.ts`
+gave its bands counters and gave the **stack holding them none** — so every page
+this lane has ever tested against was a page whose outermost part was on a
+reader's screen and said nothing. Four fixtures were modelling the defect by
+accident and nothing in the repository could see it; they report the page now,
+which is what a sender does. **57 of the 125 tests in those three files went red
+at once** — five of them the vocabulary tests a new member legitimately moves,
+the other 52 fixtures — and all 52 went green with one published figure changed
+and no assertion weakened.
+
+**Nothing reaches a reader's browser.** `broadcast.ts` and its import graph are
+untouched, and the bundle measures **7,543 bytes minified and 3,350 gzipped**,
+which is what it measures on `main`.
+
+**It publishes no name, and that is why it was the unit chosen that evening.**
+The published-names index had **148 bytes of headroom** under its 40,000-byte
+cap — about seven names, and they were nobody's to hold down — and this lane had
+already lost §82 to it. A member of a closed union and a field on a published
+type are neither of them names, so the figure on this branch was `main`'s byte
+for byte. **The cap is no longer the constraint:** `Loom docs` front-coded the
+file the next morning (#859) — each entry point's names sorted, with one
+base-36 digit saying how much of the previous name to keep — and it measures
+**27,289 bytes of 40,000 with 2,116 names in it** on the evening of
+12 November, so the next unit here is free to publish a door.
+
+**It arrived with nothing to spare, which is the figure to keep.** Written as a
+JSON array the way it travelled until that morning, those same 2,116 names
+measure **40,223 bytes** — *over* the cap. The index crossed it **within a day**
+of the remedy landing, and the remedy is the only reason nothing is red. Every
+entry in `FINDINGS.md` that worried about the last hundred bytes was right about
+how little room there was and a day early about when it would matter.
+
+**What is left and is filed:** *which of your components are silent*, the same
+defect gathered by primitive type rather than by page, which is the sentence the
+9 November entry reaches for and is a unit of its own. It answers a question
+nobody can ask until a deployment knows it has the defect at all, and the names
+index it would publish onto has room now.
+
+### 86. How long readers stay on one part · `Loom signals` · **done, 12 November**
+
+The *Goals* screen has carried the line *Stays on it waits on time on a part
+being counted per reader* since 8 November, and `docs/portal.md` records it
+twice. **The time was never missing.** A tally carries `dwellMs` beside `reached`
+for every part of every revision, and
+[0230](../decisions/0230-a-part-was-read-when-readers-had-time-for-its-words-and-only-the-skim-is-a-safe-claim.md)
+has divided the two for a part of **one** page since it landed. What was
+unaskable is the same question of a goal's part, which is one node id standing
+on nine pages: nine rows, nine word counts and nine doors, and nothing added
+them up.
+
+**Done**
+([0381](../decisions/0381-a-parts-pace-across-pages-is-one-pooled-quotient-and-a-goals-part-is-a-reading-of-its-own.md)),
+as the twenty-third reading taken out of the server-side join of 0212 rather
+than collected — **no payload field, no counter, no column, no table, no byte on
+any wire and nothing in a reader's browser.**
+
+- **`PartPace.spentMs` is the figure**: the time the typical reader who reached
+  this part had there, across every page it stands on.
+- **One pooled quotient, never a mean of the pages' paces.** `dwellMs` added as
+  the rows hold it over `readers × wordsWithin × msPerWord` added per page —
+  which is a mean of the per-page paces weighted by the words each page put in
+  front of readers, 0325's rule arrived at again. The test that kills the other
+  shape holds a part four hundred readers skimmed beside one reader who
+  lingered: the mean reads `lingered`, the pooled figure reads `skimmed`.
+- **Each page's own words, each page's own door.** The same node can say more on
+  one page than on another, and nine straddle rates are not one scalar — so
+  there is no `inflation` argument, exactly as `libraryPaceOf` has none (0250).
+- **Nothing nests, so nothing needs a nesting rule.** A node id stands at most
+  once in a revision. The only way a page can enter twice is a caller handing
+  the same reading in twice, which is deduplicated on `readingKeyOf`, reported
+  in `duplicated`, and asserted against the single-reading figures term by term
+  (0158).
+- **A node standing as two primitives on two pages is reported, not resolved.**
+  `typeDisagreed` names the later types and the first page's answer stands.
+- **The silences are a kind's four, as values.** `KindPaceSilence` unchanged, so
+  no twenty-third silence vocabulary and no twenty-third `meaningOf` landed with
+  this; only the sentence is part-shaped, in `describePartPaceSilence`.
+
+**Three names reach `@jam-overture/loom/signals`** — `partPaceOf`, `PartPace`
+and `describePartPaceSilence`. They were costed against a names index with 148
+bytes of headroom, and the unit was shaped around that number. **#859
+front-coded the file before this merged, so the measured cost is 27 bytes of
+12,738, leaving 12,711** — 27,262 bytes over 2,113 names on `main` at
+`e20d0b41`, 27,289 over 2,116 with these three. The figures first written here
+were the old cap's and were corrected on 12 November (evening); see the findings
+entry of that evening for what the cap cost this unit's design while it was
+tight. The silence vocabulary is still reused, now for the reason that outlives
+the cap: a second name for each of four identical states needs a second closed
+set and a second `meaningOf` to keep in step with it.
+
+**Nothing reaches a reader's browser.** `broadcast.ts` and its import graph are
+untouched, and the bundle measures what it measures on `main`.
+
+**What is left and is filed:** *Stays on it* is answerable **since counting
+began** and not over a range, because the hourly table holds what readers *did*
+and not what they saw — a stated limit of 0362, and the hourly dwell counter
+that would lift it is priced and declined in the entry of 6 November. And a
+per-page breakdown — *which page is this part skimmed on* — is a second question
+with a second shape that nothing has asked. **§87 asked it.**
+
+### 87. Which page a part is skimmed on · `Loom signals` · **done, 12 November**
+
+§86 left one sentence half-said. `PartPace.standings` lets a goal's screen say
+*this part is paced across your pages and **skimmed on two of them***, and
+nothing on the reading says which two. **The rows were already computed and
+summed away**: the loop reads each page's own pace, its own words and its own
+door, adds them into the pooled sums and keeps nothing.
+
+**Done**
+([0390](../decisions/0390-a-parts-pages-are-a-second-order-ranked-on-the-reading-time-its-readers-did-not-have.md)),
+as the twenty-fourth reading taken out of the server-side join rather than
+collected, and it cost an array rather than any arithmetic — **no payload field,
+no counter, no column, no table, no byte on any wire and nothing in a reader's
+browser.**
+
+- **The decision was the order, and the key is a magnitude rather than a rate.**
+  `PartPace.ranked` is the pages the part is counted on by `shortMs` — the
+  reading time their readers did not have — most first, then the lower pace,
+  then by tree and newest revision first. A band four hundred readers had a
+  second of, where its words take five, is short of 1,600 seconds at a pace of
+  0.2; the same band on a page one reader hurried past is short of 4.9 at a pace
+  of 0.02. **The rate puts the single reader first**, which is the test that
+  kills it, and 0250 and 0377 already settled this for every other order here.
+- **`worst` is the one page to go to**, and `unranked` is every page it stands
+  on with no figures of its own, by page, each carrying the silence saying why.
+- **The rows add to the figure they break down**: `readers`, `dwellMs` and
+  `needMs` sum to `PartPace`'s three exactly, term by term, which is the only
+  thing tying the two together. `ranked.length` is `counted` and the two lists
+  together are `placements`.
+- **`shortMs` is the one term that does not add**, published on the row that is
+  ranked by it. The pooled figure lets a page readers lingered on pay for a page
+  they skimmed, and a row pays for nothing but itself — so the rows sum to at
+  least the figure above them and a surface adding them has contradicted it.
+- **A silent page's time on screen stays out of the sums.** A part that says
+  nothing can have been on screen for twenty seconds with no words to measure it
+  against; the row carries that time and the numerator refuses it.
+- **A row's verdict is its page's own reading's**, never one re-derived from the
+  row's `pace` — the two quotients agree mathematically and need not agree in
+  their last float place, and `standings` counts the first.
+
+**Two names reach `@jam-overture/loom/signals`** — `PacedPlace` and
+`MeasuredPlace` — at **20 bytes** of the published names index: 27,289 over
+2,116 names on `main`, 27,309 over 2,118 with them, **leaving 12,691 of
+40,000**. `MeasuredPlace` is the narrowed row, so a screen drawing the order
+does not null-check four fields an ordered row cannot be missing.
+
+**Nothing reaches a reader's browser.** `broadcast.ts` and its import graph are
+untouched, and the bundle measures **7,852 bytes minified and 3,458 gzipped**,
+which is what it measures on `main` — remeasured here because the figure this
+plan carried was 309 bytes stale, and the row at the top of this file is
+corrected to match. **148 bytes of 8,000 are left**, which is the number the next
+change to the broadcaster has to fit in.
+
+### 88. Which of your components are silent · `Loom signals` · **done, 13 November**
+
+The 11 November entry that filed
+[0382](../decisions/0382-a-part-that-reported-nothing-with-a-reader-below-it-is-an-eighth-collection-fault-and-it-reaches-both-ranking-keys.md)
+left one half of its own sentence open, and said so: *a primitive to fix **in
+the library**, not a page to rewrite* — and the fault it had just added is raised
+per page. **A deployment with forty pages built out of one silent
+`loom.accordion` gets forty faulted pages**, and nothing in the repository says
+they are forty symptoms of one thing. The errand the fix-list hands over is
+*rewrite these forty pages*, when the work is one primitive, once.
+
+**Done**
+([0393](../decisions/0393-a-silent-component-is-a-census-over-the-placements-the-defect-could-be-seen-on-and-the-share-is-bracketed.md)),
+as the twenty-fourth reading taken out of the server-side join of 0212 rather
+than collected — **no payload field, no counter, no column, no table, no byte on
+any wire and nothing in a reader's browser.**
+
+- **`librarySendersOf` gathers the defect by `KindKey`**, the way `library.ts`
+  gathers standing and `library-reach.ts` gathers readers. The sentence is
+  *`loom.accordion` is silent in thirty-one of the thirty-four places it stands,
+  across nineteen of your pages*, and `silentTrees` is the figure the per-page
+  fault cannot give.
+- **The denominator is the placements the defect could be seen on, and that is
+  the whole design.** A silent **leaf** reports exactly what a leaf nobody
+  reached reports, so it is undetectable for ever; a holder with nothing reported
+  below it is undetectable today. `leaves + unwitnessed + witnessed =
+  placements`, and the share is `silent ÷ witnessed`. Over the placements it
+  would fall as a library gained leaves and as a window lost readers — a figure
+  that moves when nothing about a sender has.
+- **The share is bracketed rather than guessed.** A witnessed placement whose own
+  standing is `unknown` reported something that was not a view with a reader
+  below it, which is plausibly the same defect and is not claimed as it (0282).
+  `share` excludes those and `atMost` includes them; where none exist the two are
+  equal.
+- **It is 0382's defect and not a second spelling of it.** The pre-order walk and
+  the prefix counts move to `subtrees.ts` — internal, not re-exported — and
+  `frontier.ts` takes them from there. The census total is asserted equal to the
+  sum of `PageFrontier.notReporting` over the same readings.
+- **The figure is a floor, and a surface must not say otherwise.** Three
+  populations are outside it. A deployment whose senders are entirely broken
+  publishes `witnessed: 0` and a silence, never a healthy share.
+- **A page handed in twice is folded once** (0158), deduplicated on
+  `readingKeyOf` and reported in `duplicated`, with every figure asserted term by
+  term against the single-reading one.
+
+**Seven names reach `@jam-overture/loom/signals`** — `librarySendersOf`,
+`LibrarySenders`, `KindSenders`, `SenderSilence`, `SENDER_SILENCES`,
+`describeSenderSilence` and `SILENT_EXAMPLES`. Measured on the front-coded index
+(#859), by building the file both ways: **27,289 bytes over 2,116 names on
+`main`, 27,368 over 2,123 with these seven — 79 bytes of the 12,711 there were,
+leaving 12,632.** Seven names for 79 bytes is the front-coding doing what it was
+for; the same seven would have been most of the old cap's headroom.
+
+**Nothing reaches a reader's browser.** `broadcast.ts` and its import graph are
+untouched, and the bundle measures what it measures on `main`.
+
+**What is left and is filed:** the portal view is `Loom portal`'s to draw, and
+what it may say is bounded by the floor above. And the sweep the 11 November
+entry asked for — *how many other fixtures in this repository model the defect by
+accident* — is still open and still two lanes' work.
 
 ## Still not in scope
 

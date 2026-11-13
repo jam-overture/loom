@@ -8,7 +8,7 @@
       "files": 100,
       "narrower": [],
       "standing": {
-        "packageNames": 2037,
+        "packageNames": 2071,
         "otherDoors": 18,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -4246,7 +4246,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 2037,
+        "packageNames": 2071,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -4287,10 +4287,10 @@
           "reach": "loaded"
         }
       ],
-      "files": 63,
+      "files": 64,
       "narrower": [],
       "standing": {
-        "packageNames": 2037,
+        "packageNames": 2071,
         "otherDoors": 18,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -4303,7 +4303,7 @@
           {
             "specifier": "@jam-overture/loom/addressed",
             "slug": "addressed",
-            "names": 4
+            "names": 5
           }
         ],
         "collisions": []
@@ -4684,15 +4684,21 @@
               "summary": ""
             },
             {
+              "name": "LOOM_AUDIENCE_ATTRIBUTE",
+              "kind": "value",
+              "signature": "const LOOM_AUDIENCE_ATTRIBUTE = \"data-loom-audience\"",
+              "summary": ""
+            },
+            {
               "name": "EditableAttributes",
               "kind": "type",
-              "signature": "type EditableAttributes = {\n    readonly [LOOM_NODE_ATTRIBUTE]: string;\n    readonly [LOOM_TYPE_ATTRIBUTE]: string;\n    /** Root element only — see `editableAttributes`. */\n    readonly [LOOM_TREE_ATTRIBUTE]?: string;\n    readonly [LOOM_REVISION_ATTRIBUTE]?: string;\n};",
+              "signature": "type EditableAttributes = {\n    readonly [LOOM_NODE_ATTRIBUTE]: string;\n    readonly [LOOM_TYPE_ATTRIBUTE]: string;\n    /** Root element only — see `editableAttributes`. */\n    readonly [LOOM_TREE_ATTRIBUTE]?: string;\n    readonly [LOOM_REVISION_ATTRIBUTE]?: string;\n    /** Root element only, and only when the page was served to a segment. */\n    readonly [LOOM_AUDIENCE_ATTRIBUTE]?: string;\n};",
               "summary": ""
             },
             {
               "name": "editableAttributes",
               "kind": "function",
-              "signature": "const editableAttributes: (node: ElementNode, tree?: LoomTree) => EditableAttributes",
+              "signature": "const editableAttributes: (node: ElementNode, tree?: LoomTree, audience?: AudienceId) => EditableAttributes",
               "summary": "The root element additionally carries the tree it belongs to and the revision it was rendered from, which is exactly the pair an `EditIntent` needs as its base. A portal can author an intent from the DOM alone, and an intent authored against a stale render names the stale revision rather than silently claiming the current one."
             }
           ]
@@ -4964,7 +4970,7 @@
             {
               "name": "RenderOptions",
               "kind": "type",
-              "signature": "type RenderOptions = {\n    readonly resolver: PrimitiveResolver;\n    /**\n     * Absent means props are not checked against declared schemas. A registry\n     * built by §4's SDK satisfies both this and `resolver`, so wiring the same\n     * object into both is the ordinary case.\n     */\n    readonly validator?: PropsValidator;\n    /**\n     * Absent means the tree's theme is not resolved and nothing is mounted, and\n     * a tree that names one says so in a diagnostic. Supplying a registry is what\n     * bounds the palettes, font packs and style presets a proposal may name.\n     */\n    readonly themes?: ThemeRegistry;\n    /**\n     * Absent means the tree's bindings are not answered, and a tree that declares\n     * one says so in a diagnostic. Resolution is async and rendering is not, so it\n     * happens before the walk — `renderRequest` does it, and a caller driving\n     * `renderLoomTree` itself resolves with `resolveTreeData` first.\n     */\n    readonly data?: DataResolution;\n    /**\n     * Absent means the tree's submissions are not answered, and a tree that names\n     * an endpoint says so in a diagnostic. Resolution may do IO — minting a token\n     * usually does — so it happens before the walk, the same way data does;\n     * `renderRequest` does it, and a caller driving `renderLoomTree` itself\n     * resolves with `resolveTreeSubmissions` first.\n     */\n    readonly submissions?: SubmissionResolution;\n    /**\n     * The origins this deployment is willing to frame. Absent means every\n     * framable prop is refused, and each one says so in a diagnostic — the seam\n     * fails closed, because the registry *is* the allowlist and a deployment that\n     * has not written one has not agreed to run anybody's script inside its\n     * pages.\n     */\n    readonly origins?: FrameOriginRegistry;\n    /**\n     * The host's answer for the strings primitives declared — a dictionary, in the\n     * language this deployment serves. Absent means the declared strings render as\n     * their authors wrote them, which is what an untranslated deployment wants and\n     * needs no wiring: the renderer reads declarations off `resolver` when that\n     * resolver is a registry. `textResolverFor` builds one of these from a\n     * registry and a dictionary.\n     */\n    readonly text?: TextResolver;\n    /** Off by default: decoration is opt-in per request, never ambient. */\n    readonly editMode?: boolean;\n    /**\n     * Stamp each element's identity on the markup without anything else edit mode\n     * means, so a published page can say which node a reader saw or clicked.\n     */\n    readonly addressed?: boolean;\n    readonly slots?: SlotContent;\n    /**\n     * How the mounted theme reaches the elements: as the `var()` references\n     * primitives write, or as the values those references stand for.\n     */\n    readonly themeValues?: \"variables\" | \"literals\";\n};",
+              "signature": "type RenderOptions = {\n    readonly resolver: PrimitiveResolver;\n    /**\n     * Absent means props are not checked against declared schemas. A registry\n     * built by §4's SDK satisfies both this and `resolver`, so wiring the same\n     * object into both is the ordinary case.\n     */\n    readonly validator?: PropsValidator;\n    /**\n     * Absent means the tree's theme is not resolved and nothing is mounted, and\n     * a tree that names one says so in a diagnostic. Supplying a registry is what\n     * bounds the palettes, font packs and style presets a proposal may name.\n     */\n    readonly themes?: ThemeRegistry;\n    /**\n     * Absent means the tree's bindings are not answered, and a tree that declares\n     * one says so in a diagnostic. Resolution is async and rendering is not, so it\n     * happens before the walk — `renderRequest` does it, and a caller driving\n     * `renderLoomTree` itself resolves with `resolveTreeData` first.\n     */\n    readonly data?: DataResolution;\n    /**\n     * Absent means the tree's submissions are not answered, and a tree that names\n     * an endpoint says so in a diagnostic. Resolution may do IO — minting a token\n     * usually does — so it happens before the walk, the same way data does;\n     * `renderRequest` does it, and a caller driving `renderLoomTree` itself\n     * resolves with `resolveTreeSubmissions` first.\n     */\n    readonly submissions?: SubmissionResolution;\n    /**\n     * The origins this deployment is willing to frame. Absent means every\n     * framable prop is refused, and each one says so in a diagnostic — the seam\n     * fails closed, because the registry *is* the allowlist and a deployment that\n     * has not written one has not agreed to run anybody's script inside its\n     * pages.\n     */\n    readonly origins?: FrameOriginRegistry;\n    /**\n     * The host's answer for the strings primitives declared — a dictionary, in the\n     * language this deployment serves. Absent means the declared strings render as\n     * their authors wrote them, which is what an untranslated deployment wants and\n     * needs no wiring: the renderer reads declarations off `resolver` when that\n     * resolver is a registry. `textResolverFor` builds one of these from a\n     * registry and a dictionary.\n     */\n    readonly text?: TextResolver;\n    /** Off by default: decoration is opt-in per request, never ambient. */\n    readonly editMode?: boolean;\n    /**\n     * Stamp each element's identity on the markup without anything else edit mode\n     * means, so a published page can say which node a reader saw or clicked.\n     */\n    readonly addressed?: boolean;\n    /**\n     * The segment the site's server sorted this reader into, when it sorted them\n     * into one — what `segmentOf` from `@jam-overture/loom/live` answers.\n     */\n    readonly audience?: AudienceId;\n    readonly slots?: SlotContent;\n    /**\n     * How the mounted theme reaches the elements: as the `var()` references\n     * primitives write, or as the values those references stand for.\n     */\n    readonly themeValues?: \"variables\" | \"literals\";\n};",
               "summary": ""
             },
             {
@@ -5001,7 +5007,7 @@
             {
               "name": "RenderRequest",
               "kind": "type",
-              "signature": "type RenderRequest = {\n    readonly treeId: TreeId;\n    /** Decoration is a property of the request, so one process can serve both. */\n    readonly editMode: boolean;\n    /**\n     * Identity on a published page's markup, so reader signals can name the node\n     * they are about. Off when absent.\n     */\n    readonly addressed?: boolean;\n    /** Opaque host context — audience, locale, flags — passed through to the source. */\n    readonly context?: JsonObject;\n};",
+              "signature": "type RenderRequest = {\n    readonly treeId: TreeId;\n    /** Decoration is a property of the request, so one process can serve both. */\n    readonly editMode: boolean;\n    /**\n     * Identity on a published page's markup, so reader signals can name the node\n     * they are about. Off when absent.\n     */\n    readonly addressed?: boolean;\n    /**\n     * The segment the site's server sorted this reader into, written on an\n     * addressed page's root so its signals are filed under it. See\n     * `RenderOptions.audience`.\n     */\n    readonly audience?: AudienceId;\n    /** Opaque host context — audience, locale, flags — passed through to the source. */\n    readonly context?: JsonObject;\n};",
               "summary": ""
             },
             {
@@ -5243,7 +5249,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 2037,
+        "packageNames": 2071,
         "otherDoors": 18,
         "doorsSharingNothing": 17,
         "widest": false,
@@ -5251,7 +5257,7 @@
           {
             "specifier": "@jam-overture/loom/react",
             "slug": "react",
-            "names": 4
+            "names": 5
           }
         ],
         "collisions": []
@@ -5298,6 +5304,12 @@
               "kind": "value",
               "signature": "const LOOM_REVISION_ATTRIBUTE = \"data-loom-revision\"",
               "summary": ""
+            },
+            {
+              "name": "LOOM_AUDIENCE_ATTRIBUTE",
+              "kind": "value",
+              "signature": "const LOOM_AUDIENCE_ATTRIBUTE = \"data-loom-audience\"",
+              "summary": ""
             }
           ]
         }
@@ -5318,7 +5330,7 @@
       "files": 220,
       "narrower": [],
       "standing": {
-        "packageNames": 2037,
+        "packageNames": 2071,
         "otherDoors": 18,
         "doorsSharingNothing": 17,
         "widest": false,
@@ -5788,7 +5800,7 @@
       "files": 81,
       "narrower": [],
       "standing": {
-        "packageNames": 2037,
+        "packageNames": 2071,
         "otherDoors": 18,
         "doorsSharingNothing": 17,
         "widest": false,
@@ -6876,7 +6888,7 @@
       "files": 38,
       "narrower": [],
       "standing": {
-        "packageNames": 2037,
+        "packageNames": 2071,
         "otherDoors": 18,
         "doorsSharingNothing": 17,
         "widest": false,
@@ -7441,7 +7453,7 @@
       "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 2037,
+        "packageNames": 2071,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -7644,11 +7656,17 @@
       "files": 45,
       "narrower": [],
       "standing": {
-        "packageNames": 2037,
+        "packageNames": 2071,
         "otherDoors": 18,
-        "doorsSharingNothing": 18,
+        "doorsSharingNothing": 17,
         "widest": false,
-        "sharedWith": [],
+        "sharedWith": [
+          {
+            "specifier": "@jam-overture/loom/live",
+            "slug": "live",
+            "names": 3
+          }
+        ],
         "collisions": []
       },
       "groups": [
@@ -8688,7 +8706,7 @@
       "files": 61,
       "narrower": [],
       "standing": {
-        "packageNames": 2037,
+        "packageNames": 2071,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -9067,7 +9085,7 @@
       "files": 45,
       "narrower": [],
       "standing": {
-        "packageNames": 2037,
+        "packageNames": 2071,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -9319,17 +9337,48 @@
       "slug": "live",
       "types": "./dist/live/index.d.ts",
       "requires": [],
-      "files": 14,
+      "files": 22,
       "narrower": [],
       "standing": {
-        "packageNames": 2037,
+        "packageNames": 2071,
         "otherDoors": 18,
-        "doorsSharingNothing": 18,
+        "doorsSharingNothing": 17,
         "widest": false,
-        "sharedWith": [],
+        "sharedWith": [
+          {
+            "specifier": "@jam-overture/loom/store",
+            "slug": "store",
+            "names": 3
+          }
+        ],
         "collisions": []
       },
       "groups": [
+        {
+          "module": "audience/compose",
+          "title": "Compose",
+          "summary": "A page as the reader in front of it gets it: the base tree, plus the deltas the audiences they are in have earned.",
+          "symbols": [
+            {
+              "name": "AudienceForm",
+              "kind": "type",
+              "signature": "type AudienceForm = {\n    readonly audienceId: AudienceId;\n    readonly delta: TreeDelta;\n};",
+              "summary": "The delta one audience earns, against the base it was authored on."
+            },
+            {
+              "name": "ComposeError",
+              "kind": "type",
+              "signature": "type ComposeError = \n/** A rule matched an audience the overlay has no delta for. */\n{\n    readonly code: \"no-form\";\n    readonly audienceId: AudienceId;\n}\n/** The base moved and this delta was authored against an older revision. */\n | {\n    readonly code: \"stale-form\";\n    readonly audienceId: AudienceId;\n    readonly expected: number;\n    readonly actual: number;\n}\n/** The delta is for another page. */\n | {\n    readonly code: \"form-mismatch\";\n    readonly audienceId: AudienceId;\n    readonly treeId: string;\n}\n/** The operations did not apply, or what they produced is not a tree. */\n | {\n    readonly code: \"unapplicable\";\n    readonly audienceId: AudienceId;\n    readonly detail: string;\n};",
+              "summary": ""
+            },
+            {
+              "name": "describeComposeError",
+              "kind": "function",
+              "signature": "const describeComposeError: (error: ComposeError) => string",
+              "summary": ""
+            }
+          ]
+        },
         {
           "module": "live/pages",
           "title": "Pages",
@@ -9338,8 +9387,8 @@
             {
               "name": "LivePages",
               "kind": "type",
-              "signature": "type LivePages = {\n    /** The live pages, by the id of the page each one is. */\n    readonly pages: ReadonlyMap<TreeId, LoomTree>;\n    /** The entity tag the door gave for exactly these pages, if it gave one. */\n    readonly tag: string | undefined;\n    /** When the door last answered, whether it answered pages or `304`. */\n    readonly pulledAt: number | undefined;\n    /** When these pages arrived, which is older than `pulledAt` after a `304`. */\n    readonly freshAt: number | undefined;\n    /** Failed pulls since the last one the door answered. Zero while current. */\n    readonly failures: number;\n};",
-              "summary": "What a pull leaves behind: the pages, the tag that names them, and enough of the last outcome to say whether the site is current."
+              "signature": "type LivePages = {\n    /** The live pages, by the id of the page each one is. */\n    readonly pages: ReadonlyMap<TreeId, LoomTree>;\n    /**\n     * Each live page's segment rules, in the order the portal set. A page with\n     * none is absent, and every reader of it is in no segment.\n     */\n    readonly rules: ReadonlyMap<TreeId, readonly AudienceRule[]>;\n    /**\n     * Each live page's segment forms: the delta one segment's readers are served\n     * over the base. A page with none is absent,\n     * and so is a segment that is only a name — which is what every segment was\n     * before the door answered forms.\n     */\n    readonly forms: ReadonlyMap<TreeId, readonly AudienceForm[]>;\n    /** The entity tag the door gave for exactly these pages, if it gave one. */\n    readonly tag: string | undefined;\n    /** When the door last answered, whether it answered pages or `304`. */\n    readonly pulledAt: number | undefined;\n    /** When these pages arrived, which is older than `pulledAt` after a `304`. */\n    readonly freshAt: number | undefined;\n    /** Failed pulls since the last one the door answered. Zero while current. */\n    readonly failures: number;\n};",
+              "summary": "What a pull leaves behind: the pages, the rules that sort their readers, the tag that names both, and enough of the last outcome to say whether the site is current."
             },
             {
               "name": "NO_LIVE_PAGES",
@@ -9352,6 +9401,24 @@
               "kind": "function",
               "signature": "const livePageOf: (held: LivePages, page: TreeId) => LoomTree | undefined",
               "summary": "The live page for this page id, or `undefined` to render the page as built."
+            },
+            {
+              "name": "segmentOf",
+              "kind": "function",
+              "signature": "const segmentOf: (held: LivePages, page: TreeId, context: JsonObject | undefined) => AudienceId | undefined",
+              "summary": "The segment this reader of this page is in, or `undefined` for none — which is `aud_everyone`, and is what a page with no rules answers for every reader."
+            },
+            {
+              "name": "ServedPage",
+              "kind": "type",
+              "signature": "type ServedPage = {\n    /** The tree to render — the live page with this reader's forms applied. */\n    readonly tree: LoomTree;\n    /**\n     * The segment to file this page view under, or `undefined` for\n     * `aud_everyone`. Absent after a refusal, because the reader got the base.\n     */\n    readonly audience: AudienceId | undefined;\n    /**\n     * Why the forms were not applied, for the host's log. `undefined` on every\n     * request a deployment intends, including every request of a page with no\n     * segments at all.\n     */\n    readonly refusal: ComposeError | undefined;\n};",
+              "summary": "A page as one reader gets it: what to render, and what to call them while they read it."
+            },
+            {
+              "name": "pageForReader",
+              "kind": "function",
+              "signature": "const pageForReader: (held: LivePages, built: LoomTree, context: JsonObject | undefined) => ServedPage",
+              "summary": "What to render for this reader, and what to file their signals under."
             },
             {
               "name": "livePagesHeld",
@@ -9391,10 +9458,22 @@
               "summary": "Why a pull did not move what the server holds."
             },
             {
+              "name": "LivePageRules",
+              "kind": "type",
+              "signature": "type LivePageRules = {\n    readonly treeId: TreeId;\n    readonly rules: readonly AudienceRule[];\n};",
+              "summary": "One page's segment rules as the door answers them: the page, and its list in the order the portal set."
+            },
+            {
+              "name": "LivePageForms",
+              "kind": "type",
+              "signature": "type LivePageForms = {\n    readonly treeId: TreeId;\n    readonly forms: readonly AudienceForm[];\n};",
+              "summary": "One page's segment forms as the door answers them: the page, and a delta per segment that has one, each authored against the revision of the page it arrives beside."
+            },
+            {
               "name": "SitePullOutcome",
               "kind": "type",
-              "signature": "type SitePullOutcome = {\n    readonly kind: \"fresh\";\n    readonly pages: readonly LoomTree[];\n    readonly tag: string | undefined;\n} | {\n    readonly kind: \"unchanged\";\n} | {\n    readonly kind: \"failed\";\n    readonly failure: SitePullFailure;\n};",
-              "summary": "What one pull did: brought pages, confirmed the ones held, or failed."
+              "signature": "type SitePullOutcome = {\n    readonly kind: \"fresh\";\n    readonly pages: readonly LoomTree[];\n    readonly rules: readonly LivePageRules[];\n    readonly forms: readonly LivePageForms[];\n    readonly tag: string | undefined;\n} | {\n    readonly kind: \"unchanged\";\n} | {\n    readonly kind: \"failed\";\n    readonly failure: SitePullFailure;\n};",
+              "summary": "What one pull did: brought pages and their rules, confirmed the ones held, or failed."
             },
             {
               "name": "PullFetch",
@@ -9484,7 +9563,7 @@
       "slug": "signals",
       "types": "./dist/signals/index.d.ts",
       "requires": [],
-      "files": 85,
+      "files": 89,
       "narrower": [
         {
           "specifier": "@jam-overture/loom/signals/broadcast",
@@ -9497,7 +9576,7 @@
         }
       ],
       "standing": {
-        "packageNames": 2037,
+        "packageNames": 2071,
         "otherDoors": 18,
         "doorsSharingNothing": 16,
         "widest": true,
@@ -11421,7 +11500,7 @@
             {
               "name": "CollectionFault",
               "kind": "type",
-              "signature": "type CollectionFault =\n/**\n * The window's counters hold readers of this revision and there is no\n * page-view row at the door for it.\n */\n\"door-unscaled\"\n/**\n * The door row is there, something counted readers of this revision — a\n * rollup's appearances, or the counters themselves — and nothing has ever\n * said a page view *began*.\n */\n | \"openings-unmarked\"\n/**\n * The revision's distinct counts are inflated past\n * {@link COUNTS_INFLATED_ABOVE}.\n */\n | \"counts-inflated\"\n/**\n * Page views of this revision are waiting to be folded and the last fold of\n * it was longer ago than the deployment said its collection takes.\n */\n | \"collection-stalled\"\n/**\n * The window holds uses of this page and credits none of them to a reader.\n */\n | \"actions-uncredited\"\n/**\n * Counters filed under this tree and revision that name nodes the tree does\n * not contain, or the same row handed in twice.\n */\n | \"rows-mishandled\"\n/**\n * The window holds two audiences' counters for this page and the reading was\n * taken of neither.\n */\n | \"audiences-mixed\";",
+              "signature": "type CollectionFault =\n/**\n * The window's counters hold readers of this revision and there is no\n * page-view row at the door for it.\n */\n\"door-unscaled\"\n/**\n * The door row is there, something counted readers of this revision — a\n * rollup's appearances, or the counters themselves — and nothing has ever\n * said a page view *began*.\n */\n | \"openings-unmarked\"\n/**\n * The revision's distinct counts are inflated past\n * {@link COUNTS_INFLATED_ABOVE}.\n */\n | \"counts-inflated\"\n/**\n * Page views of this revision are waiting to be folded and the last fold of\n * it was longer ago than the deployment said its collection takes.\n */\n | \"collection-stalled\"\n/**\n * The window holds uses of this page and credits none of them to a reader.\n */\n | \"actions-uncredited\"\n/**\n * A part of this page reported nothing while a part **inside it** reported\n * being reached.\n */\n | \"parts-unreporting\"\n/**\n * Counters filed under this tree and revision that name nodes the tree does\n * not contain, or the same row handed in twice.\n */\n | \"rows-mishandled\"\n/**\n * The window holds two audiences' counters for this page and the reading was\n * taken of neither.\n */\n | \"audiences-mixed\";",
               "summary": "Something wrong with what a deployment is collecting, rather than a quiet window."
             },
             {
@@ -11487,7 +11566,7 @@
             {
               "name": "PageHealth",
               "kind": "type",
-              "signature": "type PageHealth = {\n    readonly treeId: TreeId;\n    readonly revision: number;\n    /**\n     * The audience this row is about, or `null` where the reading named none.\n     */\n    readonly audienceId: AudienceId | null;\n    readonly standing: HealthStanding;\n    /**\n     * Every fault, in the order {@link COLLECTION_FAULTS} publishes them, which is\n     * the order they are worth reading in: the one that costs the denominator\n     * first, the three that are the deployment's, then the caller's.\n     */\n    readonly faults: readonly CollectionFault[];\n    /**\n     * The window's view floor, carried through from the reading unchanged.\n     */\n    readonly views: number;\n    /**\n     * Page views counted at the door, exact, or `null` where this revision has no\n     * row.\n     */\n    readonly arrivals: number | null;\n    /** The same page views as the rollups saw them, or `null` with no row. */\n    readonly appearances: number | null;\n    /** This revision's own straddle rate, or `null` where nothing has opened. */\n    readonly inflation: number | null;\n    /**\n     * Openings no rollup has folded yet, which is a figure and never a fault here.\n     */\n    readonly pending: number;\n    /**\n     * When a rollup last folded a window holding page views of this revision, or\n     * `null` where nothing attests one — including every revision with no door\n     * row at all.\n     */\n    readonly foldedAt: string | null;\n    /** Counters naming nodes this revision does not contain. */\n    readonly orphaned: number;\n    /** Node counters and door rows handed in more than once, added. */\n    readonly doubled: number;\n};",
+              "signature": "type PageHealth = {\n    readonly treeId: TreeId;\n    readonly revision: number;\n    /**\n     * The audience this row is about, or `null` where the reading named none.\n     */\n    readonly audienceId: AudienceId | null;\n    readonly standing: HealthStanding;\n    /**\n     * Every fault, in the order {@link COLLECTION_FAULTS} publishes them, which is\n     * the order they are worth reading in: the one that costs the denominator\n     * first, the four that are the deployment's, then the caller's.\n     */\n    readonly faults: readonly CollectionFault[];\n    /**\n     * The window's view floor, carried through from the reading unchanged.\n     */\n    readonly views: number;\n    /**\n     * Page views counted at the door, exact, or `null` where this revision has no\n     * row.\n     */\n    readonly arrivals: number | null;\n    /** The same page views as the rollups saw them, or `null` with no row. */\n    readonly appearances: number | null;\n    /** This revision's own straddle rate, or `null` where nothing has opened. */\n    readonly inflation: number | null;\n    /**\n     * Openings no rollup has folded yet, which is a figure and never a fault here.\n     */\n    readonly pending: number;\n    /**\n     * When a rollup last folded a window holding page views of this revision, or\n     * `null` where nothing attests one — including every revision with no door\n     * row at all.\n     */\n    readonly foldedAt: string | null;\n    /** Counters naming nodes this revision does not contain. */\n    readonly orphaned: number;\n    /** Node counters and door rows handed in more than once, added. */\n    readonly doubled: number;\n    /**\n     * Parts that reported nothing while a part inside them reported being\n     * reached, which is what `parts-unreporting` is raised on.\n     */\n    readonly unreporting: number;\n};",
               "summary": "One revision of one page, and what is wrong with what was collected about it."
             },
             {
@@ -12262,6 +12341,55 @@
           ]
         },
         {
+          "module": "signals/library-senders",
+          "title": "Library senders",
+          "summary": "**Which of a deployment's components are silent.**",
+          "symbols": [
+            {
+              "name": "SenderSilence",
+              "kind": "type",
+              "signature": "type SenderSilence =\n/**\n * Nothing in the pages read is of this kind at all.\n */\n\"unplaced\"\n/**\n * Every placement of this kind holds nothing, so the defect cannot be seen on\n * it at all.\n */\n | \"unwitnessable\"\n/**\n * It holds parts, and nothing below any of its placements reported reach in\n * this window.\n */\n | \"unwitnessed\";",
+              "summary": "Why a kind has no silent-sender share."
+            },
+            {
+              "name": "SENDER_SILENCES",
+              "kind": "value",
+              "signature": "const SENDER_SILENCES: readonly SenderSilence[]",
+              "summary": ""
+            },
+            {
+              "name": "describeSenderSilence",
+              "kind": "function",
+              "signature": "const describeSenderSilence: (silence: SenderSilence) => string",
+              "summary": "One line per silence, for a surface saying why a kind has no share."
+            },
+            {
+              "name": "KindSenders",
+              "kind": "type",
+              "signature": "type KindSenders = {\n    readonly kind: KindKey;\n    /** What part a type plays, or `null`. Always `null` on a role row, which carries it as its key. */\n    readonly role: PrimitiveRole | null;\n    /** Element nodes of this kind across the readings. */\n    readonly placements: number;\n    /** Distinct trees it stands in, which is not the number of placements and not the number of readings. */\n    readonly trees: number;\n    /** Distinct revisions it stands in: two live revisions of one page are two. */\n    readonly revisions: number;\n    /** Placements holding no part at all, where the defect can never be seen. */\n    readonly leaves: number;\n    /** Placements holding parts, none of which reported reach in this window. */\n    readonly unwitnessed: number;\n    /**\n     * Placements with at least one part below them reporting reach — the\n     * population the rest of this row is about.\n     */\n    readonly witnessed: number;\n    /**\n     * Witnessed placements that reported no view of themselves, which is the\n     * defect a page's own reading raises exactly as it raises it.\n     */\n    readonly silent: number;\n    /**\n     * Witnessed placements whose own standing is `unknown` — something other than\n     * a view, with a reader below.\n     */\n    readonly indeterminate: number;\n    /**\n     * {@link silent} over {@link witnessed}; `null` where {@link silence} says why\n     * not.\n     */\n    readonly share: number | null;\n    /**\n     * `(silent + indeterminate) ÷ witnessed`, the other end of the bracket;\n     * `null` with {@link share}.\n     */\n    readonly atMost: number | null;\n    /** Why {@link share} is not there, and `null` where it is. */\n    readonly silence: SenderSilence | null;\n    /**\n     * Distinct trees with at least one silent placement of this kind.\n     */\n    readonly silentTrees: number;\n    /**\n     * Nodes of this kind that were silent, in the order the readings were handed\n     * in, capped at {@link SILENT_EXAMPLES}.\n     */\n    readonly examples: readonly NodeId[];\n};",
+              "summary": "Whether one kind of part reports itself, everywhere it stands in the pages read."
+            },
+            {
+              "name": "SILENT_EXAMPLES",
+              "kind": "value",
+              "signature": "const SILENT_EXAMPLES = 5",
+              "summary": "How many silent nodes a row carries as examples."
+            },
+            {
+              "name": "LibrarySenders",
+              "kind": "type",
+              "signature": "type LibrarySenders = {\n    /**\n     * Every type that stands anywhere, most silent placements first.\n     */\n    readonly byType: readonly KindSenders[];\n    /**\n     * Every role in the vocabulary that stands anywhere, then the row for parts\n     * whose type declared none, in the same order as {@link byType}.\n     */\n    readonly byRole: readonly KindSenders[];\n    /** Readings counted, which is revisions of pages and not trees. */\n    readonly pages: number;\n    /** Distinct trees across them. */\n    readonly trees: number;\n    /** Element nodes across them, which is the sum of every type row's placements. */\n    readonly placements: number;\n    /** Placements the defect could be seen on, over the whole library. */\n    readonly witnessed: number;\n    /**\n     * Silent placements over the whole library, which is the sum of\n     * `PageFrontier.notReporting` over the same readings.\n     */\n    readonly silent: number;\n    /** Witnessed placements whose own standing is `unknown`, over the whole library. */\n    readonly indeterminate: number;\n    /**\n     * The type silent in the most places, which is the component to fix first.\n     */\n    readonly worstSender: KindSenders | null;\n    /**\n     * Readings of a revision beyond the first, which were dropped.\n     */\n    readonly duplicated: number;\n    /**\n     * Types whose readings disagreed about the role they play, where the first\n     * reading's answer stands.\n     */\n    readonly roleDisagreed: readonly PrimitiveType[];\n};",
+              "summary": "Which of a deployment's kinds of part report themselves, and which are silent."
+            },
+            {
+              "name": "librarySendersOf",
+              "kind": "function",
+              "signature": "const librarySendersOf: (readings: readonly PageReading[]) => LibrarySenders",
+              "summary": "Which of a deployment's kinds of part report themselves."
+            }
+          ]
+        },
+        {
           "module": "signals/library-word-reach-change",
           "title": "Library word reach change",
           "summary": "The words of a kind of part the typical reader who met it reached — before and after.",
@@ -12726,6 +12854,43 @@
               "kind": "function",
               "signature": "const inflationFor: (where: RevisionOf, rows: readonly StoredPageViews[]) => number | null",
               "summary": "The straddle correction for one revision of one page: `drift ÷ opened` off that page's own door — its own form's row where the asking names an audience, and the sum of every form's where it names none."
+            }
+          ]
+        },
+        {
+          "module": "signals/part-pace",
+          "title": "Part pace",
+          "summary": "Whether the readers who reach **one part** have time for what it says, across every page it stands on.",
+          "symbols": [
+            {
+              "name": "describePartPaceSilence",
+              "kind": "function",
+              "signature": "const describePartPaceSilence: (silence: KindPaceSilence) => string",
+              "summary": "One line per silence, for a surface saying why one part has no pace."
+            },
+            {
+              "name": "PacedPlace",
+              "kind": "type",
+              "signature": "type PacedPlace = {\n    readonly treeId: TreeId;\n    readonly revision: number;\n    /** The audience this page's counters are of, as the reading has it; `null` where nothing said. */\n    readonly audienceId: AudienceId | null;\n    /**\n     * Page views that reached the part here, at this page's own door scale.\n     */\n    readonly readers: number;\n    /** Time on screen here, summed across every view in the window, exactly as the rows hold it. */\n    readonly dwellMs: number;\n    /** The words this placement puts on screen: its own and its subtree's, which is the denominator's input. */\n    readonly wordsWithin: number;\n    /** Whether {@link wordsWithin} is a floor rather than a count, because something in it declares no `copy`. */\n    readonly floored: boolean;\n    /** Whether the part is this page's root, so its words are every word the page says. */\n    readonly whole: boolean;\n    /**\n     * Why no straddle correction was applied to this page's readers, and `null`\n     * where one was.\n     */\n    readonly unscaled: ReachSilence | null;\n    /** `readers × wordsWithin × msPerWord`: the time its words take the readers who reached it here. `null` under a silence. */\n    readonly needMs: number | null;\n    /** `dwellMs ÷ readers`: the time the typical reader who reached it here had. `null` under a silence. */\n    readonly spentMs: number | null;\n    /**\n     * `needMs − dwellMs` where positive: the reading time this page's readers did\n     * not have. The ranking key of {@link PartPace.ranked}, and `null` under a\n     * silence.\n     */\n    readonly shortMs: number | null;\n    /** `dwellMs ÷ needMs`. `1` is exactly time enough. `null` under a silence. */\n    readonly pace: number | null;\n    /** This page's own verdict, by `paceStandingOf` — so one page can be `skimmed` while the part is `paced`. */\n    readonly standing: PaceStanding;\n    /** Why this page has no figures, and `null` where it has them. */\n    readonly silence: PaceSilence | null;\n};",
+              "summary": "One page a part stands on, with that page's own figures."
+            },
+            {
+              "name": "MeasuredPlace",
+              "kind": "type",
+              "signature": "type MeasuredPlace = PacedPlace & {\n    readonly needMs: number;\n    readonly spentMs: number;\n    readonly shortMs: number;\n    readonly pace: number;\n    readonly silence: null;\n};",
+              "summary": "A placement with figures of its own, which is every row of {@link PartPace.ranked} and no row of {@link PartPace.unranked}."
+            },
+            {
+              "name": "PartPace",
+              "kind": "type",
+              "signature": "type PartPace = {\n    readonly nodeId: NodeId;\n    /**\n     * What the part is, as the **first** reading holding it has it, and `null`\n     * where no reading holds it at all.\n     */\n    readonly type: PrimitiveType | null;\n    /** What part it plays, as the same reading has it; `null` where its type declared none. */\n    readonly role: PrimitiveRole | null;\n    /**\n     * Types a later reading had this node as, where the first reading's answer\n     * stands.\n     */\n    readonly typeDisagreed: readonly PrimitiveType[];\n    /** Readings that hold the part at all, after duplicates are dropped. */\n    readonly placements: number;\n    /** Placements in the figures: reached, and saying something counted. */\n    readonly counted: number;\n    /** Why the rest have no pace of their own. The counts add to `placements − counted`. */\n    readonly silences: Readonly<Record<PaceSilence, number>>;\n    /**\n     * Every placement by its own page's verdict, which is the census view of the\n     * same set.\n     */\n    readonly standings: Readonly<Record<PaceStanding, number>>;\n    /** Revisions bearing a counted placement. */\n    readonly pages: number;\n    /** Distinct trees across them, which is pages rather than versions of pages. */\n    readonly trees: number;\n    /** Counted placements whose words are a floor, because a type in them declares no `copy`. */\n    readonly floored: number;\n    /**\n     * Counted placements that are their page's root.\n     */\n    readonly whole: number;\n    /**\n     * Page views that reached a counted placement, at each page's own door scale,\n     * counted once per page it stands on.\n     */\n    readonly readers: number | null;\n    /**\n     * Time on screen across the counted placements, added, exactly as the rows\n     * hold it.\n     */\n    readonly dwellMs: number;\n    /**\n     * The time its words take the readers who reached it: `readers × wordsWithin\n     * × msPerWord`, added over the counted placements.\n     */\n    readonly needMs: number | null;\n    /**\n     * `dwellMs ÷ readers`: **the time the typical reader who reached this part\n     * had there**, which is the figure a goal's screen asks for.\n     */\n    readonly spentMs: number | null;\n    /**\n     * `needMs − dwellMs` where positive: the reading time its readers did not\n     * have. Nought where they had enough, `null` under a silence.\n     */\n    readonly shortMs: number | null;\n    /** `dwellMs ÷ needMs`. `1` is exactly time enough. `null` under a silence. */\n    readonly pace: number | null;\n    /** The verdict, by `paceStandingOf` — so a floor can hold up anything but `skimmed`. */\n    readonly standing: PaceStanding;\n    /** Why there is no verdict, and `null` where there is one. */\n    readonly silence: KindPaceSilence | null;\n    /**\n     * Of {@link readers}, those on a page the door could not scale, so no\n     * straddle correction was applied to them.\n     */\n    readonly unscaled: number;\n    /**\n     * The pages bearing a counted placement that the door could not scale, by\n     * tree and newest revision first.\n     */\n    readonly unscaledPages: readonly UnscaledPage[];\n    /**\n     * Readings of a revision beyond the first, which were dropped.\n     */\n    readonly duplicated: number;\n    /** Door rows for one revision beyond the first, which were ignored. */\n    readonly duplicatedRows: number;\n    /**\n     * Every page the part is **counted** on, by the reading time its readers did\n     * not have, most first.\n     */\n    readonly ranked: readonly MeasuredPlace[];\n    /**\n     * Every other page it stands on, by tree id and newest revision first.\n     */\n    readonly unranked: readonly PacedPlace[];\n    /**\n     * The head of the order: the one page of this part to go and look at.\n     */\n    readonly worst: MeasuredPlace | null;\n    /** The costing rate that was applied, which is the default unless one was given. */\n    readonly wordsPerMinute: number;\n};",
+              "summary": "One part, against the time its readers had for what it says, across the pages it stands on."
+            },
+            {
+              "name": "partPaceOf",
+              "kind": "function",
+              "signature": "const partPaceOf: (nodeId: NodeId, readings: readonly PageReading[], rows: readonly StoredPageViews[], options?: LibraryPaceOptions) => PartPace",
+              "summary": "Whether the readers who reach one part have time for what it says."
             }
           ]
         },
@@ -13203,6 +13368,109 @@
               "kind": "function",
               "signature": "const describeRetentionPromise: (promise: RetentionPromise) => string",
               "summary": "One line for the operator who runs the sweep, because they are the only person who can close the gap."
+            }
+          ]
+        },
+        {
+          "module": "signals/rhythm",
+          "title": "Rhythm",
+          "summary": "**The two ways a month of hours can be drawn, and the one of them that is a question nothing else here asks.**",
+          "symbols": [
+            {
+              "name": "ARRIVAL_DAY_MS",
+              "kind": "value",
+              "signature": "const ARRIVAL_DAY_MS = 86400000",
+              "summary": "A day, in the unit the counters are kept in. The prefix is `ARRIVAL_HOUR_MS`'."
+            },
+            {
+              "name": "HOURS_IN_DAY",
+              "kind": "value",
+              "signature": "const HOURS_IN_DAY = 24",
+              "summary": "How many hours a day of these counters has, which is what a shape has bars."
+            },
+            {
+              "name": "RhythmOptions",
+              "kind": "type",
+              "signature": "type RhythmOptions = {\n    /**\n     * Whole hours to add to UTC before the day is cut and its hours are named.\n     */\n    readonly offsetHours?: number;\n};",
+              "summary": "What either fold may be told, which is where the reader's midnight is."
+            },
+            {
+              "name": "DayBucket",
+              "kind": "type",
+              "signature": "type DayBucket = {\n    /** The instant the day began, at this series' offset. */\n    readonly day: number;\n    /** What was counted in it, partial hours included. */\n    readonly count: number;\n    /** How many of its twenty-four hours the series could speak for. */\n    readonly hours: number;\n    /** Whether all twenty-four are present and every one of them over. */\n    readonly whole: boolean;\n};",
+              "summary": "One day of a range, which is one bar."
+            },
+            {
+              "name": "DaySeries",
+              "kind": "type",
+              "signature": "type DaySeries = {\n    /** The range the series was taken over, carried through unchanged. */\n    readonly range: ArrivalRange;\n    /**\n     * One entry per day, ascending, dense.\n     */\n    readonly days: readonly DayBucket[];\n    /** The sum over the days, which is the sum over the hours they were folded from. */\n    readonly count: number;\n    /** The offset the days were cut at, in whole hours from UTC. */\n    readonly offsetHours: number;\n    /** Whether the range begins before counting did, carried through from the series. */\n    readonly clipped: boolean;\n    /** How many of the days above are not whole, which is the two edges and whatever a clock cut. */\n    readonly partial: number;\n};",
+              "summary": "An hourly series folded into its days."
+            },
+            {
+              "name": "DayHour",
+              "kind": "type",
+              "signature": "type DayHour = {\n    /** The hour of the day, 0 to 23, at this shape's offset. */\n    readonly hour: number;\n    /** How many days contributed a whole hour here. */\n    readonly days: number;\n    /** What was counted in those hours, which is nought where no day could speak. */\n    readonly count: number;\n    /**\n     * The mean over the days that could speak for this hour.\n     */\n    readonly perDay?: number;\n};",
+              "summary": "One hour of the day, over every day of a range."
+            },
+            {
+              "name": "DayShapeSilence",
+              "kind": "type",
+              "signature": "type DayShapeSilence =\n/** Nothing has ever been counted in this scope, so the series it folds is empty. */\n\"unmeasured\"\n/**\n * The range holds hours and not one of them is over.\n */\n | \"unsettled\";",
+              "summary": "Why a shape has nothing to say about any hour of the day."
+            },
+            {
+              "name": "DayShape",
+              "kind": "type",
+              "signature": "type DayShape = {\n    /** Twenty-four entries, ascending from hour 0. */\n    readonly hours: readonly DayHour[];\n    /** What was counted into the shape: the range's whole hours, summed. */\n    readonly count: number;\n    /**\n     * What the range counted and the shape left out, because the hour was not over.\n     */\n    readonly incomplete: number;\n    /** How many days contributed any whole hour at all. */\n    readonly days: number;\n    /**\n     * Whether every hour of the day rests on the same number of days.\n     */\n    readonly even: boolean;\n    /** The offset the hours were named at, in whole hours from UTC. */\n    readonly offsetHours: number;\n    /** Why there is nothing to read, where there is nothing. */\n    readonly silence?: DayShapeSilence;\n};",
+              "summary": "The hours of a reader's day on this deployment, over whatever range was read."
+            },
+            {
+              "name": "daySeriesOf",
+              "kind": "function",
+              "signature": "const daySeriesOf: <Hour extends SeriesHour>(series: HourlyReading<Hour>, count: (hour: Hour) => number, options?: RhythmOptions) => DaySeries",
+              "summary": "An hourly series folded into its days."
+            },
+            {
+              "name": "dayShapeOf",
+              "kind": "function",
+              "signature": "const dayShapeOf: <Hour extends SeriesHour>(series: HourlyReading<Hour>, count: (hour: Hour) => number, options?: RhythmOptions) => DayShape",
+              "summary": "The hours of the day a series' whole hours fell in."
+            },
+            {
+              "name": "arrivalDaysOf",
+              "kind": "function",
+              "signature": "const arrivalDaysOf: (series: ArrivalSeries, options?: RhythmOptions) => DaySeries",
+              "summary": "Page views by day, from the series a surface already drew by hour."
+            },
+            {
+              "name": "actedDaysOf",
+              "kind": "function",
+              "signature": "const actedDaysOf: (series: ActedSeries, options?: RhythmOptions) => DaySeries",
+              "summary": "What readers did, by day, in the kind the series is of."
+            },
+            {
+              "name": "arrivalDayShapeOf",
+              "kind": "function",
+              "signature": "const arrivalDayShapeOf: (series: ArrivalSeries, options?: RhythmOptions) => DayShape",
+              "summary": "When readers arrive, over every day the range could speak for."
+            },
+            {
+              "name": "actedDayShapeOf",
+              "kind": "function",
+              "signature": "const actedDayShapeOf: (series: ActedSeries, options?: RhythmOptions) => DayShape",
+              "summary": "When readers do a thing, over every day the range could speak for."
+            },
+            {
+              "name": "busiestHoursIn",
+              "kind": "function",
+              "signature": "const busiestHoursIn: (shape: DayShape, most?: number) => readonly DayHour[]",
+              "summary": "The hours of the day with the most, busiest first."
+            },
+            {
+              "name": "quietestHoursIn",
+              "kind": "function",
+              "signature": "const quietestHoursIn: (shape: DayShape, fewest?: number) => readonly DayHour[]",
+              "summary": "The hours of the day with the least, quietest first."
             }
           ]
         },
@@ -14043,7 +14311,7 @@
       "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 2037,
+        "packageNames": 2071,
         "otherDoors": 18,
         "doorsSharingNothing": 17,
         "widest": false,
@@ -14178,7 +14446,7 @@
       "files": 21,
       "narrower": [],
       "standing": {
-        "packageNames": 2037,
+        "packageNames": 2071,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -14240,7 +14508,7 @@
       "files": 65,
       "narrower": [],
       "standing": {
-        "packageNames": 2037,
+        "packageNames": 2071,
         "otherDoors": 18,
         "doorsSharingNothing": 17,
         "widest": false,
@@ -14814,7 +15082,7 @@
       "files": 43,
       "narrower": [],
       "standing": {
-        "packageNames": 2037,
+        "packageNames": 2071,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -14884,7 +15152,7 @@
       "files": 100,
       "narrower": [],
       "standing": {
-        "packageNames": 2037,
+        "packageNames": 2071,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -15306,7 +15574,7 @@
       "files": 81,
       "narrower": [],
       "standing": {
-        "packageNames": 2037,
+        "packageNames": 2071,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,

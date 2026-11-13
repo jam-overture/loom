@@ -7,6 +7,8 @@ import {
   TheVocabulary,
   WhatAPageMaySay,
   WhatAddressingCosts,
+  WhatOneFixRecovers,
+  WhereTheReadingStopped,
 } from "@/app/(docs)/_components/reader-signals"
 
 export const metadata = pageMetadata("the-runtime", "what-your-readers-do")
@@ -350,6 +352,26 @@ this page: reach, readership, how far down a page people get, which page loses
 the most readers, whether a change made any difference. All of it lives behind
 `@jam-overture/loom/signals`, and the
 [reference for that door](/docs/api-reference/signals) is the current list.
+
+## A count of parts is not a count of things to fix
+
+Those are **worked out from the tree the counters already name** rather than
+collected, so asking a harder question costs a payload, a table and a reader's
+browser nothing. The first one is worth seeing, because the obvious number is
+wrong.
+
+<WhereTheReadingStopped />
+
+One band nobody scrolled to holds a heading, two questions and a link, so *parts
+nobody reached* states one fact about one band once per node underneath it. A
+reading names the places it **stopped** instead — a part nobody reached whose
+container was reached — and every unreached part is behind exactly one of them.
+
+<WhatOneFixRecovers />
+
+One page's reading is `pageFrontierOf`, a deployment of them is
+`deploymentUnreadOf`, and the order over the places themselves is
+`worstPlacesIn`.
 
 ## What this still does not do
 

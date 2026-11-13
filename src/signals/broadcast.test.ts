@@ -137,6 +137,37 @@ describe("broadcastReaderSignals", () => {
     expect(parseReaderSignalBatch(batches[0]).ok).toBe(true)
   })
 
+  it("files no segment for a page served to no segment, which is every reader (0284)", () => {
+    const batches = start()
+
+    ;(document.getElementById("link-text") as HTMLElement).click()
+    broadcast?.flush()
+
+    expect(batches[0]).not.toHaveProperty("audience")
+  })
+
+  it("files every batch under the segment the site's server served the page to (0371)", () => {
+    root.setAttribute("data-loom-audience", "aud_phone")
+    const batches = start()
+
+    ;(document.getElementById("link-text") as HTMLElement).click()
+    broadcast?.flush()
+
+    expect(batches[0]).toMatchObject({ treeId: "t_1", revision: 4, audience: "aud_phone" })
+    expect(parseReaderSignalBatch(batches[0]).ok).toBe(true)
+  })
+
+  /** Ignoring it would count a segment's readers as everybody's. */
+  it("refuses a page whose segment is not an aud_ id, rather than filing it as everybody's", () => {
+    root.setAttribute("data-loom-audience", "phone")
+
+    const started = broadcastReaderSignals(root, { observeVisibility: fakeVisibility })
+
+    if (started.ok) started.value.stop()
+    expect(started.ok).toBe(false)
+    if (!started.ok) expect(started.error.detail).toContain("data-loom-audience")
+  })
+
   it("reports a details element opening as disclosed, and not also as a click", () => {
     const batches = start()
     const details = byId("n_4") as HTMLDetailsElement
@@ -1086,6 +1117,18 @@ describe("broadcastReaderSignals, handed the document", () => {
     expect(batches[1]).toMatchObject({ treeId: "t_2", revision: 1, first: true })
     expect(batches[1]?.signals.map((signal) => signal.nodeId)).toEqual(["n_8"])
     expect(batches[1]?.view).not.toBe(batches[0]?.view)
+  })
+
+  it("begins a second page view when the same revision is re-rendered for another segment", async () => {
+    const batches = follow()
+
+    root.setAttribute("data-loom-audience", "aud_phone")
+    await settle()
+    press("link-text")
+    broadcast?.flush()
+
+    expect(batches).toHaveLength(1)
+    expect(batches[0]).toMatchObject({ treeId: "t_1", revision: 4, audience: "aud_phone", first: true })
   })
 
   it("begins a second page view when the same root is re-rendered at a new revision", async () => {
