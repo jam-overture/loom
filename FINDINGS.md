@@ -70116,7 +70116,7 @@ finding that opens by saying the table does not cover this.
 ## 2026-11-11 — the per-hour denominator exists now, and the division it was built for is a `Proposed` record rather than a line of code
 
 **Filed by:** `Loom signals` · **Owned by:** `@jonathanbravecredit`
-(`decisions/0381-an-hourly-rate-is-the-quotient-of-the-rolling-pair.md`) ·
+(`decisions/0396-an-hourly-rate-is-the-quotient-of-the-rolling-pair.md`) ·
 **Status:** open — **nothing is broken, no test is failing and nothing is
 blocked**; one accepted clause and one measurement now disagree, and the
 disagreement is the maintainer's to settle
@@ -70129,7 +70129,7 @@ That entry said what the honest shape would be if a per-hour figure were ever
 wanted: **not a quotient per bucket but a rolling denominator**, the page views
 of the hour and the hour before, which is where a page view that straddles the
 boundary actually was. It named the test to write first. Both are done
-([0380](decisions/0380-an-hours-denominator-is-the-page-views-of-that-hour-and-the-one-before-published-beside-the-count-and-never-summed.md)):
+([0395](decisions/0395-an-hours-denominator-is-the-page-views-of-that-hour-and-the-one-before-published-beside-the-count-and-never-summed.md)):
 `actedAgainstOf` publishes each hour's count beside that window's page views,
 the window is never summed, and a denominator the reading cannot speak for is
 withheld rather than drawn as a nought.
@@ -70139,7 +70139,7 @@ withheld rather than drawn as a nought.
 clause 9 is `Accepted` and says in as many words that the rate is *"taken once,
 over the range, and never per hour"*, and its own alternatives section rejected
 "a rate per hour" on that clause. The reason it gave is answered by the rolling
-window; the clause as written is not. So 0381 is `Proposed` — **ARCHITECTURAL,
+window; the clause as written is not. So 0396 is `Proposed` — **ARCHITECTURAL,
 needs review** — nothing implements it, and nothing is marked superseded.
 
 **What it would cost if accepted:** one division and four withholdings, in
@@ -70149,7 +70149,7 @@ nothing to migrate.
 **What to know while deciding.** The pair is published, so a surface *can*
 divide the two numbers itself today, with no record and none of the four
 withholdings a reading would guarantee. That is stated rather than hidden: it is
-why 0381 exists at all, and the reason not to leave the question unwritten.
+why 0396 exists at all, and the reason not to leave the question unwritten.
 
 ---
 ## 2026-11-11 — the first bar of any hourly pair has a count and no denominator, because the arrivals reading draws the range it was asked for
@@ -70157,7 +70157,7 @@ why 0381 exists at all, and the reason not to leave the question unwritten.
 **Filed by:** `Loom signals` · **Owned by:** `Loom signals`
 (`src/signals/arrivals.ts`, `src/signals/acted.ts`) · **Status:** open —
 **a stated consequence of
-[0380](decisions/0380-an-hours-denominator-is-the-page-views-of-that-hour-and-the-one-before-published-beside-the-count-and-never-summed.md)**;
+[0395](decisions/0395-an-hours-denominator-is-the-page-views-of-that-hour-and-the-one-before-published-beside-the-count-and-never-summed.md)**;
 nothing is broken and nothing is asked of anybody today
 
 `actedAgainstOf` takes an `ActedSeries` and an `ArrivalSeries` and pairs them by
@@ -70206,7 +70206,7 @@ gate is green on this branch and the margin is now smaller than one ordinary
 unit**
 
 **The names.** `ActedAgainst`, `ActedAgainstHour` and `actedAgainstOf`, from
-[0380](decisions/0380-an-hours-denominator-is-the-page-views-of-that-hour-and-the-one-before-published-beside-the-count-and-never-summed.md).
+[0395](decisions/0395-an-hours-denominator-is-the-page-views-of-that-hour-and-the-one-before-published-beside-the-count-and-never-summed.md).
 The sentence the page would want is one line: *what readers did in an hour,
 beside the page views of that hour and the one before it, which is the window
 those doings could have come from — two numbers, never a quotient and never a
@@ -70234,3 +70234,45 @@ four short names takes the gate red for all four surfaces, including the ones
 that published nothing. The unit this lane built today fits only because it
 publishes three names, and choosing a unit by what it spends on a docs budget is
 not a thing a lane should be doing twice.
+---
+## 2026-11-13 (evening) — #856 still numbers two records `main` has since used, and it is the last of the four instances that entry counted
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals` · **Status:**
+**closed — renumbered on the branch, 13 November (evening)**
+
+The 12 November entry above — *two open branches number a record `main` already
+uses* — named #851 and #856. #851 was renumbered by `Loom merge` when it landed.
+**#856 was not, and it is still open**, so it was still carrying
+`0380-an-hours-denominator-…` and `0381-an-hourly-rate-…` while `main` has held
+a different 0380 since 11 November and a different 0381 since 12 November.
+
+Either of those landing takes `pnpm verify` red **on `main`**, for four surfaces,
+by `duplicate-number` from `checkNumbering` — which `decisions.test.ts` holds to
+`blocking` (0097). The branch itself is green, which is the whole reason this
+needed finding rather than discovering.
+
+**Fixed as the entry prescribes**: `git mv` to the next free numbers, the number
+changed in each record's own heading, in the references in `docs/signals.md`, in
+that branch's report and in this file, then `pnpm decisions:index`. It is one
+commit and that is the whole of what it costs when it is done before the merge.
+
+| was | is |
+| --- | --- |
+| `0380-an-hours-denominator-is-the-page-views-of-that-hour-and-the-one-before-…` | **0395** |
+| `0381-an-hourly-rate-is-the-quotient-of-the-rolling-pair.md` | **0396** |
+
+0394 was taken the same evening by §89 on a branch of its own, which is why
+these are 0395 and 0396 rather than 0394 and 0395.
+
+**The exception to this lane's own working rule, said out loud.** The rule filed
+on 12 November is *a correction goes on a fresh branch off `main`, never onto the
+open branch*, because a correction pushed to an open branch loses the race to
+`Loom merge`. **A renumbering cannot follow it**: the records exist only on that
+branch, and a fresh branch off `main` has nothing to rename. So the rule's
+boundary is now written down — it is about correcting what a branch *says*, and
+not about the branch's own files. The check it does carry still applies and was
+made: the pull request was read and still open immediately before the push.
+
+**Four instances in six days was the count that entry took.** This closes the
+last open one. The general version it raised — *nothing can see another branch's
+numbers from inside a branch* — is untouched and is still not an ask.

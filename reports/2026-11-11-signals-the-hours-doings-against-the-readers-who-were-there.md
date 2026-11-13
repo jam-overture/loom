@@ -2,7 +2,7 @@
 
 **Branch:** `signals-84-the-rate-by-the-hour-readers-acted-in`
 **Lane:** `Loom signals` · `src/signals/`, the intake, `docs/signals.md`
-**Records added:** 0380 (`Accepted`), 0381 (`Proposed` — **ARCHITECTURAL, needs
+**Records added:** 0395 (`Accepted`), 0396 (`Proposed` — **ARCHITECTURAL, needs
 review**)
 **`pnpm verify`:** EXIT=0
 
@@ -29,7 +29,7 @@ the boundary actually was — and named the test to write first. Both are done.
 **`actedAgainstOf` in `src/signals/acted.ts`** pairs each hour of an acted series
 with the page views of that hour and the hour before it. `ActedAgainst` and
 `ActedAgainstHour` are the shape;
-[0380](../decisions/0380-an-hours-denominator-is-the-page-views-of-that-hour-and-the-one-before-published-beside-the-count-and-never-summed.md)
+[0395](../decisions/0395-an-hours-denominator-is-the-page-views-of-that-hour-and-the-one-before-published-beside-the-count-and-never-summed.md)
 is the record. Four things in it are the design rather than the arithmetic:
 
 - **The boundary error goes inside the window.** An hour with five presses and
@@ -65,14 +65,14 @@ per hour" on that clause.** The *reason* it gave is answered by the rolling
 window. The clause as written is not.
 
 Under this lane's standing instruction that is ARCHITECTURAL, so
-[0381](../decisions/0381-an-hourly-rate-is-the-quotient-of-the-rolling-pair.md)
+[0396](../decisions/0396-an-hourly-rate-is-the-quotient-of-the-rolling-pair.md)
 is `Proposed`, **nothing implements it**, and nothing is marked superseded. What
 I built is the half that clause 9 permits — hourly counts, and a denominator
 published beside them rather than divided into them. What I left out is the
 division: `ActedAgainstHour` has no `per100`, and `ActedRate`'s single quotient
 over the range is untouched.
 
-If 0381 is accepted the work is **one line and four tests** — the division and
+If 0396 is accepted the work is **one line and four tests** — the division and
 the four withholdings. No stored column, no payload field, no browser byte,
 nothing to migrate.
 
@@ -112,7 +112,7 @@ reports:check` reports 2,205 visuals, 153.0 MB, none over 1.1 MB.
 | drop the hour-in-progress mark (`whole: true`) | 1 test failed |
 
 The second and fourth are the two this lane owes anything that counts. The
-fourth is the double-count test 0380 clause 2 is about: twelve hours of ten page
+fourth is the double-count test 0395 clause 2 is about: twelve hours of ten page
 views each sum to **220** across the pairs and **120** across the range, and the
 reading is held to carrying the first figure nowhere.
 
@@ -141,11 +141,11 @@ lane could take the gate red for all four surfaces.
 
 ## Records added
 
-- **0380** — *An hour's denominator is the page views of that hour and the one
+- **0395** — *An hour's denominator is the page views of that hour and the one
   before, published beside the count and never summed.* `Accepted`. Seven
   clauses, four alternatives recorded including the two that would have been
   cheaper and wrong.
-- **0381** — *An hourly rate is the quotient of the rolling pair.* `Proposed` —
+- **0396** — *An hourly rate is the quotient of the rolling pair.* `Proposed` —
   **ARCHITECTURAL, needs review**, contradicting 0362 clause 9 and implemented
   nowhere.
 
@@ -177,7 +177,7 @@ named is written.
 
 ## Open questions
 
-1. **0381.** Should an hourly rate be published at all, now that the shape its
+1. **0396.** Should an hourly rate be published at all, now that the shape its
    refusal was about has a remedy? My recommendation is **yes, as a partial
    supersession of clause 9 and no other clause** — the pair is already
    published, so the division is going to be taken by whichever screen wants it,
@@ -210,7 +210,7 @@ which is the same departure from *Procedure* step 3 that #855 recorded and for
 the same reason: #851 is held on a decision only the maintainer can make, and
 #855 is waiting for review. Stacking on either would put a unit that passes the
 gate on its own behind someone else's decision. This branch takes §84 and
-records 0380 and 0381, so #851's §82 and #855's §83 fit before them untouched.
+records 0395 and 0396, so #851's §82 and #855's §83 fit before them untouched.
 
 ## Per-reader identity
 

@@ -469,5 +469,20 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0377](0377-a-deployments-unread-places-are-a-fourth-order-ranked-on-what-one-fix-recovers.md) | A deployment's unread places are a fourth order, ranked on what one fix recovers | Accepted | §5 (reader signals), the counters |
 | 0378 | *No record on this branch* | — | — |
 | 0379 | *No record on this branch* | — | — |
-| [0380](0380-an-hours-denominator-is-the-page-views-of-that-hour-and-the-one-before-published-beside-the-count-and-never-summed.md) | An hour's denominator is the page views of that hour and the one before, published beside the count and never summed | Accepted | §5 (reader signals), the counters |
-| [0381](0381-an-hourly-rate-is-the-quotient-of-the-rolling-pair.md) | An hourly rate is the quotient of the rolling pair | Proposed — **ARCHITECTURAL, needs review.** It contradicts clause 9 | §5 (reader signals), the counters |
+| 0380 | *No record on this branch* | — | — |
+| 0381 | *No record on this branch* | — | — |
+| 0382 | *No record on this branch* | — | — |
+| 0383 | *No record on this branch* | — | — |
+| 0384 | *No record on this branch* | — | — |
+| 0385 | *No record on this branch* | — | — |
+| 0386 | *No record on this branch* | — | — |
+| 0387 | *No record on this branch* | — | — |
+| 0388 | *No record on this branch* | — | — |
+| 0389 | *No record on this branch* | — | — |
+| 0390 | *No record on this branch* | — | — |
+| 0391 | *No record on this branch* | — | — |
+| 0392 | *No record on this branch* | — | — |
+| 0393 | *No record on this branch* | — | — |
+| 0394 | *No record on this branch* | — | — |
+| [0395](0395-an-hours-denominator-is-the-page-views-of-that-hour-and-the-one-before-published-beside-the-count-and-never-summed.md) | An hour's denominator is the page views of that hour and the one before, published beside the count and never summed | Accepted | §5 (reader signals), the counters |
+| [0396](0396-an-hourly-rate-is-the-quotient-of-the-rolling-pair.md) | An hourly rate is the quotient of the rolling pair | Proposed — **ARCHITECTURAL, needs review.** It contradicts clause 9 | §5 (reader signals), the counters |

@@ -1,8 +1,16 @@
-# 0380. An hour's denominator is the page views of that hour and the one before, published beside the count and never summed
+# 0395. An hour's denominator is the page views of that hour and the one before, published beside the count and never summed
 
 **Status:** Accepted
 **Date:** 2026-11-11
 **Section:** §5 (reader signals), the counters
+
+> **Renumbered on 2026-11-13 (evening)**, from 0380, while this branch was still
+> open. `main` has held a different 0380 — *the three walks outside `src/tree`
+> carry an explicit stack* (#857) — since 11 November, and two records sharing a
+> number is fatal to `pnpm verify` on `main` for four surfaces the moment either
+> lands (0097). 0394 was taken the same evening by §89, so this record and its
+> sibling take the next two free numbers. Nothing in it changed but its number;
+> the references on this branch were moved with it.
 
 ## Context
 
@@ -28,7 +36,7 @@ shape would be if a per-hour figure were ever wanted — **a rolling
 denominator**, the page views of the hour and the hour before — and named the
 test to write first. This record takes that denominator and stops short of the
 division, which is
-[0381](0381-an-hourly-rate-is-the-quotient-of-the-rolling-pair.md)'s to argue
+[0396](0396-an-hourly-rate-is-the-quotient-of-the-rolling-pair.md)'s to argue
 for.
 
 ## Decision
@@ -93,7 +101,7 @@ over them.** `actedAgainstOf` in `src/signals/acted.ts` is the reading;
 
 - A surface can draw two bars an hour today — what readers did, and the readers
   who were there to do it — and say which hours had readers to lose. It cannot
-  draw a rate per hour, which is 0381's to allow.
+  draw a rate per hour, which is 0396's to allow.
 - **The first bar of any range has a count and no denominator.** The arrivals
   reading draws a series over the range, so the hour before the range is not in
   it. A caller who wants a denominator on every bar asks for a range one hour

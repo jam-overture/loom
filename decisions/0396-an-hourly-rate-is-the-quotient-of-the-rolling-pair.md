@@ -1,4 +1,4 @@
-# 0381. An hourly rate is the quotient of the rolling pair
+# 0396. An hourly rate is the quotient of the rolling pair
 
 **Status:** Proposed — **ARCHITECTURAL, needs review.** It contradicts clause 9
 of [0362](0362-what-readers-did-is-counted-under-the-hour-they-did-it-in-as-a-seventh-counter-the-fold-writes-for-the-three-delegated-kinds.md),
@@ -8,6 +8,12 @@ the range and **never per hour**. **Nothing on this branch implements it.**
 `ActedRate` is unchanged. Nothing is marked superseded.
 **Date:** 2026-11-11
 **Section:** §5 (reader signals), the counters
+
+> **Renumbered on 2026-11-13 (evening)**, from 0381, while this branch was still
+> open. `main` has held a different 0381 — *a part's pace across pages is one
+> pooled quotient* (#873) — since 12 November, and two records sharing a number
+> is fatal to `pnpm verify` on `main` (0097). Nothing in it changed but its
+> number, and it is still `Proposed`.
 
 ## Context
 
@@ -21,7 +27,7 @@ arrival* divides by nothing and reads as an infinite rate.
 Its *Alternatives considered* rejected "a rate per hour, so the chart could be
 of the rate rather than the count" on exactly that clause.
 
-[0380](0380-an-hours-denominator-is-the-page-views-of-that-hour-and-the-one-before-published-beside-the-count-and-never-summed.md)
+[0395](0395-an-hours-denominator-is-the-page-views-of-that-hour-and-the-one-before-published-beside-the-count-and-never-summed.md)
 has now built the denominator that reason was about. An hour's doings came from
 readers who arrived in that hour or the one before it, so the **rolling**
 denominator — the page views of both hours — puts the boundary error inside the
@@ -51,12 +57,12 @@ would stand untouched. `ActedRate`'s single quotient over the range would also
 stand: it is the exact figure, and this one is the comparable one.
 
 Were it accepted, the work is **one line and four tests**: the division, and the
-four withholdings above. Nothing in 0380 forecloses it and nothing would need
+four withholdings above. Nothing in 0395 forecloses it and nothing would need
 migrating — no stored column, no payload field, no browser byte.
 
 ## Consequences
 
-- **Until it is answered, a screen that wants the rate takes it.** 0380
+- **Until it is answered, a screen that wants the rate takes it.** 0395
   publishes the numerator and the honest denominator side by side, so a surface
   can divide them itself. That is the state this record exists to make visible
   rather than to hide: the pair is the input clause 9's reason was about, and
@@ -77,7 +83,7 @@ failure mode of being wrong here is a dashboard that recommends a deploy window
 off an hour whose rate was an artefact.
 
 **Leaving the question unwritten and letting the pair stand as the answer.**
-Cheaper, and it is what is shipped. Rejected because the next run reading 0380
+Cheaper, and it is what is shipped. Rejected because the next run reading 0395
 would find a denominator with no quotient and no record of why, and would either
 add the division without noticing clause 9 or re-derive this argument from the
 start.

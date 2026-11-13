@@ -5210,9 +5210,9 @@ were counts, and *nine presses at eleven o'clock* could not be told apart from
 nine out of five hundred.
 
 **The denominator that reason was about is built**
-([0380](../decisions/0380-an-hours-denominator-is-the-page-views-of-that-hour-and-the-one-before-published-beside-the-count-and-never-summed.md)),
+([0395](../decisions/0395-an-hours-denominator-is-the-page-views-of-that-hour-and-the-one-before-published-beside-the-count-and-never-summed.md)),
 and the division is **not** — it is
-[0381](../decisions/0381-an-hourly-rate-is-the-quotient-of-the-rolling-pair.md),
+[0396](../decisions/0396-an-hourly-rate-is-the-quotient-of-the-rolling-pair.md),
 `Proposed`, because clause 9 is accepted and this lane does not narrow an
 accepted clause on its own measurement.
 
