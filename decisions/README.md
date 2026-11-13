@@ -479,3 +479,6 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0387](0387-a-landmark-is-not-a-count-and-a-copy-is-a-sequence-of-them-at-the-distances-the-text-puts-them-at.md) | A landmark is not a count, and a copy is a sequence of them at the distances the text puts them at | Accepted | §1 (process) |
 | [0388](0388-a-routine-reads-back-what-it-posted-because-no-safe-link-length-can-be-computed-in-advance.md) | A routine reads back what it posted, because no safe link length can be computed in advance | Accepted | §1, how a run reports |
 | [0389](0389-a-range-of-hours-is-folded-into-its-days-and-into-the-hours-of-a-readers-day-where-the-mean-is-the-only-comparable-figure.md) | A range of hours is folded into its days and into the hours of a reader's day, where the mean is the only comparable figure | Accepted | §5 (reader signals), the counters |
+| 0390 | *No record on this branch* | — | — |
+| 0391 | *No record on this branch* | — | — |
+| [0392](0392-a-segments-form-arrives-in-the-same-pull-as-its-rules-and-a-form-that-cannot-be-applied-costs-the-reader-their-segment.md) | A segment's form arrives in the same pull as its rules, and a form that cannot be applied costs the reader their segment rather than their page | Accepted | §2 (portal), the read door |
