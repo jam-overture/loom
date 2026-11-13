@@ -71825,6 +71825,99 @@ it** — which was true when the margin was 148 bytes and is still true now that
 it is 12,795. Nothing is blocked by that and it is not this lane's to write.
 
 ---
+## 2026-11-13 — the silent-component census landed, and the half of the 11 November entry it does not close is the sweep
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/library-senders.ts`, `src/signals/subtrees.ts`) · **Status:**
+**closes the open half of the 11 November (evening) entry** — *silent placements
+gathered by `KindKey`, as `libraryReadingOf` gathers everything else* — and
+leaves that entry's **other** open half exactly where it was
+
+[0393](decisions/0393-a-silent-component-is-a-census-over-the-placements-the-defect-could-be-seen-on-and-the-share-is-bracketed.md)
+publishes `librarySendersOf`, so *which of your components are silent* is one
+row per primitive type ranked by the places to fix, and the forty faulted pages
+one silent `loom.accordion` produces are one errand again. The names cap, which
+the entry said wanted answering first, cost it **79 bytes of 12,711** after
+#859's front-coding.
+
+**The thing worth filing rather than reporting is the denominator**, because it
+is the one place a surface can read this row wrong. A silent **leaf** reports
+exactly what a leaf nobody reached reports, and no payload would change that. So
+the share is over `witnessed` — placements with a reader demonstrably below them
+— and never over `placements`, and the row publishes the three states
+(`leaves`, `unwitnessed`, `witnessed`) that add to the placements so that a
+surface can say which of them it is standing on. A deployment whose senders are
+entirely broken publishes `witnessed: 0` and a silence, never a healthy share;
+that is the failure mode that would have mattered, and it is tested.
+
+**What this does not close**, from the same entry: *nothing says how many other
+fixtures in this repository model the defect by accident*. The shape to look for
+is still a `pageReadingOf` fixture whose tallies name children and not the root,
+and the cheapest honest version is still a helper in `src/testing/` that refuses
+one — `src/signals/` is this lane's and everywhere else is `Loom daily build`'s,
+so it is still a unit neither of us can take alone. This lane's new fixtures are
+built the other way round on purpose and the ones meant to be sound say so.
+
+---
+## 2026-11-13 — the pre-order walk over a page's parts had one spelling, and now it has one on purpose
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/subtrees.ts`, `src/signals/frontier.ts`) · **Status:** closed on
+filing; filed because the **rule** is the reusable part and the next reading of
+a page's shape will want it
+
+`librarySendersOf` needed three things `pageFrontierOf` already computed and did
+not publish: each part's container, the end of its subtree, and the parts below
+it that reported reach. All three are projections of one pre-order list with a
+depth on each row, and all three had exactly one spelling, inside
+`frontier.ts`.
+
+Copying them would have been the failure `parts.ts` already has a name for —
+*two spellings of a projection that agree today*, which is what the counter keys
+were before they were published once, and what `spokenFor` was extracted to stop
+happening a fourth time. So they moved to **`src/signals/subtrees.ts`**:
+`extentsOf`, `prefixOf` and `between`, with `frontier.ts` taking them from there
+and its twenty-seven tests passing untouched.
+
+**It is deliberately not re-exported from `src/signals/index.ts`**, which is the
+part worth writing down. It publishes no answer about a deployment, so it is
+nobody's door and costs the published names index nothing — the same place
+`join.ts`, `counters.ts`, `words.ts` and `kinds.ts` sit. A reading that needs it
+imports it by path. **If a lane adds a module to `src/signals/` that answers
+nothing, this is the shape**: an internal helper is not a thin public surface
+waiting to be filled in, and a names index with a cap is the second reason.
+
+---
+## 2026-11-13 — seven new names on `@jam-overture/loom/signals`, and the sentence the page would want is about the denominator
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/docs/the-runtime/what-your-readers-do/page.mdx`) ·
+**Status:** open — nothing is red, and this is the fourth entry of its kind from
+this lane
+
+`docs:api` reported, on regenerating the reference for
+[0393](decisions/0393-a-silent-component-is-a-census-over-the-placements-the-defect-could-be-seen-on-and-the-share-is-bracketed.md):
+
+```
+@jam-overture/loom/signals — KindSenders, LibrarySenders, SENDER_SILENCES,
+  SILENT_EXAMPLES, SenderSilence, describeSenderSilence, librarySendersOf
+```
+
+The sentence, if the page wants one: **a part that was on a reader's screen and
+said nothing is a primitive to fix, not a page to rewrite — and the only places
+it can be caught are the ones a reader was demonstrably below.** That second
+half is what a reader of this row needs and will not guess: a silent heading and
+a heading nobody reached report the same rows, so the share is over the places
+the defect could be seen on, the three states that add to the placements are
+published beside it, and the figure is a floor on what is wrong rather than a
+count of it.
+
+**79 bytes of the names index**, measured both ways on the front-coded file:
+27,289 over 2,116 names on `main`, 27,368 over 2,123 with these seven.
+
+**This lane did not write it**, for 5 November's reason: that page is `(docs)`'
+and a run that edits prose on another lane's surface is a conflict waiting for
+whoever is drafting it.
 ## 2026-11-12 (evening) — which page a part is skimmed on is published, and the term it is ranked by is the one that must never be added
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom signals`

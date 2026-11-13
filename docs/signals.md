@@ -5531,6 +5531,67 @@ plan carried was 309 bytes stale, and the row at the top of this file is
 corrected to match. **148 bytes of 8,000 are left**, which is the number the next
 change to the broadcaster has to fit in.
 
+### 88. Which of your components are silent · `Loom signals` · **done, 13 November**
+
+The 11 November entry that filed
+[0382](../decisions/0382-a-part-that-reported-nothing-with-a-reader-below-it-is-an-eighth-collection-fault-and-it-reaches-both-ranking-keys.md)
+left one half of its own sentence open, and said so: *a primitive to fix **in
+the library**, not a page to rewrite* — and the fault it had just added is raised
+per page. **A deployment with forty pages built out of one silent
+`loom.accordion` gets forty faulted pages**, and nothing in the repository says
+they are forty symptoms of one thing. The errand the fix-list hands over is
+*rewrite these forty pages*, when the work is one primitive, once.
+
+**Done**
+([0393](../decisions/0393-a-silent-component-is-a-census-over-the-placements-the-defect-could-be-seen-on-and-the-share-is-bracketed.md)),
+as the twenty-fourth reading taken out of the server-side join of 0212 rather
+than collected — **no payload field, no counter, no column, no table, no byte on
+any wire and nothing in a reader's browser.**
+
+- **`librarySendersOf` gathers the defect by `KindKey`**, the way `library.ts`
+  gathers standing and `library-reach.ts` gathers readers. The sentence is
+  *`loom.accordion` is silent in thirty-one of the thirty-four places it stands,
+  across nineteen of your pages*, and `silentTrees` is the figure the per-page
+  fault cannot give.
+- **The denominator is the placements the defect could be seen on, and that is
+  the whole design.** A silent **leaf** reports exactly what a leaf nobody
+  reached reports, so it is undetectable for ever; a holder with nothing reported
+  below it is undetectable today. `leaves + unwitnessed + witnessed =
+  placements`, and the share is `silent ÷ witnessed`. Over the placements it
+  would fall as a library gained leaves and as a window lost readers — a figure
+  that moves when nothing about a sender has.
+- **The share is bracketed rather than guessed.** A witnessed placement whose own
+  standing is `unknown` reported something that was not a view with a reader
+  below it, which is plausibly the same defect and is not claimed as it (0282).
+  `share` excludes those and `atMost` includes them; where none exist the two are
+  equal.
+- **It is 0382's defect and not a second spelling of it.** The pre-order walk and
+  the prefix counts move to `subtrees.ts` — internal, not re-exported — and
+  `frontier.ts` takes them from there. The census total is asserted equal to the
+  sum of `PageFrontier.notReporting` over the same readings.
+- **The figure is a floor, and a surface must not say otherwise.** Three
+  populations are outside it. A deployment whose senders are entirely broken
+  publishes `witnessed: 0` and a silence, never a healthy share.
+- **A page handed in twice is folded once** (0158), deduplicated on
+  `readingKeyOf` and reported in `duplicated`, with every figure asserted term by
+  term against the single-reading one.
+
+**Seven names reach `@jam-overture/loom/signals`** — `librarySendersOf`,
+`LibrarySenders`, `KindSenders`, `SenderSilence`, `SENDER_SILENCES`,
+`describeSenderSilence` and `SILENT_EXAMPLES`. Measured on the front-coded index
+(#859), by building the file both ways: **27,289 bytes over 2,116 names on
+`main`, 27,368 over 2,123 with these seven — 79 bytes of the 12,711 there were,
+leaving 12,632.** Seven names for 79 bytes is the front-coding doing what it was
+for; the same seven would have been most of the old cap's headroom.
+
+**Nothing reaches a reader's browser.** `broadcast.ts` and its import graph are
+untouched, and the bundle measures what it measures on `main`.
+
+**What is left and is filed:** the portal view is `Loom portal`'s to draw, and
+what it may say is bounded by the floor above. And the sweep the 11 November
+entry asked for — *how many other fixtures in this repository model the defect by
+accident* — is still open and still two lanes' work.
+
 ## Still not in scope
 
 - **Signal-to-intent derivation** — a signal automatically becoming a

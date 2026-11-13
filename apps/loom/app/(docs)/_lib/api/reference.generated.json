@@ -8,7 +8,7 @@
       "files": 100,
       "narrower": [],
       "standing": {
-        "packageNames": 2061,
+        "packageNames": 2068,
         "otherDoors": 18,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -4246,7 +4246,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 2061,
+        "packageNames": 2068,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -4290,7 +4290,7 @@
       "files": 64,
       "narrower": [],
       "standing": {
-        "packageNames": 2061,
+        "packageNames": 2068,
         "otherDoors": 18,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -5249,7 +5249,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 2061,
+        "packageNames": 2068,
         "otherDoors": 18,
         "doorsSharingNothing": 17,
         "widest": false,
@@ -5330,7 +5330,7 @@
       "files": 220,
       "narrower": [],
       "standing": {
-        "packageNames": 2061,
+        "packageNames": 2068,
         "otherDoors": 18,
         "doorsSharingNothing": 17,
         "widest": false,
@@ -5800,7 +5800,7 @@
       "files": 81,
       "narrower": [],
       "standing": {
-        "packageNames": 2061,
+        "packageNames": 2068,
         "otherDoors": 18,
         "doorsSharingNothing": 17,
         "widest": false,
@@ -6888,7 +6888,7 @@
       "files": 38,
       "narrower": [],
       "standing": {
-        "packageNames": 2061,
+        "packageNames": 2068,
         "otherDoors": 18,
         "doorsSharingNothing": 17,
         "widest": false,
@@ -7453,7 +7453,7 @@
       "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 2061,
+        "packageNames": 2068,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -7656,7 +7656,7 @@
       "files": 45,
       "narrower": [],
       "standing": {
-        "packageNames": 2061,
+        "packageNames": 2068,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -8700,7 +8700,7 @@
       "files": 61,
       "narrower": [],
       "standing": {
-        "packageNames": 2061,
+        "packageNames": 2068,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -9079,7 +9079,7 @@
       "files": 45,
       "narrower": [],
       "standing": {
-        "packageNames": 2061,
+        "packageNames": 2068,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -9334,7 +9334,7 @@
       "files": 16,
       "narrower": [],
       "standing": {
-        "packageNames": 2061,
+        "packageNames": 2068,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -9508,7 +9508,7 @@
       "slug": "signals",
       "types": "./dist/signals/index.d.ts",
       "requires": [],
-      "files": 87,
+      "files": 89,
       "narrower": [
         {
           "specifier": "@jam-overture/loom/signals/broadcast",
@@ -9521,7 +9521,7 @@
         }
       ],
       "standing": {
-        "packageNames": 2061,
+        "packageNames": 2068,
         "otherDoors": 18,
         "doorsSharingNothing": 16,
         "widest": true,
@@ -12286,6 +12286,55 @@
           ]
         },
         {
+          "module": "signals/library-senders",
+          "title": "Library senders",
+          "summary": "**Which of a deployment's components are silent.**",
+          "symbols": [
+            {
+              "name": "SenderSilence",
+              "kind": "type",
+              "signature": "type SenderSilence =\n/**\n * Nothing in the pages read is of this kind at all.\n */\n\"unplaced\"\n/**\n * Every placement of this kind holds nothing, so the defect cannot be seen on\n * it at all.\n */\n | \"unwitnessable\"\n/**\n * It holds parts, and nothing below any of its placements reported reach in\n * this window.\n */\n | \"unwitnessed\";",
+              "summary": "Why a kind has no silent-sender share."
+            },
+            {
+              "name": "SENDER_SILENCES",
+              "kind": "value",
+              "signature": "const SENDER_SILENCES: readonly SenderSilence[]",
+              "summary": ""
+            },
+            {
+              "name": "describeSenderSilence",
+              "kind": "function",
+              "signature": "const describeSenderSilence: (silence: SenderSilence) => string",
+              "summary": "One line per silence, for a surface saying why a kind has no share."
+            },
+            {
+              "name": "KindSenders",
+              "kind": "type",
+              "signature": "type KindSenders = {\n    readonly kind: KindKey;\n    /** What part a type plays, or `null`. Always `null` on a role row, which carries it as its key. */\n    readonly role: PrimitiveRole | null;\n    /** Element nodes of this kind across the readings. */\n    readonly placements: number;\n    /** Distinct trees it stands in, which is not the number of placements and not the number of readings. */\n    readonly trees: number;\n    /** Distinct revisions it stands in: two live revisions of one page are two. */\n    readonly revisions: number;\n    /** Placements holding no part at all, where the defect can never be seen. */\n    readonly leaves: number;\n    /** Placements holding parts, none of which reported reach in this window. */\n    readonly unwitnessed: number;\n    /**\n     * Placements with at least one part below them reporting reach — the\n     * population the rest of this row is about.\n     */\n    readonly witnessed: number;\n    /**\n     * Witnessed placements that reported no view of themselves, which is the\n     * defect a page's own reading raises exactly as it raises it.\n     */\n    readonly silent: number;\n    /**\n     * Witnessed placements whose own standing is `unknown` — something other than\n     * a view, with a reader below.\n     */\n    readonly indeterminate: number;\n    /**\n     * {@link silent} over {@link witnessed}; `null` where {@link silence} says why\n     * not.\n     */\n    readonly share: number | null;\n    /**\n     * `(silent + indeterminate) ÷ witnessed`, the other end of the bracket;\n     * `null` with {@link share}.\n     */\n    readonly atMost: number | null;\n    /** Why {@link share} is not there, and `null` where it is. */\n    readonly silence: SenderSilence | null;\n    /**\n     * Distinct trees with at least one silent placement of this kind.\n     */\n    readonly silentTrees: number;\n    /**\n     * Nodes of this kind that were silent, in the order the readings were handed\n     * in, capped at {@link SILENT_EXAMPLES}.\n     */\n    readonly examples: readonly NodeId[];\n};",
+              "summary": "Whether one kind of part reports itself, everywhere it stands in the pages read."
+            },
+            {
+              "name": "SILENT_EXAMPLES",
+              "kind": "value",
+              "signature": "const SILENT_EXAMPLES = 5",
+              "summary": "How many silent nodes a row carries as examples."
+            },
+            {
+              "name": "LibrarySenders",
+              "kind": "type",
+              "signature": "type LibrarySenders = {\n    /**\n     * Every type that stands anywhere, most silent placements first.\n     */\n    readonly byType: readonly KindSenders[];\n    /**\n     * Every role in the vocabulary that stands anywhere, then the row for parts\n     * whose type declared none, in the same order as {@link byType}.\n     */\n    readonly byRole: readonly KindSenders[];\n    /** Readings counted, which is revisions of pages and not trees. */\n    readonly pages: number;\n    /** Distinct trees across them. */\n    readonly trees: number;\n    /** Element nodes across them, which is the sum of every type row's placements. */\n    readonly placements: number;\n    /** Placements the defect could be seen on, over the whole library. */\n    readonly witnessed: number;\n    /**\n     * Silent placements over the whole library, which is the sum of\n     * `PageFrontier.notReporting` over the same readings.\n     */\n    readonly silent: number;\n    /** Witnessed placements whose own standing is `unknown`, over the whole library. */\n    readonly indeterminate: number;\n    /**\n     * The type silent in the most places, which is the component to fix first.\n     */\n    readonly worstSender: KindSenders | null;\n    /**\n     * Readings of a revision beyond the first, which were dropped.\n     */\n    readonly duplicated: number;\n    /**\n     * Types whose readings disagreed about the role they play, where the first\n     * reading's answer stands.\n     */\n    readonly roleDisagreed: readonly PrimitiveType[];\n};",
+              "summary": "Which of a deployment's kinds of part report themselves, and which are silent."
+            },
+            {
+              "name": "librarySendersOf",
+              "kind": "function",
+              "signature": "const librarySendersOf: (readings: readonly PageReading[]) => LibrarySenders",
+              "summary": "Which of a deployment's kinds of part report themselves."
+            }
+          ]
+        },
+        {
           "module": "signals/library-word-reach-change",
           "title": "Library word reach change",
           "summary": "The words of a kind of part the typical reader who met it reached — before and after.",
@@ -14207,7 +14256,7 @@
       "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 2061,
+        "packageNames": 2068,
         "otherDoors": 18,
         "doorsSharingNothing": 17,
         "widest": false,
@@ -14342,7 +14391,7 @@
       "files": 21,
       "narrower": [],
       "standing": {
-        "packageNames": 2061,
+        "packageNames": 2068,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -14404,7 +14453,7 @@
       "files": 65,
       "narrower": [],
       "standing": {
-        "packageNames": 2061,
+        "packageNames": 2068,
         "otherDoors": 18,
         "doorsSharingNothing": 17,
         "widest": false,
@@ -14978,7 +15027,7 @@
       "files": 43,
       "narrower": [],
       "standing": {
-        "packageNames": 2061,
+        "packageNames": 2068,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -15048,7 +15097,7 @@
       "files": 100,
       "narrower": [],
       "standing": {
-        "packageNames": 2061,
+        "packageNames": 2068,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -15470,7 +15519,7 @@
       "files": 81,
       "narrower": [],
       "standing": {
-        "packageNames": 2061,
+        "packageNames": 2068,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
