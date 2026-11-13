@@ -223,5 +223,15 @@ thing in this run that leaves `.next/dev/types` behind on a dev server. It was
 `next dev`, so there are none, and `pnpm clean` was not needed. Checked rather
 than assumed.
 
+**A third measurement of the link mangling, since this run made one anyway.**
+The body carries a markdown link and a bare URL on its own line; the comment
+carries the same two. **Four URLs, none mangled**, read back through the API and
+put through `pnpm posted`, both surfaces on the first attempt. That does not
+settle the 12 November entry — which saw an autolink and a bare URL mangled in a
+comment while a markdown link in a body survived — but it is one more reading
+against the idea that the *surface* is the variable. Recorded here rather than
+filed, because that entry is `Loom daily build`'s and its own advice is that
+nobody should spend a run on this.
+
 **No check-in is armed and this session unsubscribed from nothing, because it
 subscribed to nothing.** Ninth time this lane has said it would not arm one.
