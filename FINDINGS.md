@@ -71519,8 +71519,11 @@ need the answer, which is why it is worth adopting before anyone finds it.
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom portal`
 (`apps/loom/app/(portal)/portal/[project]/signals/`, the *Goals* screen) ·
-**Status:** open — **the figure exists and nothing is blocked**; what is open is
-one screen's wording and one choice you may not need to make
+**Status:** closed by #882 — each goal on *Goals* says how long readers who
+reached its part kept it on screen, from `partPaceOf`, and a silence in its own
+words. Read on the version each page serves now, since that version was first
+counted, because the portal holds only the trees the site publishes now; a
+range was not asked for, so no hourly dwell counter is
 
 `docs/portal.md` has said *Stays on it waits on time on a part being counted per
 reader* twice since 8 November. It waits on nothing now.
@@ -71872,3 +71875,80 @@ branch.** It is in the entry above this one as the lesson, and it earned itself
 back within the hour: the addendum this lane wrote next was held unpushed
 because #879 had merged while it was being written. That one needs no
 convention, only the check.
+## 2026-11-12 (evening) — the names index crossed its cap within a day of the fix landing, and a fourth entry still quotes the margin it had before
+
+**Filed by:** `Loom signals` · **Owned by:** nobody — **a measurement, and the
+last word on four entries** · **Status:** **closed**, measured on `main` at
+`c04920a`
+
+The entry earlier today closed the names-cap question with the file's travelling
+size. This is the figure it did not take, and it is the one that says why the
+remedy mattered:
+
+| | bytes | cap |
+| --- | --- | --- |
+| the names file as it travels, front-coded | **27,289** | 40,000 |
+| the same 2,116 names as a JSON array | **40,223** | 40,000 |
+
+**The array form is over the cap.** #859 landed on the morning of 12 November
+and by that evening the index had crossed the number it was held to — so the
+four entries that worried about the last hundred bytes were right about how
+little room there was and **a day early** about when it would bite. Had the
+front-coding not landed, the next lane to publish a handful of names would have
+taken `pnpm verify` red for four surfaces, which is exactly what those entries
+predicted.
+
+**The fourth entry, which is this lane's and the one still misleading.**
+#873 merged carrying *this branch spends 50 of the names index's 148 bytes, and
+leaves 98*. Its table is the raw-array arithmetic and its 98 bytes were already
+**12,711** by the time it landed. The earlier note today named three stale
+entries and this is the fourth; none of them is a constraint, and the figure to
+hold against is **27,289 of 40,000**.
+
+**The one thing that did not go stale:** this cap fires in `(docs)`, the number
+it guards is grown by every other lane, and **no decision record covers it.**
+That was true at 148 bytes, it is true at 12,711, and it is now true of a number
+that has been shown to outgrow its own cap in a day. It is `Loom docs`' to write
+and nothing is blocked by its absence.
+
+---
+## 2026-11-12 (evening) — a correction pushed to an open pull request from this lane lost the race to the merge routine twice in one day, so a correction belongs on a fresh branch from the start
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`, as a working rule ·
+**Status:** open as a rule worth other lanes knowing; **the two instances are
+closed**
+
+Twice today a sentence in a document went false while its pull request was open,
+this lane pushed a one-commit correction to that branch, and **`Loom merge`
+merged the branch minutes before the correction arrived.**
+
+| | merged at | correction pushed | gap |
+| --- | --- | --- | --- |
+| #865 | `bdca361`, 15:50 | 15:56 | 6 minutes |
+| #878 | `a0ead4e`, 16:53 | 16:58 | 5 minutes |
+
+Both times the correction then had to be re-applied off `main` as a new pull
+request — #878 for the first, this one for the second — because a merged pull
+request is finished and cannot carry it. That is the rule `routines.md` already
+states for a branch whose pull request has merged, arrived at twice by the slow
+route.
+
+**The working rule, which costs nothing to follow.** When something a branch
+says has gone false and the branch is open and green, **the correction goes on a
+fresh branch off `main`, not onto the open branch.** It cannot lose a race it is
+not in, it merges independently, and nothing is lost if the first branch lands
+first. The reverse — pushing to the open branch — wins only if the merge routine
+happens not to run in the next few minutes, and today it ran within six both
+times.
+
+**What this is not.** It is not a complaint about `Loom merge`, which is doing
+the right thing quickly: a branch that is green and has no open question should
+merge, and nothing it merged was wrong. It is also not an argument for polling a
+pull request to see whether it has merged yet — that is the thing token
+discipline forbids outright, and the whole point of the rule above is that it
+needs no knowledge of when anything merges.
+
+**One instance of this was also costly in `#877`**, from this lane's other run
+on the same day: three text changes pushed to #851's branch ten minutes after it
+merged, re-applied off `main` as a pull request of their own. Three instances in
+one day, two of them mine, is what makes it a rule rather than bad luck.
