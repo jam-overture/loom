@@ -6,6 +6,7 @@ import { describeApplicationStoreError, type ApplicationId } from "@jam-overture
 
 import { portalDatabase } from "@/app/(portal)/_lib/database"
 import { followSite } from "@/app/(portal)/_lib/proposing/follow-site"
+import { liveWindowOf } from "@/app/(portal)/_lib/proposing/held"
 import { livePages } from "@/app/(portal)/_lib/proposing/live"
 import { followsItsSite, pageCopiesFor } from "@/app/(portal)/_lib/proposing/stores"
 import { audienceRulesFor } from "@/app/(portal)/_lib/segments/rules"
@@ -18,7 +19,7 @@ import type { PublishKeyStore } from "./publish-keys"
 import { memoryPublishKeyStore } from "./publish-keys-memory"
 import { postgresPublishKeyStore } from "./publish-keys-postgres"
 import type { PublishedPageStore } from "./published"
-import type { ReaderWindowStore } from "./reader-windows"
+import { WINDOW_LENGTH, type ReaderWindowStore } from "./reader-windows"
 import { memoryReaderWindowStore } from "./reader-windows-memory"
 import { postgresReaderWindowStore } from "./reader-windows-postgres"
 import type { SitePullStore } from "./pulls"
@@ -108,34 +109,53 @@ export const appPublishDoor: PublishDoor = {
 }
 
 /**
+ * How long the project's readers are held, in milliseconds (0383 clause 1).
+ *
+ * A window that cannot be read is *Off* rather than a failed pull. Until
+ * `pnpm db:push` makes its table nobody can have chosen one, since *Settings*
+ * keeps it in the same table; and a pull that failed over it would cost the
+ * site its newest pages over a choice that only ever holds some readers back.
+ */
+const windowLengthOf = async (application: ApplicationId): Promise<number> => {
+  const kept = await appReaderWindows.kept(application)
+
+  return kept.ok && kept.value !== null ? WINDOW_LENGTH[kept.value.window] : 0
+}
+
+/**
  * The read door's stores (0358 clause 3): the project's key, what its site
  * published, the copies Loom's accepted changes are on, and each page's
- * audience rules and segment forms (0371 clauses 4 and 5), read with the
+ * audience rules and segment forms (0371 clauses 4 and 5), and the window its
+ * readers are held for with the versions that holds (0383 clause 5), read with the
  * screens' budget, since a pull is a read and must answer even when a store is
  * slow.
  */
 export const appReadDoor: ReadDoor = {
   keys: appIngestKeys,
   applicationOf,
-  livePagesOf: async (application) => {
-    const [published, copies] = await Promise.all([
+  liveOf: async (application) => {
+    const [published, copies, windowLength] = await Promise.all([
       publishedPagesFor(application).list(),
       pageCopiesFor(application).list(),
+      windowLengthOf(application),
     ])
 
     if (!published.ok) return err({ detail: published.error.detail })
     if (!copies.ok) return err({ detail: copies.error.detail })
 
-    const live = await livePages(
-      {
-        trees: governedPagesFor(application),
-        copies: copies.value,
-        follows: followsItsSite(application),
-      },
-      published.value.map((page) => page.tree)
-    )
+    const trees = governedPagesFor(application)
+    const [pages, window] = await Promise.all([
+      livePages(
+        { trees, copies: copies.value, follows: followsItsSite(application) },
+        published.value.map((page) => page.tree)
+      ),
+      liveWindowOf({ trees, copies: copies.value }, published.value, windowLength, Date.now()),
+    ])
 
-    return live.ok ? live : err({ detail: live.error.detail })
+    if (!pages.ok) return err({ detail: pages.error.detail })
+    if (!window.ok) return err({ detail: window.error.detail })
+
+    return ok({ pages: pages.value, window: window.value })
   },
   /** Through the store the *Segments* screen writes, so the site gets what a person saved (0371 clause 3). */
   overlaysOf: (application, pages) => readPageOverlays(audienceRulesFor(application), pages),
