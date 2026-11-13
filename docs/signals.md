@@ -32,7 +32,7 @@ the portal every day.
 | Content | **none** — no text, no URLs, no typed values, nothing about the reader |
 | Configuration | the host's argument, never a prop in the tree |
 | Default | off; an unaddressed render is byte-identical |
-| Browser cost | **7,543 bytes** minified, **3,350 gzipped**, measured 9 November by the gate itself; `src/signals/browser-weight.test.ts` fails if an import reaches a package, and now also if the bundle passes 8,000 minified or 3,600 gzipped. The 3,361 this row carried from 7 November was the same bundle measured through `gzip -9` on the command line, which writes the file's name into the header — the gate's `gzipSync` is the figure to quote, because it is the one that can fail |
+| Browser cost | **7,852 bytes** minified, **3,458 gzipped**, measured 12 November (evening) by the gate itself, which leaves **148 bytes of the 8,000 and 142 of the 3,600**. This row read 7,543 and 3,350 from 9 November and went false on 12 November at 08:59, when #870 taught the broadcaster to carry a reader's segment (0385) and spent 309 minified and 108 gzipped with no figure in that pull request or its record; the ceiling held, so nothing said so. `src/signals/browser-weight.test.ts` fails if an import reaches a package, and now also if the bundle passes 8,000 minified or 3,600 gzipped. The 3,361 this row carried from 7 November was the same bundle measured through `gzip -9` on the command line, which writes the file's name into the header — the gate's `gzipSync` is the figure to quote, because it is the one that can fail |
 | What a broadcast follows | the page, when it is handed the `Document` ([0366](../decisions/0366-a-broadcast-handed-a-document-follows-the-page-and-a-client-side-navigation-is-a-new-page-view.md)) — a client-side navigation ends one page view and opens another with its own arrival, a re-render leaves the page view alone, and the same revision rendered again continues it; handed an `Element` it reads that element's tree and revision once, as it always has |
 | How long a delivery lives | two windows since 5 November: counted once it is ripe, **kept for 30 days by default** and then deleted ([0349](../decisions/0349-a-projects-reader-events-are-kept-thirty-days-by-default-and-the-tallies-stay-the-durable-record.md), [0351](../decisions/0351-a-counted-delivery-is-kept-for-a-stated-window-rather-than-deleted-by-the-fold.md)) — and nothing deletes a delivery no fold has counted, so a deployment whose collection stopped keeps rather than loses them |
 | What an operator can look at, delivery by delivery | one row per signal the deployment still keeps, newest first, in exact pages, with the rest of one page view beside any of them ([0355](../decisions/0355-the-events-a-screen-lists-are-one-row-per-signal-and-one-page-view-is-read-on-a-key-the-caller-already-holds.md)) — the handle the *Events* tab is drawn from, which counts nothing, names no page and cannot be asked which page views exist |
@@ -5398,8 +5398,17 @@ cap — about seven names, and they were nobody's to hold down — and this lane
 already lost §82 to it. A member of a closed union and a field on a published
 type are neither of them names, so the figure on this branch was `main`'s byte
 for byte. **The cap is no longer the constraint:** `Loom docs` front-coded the
-file the next morning (#859), which took it to **27,205 bytes of 40,000 with
-2,109 names in it**, so the next unit here is free to publish a door.
+file the next morning (#859) — each entry point's names sorted, with one
+base-36 digit saying how much of the previous name to keep — and it measures
+**27,289 bytes of 40,000 with 2,116 names in it** on the evening of
+12 November, so the next unit here is free to publish a door.
+
+**It arrived with nothing to spare, which is the figure to keep.** Written as a
+JSON array the way it travelled until that morning, those same 2,116 names
+measure **40,223 bytes** — *over* the cap. The index crossed it **within a day**
+of the remedy landing, and the remedy is the only reason nothing is red. Every
+entry in `FINDINGS.md` that worried about the last hundred bytes was right about
+how little room there was and a day early about when it would matter.
 
 **What is left and is filed:** *which of your components are silent*, the same
 defect gathered by primitive type rather than by page, which is the sentence the
@@ -5467,7 +5476,121 @@ began** and not over a range, because the hourly table holds what readers *did*
 and not what they saw — a stated limit of 0362, and the hourly dwell counter
 that would lift it is priced and declined in the entry of 6 November. And a
 per-page breakdown — *which page is this part skimmed on* — is a second question
-with a second shape that nothing has asked.
+with a second shape that nothing has asked. **§87 asked it.**
+
+### 87. Which page a part is skimmed on · `Loom signals` · **done, 12 November**
+
+§86 left one sentence half-said. `PartPace.standings` lets a goal's screen say
+*this part is paced across your pages and **skimmed on two of them***, and
+nothing on the reading says which two. **The rows were already computed and
+summed away**: the loop reads each page's own pace, its own words and its own
+door, adds them into the pooled sums and keeps nothing.
+
+**Done**
+([0390](../decisions/0390-a-parts-pages-are-a-second-order-ranked-on-the-reading-time-its-readers-did-not-have.md)),
+as the twenty-fourth reading taken out of the server-side join rather than
+collected, and it cost an array rather than any arithmetic — **no payload field,
+no counter, no column, no table, no byte on any wire and nothing in a reader's
+browser.**
+
+- **The decision was the order, and the key is a magnitude rather than a rate.**
+  `PartPace.ranked` is the pages the part is counted on by `shortMs` — the
+  reading time their readers did not have — most first, then the lower pace,
+  then by tree and newest revision first. A band four hundred readers had a
+  second of, where its words take five, is short of 1,600 seconds at a pace of
+  0.2; the same band on a page one reader hurried past is short of 4.9 at a pace
+  of 0.02. **The rate puts the single reader first**, which is the test that
+  kills it, and 0250 and 0377 already settled this for every other order here.
+- **`worst` is the one page to go to**, and `unranked` is every page it stands
+  on with no figures of its own, by page, each carrying the silence saying why.
+- **The rows add to the figure they break down**: `readers`, `dwellMs` and
+  `needMs` sum to `PartPace`'s three exactly, term by term, which is the only
+  thing tying the two together. `ranked.length` is `counted` and the two lists
+  together are `placements`.
+- **`shortMs` is the one term that does not add**, published on the row that is
+  ranked by it. The pooled figure lets a page readers lingered on pay for a page
+  they skimmed, and a row pays for nothing but itself — so the rows sum to at
+  least the figure above them and a surface adding them has contradicted it.
+- **A silent page's time on screen stays out of the sums.** A part that says
+  nothing can have been on screen for twenty seconds with no words to measure it
+  against; the row carries that time and the numerator refuses it.
+- **A row's verdict is its page's own reading's**, never one re-derived from the
+  row's `pace` — the two quotients agree mathematically and need not agree in
+  their last float place, and `standings` counts the first.
+
+**Two names reach `@jam-overture/loom/signals`** — `PacedPlace` and
+`MeasuredPlace` — at **20 bytes** of the published names index: 27,289 over
+2,116 names on `main`, 27,309 over 2,118 with them, **leaving 12,691 of
+40,000**. `MeasuredPlace` is the narrowed row, so a screen drawing the order
+does not null-check four fields an ordered row cannot be missing.
+
+**Nothing reaches a reader's browser.** `broadcast.ts` and its import graph are
+untouched, and the bundle measures **7,852 bytes minified and 3,458 gzipped**,
+which is what it measures on `main` — remeasured here because the figure this
+plan carried was 309 bytes stale, and the row at the top of this file is
+corrected to match. **148 bytes of 8,000 are left**, which is the number the next
+change to the broadcaster has to fit in.
+
+### 88. Which of your components are silent · `Loom signals` · **done, 13 November**
+
+The 11 November entry that filed
+[0382](../decisions/0382-a-part-that-reported-nothing-with-a-reader-below-it-is-an-eighth-collection-fault-and-it-reaches-both-ranking-keys.md)
+left one half of its own sentence open, and said so: *a primitive to fix **in
+the library**, not a page to rewrite* — and the fault it had just added is raised
+per page. **A deployment with forty pages built out of one silent
+`loom.accordion` gets forty faulted pages**, and nothing in the repository says
+they are forty symptoms of one thing. The errand the fix-list hands over is
+*rewrite these forty pages*, when the work is one primitive, once.
+
+**Done**
+([0393](../decisions/0393-a-silent-component-is-a-census-over-the-placements-the-defect-could-be-seen-on-and-the-share-is-bracketed.md)),
+as the twenty-fourth reading taken out of the server-side join of 0212 rather
+than collected — **no payload field, no counter, no column, no table, no byte on
+any wire and nothing in a reader's browser.**
+
+- **`librarySendersOf` gathers the defect by `KindKey`**, the way `library.ts`
+  gathers standing and `library-reach.ts` gathers readers. The sentence is
+  *`loom.accordion` is silent in thirty-one of the thirty-four places it stands,
+  across nineteen of your pages*, and `silentTrees` is the figure the per-page
+  fault cannot give.
+- **The denominator is the placements the defect could be seen on, and that is
+  the whole design.** A silent **leaf** reports exactly what a leaf nobody
+  reached reports, so it is undetectable for ever; a holder with nothing reported
+  below it is undetectable today. `leaves + unwitnessed + witnessed =
+  placements`, and the share is `silent ÷ witnessed`. Over the placements it
+  would fall as a library gained leaves and as a window lost readers — a figure
+  that moves when nothing about a sender has.
+- **The share is bracketed rather than guessed.** A witnessed placement whose own
+  standing is `unknown` reported something that was not a view with a reader
+  below it, which is plausibly the same defect and is not claimed as it (0282).
+  `share` excludes those and `atMost` includes them; where none exist the two are
+  equal.
+- **It is 0382's defect and not a second spelling of it.** The pre-order walk and
+  the prefix counts move to `subtrees.ts` — internal, not re-exported — and
+  `frontier.ts` takes them from there. The census total is asserted equal to the
+  sum of `PageFrontier.notReporting` over the same readings.
+- **The figure is a floor, and a surface must not say otherwise.** Three
+  populations are outside it. A deployment whose senders are entirely broken
+  publishes `witnessed: 0` and a silence, never a healthy share.
+- **A page handed in twice is folded once** (0158), deduplicated on
+  `readingKeyOf` and reported in `duplicated`, with every figure asserted term by
+  term against the single-reading one.
+
+**Seven names reach `@jam-overture/loom/signals`** — `librarySendersOf`,
+`LibrarySenders`, `KindSenders`, `SenderSilence`, `SENDER_SILENCES`,
+`describeSenderSilence` and `SILENT_EXAMPLES`. Measured on the front-coded index
+(#859), by building the file both ways: **27,289 bytes over 2,116 names on
+`main`, 27,368 over 2,123 with these seven — 79 bytes of the 12,711 there were,
+leaving 12,632.** Seven names for 79 bytes is the front-coding doing what it was
+for; the same seven would have been most of the old cap's headroom.
+
+**Nothing reaches a reader's browser.** `broadcast.ts` and its import graph are
+untouched, and the bundle measures what it measures on `main`.
+
+**What is left and is filed:** the portal view is `Loom portal`'s to draw, and
+what it may say is bounded by the floor above. And the sweep the 11 November
+entry asked for — *how many other fixtures in this repository model the defect by
+accident* — is still open and still two lanes' work.
 
 ## Still not in scope
 
