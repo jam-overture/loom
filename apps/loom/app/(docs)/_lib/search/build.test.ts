@@ -776,6 +776,34 @@ describe("what the index contains", () => {
   })
 
   /**
+   * A body that is not a body costs one entry and not a section.
+   *
+   * Found by mutation: the parse used to drop anything that was not a string,
+   * which was right while a body was a pair and its address travelled with it.
+   * It is wrong now — a dropped body shifts every body after it one entry up,
+   * and the count guard would then refuse the file and cost a reader the whole
+   * section's sentences over one bad value.
+   */
+  it("empties a body that is not one, rather than dropping it out of the order", () => {
+    const runtime = searchProseFor("the-runtime")
+    const mangled = parseSearchProse({
+      under: runtime.under,
+      bodies: runtime.bodies.map((body, at) => (at === 1 ? 42 : body)),
+    })
+
+    expect(mangled.bodies.length).toBe(runtime.bodies.length)
+    expect(mangled.bodies[1]).toBe("")
+    expect(mangled.bodies[2]).toBe(runtime.bodies[2])
+
+    const contents = parseSearchIndex(JSON.parse(JSON.stringify(searchContents())))
+    const merged = withProse(contents, mangled)
+    const entries = proseEntriesOf(merged.entries, runtime.under)
+
+    expect(entries[1]?.body).toBe("")
+    expect(entries[2]?.body).toBe(runtime.bodies[2])
+  })
+
+  /**
    * And a file that does not line up is refused whole.
    *
    * The failure this shape could have, written as the test that says it does

@@ -365,7 +365,16 @@ export const parseSearchProse = (value: unknown): SearchProse => {
    */
   return {
     under: typeof value.under === "string" ? value.under : "",
-    bodies: value.bodies.filter((body): body is string => typeof body === "string"),
+    /*
+     * **A body that is not a string becomes an empty one, and is not dropped.**
+     * Dropping was what the keyed shape did, and it was right there: a pair
+     * that was not a pair said nothing about any other pair. Here a body's
+     * place is its address, so dropping one moves every body after it onto the
+     * wrong entry — or, if the count guard catches it, costs the reader the
+     * whole section's sentences over one bad value. Emptying costs them that
+     * one body and nothing else.
+     */
+    bodies: value.bodies.map((body) => (typeof body === "string" ? body : "")),
   }
 }
 
