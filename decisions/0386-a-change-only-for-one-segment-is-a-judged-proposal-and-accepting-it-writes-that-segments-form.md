@@ -1,8 +1,19 @@
 # 0386. A change only for one segment is a judged proposal, and accepting it writes that segment's form
 
-**Status:** Proposed
+**Status:** Accepted
 **Date:** 2026-11-12
 **Section:** §5 (portal), the governance and connection planes
+
+> **Accepted on 13 November 2026.** The maintainer: *"Okay, take the proposal
+> for 872."* The three defaults stand as written: the person picks the segment
+> at *Accept*, one segment per change, and the Gate's verdict for everyone
+> stands for one segment. Piece 2 of clause 9 landed before acceptance, from
+> the framework's lane: [0392](0392-a-segments-form-arrives-in-the-same-pull-as-its-rules-and-a-form-that-cannot-be-applied-costs-the-reader-their-segment.md)
+> (#886) has the door answer `{ pages, rules, forms }` and the pull client
+> compose a reader's segment with `pageForReader`, falling back to the base
+> where a form cannot be applied. Clause 6's rebuild keeps the portal from
+> writing such a form; 0392 clause 4 is what a site does if one reaches it
+> anyway. Pieces 1 and 3 are the portal's.
 
 ## Context
 

@@ -272,7 +272,7 @@ figure to that segment's readers and says *Nothing has been counted for
 <segment> yet* until the site names it. The split on *Page history* and *only
 for: <segment>* are piece 4, whose record is
 [0386](../decisions/0386-a-change-only-for-one-segment-is-a-judged-proposal-and-accepting-it-writes-that-segments-form.md)
-(Proposed 12 November).
+(Accepted 13 November).
 
 ---
 
