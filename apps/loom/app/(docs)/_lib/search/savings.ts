@@ -219,9 +219,9 @@ let bodies: readonly Body[] | undefined
  * is a pure function of the repository as it sits on disk.
  */
 const everyBody = (): readonly Body[] =>
-  (bodies ??= proseEntriesOf((index ??= buildSearchIndex()).entries, "")
-    .filter((entry) => entry.body !== "")
-    .map((entry) => [entry.href, entry.body] as const))
+  (bodies ??= proseEntriesOf((index ??= buildSearchIndex()).entries, "").map(
+    (entry) => [entry.href, entry.body] as const
+  ))
 
 /**
  * A set of bodies as a prose file: positions rather than keys, the way one is
@@ -235,8 +235,16 @@ const everyBody = (): readonly Body[] =>
  */
 const fileOf = (under: string, rewritten: ReadonlyMap<string, string>): SearchProse => ({
   under,
+  /*
+   * The empty string is the type's default and not a fallback: `storedAs`
+   * answers with a body for every body it was given and it is given every
+   * entry, so there is nothing for a real default to be. Written as `?? ""`
+   * rather than as the entry's own body for that reason — a mutation showed
+   * the second spelling could not fire, and a branch that cannot fire reads as
+   * a rule about partial rewrites that nothing here does.
+   */
   bodies: proseEntriesOf((index ??= buildSearchIndex()).entries, under).map(
-    (entry) => rewritten.get(entry.href) ?? entry.body
+    (entry) => rewritten.get(entry.href) ?? ""
   ),
 })
 
