@@ -718,6 +718,22 @@ describe("what the index contains", () => {
 
     expect(new Set(hrefs).size).toBe(hrefs.length)
     expect(new Set(blocks).size).toBe(blocks.length)
+
+    /*
+     * **And no name shares an address with a page or a heading**, which is the
+     * invariant standing where a guard used to. `withProse` builds its map off
+     * the entries that are not names and then reads it by href, so a name whose
+     * href collided with a heading's would be handed that heading's paragraph.
+     * It was written as a `kind === "export"` check in `withProse` first; a
+     * mutation showed the check could not fire, which on this site means the
+     * collision cannot happen — so the thing to hold is the reason, here, where
+     * it fails if an anchor scheme ever changes.
+     */
+    const written = new Set(index.entries.filter((entry) => entry.kind !== "export").map((entry) => entry.href))
+
+    for (const name of index.entries.filter((entry) => entry.kind === "export")) {
+      expect(written.has(name.href), name.href).toBe(false)
+    }
   })
 
   /**

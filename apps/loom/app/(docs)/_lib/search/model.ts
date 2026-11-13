@@ -399,9 +399,9 @@ export const withProse = (index: SearchIndex, prose: SearchProse): SearchIndex =
 
   return {
     entries: index.entries.map((entry) => {
-      const body = entry.kind === "export" ? undefined : bodies.get(entry.href)
+      const body = bodies.get(entry.href)
 
-      return body === undefined || body === "" ? entry : { ...entry, body }
+      return body === undefined ? entry : { ...entry, body }
     }),
   }
 }
