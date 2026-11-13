@@ -219,3 +219,36 @@ about an hour of a revision, with no key, no region and nothing per reader; the
 rolling window is arithmetic over two tables and remembers nothing between two
 readings. Adding an opt-in identity later would add a table rather than change
 this reading.
+
+---
+
+## Postscript, 13 November — what the two days changed
+
+This report is the account of 11 November and the figures above are the ones
+measured that day. Two of them went false while the pull request waited, neither
+because of anything on this branch, and both are corrected in `docs/signals.md`
+and in 0395 rather than rewritten here.
+
+- **The broadcaster bundle is 7,852 minified and 3,458 gzipped**, not 7,543 and
+  3,350. #870 spent 309 bytes on 12 November teaching the broadcaster to carry a
+  reader's segment (0385). This branch still adds nothing to it: the figure is
+  `main`'s, as it was then.
+- **The names index is no longer near its cap.** The front-coding in #859 put the
+  file at **27,488 of 40,000** with this branch's three names in it — 12,512 of
+  headroom, against the 97 this report was written to warn about. The warning was
+  right and the remedy landed: the finding filed here is closed on that, and #851
+  was unblocked by it rather than by anything argued above.
+
+Two other things the wait changed, neither of them a measurement:
+
+- **The records are 0395 and 0396**, not 0380 and 0381. `main` gave both numbers
+  to other records while this waited, and two records sharing a number is fatal
+  (0097).
+- **The branch had to take `main` in.** Eighteen commits landed under it,
+  including §85 through §88 of this plan, and `docs/signals.md` conflicted
+  because every one of them appends a step where this one does. Resolved by
+  keeping both sides and ordering §84 between §83 and §85, which is where it was
+  always going to go — the later runs left the number free.
+
+Re-verified after the merge on 13 November: `pnpm verify` **EXIT=0**, figures in
+the pull request comment of that date.

@@ -18,14 +18,10 @@ export const BAND = {
    * The chain, and it is the first band under the hero as of 25 October.
    *
    * *Start to finish* rather than a count, for the reason `chain.ts` gives at
-   * length: this page already says *four steps* one band further down and
-   * `/how-it-works` says *five*, and a third number on the front door would
-   * undo the one thing `journey.ts` was written to fix.
+   * length: `/how-it-works` says *five steps*, and a second number on the
+   * front door would undo the one thing `journey.ts` was written to fix.
    */
   chain: "Start to finish",
-  whatIsIt: "What is Loom?",
-  usingIt: "Using it",
-  problems: "What this is for",
   facts: "Where it is today",
   asData: "How this page is put together",
   questions: "Questions",
@@ -34,11 +30,12 @@ export const BAND = {
    * What it costs, and it is the first band on this site to say anything about
    * money.
    *
-   * It sits directly under `install` because the question it answers is the one
-   * a reader has the moment they are shown a command to run. `costs.ts` has the
-   * whole of what it may claim and where that permission comes from.
+   * *Free to get started* rather than *What it costs*, at the maintainer's
+   * word of 11 November: the eyebrow leads with what a reader gets rather than
+   * with the bill. `costs.ts` has the whole of what it may claim and where that
+   * permission comes from.
    */
-  costs: "What it costs",
+  costs: "Free to get started",
   waysIn: "Keep going",
 } as const
 
@@ -176,6 +173,22 @@ export const READY_MADE_ANCHOR = "ready-made"
 export const ON_YOUR_SITE_ANCHOR = "on-your-own-site"
 
 /**
+ * The band that says the package writes your first files, which is the fourth
+ * anchor on this site nothing links to.
+ *
+ * Declared for the reason `ALLOWED_ANCHOR`, `READY_MADE_ANCHOR` and
+ * `ON_YOUR_SITE_ANCHOR` above all give, and the reason has not changed: an
+ * anchor buys **addressability**, and this is the surface the maintainer judges
+ * by eye. A band whose middle is a terminal panel is one a pull request comment
+ * wants to send him straight to.
+ *
+ * It is not in `WHY_USE_IT_ANCHOR` below for the same reason those three are
+ * not: that map is the bands of `/why-use-it` **the chain points at**, and the
+ * chain has six links, none of which is this one. `scaffold.ts` has the band.
+ */
+export const SCAFFOLD_ANCHOR = "your-first-files"
+
+/**
  * The bands of `/why-use-it` that the chain points at.
  *
  * **The chain is the site's map as of today**, and that is what these exist
@@ -234,11 +247,10 @@ export const WHY_USE_IT_ANCHOR = {
   /**
    * The one function a reader writes to connect a model of their own.
    *
-   * It is not one of the chain's six, so it is in this map rather than beside
-   * it for a different reason: the front door's four steps now carry an `href`
-   * each, and this is the one of the four that had nowhere to point.
-   * `connected.ts` has why the band exists and `using-it.test.ts` holds every
-   * step to landing on a band that declares its anchor.
+   * It is not one of the chain's six, so it is in this map for a different
+   * reason: the front door's *Using it* band pointed a step at it until that
+   * band came off on 11 November. `connected.ts` has why the band exists; it
+   * stays addressable for the reason `ALLOWED_ANCHOR` gives.
    */
   connected: "hook-up-your-model",
 } as const

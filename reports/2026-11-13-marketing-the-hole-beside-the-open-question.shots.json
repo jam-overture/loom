@@ -1,0 +1,51 @@
+{
+  "outDir": "reports",
+  "shots": [
+    {
+      "path": "/",
+      "out": "2026-11-13-marketing-the-hole-after",
+      "viewport": "wide",
+      "waitFor": "h1",
+      "clip": "section:has(h2:text-is('The ones worth asking first'))",
+      "measure": ["details", "section:has(h2:text-is('The ones worth asking first'))"]
+    },
+    {
+      "path": "/",
+      "out": "2026-11-13-marketing-the-hole-after-opened",
+      "viewport": "wide",
+      "waitFor": "h1",
+      "clip": "section:has(h2:text-is('The ones worth asking first'))",
+      "do": [{ "click": "summary:has-text('Is this a page builder?')" }, { "wait": 600 }],
+      "measure": ["details"]
+    },
+    {
+      "path": "/?theme=bold",
+      "out": "2026-11-13-marketing-the-hole-bold",
+      "viewport": "wide",
+      "waitFor": "h1",
+      "clip": "section:has(h2:text-is('The ones worth asking first'))"
+    },
+    {
+      "path": "/?theme=editorial",
+      "out": "2026-11-13-marketing-the-hole-editorial",
+      "viewport": "wide",
+      "waitFor": "h1",
+      "clip": "section:has(h2:text-is('The ones worth asking first'))"
+    },
+    {
+      "path": "/",
+      "out": "2026-11-13-marketing-the-hole-phone",
+      "viewport": "phone",
+      "waitFor": "h1",
+      "clip": "section:has(h2:text-is('The ones worth asking first'))",
+      "measure": ["details"]
+    },
+    {
+      "path": "/",
+      "out": "2026-11-13-marketing-the-hole-front-door",
+      "viewport": "wide",
+      "waitFor": "h1",
+      "fullPage": true
+    }
+  ]
+}

@@ -92,10 +92,12 @@ over them.** `actedAgainstOf` in `src/signals/acted.ts` is the reading;
    read. There is no new store method, no new table and no new request field.
 
 7. **Nothing reaches a reader's browser and nothing new is collected.**
-   `broadcast.ts` and its import graph are untouched; the bundle measures 7,543
-   bytes minified and 3,350 gzipped, which is `main`'s figure. No payload field,
-   no new kind, no view key: both numbers are counters this subsystem already
-   kept.
+   `broadcast.ts` and its import graph are untouched, and the bundle measures
+   what it measures on `main` — 7,852 bytes minified and 3,458 gzipped when this
+   branch merged `main` on 13 November, where it was 7,543 and 3,350 when this
+   record was written on the 11th. The figure moved under the branch rather than
+   because of it (#870, 0385). No payload field, no new kind, no view key: both
+   numbers are counters this subsystem already kept.
 
 ## Consequences
 
@@ -107,9 +109,11 @@ over them.** `actedAgainstOf` in `src/signals/acted.ts` is the reading;
   it. A caller who wants a denominator on every bar asks for a range one hour
   wider and drops the first bar. Filed, because the remedy is available to a
   caller and not to a screen reading `readReaderActedRate`.
-- `@jam-overture/loom/signals` publishes three more names, 51 bytes of the
-  names index's 148 remaining. 97 are left and the cap is `Loom docs`' to settle
-  (#851 is held on it).
+- `@jam-overture/loom/signals` publishes three more names. **This cost 51 of
+  the names index's 148 remaining bytes when the record was written on
+  11 November and costs nothing worth naming now**: the front-coding that landed
+  on the 12th (#859) put the file at 27,488 of 40,000 with this branch's names in
+  it, so the cap that was holding #851 is not a constraint on anything here.
 - Per-reader identity stays as far away as it was (deferred, 30 September). A
   pair here is two counts about an hour, with no key, no region and nothing per
   reader; the rolling window is arithmetic over two tables and remembers

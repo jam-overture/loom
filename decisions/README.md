@@ -460,29 +460,29 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0368](0368-what-readers-did-inside-a-part-is-derived-from-the-tree-and-the-sum-is-exact-because-occurrences-add.md) | What readers did inside a part is derived from the tree, and the sum is exact because occurrences add | Accepted | §5 (reader signals), the counters |
 | [0369](0369-the-sites-build-publishes-its-pages-and-a-refusal-never-stops-a-deploy.md) | The site's build publishes its pages, and a refusal never stops a deploy | Accepted | §5 (portal), the connection plane |
 | [0370](0370-loomjs-org-serves-its-live-pages-and-pulls-them-like-a-customers-site.md) | loomjs.org serves its live pages, and pulls them like a customer's site | Accepted | §5 (portal), the connection plane |
-| 0371 | *No record on this branch* | — | — |
+| [0371](0371-a-segment-is-an-audience-the-site-sorts-its-readers-into-and-loom-keeps-only-its-rules-and-its-name.md) | A segment is an audience the site sorts its readers into, and Loom keeps only its rules and its name | Accepted | §5 (portal), the governance and reasoning planes |
 | [0372](0372-every-read-of-a-tree-carries-an-explicit-stack-because-a-page-s-depth-is-data.md) | Every read of a tree carries an explicit stack, because a page's depth is data | Accepted | §2, the tree |
 | [0373](0373-an-edit-to-a-tree-descends-by-the-path-and-rebuilds-a-sibling-list-in-one-pass.md) | An edit to a tree descends by the path and rebuilds a sibling list in one pass | Accepted | §2, the tree |
 | [0374](0374-a-pages-unread-parts-are-reported-as-the-places-its-reading-stopped-and-each-is-behind-exactly-one.md) | A page's unread parts are reported as the places its reading stopped, and each is behind exactly one | Accepted | §5 (reader signals), the counters |
 | [0375](0375-a-whole-repository-check-is-budgeted-by-what-it-reads-rather-than-by-a-wall-clock.md) | A whole-repository check is budgeted by what it reads, rather than by a wall clock | Accepted | §1, the merge gate |
 | [0376](0376-a-pages-audience-rules-are-an-attributed-log-and-its-forms-are-rows.md) | A page's audience rules are an attributed log and its forms are rows | Accepted | §5, and §1's audience dimension |
 | [0377](0377-a-deployments-unread-places-are-a-fourth-order-ranked-on-what-one-fix-recovers.md) | A deployment's unread places are a fourth order, ranked on what one fix recovers | Accepted | §5 (reader signals), the counters |
-| 0378 | *No record on this branch* | — | — |
-| 0379 | *No record on this branch* | — | — |
-| 0380 | *No record on this branch* | — | — |
-| 0381 | *No record on this branch* | — | — |
-| 0382 | *No record on this branch* | — | — |
-| 0383 | *No record on this branch* | — | — |
-| 0384 | *No record on this branch* | — | — |
-| 0385 | *No record on this branch* | — | — |
-| 0386 | *No record on this branch* | — | — |
-| 0387 | *No record on this branch* | — | — |
-| 0388 | *No record on this branch* | — | — |
-| 0389 | *No record on this branch* | — | — |
-| 0390 | *No record on this branch* | — | — |
-| 0391 | *No record on this branch* | — | — |
-| 0392 | *No record on this branch* | — | — |
-| 0393 | *No record on this branch* | — | — |
+| [0378](0378-a-fix-lists-row-carries-the-place-its-pages-reading-stopped-and-the-fourth-reading-cannot-take-a-row-away.md) | A fix-list's row carries the place its page's reading stopped, and the fourth reading cannot take a row away | Accepted | §5 (reader signals), the counters |
+| [0379](0379-a-file-may-publish-part-of-its-body-as-somebody-elses-code-and-a-check-that-reads-this-deployment-stops-at-the-marker.md) | A file may publish part of its body as somebody else's code, and a check that reads *this* deployment stops at the marker | Accepted | §1, the merge gate |
+| [0380](0380-the-three-walks-outside-src-tree-carry-an-explicit-stack-and-react-was-never-the-bound-on-rendering-a-deep-page.md) | The three walks outside `src/tree/` carry an explicit stack, and React was never the bound on rendering a deep page | Accepted | §2 |
+| [0381](0381-a-parts-pace-across-pages-is-one-pooled-quotient-and-a-goals-part-is-a-reading-of-its-own.md) | A part's pace across pages is one pooled quotient, and a goal's part is a reading of its own | Accepted | §5 (reader signals), the counters |
+| [0382](0382-a-part-that-reported-nothing-with-a-reader-below-it-is-an-eighth-collection-fault-and-it-reaches-both-ranking-keys.md) | A part that reported nothing with a reader below it is an eighth collection fault, and it reaches both ranking keys | Accepted | §5 (reader signals), the counters |
+| [0383](0383-a-reader-keeps-the-pages-they-first-saw-for-a-window-the-project-sets-and-their-browser-holds-one-number-many-readers-share.md) | A reader keeps the pages they first saw for a window the project sets, and their browser holds one number many readers share | Accepted | §1, §5 (portal), the connection plane |
+| [0384](0384-a-simulation-runs-looms-own-loop-in-one-process-on-a-clock-it-moves-and-its-readers-never-reach-a-real-project.md) | A simulation runs Loom's own loop in one process on a clock it moves, and its readers never reach a real project | Accepted | §1 (process), §4c (reader signals), the reasoning plane |
+| [0385](0385-a-reader-two-segments-match-is-counted-in-the-last-ones-and-the-page-carries-it-to-its-signals.md) | A reader two segments match is counted in the last one's, and the page carries it to its signals | Accepted | §2 (signals) |
+| [0386](0386-a-change-only-for-one-segment-is-a-judged-proposal-and-accepting-it-writes-that-segments-form.md) | A change only for one segment is a judged proposal, and accepting it writes that segment's form | Accepted | §5 (portal), the governance and connection planes |
+| [0387](0387-a-landmark-is-not-a-count-and-a-copy-is-a-sequence-of-them-at-the-distances-the-text-puts-them-at.md) | A landmark is not a count, and a copy is a sequence of them at the distances the text puts them at | Accepted | §1 (process) |
+| [0388](0388-a-routine-reads-back-what-it-posted-because-no-safe-link-length-can-be-computed-in-advance.md) | A routine reads back what it posted, because no safe link length can be computed in advance | Accepted | §1, how a run reports |
+| [0389](0389-a-range-of-hours-is-folded-into-its-days-and-into-the-hours-of-a-readers-day-where-the-mean-is-the-only-comparable-figure.md) | A range of hours is folded into its days and into the hours of a reader's day, where the mean is the only comparable figure | Accepted | §5 (reader signals), the counters |
+| [0390](0390-a-parts-pages-are-a-second-order-ranked-on-the-reading-time-its-readers-did-not-have.md) | A part's pages are a second order, ranked on the reading time its readers did not have | Accepted | §5 (reader signals), the counters |
+| [0391](0391-a-whole-repository-sweep-names-its-budget-on-the-block-that-holds-it.md) | A whole-repository sweep names its budget on the block that holds it, and a check says which files those are | Accepted | §1, the merge gate |
+| [0392](0392-a-segments-form-arrives-in-the-same-pull-as-its-rules-and-a-form-that-cannot-be-applied-costs-the-reader-their-segment.md) | A segment's form arrives in the same pull as its rules, and a form that cannot be applied costs the reader their segment rather than their page | Accepted | §2 (portal), the read door |
+| [0393](0393-a-silent-component-is-a-census-over-the-placements-the-defect-could-be-seen-on-and-the-share-is-bracketed.md) | A silent component is a census over the placements the defect could be seen on, and the share is bracketed | Accepted | §5 (reader signals), the readings |
 | 0394 | *No record on this branch* | — | — |
 | [0395](0395-an-hours-denominator-is-the-page-views-of-that-hour-and-the-one-before-published-beside-the-count-and-never-summed.md) | An hour's denominator is the page views of that hour and the one before, published beside the count and never summed | Accepted | §5 (reader signals), the counters |
 | [0396](0396-an-hourly-rate-is-the-quotient-of-the-rolling-pair.md) | An hourly rate is the quotient of the rolling pair | Proposed — **ARCHITECTURAL, needs review.** It contradicts clause 9 | §5 (reader signals), the counters |

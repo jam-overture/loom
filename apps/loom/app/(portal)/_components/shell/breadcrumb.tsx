@@ -65,7 +65,7 @@ export const Breadcrumb = () => {
   const read = useProjectName(projectId, pathname)
 
   return (
-    <nav aria-label="Where you are" className="min-w-0">
+    <nav aria-label="Where you are" className="min-w-0 overflow-hidden">
       <ol className="m-0 flex min-w-0 list-none items-center gap-2 p-0 text-sm">
         <Separator />
         <li>

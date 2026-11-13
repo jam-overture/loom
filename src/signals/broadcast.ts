@@ -1,9 +1,11 @@
-import { NAMESPACED_ID_PATTERN, NODE_ID_PATTERN, TREE_ID_PATTERN } from "../grammar.js"
+import type { AudienceId } from "../audience/audience.js"
+import { idPattern, NAMESPACED_ID_PATTERN, NODE_ID_PATTERN, TREE_ID_PATTERN } from "../grammar.js"
 import type { NodeId, TreeId } from "../ids.js"
 import type { PrimitiveType } from "../primitive-type.js"
 import { addressedRootIn } from "../render/addressed.js"
 import { DISCLOSED_ATTRIBUTE } from "../render/disclosed.js"
 import {
+  LOOM_AUDIENCE_ATTRIBUTE,
   LOOM_NODE_ATTRIBUTE,
   LOOM_REVISION_ATTRIBUTE,
   LOOM_TREE_ATTRIBUTE,
@@ -280,7 +282,19 @@ const addressOf = (element: Element): SignalAddress | undefined => {
   return isNodeId(nodeId) && isPrimitiveType(type) ? { nodeId, type } : undefined
 }
 
-const pageOf = (root: Element): Result<{ treeId: TreeId; revision: number }, ReaderSignalBroadcastError> => {
+/** The pattern `audienceIdSchema` holds, without the schema library in a reader's bundle. */
+const AUDIENCE_ID_PATTERN = idPattern("aud")
+
+const isAudienceId = (value: string): value is AudienceId => AUDIENCE_ID_PATTERN.test(value)
+
+/** What a page's root says it is: the revision of the tree, and the segment it was served to. */
+type PageIdentity = {
+  readonly treeId: TreeId
+  readonly revision: number
+  readonly audience: AudienceId | undefined
+}
+
+const pageOf = (root: Element): Result<PageIdentity, ReaderSignalBroadcastError> => {
   const treeId = root.getAttribute(LOOM_TREE_ATTRIBUTE)
   /**
    * Matched as digits before it is converted. `Number(null)` and `Number("")` are
@@ -290,11 +304,28 @@ const pageOf = (root: Element): Result<{ treeId: TreeId; revision: number }, Rea
   const written = root.getAttribute(LOOM_REVISION_ATTRIBUTE) ?? ""
   const revision = /^\d+$/.test(written) ? Number(written) : Number.NaN
 
-  return isTreeId(treeId) && Number.isSafeInteger(revision)
-    ? ok({ treeId, revision })
+  if (!isTreeId(treeId) || !Number.isSafeInteger(revision)) {
+    return err({
+      code: "unaddressed",
+      detail: `the root element carries no ${LOOM_TREE_ATTRIBUTE} and ${LOOM_REVISION_ATTRIBUTE}; render the page with addressed: true`,
+    })
+  }
+
+  /**
+   * Absent is every reader (`aud_everyone`), which is what a page served to no
+   * segment says by saying nothing (0284). Present and unreadable is refused
+   * rather than ignored: ignoring it would file a segment's page views as
+   * everybody's, and the intake would refuse every batch that carried it.
+   */
+  const audience = root.getAttribute(LOOM_AUDIENCE_ATTRIBUTE)
+
+  if (audience === null) return ok({ treeId, revision, audience: undefined })
+
+  return isAudienceId(audience)
+    ? ok({ treeId, revision, audience })
     : err({
         code: "unaddressed",
-        detail: `the root element carries no ${LOOM_TREE_ATTRIBUTE} and ${LOOM_REVISION_ATTRIBUTE}; render the page with addressed: true`,
+        detail: `the root element's ${LOOM_AUDIENCE_ATTRIBUTE} is not a segment's aud_ id: ${audience}`,
       })
 }
 
@@ -414,6 +445,7 @@ const broadcastFromRoot = (
     const batch: ReaderSignalBatch = {
       treeId: page.value.treeId,
       revision: page.value.revision,
+      ...(page.value.audience === undefined ? {} : { audience: page.value.audience }),
       sentAt: now(),
       view: of.key,
       ...(of.opened ? {} : { first: true as const }),
@@ -667,7 +699,9 @@ const broadcastFromRoot = (
 }
 
 /**
- * The tree and revision an element says it is, as one comparable value.
+ * The tree, revision and segment an element says it is, as one comparable
+ * value. A page served to another segment is another form of the page, and so
+ * another page view, as a new revision is.
  *
  * Read off the attributes rather than off {@link pageOf}, because what this
  * compares is *whether the page changed* and not whether it is addressed well
@@ -676,7 +710,9 @@ const broadcastFromRoot = (
  * can report on, and those are two answers rather than one.
  */
 const identityOf = (root: Element): string =>
-  `${root.getAttribute(LOOM_TREE_ATTRIBUTE)} ${root.getAttribute(LOOM_REVISION_ATTRIBUTE)}`
+  [LOOM_TREE_ATTRIBUTE, LOOM_REVISION_ATTRIBUTE, LOOM_AUDIENCE_ATTRIBUTE]
+    .map((attribute) => root.getAttribute(attribute))
+    .join(" ")
 
 /** What a broadcast is observing, while it is observing it. */
 type Observing = {
@@ -816,7 +852,7 @@ const followAddressedPage = (
     childList: true,
     subtree: true,
     attributes: true,
-    attributeFilter: [LOOM_TREE_ATTRIBUTE, LOOM_REVISION_ATTRIBUTE],
+    attributeFilter: [LOOM_TREE_ATTRIBUTE, LOOM_REVISION_ATTRIBUTE, LOOM_AUDIENCE_ATTRIBUTE],
   })
 
   return ok({

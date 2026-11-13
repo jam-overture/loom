@@ -14,6 +14,7 @@ import { unhonored } from "../frames"
 import { pageTreeFor, renderTree, SITE_PAGES, treeFor } from "../render"
 import { asRequested } from "../requested"
 import { THE_REPORT } from "../reported"
+import { SCAFFOLD_COMMAND } from "../scaffold"
 import { WIRED_FILES } from "../wired"
 import { WRITTEN_FILES } from "../written"
 
@@ -498,66 +499,6 @@ describe("a surface added to the product", () => {
   })
 })
 
-/**
- * The band whose cells are not all the same width, and the copy that has to
- * know it.
- *
- * `loom.mosaic`'s `alternating` rhythm is wide, narrow, narrow, wide, and the
- * spans belong to the container — a child is never told which it landed in
- * (0062). That is the right split and it leaves the tree holding one job: a
- * wide cell is twice a narrow cell's column width, so four bodies of roughly
- * equal length render as two full cells and two cells better than a third
- * empty. The band looked exactly like that until 25 August.
- *
- * The ratio is what is held, not the wording, because copy on this page is
- * rewritten often and by whoever is nearest the sentence.
- *
- * **What it catches is drift back toward four equal paragraphs**, which is the
- * state the band was actually in — restoring all four of the bodies it shipped
- * with fails this. It is a floor and not a guarantee: shortening one wide body
- * by a little still clears 1.6, and the threshold is deliberately not tightened
- * to the current margin, because a test that fails on every ordinary edit is a
- * test people learn to change rather than to read.
- */
-describe("the band that says what this is for", () => {
-  const rhythm = treeFor(HOME, { theme: DEFAULT_THEME })
-    .root.children.find(
-      (child) => child.kind === "element" && child.props["eyebrow"] === BAND.problems
-    )
-
-  const cells = ((rhythm as ElementNode).children.find(
-    (child) => child.kind === "element" && child.type === "loom.mosaic"
-  ) as ElementNode | undefined)?.children.filter(
-    (child): child is ElementNode => child.kind === "element"
-  )
-
-  it("fills its wide cells, which means writing to the rhythm", () => {
-    expect(cells).toHaveLength(4)
-
-    const lengths = (cells ?? []).map((cell) => String(cell.props["body"] ?? "").length)
-    const [first, second, third, fourth] = lengths as [number, number, number, number]
-
-    /** Wide, narrow, narrow, wide — and a wide cell is two narrow ones across. */
-    for (const wide of [first, fourth]) {
-      for (const narrow of [second, third]) {
-        expect(wide / narrow).toBeGreaterThan(1.6)
-      }
-    }
-  })
-
-  /**
-   * `loom.feature` caps a body at 280 characters, and writing to the rhythm
-   * pushes the wide cells at it deliberately. A body over the cap is a
-   * validation diagnostic rather than a thrown render, so it would reach the
-   * page as a cell that quietly did not draw.
-   */
-  it("stays inside what the primitive accepts", () => {
-    for (const cell of cells ?? []) {
-      expect(String(cell.props["body"] ?? "").length).toBeLessThanOrEqual(280)
-    }
-  })
-})
-
 describe("the panels that print data", () => {
   const everyPanel = async (): Promise<readonly ElementNode[]> => {
     const found = (node: LoomNode): readonly ElementNode[] =>
@@ -598,10 +539,17 @@ describe("the panels that print data", () => {
    *
    * **And a fourth time on 10 November**, naming the route *On your own site*
    * prints. `wired.ts` publishes it and it is last in the list because its band
-   * is the last of the four down the page. The pin has now caught every panel
-   * this site has ever grown, on the run that grew it, four times out of four.
+   * is the last of the four down the page.
+   *
+   * **And a fifth time on 11 November**, and this one is a different kind of
+   * panel: a command rather than a module. `SCAFFOLD_COMMAND` is what
+   * *Starting from nothing* prints, it sits between the two written files and
+   * the report because its band sits between theirs on the page, and
+   * `scaffold.test.ts` holds it to being a command the framework's own parser
+   * accepts. The pin has now caught every panel this site has ever grown, on
+   * the run that grew it, five times out of five.
    */
-  it("is the install line, four source panels and the one report, counted rather than assumed", async () => {
+  it("is the install line, five source panels and the one report, counted rather than assumed", async () => {
     const panels = await everyPanel()
     const printed = panels.flatMap((panel) =>
       panel.children.flatMap((child) => (child.kind === "text" ? [child.value] : []))
@@ -610,6 +558,7 @@ describe("the panels that print data", () => {
     expect(printed).toEqual([
       "npm install @jam-overture/loom @jam-overture/loom-primitives",
       ...WRITTEN_FILES.map((file) => file.source),
+      SCAFFOLD_COMMAND,
       THE_REPORT,
       ...CONNECTED_FILES.map((file) => file.source),
       ...WIRED_FILES.map((file) => file.source),

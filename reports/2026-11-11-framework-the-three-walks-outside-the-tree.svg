@@ -1,0 +1,99 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 760" width="1080" height="760" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif">
+  <style>
+    .title { font-size: 21px; font-weight: 650; fill: #0f172a; }
+    .sub { font-size: 13px; fill: #64748b; }
+    .panel-title { font-size: 12px; font-weight: 650; fill: #475569; letter-spacing: 0.09em; }
+    .path { font-size: 11px; fill: #94a3b8; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .fn { font-size: 13px; font-weight: 650; fill: #0f172a; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .what { font-size: 11.5px; fill: #64748b; }
+    .tick { font-size: 10.5px; fill: #94a3b8; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .stop { font-size: 11px; font-weight: 650; fill: #dc2626; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .ok { font-size: 11px; font-weight: 650; fill: #15803d; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .row { font-size: 11.5px; fill: #334155; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .rowhead { font-size: 10px; font-weight: 650; fill: #64748b; letter-spacing: 0.04em; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .note { font-size: 12px; fill: #475569; }
+    .emph { font-size: 12.5px; font-weight: 650; fill: #0f172a; }
+    .bad { font-size: 11.5px; font-weight: 650; fill: #b91c1c; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .good { font-size: 11.5px; font-weight: 650; fill: #15803d; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+  </style>
+  <rect width="1080" height="760" fill="#ffffff"/>
+
+  <text x="72" y="46" class="title">The three walks 0372 and 0373 left out, and the depth each stopped at</text>
+  <text x="72" y="70" class="sub">0380. The shallowest bound in the framework was on every page render &#8212; and React, the reason given for leaving it alone, was never the bound.</text>
+
+  <text x="72" y="112" class="panel-title">DEPTH AT WHICH THE WALK ANSWERS &#8212; LOG SCALE, NODES IN A CHAIN</text>
+  <line x1="300" y1="150" x2="300" y2="420" stroke="#e2e8f0"/>
+  <text x="300" y="142" class="tick" text-anchor="middle">100</text>
+  <line x1="477" y1="150" x2="477" y2="420" stroke="#e2e8f0"/>
+  <text x="477" y="142" class="tick" text-anchor="middle">1k</text>
+  <line x1="654" y1="150" x2="654" y2="420" stroke="#e2e8f0"/>
+  <text x="654" y="142" class="tick" text-anchor="middle">10k</text>
+  <line x1="831" y1="150" x2="831" y2="420" stroke="#e2e8f0"/>
+  <text x="831" y="142" class="tick" text-anchor="middle">100k</text>
+  <line x1="1008" y1="150" x2="1008" y2="420" stroke="#e2e8f0"/>
+  <text x="1008" y="142" class="tick" text-anchor="middle">1M</text>
+  <text x="72" y="160" class="path">src/render/render.ts</text>
+  <text x="72" y="178" class="fn">renderNode / renderChildren</text>
+  <text x="72" y="195" class="what">every page render</text>
+  <rect x="300" y="165" width="177" height="15" rx="3" fill="#fecaca" stroke="#f87171"/>
+  <line x1="477" y1="160" x2="477" y2="185" stroke="#dc2626" stroke-width="2.5"/>
+  <text x="485" y="177" class="stop">RangeError at 1,000</text>
+  <rect x="300" y="188" width="655" height="15" rx="3" fill="#bbf7d0" stroke="#4ade80"/>
+  <text x="963" y="200" class="ok">500,000</text>
+  <text x="72" y="246" class="path">src/interpretation/materialize.ts</text>
+  <text x="72" y="264" class="fn">materializeNode</text>
+  <text x="72" y="281" class="what">AI output becomes a tree</text>
+  <rect x="300" y="251" width="230" height="15" rx="3" fill="#fecaca" stroke="#f87171"/>
+  <line x1="530" y1="246" x2="530" y2="271" stroke="#dc2626" stroke-width="2.5"/>
+  <text x="538" y="263" class="stop">RangeError at 2,000</text>
+  <rect x="300" y="274" width="655" height="15" rx="3" fill="#bbf7d0" stroke="#4ade80"/>
+  <text x="963" y="286" class="ok">500,000</text>
+  <text x="72" y="332" class="path">src/runtime/nesting.ts</text>
+  <text x="72" y="350" class="fn">collect</text>
+  <text x="72" y="367" class="what">a target inside a target</text>
+  <rect x="300" y="337" width="354" height="15" rx="3" fill="#fecaca" stroke="#f87171"/>
+  <line x1="654" y1="332" x2="654" y2="357" stroke="#dc2626" stroke-width="2.5"/>
+  <text x="662" y="349" class="stop">RangeError at 10,000</text>
+  <rect x="300" y="360" width="655" height="15" rx="3" fill="#bbf7d0" stroke="#4ade80"/>
+  <text x="963" y="372" class="ok">500,000</text>
+
+  <line x1="72" y1="452" x2="1008" y2="452" stroke="#e2e8f0"/>
+
+  <text x="72" y="486" class="panel-title">REACT, THE REASON GIVEN FOR LEAVING THE RENDER WALK ALONE</text>
+  <rect x="72" y="500" width="456" height="128" rx="6" fill="#f8fafc" stroke="#cbd5e1"/>
+  <text x="88" y="522" class="rowhead">renderToStaticMarkup, NO LOOM</text>
+  <text x="400" y="522" class="rowhead" text-anchor="end">10,000</text>
+  <text x="496" y="522" class="rowhead" text-anchor="end">50,000</text>
+  <line x1="88" y1="530" x2="512" y2="530" stroke="#cbd5e1"/>
+  <text x="88" y="550" class="row">plain host elements</text>
+  <text x="400" y="550" class="row" text-anchor="end">15 ms</text>
+  <text x="496" y="550" class="row" text-anchor="end">45 ms</text>
+  <text x="88" y="572" class="row">one component per level</text>
+  <text x="400" y="572" class="row" text-anchor="end">36 ms</text>
+  <text x="496" y="572" class="row" text-anchor="end">135 ms</text>
+  <text x="88" y="602" class="note">Not recursive in a way that bounds depth. Loom&#8217;s own</text>
+  <text x="88" y="618" class="note">recursion was the whole bound.</text>
+
+  <text x="552" y="486" class="panel-title">AND materializeNode WAS QUADRATIC TOO</text>
+  <rect x="552" y="500" width="456" height="128" rx="6" fill="#f8fafc" stroke="#cbd5e1"/>
+  <text x="568" y="522" class="rowhead">CHILDREN OF ONE PARENT</text>
+  <text x="820" y="522" class="rowhead" text-anchor="end">8,000</text>
+  <text x="904" y="522" class="rowhead" text-anchor="end">16,000</text>
+  <text x="992" y="522" class="rowhead" text-anchor="end">32,000</text>
+  <line x1="568" y1="530" x2="992" y2="530" stroke="#cbd5e1"/>
+  <text x="568" y="550" class="bad">before</text>
+  <text x="820" y="550" class="bad" text-anchor="end">70 ms</text>
+  <text x="904" y="550" class="bad" text-anchor="end">690 ms</text>
+  <text x="992" y="550" class="bad" text-anchor="end">4,704 ms</text>
+  <text x="568" y="572" class="good">after</text>
+  <text x="820" y="572" class="good" text-anchor="end">3.7 ms</text>
+  <text x="904" y="572" class="good" text-anchor="end">4.2 ms</text>
+  <text x="992" y="572" class="good" text-anchor="end">14.2 ms</text>
+  <text x="568" y="602" class="note">How wide a reply is, and how deep, is the model&#8217;s choice.</text>
+  <text x="568" y="618" class="note">It is the one door where the shape arrives from outside.</text>
+
+  <line x1="72" y1="658" x2="1008" y2="658" stroke="#e2e8f0"/>
+  <text x="72" y="690" class="emph">The finding that asked for this ranked the render walk last of the three, and said not to open it because React would keep the bound anyway.</text>
+  <text x="72" y="712" class="note">Both halves were wrong. Measuring first is what found that &#8212; and the rule that produced the measurement was the lane&#8217;s own <tspan font-style="italic">do not open this because it is tidy</tspan>.</text>
+  <text x="72" y="736" class="note">Guards: 11 new assertions at 10,000 deep and 60,000 wide. Seven fail against the implementations replaced &#8212; five with RangeError, two by taking 21 seconds each.</text>
+</svg>

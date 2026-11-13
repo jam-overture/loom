@@ -117,6 +117,83 @@ every time, and quote the number from it in the report. Written here rather than
 any lane's code because it is a thing a **run** does, not a thing the repository
 contains.
 
+## Posting to GitHub
+
+**A markdown link you post can come back with characters welded onto it, and
+there is no length you can compute in advance that avoids it.** The second half
+is the part that costs runs, because four lanes have each tried to compute one.
+
+A pull request body posted from a routine session can arrive with a run of
+backticks — and, since 10 November, apostrophes — wrapping a URL. The run is in
+the **stored** body: a read through the API returns it in the raw markdown, so
+whatever inserts it does so before GitHub sees it. **Re-posting the same text
+changes nothing.** Replacing the text, in one `update_pull_request` call,
+produces a clean body on the first attempt, so the round-trip is deterministic
+rather than flaky. Where the wrapping happens is still not known, and nobody
+should spend a run finding out.
+
+The 23 September entry's own running count reaches **twenty-three read-backs**
+by 6 October, and four later instances are entries of their own. From four lanes
+over seven weeks, they
+agree that **URL length moves the outcome** and agree on nothing else:
+
+| the body | survived | mangled |
+| --- | --- | --- |
+| #378 | 157 | 158 |
+| #390 | markdown links of 145, 146, 146, 147 | 151, 156, 168, 169, 170, 172 |
+| #423 | 114, 124 | 150, 152, 162, 188 |
+
+No constant fits all three, and the one reading that does is that the limit is
+**the tail of some other budget the whole body spends** — #423's body is the
+longest and has the lowest boundary. Five explanations that each lasted exactly
+one measurement are written into the 23 September entry as a graveyard, three of
+them the framework lane's own. Read it before proposing a sixth.
+
+So the rule is about **form and procedure**, not about a number.
+
+**Write a repository file as a backticked path.** `` `decisions/0379-….md` `` and
+`` `reports/2026-11-10-….md` `` have survived every measurement, they are
+searchable, and `Loom merge` and the maintainer reach a record by path anyway. A
+record's filename alone runs to 89 characters, so **a record is cited by number
+with its path in a code span and is never linked.** A report linked as a bare URL
+on its own line carries its images by relative path and meets no boundary at all.
+
+**The forms that have never been mangled**, in order of how often they have been
+measured: a backticked repository path, an autolink `<https://…>`, a bare URL on
+its own line, and a short markdown link. The shortest lever on a long URL is a
+commit permalink prefix — `…/blob/e084184/`, 49 characters — rather than a branch
+name, which runs to 44 characters on its own and cannot be shortened after a push.
+
+**Then read it back, because the form is a precaution and the read-back is the
+check.** It is one call, it is how every one of those read-backs exists,
+and it is the only thing that has ever been reliable. `pnpm posted` is that half
+written down:
+
+```bash
+# read the body back through the API, write it to a file, then:
+pnpm posted body.md
+```
+
+```
+body.md  3 URLs, 4 mangled
+  line 3: "``''" before the link's opening bracket — https://github.com/…/0379-….md
+  line 3: "''``" after the closing parenthesis — https://github.com/…/0379-….md
+```
+
+It fetches nothing and it is **not** in `pnpm verify` — the text it reads is
+never committed, so there is nothing on a branch for a gate to check. It exits
+non-zero when it finds something.
+
+**Fix it by replacing the text, not by posting it again.** And when a body has
+already been posted twice, weigh the second `update_pull_request` against a
+reviewer's one click: on #854 the run left it, named the report and the record by
+path in the body, and said so.
+
+Written here rather than in any lane's code because it is a thing a **run** does.
+Six entries asked for it over seven weeks; three were filed by a lane that then
+said in as many words that it had not written this section because
+`docs/routines.md` is not its file. It is `Loom daily build`'s.
+
 ## The git every machine has
 
 **The floor is git 2.15**, and it is the maintainer's machine. A routine runs in
@@ -327,6 +404,10 @@ It never closes a pull request, deletes a branch, or schedules anything.
 9. Comment on it starting `@jonathanbravecredit`: a short summary, then
    `## Needs your input` with a recommendation for each question, or an explicit
    "nothing blocking". Keep it short — detail belongs in the report.
+10. **Read the body and the comment back through the API and run `pnpm posted`
+    over them.** *Posting to GitHub* above is why: a link you wrote can be
+    stored with characters welded onto it, no safe length can be computed in
+    advance, and re-posting the same text does not fix it.
 
 From the first rendered primitive onward, **include the deployed preview URL**,
 and a screenshot once there is a page worth looking at.
@@ -702,10 +783,14 @@ pnpm weigh http://127.0.0.1:3000/why-use-it      # or a response saved to a file
 ```
 
 ```
-/why-use-it  2,491,320 bytes
-    style  47,981 bytes  carried 43 times  at least 2,015,202 bytes repeated (81% of the document)
-    style  2,255 bytes  carried 4 times  at least 6,765 bytes repeated (0% of the document)
+/why-use-it  2,793,071 bytes
+    style  47,981 bytes  carried 48 times  at least 2,255,107 bytes repeated (81% of the document)
+    style  79 bytes  carried 2 times  at least 79 bytes repeated (0% of the document)
 ```
+
+(The build of 12 November. The first line is the reading the instrument was
+written for and has not moved since 0348 took it; the second is the line 0387
+corrected, and it read *carried 386 times* that morning.)
 
 **It prints the number and does not judge it**, which is
 [0213](../decisions/0213-the-harness-reads-a-box-it-prints-the-number-and-the-judgement-stays-in-the-report.md)
@@ -724,10 +809,23 @@ carrying `href` and `precedence` and deduplicates it correctly, so a page's
 markup holds the library stylesheet exactly **once** — while the RSC flight
 payload holds it once per primitive that emitted it, JSON-escaped, sharing no
 long substring with the element it came from. So the unit of measurement is a
-**landmark**: the longest run of letters, digits, dots, underscores and hyphens
-that the text contains exactly once, which is what no escaping rewrites. The
-saving reported is `(copies - 1)` times the text's own length — provably under
-the truth, because escaping only ever grows a copy.
+**landmark**: a run of letters, digits, dots, underscores and hyphens that the
+text contains exactly once, which is what no escaping rewrites. The saving
+reported is `(copies - 1)` times the text's own length — provably under the
+truth, because escaping only ever grows a copy.
+
+**And why one landmark is not a count** —
+[0387](../decisions/0387-a-landmark-is-not-a-count-and-a-copy-is-a-sequence-of-them-at-the-distances-the-text-puts-them-at.md),
+after `pnpm weigh` reported a 78-byte rule as carried 426 times on a document
+that held it twice. A token the text contains once is still a token the rest of
+the document may contain hundreds of times, and against a page that is mostly
+CSS the tokens that are both long and common are exactly the property names:
+that rule's landmark was `background-color`. **A copy is therefore a sequence**
+— up to six of the text's landmarks, in the text's order, each between one and
+six times as far from the one before as the text puts it, and each occurring
+once inside the span. A text with only one landmark reads *not counted* rather
+than a number. If you read a figure here and disbelieve it, that is a finding
+and the hand count belongs in it.
 
 ## Standards
 

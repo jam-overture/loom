@@ -1,0 +1,40 @@
+{
+  "baseUrl": "http://localhost:3000",
+  "outDir": "reports",
+  "shots": [
+    {
+      "path": "/why-use-it?theme=minimal",
+      "out": "2026-11-11-marketing-your-first-files-minimal.webp",
+      "viewport": "wide",
+      "waitFor": "#your-first-files",
+      "clip": "#your-first-files"
+    },
+    {
+      "path": "/why-use-it?theme=editorial",
+      "out": "2026-11-11-marketing-your-first-files-editorial.webp",
+      "viewport": "wide",
+      "waitFor": "#your-first-files",
+      "clip": "#your-first-files"
+    },
+    {
+      "path": "/why-use-it?theme=bold",
+      "out": "2026-11-11-marketing-your-first-files-bold.webp",
+      "viewport": "wide",
+      "waitFor": "#your-first-files",
+      "clip": "#your-first-files"
+    },
+    {
+      "path": "/why-use-it?theme=bold",
+      "out": "2026-11-11-marketing-your-first-files-phone.webp",
+      "viewport": "phone",
+      "waitFor": "#your-first-files",
+      "clip": "#your-first-files"
+    },
+    {
+      "path": "/why-use-it?theme=minimal#your-first-files",
+      "out": "2026-11-11-marketing-your-first-files-in-context.webp",
+      "viewport": "wide",
+      "waitFor": "#your-first-files"
+    }
+  ]
+}

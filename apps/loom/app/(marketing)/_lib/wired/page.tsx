@@ -42,16 +42,17 @@
  * `components` come from `./loom` beside this file, which is scaffolding rather
  * than a claim about how a host arranges their own application.
  *
- * ## The address and the key are not read off `process.env` here, and a check
- * is the reason
+ * ## The address and the key are read off `process.env`, which is the point
  *
- * A reader's own version of this file reads them from the environment, and the
- * published entry point's example does exactly that. `wired/loom.ts` carries
- * the whole of why this one cannot: `tools/sources/deployment.ts` reads the
- * variables the application's code names and holds the operator's example file
- * to offering each, and it has no way to tell a printed specimen from a setting
- * this deployment has. It is filed rather than worked around, and the copy
- * beside the panel says where the two values come from.
+ * This is the one line of the panel a reader has to change, and the panel
+ * landed on 10 November without it. For the two days since, the two values came
+ * out of a mutable object in `wired/loom.ts`, because the sweep that reads this
+ * deployment's settings could not tell a printed specimen from a setting the
+ * Loom site has. `wired/loom.ts` carries what that cost and what closed it.
+ * [0379](../../../../../../decisions/0379-a-file-may-publish-part-of-its-body-as-somebody-elses-code-and-a-check-that-reads-this-deployment-stops-at-the-marker.md)
+ * stops that sweep at the marker below, so the panel prints the two reads the
+ * published entry point's own example prints and the band needs no sentence
+ * standing in for them.
  *
  * ## The registry is called `components` here, and the rule says so
  *
@@ -74,11 +75,11 @@
 import { livePageOf, startPullingLivePages } from "@jam-overture/loom/live"
 import { renderLoomTree } from "@jam-overture/loom/react"
 
-import { components, homePage, loomProject } from "./loom"
+import { components, homePage } from "./loom"
 
 const live = startPullingLivePages({
-  deployment: loomProject.url,
-  key: loomProject.key,
+  deployment: process.env.LOOM_URL ?? "",
+  key: process.env.LOOM_PROJECT_KEY ?? "",
 })
 
 const Page = async () => {
