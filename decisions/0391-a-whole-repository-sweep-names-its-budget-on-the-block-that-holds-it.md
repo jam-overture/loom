@@ -1,4 +1,4 @@
-# 0390. A whole-repository sweep names its budget on the block that holds it, and a check says which files those are
+# 0391. A whole-repository sweep names its budget on the block that holds it, and a check says which files those are
 
 **Status:** Accepted
 **Date:** 2026-11-12

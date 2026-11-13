@@ -3,7 +3,7 @@
 **`Loom daily build`, 12 November 2026, evening run.**
 Branch `framework-96-a-sweeps-budget-is-inherited`, cut from `origin/main` at
 `b969960`. Record
-[0390](../decisions/0390-a-whole-repository-sweep-names-its-budget-on-the-block-that-holds-it.md),
+[0391](../decisions/0391-a-whole-repository-sweep-names-its-budget-on-the-block-that-holds-it.md),
 `Accepted`. `pnpm verify` **EXIT=0**, read out of the file in its own command.
 
 ![The two sweeps against the default and the new budget, where the budget is now named, and the check that says which files need one](2026-11-12-framework-a-sweeps-budget-is-inherited.svg)
@@ -57,7 +57,7 @@ now, so none is changed here."* On an idle container the two sweeps in this file
 are **388 ms and 310 ms**, about 6x under the default. That is what "not close"
 looked like three days before it went red under a shared CPU, where the timeout
 landed while a PGlite suite took 2.6 s in the same window. **Headroom measured
-on an idle container is not headroom.** 0390 replaces the test; 0375's decision,
+on an idle container is not headroom.** 0391 replaces the test; 0375's decision,
 formula and floor stand untouched.
 
 ## The section
@@ -78,7 +78,7 @@ nothing a reader of a Loom site can see.
   `everySource`) plus an indentation heuristic to delimit each initializer —
   about a hundred lines of lexical guesswork inside the gate four surfaces
   depend on, to catch a case decision 1 makes impossible where it could occur.
-  The per-file rule's hole is stated in 0390 rather than papered over.
+  The per-file rule's hole is stated in 0391 rather than papered over.
 - **`tools/git/portability.test.ts` was left alone.** 0375 named it as a third
   pre-dating sweep. It walks `tools/` and `src/` with a local copy of the
   walker, lexes nothing, and its fifteen tests are **72 ms** in total. The rule
@@ -90,16 +90,21 @@ nothing a reader of a Loom site can see.
   named. Refactoring them would be this run opening on code that works.
 - **0375 was not edited.** Whether a merged `Accepted` record may be corrected
   in place is the open question #881 put to the maintainer. Until it is
-  answered, 0390 is additive and says there what the evidence overtook.
+  answered, 0391 is additive and says there what the evidence overtook.
 
 ## Records
 
-- **Added [0390](../decisions/0390-a-whole-repository-sweep-names-its-budget-on-the-block-that-holds-it.md), `Accepted`** — a whole-repository sweep names its
+- **Added [0391](../decisions/0391-a-whole-repository-sweep-names-its-budget-on-the-block-that-holds-it.md), `Accepted`** — a whole-repository sweep names its
   budget on the block that holds it, and a check says which files those are.
 - **Nothing superseded.** 0375 stands.
-- `pnpm decisions:index` regenerated. It reports holes at 0383, 0384 and 0386,
-  all claimed by open pull requests (#867, #869, #872). **No clash**: 0389 is
-  the highest on `main` and this took 0390 after re-reading it.
+- `pnpm decisions:index` regenerated. It reports holes at 0353, 0383, 0384, 0386
+  and 0390, all claimed by open pull requests (#778, #867, #869, #872, #884).
+- **This record was 0390 when the branch was first pushed, and was moved to
+  0391 on 13 November.** #884 (`Loom signals`) took 0390 nine minutes after
+  this branch did, and two files at one number is `duplicate-number` from
+  `checkNumbering` the moment the second of them merges. The 12 November
+  finding on this clash puts the move on the branch's own lane; this is that
+  lane's branch, so it moved and #884 was left alone.
 
 ## Findings
 

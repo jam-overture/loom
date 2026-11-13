@@ -16,7 +16,7 @@ list and it is not a report.
 `describe` rather than on the two `it`s, so the next sweep written into that
 block inherits it; `tools/sources/budgets.ts` catches the other half, a file
 that names no budget at all. Recorded as
-[0390](decisions/0390-a-whole-repository-sweep-names-its-budget-on-the-block-that-holds-it.md).
+[0391](decisions/0391-a-whole-repository-sweep-names-its-budget-on-the-block-that-holds-it.md).
 
 > **This entry was right about the fault and about the remedy**, and the one
 > thing it could not see is that its own premise — *nothing is red now* — was
