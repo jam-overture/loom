@@ -75,10 +75,27 @@ export type WiredFile = {
  *
  * Three things in it are worth a reader's attention and the copy around the
  * panel names each: the loop is at module scope because it belongs to the
- * server rather than to a request; `??` is the entire fallback, so a Loom that
- * has never answered and a page it does not know are the same case; and the
- * page is drawn by the host's own registry, which is the one from three bands
- * above with their own component in it.
+ * server rather than to a request; `?? homePage` is the entire fallback, so a
+ * Loom that has never answered and a page it does not know are the same case;
+ * and the page is drawn by the host's own registry, which is the one from three
+ * bands above with their own component in it.
+ *
+ * ## The two lines a reader has to change, which the panel used to hide
+ *
+ * The address and the key are read off `process.env`, with the names the
+ * published entry point's own example reads. **Until today they were not**: the
+ * panel took them from an object in `wired/loom.ts`, because
+ * `tools/sources/deployment.ts` had no way to tell a printed specimen from a
+ * setting this deployment has, and the band carried a sentence saying *the
+ * address and the key come out of your environment* in place of lines that did
+ * not say it. `wired/loom.ts` has what closed that
+ * ([0379](../../../../../decisions/0379-a-file-may-publish-part-of-its-body-as-somebody-elses-code-and-a-check-that-reads-this-deployment-stops-at-the-marker.md)).
+ *
+ * **The sentence came off with the workaround**, which is the part worth
+ * reading twice: it was nine words paying for an indirection, on the panel
+ * whose whole value is being exactly the file a reader writes. A panel that
+ * needs prose to say what its own code would have said is the thing to notice,
+ * and it is nine words back on a page that had 34 left.
  */
 export const YOUR_ROUTE: WiredFile = {
   caption: "app/page.tsx",
@@ -86,11 +103,11 @@ export const YOUR_ROUTE: WiredFile = {
   source: `import { livePageOf, startPullingLivePages } from "@jam-overture/loom/live"
 import { renderLoomTree } from "@jam-overture/loom/react"
 
-import { components, homePage, loomProject } from "./loom"
+import { components, homePage } from "./loom"
 
 const live = startPullingLivePages({
-  deployment: loomProject.url,
-  key: loomProject.key,
+  deployment: process.env.LOOM_URL ?? "",
+  key: process.env.LOOM_PROJECT_KEY ?? "",
 })
 
 const Page = async () => {

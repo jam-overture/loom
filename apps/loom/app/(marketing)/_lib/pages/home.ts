@@ -595,27 +595,126 @@ const facts = (ids: IdFactory): LoomNode =>
  * schema would be the site telling a person one thing and an assistant another,
  * and nothing on any screen would say so.
  *
- * Nothing a visitor sees changed. The `open` on the first is the band's
- * business rather than the schema's, so it rides along on the data and the
- * schema ignores it.
+ * The `open` on the first is the band's business rather than the schema's, so
+ * it rides along on the data and the schema ignores it.
+ *
+ * ## Two lists beside each other, and not one list in two columns
+ *
+ * **This band drew a hole and had been drawing one since the day it got a
+ * second column.** `loom.faq-list` with `columns: "two"` is a CSS grid, so the
+ * five questions are five cells in three rows, and **a grid row is as tall as
+ * the tallest cell in it**. The first question is open on arrival, which makes
+ * the first row 172px tall — so the closed question beside it was a 51px
+ * question inside a 172px box, with its own rule floating **121px under the
+ * words it belongs to**.
+ *
+ * It is not a thing a reader has to do anything to meet: that is the band as
+ * the page loads. And it moves. Pressing *Is this a page builder?* in the left
+ * column, measured on a production build at 1280, took *What happens when a
+ * change is wrong?* in the right column from 51px to 145px — **94px of empty
+ * space opened inside a closed question by a press on the other side of the
+ * page**.
+ *
+ * So the grid is the wrong shape for this content, and the reason is in
+ * `balance.test.ts`' own first paragraph: a cell that says less than the cell
+ * beside it carries the difference as empty space, under the last line, where a
+ * reader reads it as something missing. A question that opens says a different
+ * amount from one moment to the next, so no amount of evening the copy up could
+ * have fixed it.
+ *
+ * **What is here instead is two lists, each read downward, in a grid that does
+ * not stretch them.** `loom.grid` takes `align: "start"`, so the two cells are
+ * as tall as their own rows want and neither is pulled to the other's height;
+ * inside each list every question is the full width of its column, which is the
+ * arrangement `balance.test.ts` exempts `loom.faq-list` for in the first place
+ * — *"rows open and close"*. The band keeps both columns, so nothing about the
+ * density of the page changed.
+ *
+ * Reading order changes and it changes for the better. A two-column grid is
+ * read **across** — one, two, then three, four — which is the order the markup
+ * is in and not the order a column of questions looks like it should be read
+ * in. Two lists are read **down**: the first three on the left, the last two on
+ * the right. `siteQuestions()` is still the one order, so the `FAQPage` a
+ * search engine is handed is unchanged.
+ *
+ * **The split is by index and never by eye.** Two and three, with the **smaller
+ * half first** because the first question is the one that arrives open, so
+ * adding a sixth question needs no decision from whoever adds it.
+ *
+ * Nothing about the band's measurements changed. `loom.grid`'s `two` is a
+ * 22rem floor fed to `auto-fit`, which is the same floor `loom.faq-list`'s own
+ * `two` uses, so the band still collapses to one column at the same width; and
+ * `gap: "roomy"` is `space(6)`, which is the column gap the list was already
+ * drawing. The columns are where they were. What moved is that neither is
+ * stretched to the other.
+ *
+ * ## What the workaround costs, which is a phone and 27px
+ *
+ * `loom.grid`'s `gap` is one value for rows and columns, so the space that
+ * holds the two columns apart at 1280 is also the space between them once they
+ * stack. On a 390 viewport the band is one column of five questions with a
+ * **27px break between the second and the third**, where before it was a
+ * continuous run of ruled rows: the third question starts at y 4489 against
+ * 4462. Two rules with nothing between them is a
+ * smaller blemish than a rule floating 121px under its question, and it is a
+ * blemish. It is in the finding with the rest.
+ *
+ * The half of this that is `Loom primitives`' is filed rather than worked
+ * around in `src/`: a two-column `loom.faq-list` could set `align-items: start`
+ * on its own grid and no host would ever meet this. **When that lands, this
+ * band goes back to being one list** — which takes the phone seam with it,
+ * because there would be no second element to separate. This note is the
+ * instruction to do it.
  */
-const questions = (ids: IdFactory): LoomNode =>
-  section(ids, { width: "wide", eyebrow: BAND.questions }, "The ones worth asking first", [
+const questions = (ids: IdFactory): LoomNode => {
+  const asked = siteQuestions()
+  /**
+   * **The first column takes the smaller half**, because the first question is
+   * the one that arrives open and its answer is four lines nothing beside it
+   * has. Three and two the other way round, measured at 1280, left a 274px
+   * column beside a 102px one; two and three is 223 against 153.
+   */
+  const inTheFirstColumn = Math.floor(asked.length / 2)
+  /**
+   * `filter` rather than two slices taken on trust: with one question left the
+   * second slice is empty, and an empty `loom.faq-list` is a column of nothing
+   * standing beside the only question there is.
+   */
+  const columnsOfQuestions = [
+    asked.slice(0, inTheFirstColumn),
+    asked.slice(inTheFirstColumn),
+  ].filter((column) => column.length > 0)
+
+  return section(ids, { width: "wide", eyebrow: BAND.questions }, "The ones worth asking first", [
     buildElement(ids, {
-      type: "loom.faq-list",
-      props: { columns: "two" },
-      children: siteQuestions().map((entry) =>
+      type: "loom.grid",
+      /**
+       * `align: "start"` is the whole of the fix. Without it a grid stretches
+       * every cell to the row's height, which is right for a row of cards and
+       * is exactly how the hole above got drawn — one column of questions would
+       * be pulled to the height of the other, and the shorter one would carry
+       * the difference as empty space under its last rule.
+       */
+      props: { columns: "two", gap: "roomy", align: "start" },
+      children: columnsOfQuestions.map((column) =>
         buildElement(ids, {
-          type: "loom.faq",
-          props: {
-            question: entry.question,
-            answer: entry.answer,
-            ...(entry.open === true ? { open: true } : {}),
-          },
+          type: "loom.faq-list",
+          props: {},
+          children: column.map((entry) =>
+            buildElement(ids, {
+              type: "loom.faq",
+              props: {
+                question: entry.question,
+                answer: entry.answer,
+                ...(entry.open === true ? { open: true } : {}),
+              },
+            })
+          ),
         })
       ),
     }),
   ])
+}
 
 /**
  * The ask, and the first time the front door has carried one.

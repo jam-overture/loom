@@ -19,9 +19,13 @@
 
 import { z } from "zod"
 
+import { audienceIdSchema } from "../audience/audience.js"
+import type { AudienceForm } from "../audience/compose.js"
+import { audienceRuleSchema, type AudienceRule } from "../audience/rule.js"
 import { ceilingOf, describeCeiling, withCeiling } from "../deadline.js"
-import type { TreeId } from "../ids.js"
+import { treeIdSchema, type TreeId } from "../ids.js"
 import { err, ok, type Result } from "../result.js"
+import { treeDeltaSchema } from "../tree/delta.js"
 import { describeTreeError } from "../tree/errors.js"
 import { parseTree, type LoomTree } from "../tree/tree.js"
 
@@ -47,11 +51,32 @@ export type SitePullFailure = {
   readonly status?: number
 }
 
-/** What one pull did: brought pages, confirmed the ones held, or failed. */
+/**
+ * One page's segment rules as the door answers them: the page, and its list in
+ * the order the portal set (0371).
+ */
+export type LivePageRules = {
+  readonly treeId: TreeId
+  readonly rules: readonly AudienceRule[]
+}
+
+/**
+ * One page's segment forms as the door answers them: the page, and a delta per
+ * segment that has one, each authored against the revision of the page it
+ * arrives beside (0371).
+ */
+export type LivePageForms = {
+  readonly treeId: TreeId
+  readonly forms: readonly AudienceForm[]
+}
+
+/** What one pull did: brought pages and their rules, confirmed the ones held, or failed. */
 export type SitePullOutcome =
   | {
       readonly kind: "fresh"
       readonly pages: readonly LoomTree[]
+      readonly rules: readonly LivePageRules[]
+      readonly forms: readonly LivePageForms[]
       readonly tag: string | undefined
     }
   | { readonly kind: "unchanged" }
@@ -142,8 +167,31 @@ export const livePagesUrlOf = (deployment: string): Result<URL, SitePullFailure>
   return ok(url)
 }
 
-/** The envelope the door answers. The trees inside are parsed one at a time. */
-const answerSchema = z.object({ pages: z.array(z.unknown()) })
+/**
+ * The envelope the door answers. The trees inside are parsed one at a time, so
+ * a refusal can say which page could not be read.
+ *
+ * `rules` and `forms` are optional because a door from before 0371 answers
+ * neither, and a site pulling from one has no segments — which is true of it
+ * rather than a guess. They are read separately for the same reason: a door
+ * that answers rules and no forms is every deployment whose segments are still
+ * only names.
+ */
+const answerSchema = z.object({
+  pages: z.array(z.unknown()),
+  rules: z.array(z.unknown()).optional(),
+  forms: z.array(z.unknown()).optional(),
+})
+
+const pageRulesSchema = z.object({
+  treeId: treeIdSchema,
+  rules: z.array(audienceRuleSchema),
+})
+
+const pageFormsSchema = z.object({
+  treeId: treeIdSchema,
+  forms: z.array(z.object({ audienceId: audienceIdSchema, delta: treeDeltaSchema })),
+})
 
 const refusals: Readonly<Record<number, string>> = {
   401: "the project key was not accepted: it is not a key this deployment issued, it has been replaced, or it is a publish key",
@@ -155,11 +203,92 @@ const unreadable = (detail: string): SitePullOutcome => ({
   failure: { reason: "unreadable", detail, status: 200 },
 })
 
+/**
+ * A list the door answered per page, read against the pages it answered beside
+ * them.
+ *
+ * **Any entry that cannot be read refuses the whole answer**, rather than
+ * dropping that page's. A page whose rules were dropped files every reader
+ * under `aud_everyone`, which is a segment's page views quietly counted as
+ * everybody's — the number that looks right for ever (0284). A page whose
+ * forms were dropped serves every reader the base while their signals still
+ * say which segment they were in, which is the same fault one dimension
+ * across. Keeping the last whole answer instead is what an unreadable page
+ * already does.
+ *
+ * An entry for a page the answer does not hold, and two entries for one page,
+ * are refused for the same reason two pages under one id are: the answer has
+ * no single reading.
+ */
+const readPerPage = <T extends { readonly treeId: TreeId }>(
+  answered: readonly unknown[],
+  pages: ReadonlySet<TreeId>,
+  label: string,
+  parse: (entry: unknown) => Result<T, string>
+): Result<readonly T[], string> => {
+  const read: T[] = []
+  const seen = new Set<TreeId>()
+
+  for (const [index, entry] of answered.entries()) {
+    const where = `${label} ${index + 1} of ${answered.length}`
+    const parsed = parse(entry)
+
+    if (!parsed.ok) return err(`${where} ${parsed.error}`)
+
+    const { treeId } = parsed.value
+
+    if (!pages.has(treeId)) return err(`${where} is for a page the answer does not hold: ${treeId}`)
+    if (seen.has(treeId)) return err(`${where} repeats a page already answered: ${treeId}`)
+
+    seen.add(treeId)
+    read.push(parsed.value)
+  }
+
+  return ok(read)
+}
+
+/** Why one entry could not be read, as the clause that follows *rule list 2 of 3*. */
+const unreadableEntry = (issues: readonly z.ZodIssue[], noun: string): string => {
+  const [issue] = issues
+  const at = issue === undefined ? "" : ` (${issue.path.join(".") || "the entry"}: ${issue.message})`
+
+  return `is not a page's segment ${noun} this version can read${at}`
+}
+
+const readRules = (
+  answered: readonly unknown[],
+  pages: ReadonlySet<TreeId>
+): Result<readonly LivePageRules[], string> =>
+  readPerPage(answered, pages, "rule list", (entry) => {
+    const parsed = pageRulesSchema.safeParse(entry)
+
+    return parsed.success ? ok(parsed.data) : err(unreadableEntry(parsed.error.issues, "rules"))
+  })
+
+/**
+ * The forms the door answered.
+ *
+ * A page with an entry and an empty list is read rather than refused: it is
+ * what a door answers for a page whose every form was left out, and it means
+ * the same thing as no entry at all.
+ */
+const readForms = (
+  answered: readonly unknown[],
+  pages: ReadonlySet<TreeId>
+): Result<readonly LivePageForms[], string> =>
+  readPerPage(answered, pages, "form list", (entry) => {
+    const parsed = pageFormsSchema.safeParse(entry)
+
+    return parsed.success ? ok(parsed.data) : err(unreadableEntry(parsed.error.issues, "forms"))
+  })
+
 const readPages = async (answer: Response): Promise<SitePullOutcome> => {
   const body = await answer.json().catch(() => undefined)
   const envelope = answerSchema.safeParse(body)
 
-  if (!envelope.success) return unreadable("the answer was not `{ pages: [...] }`")
+  if (!envelope.success) {
+    return unreadable("the answer was not `{ pages: [...], rules: [...], forms: [...] }`")
+  }
 
   const pages: LoomTree[] = []
   const seen = new Set<TreeId>()
@@ -185,7 +314,21 @@ const readPages = async (answer: Response): Promise<SitePullOutcome> => {
     pages.push(parsed.value)
   }
 
-  return { kind: "fresh", pages, tag: answer.headers.get("etag") ?? undefined }
+  const rules = readRules(envelope.data.rules ?? [], seen)
+
+  if (!rules.ok) return unreadable(rules.error)
+
+  const forms = readForms(envelope.data.forms ?? [], seen)
+
+  if (!forms.ok) return unreadable(forms.error)
+
+  return {
+    kind: "fresh",
+    pages,
+    rules: rules.value,
+    forms: forms.value,
+    tag: answer.headers.get("etag") ?? undefined,
+  }
 }
 
 /**
@@ -292,7 +435,8 @@ export const pullLivePages = async (
  * A failed pull returns the pages untouched with one more failure against them,
  * which is clause 4 of the decision behind the pull (0358) as a line of code:
  * freshness is what is lost, never the page. A tag moves only with the pages it
- * names, so what is sent back as `If-None-Match` always describes what is held.
+ * names, so what is sent back as `If-None-Match` always describes what is held,
+ * and the rules move only with the pages they sort readers of (0371 clause 4).
  */
 export const withPullOutcome = (
   held: LivePages,
@@ -302,12 +446,14 @@ export const withPullOutcome = (
   if (outcome.kind === "failed") return { ...held, failures: held.failures + 1 }
   if (outcome.kind === "unchanged") return { ...held, pulledAt: at, failures: 0 }
 
-  const pages = new Map<TreeId, LoomTree>()
-
-  for (const page of outcome.pages) pages.set(page.treeId, page)
-
   return {
-    pages,
+    pages: new Map(outcome.pages.map((page) => [page.treeId, page])),
+    rules: new Map(
+      outcome.rules.filter(({ rules }) => rules.length > 0).map(({ treeId, rules }) => [treeId, rules])
+    ),
+    forms: new Map(
+      outcome.forms.filter(({ forms }) => forms.length > 0).map(({ treeId, forms }) => [treeId, forms])
+    ),
     tag: outcome.tag,
     pulledAt: at,
     freshAt: at,

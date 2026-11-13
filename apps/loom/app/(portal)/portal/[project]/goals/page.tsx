@@ -1,6 +1,13 @@
 import Link from "next/link"
 import { notFound } from "next/navigation"
 
+import {
+  readReaderWindow,
+  treesIn,
+  windowReadingsOf,
+  type PageReading,
+  type StoredPageViews,
+} from "@jam-overture/loom/signals"
 import { projectIdSchema } from "@jam-overture/loom/store"
 
 import { Screen } from "@/app/(portal)/_components/screen"
@@ -14,12 +21,14 @@ import {
   countsWhen,
   goalReadingOf,
   pageChoicesOf,
+  pageNameIn,
   partsByPageOf,
   readingSentence,
   whereSentence,
   type PageChoice,
 } from "@/app/(portal)/_lib/goals/goal-view"
 import { shippedByGoalOf } from "@/app/(portal)/_lib/going-live"
+import { goalStayOf, type GoalStay } from "@/app/(portal)/_lib/goals/goal-stay"
 import { waitingByGoalOf } from "@/app/(portal)/_lib/goals/serving"
 import { goalsFor, proposalGoalsFor } from "@/app/(portal)/_lib/goals/stores"
 import { readGoalCounters } from "@/app/(portal)/_lib/goal-counters"
@@ -36,6 +45,7 @@ import {
   type SignalsRange,
 } from "@/app/(portal)/_lib/signals-range"
 import { single } from "@/app/(portal)/_lib/query"
+import { portalRegistry } from "@/app/(portal)/_lib/registry"
 import { EVERY_CHANGE, reviewHrefOf } from "@/app/(portal)/_lib/review-filter"
 import {
   audienceRulesFor,
@@ -58,6 +68,7 @@ import { readingsFor } from "@/app/_lib/reader-signals/intake"
 
 import { GoalControls } from "./_components/goal-controls"
 import { GoalForm } from "./_components/goal-form"
+import { TimeOnIt } from "./_components/time-on-it"
 
 /**
  * *Goals* (8b of `docs/portal.md`, *3 · Goals* of the wireframes, 0350): what
@@ -87,12 +98,30 @@ import { GoalForm } from "./_components/goal-form"
  * counted over the same 7 days, from those counters folded into totals by page
  * and part, worked out in the browser as the owner picks.
  *
+ * **How long readers stay on it** sits under what each goal counts: the time
+ * the typical reader who reached its part kept it on screen, pooled across the
+ * pages it covers (`partPaceOf`, 0381), on the version each page serves now
+ * since that version was first counted. It is a figure beside the goal, not
+ * the wireframe's *Stays on it* kind, which 0350 leaves unoffered; a part
+ * nobody was seen on says so rather than reading nought. Beneath it, the pages
+ * the part is skimmed on, the one short of the most reading time first (0390).
+ *
  * **A segment** (`?segment=`, unit 9 piece 3) narrows both figures to its
  * readers (0371 clause 6), and a segment nothing has been counted under says
  * so in place of the list. The changes waiting and shipped stay the project's,
  * since no change is for one segment until piece 4. *New goal* reads every
  * reader: a goal is the project's, whichever readers the list was showing.
  */
+
+/**
+ * How long readers stay on each goal's part, from the readings of the
+ * versions the site publishes now; `undefined` for every goal where the
+ * counters or the pages could not be read.
+ */
+const staysOf =
+  (readings: readonly PageReading[] | undefined, rows: readonly StoredPageViews[] | undefined) =>
+  (goal: Goal): GoalStay | undefined =>
+    readings === undefined || rows === undefined ? undefined : goalStayOf(goal, readings, rows)
 
 /** The range *Goals* measures each goal over: the wireframe's *7-day rate with its trend*. */
 const GOALS_RANGE: SignalsRange = "7d"
@@ -101,6 +130,8 @@ type Readings = {
   readonly goals: readonly Goal[]
   readonly pages: readonly PageChoice[]
   readonly reading: (goal: Goal) => string
+  /** How long readers stay on the goal's part, `undefined` where the counters could not be read. */
+  readonly stay: (goal: Goal) => GoalStay | undefined
   /** The goal over the last 7 days, `undefined` where the hourly counters could not be read. */
   readonly week: (goal: Goal) => Omit<RangeFigure, "label"> | undefined
   /** Changes waiting for each goal, `undefined` where they could not be read. */
@@ -199,6 +230,7 @@ const GoalRow = ({
     <td className="py-2 pr-3 text-xs">
       {countsWhen(goal, readings.pages)}
       <span className="text-ink-muted block font-mono text-[11px]">{goal.nodeId}</span>
+      <TimeOnIt stay={readings.stay(goal)} nameOf={pageNameIn(readings.pages)} />
     </td>
     <td className="py-2 pr-3 text-xs">{whereSentence(goal, readings.pages)}</td>
     <td className="py-2 pr-3">
@@ -341,9 +373,9 @@ const GoalsPage = async ({
   const audience = audienceOfPick(segment)
   const narrowed = audience === undefined ? {} : { audience }
 
-  const [goals, published, pageViews, tallies, held, hourly, accepted] =
+  const [goals, published, readerWindow, held, hourly, accepted] =
     application === undefined || signals === undefined
-      ? [undefined, undefined, undefined, undefined, undefined, undefined, undefined]
+      ? [undefined, undefined, undefined, undefined, undefined, undefined]
       : await Promise.all([
           readWithin(
             () => goalsFor(application.applicationId).list(),
@@ -355,8 +387,7 @@ const GoalsPage = async ({
             unavailable,
             PORTAL_READ_BUDGET_MS
           ),
-          boundedReaderTallyStore(signals.tallies).pageViews(narrowed),
-          boundedReaderTallyStore(signals.tallies).tallies(narrowed),
+          readReaderWindow({ tallies: boundedReaderTallyStore(signals.tallies) }, narrowed),
           holdsFor(application.applicationId).waiting(),
           readGoalCounters(boundedReaderTallyStore(signals.tallies), goalSpanOf(week), narrowed),
           readAccepted(projectId, now),
@@ -419,13 +450,23 @@ const GoalsPage = async ({
     const pages = published?.ok === true ? pageChoicesOf(published.value) : []
     const parts = partsByPageOf(pages)
     const counted =
-      pageViews?.ok === true && tallies?.ok === true
+      readerWindow?.ok === true
         ? {
-            pageViews: pageViews.value,
-            tallies: tallies.value,
+            pageViews: readerWindow.value.pageViews,
+            tallies: readerWindow.value.tallies,
             parts,
           }
         : undefined
+    const stays = staysOf(
+      readerWindow?.ok === true && published?.ok === true
+        ? windowReadingsOf(
+            readerWindow.value,
+            treesIn(published.value.map(({ tree }) => tree)),
+            portalRegistry
+          ).pages
+        : undefined,
+      counted?.pageViews
+    )
 
     const readings: Readings = {
       goals: goals.value,
@@ -443,6 +484,7 @@ const GoalsPage = async ({
         counted === undefined
           ? "could not be read just now."
           : readingSentence(goal.kind, goalReadingOf(goal, counted)),
+      stay: stays,
       waiting:
         waitingIntents !== undefined && served?.ok === true
           ? waitingByGoalOf(waitingIntents, served.value)
@@ -457,7 +499,11 @@ const GoalsPage = async ({
       <SegmentPicker pick={{ word: segment, offered }} hrefOf={segmentHref} />
     )
 
-    if (segment !== undefined && pageViews?.ok === true && pageViews.value.length === 0) {
+    if (
+      segment !== undefined &&
+      readerWindow?.ok === true &&
+      readerWindow.value.pageViews.length === 0
+    ) {
       return (
         <div className="flex flex-col gap-4">
           {picker}
@@ -481,7 +527,9 @@ const GoalsPage = async ({
             across every version
             {segment === undefined ? "" : `, among the readers your site sorts into ${segment}`}.
             Loom proposes each change toward one goal: the changes counted here are those waiting
-            for review, and those accepted that went live on your site.
+            for review, and those accepted that went live on your site. Time on screen is per page
+            view that reached the goal&rsquo;s part, on the version each page serves now, since that
+            version was first counted.
           </p>
           {accepted?.kind === "read" && accepted.reach.kind === "never" && (
             <p className="text-ink-muted m-0 text-xs">
