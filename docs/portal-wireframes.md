@@ -61,7 +61,7 @@ carry structure, green as a tinted mark, one black filled action per screen).
 | Goals | What are we trying to get readers to do? |
 | Segments | Later: which readers behave differently? |
 | Connect your site | Key, snippet, publish key, repository |
-| Settings | Name, address, model key, closing |
+| Settings | Name, address, model key, how long a reader keeps a page ([0383](../decisions/0383-a-reader-keeps-the-pages-they-first-saw-for-a-window-the-project-sets-and-their-browser-holds-one-number-many-readers-share.md)), closing |
 
 ## Patterns every screen shares
 
