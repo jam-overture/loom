@@ -59,6 +59,7 @@ const address: EventsAddress = {
     page: undefined,
     view: undefined,
     search: undefined,
+    segment: undefined,
     live: false,
     range: "24h",
   },

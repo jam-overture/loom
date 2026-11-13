@@ -74,6 +74,12 @@ export const pageChoicesOf = (published: readonly PublishedPage[]): readonly Pag
 export const pageLabelOf = (page: Pick<PageChoice, "name" | "treeId">): string =>
   page.name ?? page.treeId
 
+/** A page's name among `pages` by its tree id, or the id itself where it has none or is not published. */
+export const pageNameIn =
+  (pages: readonly PageChoice[]) =>
+  (treeId: string): string =>
+    pages.find((page) => page.treeId === treeId)?.name ?? treeId
+
 /** Which parts each published page has, for `readGoalForm` to check a choice against. */
 export const partsByPageOf = (pages: readonly PageChoice[]): PartsByPage =>
   new Map(pages.map((page) => [page.treeId, new Set(page.parts.map((part) => part.nodeId))]))
@@ -187,15 +193,8 @@ export const countsWhen = (goal: Goal, pages: readonly PageChoice[]): string => 
 }
 
 /** *All pages with it*, or the pages chosen by name. */
-export const whereSentence = (goal: Goal, pages: readonly PageChoice[]): string => {
-  if (goal.pages === null) return "Every page that has it"
-
-  const names = goal.pages.map(
-    (treeId) => pages.find((page) => page.treeId === treeId)?.name ?? treeId
-  )
-
-  return names.join(", ")
-}
+export const whereSentence = (goal: Goal, pages: readonly PageChoice[]): string =>
+  goal.pages === null ? "Every page that has it" : goal.pages.map(pageNameIn(pages)).join(", ")
 
 /**
  * The page *New goal*'s outline draws: the one the owner chose, else the first

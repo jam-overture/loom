@@ -9,6 +9,8 @@ import {
   type ReaderTallyStore,
 } from "@jam-overture/loom/signals"
 
+import { audienceIdSchema } from "@jam-overture/loom/store"
+
 import { readGoalCounters } from "./goal-counters"
 import { goalSpanOf } from "./goal-range"
 
@@ -78,6 +80,19 @@ describe("readGoalCounters", () => {
       { from: SPAN.from, to: SPAN.from },
     ])
     expect(counters?.actedBegins).toBe(FIRST_ACTED)
+  })
+
+  it("narrows both to one segment's audience, and its page views' first hour is then the segment's", async () => {
+    const { tallies, arrivalsAsked, actedAsked } = recording()
+    const phone = audienceIdSchema.parse("aud_phone")
+
+    await readGoalCounters(tallies, SPAN, { nodeId: START, audience: phone })
+
+    expect(arrivalsAsked).toEqual([{ audience: phone, ...SPAN }])
+    expect(actedAsked).toEqual([
+      { nodeId: START, audience: phone, ...SPAN },
+      { from: SPAN.from, to: SPAN.from },
+    ])
   })
 
   it.each([

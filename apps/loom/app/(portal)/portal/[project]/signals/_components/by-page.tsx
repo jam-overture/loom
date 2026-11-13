@@ -15,6 +15,7 @@ import { goalRangeWordsOf } from "@/app/(portal)/_lib/goal-range"
 import { wordCountOf, type PageStops } from "@/app/(portal)/_lib/page-stops"
 import { per100Of, readingSentence } from "@/app/(portal)/_lib/goals/goal-view"
 import { positionWords, spanLine, stretchWords } from "@/app/(portal)/_lib/list-span"
+import { SEGMENT_PARAM } from "@/app/(portal)/_lib/segments/segment-pick"
 import { rangeLabel, rangeParam, type SignalsRange } from "@/app/(portal)/_lib/signals-range"
 import { plainMoment } from "@/app/(portal)/_lib/when"
 
@@ -23,7 +24,7 @@ import { plainMoment } from "@/app/(portal)/_lib/when"
  * and the drawer for the one the URL names (8a of `docs/portal.md`).
  *
  * Every link is a plain address — `from` for where the list starts, `page`
- * for the drawer's subject, `range` for the figures above — so a link a person sends reopens exactly what
+ * for the drawer's subject, `range` and `segment` for the figures above — so a link a person sends reopens exactly what
  * they were looking at, and the screen needs no client code to do it.
  */
 
@@ -31,16 +32,18 @@ export type ByPageAddress = {
   readonly base: string
   readonly from: string | undefined
   readonly range: SignalsRange
+  /** The segment the figures are read for, `undefined` for everyone. */
+  readonly segment: string | undefined
 }
 
-/** An address on this tab, keeping the range the figures above it are read over. */
+/** An address on this tab, keeping the range and the segment the figures are read for. */
 export const byPageHref = (
-  { base, range }: ByPageAddress,
+  { base, range, segment }: ByPageAddress,
   query: Readonly<Record<string, string | undefined>>
 ) => {
   const kept = new URLSearchParams(
-    Object.entries({ ...query, range: rangeParam(range) }).flatMap(([key, value]) =>
-      value === undefined ? [] : [[key, value]]
+    Object.entries({ ...query, range: rangeParam(range), [SEGMENT_PARAM]: segment }).flatMap(
+      ([key, value]) => (value === undefined ? [] : [[key, value]])
     )
   ).toString()
 

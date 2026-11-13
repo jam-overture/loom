@@ -75,6 +75,7 @@ const EVERYTHING: EventFilter = {
   page: undefined,
   view: undefined,
   search: undefined,
+  segment: undefined,
 }
 
 const goal = (overrides: Partial<Goal>): Goal => ({
@@ -208,6 +209,31 @@ describe("the filter", () => {
     expect(keeps({ page: "t_other" as TreeId })).toBe(false)
     expect(keeps({ view: VIEW_B })).toBe(false)
     expect(keeps({ search: "pricing" })).toBe(false)
+  })
+
+  it("narrows to one segment's readers: the deliveries filed under its audience", () => {
+    const naming = namingOf([{ tree: home, receivedAt: 0 }])
+    const keeps = (event: ReaderEvent, segment: string | undefined): boolean =>
+      matchesFilter({ ...EVERYTHING, segment }, naming)(event)
+    const phone = eventOf(pressed(), { audienceId: "aud_phone" } as Partial<ReceivedBatch>)
+
+    expect(eventQueryOf({ segment: "phone" }).segment).toBe("phone")
+    expect(eventQueryOf({ segment: "everyone" }).segment).toBeUndefined()
+    expect(eventQueryOf({ segment: "not a word" }).segment).toBeUndefined()
+    expect(keeps(phone, "phone")).toBe(true)
+    expect(keeps(phone, undefined)).toBe(true)
+    expect(keeps(eventOf(pressed()), "phone")).toBe(false)
+    expect(keeps(phone, "search")).toBe(false)
+  })
+
+  it("carries the segment to every address", () => {
+    expect(
+      eventsHref(
+        "/portal/prj_a/signals",
+        { ...EVERYTHING, kind: "viewed", segment: "phone", live: false, range: "7d" },
+        { event: "3.0" }
+      )
+    ).toBe("/portal/prj_a/signals?kind=viewed&range=7d&segment=phone&event=3.0")
   })
 
   it("writes an address that keeps the filter and names what changes", () => {

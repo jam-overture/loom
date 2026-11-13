@@ -18,44 +18,38 @@
  *   what the printed file does with it does not depend on how big it is, and a
  *   fuller page here would read as the interesting part of a file whose point
  *   is that it is uninteresting.
- * - **`loomProject`** is the address and the key the printed file pulls with.
  *
- * ## Why `loomProject` is an object, and why it is not read off `process.env`
+ * ## The address and the key are not in here any more
  *
- * **A reader's own version of this reads the environment**, and the published
- * entry point's example says so in as many words: `process.env.LOOM_URL`,
- * `process.env.LOOM_PROJECT_KEY`. The panel does not, and the reason is a check
- * rather than a preference.
+ * They were, from 10 November until today, as a mutable `loomProject` object
+ * the panel imported alongside these two. That was a workaround and this file
+ * carried the whole of why: `tools/sources/deployment.ts` reads every
+ * environment variable the application's **code** names and holds
+ * `apps/loom/.env.example` to offering each one, and it could not tell a
+ * setting this deployment reads from one a printed specimen reads. The two
+ * reads a reader actually writes arrived in that sweep as two settings of the
+ * Loom site, which they are not.
  *
- * `tools/sources/deployment.ts` reads every environment variable the
- * application's **code** names and holds `apps/loom/.env.example` to offering
- * each one. It cannot tell a setting this deployment reads from one a printed
- * specimen reads, and the discipline that makes these panels trustworthy is
- * that they are real compiled modules — so the read in a specimen arrives in
- * that sweep as a nineteenth setting of the Loom site, which it is not.
- * Measured on this branch: `LOOM_URL` and `LOOM_PROJECT_KEY` turn two of its
- * cases red.
+ * `Loom daily build` closed that the same evening.
+ * [0379](../../../../../../decisions/0379-a-file-may-publish-part-of-its-body-as-somebody-elses-code-and-a-check-that-reads-this-deployment-stops-at-the-marker.md)
+ * stops that sweep at `SHOWN_MARKER`, so everything a visitor copies is read as
+ * the visitor's setting and never as this deployment's. **So the panel prints
+ * `process.env.LOOM_URL` and `process.env.LOOM_PROJECT_KEY`**, which is what
+ * the published entry point's own example prints, and the one indirection
+ * between the panel and the file a reader would write is gone.
  *
- * Both ways out of that are another lane's file. Offering them in
- * `.env.example` would document two settings this deployment does not have, and
- * adding them to that sweep's `NOT_SET_BY_AN_OPERATOR` is an edit to `tools/`.
- * **So it is filed and the panel is shaped around it** — the copy beside the
- * panel says the address and the key come out of a reader's environment, which
- * is the fact, and the file takes them from the configuration module it already
- * imports two things from.
+ * Two things that follow, and the second is the one to know before editing
+ * either file:
  *
- * **It is mutable, and that is what lets `wired.test.ts` be real.** The test
- * points the specimen at a server answering the live-pages door, which means
- * setting these two before `wired/page.tsx` evaluates. `vi.resetModules()`
- * followed by importing this module and then that one gives both a fresh
- * evaluation out of one registry, so the object the test writes to is the
- * object the panel's code reads. No mock, and nothing that depends on which
- * file the suite loaded first.
- *
- * The printed file imports both from `"./loom"` rather than from two modules,
- * so that its import block is three lines instead of four. That is a choice
- * about the panel and not about how a host arranges their application, and
- * `wired.ts` says so in the copy the band prints under it.
+ * - **The exemption is the region and not the file.** Whatever `wired/page.tsx`
+ *   reads *above* its marker is still this deployment's setting. There is
+ *   nothing above it today and a read put there would be a real finding.
+ * - **`wired.test.ts` writes the two variables rather than an object**, around
+ *   each render and back again afterwards. The module-scope read is what makes
+ *   that the honest spelling: the panel takes its deployment as it evaluates,
+ *   so the test sets the environment, resets the module registry and imports
+ *   the panel fresh. That is one step shorter than it was, because the
+ *   configuration module it used to write to no longer has anything to write.
  */
 
 import {
@@ -75,12 +69,6 @@ if (!built.ok) {
 }
 
 export const components: PrimitiveRegistry = built.value
-
-/**
- * The address and the key the printed file pulls with. See above for why this
- * is an object a test can write to rather than two reads of the environment.
- */
-export const loomProject: { url: string; key: string } = { url: "", key: "" }
 
 /**
  * The page as the host's own code writes it down, which is what a reader is

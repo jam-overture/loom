@@ -3,13 +3,14 @@ import { describe, expect, it, vi } from "vitest"
 
 import { proposalIdSchema, treeIdSchema } from "@jam-overture/loom"
 
+import { edgesOf } from "@/app/(portal)/_lib/expectation"
 import { goalIdSchema } from "@/app/(portal)/_lib/goals/goal"
 import type { HeldDrawn } from "@/app/(portal)/_lib/held-change"
 import type { RequestParts } from "@/app/(portal)/_lib/proposing/brief"
 import type { QueueRow } from "@/app/(portal)/_lib/queue"
 import { STAKES } from "@/app/(portal)/_lib/vocabulary"
 
-import { ChangeDrawer } from "./change-drawer"
+import { ChangeDrawer, type GoalStanding } from "./change-drawer"
 
 vi.mock("../actions", () => ({ answerAction: vi.fn() }))
 
@@ -46,6 +47,20 @@ const DRAWN: HeldDrawn = {
 
 const CLOSE = "/portal/prj_a/review"
 
+const NOW_SIDE = { range: { from: 0, to: 14 * 24 * 3_600_000 }, views: 2_000, count: 70 }
+
+const STANDING: GoalStanding = {
+  kind: "read",
+  goal: { name: "Sign-ups", kind: "activated" },
+  expectation: {
+    kind: "read",
+    now: NOW_SIDE,
+    clipped: false,
+    views: 2_000,
+    band: edgesOf(NOW_SIDE),
+  },
+}
+
 const drawer = (over: Partial<Parameters<typeof ChangeDrawer>[0]> = {}) =>
   render(
     <ChangeDrawer
@@ -55,6 +70,7 @@ const drawer = (over: Partial<Parameters<typeof ChangeDrawer>[0]> = {}) =>
       lastTurnedDown={null}
       acceptedBy="approver"
       goalsRead
+      standing={STANDING}
       projectId="prj_a"
       close={CLOSE}
       {...over}
@@ -81,10 +97,32 @@ describe("the drawer for one change waiting for review", () => {
 
     expect(screen.getByText(PARTS.why ?? "")).toBeDefined()
     expect(screen.getByText(/measured on “Sign-ups” for the 14 days after/u)).toBeDefined()
-    expect(screen.getByText(/1,000 page views each side/u)).toBeDefined()
     expect(screen.getByText("An approver or an owner can accept it.")).toBeDefined()
     expect(screen.getByRole("button", { name: "Accept" })).toBeDefined()
     expect(screen.getByText(/your site has it from its next pull/u)).toBeDefined()
+  })
+
+  it("says where its goal stands on the page and the band a result has to leave, and predicts nothing", () => {
+    drawer()
+
+    expect(screen.getByText(/counted 70 presses in 2,000 page views, 3.5 per 100/u)).toBeDefined()
+    expect(screen.getByText(/reads Helped at [\d.]+ per 100 or more and Hurt at/u)).toBeDefined()
+    expect(screen.getByText(/does not predict where in that band it will land/u)).toBeDefined()
+  })
+
+  it("says where a goal stands could not be read, or is no longer read, and still how it is measured", () => {
+    const { unmount } = drawer({ standing: { kind: "unreadable" } })
+
+    expect(
+      screen.getByText(/Where “Sign-ups” stands on this page could not be read/u)
+    ).toBeDefined()
+    expect(screen.getByText(/measured on “Sign-ups” for the 14 days after/u)).toBeDefined()
+    unmount()
+
+    drawer({ standing: { kind: "unplaced" } })
+
+    expect(screen.getByText(/“Sign-ups” is no longer one of the project's goals/u)).toBeDefined()
+    expect(screen.getByText(/measured on “Sign-ups” for the 14 days after/u)).toBeDefined()
   })
 
   it("marks a change that no longer fits red, draws nothing and offers no Accept", () => {

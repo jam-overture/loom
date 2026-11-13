@@ -1,4 +1,4 @@
-import type { ElementNode, LoomNode } from "@jam-overture/loom"
+import type { ElementNode, JsonObject, LoomNode } from "@jam-overture/loom"
 
 import { SOURCE_PANEL } from "./words"
 
@@ -132,6 +132,25 @@ export const wordsIn = (node: LoomNode): number => {
  */
 export type Run = {
   readonly container: string
+  /**
+   * What the container was built with, because **the type does not decide the
+   * layout and the props do.**
+   *
+   * `balance.test.ts` classified a run by its container's type alone until
+   * 13 November, and the front door's questions band is what that cost: a
+   * `loom.faq-list` is read downward one question at a time, which is the
+   * reason the file exempts it, and the same primitive with `columns: "two"` is
+   * a grid of cells stretched to a common height, which is the exact hole the
+   * file exists to catch. One type, two layouts, and the list of exemptions
+   * could not tell them apart.
+   *
+   * So the props travel with the run and the classification reads them. It is
+   * the same shape as the 29 September filing that `balance.test.ts` quotes —
+   * *a prop with a safe default is invisible to every instrument here except a
+   * camera* — one level out: here the prop was set, and the instrument was
+   * looking at the wrong half of the element.
+   */
+  readonly props: JsonObject
   readonly cell: string
   readonly words: readonly number[]
   readonly cells: readonly ElementNode[]
@@ -149,6 +168,7 @@ export const runsIn = (node: LoomNode): readonly Run[] => {
     if (isElement(current) && cells.length >= 2 && types.size === 1) {
       found.push({
         container: current.type,
+        props: current.props,
         cell: [...types][0] as string,
         words: cells.map(wordsIn),
         cells,

@@ -16,7 +16,8 @@ import type { PublishedPage } from "@/app/_lib/pages/published"
 
 import { portalDatabase } from "../database"
 import { pageLabelOf, pageChoicesOf } from "../goals/goal-view"
-import type { PageRules } from "./segment"
+
+import { segmentsOf } from "./segment"
 
 /**
  * One application's audience rules, read and written through 0376's store
@@ -52,25 +53,38 @@ export type RulesPage = { readonly treeId: string; readonly name: string }
 export const rulesPagesOf = (published: readonly PublishedPage[]): readonly RulesPage[] =>
   pageChoicesOf(published).map((page) => ({ treeId: page.treeId, name: pageLabelOf(page) }))
 
-export type RulesReading =
-  | { readonly ok: true; readonly pages: readonly PageRules[] }
+/** A page as its rules are asked for: by id, and with whatever the asker reads it by. */
+type RulesFor = { readonly treeId: string }
+
+export type RulesReading<P extends RulesFor = RulesPage> =
+  | {
+      readonly ok: true
+      /** `head` is `undefined` for a page nobody has written rules for. */
+      readonly pages: readonly (P & { readonly head: AudienceRuleRevision | undefined })[]
+    }
   | { readonly ok: false; readonly detail: string }
 
 /**
- * Every published page's current rules, read at once and each within the
- * portal's budget. One page that cannot be read makes the whole reading
- * unreadable rather than a list of segments missing that page's: a segment's
- * order and its pages are only true of every page at once.
+ * Every page's current rules, read at once and each within the portal's
+ * budget. One page that cannot be read makes the whole reading unreadable
+ * rather than a list missing that page's: a segment's order and its pages are
+ * only true of every page at once, and the read door must never answer pages
+ * beside rules that leave one out (0371 clause 4).
  */
-export const readPageRules = async (
+export const readPageRules = async <P extends RulesFor>(
   store: AudienceOverlayStore,
-  pages: readonly RulesPage[]
-): Promise<RulesReading> => {
+  pages: readonly P[]
+): Promise<RulesReading<P>> => {
+  type Read = P & { readonly head: AudienceRuleRevision | undefined }
+  type Outcome =
+    | { readonly ok: true; readonly page: Read }
+    | { readonly ok: false; readonly detail: string }
+
   const read = await Promise.all(
-    pages.map(async (page): Promise<PageRules | string> => {
+    pages.map(async (page): Promise<Outcome> => {
       const treeId = treeIdSchema.safeParse(page.treeId)
 
-      if (!treeId.success) return `${page.treeId} is not a page id`
+      if (!treeId.success) return { ok: false, detail: `${page.treeId} is not a page id` }
 
       const head = await readWithin<AudienceRuleRevision | undefined, AudienceOverlayError>(
         () => store.rules(treeId.data),
@@ -78,15 +92,35 @@ export const readPageRules = async (
         PORTAL_READ_BUDGET_MS
       )
 
-      return head.ok ? { ...page, head: head.value } : describeAudienceOverlayError(head.error)
+      return head.ok
+        ? { ok: true, page: { ...page, head: head.value } }
+        : { ok: false, detail: describeAudienceOverlayError(head.error) }
     })
   )
 
-  const failed = read.find((entry): entry is string => typeof entry === "string")
+  const failed = read.find((outcome) => !outcome.ok)
 
-  return failed === undefined
-    ? { ok: true, pages: read.filter((entry): entry is PageRules => typeof entry !== "string") }
-    : { ok: false, detail: failed }
+  return failed === undefined || failed.ok
+    ? { ok: true, pages: read.flatMap((outcome) => (outcome.ok ? [outcome.page] : [])) }
+    : { ok: false, detail: failed.detail }
+}
+
+/**
+ * The words of the project's segments, for a screen that offers them (the
+ * segment picker, `segment-pick.ts`): every audience any page's rules name,
+ * alphabetically. `undefined` where the rules could not be read, so the
+ * picker can say it has nothing to offer rather than that there is nothing.
+ */
+export const readSegmentWords = async (
+  store: AudienceOverlayStore,
+  pages: readonly { readonly treeId: string }[]
+): Promise<readonly string[] | undefined> => {
+  const read = await readPageRules(
+    store,
+    pages.map(({ treeId }) => ({ treeId, name: treeId }))
+  )
+
+  return read.ok ? segmentsOf(read.pages).map((segment) => segment.word) : undefined
 }
 
 /** One page's new rules, and the revision they were worked out from. */

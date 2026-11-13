@@ -1,6 +1,6 @@
 # 0383. A reader keeps the pages they first saw for a window the project sets, and their browser holds one number many readers share
 
-**Status:** Proposed
+**Status:** Accepted
 **Date:** 2026-11-11
 **Section:** §1, §5 (portal), the connection plane
 
@@ -8,9 +8,10 @@
 > `0381` (signals, the rate by the hour) and `0382` (signals, the part that was
 > on screen), so this takes `0383`.
 >
-> **Why `Proposed`.** The maintainer asked for this to go into the plan on
-> 11 November. The window's choices, its default and the cookie it needs are
-> his to accept; nothing here is built until he does.
+> **Why `Accepted`.** The maintainer asked for this to go into the plan on
+> 11 November, and on 13 November accepted it as proposed: *"867 and 869 seem
+> okay to move forward, unless there is something i am missing."* That takes
+> the choices, *Off* as the default, and the cookie of clause 3.
 
 ## Context
 

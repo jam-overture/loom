@@ -29,7 +29,7 @@ its unit serves.
 | --- | --- | --- | --- |
 | 1 | Readers act: views, dwells, presses, opens, completions arrive with the project key | Signals | built (tallies, buffer, by page) |
 | 2 | A goal says which signals count | Goals | built (goals kept and measured, 0350; proposals aim at them, 0352) |
-| 3 | Loom proposes one change toward a goal | For review | partly (each proposal names its goal, 0352; the goal picker, the drawer with before and after, *Turned down recently* and the next time Loom looks are built; no predicted effect yet) |
+| 3 | Loom proposes one change toward a goal | For review | partly (each proposal names its goal, 0352; the goal picker, the drawer with before and after, *Turned down recently* and the next time Loom looks are built; *What it expects* says where the goal stands on the page and the band a result has to leave, but predicts no effect yet) |
 | 4 | A person accepts or turns it down | For review | partly (the queue exists, as *Waiting*) |
 | 5 | An accepted change goes live on the site, with no pull request (0358) | Unit 8 | built (read door, replay, whether the site pulls, *Accepted* and the timeline from *Accept*; the goal chip on it still owed) |
 | 6 | The next version is measured against the last, on its goal | Pages · History | new |
@@ -61,7 +61,7 @@ carry structure, green as a tinted mark, one black filled action per screen).
 | Goals | What are we trying to get readers to do? |
 | Segments | Later: which readers behave differently? |
 | Connect your site | Key, snippet, publish key, repository |
-| Settings | Name, address, model key, how long a reader keeps a page ([0383](../decisions/0383-a-reader-keeps-the-pages-they-first-saw-for-a-window-the-project-sets-and-their-browser-holds-one-number-many-readers-share.md), proposed), closing |
+| Settings | Name, address, model key, how long a reader keeps a page ([0383](../decisions/0383-a-reader-keeps-the-pages-they-first-saw-for-a-window-the-project-sets-and-their-browser-holds-one-number-many-readers-share.md)), closing |
 
 ## Patterns every screen shares
 
@@ -263,6 +263,14 @@ split of before and after on History, and *only for: <segment>* on a proposed
 change. It is defined only from what a batch already says, never from anything
 personal (`docs/signals.md` rule 1, and the deferral of per-reader identity).
 It needs its own decision record before any of it is built.
+
+**Since built** ([0371](../decisions/0371-a-segment-is-an-audience-the-site-sorts-its-readers-into-and-loom-keeps-only-its-rules-and-its-name.md),
+Accepted 11 November): *Segments* on the rail, the read door answering each
+page's rules, and the segment filter, a *Segment* picker under the range on
+*Signals* and above the list on *Goals* (`?segment=`), which narrows every
+figure to that segment's readers and says *Nothing has been counted for
+<segment> yet* until the site names it. The split on *Page history* and *only
+for: <segment>* are piece 4, which waits on its own record.
 
 ---
 

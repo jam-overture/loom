@@ -1,19 +1,30 @@
 import { describe, expect, it } from "vitest"
 
-import { err, ok, type LoomTree } from "@jam-overture/loom"
+import { deltaIdSchema, err, ok, treeIdSchema, type LoomTree } from "@jam-overture/loom"
 import {
   DEFAULT_APPLICATION_ID,
   applicationIdSchema,
+  audienceIdSchema,
   projectIdSchema,
   type Application,
   type ApplicationId,
+  type AudienceForm,
+  type AudienceRule,
 } from "@jam-overture/loom/store"
 
 import { issueIngestKey, type IngestKey } from "@/app/_lib/reader-signals/keys"
 import { memoryIngestKeyStore } from "@/app/_lib/reader-signals/keys-memory"
 
 import { pageFixture } from "./fixtures"
-import { entityTagOf, matchesTag, serveLivePages, type ReadDoor } from "./live"
+import {
+  entityTagOf,
+  liveFormsOf,
+  liveRulesOf,
+  matchesTag,
+  serveLivePages,
+  type ReadDoor,
+} from "./live"
+import type { PageOverlay } from "./overlays"
 import type { SitePull } from "./pulls"
 
 const SITE: Application = {
@@ -27,6 +38,15 @@ const OTHER = applicationIdSchema.parse("app_other")
 const AT = 1_760_000_000_000
 const HOME = pageFixture("home", "Welcome")
 const PRICING = pageFixture("pricing", "Pricing")
+
+const PHONE: AudienceRule = {
+  audienceId: audienceIdSchema.parse("aud_phone"),
+  clauses: [{ key: "device", anyOf: ["phone"] }],
+}
+const ADS: AudienceRule = {
+  audienceId: audienceIdSchema.parse("aud_ads"),
+  clauses: [{ key: "source", anyOf: ["search", "ads"] }],
+}
 
 type Fixture = {
   readonly door: ReadDoor
@@ -42,6 +62,10 @@ const fixtureOf = async (
   over: Partial<ReadDoor> & {
     readonly application?: Application | null
     readonly pages?: readonly LoomTree[]
+    /** Each page's rules, by page id; a page missing has none. */
+    readonly rules?: Readonly<Record<string, readonly AudienceRule[]>>
+    /** Each page's segment forms, by page id; a page missing has none. */
+    readonly forms?: Readonly<Record<string, readonly AudienceForm[]>>
   } = {}
 ): Promise<Fixture & { readonly otherKey: IngestKey }> => {
   const keys = memoryIngestKeyStore()
@@ -75,6 +99,18 @@ const fixtureOf = async (
 
         return Promise.resolve(ok(id === SITE.applicationId ? (over.pages ?? [HOME, PRICING]) : []))
       },
+      overlaysOf: (_, pages) =>
+        Promise.resolve(
+          ok(
+            pages.map(
+              (treeId): PageOverlay => ({
+                treeId,
+                rules: over.rules?.[treeId],
+                forms: over.forms?.[treeId] ?? [],
+              })
+            )
+          )
+        ),
       pulled: (taken) => {
         pulls.push(taken)
       },
@@ -106,7 +142,7 @@ describe("serveLivePages", () => {
 
     expect(response.status).toBe(200)
     expect(response.headers.get("content-type")).toMatch(/^application\/json/)
-    expect(JSON.parse(body)).toEqual({ pages: [HOME, PRICING] })
+    expect(JSON.parse(body)).toEqual({ pages: [HOME, PRICING], rules: [], forms: [] })
     expect(response.headers.get("etag")).toBe(await entityTagOf(body))
     expect(response.headers.get("cache-control")).toBe("private, no-cache")
     expect(asked).toEqual([SITE.applicationId])
@@ -117,7 +153,7 @@ describe("serveLivePages", () => {
 
     const response = await serveLivePages(pull(`Bearer ${otherKey}`), door)
 
-    expect(await response.json()).toEqual({ pages: [] })
+    expect(await response.json()).toEqual({ pages: [], rules: [], forms: [] })
     expect(asked).toEqual([OTHER])
   })
 
@@ -144,7 +180,7 @@ describe("serveLivePages", () => {
     )
 
     expect(again.status).toBe(200)
-    expect(await again.json()).toEqual({ pages: [HOME] })
+    expect(await again.json()).toEqual({ pages: [HOME], rules: [], forms: [] })
   })
 
   it("tells of each answer the site took, the 304s as well as the 200s, under its project", async () => {
@@ -249,6 +285,7 @@ describe("serveLivePages", () => {
     const keysDown = await fixtureOf()
     const applicationsDown = await fixtureOf({ applicationOf: () => Promise.resolve(err(DOWN)) })
     const pagesDown = await fixtureOf({ livePagesOf: () => Promise.resolve(err(DOWN)) })
+    const rulesDown = await fixtureOf({ overlaysOf: () => Promise.resolve(err(DOWN)) })
 
     const answers = await Promise.all([
       serveLivePages(pull(`Bearer ${keysDown.key}`), {
@@ -260,14 +297,188 @@ describe("serveLivePages", () => {
       }),
       serveLivePages(pull(`Bearer ${applicationsDown.key}`), applicationsDown.door),
       serveLivePages(pull(`Bearer ${pagesDown.key}`), pagesDown.door),
+      serveLivePages(pull(`Bearer ${rulesDown.key}`), rulesDown.door),
     ])
 
-    expect(answers.map((response) => response.status)).toEqual([503, 503, 503])
+    expect(answers.map((response) => response.status)).toEqual([503, 503, 503, 503])
     expect(await Promise.all(answers.map((response) => response.text()))).toEqual([
       "live pages are unavailable: down\n",
       "live pages are unavailable: down\n",
       "live pages are unavailable: down\n",
+      "live pages are unavailable: down\n",
     ])
+  })
+})
+
+describe("the rules beside the pages (0371 clause 4)", () => {
+  it("answers each page's rule list in its order, for the pages it answers", async () => {
+    const { door, key } = await fixtureOf({
+      rules: { [HOME.treeId]: [PHONE, ADS], [PRICING.treeId]: [ADS] },
+    })
+
+    const response = await serveLivePages(pull(`Bearer ${key}`), door)
+
+    expect(await response.json()).toEqual({
+      pages: [HOME, PRICING],
+      rules: [
+        { treeId: HOME.treeId, rules: [PHONE, ADS] },
+        { treeId: PRICING.treeId, rules: [ADS] },
+      ],
+      forms: [],
+    })
+  })
+
+  it("asks for the rules of exactly the pages it answers, under the key's project", async () => {
+    const asked: [ApplicationId, readonly string[]][] = []
+    const { door, key } = await fixtureOf({
+      overlaysOf: (application, pages) => {
+        asked.push([application, pages])
+
+        return Promise.resolve(ok([]))
+      },
+    })
+
+    await serveLivePages(pull(`Bearer ${key}`), door)
+
+    expect(asked).toEqual([[SITE.applicationId, [HOME.treeId, PRICING.treeId]]])
+  })
+
+  it("tags the rules with the pages, so a site holding old rules is answered again", async () => {
+    const before = await fixtureOf()
+    const first = await serveLivePages(pull(`Bearer ${before.key}`), before.door)
+    const tag = first.headers.get("etag") ?? ""
+
+    const after = await fixtureOf({ rules: { [HOME.treeId]: [PHONE] } })
+    const again = await serveLivePages(
+      pull(`Bearer ${after.key}`, { ifNoneMatch: tag }),
+      after.door
+    )
+
+    expect(again.status).toBe(200)
+    expect(again.headers.get("etag")).not.toBe(tag)
+  })
+})
+
+describe("liveRulesOf", () => {
+  it("leaves out a page with no rules and a page whose list was emptied, which mean the same", () => {
+    const heads: readonly PageOverlay[] = [
+      { treeId: HOME.treeId, rules: undefined, forms: [] },
+      { treeId: PRICING.treeId, rules: [], forms: [] },
+    ]
+
+    expect(liveRulesOf(heads)).toEqual([])
+  })
+
+  it("keeps the pages' order and each list's order, which says who wins a part", () => {
+    const heads: readonly PageOverlay[] = [
+      { treeId: PRICING.treeId, rules: [ADS, PHONE], forms: [] },
+      { treeId: HOME.treeId, rules: undefined, forms: [] },
+    ]
+
+    expect(liveRulesOf(heads)).toEqual([{ treeId: PRICING.treeId, rules: [ADS, PHONE] }])
+  })
+})
+
+const formFor = (audience: string, treeId: string): AudienceForm => ({
+  audienceId: audienceIdSchema.parse(audience),
+  delta: {
+    deltaId: deltaIdSchema.parse(`d_${audience.slice(4)}`),
+    treeId: treeIdSchema.parse(treeId),
+    baseRevision: 0,
+    operations: [{ op: "configure", nodeId: HOME.root.id, set: { title: audience }, unset: [] }],
+  },
+})
+
+const PHONE_FORM = formFor("aud_phone", HOME.treeId)
+const ADS_FORM = formFor("aud_ads", HOME.treeId)
+
+describe("the segment forms the door answers beside the pages (0371 clause 5)", () => {
+  it("answers each page's forms, for a site to compose with itself", async () => {
+    const { door, key } = await fixtureOf({
+      rules: { [HOME.treeId]: [PHONE] },
+      forms: { [HOME.treeId]: [PHONE_FORM] },
+    })
+
+    const response = await serveLivePages(pull(`Bearer ${key}`), door)
+
+    expect(await response.json()).toMatchObject({
+      forms: [{ treeId: HOME.treeId, forms: [PHONE_FORM] }],
+    })
+  })
+
+  /** Pages, rules and forms are one answer under one tag, and they fail together. */
+  it("answers 503 and no pages at all when the overlays cannot be read", async () => {
+    const { door, key } = await fixtureOf({
+      overlaysOf: () => Promise.resolve(err({ detail: "the store did not answer" })),
+    })
+
+    const response = await serveLivePages(pull(`Bearer ${key}`), door)
+
+    expect(response.status).toBe(503)
+  })
+
+  it("moves the tag when a form changes and nothing else does", async () => {
+    const before = await fixtureOf({
+      rules: { [HOME.treeId]: [PHONE] },
+      forms: { [HOME.treeId]: [PHONE_FORM] },
+    })
+    const first = await serveLivePages(pull(`Bearer ${before.key}`), before.door)
+
+    const after = await fixtureOf({
+      rules: { [HOME.treeId]: [PHONE] },
+      forms: { [HOME.treeId]: [formFor("aud_phone", PRICING.treeId)] },
+    })
+    const again = await serveLivePages(
+      pull(`Bearer ${after.key}`, { ifNoneMatch: first.headers.get("etag") ?? "" }),
+      after.door
+    )
+
+    expect(again.status).toBe(200)
+  })
+})
+
+describe("liveFormsOf", () => {
+  it("leaves out a form whose segment the page's rules do not name", () => {
+    const overlays: readonly PageOverlay[] = [
+      { treeId: HOME.treeId, rules: [PHONE], forms: [PHONE_FORM, ADS_FORM] },
+    ]
+
+    expect(liveFormsOf(overlays)).toEqual([{ treeId: HOME.treeId, forms: [PHONE_FORM] }])
+  })
+
+  it("leaves out a page whose rules name no form at all", () => {
+    const overlays: readonly PageOverlay[] = [
+      { treeId: HOME.treeId, rules: [PHONE], forms: [] },
+      { treeId: PRICING.treeId, rules: undefined, forms: [ADS_FORM] },
+    ]
+
+    expect(liveFormsOf(overlays)).toEqual([])
+  })
+
+  /** The order two deltas reaching one part resolve in is the rules' (0359 clause 3). */
+  it("puts the forms in the rules' order rather than the store's", () => {
+    const overlays: readonly PageOverlay[] = [
+      { treeId: HOME.treeId, rules: [ADS, PHONE], forms: [PHONE_FORM, ADS_FORM] },
+    ]
+
+    expect(liveFormsOf(overlays)).toEqual([{ treeId: HOME.treeId, forms: [ADS_FORM, PHONE_FORM] }])
+  })
+
+  /**
+   * Two rules may name one segment — the deployment wrote two ways into one
+   * group — and its delta is one delta. Sending it twice would have the site
+   * apply it twice and double whatever it inserted.
+   */
+  it("sends a segment named by two rules one form", () => {
+    const alsoPhone: AudienceRule = {
+      audienceId: PHONE.audienceId,
+      clauses: [{ key: "device", anyOf: ["tablet"] }],
+    }
+    const overlays: readonly PageOverlay[] = [
+      { treeId: HOME.treeId, rules: [PHONE, alsoPhone], forms: [PHONE_FORM] },
+    ]
+
+    expect(liveFormsOf(overlays)).toEqual([{ treeId: HOME.treeId, forms: [PHONE_FORM] }])
   })
 })
 
