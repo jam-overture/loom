@@ -71813,6 +71813,68 @@ it** — which was true when the margin was 148 bytes and is still true now that
 it is 12,795. Nothing is blocked by that and it is not this lane's to write.
 
 ---
+## 2026-11-12 (evening) — correcting a merged record and a merged report are two conventions this repository does not have, and today needed both
+
+**Filed by:** `Loom signals` · **Owned by:** **@jonathanbravecredit** ·
+**Status:** open — **nothing is broken, nothing is urgent and no deadline is
+attached.** Two questions a routine answered for itself today and should not be
+the one answering
+
+Both were asked on #879 and it has merged, so they live in a closed pull
+request's comment and nowhere a routine reads. They are filed here because the
+whole episode they come from was a true figure getting lost.
+
+**What happened, in one paragraph.** §86 and
+[0381](decisions/0381-a-parts-pace-across-pages-is-one-pooled-quotient-and-a-goals-part-is-a-reading-of-its-own.md)
+merged on #873 carrying a byte figure that #859 had already made false. The
+correction was pushed to the branch twenty minutes after #873 merged, so it
+reached a closed branch and `main` kept the false number until #879 landed it.
+`docs/routines.md` has no rule for either half of that repair, and this lane
+picked both.
+
+### 1. A record that is `Accepted` and merged, with a measurement in it that is now false
+
+**What this lane did:** corrected 0381's consequence bullet in place, leaving the
+old figure, the remeasurement and its date all visible, and left the decision,
+its five clauses and its alternatives untouched.
+
+**Why:** the standing rule is *never edit a record to change direction*, and no
+direction moved — a measured number in a consequence did. A record carrying a
+false measurement seemed worse than one carrying a dated correction, and
+`Superseded by NNNN` would have spent a decision number on a byte count.
+
+**The recommendation, for whoever writes the rule:** allow an in-place
+correction of a **measured figure** in a merged record, provided the old value
+stays visible and is dated, and keep `Superseded by` for anything that changes
+what the record decides. The risk of the looser rule is somebody calling a
+change of direction a correction; the risk of the stricter one is a shelf of
+records that each supersede the last over a number.
+
+### 2. A report of a finished run with a figure in it that is now false
+
+**What this lane did:** left
+[the morning's report](reports/2026-11-12-signals-how-long-readers-stay-on-one-part.md)
+exactly as it stands, including its 50-bytes-of-148 table, and corrected the
+number in the plan, in the record and in this file instead.
+
+**Why:** *never overwrite an existing report* is a standing instruction, and a
+report reads as the record of a run rather than a live document.
+
+**The recommendation:** keep it, and make the consequence explicit — **a report
+is a dated account and may be wrong about the world afterwards; the plan, the
+records and this ledger are what must be true now.** A reader who needs the
+current figure should not be reading a report for it. If instead you want
+reports corrected in place when a figure in them is found false, that is one
+line in `docs/routines.md` and this lane would rather you set it than infer it a
+second time.
+
+### The one thing already fixed without asking
+
+**Read whether a pull request is still open before pushing a correction to its
+branch.** It is in the entry above this one as the lesson, and it earned itself
+back within the hour: the addendum this lane wrote next was held unpushed
+because #879 had merged while it was being written. That one needs no
+convention, only the check.
 ## 2026-11-12 (evening) — the names index crossed its cap within a day of the fix landing, and a fourth entry still quotes the margin it had before
 
 **Filed by:** `Loom signals` · **Owned by:** nobody — **a measurement, and the
