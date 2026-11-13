@@ -5592,6 +5592,60 @@ what it may say is bounded by the floor above. And the sweep the 11 November
 entry asked for — *how many other fixtures in this repository model the defect by
 accident* — is still open and still two lanes' work.
 
+### 89. What fixing a silent component was worth · `Loom signals` · **done, 13 November**
+
+§88 named the component to fix. The question it left is the one an author has
+the moment they have fixed it — **did it work, and how much of the library did it
+recover?** — and its sharper sibling, which nobody could ask: **did this release
+silence a component that was reporting last week?** A census of the later window
+cannot tell the two apart. It sees a component that is silent now.
+
+**Done**
+([0394](../decisions/0394-what-a-fix-to-a-silent-component-was-worth-is-read-over-the-places-both-windows-could-check.md)),
+as the twenty-fifth reading taken out of the server-side join of 0212 rather than
+collected — **no payload field, no counter, no column, no table, no byte on any
+wire and nothing in a reader's browser.** A browser could not send this if it
+wanted to: whether a part is silent is a statement about *what else was on the
+page*.
+
+- **`librarySendersChangeOf` pairs the places first**, by 0266's rule and
+  through its published helpers: windows keyed by page in its form, placements
+  paired by node, a form held at two revisions excluded and named, a reading
+  handed in twice dropped and counted (0158).
+- **The population is the paired places checkable in *both* windows**, and
+  clause 3 of the record is the whole design: a denominator of the places
+  checkable **now** would publish a repair for a window that merely got busier,
+  and nothing on the row would look wrong. `checkableWas` and `checkableNow` are
+  published beside it, because coverage moving is a fact about readers and not
+  about senders.
+- **An unclaimed side makes the transition unclaimable, not the share wider.**
+  §88 brackets `unknown` between `share` and `atMost`; across two windows
+  *indeterminate, then reporting* is no claim at all about what moved, so it is
+  counted in `indeterminate`, kept out of `comparable`, and named by the silence
+  `unclaimable`.
+- **The verdict is the sign of `repaired − wentSilent`** — two counts of places
+  over one population, no threshold and no reader in it. `still-silent` is kept
+  apart from `held` because it is the one state that is an instruction.
+- **0382's rule has one spelling.** The five states a placement can be in move to
+  `subtrees.ts` as `senderStatesOf`, and §88's census takes them from there; two
+  readings of one window are asserted to reproduce the census term for term.
+
+**Ten names reach `@jam-overture/loom/signals`** — `librarySendersChangeOf`,
+`LibrarySendersChange`, `KindSenderChange`, `SenderMovement`,
+`SENDER_MOVEMENTS`, `describeSenderMovement`, `SenderFixSilence`,
+`SENDER_FIX_SILENCES`, `describeSenderFixSilence` and `SILENCED_EXAMPLES`.
+
+**Nothing reaches a reader's browser.** `broadcast.ts` and its import graph are
+untouched, and the bundle measures **7,852 bytes minified and 3,458 gzipped**,
+which is `main`'s figure exactly. The names index is **27,569 bytes over 2,141
+names**, measured by building the file both ways — 107 bytes for the ten, of the
+12,538 there were, leaving **12,431**.
+
+**What is left and is filed:** the reader-weighted version — *of the readers who
+met your accordion, the share that was measured has gone from four in ten to
+seven* — is 0256's refusal at this unit and is not built. And the portal view is
+`Loom portal`'s, bounded by the same floor §88 is.
+
 ## Still not in scope
 
 - **Signal-to-intent derivation** — a signal automatically becoming a
