@@ -34,6 +34,7 @@ import { ensureReaderRefusalsSchema } from "../app/_lib/reader-signals/refusals-
 import { ensurePageCopiesSchema } from "../app/(portal)/_lib/proposing/copies-postgres"
 import { ensureTurnedDownSchema } from "../app/(portal)/_lib/proposing/turned-down-postgres"
 import { ensureMadeChangesSchema } from "../app/(portal)/_lib/proposing/made-from-postgres"
+import { ensureSegmentChangesSchema } from "../app/(portal)/_lib/segments/segment-changes-postgres"
 import { ensureGoalsSchema } from "../app/(portal)/_lib/goals/goals-postgres"
 import { ensureProposalGoalsSchema } from "../app/(portal)/_lib/goals/proposal-goals-postgres"
 import { resolveConnectionString } from "../app/_lib/app/connection"
@@ -199,6 +200,12 @@ try {
    * could not be read, and nothing made meanwhile is recorded.
    */
   await ensureMadeChangesSchema(db)
+  /**
+   * The changes accepted for one segment only (0386), which each segment's
+   * form is built from. A deployment that has not run this offers *Accept*
+   * for everyone only: accepting for a segment says the store did not answer.
+   */
+  await ensureSegmentChangesSchema(db)
   /**
    * A page's audience rules and the form each audience earns (0263's store
    * dimension). Created here rather than when a rule editor first needs it,

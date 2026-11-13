@@ -135,6 +135,7 @@ export const ChangeDrawer = ({
   acceptedBy,
   goalsRead,
   standing,
+  segments,
   projectId,
   close,
 }: {
@@ -148,6 +149,8 @@ export const ChangeDrawer = ({
   readonly goalsRead: boolean
   /** Where the goal it serves stands on its page now. */
   readonly standing: GoalStanding
+  /** The words of the segments it can be accepted for alone (0386 clause 3). */
+  readonly segments: readonly string[]
   readonly projectId: string
   /** *For review* without the drawer, every filter kept. */
   readonly close: string
@@ -217,12 +220,19 @@ export const ChangeDrawer = ({
             projectId={projectId}
             proposalId={row.proposalId}
             acceptable={row.standing !== "conflicts"}
+            segments={segments}
           />
           <p className="text-ink-muted m-0 text-xs">
             {row.standing === "conflicts"
               ? "Turning it down lets Loom look at your site's newer version."
               : "Accepting puts it on the live page, and your site has it from its next pull."}
           </p>
+          {row.standing === "conflicts" || segments.length === 0 ? null : (
+            <p className="text-ink-muted m-0 text-xs">
+              Accepting for one segment puts it only on the page that segment&apos;s readers are
+              shown. Everyone else keeps the page as it is.
+            </p>
+          )}
         </div>
       ) : (
         <p className="text-ink-muted m-0 text-xs">Waiting on an {row.waitsOn}.</p>

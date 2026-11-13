@@ -11,6 +11,7 @@ import { proposeReverting, type NotReverted } from "@/app/(portal)/_lib/proposin
 import { runOnPage } from "@/app/(portal)/_lib/proposing/run"
 import { madeFromFor, pageCopiesFor } from "@/app/(portal)/_lib/proposing/stores"
 import { publishedRowOf } from "@/app/(portal)/_lib/published-view"
+import { rebuildSegmentFormsFor } from "@/app/(portal)/_lib/segments/kept"
 import { beginWrite } from "@/app/(portal)/_lib/write"
 import { modelKeyOf } from "@/app/_lib/models/store"
 import { publishedPagesFor } from "@/app/_lib/pages/store"
@@ -154,6 +155,8 @@ export const revertAction = async (
   }
 
   const { outcome, goal } = reverting.value
+
+  if (outcome.kind === "committed") await rebuildSegmentFormsFor(application, [page.tree])
   const report = {
     ...siteReport(revertReportOf(outcome, write.weighedAgainst), application),
     ...(goal === undefined ? {} : { goal: goal.name }),

@@ -6,10 +6,11 @@ import { useFormStatus } from "react-dom"
 
 import { toneClasses } from "@/app/(portal)/_lib/outcome"
 import { MAX_REASON_LENGTH } from "@/app/(portal)/_lib/proposing/turned-down"
+import { segmentAnswerFor } from "@/app/(portal)/_lib/segments/segment-answer"
 
 import { answerAction, type AnswerReport } from "../actions"
 
-const Answer = ({ value, label }: { value: "accept" | "refuse"; label: string }) => {
+const Answer = ({ value, label }: { value: string; label: string }) => {
   const { pending } = useFormStatus()
 
   return (
@@ -19,7 +20,7 @@ const Answer = ({ value, label }: { value: "accept" | "refuse"; label: string })
       value={value}
       disabled={pending}
       className={
-        value === "accept"
+        value !== "refuse"
           ? "bg-ink text-surface-base rounded-md px-2.5 py-1 text-xs disabled:opacity-60"
           : "border-edge text-ink rounded-md border px-2.5 py-1 text-xs disabled:opacity-60"
       }
@@ -38,15 +39,23 @@ const Answer = ({ value, label }: { value: "accept" | "refuse"; label: string })
  * A reason can go with *Turn down*, and Loom reads it before it proposes for
  * the page again (0341). *Accept* is not offered for a change that no longer
  * fits the version the site serves (0340).
+ *
+ * *Accept for <segment> only* is offered beside it for each segment the
+ * page's rules name and has readers counted in (0386 clause 3): the change
+ * goes to that segment's readers alone and the page stays as it is for
+ * everyone else.
  */
 export const AnswerControls = ({
   projectId,
   proposalId,
   acceptable,
+  segments = [],
 }: {
   projectId: string
   proposalId: string
   acceptable: boolean
+  /** The words of the segments it can be accepted for alone. */
+  segments?: readonly string[]
 }) => {
   const [answer, action] = useActionState<AnswerReport | null, FormData>(answerAction, null)
 
@@ -77,8 +86,13 @@ export const AnswerControls = ({
           className="border-edge text-ink bg-surface-base rounded-md border p-2 text-xs"
         />
       </label>
-      <div className="flex gap-2">
+      <div className="flex flex-wrap gap-2">
         {acceptable ? <Answer value="accept" label="Accept" /> : null}
+        {acceptable
+          ? segments.map((word) => (
+              <Answer key={word} value={segmentAnswerFor(word)} label={`Accept for ${word} only`} />
+            ))
+          : null}
         <Answer value="refuse" label="Turn down" />
       </div>
       {answer?.refusal === undefined ? null : (

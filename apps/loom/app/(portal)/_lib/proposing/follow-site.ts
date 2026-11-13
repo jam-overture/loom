@@ -1,6 +1,7 @@
 import { randomIdFactory, type LoomTree } from "@jam-overture/loom"
 import type { ApplicationId } from "@jam-overture/loom/store"
 
+import { rebuildSegmentFormsFor } from "../segments/kept"
 import { beginWrite } from "../write"
 import { currentCopyOf } from "./copies"
 import { followPublished } from "./following"
@@ -14,7 +15,8 @@ import { followsItsSite, pageCopiesFor } from "./stores"
  * Only pages something was proposed for have a copy, and only those are
  * followed: a page Loom never looked at has nothing to keep up to date. Pages
  * go one after another, and one that cannot be followed now is followed at
- * the next look, which runs the same step first.
+ * the next look, which runs the same step first. Each segment's form of those
+ * pages is then brought up to the page as it is live (0386 clause 6).
  */
 export const followSite = async (
   application: ApplicationId,
@@ -48,4 +50,5 @@ export const followSite = async (
   }
 
   await write.finish()
+  await rebuildSegmentFormsFor(application, trees)
 }

@@ -29,6 +29,9 @@ import {
   standingChoicesOf,
 } from "@/app/(portal)/_lib/review-filter"
 import { readReview } from "@/app/(portal)/_lib/review-reading"
+import { readOfferedSegments } from "@/app/(portal)/_lib/segments/offered"
+import { audienceRulesFor } from "@/app/(portal)/_lib/segments/rules"
+import { segmentWordOf } from "@/app/(portal)/_lib/segments/segment"
 import { readTurnedDownCount } from "@/app/(portal)/_lib/turned-down-reading"
 import type { QueueRow } from "@/app/(portal)/_lib/queue"
 import { governedPagesFor } from "@/app/(portal)/_lib/write"
@@ -112,6 +115,30 @@ const readStanding = async (
     : { kind: "read", goal, expectation: expectationOf(goal.kind, range, read) }
 }
 
+/**
+ * The segments a change on this page can be accepted for alone, by word: the
+ * ones its rules name and have readers counted in (0386 clause 3). None where
+ * the page is not one the site published by that id, or nothing could be read.
+ */
+const readSegmentsFor = async (
+  application: ApplicationId,
+  pageId: string
+): Promise<readonly string[]> => {
+  const page = treeIdSchema.safeParse(pageId)
+
+  if (!page.success) return []
+
+  const offered = await readOfferedSegments(
+    {
+      rules: audienceRulesFor(application),
+      tallies: boundedReaderTallyStore(readingsFor(application).tallies),
+    },
+    page.data
+  )
+
+  return offered.map(segmentWordOf)
+}
+
 /** The drawer for one waiting change: the page before and after it, read when it opens. */
 const OpenChange = async ({
   application,
@@ -133,10 +160,11 @@ const OpenChange = async ({
   readonly close: string
 }) => {
   const parts = requestPartsOf(row.asked)
-  const [drawn, lastTurnedDown, standing] = await Promise.all([
+  const [drawn, lastTurnedDown, standing, segments] = await Promise.all([
     drawHeld(governedPagesFor(application), held, row.standing),
     parts.again === null ? null : lastTurnedDownOn(application, row.pageId),
     readStanding(application, row.pageId, row.goalId, goals, now),
+    readSegmentsFor(application, row.pageId),
   ])
 
   return (
@@ -148,6 +176,7 @@ const OpenChange = async ({
       acceptedBy={roleThatCanAccept(held.disposition.stakes)}
       goalsRead={goalsRead}
       standing={standing}
+      segments={segments}
       projectId={projectId}
       close={close}
     />
