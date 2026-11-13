@@ -2,7 +2,7 @@
 
 **Status: a plan, nothing built.** Decided in shape by
 [0384](../decisions/0384-a-simulation-runs-looms-own-loop-in-one-process-on-a-clock-it-moves-and-its-readers-never-reach-a-real-project.md)
-(Proposed). Each milestone below is one pull request, and none starts before the
+(Accepted 13 November 2026). Each milestone below is one pull request, and none starts before the
 one above it is on `main`.
 
 ## Why

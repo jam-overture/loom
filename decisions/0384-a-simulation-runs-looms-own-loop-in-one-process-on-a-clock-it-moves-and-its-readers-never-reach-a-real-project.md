@@ -1,6 +1,6 @@
 # 0384. A simulation runs Loom's own loop in one process on a clock it moves, and its readers never reach a real project
 
-**Status:** Proposed
+**Status:** Accepted
 **Date:** 2026-11-12
 **Section:** §1 (process), §4c (reader signals), the reasoning plane
 
@@ -30,6 +30,9 @@ Every stage already takes its clock and its transport as arguments (the
 intake's `now`, the collector's and interpreter's `clock`, the pull's `fetch`),
 and `tools/pglite` gives an in-process Postgres. The plan is
 [`docs/simulation.md`](../docs/simulation.md).
+
+Accepted by the maintainer on 13 November 2026: *"867 and 869 seem okay to
+move forward."*
 
 ## Decision
 
