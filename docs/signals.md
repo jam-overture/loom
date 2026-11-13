@@ -5543,7 +5543,7 @@ they are forty symptoms of one thing. The errand the fix-list hands over is
 *rewrite these forty pages*, when the work is one primitive, once.
 
 **Done**
-([0391](../decisions/0391-a-silent-component-is-a-census-over-the-placements-the-defect-could-be-seen-on-and-the-share-is-bracketed.md)),
+([0393](../decisions/0393-a-silent-component-is-a-census-over-the-placements-the-defect-could-be-seen-on-and-the-share-is-bracketed.md)),
 as the twenty-fourth reading taken out of the server-side join of 0212 rather
 than collected — **no payload field, no counter, no column, no table, no byte on
 any wire and nothing in a reader's browser.**

@@ -3,7 +3,7 @@
 **`Loom signals`, 13 November 2026 (morning run).** One unit, built and green:
 `librarySendersOf` — the silent-sender defect gathered by kind of part instead
 of by page. Branch `signals-88-which-components-are-silent`, one record
-([0391](../decisions/0391-a-silent-component-is-a-census-over-the-placements-the-defect-could-be-seen-on-and-the-share-is-bracketed.md),
+([0393](../decisions/0393-a-silent-component-is-a-census-over-the-placements-the-defect-could-be-seen-on-and-the-share-is-bracketed.md),
 Accepted), three findings filed, one of them closing the half of an older entry
 this was queued behind.
 
@@ -80,13 +80,16 @@ names index nothing, which is where `join.ts`, `counters.ts` and `words.ts` sit.
 
 ## Records added
 
-- `decisions/0391-a-silent-component-is-a-census-over-the-placements-the-defect-could-be-seen-on-and-the-share-is-bracketed.md`
+- `decisions/0393-a-silent-component-is-a-census-over-the-placements-the-defect-could-be-seen-on-and-the-share-is-bracketed.md`
   — **Accepted.** Ten clauses, six alternatives recorded with their reasons.
   Nothing superseded; it contradicts no accepted record and changes no schema.
 
-0391 was the next number free on `main` **and** on every open branch: 0383,
-0384 and 0386 are claimed by #867, #869 and #872, and 0390 is claimed twice —
-by #884 here and by #883 in the framework lane.
+0391 was the next number free on `main` **and** on every open branch when this
+was written: 0383, 0384 and 0386 are claimed by #867, #869 and #872, and 0390 is
+claimed twice — by #884 here and by #883 in the framework lane. #883 then moved
+its own record to 0391 and landed first, so `Loom merge` renumbered this one to
+0393 at merge time (0392 is claimed by #886); the record carries a dated note
+saying so, and nothing else in it changed.
 
 ## Findings filed and closed
 
@@ -174,7 +177,7 @@ holds this branch:
    limit is the reason. That is priced and declined (6 November), so the honest
    next unit is smaller — the portal can now ask which component to fix, and
    what it cannot ask is **what a fix was worth**: a silent-sender census of two
-   windows, which is `library-change.ts`'s shape applied to 0391's rows.
+   windows, which is `library-change.ts`'s shape applied to 0393's rows.
 
 ## On the parked door
 

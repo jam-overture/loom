@@ -71833,7 +71833,7 @@ it is 12,795. Nothing is blocked by that and it is not this lane's to write.
 gathered by `KindKey`, as `libraryReadingOf` gathers everything else* — and
 leaves that entry's **other** open half exactly where it was
 
-[0391](decisions/0391-a-silent-component-is-a-census-over-the-placements-the-defect-could-be-seen-on-and-the-share-is-bracketed.md)
+[0393](decisions/0393-a-silent-component-is-a-census-over-the-placements-the-defect-could-be-seen-on-and-the-share-is-bracketed.md)
 publishes `librarySendersOf`, so *which of your components are silent* is one
 row per primitive type ranked by the places to fix, and the forty faulted pages
 one silent `loom.accordion` produces are one errand again. The names cap, which
@@ -71896,7 +71896,7 @@ waiting to be filled in, and a names index with a cap is the second reason.
 this lane
 
 `docs:api` reported, on regenerating the reference for
-[0391](decisions/0391-a-silent-component-is-a-census-over-the-placements-the-defect-could-be-seen-on-and-the-share-is-bracketed.md):
+[0393](decisions/0393-a-silent-component-is-a-census-over-the-placements-the-defect-could-be-seen-on-and-the-share-is-bracketed.md):
 
 ```
 @jam-overture/loom/signals — KindSenders, LibrarySenders, SENDER_SILENCES,

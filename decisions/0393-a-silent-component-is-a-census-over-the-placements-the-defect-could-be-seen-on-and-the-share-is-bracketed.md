@@ -1,8 +1,16 @@
-# 0391. A silent component is a census over the placements the defect could be seen on, and the share is bracketed
+# 0393. A silent component is a census over the placements the defect could be seen on, and the share is bracketed
 
 **Status:** Accepted
 **Date:** 2026-11-13
 **Section:** §5 (reader signals), the readings
+
+> **Renumbered on 2026-11-13**, from 0391, when the branch that carried it
+> (#885) was merged. `main` had meanwhile accepted a different 0391 — *a
+> whole-repository sweep names its budget on the block that holds it* (#883,
+> merged earlier the same morning) — and two records sharing a number is fatal
+> (0097). 0392 is claimed by #886, so this record takes the next free number.
+> Nothing in it changed but its number; the references on this branch were
+> updated with it.
 
 ## Context
 

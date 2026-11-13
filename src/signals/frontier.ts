@@ -256,7 +256,7 @@ export const pageFrontierOf = (reading: PageReading): PageFrontier => {
    * Spelled in [`subtrees.ts`](subtrees.ts) rather than here, because the
    * library's reading of the same defect needs the same two projections and a
    * second spelling of them is the failure this subsystem already has a name
-   * for (0391).
+   * for (0393).
    */
   const { containers, ends } = extentsOf(parts)
 
