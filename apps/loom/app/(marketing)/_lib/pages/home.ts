@@ -9,7 +9,7 @@ import {
 } from "@jam-overture/loom"
 import { THEME_PROP_KEY } from "@jam-overture/loom/react"
 
-import { ALLOWED_ANCHOR, BAND, WHY_USE_IT_ANCHOR } from "../bands"
+import { BAND, WHY_USE_IT_ANCHOR } from "../bands"
 import {
   siteFooter,
   siteHeader,
@@ -307,9 +307,9 @@ const hero = (ids: IdFactory): LoomNode =>
  * That reverses the order this page has had since August and it is the point of
  * the change. *What is Loom?* used to be the second band and opened *"A
  * governance framework for modern AI-enabled adaptive web pages"*, which is a
- * true sentence answering a question nobody has asked yet. It has not been
- * rewritten and it has not come off: it is the band after this one, which is
- * where it is right.
+ * true sentence answering a question nobody has asked yet. It moved below this
+ * band on 25 October, and came off the page on 11 November at the maintainer's
+ * word, along with *Using it* and *What this is for*.
  *
  * ## The marker column names the actor, and that is the argument
  *
@@ -318,13 +318,11 @@ const hero = (ids: IdFactory): LoomNode =>
  *
  * It makes the shape of the chain readable at a glance: **You, You, Loom, Your
  * page, Your AI model, Your readers.** The work stops at the second rung, which
- * is the sell and is the same shape `usingIt` carries two bands down.
+ * is the sell.
  *
  * And **a number here would break the one thing `journey.ts` exists to hold.**
- * This page says *Four steps* in the band about what you do, and the page one
- * press away says *five steps* about what happens to one change. Those two are
- * different things and the distinction is fragile; a visitor who reads a third
- * count on the first screen has been shown that this site cannot count the
+ * The page one press away says *five steps* about what happens to one change,
+ * and a visitor who reads a second count on the first screen has been shown that this site cannot count the
  * thing it offers to count for them. So nothing here is numbered and no
  * sentence on this site says how long the chain is.
  *
@@ -451,375 +449,6 @@ const vocabulary = (ids: IdFactory): LoomNode =>
       }),
     ],
   })
-
-/**
- * What this is for: the problem, and what Loom does about it.
- *
- * The band that stood here listed four capabilities under "Change, with a paper
- * trail" — four true sentences about what the product has, which is the shape
- * every framework's landing page takes and the shape that persuades nobody. On
- * 21 August the maintainer said the core of this site is **the problems we are
- * solving and how Loom solves them**, so the band is rewritten as pairs: the
- * headline is the thing that is wrong today, and the sentence under it is the
- * answer.
- *
- * Every problem here is one this repository can actually speak to, and none of
- * them is a claim about who has it. Whether the people who care most are
- * regulated teams, agencies or hobbyists is positioning and is the maintainer's;
- * *that un-reviewable AI output is a problem* is not a market claim, it is the
- * reason the Gate exists.
- *
- * `loom.mosaic` rather than the feature grid it used to be, which closes the
- * finding this lane filed on 20 August: eight identical rectangles read as a
- * table of specifications, and the band that says what a product is for should
- * not look like a kit list. The primitives lane shipped exactly that on #121.
- *
- * **The copy is written to the rhythm, and that is the thing worth knowing
- * about this primitive.** `alternating` is wide, narrow, narrow, wide — the
- * spans are the container's and the children are untouched, which is the whole
- * of 0062's argument and is right. What follows from it is a job the tree has
- * to do: a wide cell is twice the column width of a narrow one, so four bodies
- * of roughly equal length come out as two full cells and two cells running
- * better than a third empty. That is what this band looked like until today,
- * and it read as unfinished rather than as composed.
- *
- * So the two wide cells carry the two long arguments and the narrow cells carry
- * the short ones, at roughly twice the characters. `pages.test.ts` holds the
- * ratio rather than the wording, because the wording will be edited by someone
- * who is not thinking about spans and the ratio is the part that breaks
- * silently.
- *
- * The glyphs went with it — `◇ ◈ ◆ ◊`, four diamonds distinguishable only by
- * fill, which is decoration that survived four rewrites without ever meaning
- * anything. See the note on `WAYS_IN` for the general version.
- */
-/**
- * **The definition, and it is the maintainer's of 1 October.**
- *
- * His words: *"What is Loom? A governance framework for modern AI enabled web
- * development and adaptation."* It sits directly under the opening because it
- * is the answer to the first question a stranger has, and until now the page
- * answered it only by implication — a manifesto headline, then four words of
- * vocabulary, then a demonstration. Somebody could read three screens and still
- * not have been told what the thing *is*.
- *
- * ## Why it is a heading rather than a paragraph
- *
- * It is one sentence and it is the sentence the rest of the page elaborates, so
- * it is set at heading size and nothing else shares the band. A definition
- * folded into a paragraph is a definition a reader skims past.
- *
- * ## The gloss underneath is not decoration
- *
- * **"Governance framework" is a boardroom phrase**, and this lane is held to a
- * high schooler following what is going on. The phrase is right for the buyer
- * `docs/rollout.md` records — *"regulated teams, agencies answering to clients,
- * anyone with a compliance function"* — and it is a phrase a developer
- * evaluating on a lunch break can bounce off. So the line under it says the
- * same thing in words nobody needs a glossary for, and the two together are the
- * band: the term for the person who was looking for that term, and the plain
- * reading for everybody else.
- *
- * Nothing here says `TreeDelta`, `disposition` or `the Gate`.
- */
-/**
- * What Loom is, in the words that were already underneath the words.
- *
- * ## The sentence this band used to open with
- *
- * > *A governance framework for modern AI-enabled adaptive web pages.*
- *
- * Four abstract nouns in a row, and under it, as a second paragraph:
- *
- * > *In other words: an AI model can change your live site, but only in the
- * > ways you approved first. You can see every change it made, and you can undo
- * > any of them.*
- *
- * **Whenever copy needs *in other words*, the words after it are the real
- * ones.** The plain version had been sitting one line below the abstract one
- * since the band was written, which is the whole of the fix: the heading is the
- * sentence that was already explaining it, and the preamble goes because it is
- * no longer other words than anything.
- *
- * The maintainer, 24 October: *"Avoid the abstract nouns and wording, it is
- * super confusing and is counter productive to our goal."* That is an
- * instruction about the writing rather than a positioning decision, so it is
- * this lane's to act on; nothing here claims anything the band did not claim
- * before.
- *
- * **The first draft of this heading was caught by this run's own rule**, which
- * is worth recording because it is the case the rule's docblock calls its
- * limit. *An AI model can change your live site, but only in the ways you
- * approved first* ends in a comma clause, and that clause is the most
- * load-bearing fact in the sentence rather than a flourish — the rule cannot
- * tell those apart and is not meant to. The remedy `routines.md` names is the
- * one taken: it is one clause now, and it says the same thing.
- *
- * ## Why the band stays where it is
- *
- * `docs/positioning.md` lists this band under *wrong as of today* — it answers
- * *what is Loom* with the governance story, and governance is the thing under
- * the hood now. **It is not deleted, and this lane may not delete it.** That
- * file says so in as many words: *rewriting is not the same as deleting and
- * this file does not authorise either: where a band comes off, it comes off
- * because the maintainer said so.*
- *
- * So what is fixed here is the half that is plainly a writing defect and was
- * named as one. Whether a page that leads with the chain still wants a band
- * defining Loom as governance three screens down is his.
- */
-const whatIsIt = (ids: IdFactory): LoomNode =>
-  section(
-    ids,
-    { width: "wide", eyebrow: BAND.whatIsIt },
-    "An AI model can only change your live site in the ways you approved first",
-    [
-      prose(
-        ids,
-        "You can see every change it made, and you can undo any of them.",
-        { size: "lead", measured: true }
-      ),
-    ]
-  )
-
-/**
- * The four beats, as data, because the shape is checked rather than described.
- *
- * `state` is what separates the two halves visually: `done` is a thing you have
- * finished doing, `current` is a thing that is happening now and will be
- * happening on the next visit too. That is the primitive's own vocabulary used
- * for what it means, rather than a colour chosen to make two look different
- * from two.
- */
-type UsingItStep = {
-  readonly marker: string
-  readonly title: string
-  readonly body: string
-  readonly state: "done" | "current"
-  /**
-   * The band of `/why-use-it` where a reader can watch this step being true.
-   *
-   * **Every step has one as of today**, and the third is why this field
-   * exists. Three of these four steps already had a band and a reader had no
-   * way to find it: the step made a claim about what the step costs and the
-   * evidence sat on another page under a different heading. The third had no
-   * band at all, which is the half of this that was work rather than a link
-   * (`connected.ts`).
-   *
-   * It is the argument `chain.ts` makes about the six links, applied to the
-   * four steps, and `using-it.test.ts` holds it the same way: the press lands
-   * on a band that declares the anchor, read off the markup rather than off the
-   * tree that built it.
-   */
-  readonly shownAt: string
-}
-
-const USING_IT: readonly UsingItStep[] = [
-  {
-    marker: "1",
-    title: "Build your components",
-    body: "Use whatever framework you already use. Loom does not write code into your page, and it does not ask you to rebuild anything.",
-    state: "done",
-    shownAt: WHY_USE_IT_ANCHOR.staysYours,
-  },
-  {
-    marker: "2",
-    title: "Register them with Loom",
-    body: "Tell Loom which of your components the AI is allowed to use. That is all the setup there is.",
-    state: "done",
-    shownAt: WHY_USE_IT_ANCHOR.whatYouWrite,
-  },
-  {
-    marker: "3",
-    title: "Hook up your preferred AI model",
-    body: "Loom is AI model agnostic. Pick the model you already use, or bring your own. Loom sends it what your users are doing, and it suggests changes from there.",
-    state: "done",
-    shownAt: WHY_USE_IT_ANCHOR.connected,
-  },
-  {
-    marker: "4",
-    title: "Adapt your page within your rules",
-    body: "Define your acceptance policy up front, so an AI model can only make changes you already approved. Anything else gets rejected, and Loom tells you why.",
-    state: "current",
-    shownAt: ALLOWED_ANCHOR,
-  },
-]
-
-/**
- * **How you would use this, said plainly, before anything is demonstrated.**
- *
- * Placed directly under the plain-words band, at the maintainer's direction of
- * 30 September: the four words say what a change *is*, and this says what
- * **you** do about it, so the two read as one answer to *what is this and how
- * would I use it* before the demonstration below asks anybody to watch
- * anything.
- *
- * The front door argued *why* for five weeks and never once said *what you
- * would do*. Every other band is a claim about the world, a list of what goes
- * wrong without this, a number, a question, or the product changing itself in
- * front of you — all of it true, none of it an answer to the first thing a
- * developer wants to know. A visitor could watch the demonstration work and
- * still not know whether using it means rewriting their components.
- *
- * ## The shape is the argument, and it is not four equal steps
- *
- * The four beats divide two and two, and the division is the sell. **One and
- * two are things you do once.** Three and four are what happens afterwards,
- * on every visit, without you. A row of four identical boxes would read as
- * four chores; the heading and the markers carry the split instead, so the
- * payoff — *the work stops at two* — is the thing a reader takes away.
- *
- * `loom.milestone-row` is the primitive for it and this page had never used
- * it. Its own docstring is exact about why it exists rather than the rail on
- * `/how-it-works`: *"a roadmap is read down because time runs that way, and
- * three steps are read across because they are meant to be taken in at once."*
- * This band is the second kind. The five-step `JOURNEY` on `/how-it-works` is
- * the first, and the two must not be confused — that one is what happens to
- * **one change**, in milliseconds, at runtime; this one is what **you** do, in
- * an afternoon, once.
- *
- * ## The fourth beat carries the record, and that is deliberate
- *
- * *"Your AI adapts your page"* is where the maintainer's sketch of this band
- * ended, and ending there would sell the half a competitor can also claim.
- * `docs/rollout.md` has the positioning on record: **the differentiator is not
- * adaptation, it is the record.** So the fourth beat is the change *and* what
- * is kept about it, which is also what turns the last step back toward the
- * reader instead of trailing off the edge of the band.
- *
- * ## The vocabulary, checked against the brief
- *
- * *Monitor* is not used, though it is the word in the sketch: to a stranger it
- * means uptime and dashboards. What actually happens is that the page reports
- * which of its parts a reader reached, how long they stayed and what they
- * pressed — and never who they are (0146), which is a property of the record
- * rather than a setting, and is worth the words here because *your AI watches
- * your users* is the sentence in this band most likely to alarm somebody.
- *
- * Nothing here says `TreeDelta`, `disposition` or `the Gate`.
- */
-const usingIt = (ids: IdFactory): LoomNode =>
-  section(
-    ids,
-    { width: "wide", eyebrow: BAND.usingIt },
-    "Four steps. Your rules decide.",
-    [
-      prose(
-        ids,
-        "You keep your framework and your components. Loom provides the oversight and governance.",
-        { size: "lead", measured: true }
-      ),
-      /**
-       * **The same scaffolding sentence the chain band carries, for the same
-       * reason**, and it comes off when the same finding is met.
-       *
-       * A `loom.milestone` with an `href` renders `.loom-underline`, whose rest
-       * state is `background-size: 0% 2px`, so a step that is a link is
-       * pixel-identical to one that is not until a pointer touches it. On a
-       * phone nothing ever does. That is filed for `Loom primitives` and the
-       * composition says in words what the library cannot say in paint.
-       *
-       * **It says *any* where the chain's says *a*, and the difference is
-       * load-bearing.** The chain's last rung has nowhere to go, so a universal
-       * would be a promise that band breaks once. All four of these steps land
-       * somewhere, `using-it.test.ts` holds that they do, and the day one stops
-       * this sentence is the thing that goes red.
-       */
-      prose(ids, "Press any step to see that part of it on this site.", {
-        size: "small",
-        tone: "muted",
-      }),
-      buildElement(ids, {
-        type: "loom.milestone-row",
-        props: { rail: "line", density: "loose" },
-        children: USING_IT.map((step) =>
-          buildElement(ids, {
-            type: "loom.milestone",
-            props: {
-              marker: step.marker,
-              title: step.title,
-              body: step.body,
-              state: step.state,
-              href: `${sitePath(WHY_USE_IT.path)}#${step.shownAt}`,
-            },
-          })
-        ),
-      }),
-    ]
-  )
-
-const problems = (ids: IdFactory): LoomNode =>
-  section(
-    ids,
-    { eyebrow: BAND.problems, width: "wide" },
-    "The hard part is answering for what it changed",
-    [
-      prose(
-        ids,
-        "Getting a machine to change your page is easy now. Being able to say what it changed, and put it back, is not.",
-        { size: "lead", measured: true }
-      ),
-      buildElement(ids, {
-        type: "loom.mosaic",
-        props: { rhythm: "alternating" },
-        children: [
-          buildElement(ids, {
-            type: "loom.feature",
-            props: {
-              title: "Somebody has to read every line it writes",
-              body: "When a tool writes components for you, somebody still has to read, review and own every line. Loom does not write code. It rearranges components you already built.",
-            },
-          }),
-          buildElement(ids, {
-            type: "loom.feature",
-            props: {
-              title: "Nobody can tell you what changed or why",
-              body: "Ask most tools what changed last Tuesday and the best answer is a diff.",
-            },
-          }),
-          buildElement(ids, {
-            type: "loom.feature",
-            props: {
-              title: "It is live before anyone has looked at it",
-              body: "Changes land because a model was confident. That is not the same as being right.",
-            },
-          }),
-          buildElement(ids, {
-            type: "loom.feature",
-            props: {
-              title: "Undoing it means finding the commit and hoping",
-              /**
-               * **Rewritten on 29 October, because the front door was saying
-               * one sentence twice.**
-               *
-               * This read *"Loom works out how to undo a change at the same
-               * time it makes it, and saves both. Putting the page back takes
-               * one press, and that gets recorded too."* The `Undo` gloss in
-               * `journey.ts` opens on that same nineteen-word sentence,
-               * verbatim, and both are rendered on this page — four bands
-               * apart, which is far enough that no run writing either one
-               * would meet the other.
-               *
-               * The gloss is where that sentence belongs: its whole job is to
-               * say what the word means. A problem card's job is to answer the
-               * problem in its own title, so this says what a reader gets
-               * instead of the commit hunt, and says it in its own words.
-               *
-               * **It is still a wide cell's worth of copy**, which the first
-               * attempt at this was not. `loom.mosaic`'s `alternating` rhythm
-               * makes the first and fourth cells two narrow cells across, and
-               * `pages.test.ts` holds the copy to the shape: a 76-character
-               * body in a cell laid out at twice the width draws a card that
-               * is mostly nothing. Short was the budget talking, and the
-               * budget is not a reason to half-fill a card.
-               */
-              body: "There is no commit to go and find. Loom can put the page back the way it was before the change, in one press, and it records that too.",
-            },
-          }),
-        ],
-      }),
-    ]
-  )
 
 /**
  * Numbers counted from the thing they are about, rather than typed from memory.
@@ -1005,14 +634,12 @@ const questions = (ids: IdFactory): LoomNode =>
  * page would have been asked to raise a number the page had no way of
  * producing, and every proposal it made would have been scored against noise.
  *
- * **One band, after the questions, rather than a line under the hero.** The
- * hero placement is the one `loom.code`'s own `density: "compact"` was written
- * for and is the obvious second thing to try; this is first because the ask
- * reads differently to somebody whose objections have just been answered, and
- * because *where the ask goes* is exactly the question this site exists to have
- * settled by evidence rather than by taste. One band in one place, addressed as
- * a node of its own, is the arrangement a proposal can move and the Gate can
- * decide on.
+ * **One band, directly under the chain, as of 11 November.** It sat after the
+ * questions until the maintainer moved it above the four plain words and
+ * headed it *Just want to get started?*: a reader who already knows what they
+ * want should not have to scroll past the argument to reach the command. One
+ * band in one place, addressed as a node of its own, is still the arrangement
+ * a proposal can move and the Gate can decide on.
  *
  * **The panel is the one deliberate `wrap: false` on this site**, and the note
  * on `code` in `nodes.ts` is the reason: the default wraps because a pretty
@@ -1048,7 +675,7 @@ const install = (ids: IdFactory): LoomNode =>
   section(
     ids,
     { width: "readable", eyebrow: BAND.install },
-    "Put it in a project you already have",
+    "Just want to get started?",
     [
       /**
        * The two names, in the sentence rather than only in the command.
@@ -1364,41 +991,22 @@ export const homePageTree = (context: PageContext): LoomTree => {
       children: [
         siteHeader(ids, chrome),
         hero(ids),
-        /**
-         * The chain, then what it is, then what you do about it.
-         *
-         * `chain(ids)` is new on 25 October and the two bands after it have not
-         * moved relative to each other. What moved is the four plain words,
-         * which were the third band and are now the sixth: see the note on
-         * `vocabulary` below.
-         */
         chain(ids),
-        whatIsIt(ids),
-        usingIt(ids),
         /**
-         * Third band, and deliberately before anything that argues for the
-         * product. The hero has made the claim and the four words have named
-         * the steps; the next thing a visitor meets should be the claim being
-         * true, not four features explaining why it would be.
+         * **The ask, straight after the chain, as of 11 November.**
+         *
+         * The maintainer's instruction that day: take *What is Loom?*, *Using
+         * it* and *What this is for* off the front door, and put the install
+         * band above the four plain words under the heading *Just want to get
+         * started?* So a reader who has been told what Loom builds is offered
+         * the command next, before anything argues for the governance story.
          */
-        problems(ids),
+        install(ids),
         /**
-         * **The four plain words, moved down from the third band on 25 October.**
-         *
-         * They are the governance story — *Ask · Check · Record · Undo* — and
-         * `docs/positioning.md` names them as the first of the two things on
-         * this page that are *"wrong as of today"*: not wrong in what they say,
-         * wrong in being the third thing a stranger meets. The same file is
-         * explicit that **rewriting is not deleting and neither is authorised
-         * here**, so the band is unchanged, every word of it, and it reads
-         * where it belongs: after the chain has said what Loom builds, after
-         * the band that says what you do, and beside the band about what is
-         * hard. Nothing points at it, so no address broke in the move.
-         *
-         * The second of the two is `problems` above, whose heading argues the
-         * audit case. It has not been rewritten either, and it no longer meets
-         * a reader who has not been told what Loom builds, which is what
-         * `positioning.md` says is wrong with it.
+         * **The four plain words**, the governance story — *Ask · Check ·
+         * Record · Undo* — read after the chain has said what Loom builds and
+         * after the ask. Nothing points at the band, so no address broke when
+         * it moved.
          */
         vocabulary(ids),
         /**
@@ -1410,16 +1018,12 @@ export const homePageTree = (context: PageContext): LoomTree => {
         buildElement(ids, { type: "loom.divider", props: { ornament: "rule" } }),
         facts(ids),
         questions(ids),
-        install(ids),
         /**
          * What it costs, new on 29 October and the first thing this site has
-         * ever said about money.
-         *
-         * It is here rather than anywhere else because the band above ends on
-         * a command a reader is meant to run, and *what will this cost me* is
-         * the question that follows one. `costs.ts` carries where the
-         * permission to say it comes from, which is the part of this band that
-         * matters more than its placing.
+         * ever said about money. It stayed here when the install band moved up
+         * on 11 November, because only the install band was asked to move; it
+         * still reads below the command it refers to. `costs.ts` carries where
+         * the permission to say it comes from.
          */
         costs(ids),
         waysIn(ids),

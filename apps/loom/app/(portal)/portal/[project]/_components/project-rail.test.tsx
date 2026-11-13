@@ -33,6 +33,7 @@ describe("ProjectRail", () => {
       "For review",
       "Pages",
       "Goals",
+      "Segments",
       "Connect your site",
       "Settings",
     ])

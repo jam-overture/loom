@@ -22,14 +22,17 @@ import {
   deploymentAgendaOf,
   deploymentConversionOf,
   deploymentReadingOf,
+  deploymentUnreadOf,
   describeAgendaSubject,
   describeAgendaWork,
   funnelReachOf,
+  pageFrontierOf,
   readingProgressOf,
   pageReadingOf,
   type ArrivalStanding,
   type CollectionSchedule,
   type DeploymentAgenda,
+  type DeploymentUnread,
   type FunnelPair,
   type PageReading,
   type PartDeclarations,
@@ -94,16 +97,29 @@ const tally = (
   ...counters,
 })
 
-/** One page of bands, each reached by the readers given, with no row where nobody reached one. */
+/**
+ * One page of bands, each reached by the readers given, with no row where
+ * nobody reached one.
+ *
+ * **The stack holding the bands reports too**, with the readers of the band
+ * most of them reached. Without it this fixture is a page whose outermost part
+ * was on a reader's screen and said nothing, which is `parts-unreporting` on
+ * every page of every deployment built here — a sender defect the fixture was
+ * modelling by accident, and the fault that names it is the one unit that
+ * noticed (0382).
+ */
 const reading = (
   treeId: TreeId,
   revision: number,
   reached: readonly number[],
   extra: readonly ReaderTally[] = []
-): PageReading =>
-  pageReadingOf(
+): PageReading => {
+  const top = Math.max(0, ...reached)
+
+  return pageReadingOf(
     treeOf(treeId, revision, reached.length),
     [
+      ...(top > 0 ? [tally(treeId, revision, "page", { views: top, reached: top })] : []),
       ...reached.flatMap((count, at) =>
         count > 0 ? [tally(treeId, revision, `band${at + 1}`, { views: count, reached: count })] : []
       ),
@@ -111,9 +127,53 @@ const reading = (
     ],
     NOTHING_DECLARED
   )
+}
 
 /** A page readers leave: a hundred reach the first band and forty the second. */
 const leaky = (treeId: TreeId, revision = 1): PageReading => reading(treeId, revision, [100, 40])
+
+/**
+ * The same page with a band nobody reached.
+ *
+ * A fall **and** a place the reading stopped, which is the row this join exists
+ * to make: a hundred readers reach the first band, forty the second, and the
+ * third is behind where every reading of the page got to. The outermost part
+ * reports, as it does on every page this fixture builds, because a page whose
+ * outermost part reported nothing has one stop — itself — and that is a
+ * different fact from a band going unread (0374), as well as a sender defect
+ * (0382).
+ */
+const stopping = (treeId: TreeId, revision = 1): PageReading =>
+  reading(treeId, revision, [100, 40, 0])
+
+/**
+ * A page whose second band holds two cells and whose readers never reached it.
+ *
+ * One place, three parts behind it — which is the figure the order of places
+ * exists for and the one a count of unread parts gets backwards (0374, 0377).
+ * Its fall is small, so it is the page to **go and look at** without being the
+ * page to rewrite first.
+ */
+const bandOfCells = (treeId: TreeId): PageReading =>
+  pageReadingOf(
+    {
+      treeId,
+      schemaVersion: TREE_SCHEMA_VERSION,
+      revision: 1,
+      root: {
+        kind: "element",
+        id: nodeId("page"),
+        type: primitiveType("loom.stack"),
+        props: {},
+        children: [band("band1"), { ...band("band2"), children: [band("cell1"), band("cell2")] }],
+      },
+    },
+    [
+      tally(treeId, 1, "page", { views: 10, reached: 10 }),
+      tally(treeId, 1, "band1", { views: 10, reached: 10 }),
+    ],
+    NOTHING_DECLARED
+  )
 
 /**
  * The same leaky page, with counters filed against a node its tree does not
@@ -124,6 +184,33 @@ const mishandled = (treeId: TreeId, revision = 1): PageReading =>
   reading(treeId, revision, [100, 40], [tally(treeId, revision, "ghost", { views: 9, reached: 9 })])
 
 /**
+ * A page whose band says nothing while the cell inside it reports being
+ * reached — a reader was below a part that never said it was on screen, which
+ * is the sender defect the fix-list had no sentence for (0382).
+ */
+const silentBand = (treeId: TreeId): PageReading =>
+  pageReadingOf(
+    {
+      treeId,
+      schemaVersion: TREE_SCHEMA_VERSION,
+      revision: 1,
+      root: {
+        kind: "element",
+        id: nodeId("page"),
+        type: primitiveType("loom.stack"),
+        props: {},
+        children: [band("band1"), { ...band("band2"), children: [band("cell1")] }],
+      },
+    },
+    [
+      tally(treeId, 1, "page", { views: 100, reached: 100 }),
+      tally(treeId, 1, "band1", { views: 100, reached: 100 }),
+      tally(treeId, 1, "cell1", { views: 100, reached: 100 }),
+    ],
+    NOTHING_DECLARED
+  )
+
+/**
  * The same leaky page, with presses nobody is credited for — which is a sender
  * that does not walk its ancestry, and spends a counter no fall is made of.
  */
@@ -131,6 +218,7 @@ const uncredited = (treeId: TreeId, revision = 1): PageReading =>
   pageReadingOf(
     treeOf(treeId, revision, 2),
     [
+      tally(treeId, revision, "page", { views: 100, reached: 100 }),
       tally(treeId, revision, "band1", { views: 100, reached: 100 }),
       tally(treeId, revision, "band2", { views: 40, reached: 40, activations: 7 }),
     ],
@@ -194,7 +282,17 @@ const question = (
 })
 
 /**
- * The route a surface takes: one window, three readings, one join.
+ * The deployment's pages as the order of places has them, built by the
+ * published reading over the same page readings — never written by hand, for
+ * the reason the arrival standing is not: what a row carries has to be what
+ * that order published, or this file would agree with itself about a place no
+ * reading could have produced.
+ */
+const places = (readings: readonly PageReading[]): DeploymentUnread =>
+  deploymentUnreadOf(readings.map(pageFrontierOf))
+
+/**
+ * The route a surface takes: one window, four readings, one join.
  *
  * The funnel rows default to none, which is a deployment that asks its readers
  * nothing — every page `unasked` in the order of conversions, which is where the
@@ -214,7 +312,8 @@ const agendaOf = (
     ),
     deploymentConversionOf(readings.map((page) => funnelReachOf(page, funnels, rows))),
     collectionHealthOf(readings, rows, over),
-    arrival
+    arrival,
+    places(readings)
   )
 
 /** The order of conversions a caller gets for a deployment that asks nothing. */
@@ -355,7 +454,8 @@ describe("deploymentAgendaOf — the subject is a claim about these rows", () =>
       deploymentReadingOf([], rows),
       asksNothing([], rows),
       collectionHealthOf([leaky(TREE)], rows),
-      arrivingAt([], [], [refusal("wrong-site", 9)])
+      arrivingAt([], [], [refusal("wrong-site", 9)]),
+      places([leaky(TREE)])
     )
 
     expect(agenda.subject).toBe("pages")
@@ -367,12 +467,19 @@ describe("deploymentAgendaOf — the subject is a claim about these rows", () =>
     const rows = [exact(TREE, 1, 100)]
     const health = collectionHealthOf([leaky(TREE)], rows)
     const order = deploymentReadingOf([readingProgressOf(leaky(TREE))], rows)
-    const once = deploymentAgendaOf(order, asksNothing([leaky(TREE)], rows), health, null)
+    const once = deploymentAgendaOf(
+      order,
+      asksNothing([leaky(TREE)], rows),
+      health,
+      null,
+      places([leaky(TREE)])
+    )
     const twice = deploymentAgendaOf(
       order,
       asksNothing([leaky(TREE)], rows),
       { ...health, pages: [...health.pages, ...health.pages] },
-      null
+      null,
+      places([leaky(TREE)])
     )
 
     expect(twice.duplicated).toBe(1)
@@ -411,6 +518,34 @@ describe("deploymentAgendaOf", () => {
     /** The rank it would have had travels with it, which is what says why it was moved. */
     expect(agenda.contested[0]?.order.standing).toBe("ranked")
     expect(agenda.contested[0]?.order.readers).toBe(60)
+  })
+
+  /**
+   * The row this join was asked for on 9 November: *a part that said nothing
+   * with a reader demonstrably below it is a primitive to fix in the library,
+   * not a page to rewrite, and the fault vocabulary has no member for it.* It
+   * has one now, so the page leaves the order of falls it would have led and
+   * arrives as collection work with a sentence about senders (0382).
+   */
+  it("sends an operator to repair a silent part rather than to rewrite the page it is on", () => {
+    const agenda = agendaOf([silentBand(TREE)], [exact(TREE, 1, 100)])
+
+    expect(agenda.rows[0]?.health.faults).toEqual(["parts-unreporting"])
+    expect(agenda.rows[0]?.health.unreporting).toBe(1)
+    expect(agenda.rows[0]?.work).toBe("collection")
+    expect(agenda.page).toEqual([])
+    expect(agenda.collection.map(named)).toEqual([named({ treeId: TREE, revision: 1 })])
+    expect(agenda.first?.work).toBe("collection")
+
+    /**
+     * The fall it would have led with is a total fall into a part a reader was
+     * below, which is the manufactured sharpest fall this withdrawal exists
+     * for — and it travels with the row, so the figure that moved the page is
+     * the figure an operator is shown.
+     */
+    expect(agenda.contested.map(named)).toEqual([named({ treeId: TREE, revision: 1 })])
+    expect(agenda.contested[0]?.spoiled).toBe(true)
+    expect(agenda.contested[0]?.order.standing).toBe("ranked")
   })
 
   it("keeps a page whose sender credits no action in the order, because a fall is made of another counter", () => {
@@ -523,29 +658,38 @@ describe("deploymentAgendaOf", () => {
   })
 
   it("drops a page a caller handed in twice on either side, and says how many it dropped", () => {
-    const order = deploymentReadingOf([readingProgressOf(leaky(TREE))], [exact(TREE, 1, 100)])
-    const health = collectionHealthOf([leaky(TREE)], [exact(TREE, 1, 100)])
+    const order = deploymentReadingOf([readingProgressOf(stopping(TREE))], [exact(TREE, 1, 100)])
+    const health = collectionHealthOf([stopping(TREE)], [exact(TREE, 1, 100)])
 
-    const leaking = asksNothing([leaky(TREE)], [exact(TREE, 1, 100)])
+    const leaking = asksNothing([stopping(TREE)], [exact(TREE, 1, 100)])
+
+    const unread = places([stopping(TREE)])
 
     const doubledOrder = deploymentAgendaOf(
       { ...order, ranked: [...order.ranked, ...order.ranked] },
       leaking,
       health,
-      null
+      null,
+      unread
     )
     const doubledHealth = deploymentAgendaOf(
       order,
       leaking,
       { ...health, pages: [...health.pages, ...health.pages] },
-      null
+      null,
+      unread
     )
     const doubledConversion = deploymentAgendaOf(
       order,
       { ...leaking, unranked: [...leaking.unranked, ...leaking.unranked] },
       health,
-      null
+      null,
+      unread
     )
+    const doubledPlaces = deploymentAgendaOf(order, leaking, health, null, {
+      ...unread,
+      ranked: [...unread.ranked, ...unread.ranked],
+    })
 
     expect(doubledOrder.rows.length).toBe(1)
     expect(doubledOrder.duplicated).toBe(1)
@@ -554,11 +698,21 @@ describe("deploymentAgendaOf", () => {
 
     expect(doubledHealth.rows.length).toBe(1)
     expect(doubledHealth.duplicated).toBe(1)
-    expect(doubledHealth.unpaired).toEqual({ order: 0, health: 0, conversion: 0 })
+    expect(doubledHealth.unpaired).toEqual({ order: 0, health: 0, conversion: 0, unread: 0 })
 
     expect(doubledConversion.rows.length).toBe(1)
     expect(doubledConversion.duplicated).toBe(1)
-    expect(doubledConversion.unpaired).toEqual({ order: 0, health: 0, conversion: 0 })
+    expect(doubledConversion.unpaired).toEqual({ order: 0, health: 0, conversion: 0, unread: 0 })
+
+    /*
+     * The fourth side, which is the one that cannot take a row away: a places
+     * reading holding one page twice is counted, the first of the two stands,
+     * and the row carries one place rather than the second copy of it.
+     */
+    expect(doubledPlaces.rows.length).toBe(1)
+    expect(doubledPlaces.duplicated).toBe(1)
+    expect(doubledPlaces.unpaired).toEqual({ order: 0, health: 0, conversion: 0, unread: 0 })
+    expect(doubledPlaces.rows[0]?.unread).toBe(unread.ranked[0])
   })
 
   it("does not put a page in a list twice because the order named it twice", () => {
@@ -567,7 +721,8 @@ describe("deploymentAgendaOf", () => {
       { ...order, ranked: [...order.ranked, ...order.ranked] },
       asksNothing([leaky(TREE)], [exact(TREE, 1, 100)]),
       collectionHealthOf([leaky(TREE)], [exact(TREE, 1, 100)]),
-      null
+      null,
+      places([leaky(TREE)])
     )
 
     expect(agenda.page.map(named)).toEqual([named({ treeId: TREE, revision: 1 })])
@@ -584,13 +739,15 @@ describe("deploymentAgendaOf", () => {
       ),
       asksNothing(both, rows),
       collectionHealthOf([leaky(TREE)], rows),
-      null
+      null,
+      places(both)
     )
     const shortOrder = deploymentAgendaOf(
       deploymentReadingOf([readingProgressOf(leaky(TREE))], rows),
       asksNothing(both, rows),
       collectionHealthOf(both, rows),
-      null
+      null,
+      places(both)
     )
     const shortConversion = deploymentAgendaOf(
       deploymentReadingOf(
@@ -599,16 +756,17 @@ describe("deploymentAgendaOf", () => {
       ),
       asksNothing([leaky(TREE)], rows),
       collectionHealthOf(both, rows),
-      null
+      null,
+      places(both)
     )
 
-    expect(shortHealth.unpaired).toEqual({ order: 1, health: 0, conversion: 1 })
+    expect(shortHealth.unpaired).toEqual({ order: 1, health: 0, conversion: 1, unread: 1 })
     expect(shortHealth.rows.map(named)).toEqual([named({ treeId: TREE, revision: 1 })])
 
-    expect(shortOrder.unpaired).toEqual({ order: 0, health: 1, conversion: 1 })
+    expect(shortOrder.unpaired).toEqual({ order: 0, health: 1, conversion: 1, unread: 1 })
     expect(shortOrder.rows.map(named)).toEqual([named({ treeId: TREE, revision: 1 })])
 
-    expect(shortConversion.unpaired).toEqual({ order: 1, health: 1, conversion: 0 })
+    expect(shortConversion.unpaired).toEqual({ order: 1, health: 1, conversion: 0, unread: 1 })
     expect(shortConversion.rows.map(named)).toEqual([named({ treeId: TREE, revision: 1 })])
   })
 
@@ -616,6 +774,7 @@ describe("deploymentAgendaOf", () => {
     const skiers = pageReadingOf(
       treeOf(TREE, 1, 2),
       [
+        { ...tally(TREE, 1, "page", { views: 100, reached: 100 }), audienceId: SKIERS },
         { ...tally(TREE, 1, "band1", { views: 100, reached: 100 }), audienceId: SKIERS },
         { ...tally(TREE, 1, "band2", { views: 40, reached: 40 }), audienceId: SKIERS },
       ],
@@ -625,6 +784,7 @@ describe("deploymentAgendaOf", () => {
     const riders = pageReadingOf(
       treeOf(TREE, 1, 2),
       [
+        { ...tally(TREE, 1, "page", { views: 900, reached: 900 }), audienceId: RIDERS },
         { ...tally(TREE, 1, "band1", { views: 900, reached: 900 }), audienceId: RIDERS },
         { ...tally(TREE, 1, "band2", { views: 880, reached: 880 }), audienceId: RIDERS },
       ],
@@ -671,7 +831,7 @@ describe("deploymentAgendaOf", () => {
       first: null,
       work: { page: 0, collection: 0, both: 0, none: 0 },
       trees: 0,
-      unpaired: { order: 0, health: 0, conversion: 0 },
+      unpaired: { order: 0, health: 0, conversion: 0, unread: 0 },
       duplicated: 0,
     })
   })
@@ -834,7 +994,8 @@ describe("the conversions a deployment's fix-list was silent about", () => {
       deploymentReadingOf([readingProgressOf(leaky(TREE))], rows),
       { ...conversion, ranked: [...conversion.ranked, ...conversion.ranked] },
       collectionHealthOf([leaky(TREE)], rows),
-      null
+      null,
+      places([leaky(TREE)])
     )
 
     expect(agenda.converting.map(named)).toEqual([named({ treeId: TREE, revision: 1 })])
@@ -851,5 +1012,235 @@ describe("the conversions a deployment's fix-list was silent about", () => {
 
     expect(agenda.contested.length).toBe(1)
     expect(agenda.contested.every((row) => agenda.collection.includes(row))).toBe(true)
+  })
+})
+
+/**
+ * The fourth reading, joined (0378). *Rewrite this page* arriving with *and
+ * here is where*.
+ *
+ * What is under test is the asymmetry: the place is read **onto** rows the
+ * three orders made, so every assertion here is as much about what did not
+ * change as about the field that arrived. A fix-list that lost a row, a count
+ * or its first instruction because a fourth reading was handed in would be a
+ * worse fix-list than the one that could not say where on the page to go.
+ */
+describe("deploymentAgendaOf — where on the page, beside which page", () => {
+  it("carries the place its reading stopped on the row that says to rewrite the page", () => {
+    const rows = [exact(TREE, 1, 100)]
+    const agenda = agendaOf([stopping(TREE)], rows)
+    const unread = places([stopping(TREE)])
+
+    expect(agenda.first?.work).toBe("page")
+    expect(agenda.first?.unread).toEqual(unread.ranked[0])
+    expect(agenda.first?.unread?.standing).toBe("ranked")
+    expect(agenda.first?.unread?.at?.nodeId).toBe(nodeId("band3"))
+    expect(agenda.first?.unread?.costs).toBe(1)
+  })
+
+  /**
+   * The same object the order published rather than a second reading of one
+   * page, which is the guarantee the three readings above it are carried under.
+   */
+  it("carries the row the order of places published, and not a copy of it", () => {
+    const rows = [exact(TREE, 1, 100)]
+    const unread = places([stopping(TREE)])
+    const agenda = deploymentAgendaOf(
+      deploymentReadingOf([readingProgressOf(stopping(TREE))], rows),
+      asksNothing([stopping(TREE)], rows),
+      collectionHealthOf([stopping(TREE)], rows),
+      null,
+      unread
+    )
+
+    expect(agenda.rows[0]?.unread).toBe(unread.ranked[0])
+  })
+
+  /**
+   * The parts one form's readers never reached are not the parts the other's
+   * never reached, so the join is on the trio and never on the tree (0300).
+   */
+  it("gives two forms of one page their own places", () => {
+    const partsOf = (audienceId: typeof SKIERS, reached: readonly number[]): PageReading =>
+      pageReadingOf(
+        treeOf(TREE, 1, 3),
+        [
+          { ...tally(TREE, 1, "page", { views: 100, reached: 100 }), audienceId },
+          ...reached.flatMap((count, at) =>
+            count > 0
+              ? [
+                  {
+                    ...tally(TREE, 1, `band${String(at + 1)}`, { views: count, reached: count }),
+                    audienceId,
+                  },
+                ]
+              : []
+          ),
+        ],
+        NOTHING_DECLARED,
+        audienceId
+      )
+
+    const skiers = partsOf(SKIERS, [100, 40, 0])
+    const riders = partsOf(RIDERS, [900, 0, 0])
+    const rows: readonly StoredPageViews[] = [
+      { ...exact(TREE, 1, 100), audienceId: SKIERS },
+      { ...exact(TREE, 1, 900), audienceId: RIDERS },
+    ]
+
+    const agenda = agendaOf([skiers, riders], rows)
+    const bySkiers = agenda.rows.find((row) => row.audienceId === SKIERS)
+    const byRiders = agenda.rows.find((row) => row.audienceId === RIDERS)
+
+    expect(bySkiers?.unread?.audienceId).toBe(SKIERS)
+    expect(byRiders?.unread?.audienceId).toBe(RIDERS)
+    expect(bySkiers?.unread?.at?.nodeId).toBe(nodeId("band3"))
+    expect(byRiders?.unread?.at?.nodeId).toBe(nodeId("band2"))
+    expect(bySkiers?.unread?.reading.frontier).toHaveLength(1)
+    expect(byRiders?.unread?.reading.frontier).toHaveLength(2)
+  })
+
+  /**
+   * The judgement 0377 left open and 0378 kept open: the key here is parts of a
+   * page and the three orders are readers, so the fourth reading cannot decide
+   * what to do first — or anything else about the shape of the list.
+   *
+   * Asserted against the **same join handed a places reading of nothing**,
+   * which is the only form of this claim that cannot drift: every published
+   * field but the place on a row and `unpaired.unread` is the field it was
+   * before the fourth reading existed.
+   */
+  it("decides the work, every list and the first row without the places, which only ride on the rows", () => {
+    const rows = [exact(TREE, 1, 100), exact(OTHER_TREE, 1, 10)]
+    const readings = [stopping(TREE), bandOfCells(OTHER_TREE)]
+
+    const withPlaces = agendaOf(readings, rows)
+    const without = deploymentAgendaOf(
+      deploymentReadingOf(
+        readings.map((page) => readingProgressOf(page)),
+        rows
+      ),
+      asksNothing(readings, rows),
+      collectionHealthOf(readings, rows),
+      null,
+      places([])
+    )
+
+    /*
+     * The page to rewrite first loses sixty readers at one fall; the place
+     * worth going to is on the other page, where one band hides three parts.
+     * Two questions, two answers, one list.
+     */
+    expect(named(withPlaces.first!)).toBe(named({ treeId: TREE, revision: 1 }))
+    expect(withPlaces.first?.unread?.costs).toBe(1)
+    expect(places(readings).worst?.treeId).toBe(OTHER_TREE)
+    expect(places(readings).worst?.costs).toBe(3)
+
+    expect(without.subject).toBe(withPlaces.subject)
+    expect(without.work).toEqual(withPlaces.work)
+    expect(without.trees).toBe(withPlaces.trees)
+    expect(without.duplicated).toBe(withPlaces.duplicated)
+    expect(named(without.first!)).toBe(named(withPlaces.first!))
+    expect(without.rows.map(named)).toEqual(withPlaces.rows.map(named))
+    expect(without.page.map(named)).toEqual(withPlaces.page.map(named))
+    expect(without.converting.map(named)).toEqual(withPlaces.converting.map(named))
+    expect(without.collection.map(named)).toEqual(withPlaces.collection.map(named))
+    expect(without.contested.map(named)).toEqual(withPlaces.contested.map(named))
+    expect(without.rows.every((row) => row.unread === null)).toBe(true)
+  })
+
+  it("says a page has nothing unread with a standing rather than with a figure", () => {
+    const read = reading(TREE, 1, [100, 100], [
+      tally(TREE, 1, "page", { views: 100, reached: 100 }),
+    ])
+    const agenda = agendaOf([read], [exact(TREE, 1, 100)])
+
+    expect(agenda.rows[0]?.unread?.standing).toBe("whole")
+    expect(agenda.rows[0]?.unread?.at).toBeNull()
+    expect(agenda.rows[0]?.unread?.costs).toBeNull()
+  })
+
+  /**
+   * A wrong tree-and-window pair reads as a page every reader stopped at the
+   * top of, which is the most plausible-looking output that reading has. The
+   * row carries the standing that says so and the withheld figures with it
+   * (0301, 0326, 0377), rather than the fix-list quietly printing a place off a
+   * pair nobody should act on.
+   */
+  it("carries a page whose tree and window do not belong together with its figures withheld", () => {
+    const agenda = agendaOf([mishandled(TREE)], [exact(TREE, 1, 100)])
+
+    expect(agenda.rows[0]?.unread?.standing).toBe("mismatched")
+    expect(agenda.rows[0]?.unread?.costs).toBeNull()
+    expect(agenda.rows[0]?.unread?.share).toBeNull()
+    expect(agenda.rows[0]?.work).toBe("collection")
+  })
+
+  /**
+   * The one place this join is deliberately asymmetric. A short fourth reading
+   * costs a row its place and nothing else — losing the row would be the worst
+   * failure available here, because the three readings that made it are the
+   * ones that say there is work.
+   */
+  it("keeps every row where the order of places is of another window, and counts what it could not place", () => {
+    const rows = [exact(TREE, 1, 100), exact(OTHER_TREE, 1, 100)]
+    const both = [stopping(TREE), stopping(OTHER_TREE)]
+    const full = agendaOf(both, rows)
+    const short = deploymentAgendaOf(
+      deploymentReadingOf(
+        both.map((page) => readingProgressOf(page)),
+        rows
+      ),
+      asksNothing(both, rows),
+      collectionHealthOf(both, rows),
+      null,
+      places([stopping(TREE)])
+    )
+
+    expect(short.rows.map(named)).toEqual(full.rows.map(named))
+    expect(short.page.map(named)).toEqual(full.page.map(named))
+    expect(short.work).toEqual(full.work)
+    expect(short.unpaired).toEqual({ order: 0, health: 0, conversion: 0, unread: 0 })
+    expect(short.rows.find((row) => row.treeId === TREE)?.unread).not.toBeNull()
+    expect(short.rows.find((row) => row.treeId === OTHER_TREE)?.unread).toBeNull()
+
+    /*
+     * The other direction: pages the places order named that no row carries.
+     * Counted here because there is no row for them to be `null` on.
+     */
+    const wide = deploymentAgendaOf(
+      deploymentReadingOf([readingProgressOf(stopping(TREE))], rows),
+      asksNothing([stopping(TREE)], rows),
+      collectionHealthOf([stopping(TREE)], rows),
+      null,
+      places(both)
+    )
+
+    expect(wide.rows.map(named)).toEqual([named({ treeId: TREE, revision: 1 })])
+    expect(wide.unpaired.unread).toBe(1)
+  })
+
+  /**
+   * `DeploymentUnread` already publishes the deployment's parts and its places,
+   * and a second total here would be a second answer to one question (0327).
+   * Asserted over the published keys rather than argued, because the way a
+   * figure like that arrives is somebody adding one field.
+   */
+  it("publishes no figure of its own over the places", () => {
+    const agenda = agendaOf([stopping(TREE)], [exact(TREE, 1, 100)])
+
+    expect(Object.keys(agenda).sort()).toEqual([
+      "collection",
+      "contested",
+      "converting",
+      "duplicated",
+      "first",
+      "page",
+      "rows",
+      "subject",
+      "trees",
+      "unpaired",
+      "work",
+    ])
   })
 })

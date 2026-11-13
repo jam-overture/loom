@@ -88,16 +88,24 @@ const tally = (
 /**
  * One page of bands, each reached by the readers given, with no row at all where
  * nobody reached one — which is what a rollup writes.
+ *
+ * **The stack holding the bands reports too**, with the readers of the band
+ * most of them reached. Without it every page this fixture builds is a page
+ * whose outermost part was on a reader's screen and said nothing, which is
+ * `parts-unreporting` on all of them (0382).
  */
 const reading = (
   treeId: TreeId,
   revision: number,
   reached: readonly number[],
   extra: readonly ReaderTally[] = []
-): PageReading =>
-  pageReadingOf(
+): PageReading => {
+  const top = Math.max(0, ...reached)
+
+  return pageReadingOf(
     treeOf(treeId, revision, reached.length),
     [
+      ...(top > 0 ? [tally(treeId, revision, "page", { views: top, reached: top })] : []),
       ...reached.flatMap((count, at) =>
         count > 0
           ? [tally(treeId, revision, `band${at + 1}`, { views: count, reached: count })]
@@ -107,6 +115,7 @@ const reading = (
     ],
     NOTHING_DECLARED
   )
+}
 
 /**
  * A page whose second band holds presses and whose every part credits a reader
@@ -116,6 +125,26 @@ const uncredited = (treeId: TreeId, revision: number, readers: number): PageRead
   reading(treeId, revision, [readers, 0], [
     tally(treeId, revision, "band2", { activations: 3 }),
   ])
+
+/**
+ * A page whose middle band says nothing while the cell inside it reports being
+ * reached — a reader was below a part that did not say it was on screen, which
+ * is the one shape of sender defect the counters can see (0382).
+ */
+const silentBand = (treeId: TreeId): PageReading =>
+  pageReadingOf(
+    {
+      treeId,
+      schemaVersion: TREE_SCHEMA_VERSION,
+      revision: 1,
+      root: band("page", [band("band1", [band("cell1")])]),
+    },
+    [
+      tally(treeId, 1, "page", { views: 100, reached: 100 }),
+      tally(treeId, 1, "cell1", { views: 100, reached: 100 }),
+    ],
+    NOTHING_DECLARED
+  )
 
 /** A page nothing reported at all, which is a tree, a revision and an empty window. */
 const unread = (treeId: TreeId, revision: number): PageReading =>
@@ -274,6 +303,105 @@ describe("collectionHealthOf", () => {
       expect(faultsOn(health, TREE)).toEqual([])
     })
 
+    /**
+     * The eighth fault, and the one this reading could always see and never
+     * said anything about: a part reported nothing while a part **inside it**
+     * reported being reached, so a reader was demonstrably below it and it was
+     * on a screen (0382).
+     */
+    it("reports a part that was on a reader's screen and said nothing", () => {
+      const health = collectionHealthOf([silentBand(TREE)], [exact(TREE, 1, 100)])
+
+      expect(faultsOn(health, TREE)).toEqual(["parts-unreporting"])
+      expect(health.pages[0]?.unreporting).toBe(1)
+      expect(remedyOf("parts-unreporting")).toBe("senders")
+    })
+
+    /**
+     * The half of the defect the counters cannot see, asserted so that the
+     * fault is never read as *these are the parts that went missing*. A silent
+     * leaf and a part nobody reached produce the same rows, and the one thing
+     * that must not happen is this reading guessing between them.
+     */
+    it("says nothing about a silent part with nothing reported inside it", () => {
+      const health = collectionHealthOf([reading(TREE, 1, [100, 0])], [exact(TREE, 1, 100)])
+
+      expect(faultsOn(health, TREE)).toEqual([])
+      expect(health.pages[0]?.unreporting).toBe(0)
+    })
+
+    /**
+     * A window with no views makes every part `unknown` rather than skipped, so
+     * there is no silence to attribute to anybody — which is the state this
+     * fault would be loudest and most wrong in.
+     */
+    it("raises nothing about a page no window holds a view of", () => {
+      const health = collectionHealthOf([unread(TREE, 1)], [door(TREE, 1, 0, 0)])
+
+      expect(faultsOn(health, TREE)).toEqual([])
+      expect(health.pages[0]?.unreporting).toBe(0)
+    })
+
+    /**
+     * A tree and a window that do not belong together leave most of a page
+     * reading `skipped`, which can manufacture this fault as readily as it
+     * manufactures a fall (0212). **Both are published**, and the published
+     * order is the vocabulary\'s own — what a fault costs and whose hand it
+     * falls to (0271) — rather than which fault caused which, so the silence
+     * is read before the mishandled row that may have produced it.
+     *
+     * That is stated here rather than worked around, because the alternative
+     * is this reading guessing: a page can have both for unrelated reasons,
+     * and suppressing one on the strength of the other would hide a real
+     * sender defect behind a caller\'s mistake. A caller holding both fixes
+     * their own two arguments first and reads this page again.
+     */
+    it("names the silence and the mishandled row that may have produced it", () => {
+      const health = collectionHealthOf(
+        [
+          pageReadingOf(
+            {
+              treeId: TREE,
+              schemaVersion: TREE_SCHEMA_VERSION,
+              revision: 1,
+              root: band("page", [band("band1", [band("cell1")])]),
+            },
+            [
+              tally(TREE, 1, "cell1", { views: 100, reached: 100 }),
+              tally(TREE, 1, "ghost", { views: 5, reached: 5 }),
+            ],
+            NOTHING_DECLARED
+          ),
+        ],
+        [exact(TREE, 1, 100)]
+      )
+
+      expect(faultsOn(health, TREE)).toEqual(["parts-unreporting", "rows-mishandled"])
+      expect(COLLECTION_FAULTS.indexOf("parts-unreporting")).toBeLessThan(
+        COLLECTION_FAULTS.indexOf("rows-mishandled")
+      )
+    })
+
+    /**
+     * The count is of parts of a tree, so the way it would be doubled is a
+     * caller concatenating two reads of one page — which this reading drops
+     * rather than adds, because a count that has been doubled cannot be
+     * undoubled (0158).
+     */
+    it("counts the silent parts of a page handed in twice once", () => {
+      const once = collectionHealthOf([silentBand(TREE)], [exact(TREE, 1, 100)])
+      const twice = collectionHealthOf(
+        [silentBand(TREE), silentBand(TREE)],
+        [exact(TREE, 1, 100)]
+      )
+
+      expect(twice.pages).toHaveLength(1)
+      expect(twice.duplicated).toBe(1)
+      expect(twice.pages[0]?.unreporting).toBe(once.pages[0]?.unreporting)
+      expect(twice.faults).toEqual(once.faults)
+      expect(twice.arrivals).toBe(once.arrivals)
+    })
+
     it("reports counters naming a node the revision does not contain", () => {
       const health = collectionHealthOf(
         [reading(TREE, 1, [100], [tally(TREE, 1, "ghost", { views: 5, reached: 5 })])],
@@ -413,16 +541,19 @@ describe("collectionHealthOf", () => {
     const servedTo = (audienceId: typeof SKIERS, reached: readonly number[]): PageReading =>
       pageReadingOf(
         treeOf(TREE, 1, reached.length),
-        reached.flatMap((count, at) =>
-          count > 0
-            ? [
-                {
-                  ...tally(TREE, 1, `band${at + 1}`, { views: count, reached: count }),
-                  audienceId,
-                },
-              ]
-            : []
-        ),
+        [
+          { ...tally(TREE, 1, "page", { views: Math.max(...reached), reached: Math.max(...reached) }), audienceId },
+          ...reached.flatMap((count, at) =>
+            count > 0
+              ? [
+                  {
+                    ...tally(TREE, 1, `band${at + 1}`, { views: count, reached: count }),
+                    audienceId,
+                  },
+                ]
+              : []
+          ),
+        ],
         NOTHING_DECLARED,
         audienceId
       )
@@ -798,7 +929,7 @@ describe("collectionHealthOf", () => {
 
   describe("the vocabularies this reading publishes", () => {
     it("gives every fault a remedy, a sentence and a place in the published order", () => {
-      expect(COLLECTION_FAULTS).toHaveLength(7)
+      expect(COLLECTION_FAULTS).toHaveLength(8)
 
       for (const fault of COLLECTION_FAULTS) {
         expect(FAULT_REMEDIES).toContain(remedyOf(fault))
@@ -820,6 +951,7 @@ describe("collectionHealthOf", () => {
         ["counts-inflated", false],
         ["collection-stalled", true],
         ["actions-uncredited", false],
+        ["parts-unreporting", true],
         ["rows-mishandled", true],
         ["audiences-mixed", true],
       ])
@@ -848,6 +980,7 @@ describe("collectionHealthOf", () => {
         ["counts-inflated", true],
         ["collection-stalled", true],
         ["actions-uncredited", false],
+        ["parts-unreporting", true],
         ["rows-mishandled", true],
         ["audiences-mixed", true],
       ])
@@ -901,15 +1034,16 @@ describe("collectionHealthOf", () => {
     })
 
     /**
-     * Four hands and six faults, and the point of the mapping is that two
+     * Four hands and eight faults, and the point of the mapping is that two
      * faults falling to the same hand is one errand: a deployment told *your
-     * senders are old* twice does not go twice.
+     * senders are old* three times does not go three times.
      */
-    it("falls to two hands twice each and names one hand it cannot determine", () => {
+    it("falls to one hand three times, two twice, and names one it cannot determine", () => {
       const remedies = COLLECTION_FAULTS.map(remedyOf)
 
-      expect(remedies.filter((remedy) => remedy === "senders")).toHaveLength(2)
+      expect(remedies.filter((remedy) => remedy === "senders")).toHaveLength(3)
       expect(remedies.filter((remedy) => remedy === "configuration")).toHaveLength(2)
+      expect(remedies.filter((remedy) => remedy === "caller")).toHaveLength(2)
       expect(remedies.filter((remedy) => remedy === "undetermined")).toHaveLength(1)
       expect(new Set(remedies).size).toBe(FAULT_REMEDIES.length)
     })
@@ -921,6 +1055,23 @@ describe("collectionHealthOf", () => {
     it("publishes the two faults one hand answers for next to each other", () => {
       expect(COLLECTION_FAULTS.indexOf("collection-stalled")).toBe(
         COLLECTION_FAULTS.indexOf("counts-inflated") + 1
+      )
+    })
+
+    /**
+     * The same rule for the two faults that are found by joining the counters
+     * to the tree and fall to the senders: a deployment told *this page\'s
+     * components are not reporting what they are doing* reads both lines in one
+     * place rather than one at either end of the list.
+     *
+     * `openings-unmarked` is the senders\' third and is **not** beside them,
+     * which is deliberate: it costs the denominator and is published first for
+     * that reason, and a fault\'s place in this order is what it costs rather
+     * than whose hand it falls to (0271).
+     */
+    it("publishes the two sender faults the tree reveals next to each other", () => {
+      expect(COLLECTION_FAULTS.indexOf("parts-unreporting")).toBe(
+        COLLECTION_FAULTS.indexOf("actions-uncredited") + 1
       )
     })
   })

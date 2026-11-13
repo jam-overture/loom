@@ -38,6 +38,7 @@ import {
 import { WIRED_LANGUAGE, YOUR_ROUTE } from "../wired"
 import { siteFooter, siteHeader, siteReadingBand, type ChromeContext } from "../chrome"
 import { readyMadeBand } from "../ready"
+import { scaffoldBand } from "../scaffold"
 import {
   action,
   code,
@@ -910,6 +911,16 @@ const whatAllowedIt = (ids: IdFactory): LoomNode =>
  * This is source and not data, so a wrapped line reads as two statements.
  * `wired.test.ts` bounds how far the longest line runs, which is what makes
  * saying `false` honest on a phone.
+ *
+ * ## Nine words shorter than it was, and the panel is why
+ *
+ * The opening sentence used to carry a second clause — *"The address and the
+ * key come out of your environment"* — because the panel under it could not
+ * print the two reads that say so. It can now
+ * ([0379](../../../../../decisions/0379-a-file-may-publish-part-of-its-body-as-somebody-elses-code-and-a-check-that-reads-this-deployment-stops-at-the-marker.md),
+ * and `wired.ts` has the history), and a sentence describing a line the reader
+ * is looking at is the same mistake as a sentence naming a function the panel
+ * does not call. So it came off with the workaround it was paying for.
  */
 const onYourOwnSite = (ids: IdFactory): LoomNode =>
   section(
@@ -917,11 +928,11 @@ const onYourOwnSite = (ids: IdFactory): LoomNode =>
     { width: "wide", eyebrow: "On your own site", anchor: ON_YOUR_SITE_ANCHOR },
     "Two calls put a Loom page on your route",
     [
-      prose(
-        ids,
-        "This is the whole of a route in a Next.js app. The address and the key come out of your environment.",
-        { tone: "muted", align: "center", measured: true }
-      ),
+      prose(ids, "This is the whole of a route in a Next.js app.", {
+        tone: "muted",
+        align: "center",
+        measured: true,
+      }),
       code(ids, YOUR_ROUTE.source, {
         language: WIRED_LANGUAGE,
         caption: YOUR_ROUTE.caption,
@@ -1004,6 +1015,14 @@ export const whyUseItPageTree = (context: PageContext): LoomTree => {
         theParts(ids),
         readyMadeBand(ids),
         whatYouWrite(ids),
+        /**
+         * The alternative to the two panels above, directly under them.
+         *
+         * `scaffold.ts` carries the whole argument. The short version is the
+         * order: a reader who has not seen what those two files look like
+         * cannot tell what a command that writes one of them is worth.
+         */
+        scaffoldBand(ids),
         onAPage(ids),
         whatItReports(ids),
         connected(ids),

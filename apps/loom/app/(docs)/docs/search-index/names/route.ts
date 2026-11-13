@@ -1,4 +1,4 @@
-import { searchNames } from "@/app/(docs)/_lib/search/build"
+import { searchNamesFile } from "@/app/(docs)/_lib/search/build"
 
 /**
  * The runtime's published names, as the fourth static file.
@@ -18,6 +18,6 @@ import { searchNames } from "@/app/(docs)/_lib/search/build"
 export const dynamic = "force-static"
 
 export const GET = (): Response =>
-  Response.json(searchNames(), {
+  Response.json(searchNamesFile(), {
     headers: { "cache-control": "public, max-age=0, must-revalidate" },
   })

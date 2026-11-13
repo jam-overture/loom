@@ -62,9 +62,16 @@ const isElement = (node: ParentNode): node is Element => node.nodeType === 1
  *
  * `undefined` rather than `null` because *there is no addressed page here* is
  * the absence of an answer rather than an answer, and because a caller reaching
- * through an optional ref — `addressedRootIn(frame.current)` is the shape of two
- * callers in this repository — otherwise has two empty values to test for where
- * one will do.
+ * through an optional ref otherwise has two empty values to test for on the way
+ * out where one will do.
+ *
+ * The saving is on the way **out** and not on the way in: `scope` is
+ * `ParentNode`, so a caller guards its ref and then asks —
+ * `container === null ? undefined : addressedRootIn(container)`, which is what
+ * `reader-signals-live.tsx` writes. An earlier version of this note showed
+ * `addressedRootIn(frame.current)`, which does not typecheck. The narrow
+ * parameter is the honest type for a function whose contract is *somewhere to
+ * look*.
  */
 export const addressedRootIn = (scope: ParentNode): Element | undefined => {
   if (isElement(scope) && scope.hasAttribute(LOOM_TREE_ATTRIBUTE)) return scope
@@ -72,4 +79,10 @@ export const addressedRootIn = (scope: ParentNode): Element | undefined => {
   return scope.querySelector(`[${LOOM_TREE_ATTRIBUTE}]`) ?? undefined
 }
 
-export { LOOM_NODE_ATTRIBUTE, LOOM_REVISION_ATTRIBUTE, LOOM_TREE_ATTRIBUTE, LOOM_TYPE_ATTRIBUTE } from "./editable.js"
+export {
+  LOOM_AUDIENCE_ATTRIBUTE,
+  LOOM_NODE_ATTRIBUTE,
+  LOOM_REVISION_ATTRIBUTE,
+  LOOM_TREE_ATTRIBUTE,
+  LOOM_TYPE_ATTRIBUTE,
+} from "./editable.js"

@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 import { ARTICLE_ID } from "@/app/(docs)/_lib/chrome"
 import {
+  encodeSearchNames,
   SEARCH_CODE_PATH,
   SEARCH_INDEX_PATH,
   SEARCH_NAMES_PATH,
@@ -122,7 +123,7 @@ const fetchMock = vi.fn()
  *
  * The names file is the one that carries **rows** rather than text, and it is
  * written here the way the site writes it: an entry point and the names under
- * it, with no address anywhere. The component rebuilds the addresses, which is
+ * it, encoded as the route encodes them, with no address anywhere. The component rebuilds the addresses, which is
  * the point of the shape and is therefore the thing worth exercising through a
  * fixture rather than asserting about the builder.
  */
@@ -132,7 +133,7 @@ const contents = {
     .map((entry) => ({ ...entry, body: "", code: "" })),
 }
 
-const names = { entryPoints: [{ specifier: "@jam-overture/loom", names: ["evaluateGate"] }] }
+const names = encodeSearchNames({ entryPoints: [{ specifier: "@jam-overture/loom", names: ["evaluateGate"] }] })
 
 /**
  * The words, **one file per section**, which is how they really travel.

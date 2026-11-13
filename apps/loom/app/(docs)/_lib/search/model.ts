@@ -1,5 +1,7 @@
 import { apiAnchorFor, apiSlugFor } from "../api/model"
 
+import { decodeNames, encodeNames } from "./names"
+
 /**
  * What the site knows how to find, as data.
  *
@@ -302,7 +304,7 @@ export type SearchProse = {
   readonly bodies: readonly (readonly [string, string])[]
 }
 
-const isBody = (value: unknown): value is readonly [string, string] =>
+const isTextPair = (value: unknown): value is readonly [string, string] =>
   Array.isArray(value) && value.length === 2 && typeof value[0] === "string" && typeof value[1] === "string"
 
 /**
@@ -336,7 +338,7 @@ export const parseSearchProse = (value: unknown): SearchProse => {
   return {
     under: "",
     bodies: value.bodies
-      .filter(isBody)
+      .filter(isTextPair)
       .map(([key, words]) => [proseAddressOf(under, key), words] as const),
   }
 }
@@ -372,7 +374,7 @@ export const parseSearchCode = (value: unknown): SearchCode => {
     throw new Error("loom: the search code has no blocks")
   }
 
-  return { blocks: value.blocks.filter(isBody) }
+  return { blocks: value.blocks.filter(isTextPair) }
 }
 
 /** The entries and their code, put back together. */
@@ -394,28 +396,60 @@ export const withCode = (index: SearchIndex, code: SearchCode): SearchIndex => {
  * costs 20, because it was `/docs/api-reference/runtime#s-` written down a
  * thousand times; and a file carrying its own copy of an address scheme is a
  * second place for that scheme to be true.
+ *
+ * This is the shape the builder and the browser work with. What travels is
+ * `SearchNamesFile`, which writes each list of names as one front-coded line.
  */
 export type SearchNames = {
   readonly entryPoints: readonly {
     /** The import specifier, as a reader would type it. */
     readonly specifier: string
-    /** Every name that entry point publishes, in the order the reference lists them. */
+    /** Every name that entry point publishes, in alphabetical order. */
     readonly names: readonly string[]
   }[]
 }
 
-const isEntryPoint = (value: unknown): value is { specifier: string; names: string[] } =>
-  isRecord(value) &&
-  typeof value.specifier === "string" &&
-  Array.isArray(value.names) &&
-  value.names.every((name) => typeof name === "string")
+/**
+ * The names as they travel: one `[specifier, line]` pair per entry point,
+ * where the line is the entry point's names put through `encodeNames`.
+ *
+ * Pairs rather than objects for the reason the prose file uses them — the
+ * field names would be written out once per entry point for nothing — and a
+ * line rather than an array because the array's quotes and commas, and the
+ * prefix every name shares with the one before it, were most of what the file
+ * had left to spend. `names.ts` has the numbers.
+ */
+export type SearchNamesFile = {
+  readonly entryPoints: readonly (readonly [specifier: string, names: string])[]
+}
 
+export const encodeSearchNames = (names: SearchNames): SearchNamesFile => ({
+  entryPoints: names.entryPoints.map((entryPoint) => [entryPoint.specifier, encodeNames(entryPoint.names)]),
+})
+
+const decodeEntryPoint = (value: unknown): SearchNames["entryPoints"] => {
+  if (!isTextPair(value)) return []
+
+  const [specifier, line] = value
+  const names = decodeNames(line)
+
+  return names === undefined ? [] : [{ specifier, names }]
+}
+
+/**
+ * The names file as it arrived, or as much of it as can be trusted.
+ *
+ * An entry point whose pair is malformed, or whose line does not decode, is
+ * dropped and the rest are kept — the same bargain `parseSearchIndex` strikes
+ * for a row, because a search box missing one entry point's names is a smaller
+ * failure than one missing all of them.
+ */
 export const parseSearchNames = (value: unknown): SearchNames => {
   if (!isRecord(value) || !Array.isArray(value.entryPoints)) {
     throw new Error("loom: the search names have no entry points")
   }
 
-  return { entryPoints: value.entryPoints.filter(isEntryPoint) }
+  return { entryPoints: value.entryPoints.flatMap(decodeEntryPoint) }
 }
 
 /**

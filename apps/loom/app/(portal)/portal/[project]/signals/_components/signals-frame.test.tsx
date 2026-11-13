@@ -42,6 +42,9 @@ const hourly: ArrivalReading = {
 
 const rangeHref = (range: SignalsRange) => `/portal/prj_a/signals?range=${range}`
 
+const segmentHref = (word: string | undefined) =>
+  word === undefined ? "/portal/prj_a/signals" : `/portal/prj_a/signals?segment=${word}`
+
 const read = (
   latest: "arrived" | undefined,
   overrides: Partial<Extract<SignalsReading, { state: "read" }>> = {}
@@ -63,13 +66,20 @@ const read = (
   range: "24h",
   hourly,
   goal: { kind: "none" },
+  segment: { word: undefined, offered: [] },
   ...overrides,
 })
 
 describe("the Signals frame", () => {
   it("draws the figures and the two tabs, marking the one shown, once something has arrived", () => {
     render(
-      <SignalsFrame reading={read("arrived")} projectId="prj_a" tab="pages" rangeHref={rangeHref}>
+      <SignalsFrame
+        reading={read("arrived")}
+        projectId="prj_a"
+        tab="pages"
+        rangeHref={rangeHref}
+        segmentHref={segmentHref}
+      >
         <p>the list</p>
       </SignalsFrame>
     )
@@ -90,6 +100,7 @@ describe("the Signals frame", () => {
         projectId="prj_a"
         tab="events"
         rangeHref={rangeHref}
+        segmentHref={segmentHref}
       >
         <p>the list</p>
       </SignalsFrame>
@@ -104,7 +115,13 @@ describe("the Signals frame", () => {
 
   it("says nothing has arrived, and draws no tab, before anything has", () => {
     render(
-      <SignalsFrame reading={read(undefined)} projectId="prj_a" tab="events" rangeHref={rangeHref}>
+      <SignalsFrame
+        reading={read(undefined)}
+        projectId="prj_a"
+        tab="events"
+        rangeHref={rangeHref}
+        segmentHref={segmentHref}
+      >
         <p>the list</p>
       </SignalsFrame>
     )
@@ -121,6 +138,7 @@ describe("the Signals frame", () => {
         projectId="prj_a"
         tab="events"
         rangeHref={rangeHref}
+        segmentHref={segmentHref}
       />
     )
 
@@ -130,7 +148,13 @@ describe("the Signals frame", () => {
 
   it("puts page views in the range over the chart, with the range picker and the total", () => {
     render(
-      <SignalsFrame reading={read("arrived")} projectId="prj_a" tab="events" rangeHref={rangeHref}>
+      <SignalsFrame
+        reading={read("arrived")}
+        projectId="prj_a"
+        tab="events"
+        rangeHref={rangeHref}
+        segmentHref={segmentHref}
+      >
         <p>the list</p>
       </SignalsFrame>
     )
@@ -157,6 +181,7 @@ describe("the Signals frame", () => {
         projectId="prj_a"
         tab="events"
         rangeHref={rangeHref}
+        segmentHref={segmentHref}
       >
         <p>the list</p>
       </SignalsFrame>
@@ -174,6 +199,7 @@ describe("the Signals frame", () => {
         projectId="prj_a"
         tab="events"
         rangeHref={rangeHref}
+        segmentHref={segmentHref}
       >
         <p>the list</p>
       </SignalsFrame>
@@ -212,6 +238,7 @@ describe("the Signals frame", () => {
         projectId="prj_a"
         tab="events"
         rangeHref={rangeHref}
+        segmentHref={segmentHref}
       >
         <p>the list</p>
       </SignalsFrame>
@@ -224,7 +251,13 @@ describe("the Signals frame", () => {
 
   it("draws no goal figure for a project without a goal, and says one that could not be read", () => {
     const { unmount } = render(
-      <SignalsFrame reading={read("arrived")} projectId="prj_a" tab="events" rangeHref={rangeHref}>
+      <SignalsFrame
+        reading={read("arrived")}
+        projectId="prj_a"
+        tab="events"
+        rangeHref={rangeHref}
+        segmentHref={segmentHref}
+      >
         <p>the list</p>
       </SignalsFrame>
     )
@@ -238,6 +271,7 @@ describe("the Signals frame", () => {
         projectId="prj_a"
         tab="events"
         rangeHref={rangeHref}
+        segmentHref={segmentHref}
       >
         <p>the list</p>
       </SignalsFrame>
@@ -245,5 +279,88 @@ describe("the Signals frame", () => {
 
     expect(screen.getByText("Primary goal")).toBeTruthy()
     expect(screen.getByText(/The primary goal's figures could not be read/)).toBeTruthy()
+  })
+
+  it("offers the project's segments beside the range, keeping the one shown on the tabs", () => {
+    render(
+      <SignalsFrame
+        reading={read("arrived", {
+          range: "7d",
+          segment: { word: "phone", offered: ["phone", "search"] },
+        })}
+        projectId="prj_a"
+        tab="events"
+        rangeHref={rangeHref}
+        segmentHref={segmentHref}
+      >
+        <p>the list</p>
+      </SignalsFrame>
+    )
+
+    const picker = screen.getByRole("navigation", { name: "Segment" })
+
+    expect(picker.textContent).toContain("Everyone")
+    expect(screen.getByRole("link", { name: "phone" }).getAttribute("aria-current")).toBe("true")
+    expect(screen.getByRole("link", { name: "search" }).getAttribute("href")).toBe(
+      "/portal/prj_a/signals?segment=search"
+    )
+    expect(screen.getByRole("link", { name: "By page" }).getAttribute("href")).toBe(
+      "/portal/prj_a/signals/pages?range=7d&segment=phone"
+    )
+    expect(screen.getByText(/nothing turned away is filed under a segment/)).toBeTruthy()
+  })
+
+  it("draws no picker for a project with no segment, and says so where they could not be read", () => {
+    const { unmount } = render(
+      <SignalsFrame
+        reading={read("arrived")}
+        projectId="prj_a"
+        tab="events"
+        rangeHref={rangeHref}
+        segmentHref={segmentHref}
+      >
+        <p>the list</p>
+      </SignalsFrame>
+    )
+
+    expect(screen.queryByRole("navigation", { name: "Segment" })).toBeNull()
+    expect(screen.queryByText(/segments could not be read/)).toBeNull()
+    unmount()
+
+    render(
+      <SignalsFrame
+        reading={read("arrived", { segment: { word: undefined, offered: undefined } })}
+        projectId="prj_a"
+        tab="events"
+        rangeHref={rangeHref}
+        segmentHref={segmentHref}
+      >
+        <p>the list</p>
+      </SignalsFrame>
+    )
+
+    expect(screen.getByText(/segments could not be read just now/)).toBeTruthy()
+  })
+
+  it("says nothing was counted for a segment in place of its figures, with the way back to everyone", () => {
+    render(
+      <SignalsFrame
+        reading={read(undefined, { segment: { word: "phone", offered: ["phone"] } })}
+        projectId="prj_a"
+        tab="events"
+        rangeHref={rangeHref}
+        segmentHref={segmentHref}
+      >
+        <p>the list</p>
+      </SignalsFrame>
+    )
+
+    expect(screen.getByText("Nothing has been counted for phone yet")).toBeTruthy()
+    expect(screen.getByText("aud_phone")).toBeTruthy()
+    expect(screen.getByRole("link", { name: "Show everyone" }).getAttribute("href")).toBe(
+      "/portal/prj_a/signals"
+    )
+    expect(screen.queryByText("Nothing has arrived yet")).toBeNull()
+    expect(screen.queryByText("the list")).toBeNull()
   })
 })
