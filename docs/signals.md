@@ -5398,8 +5398,17 @@ cap — about seven names, and they were nobody's to hold down — and this lane
 already lost §82 to it. A member of a closed union and a field on a published
 type are neither of them names, so the figure on this branch was `main`'s byte
 for byte. **The cap is no longer the constraint:** `Loom docs` front-coded the
-file the next morning (#859), which took it to **27,205 bytes of 40,000 with
-2,109 names in it**, so the next unit here is free to publish a door.
+file the next morning (#859) — each entry point's names sorted, with one
+base-36 digit saying how much of the previous name to keep — and it measures
+**27,289 bytes of 40,000 with 2,116 names in it** on the evening of
+12 November, so the next unit here is free to publish a door.
+
+**It arrived with nothing to spare, which is the figure to keep.** Written as a
+JSON array the way it travelled until that morning, those same 2,116 names
+measure **40,223 bytes** — *over* the cap. The index crossed it **within a day**
+of the remedy landing, and the remedy is the only reason nothing is red. Every
+entry in `FINDINGS.md` that worried about the last hundred bytes was right about
+how little room there was and a day early about when it would matter.
 
 **What is left and is filed:** *which of your components are silent*, the same
 defect gathered by primitive type rather than by page, which is the sentence the

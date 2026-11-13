@@ -11,9 +11,21 @@ list and it is not a report.
 ## 2026-11-12 — `mocks.test.ts` is the one whole-repository sweep 0375 did not reach, and it took the merge gate down on a branch that costs it half a millisecond
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom daily build`
-(`tools/sources/mocks.test.ts`) · **Status:** open — **nothing is red now**; it
-is one argument on two `it`s, and the fix is the one four sibling sweeps in the
-same directory already carry.
+(`tools/sources/mocks.test.ts`) · **Status:** **closed by
+`framework-96-a-sweeps-budget-is-inherited`** — the argument is on the
+`describe` rather than on the two `it`s, so the next sweep written into that
+block inherits it; `tools/sources/budgets.ts` catches the other half, a file
+that names no budget at all. Recorded as
+[0391](decisions/0391-a-whole-repository-sweep-names-its-budget-on-the-block-that-holds-it.md).
+
+> **This entry was right about the fault and about the remedy**, and the one
+> thing it could not see is that its own premise — *nothing is red now* — was
+> the test 0375 had already set and the one that failed. Idle headroom is not
+> headroom: the two sweeps are 388 ms and 310 ms on an idle container, about 6x
+> under the default, which is what "not close to its budget" looked like three
+> days before it went red. So the fix is not only the one line this entry asked
+> for; the budget moved up to the block, where a fourth sweep cannot be written
+> without it.
 
 0375 (`decisions/0375-a-whole-repository-check-is-budgeted-by-what-it-reads-rather-than-by-a-wall-clock.md`)
 replaced the fixed five-second wall clock on the whole-repository sweeps with
@@ -71933,3 +71945,142 @@ it would make the row a tested figure rather than a remembered one — the same
 move that turned rule 4's size half from a sentence into a test. It is a
 `tools/` check and `tools/` is in no lane's row, which the 9 November entry
 already says; this lane is not taking it unasked.
+## 2026-11-12 (evening) — correcting a merged record and a merged report are two conventions this repository does not have, and today needed both
+
+**Filed by:** `Loom signals` · **Owned by:** **@jonathanbravecredit** ·
+**Status:** open — **nothing is broken, nothing is urgent and no deadline is
+attached.** Two questions a routine answered for itself today and should not be
+the one answering
+
+Both were asked on #879 and it has merged, so they live in a closed pull
+request's comment and nowhere a routine reads. They are filed here because the
+whole episode they come from was a true figure getting lost.
+
+**What happened, in one paragraph.** §86 and
+[0381](decisions/0381-a-parts-pace-across-pages-is-one-pooled-quotient-and-a-goals-part-is-a-reading-of-its-own.md)
+merged on #873 carrying a byte figure that #859 had already made false. The
+correction was pushed to the branch twenty minutes after #873 merged, so it
+reached a closed branch and `main` kept the false number until #879 landed it.
+`docs/routines.md` has no rule for either half of that repair, and this lane
+picked both.
+
+### 1. A record that is `Accepted` and merged, with a measurement in it that is now false
+
+**What this lane did:** corrected 0381's consequence bullet in place, leaving the
+old figure, the remeasurement and its date all visible, and left the decision,
+its five clauses and its alternatives untouched.
+
+**Why:** the standing rule is *never edit a record to change direction*, and no
+direction moved — a measured number in a consequence did. A record carrying a
+false measurement seemed worse than one carrying a dated correction, and
+`Superseded by NNNN` would have spent a decision number on a byte count.
+
+**The recommendation, for whoever writes the rule:** allow an in-place
+correction of a **measured figure** in a merged record, provided the old value
+stays visible and is dated, and keep `Superseded by` for anything that changes
+what the record decides. The risk of the looser rule is somebody calling a
+change of direction a correction; the risk of the stricter one is a shelf of
+records that each supersede the last over a number.
+
+### 2. A report of a finished run with a figure in it that is now false
+
+**What this lane did:** left
+[the morning's report](reports/2026-11-12-signals-how-long-readers-stay-on-one-part.md)
+exactly as it stands, including its 50-bytes-of-148 table, and corrected the
+number in the plan, in the record and in this file instead.
+
+**Why:** *never overwrite an existing report* is a standing instruction, and a
+report reads as the record of a run rather than a live document.
+
+**The recommendation:** keep it, and make the consequence explicit — **a report
+is a dated account and may be wrong about the world afterwards; the plan, the
+records and this ledger are what must be true now.** A reader who needs the
+current figure should not be reading a report for it. If instead you want
+reports corrected in place when a figure in them is found false, that is one
+line in `docs/routines.md` and this lane would rather you set it than infer it a
+second time.
+
+### The one thing already fixed without asking
+
+**Read whether a pull request is still open before pushing a correction to its
+branch.** It is in the entry above this one as the lesson, and it earned itself
+back within the hour: the addendum this lane wrote next was held unpushed
+because #879 had merged while it was being written. That one needs no
+convention, only the check.
+## 2026-11-12 (evening) — the names index crossed its cap within a day of the fix landing, and a fourth entry still quotes the margin it had before
+
+**Filed by:** `Loom signals` · **Owned by:** nobody — **a measurement, and the
+last word on four entries** · **Status:** **closed**, measured on `main` at
+`c04920a`
+
+The entry earlier today closed the names-cap question with the file's travelling
+size. This is the figure it did not take, and it is the one that says why the
+remedy mattered:
+
+| | bytes | cap |
+| --- | --- | --- |
+| the names file as it travels, front-coded | **27,289** | 40,000 |
+| the same 2,116 names as a JSON array | **40,223** | 40,000 |
+
+**The array form is over the cap.** #859 landed on the morning of 12 November
+and by that evening the index had crossed the number it was held to — so the
+four entries that worried about the last hundred bytes were right about how
+little room there was and **a day early** about when it would bite. Had the
+front-coding not landed, the next lane to publish a handful of names would have
+taken `pnpm verify` red for four surfaces, which is exactly what those entries
+predicted.
+
+**The fourth entry, which is this lane's and the one still misleading.**
+#873 merged carrying *this branch spends 50 of the names index's 148 bytes, and
+leaves 98*. Its table is the raw-array arithmetic and its 98 bytes were already
+**12,711** by the time it landed. The earlier note today named three stale
+entries and this is the fourth; none of them is a constraint, and the figure to
+hold against is **27,289 of 40,000**.
+
+**The one thing that did not go stale:** this cap fires in `(docs)`, the number
+it guards is grown by every other lane, and **no decision record covers it.**
+That was true at 148 bytes, it is true at 12,711, and it is now true of a number
+that has been shown to outgrow its own cap in a day. It is `Loom docs`' to write
+and nothing is blocked by its absence.
+
+---
+## 2026-11-12 (evening) — a correction pushed to an open pull request from this lane lost the race to the merge routine twice in one day, so a correction belongs on a fresh branch from the start
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`, as a working rule ·
+**Status:** open as a rule worth other lanes knowing; **the two instances are
+closed**
+
+Twice today a sentence in a document went false while its pull request was open,
+this lane pushed a one-commit correction to that branch, and **`Loom merge`
+merged the branch minutes before the correction arrived.**
+
+| | merged at | correction pushed | gap |
+| --- | --- | --- | --- |
+| #865 | `bdca361`, 15:50 | 15:56 | 6 minutes |
+| #878 | `a0ead4e`, 16:53 | 16:58 | 5 minutes |
+
+Both times the correction then had to be re-applied off `main` as a new pull
+request — #878 for the first, this one for the second — because a merged pull
+request is finished and cannot carry it. That is the rule `routines.md` already
+states for a branch whose pull request has merged, arrived at twice by the slow
+route.
+
+**The working rule, which costs nothing to follow.** When something a branch
+says has gone false and the branch is open and green, **the correction goes on a
+fresh branch off `main`, not onto the open branch.** It cannot lose a race it is
+not in, it merges independently, and nothing is lost if the first branch lands
+first. The reverse — pushing to the open branch — wins only if the merge routine
+happens not to run in the next few minutes, and today it ran within six both
+times.
+
+**What this is not.** It is not a complaint about `Loom merge`, which is doing
+the right thing quickly: a branch that is green and has no open question should
+merge, and nothing it merged was wrong. It is also not an argument for polling a
+pull request to see whether it has merged yet — that is the thing token
+discipline forbids outright, and the whole point of the rule above is that it
+needs no knowledge of when anything merges.
+
+**One instance of this was also costly in `#877`**, from this lane's other run
+on the same day: three text changes pushed to #851's branch ten minutes after it
+merged, re-applied off `main` as a pull request of their own. Three instances in
+one day, two of them mine, is what makes it a rule rather than bad luck.
