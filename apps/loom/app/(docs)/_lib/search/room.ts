@@ -101,9 +101,9 @@ const fileOf = (sectionSlug: string): { readonly json: string; readonly gz: numb
  * them from there instead of reconstructing what the browser reconstructs.
  */
 const everyBody = (): readonly (readonly [string, string])[] =>
-  (allBodies ??= proseEntriesOf(buildSearchIndex().entries, "")
-    .filter((entry) => entry.body !== "")
-    .map((entry) => [entry.href, entry.body] as const))
+  (allBodies ??= proseEntriesOf(buildSearchIndex().entries, "").map(
+    (entry) => [entry.href, entry.body] as const
+  ))
 
 /**
  * The words a reader would count, which is every run of non-space.
