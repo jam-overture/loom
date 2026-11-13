@@ -27,6 +27,7 @@ import {
   withNames,
   withProse,
 } from "./model"
+import { docsSectionOfPath } from "./shards"
 import {
   PROSE_SECTION_GZIP_CAP,
   PROSE_SECTION_RAW_CAP,
@@ -717,6 +718,45 @@ describe("what the index contains", () => {
 
     expect(new Set(hrefs).size).toBe(hrefs.length)
     expect(new Set(blocks).size).toBe(blocks.length)
+  })
+
+  /**
+   * Which addresses a file is about, at the boundary rather than in the middle.
+   *
+   * **Written because a mutation survived.** `isUnder` reads
+   * `href === under || href.startsWith(under + "/") || href.startsWith(under + "#")`,
+   * and replacing all three with a bare `startsWith(under)` broke nothing —
+   * because no section slug on this site is a prefix of another, so there is no
+   * real address the two answers disagree about. The docblock claimed this was
+   * held against `docsSectionOfPath` over every entry, and over every entry the
+   * site *has* that claim is true and empty.
+   *
+   * So the disagreement is constructed. A section called `the-runtime-extras`
+   * is one `nav.ts` entry away, and the day somebody adds it a bare prefix test
+   * would put its words in the runtime's file, where `docsSectionOfPath` would
+   * not look for them. Both halves are here: the real entries, where the two
+   * functions must agree, and the two spellings the site does not have yet.
+   */
+  it("claims an address by its boundary and not by its first characters", () => {
+    for (const entry of index.entries.filter((entry) => entry.kind !== "export")) {
+      const section = docsSectionOfPath(entry.href)
+
+      for (const candidate of docsSections) {
+        const claimed = proseEntriesOf([entry], `/docs/${candidate.slug}`).length === 1
+
+        expect(claimed, `${entry.href} under ${candidate.slug}`).toBe(section === candidate.slug)
+      }
+    }
+
+    const near = ["/docs/the-runtime-extras", "/docs/the-runtimex", "/docs/the-runtime-extras#x"].map(
+      (href) => ({ href, kind: "page" as const })
+    )
+
+    expect(proseEntriesOf(near, "/docs/the-runtime")).toEqual([])
+    expect(proseEntriesOf(near, "/docs/the-runtime-extras").map((entry) => entry.href)).toEqual([
+      "/docs/the-runtime-extras",
+      "/docs/the-runtime-extras#x",
+    ])
   })
 
   /**
