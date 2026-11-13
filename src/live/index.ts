@@ -18,10 +18,11 @@
  *   timer, and no reader waits on it.
  * - **Loom never learns who a reader is.** The request carries the project's
  *   key and the tag of what is held, and nothing else. The door answers every
- *   page's segment rules beside the pages (0371), and sorting a reader into a
- *   segment happens afterwards, here, against rules already held: `segmentOf`
- *   reads the context the host's server built and answers a segment's name,
- *   and nothing about the reader leaves the process.
+ *   page's segment rules and segment forms beside the pages (0371), and both
+ *   sorting a reader into a segment and composing the page they get happen
+ *   afterwards, here, against rules and deltas already held: `pageForReader`
+ *   reads the context the host's server built and answers a tree and a
+ *   segment's name, and nothing about the reader leaves the process.
  * - **A failed pull costs freshness, never the page** (0358 clause 4). Every
  *   way a pull can fail leaves the last pages whole, and a server with none
  *   renders every page as it was built.
@@ -35,27 +36,37 @@
  *   },
  * })
  *
- * // wherever a page is rendered, with the tree the site was built with
+ * // wherever a page is rendered, with the tree the site was built with, and
+ * // what this server knows about the request in the keys the rules read
  * const held = await live.ready()
- * const tree = livePageOf(held, builtTree.treeId) ?? builtTree
+ * const served = pageForReader(held, builtTree, { device: "phone", returning: true })
  *
- * // what this server knows about the request, in the keys the segments' rules read
- * const audience = segmentOf(held, builtTree.treeId, { device: "phone", returning: true })
+ * if (served.refusal !== undefined) log.warn(describeComposeError(served.refusal))
  *
- * renderLoomTree(tree, { resolver, addressed: true, audience })
+ * renderLoomTree(served.tree, { resolver, addressed: true, audience: served.audience })
  * ```
  *
  * The page's signals are filed under the segment it was rendered for (0284):
  * the root carries it, and the broadcaster reads it from there.
  */
 
+/**
+ * The refusal a composition hands back, and the sentence for it, re-exported
+ * here because the place a host meets one is the render path. A site's server
+ * imports `/live` and `/react`; making it import the control plane's door to
+ * say why a page was served as the base would be the wrong dependency for the
+ * one line of logging this costs.
+ */
+export { describeComposeError, type AudienceForm, type ComposeError } from "../audience/compose.js"
 export {
   isPulling,
   livePageOf,
   livePagesHeld,
   NO_LIVE_PAGES,
+  pageForReader,
   segmentOf,
   type LivePages,
+  type ServedPage,
 } from "./pages.js"
 export {
   describeSitePullFailure,
@@ -64,6 +75,7 @@ export {
   livePagesUrlOf,
   pullLivePages,
   withPullOutcome,
+  type LivePageForms,
   type LivePageRules,
   type PullFetch,
   type PullLivePagesOptions,

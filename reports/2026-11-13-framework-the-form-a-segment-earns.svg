@@ -1,0 +1,105 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 730" width="1080" height="730" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif">
+  <style>
+    .title { font-size: 21px; font-weight: 650; fill: #0f172a; }
+    .sub { font-size: 13px; fill: #64748b; }
+    .panel-title { font-size: 11px; font-weight: 650; fill: #475569; letter-spacing: 0.09em; }
+    .note { font-size: 12px; fill: #475569; }
+    .mono { font-size: 11.5px; fill: #334155; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .monob { font-size: 11.5px; font-weight: 650; fill: #0f172a; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .dim { font-size: 11.5px; fill: #94a3b8; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .bad { font-size: 11.5px; font-weight: 650; fill: #b91c1c; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .ok { font-size: 11.5px; font-weight: 650; fill: #15803d; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .rowhead { font-size: 10px; font-weight: 650; fill: #64748b; letter-spacing: 0.05em; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .emph { font-size: 12.5px; font-weight: 650; fill: #0f172a; }
+  </style>
+
+  <rect width="1080" height="730" fill="#ffffff" />
+
+  <text class="title" x="40" y="46">The form a segment earns</text>
+  <text class="sub" x="40" y="68">0392 — the door answers rules and forms in one pull, and the site composes them in its own process. Loom is told no reader and no audience.</text>
+
+  <!-- ============ left: the answer ============ -->
+  <text class="panel-title" x="40" y="108">GET /api/pages/live  —  ONE ANSWER, ONE TAG</text>
+
+  <rect x="40" y="122" width="470" height="258" rx="8" fill="#f8fafc" stroke="#e2e8f0" />
+
+  <text class="monob" x="60" y="150">{</text>
+  <text class="monob" x="76" y="172">pages:</text><text class="mono" x="140" y="172">[ LoomTree, … ]</text>
+  <text class="dim" x="382" y="172">every live page</text>
+
+  <text class="monob" x="76" y="200">rules:</text><text class="mono" x="140" y="200">[ { treeId, rules }, … ]</text>
+  <text class="dim" x="382" y="200">since #866</text>
+
+  <text class="monob" x="76" y="228">forms:</text><text class="mono" x="140" y="228">[ { treeId, forms }, … ]</text>
+  <text class="ok" x="382" y="228">new</text>
+  <text class="monob" x="60" y="252">}</text>
+
+  <line x1="60" y1="268" x2="490" y2="268" stroke="#e2e8f0" />
+
+  <text class="note" x="60" y="290">A form whose segment the page's rules do not name is</text>
+  <text class="note" x="60" y="308">left out — it matches nobody. A segment named by two</text>
+  <text class="note" x="60" y="326">rules gets one form. The order is the rules' order.</text>
+  <text class="note" x="60" y="348">Pages, rules and forms fail together — a store that</text>
+  <text class="note" x="60" y="366">cannot answer costs the pull, never the pages held.</text>
+
+  <!-- arrow -->
+  <g stroke="#94a3b8" stroke-width="1.6" fill="none">
+    <path d="M 516 240 L 556 240" />
+    <path d="M 548 234 L 556 240 L 548 246" />
+  </g>
+
+  <!-- ============ right: the client ============ -->
+  <text class="panel-title" x="570" y="108">IN THE CUSTOMER'S SERVER  —  pageForReader(held, built, context)</text>
+
+  <rect x="570" y="122" width="470" height="258" rx="8" fill="#f8fafc" stroke="#e2e8f0" />
+
+  <text class="note" x="590" y="150">The context is whatever this server knows about the</text>
+  <text class="note" x="590" y="168">request — device, source, returning — and none of it</text>
+  <text class="note" x="590" y="186">leaves the process.</text>
+
+  <text class="monob" x="590" y="222">{</text>
+  <text class="monob" x="606" y="244">tree</text><text class="dim" x="660" y="244">what to render</text>
+  <text class="monob" x="606" y="268">audience</text><text class="dim" x="700" y="268">what to file the page view under</text>
+  <text class="monob" x="606" y="292">refusal</text><text class="dim" x="690" y="292">why a form was not applied</text>
+  <text class="monob" x="590" y="316">}</text>
+
+  <text class="note" x="590" y="348">One call, so a host cannot do two of the three: the</text>
+  <text class="note" x="590" y="366">fallback, the sorting and the composition are one answer.</text>
+
+  <!-- ============ the four requests ============ -->
+  <text class="panel-title" x="40" y="420">WHAT ONE READER GETS, FOR THE FOUR STATES A PAGE'S SEGMENTS CAN BE IN</text>
+
+  <rect x="40" y="434" width="1000" height="206" rx="8" fill="#ffffff" stroke="#e2e8f0" />
+
+  <text class="rowhead" x="60" y="458">THE PAGE'S RULES AND FORMS</text>
+  <text class="rowhead" x="470" y="458">tree</text>
+  <text class="rowhead" x="650" y="458">audience</text>
+  <text class="rowhead" x="850" y="458">refusal</text>
+  <line x1="60" y1="468" x2="1020" y2="468" stroke="#e2e8f0" />
+
+  <text class="mono" x="60" y="494">no rules at all, or no rule this reader matches</text>
+  <text class="mono" x="470" y="494">the base</text>
+  <text class="dim" x="650" y="494">none</text>
+  <text class="dim" x="850" y="494">none</text>
+  <line x1="60" y1="508" x2="1020" y2="508" stroke="#f1f5f9" />
+
+  <text class="mono" x="60" y="534">a rule matches, its segment has no form yet</text>
+  <text class="mono" x="470" y="534">the base</text>
+  <text class="ok" x="650" y="534">aud_phone</text>
+  <text class="dim" x="850" y="534">none</text>
+  <line x1="60" y1="548" x2="1020" y2="548" stroke="#f1f5f9" />
+
+  <text class="mono" x="60" y="574">a rule matches and its form applies</text>
+  <text class="ok" x="470" y="574">base + delta</text>
+  <text class="ok" x="650" y="574">aud_phone</text>
+  <text class="dim" x="850" y="574">none</text>
+  <line x1="60" y1="588" x2="1020" y2="588" stroke="#f1f5f9" />
+
+  <text class="mono" x="60" y="614">a rule matches and its form will not apply</text>
+  <text class="mono" x="470" y="614">the base</text>
+  <text class="bad" x="650" y="614">none</text>
+  <text class="bad" x="850" y="614">stale-form</text>
+
+  <text class="emph" x="40" y="678">A form that cannot be applied costs the reader their segment, not their page.</text>
+  <text class="note" x="40" y="700">They get a page, their signals say what they were actually shown, and the deployment's figures stay a comparison of forms readers were served.</text>
+</svg>

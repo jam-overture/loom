@@ -1,8 +1,9 @@
 import { describe, expect, it } from "vitest"
 
 import { audienceIdSchema } from "../audience/audience.js"
+import type { AudienceForm } from "../audience/compose.js"
 import type { AudienceRule } from "../audience/rule.js"
-import { treeIdSchema } from "../ids.js"
+import { sequentialIdFactory, treeIdSchema } from "../ids.js"
 import { sampleTree } from "../testing/fixtures.js"
 import type { LoomTree } from "../tree/tree.js"
 
@@ -54,6 +55,23 @@ const answersPagesAndRules = (pages: readonly unknown[], rules: readonly unknown
 const onPhones: AudienceRule = {
   audienceId: audienceIdSchema.parse("aud_phone"),
   clauses: [{ key: "device", anyOf: ["phone"] }],
+}
+
+/** The door's answer since 0371 piece 4: each page's segment forms as well. */
+const answersPagesAndForms = (pages: readonly unknown[], forms: readonly unknown[]): Response =>
+  new Response(JSON.stringify({ pages, rules: [], forms }), {
+    status: 200,
+    headers: { "content-type": "application/json", etag: '"formed"' },
+  })
+
+const phoneForm: AudienceForm = {
+  audienceId: audienceIdSchema.parse("aud_phone"),
+  delta: {
+    deltaId: sequentialIdFactory("spare").deltaId(),
+    treeId: page.treeId,
+    baseRevision: page.revision,
+    operations: [{ op: "remove", nodeId: page.root.id }],
+  },
 }
 
 const pull = (
@@ -139,6 +157,7 @@ describe("one pull", () => {
       kind: "fresh",
       pages: [page, other],
       rules: [],
+      forms: [],
       tag: '"fresh"',
     })
   })
@@ -150,6 +169,7 @@ describe("one pull", () => {
       kind: "fresh",
       pages: [],
       rules: [],
+      forms: [],
       tag: '"empty"',
     })
   })
@@ -252,6 +272,7 @@ describe("the segment rules a pull reads beside the pages (0371 clause 4)", () =
       kind: "fresh",
       pages: [page, other],
       rules: [{ treeId: page.treeId, rules: [onPhones] }],
+      forms: [],
       tag: '"ruled"',
     })
   })
@@ -309,7 +330,7 @@ describe("what an outcome does to what is held", () => {
   it("holds fresh pages by their own ids, with the tag that names them", () => {
     const held = withPullOutcome(
       NO_LIVE_PAGES,
-      { kind: "fresh", pages: [page, other], rules: [], tag: '"one"' },
+      { kind: "fresh", pages: [page, other], rules: [], forms: [], tag: '"one"' },
       1_000
     )
 
@@ -323,10 +344,10 @@ describe("what an outcome does to what is held", () => {
   it("drops a page the newest answer no longer names, so it renders as built", () => {
     const both = withPullOutcome(
       NO_LIVE_PAGES,
-      { kind: "fresh", pages: [page, other], rules: [], tag: undefined },
+      { kind: "fresh", pages: [page, other], rules: [], forms: [], tag: undefined },
       1
     )
-    const one = withPullOutcome(both, { kind: "fresh", pages: [page], rules: [], tag: undefined }, 2)
+    const one = withPullOutcome(both, { kind: "fresh", pages: [page], rules: [], forms: [], tag: undefined }, 2)
 
     expect([...one.pages.keys()]).toEqual([page.treeId])
   })
@@ -334,7 +355,7 @@ describe("what an outcome does to what is held", () => {
   it("moves only the moment of the pull when nothing had changed", () => {
     const fresh = withPullOutcome(
       NO_LIVE_PAGES,
-      { kind: "fresh", pages: [page], rules: [], tag: '"one"' },
+      { kind: "fresh", pages: [page], rules: [], forms: [], tag: '"one"' },
       1_000
     )
     const again = withPullOutcome(fresh, { kind: "unchanged" }, 2_000)
@@ -349,7 +370,7 @@ describe("what an outcome does to what is held", () => {
   it("keeps every page, and the tag that names them, through a failure", () => {
     const fresh = withPullOutcome(
       NO_LIVE_PAGES,
-      { kind: "fresh", pages: [page], rules: [], tag: '"one"' },
+      { kind: "fresh", pages: [page], rules: [], forms: [], tag: '"one"' },
       1_000
     )
     const failed = withPullOutcome(
@@ -386,6 +407,7 @@ describe("what an outcome does to what is held", () => {
           { treeId: page.treeId, rules: [onPhones] },
           { treeId: other.treeId, rules: [] },
         ],
+        forms: [],
         tag: '"one"',
       },
       1
@@ -398,10 +420,10 @@ describe("what an outcome does to what is held", () => {
   it("drops the rules the newest answer no longer carries", () => {
     const ruled = withPullOutcome(
       NO_LIVE_PAGES,
-      { kind: "fresh", pages: [page], rules: [{ treeId: page.treeId, rules: [onPhones] }], tag: '"one"' },
+      { kind: "fresh", pages: [page], rules: [{ treeId: page.treeId, rules: [onPhones] }], forms: [], tag: '"one"' },
       1
     )
-    const unruled = withPullOutcome(ruled, { kind: "fresh", pages: [page], rules: [], tag: '"two"' }, 2)
+    const unruled = withPullOutcome(ruled, { kind: "fresh", pages: [page], rules: [], forms: [], tag: '"two"' }, 2)
 
     expect(unruled.rules.size).toBe(0)
   })
@@ -409,7 +431,7 @@ describe("what an outcome does to what is held", () => {
   it("keeps the rules beside the pages through a failure, never one without the other", () => {
     const ruled = withPullOutcome(
       NO_LIVE_PAGES,
-      { kind: "fresh", pages: [page], rules: [{ treeId: page.treeId, rules: [onPhones] }], tag: '"one"' },
+      { kind: "fresh", pages: [page], rules: [{ treeId: page.treeId, rules: [onPhones] }], forms: [], tag: '"one"' },
       1
     )
     const failed = withPullOutcome(
@@ -423,9 +445,9 @@ describe("what an outcome does to what is held", () => {
   })
 
   it("never edits what it was handed", () => {
-    const fresh = withPullOutcome(NO_LIVE_PAGES, { kind: "fresh", pages: [page], rules: [], tag: '"one"' }, 1)
+    const fresh = withPullOutcome(NO_LIVE_PAGES, { kind: "fresh", pages: [page], rules: [], forms: [], tag: '"one"' }, 1)
 
-    withPullOutcome(fresh, { kind: "fresh", pages: [other], rules: [], tag: '"two"' }, 2)
+    withPullOutcome(fresh, { kind: "fresh", pages: [other], rules: [], forms: [], tag: '"two"' }, 2)
 
     expect([...fresh.pages.keys()]).toEqual([page.treeId])
     expect(NO_LIVE_PAGES.pages.size).toBe(0)
@@ -437,5 +459,139 @@ describe("the sentence a failed pull leaves in a log", () => {
     expect(
       describeSitePullFailure({ reason: "refused", detail: "the project is closed", status: 403 })
     ).toBe("live pages were not pulled (refused): the project is closed")
+  })
+})
+
+describe("the segment forms a pull reads beside the pages (0371 clause 5)", () => {
+  it("reads each page's forms, in the order the door answered them", async () => {
+    const outcome = await pull({
+      fetch: door(answersPagesAndForms([page, other], [{ treeId: page.treeId, forms: [phoneForm] }]))
+        .fetch,
+    })
+
+    expect(outcome).toEqual({
+      kind: "fresh",
+      pages: [page, other],
+      rules: [],
+      forms: [{ treeId: page.treeId, forms: [phoneForm] }],
+      tag: '"formed"',
+    })
+  })
+
+  /**
+   * A door answering rules and no forms is every deployment whose segments are
+   * still only names, which is all of them until somebody writes one.
+   */
+  it("reads an answer with no forms at all as pages with none", async () => {
+    const outcome = await pull({
+      fetch: door(answersPagesAndRules([page], [{ treeId: page.treeId, rules: [onPhones] }])).fetch,
+    })
+
+    expect(outcome.kind === "fresh" && outcome.forms).toEqual([])
+  })
+
+  /**
+   * A page whose forms were dropped serves every reader the base while their
+   * signals still name the segment they were sorted into — the same fault as a
+   * dropped rule list, one dimension across.
+   */
+  it("keeps the last pages and forms when one list cannot be read", async () => {
+    const broken = { treeId: page.treeId, forms: [{ audienceId: "aud_phone", delta: {} }] }
+    const outcome = await pull({ fetch: door(answersPagesAndForms([page], [broken])).fetch })
+
+    expect(outcome.kind === "failed" && outcome.failure.reason).toBe("unreadable")
+    expect(outcome.kind === "failed" && outcome.failure.detail).toContain("form list 1 of 1")
+    expect(outcome.kind === "failed" && outcome.failure.detail).toContain("forms.0.delta")
+  })
+
+  it("refuses forms for a page the answer does not hold", async () => {
+    const outcome = await pull({
+      fetch: door(answersPagesAndForms([page], [{ treeId: other.treeId, forms: [] }])).fetch,
+    })
+
+    expect(outcome.kind === "failed" && outcome.failure.reason).toBe("unreadable")
+    expect(outcome.kind === "failed" && outcome.failure.detail).toContain(other.treeId)
+  })
+
+  it("refuses two lists for one page, which has no single order", async () => {
+    const twice = [
+      { treeId: page.treeId, forms: [phoneForm] },
+      { treeId: page.treeId, forms: [] },
+    ]
+    const outcome = await pull({ fetch: door(answersPagesAndForms([page], twice)).fetch })
+
+    expect(outcome.kind === "failed" && outcome.failure.detail).toContain("repeats a page")
+  })
+
+  it("refuses `forms` that is not a list, rather than reading it as none", async () => {
+    const outcome = await pull({
+      fetch: door(new Response(JSON.stringify({ pages: [page], forms: {} }), { status: 200 })).fetch,
+    })
+
+    expect(outcome.kind === "failed" && outcome.failure.reason).toBe("unreadable")
+  })
+
+  it("holds each page's forms by its id, and no entry for a page whose list is empty", () => {
+    const held = withPullOutcome(
+      NO_LIVE_PAGES,
+      {
+        kind: "fresh",
+        pages: [page, other],
+        rules: [],
+        forms: [
+          { treeId: page.treeId, forms: [phoneForm] },
+          { treeId: other.treeId, forms: [] },
+        ],
+        tag: '"formed"',
+      },
+      1
+    )
+
+    expect([...held.forms.entries()]).toEqual([[page.treeId, [phoneForm]]])
+  })
+
+  /** A failed pull costs freshness, never the page — and never a form without its page. */
+  it("keeps the forms beside the pages through a failure", () => {
+    const formed = withPullOutcome(
+      NO_LIVE_PAGES,
+      {
+        kind: "fresh",
+        pages: [page],
+        rules: [{ treeId: page.treeId, rules: [onPhones] }],
+        forms: [{ treeId: page.treeId, forms: [phoneForm] }],
+        tag: '"formed"',
+      },
+      1
+    )
+    const failed = withPullOutcome(
+      formed,
+      { kind: "failed", failure: { reason: "unreachable", detail: "no" } },
+      2
+    )
+
+    expect(failed.forms).toBe(formed.forms)
+    expect(failed.rules).toBe(formed.rules)
+    expect(failed.pages).toBe(formed.pages)
+  })
+
+  it("drops the forms the newest answer no longer carries", () => {
+    const formed = withPullOutcome(
+      NO_LIVE_PAGES,
+      {
+        kind: "fresh",
+        pages: [page],
+        rules: [],
+        forms: [{ treeId: page.treeId, forms: [phoneForm] }],
+        tag: '"one"',
+      },
+      1
+    )
+    const bare = withPullOutcome(
+      formed,
+      { kind: "fresh", pages: [page], rules: [], forms: [], tag: '"two"' },
+      2
+    )
+
+    expect(bare.forms.size).toBe(0)
   })
 })

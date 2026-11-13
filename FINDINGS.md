@@ -341,6 +341,17 @@ under it. This entry closes when that merges **and a site wires it**: loomjs.org
 does not pass a context or an audience yet (`app/(marketing)/_lib/live.ts`),
 which is `Loom marketing`'s three lines.
 
+*Composition, 13 November:* the half of point 2 that was still outstanding —
+*compose with `composeTreeForContext`* — is built on
+`framework-97-the-form-a-segment-earns` under
+[0392](decisions/0392-a-segments-form-arrives-in-the-same-pull-as-its-rules-and-a-form-that-cannot-be-applied-costs-the-reader-their-segment.md).
+The door answers `{ pages, rules, forms }` from one read of 0376's store per
+page, and `pageForReader(held, built, context)` answers the tree, the segment
+and — where a form would not apply — the refusal. **So the four points are now
+all built**, and what is left of this entry is unchanged: it closes when a site
+wires a context, which is `Loom marketing`'s three lines in
+`app/(marketing)/_lib/live.ts`.
+
 ---
 ## 2026-11-11 — the command that adds a component of your own cannot be printed on this site, because its own grammar is a word the site keeps off every page
 
@@ -1244,6 +1255,32 @@ routine of this lane will do what this one did — read, verify once, unsubscrib
 > correct its own pull-request comment, which said *subscribed to nothing* —
 > true of what this session called, false of what it was subscribed to, and the
 > distinction is invisible to anyone reading the pull request later.
+>
+> **Fourth instance, 13 November, `Loom daily build`.** #886 was opened at
+> 09:38:45Z and by 09:40:06Z this session had **three** queued wakes: one
+> `subscription.created` for a subscription this session never asked for, and
+> **two from `vercel[bot]` posting one comment and editing it once** as the
+> build went Building → Ready. Same response: read all three, checked the pull
+> request against primary sources once — `mergeable_state: clean`, the one
+> check run `success`, no review thread, no non-bot comment but this session's
+> own — then `unsubscribe_pr_activity`, nothing armed.
+>
+> **Two figures in this entry move.** The ratio is **two of every three** here
+> rather than five of six, because this repository now runs one check and no
+> `check_suite.completed` arrived — so *six wakes a pull request* is the wrong
+> number to quote and the shape, not the count, is what has held across four
+> instances. And the batching the second instance could not confirm from one
+> observation now has a second: all three were handed over in **one**
+> `ReadNotifications` call, so this run was billed **one** session, not three.
+> Two observations is still not a guarantee, but a lane reading this should
+> expect one session a pull request rather than six.
+>
+> **The conflict is unchanged and is four instances old.** The
+> `subscription.created` body still asks for a check-in chain this lane's brief
+> forbids in two sentences, and the brief still cannot stop the subscription
+> being created. Every routine of this lane will keep doing what these four
+> did. **The maintainer is the only one who can settle which rule wins**, and
+> the cost of not settling it is now measured rather than estimated.
 
 ---
 ## 2026-11-07 — the merge gate for four surfaces goes red about 13 November on a documentation cap, and the remedy that cap pre-agrees is measured as unaffordable
@@ -71825,6 +71862,103 @@ it** — which was true when the margin was 148 bytes and is still true now that
 it is 12,795. Nothing is blocked by that and it is not this lane's to write.
 
 ---
+## 2026-11-13 — the live door publishes three names and `@jam-overture/loom/live` has no written page at all, so the one call a site's render path makes is documented only by its signature
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/`) · **Status:** open — **nothing is broken and nothing
+is blocked**; the generated reference has the three names and their doc
+comments, and `pnpm verify` is green
+
+`pnpm --filter @loom/app docs:api` said it itself, in the words the generator
+uses for a name no prose reaches:
+
+```
+@jam-overture/loom/live — LivePageForms, ServedPage, pageForReader
+  no written page names anything published by @jam-overture/loom/live, so a
+  sentence about a new name on it would be the first on this site. That is a
+  page rather than a line — file it for `Loom docs`.
+```
+
+**This is the door a customer's own server imports.** Twenty-nine names, and
+`pageForReader` is now the one call a render path makes once a project has
+segments: it answers the tree to render, the segment to file the page view
+under, and why a form was not applied. The two calls the marketing site's
+*Connect your site* prints (`startPullingLivePages` and `livePageOf`) are the
+only prose about any of it anywhere, and they are on another lane's page for
+another purpose.
+
+**What is already written and would not have to be:** the module docblock in
+`src/live/index.ts` is a page's worth of prose — three properties that hold by
+construction, a worked example, and what each of them costs. It is lifted into
+the reference and is the thing a page would be assembled from rather than
+researched.
+
+**The cap is not the reason this has waited.** `main` has 12,795 bytes spare on
+the published-names file as of 12 November (#859), so there is room. This entry
+is filed because the generator asked for it and because the name it is about is
+the one a host cannot avoid, not because anything is urgent.
+
+---
+## 2026-11-13 — a site can be served a segment's form now, and loomjs.org still passes no context, so the only deployment anybody can look at serves every reader the base
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom marketing`
+(`apps/loom/app/(marketing)/_lib/live.ts`) · **Status:** open — **nothing is
+broken**; this is the same three lines the 11 November segments entry already
+asks for, restated now that the thing they would turn on exists
+
+Until today the ask was worth little: a site passing a context would have had
+its readers *named* and served exactly the same page, because nothing composed.
+As of
+[0392](decisions/0392-a-segments-form-arrives-in-the-same-pull-as-its-rules-and-a-form-that-cannot-be-applied-costs-the-reader-their-segment.md)
+the pull client composes, so the three lines are now the difference between a
+deployment that can serve two forms of a page and one that cannot.
+
+`app/(marketing)/_lib/live.ts` line 117 is the whole of it:
+
+```ts
+return livePageOf(await live.pullFor(deployment, key).ready(), built.treeId) ?? built
+```
+
+`pageForReader(held, built, context)` replaces that expression and the
+`?? built` with one call, and takes whatever this server knows about the
+request — the keys a segment's rules are written against. What it answers is
+`{ tree, audience, refusal }`; the `audience` goes to `renderLoomTree`'s
+`audience` option, which is already wired, and the `refusal` is one line of
+logging.
+
+**No framework work is left for this.** Both halves are on the branch named
+above. What this lane decides is which keys loomjs.org's server can honestly
+put in a context, which is a question about that server and not about Loom.
+
+---
+## 2026-11-13 — the door's answer now grows with how much work a project has done rather than with how many pages it has, and nothing measures it
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build`
+(`apps/loom/app/_lib/pages/live.ts`) · **Status:** open — **nothing is broken
+and no deployment has a form in it**; filed on the day the shape changed, so
+that the first project with real forms is not the thing that discovers it
+
+[0392](decisions/0392-a-segments-form-arrives-in-the-same-pull-as-its-rules-and-a-form-that-cannot-be-applied-costs-the-reader-their-segment.md)
+adds `forms` to `GET /api/pages/live`: every segment's full `TreeDelta`, for
+every live page, on every pull that is not a `304`. That is 0263 clause 3's
+bargain and it is the right one — the overlay is cacheable beside the base
+precisely so that no call is made per request — but it is the first part of
+that answer whose size is set by **how much a project has authored** rather
+than by how many pages it has published.
+
+**What bounds it today**, and both are in the record: a form whose segment the
+page's rules do not name is left out, and a segment named by two rules is sent
+one form. What does not bound it: how large one delta may be, and how many
+segments a page may have forms for. 0371 took *at most ten segments a project*
+as a reversible default; nothing holds the deltas to anything.
+
+**What would close it:** a figure. The body of `/api/pages/live` is already
+one `JSON.stringify` in one function, and `pnpm weigh` reads a response saved
+to a file, so measuring it costs nothing — what is missing is a deployment with
+forms in it to measure. **It is explicitly not worth building a bound before
+there is a number**, which is the mistake the 9 November sweep-budget entries
+were about from the other direction: a wall-clock figure picked on an idle
+container is not evidence.
 ## 2026-11-13 — the silent-component census landed, and the half of the 11 November entry it does not close is the sweep
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom signals`
