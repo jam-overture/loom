@@ -18,6 +18,9 @@ import type { PublishKeyStore } from "./publish-keys"
 import { memoryPublishKeyStore } from "./publish-keys-memory"
 import { postgresPublishKeyStore } from "./publish-keys-postgres"
 import type { PublishedPageStore } from "./published"
+import type { ReaderWindowStore } from "./reader-windows"
+import { memoryReaderWindowStore } from "./reader-windows-memory"
+import { postgresReaderWindowStore } from "./reader-windows-postgres"
 import type { SitePullStore } from "./pulls"
 import { memorySitePullStore } from "./pulls-memory"
 import { postgresSitePullStore } from "./pulls-postgres"
@@ -27,8 +30,8 @@ import type { ReadDoor } from "./live"
 import type { PublishDoor } from "./receive"
 
 /**
- * This deployment's publish keys, published pages and the pulls of its read
- * door: Postgres when one is
+ * This deployment's publish keys, published pages, the pulls of its read
+ * door and each project's reader window: Postgres when one is
  * configured and memory when not, on the handle the store already uses.
  *
  * Memoised on a global carrier for `key-store.ts`'s reason: the door and the
@@ -39,6 +42,7 @@ type Held = {
   readonly keys: PublishKeyStore
   readonly pagesFor: (application: ApplicationId) => PublishedPageStore
   readonly pulls: SitePullStore
+  readonly windows: ReaderWindowStore
 }
 
 const memoryHeld = (): Held => {
@@ -53,6 +57,7 @@ const memoryHeld = (): Held => {
       return known
     },
     pulls: memorySitePullStore(),
+    windows: memoryReaderWindowStore(),
   }
 }
 
@@ -60,6 +65,7 @@ const postgresHeld = (db: LoomDatabase): Held => ({
   keys: postgresPublishKeyStore(db),
   pagesFor: (application) => postgresPublishedPageStore(db, { application }),
   pulls: postgresSitePullStore(db),
+  windows: postgresReaderWindowStore(db),
 })
 
 const CARRIER_KEY = Symbol.for("loom.app.pages")
@@ -71,6 +77,9 @@ export const appPublishKeys: PublishKeyStore = held.keys
 
 /** When each project's site took its live pages, for *Connect your site* to say whether it pulls. */
 export const appSitePulls: SitePullStore = held.pulls
+
+/** How long each project's readers keep the pages they first saw (0383), as *Settings* sets it. */
+export const appReaderWindows: ReaderWindowStore = held.windows
 
 export const publishedPagesFor = (application: ApplicationId): PublishedPageStore =>
   held.pagesFor(application)
