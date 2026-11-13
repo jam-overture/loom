@@ -72212,8 +72212,15 @@ which is written on `ranked` and has a test of its own.
 
 ### The half left open, and it is a sentence rather than a shape
 
-**Owned by `Loom portal`** (the *Goals* screen), **status: open, nothing is
-broken.** The screen landed this morning (#882) saying *how long readers stay on
+**Owned by `Loom portal`** (the *Goals* screen), **status: closed 13 November
+by `Portal: 8b each goal says which page its part is skimmed on`** (#888): each
+goal now says *Skimmed on 2 of the 5 pages it is counted on: “Pricing” and
+“Tour”. Start with “Pricing”: its readers were short of 3 minutes between them*, from the
+skimmed rows of `ranked` in their order, reading `standing` and never a row's
+`pace`, and naming one page's own `shortMs`, never a sum of them. The words
+below are kept as filed.
+
+**Was: open, nothing is broken.** The screen landed this morning (#882) saying *how long readers stay on
 this part* with a silence in its own words. It can now also say **which page**,
 and it draws neither the breakdown nor the count of verdicts.
 

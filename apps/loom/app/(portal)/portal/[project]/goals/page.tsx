@@ -21,6 +21,7 @@ import {
   countsWhen,
   goalReadingOf,
   pageChoicesOf,
+  pageNameIn,
   partsByPageOf,
   readingSentence,
   whereSentence,
@@ -102,7 +103,8 @@ import { TimeOnIt } from "./_components/time-on-it"
  * pages it covers (`partPaceOf`, 0381), on the version each page serves now
  * since that version was first counted. It is a figure beside the goal, not
  * the wireframe's *Stays on it* kind, which 0350 leaves unoffered; a part
- * nobody was seen on says so rather than reading nought.
+ * nobody was seen on says so rather than reading nought. Beneath it, the pages
+ * the part is skimmed on, the one short of the most reading time first (0390).
  *
  * **A segment** (`?segment=`, unit 9 piece 3) narrows both figures to its
  * readers (0371 clause 6), and a segment nothing has been counted under says
@@ -228,7 +230,7 @@ const GoalRow = ({
     <td className="py-2 pr-3 text-xs">
       {countsWhen(goal, readings.pages)}
       <span className="text-ink-muted block font-mono text-[11px]">{goal.nodeId}</span>
-      <TimeOnIt stay={readings.stay(goal)} />
+      <TimeOnIt stay={readings.stay(goal)} nameOf={pageNameIn(readings.pages)} />
     </td>
     <td className="py-2 pr-3 text-xs">{whereSentence(goal, readings.pages)}</td>
     <td className="py-2 pr-3">
