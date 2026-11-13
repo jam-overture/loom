@@ -3,12 +3,14 @@ import type { PrimitiveType } from "../primitive-type.js"
 import type { AudienceId } from "../audience/audience.js"
 
 import {
+  ARRIVAL_HOUR_MS,
   arrivalRangeBefore,
   hourlySeriesOf,
   readReaderArrivals,
   type ArrivalCounterHandle,
   type ArrivalRange,
   type ArrivalReading,
+  type ArrivalSeries,
   type ArrivalSeriesOptions,
 } from "./arrivals.js"
 import type { ReaderSignalStoreError } from "./journal.js"
@@ -399,6 +401,134 @@ export const readReaderActed = async (
 }
 
 /**
+ * One hour of {@link ActedAgainst}: what readers did in it, and the page views
+ * those doings could have come from.
+ */
+export type ActedAgainstHour = {
+  /** The instant the hour began (UTC). */
+  readonly hour: number
+  /** What readers did in this hour, in the kind the reading is of. */
+  readonly count: number
+  /**
+   * The page views this hour's doings could have come from — **this hour's and
+   * the hour before's** — or `null` where the reading cannot speak for the hour
+   * before.
+   *
+   * `0` is a real nought: page views were counted in both hours and there were
+   * none. `null` is a withholding, and it means the earlier hour is not one the
+   * arrivals series reached — the first hour of a range always, and an hour
+   * before page views were first counted. A nought there would read as *nobody
+   * was here*, which is the one way this pair could be worse than no pair:
+   * {@link count} against it is the shape where five presses and no arrivals
+   * looks like five presses from nobody, rather than five presses by readers
+   * who arrived in the previous hour.
+   */
+  readonly views: number | null
+  /** Whether this hour is over and inside the range. Carried from {@link ActedHour.whole}. */
+  readonly whole: boolean
+}
+
+/**
+ * **What readers did over a range, by hour, against the readers who were there
+ * to do it.**
+ *
+ * `actedSeriesOf` draws *nine presses at eleven o'clock*. Whether that is a
+ * good hour or a bad one is not in it: nine presses out of twenty page views
+ * and nine out of five hundred are the same bar. The figure that tells them
+ * apart is a denominator per hour, and 0362 clause 9 refused one because the
+ * two numbers are counted at different moments — a reader who arrived at 10:59
+ * and pressed at 11:01 is in the eleven o'clock numerator and the ten o'clock
+ * denominator, which is two page views' worth of a month and the whole of an
+ * hour.
+ *
+ * ## The denominator is rolling, and that is the whole of the design
+ *
+ * An hour's doings came from readers who arrived in **that hour or the one
+ * before it**, which is where a page view that straddles the boundary actually
+ * was. So the denominator of eleven o'clock is the page views of ten and
+ * eleven, and the boundary error is inside the window rather than across its
+ * edge.
+ *
+ * **It is therefore never added up, and there is no total here to add.** Every
+ * page view is in two hours' denominators on purpose, so a sum of
+ * {@link ActedAgainstHour.views} over a day is about twice the day's page views
+ * — the double count this reading commits deliberately and must never publish.
+ * The range's own denominator is exact and already published, once, as
+ * {@link ActedRate}: `views` on the arrivals reading beside this one, under one
+ * quotient (0158, 0362 clause 9). {@link count} is a sum because occurrences
+ * add (0368); the denominators are not, and the asymmetry is the reason this is
+ * a reading of its own rather than two more fields on {@link ActedSeries}.
+ *
+ * **No quotient is published here.** 0362 clause 9 is an accepted record and it
+ * says the rate is taken once over the range and never per hour; this publishes
+ * the pair its reason was about and leaves the division to the decision that
+ * would allow it. A surface can draw two bars today and say which hours had
+ * readers to lose.
+ *
+ * Pure: a function of two readings, no store, no clock, no DOM.
+ */
+export type ActedAgainst = {
+  /** The range, as the acted series has it. */
+  readonly range: ArrivalRange
+  /** The kind the numerators are of, as the acted series has it. */
+  readonly kind: ActedKind
+  /**
+   * One entry per hour of the acted series, ascending and in step with it.
+   *
+   * Empty where the acted series is empty, which is *nothing has ever been
+   * counted here* rather than *nobody acted* (0309, 0347) — the same sentence
+   * {@link ActedSeries.hours} says, kept rather than filled in with noughts
+   * this reading would be inventing.
+   */
+  readonly hours: readonly ActedAgainstHour[]
+  /** What readers did inside the range, which is the sum of the hours above. */
+  readonly count: number
+  /** The first hour the acted scope ever counted, carried through. */
+  readonly begins?: number
+  /** Whether the range starts before the acted counter did. */
+  readonly clipped: boolean
+}
+
+/**
+ * The two series, paired by hour.
+ *
+ * Both readings rather than both stores, because the guarantee this needs is
+ * the one `readReaderActedRate` already makes: **one range, taken once, passed
+ * to both halves.** Handed two series a caller assembled over different ranges,
+ * every hour the arrivals series does not reach is withheld rather than
+ * divided by nothing — a mismatch degrades to a pair this reading will not
+ * speak for, never to a number nobody can tell is wrong by looking at it.
+ *
+ * The first hour of the range is always withheld, because its earlier hour lies
+ * outside the series the arrivals reading draws. A caller who wants a
+ * denominator on every bar asks for a range one hour wider and drops the first.
+ */
+export const actedAgainstOf = (acted: ActedSeries, arrivals: ArrivalSeries): ActedAgainst => {
+  const views = new Map(arrivals.hours.map((hour) => [hour.hour, hour.views] as const))
+
+  const rolling = (hour: number): number | null => {
+    const here = views.get(hour)
+    const before = views.get(hour - ARRIVAL_HOUR_MS)
+
+    return here === undefined || before === undefined ? null : here + before
+  }
+
+  return {
+    range: acted.range,
+    kind: acted.kind,
+    hours: acted.hours.map(({ hour, count, whole }) => ({
+      hour,
+      count,
+      views: rolling(hour),
+      whole,
+    })),
+    count: acted.count,
+    ...(acted.begins === undefined ? {} : { begins: acted.begins }),
+    clipped: acted.clipped,
+  }
+}
+
+/**
  * What readers did in a range, over the page views they did it in.
  *
  * The figure 0350 clause 4 defines — *7 presses in 200 page views, 3.5 per
@@ -422,6 +552,11 @@ export const readReaderActed = async (
  * per bucket, in a shape where *a press with no arrival* reads as an infinite
  * rate rather than as a reader who came in before the hour. The hours are
  * published as counts, which add honestly, and the quotient is taken once.
+ *
+ * **The denominator an hour can have is published beside it rather than divided
+ * into it**, as {@link ActedAgainst}: the page views of the hour and the hour
+ * before, which is the window the boundary error fits inside. The division
+ * stays unpublished because 0362 clause 9 is the record that refused it.
  */
 export type ActedRate = {
   /**
@@ -445,6 +580,16 @@ export type ActedRateReading = {
   readonly acted: ActedReading
   readonly arrivals: ArrivalReading
   readonly rate: ActedRate
+  /**
+   * The two series paired by hour, which is {@link actedAgainstOf} of the two
+   * above.
+   *
+   * Published here rather than left to a caller because the pairing's one
+   * guarantee is this call's one guarantee — the same range into both reads —
+   * and a caller composing it from two reads of its own is the caller that gets
+   * a denominator describing a different stretch of time from its numerator.
+   */
+  readonly against: ActedAgainst
 }
 
 /** Both figures' handles, which one counter store satisfies. */
@@ -489,5 +634,6 @@ export const readReaderActedRate = async (
     acted: acted.value,
     arrivals: arrivals.value,
     rate: { per100: now, was, ratio: ratioOf(was, now) },
+    against: actedAgainstOf(acted.value.series, arrivals.value.series),
   })
 }

@@ -4,6 +4,7 @@ import { nodeId, primitiveType, TREE } from "../testing/reader-signal-contract.j
 
 import {
   ACTED_KINDS,
+  actedAgainstOf,
   actedChangeOf,
   actedCountOf,
   actedSeriesOf,
@@ -15,7 +16,12 @@ import {
   type StoredActed,
   type StoredActedHour,
 } from "./acted.js"
-import { ARRIVAL_HOUR_MS, arrivalRangeOf, type StoredArrivals } from "./arrivals.js"
+import {
+  ARRIVAL_HOUR_MS,
+  arrivalRangeOf,
+  arrivalSeriesOf,
+  type StoredArrivals,
+} from "./arrivals.js"
 import type { ReaderSignalStoreError } from "./journal.js"
 import { DEFAULT_AUDIENCE_ID } from "../audience/audience.js"
 
@@ -352,6 +358,221 @@ describe("readReaderActedRate", () => {
     expect(handle.reads[0]?.nodeId).toBe(nodeId("buy"))
     expect(handle.reads).toHaveLength(1)
     expect(read.ok && read.value.arrivals.change.views).toBe(10)
+  })
+
+  /**
+   * The pairing's one guarantee is this call's one guarantee, so it is taken
+   * here rather than left to a caller holding two readings.
+   */
+  it("pairs the two series it read over one range, with no second read", async () => {
+    const handle = handleOver(
+      [row(13, { activations: 5 })],
+      hourOf(0),
+      arrivals(
+        [
+          { hour: hourOf(12), views: 20 },
+          { hour: hourOf(13), views: 30 },
+        ],
+        hourOf(0)
+      )
+    )
+    const reading = await readReaderActedRate(handle, { range })
+
+    expect(handle.reads).toHaveLength(1)
+    expect(reading.ok && reading.value.against.hours[0]).toEqual({
+      hour: hourOf(12),
+      count: 0,
+      views: null,
+      whole: true,
+    })
+    expect(reading.ok && reading.value.against.hours[1]).toEqual({
+      hour: hourOf(13),
+      count: 5,
+      views: 50,
+      whole: true,
+    })
+    expect(reading.ok && reading.value.against.range).toEqual(range)
+  })
+})
+
+/**
+ * The pair, which is the reading 0362 clause 9's reason was about: an hour's
+ * doings and the page views they could have come from, with no quotient between
+ * them.
+ *
+ * Every test here is about a **denominator**, because the numerators are
+ * `actedSeriesOf`'s and are already guarded above. Two of them are the whole
+ * point: the rolling window (so an hour whose readers arrived in the previous
+ * hour is a pair rather than presses from nobody), and the refusal to add the
+ * denominators up (because every page view is in two of them on purpose).
+ */
+describe("actedAgainstOf", () => {
+  const range = { from: hourOf(12), to: hourOf(24) }
+
+  const arrivalRows = (
+    hours: readonly { hour: number; views: number }[],
+    begins?: number
+  ): StoredArrivals => ({
+    hours: hours.map(({ hour, views }) => ({
+      audienceId: DEFAULT_AUDIENCE_ID,
+      treeId: TREE,
+      revision: 1,
+      hour,
+      views,
+      updatedAt: new Date(hour).toISOString(),
+    })),
+    ...(begins === undefined ? {} : { begins }),
+  })
+
+  /** An acted series and an arrivals series over the same range, as a reading hands them over. */
+  const pairOver = (
+    acted: readonly StoredActedHour[],
+    arrivals: readonly { hour: number; views: number }[],
+    options: { readonly arrivalsBegins?: number } = {}
+  ) =>
+    actedAgainstOf(
+      actedSeriesOf(stored(acted, hourOf(0)), range),
+      arrivalSeriesOf(arrivalRows(arrivals, options.arrivalsBegins ?? hourOf(0)), range)
+    )
+
+  const viewsAt = (against: ReturnType<typeof pairOver>, hour: number): number | null | undefined =>
+    against.hours.find((entry) => entry.hour === hourOf(hour))?.views
+
+  it("pairs an hour's doings with the page views of that hour and the one before", () => {
+    const against = pairOver(
+      [row(14, { activations: 9 })],
+      [
+        { hour: hourOf(13), views: 40 },
+        { hour: hourOf(14), views: 60 },
+      ]
+    )
+
+    expect(viewsAt(against, 14)).toBe(100)
+    expect(against.hours.find((entry) => entry.hour === hourOf(14))?.count).toBe(9)
+  })
+
+  /**
+   * The test the finding of 6 November asked for first, in the shape this
+   * reading takes: an hour holding doings and no arrivals of its own is not an
+   * hour whose readers came from nowhere.
+   */
+  it("reads an hour whose readers all arrived in the previous hour as a pair, not as doings from nobody", () => {
+    const against = pairOver([row(13, { activations: 5 })], [{ hour: hourOf(12), views: 20 }])
+
+    expect(viewsAt(against, 13)).toBe(20)
+  })
+
+  /**
+   * The denominator is the only number here that does not add, and this is the
+   * assertion that keeps it from being added: every page view is in two hours'
+   * windows deliberately, so a sum of them is about twice the range's page
+   * views — and the range's own denominator is `ActedRate`'s, taken once
+   * (0158).
+   */
+  it("publishes no total denominator, because every page view is in two hours' windows", () => {
+    const hours = Array.from({ length: 12 }, (_, index) => index + 12)
+    const against = pairOver(
+      hours.map((hour) => row(hour, { activations: 1 })),
+      hours.map((hour) => ({ hour: hourOf(hour), views: 10 }))
+    )
+
+    const denominators = against.hours.reduce((sum, entry) => sum + (entry.views ?? 0), 0)
+
+    expect(denominators).toBe(220)
+    expect(against.count).toBe(12)
+    expect(against).not.toHaveProperty("views")
+    expect(against.hours.reduce((sum, entry) => sum + entry.count, 0)).toBe(against.count)
+  })
+
+  it("withholds the first hour of the range, whose earlier hour the arrivals series does not draw", () => {
+    const against = pairOver(
+      [row(12, { activations: 3 })],
+      [
+        { hour: hourOf(11), views: 70 },
+        { hour: hourOf(12), views: 30 },
+      ]
+    )
+
+    expect(viewsAt(against, 12)).toBeNull()
+    expect(against.hours.find((entry) => entry.hour === hourOf(12))?.count).toBe(3)
+  })
+
+  /**
+   * The two states this field keeps apart, which is the rule the subsystem
+   * keeps everywhere a figure can be empty for two reasons (0309, 0347).
+   */
+  it("counts a nought denominator as a nought and an unreachable one as a withholding", () => {
+    const against = pairOver([row(14, { activations: 2 })], [{ hour: hourOf(20), views: 5 }])
+
+    expect(viewsAt(against, 14)).toBe(0)
+    expect(viewsAt(against, 12)).toBeNull()
+  })
+
+  it("withholds the hours before page views were first counted, rather than dividing by a page nobody counted", () => {
+    const against = pairOver(
+      [row(13, { activations: 1 }), row(15, { activations: 1 })],
+      [
+        { hour: hourOf(14), views: 10 },
+        { hour: hourOf(15), views: 10 },
+      ],
+      { arrivalsBegins: hourOf(14) }
+    )
+
+    expect(viewsAt(against, 13)).toBeNull()
+    expect(viewsAt(against, 14)).toBeNull()
+    expect(viewsAt(against, 15)).toBe(20)
+  })
+
+  it("is in step with the acted series, and carries its range, kind and clipping", () => {
+    const series = actedSeriesOf(stored([row(14, { activations: 1 })], hourOf(13)), range)
+    const against = actedAgainstOf(
+      series,
+      arrivalSeriesOf(arrivalRows([{ hour: hourOf(14), views: 1 }], hourOf(0)), range)
+    )
+
+    expect(against.range).toEqual(series.range)
+    expect(against.kind).toBe(series.kind)
+    expect(against.clipped).toBe(series.clipped)
+    expect(against.begins).toBe(hourOf(13))
+    expect(against.hours.map((entry) => entry.hour)).toEqual(series.hours.map((entry) => entry.hour))
+  })
+
+  it("marks the hour in progress as the acted series does, so a surface does not draw the clock as a fall", () => {
+    const against = actedAgainstOf(
+      actedSeriesOf(stored([row(23, { activations: 1 })], hourOf(0)), range, { now: hourOf(23) }),
+      arrivalSeriesOf(arrivalRows([{ hour: hourOf(23), views: 2 }], hourOf(0)), range)
+    )
+
+    expect(against.hours.at(-1)).toMatchObject({ hour: hourOf(23), whole: false })
+  })
+
+  it("draws nothing where nothing has ever been counted, rather than a row of noughts", () => {
+    const against = actedAgainstOf(
+      actedSeriesOf({ hours: [] }, range),
+      arrivalSeriesOf(arrivalRows([{ hour: hourOf(14), views: 4 }], hourOf(0)), range)
+    )
+
+    expect(against.hours).toEqual([])
+    expect(against.count).toBe(0)
+  })
+
+  /**
+   * Handed two series a caller assembled over different ranges, the pairing
+   * degrades to a withholding rather than to a denominator describing a
+   * different stretch of time — which is a number nobody can tell is wrong by
+   * looking at it.
+   */
+  it("withholds every denominator where the arrivals series is over another range", () => {
+    const against = actedAgainstOf(
+      actedSeriesOf(stored([row(14, { activations: 1 })], hourOf(0)), range),
+      arrivalSeriesOf(arrivalRows([{ hour: hourOf(2), views: 100 }], hourOf(0)), {
+        from: hourOf(0),
+        to: hourOf(12),
+      })
+    )
+
+    expect(against.hours.every((entry) => entry.views === null)).toBe(true)
+    expect(against.hours).not.toHaveLength(0)
   })
 })
 
