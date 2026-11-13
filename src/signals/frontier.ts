@@ -4,6 +4,7 @@ import type { PrimitiveType } from "../primitive-type.js"
 import type { PrimitiveRole } from "../role.js"
 
 import type { PageReading, PartReading, PartStanding } from "./parts.js"
+import { between, extentsOf, prefixOf } from "./subtrees.js"
 
 /**
  * **Where a window's reading of a page stopped.**
@@ -234,18 +235,6 @@ export type PageFrontier = {
   readonly orphaned: number
 }
 
-/** Prefix counts, so a subtree's standings are two subtractions rather than a scan. */
-const prefixOf = (parts: readonly PartReading[], standing: PartStanding): readonly number[] => {
-  const counts: number[] = [0]
-
-  for (const part of parts) counts.push((counts.at(-1) ?? 0) + (part.standing === standing ? 1 : 0))
-
-  return counts
-}
-
-const between = (counts: readonly number[], from: number, to: number): number =>
-  (counts[to] ?? 0) - (counts[from] ?? 0)
-
 /**
  * Read a page's reading as the places it stopped.
  *
@@ -264,30 +253,12 @@ export const pageFrontierOf = (reading: PageReading): PageFrontier => {
    * The index of the part each part sits inside, and the exclusive end of each
    * part's subtree, both from one pre-order pass over a stack of open parts.
    *
-   * Taken by index rather than by id so that a container's standing is read off
-   * the row itself. An id would be a second place where two parts sharing one —
-   * which a tree does not do, and which this reading cannot check — became a
-   * wrong answer instead of an impossible one.
+   * Spelled in [`subtrees.ts`](subtrees.ts) rather than here, because the
+   * library's reading of the same defect needs the same two projections and a
+   * second spelling of them is the failure this subsystem already has a name
+   * for (0391).
    */
-  const containers: (number | null)[] = []
-  const ends: number[] = new Array<number>(total).fill(total)
-  const open: number[] = []
-
-  for (const [at, part] of parts.entries()) {
-    for (;;) {
-      const top = open.at(-1)
-      if (top === undefined) break
-
-      const above = parts[top]
-      if (above === undefined || above.depth < part.depth) break
-
-      ends[top] = at
-      open.pop()
-    }
-
-    containers.push(open.at(-1) ?? null)
-    open.push(at)
-  }
+  const { containers, ends } = extentsOf(parts)
 
   /**
    * The frontier part that accounts for each unreached part: itself where its
