@@ -2,7 +2,8 @@ import { gzipSync } from "node:zlib"
 
 import { DOCS_LANDING_SLUG, docsHref, docsSections } from "../nav"
 
-import { searchProse, searchProseFor } from "./build"
+import { buildSearchIndex, searchProseFor } from "./build"
+import { proseEntriesOf } from "./model"
 
 /**
  * Whether this site has room for another page, in the unit somebody writing one
@@ -90,7 +91,19 @@ const fileOf = (sectionSlug: string): { readonly json: string; readonly gz: numb
   return measured
 }
 
-const everyBody = (): readonly (readonly [string, string])[] => (allBodies ??= searchProse().bodies)
+/**
+ * Every body on the site, beside the address it sits at.
+ *
+ * Read off the index rather than out of a prose file, because a prose file
+ * stopped carrying addresses on 13 November: its bodies line up with the
+ * entries `proseEntriesOf` picks out and the address is the entry's own. This
+ * module runs on the server and has the entries in front of it, so it takes
+ * them from there instead of reconstructing what the browser reconstructs.
+ */
+const everyBody = (): readonly (readonly [string, string])[] =>
+  (allBodies ??= proseEntriesOf(buildSearchIndex().entries, "")
+    .filter((entry) => entry.body !== "")
+    .map((entry) => [entry.href, entry.body] as const))
 
 /**
  * The words a reader would count, which is every run of non-space.

@@ -2,7 +2,8 @@ import { describe, expect, it } from "vitest"
 
 import { DOCS_LANDING_SLUG, docsHref, docsSections, writtenDocsSections } from "../nav"
 
-import { searchProse, searchProseFor } from "./build"
+import { buildSearchIndex, searchProse, searchProseFor } from "./build"
+import { addressedProse } from "./model"
 import {
   bytesPerWord,
   capsOver,
@@ -36,8 +37,8 @@ import {
 describe("the room this site has for another page", () => {
   /** Every word on a page, read the way `room.ts` reads it rather than from it. */
   const proseOn = (href: string): string =>
-    searchProse()
-      .bodies.filter(([at]) => at === href || at.startsWith(`${href}#`))
+    addressedProse(buildSearchIndex().entries, searchProse())
+      .filter(([at, words]) => words !== "" && (at === href || at.startsWith(`${href}#`)))
       .map(([, words]) => words)
       .join(" ")
 
@@ -211,11 +212,22 @@ describe("the room this site has for another page", () => {
   it("carries the remedy clause exactly where a short page would not fit", () => {
     expect(shortestWrittenPage()).toBeDefined()
 
+    /*
+     * **Both ways, off a constructed room**, because since 13 November no
+     * section of this site fails to fit and a loop over the five would assert
+     * the clause's absence five times and its presence never. `sentenceOf`
+     * takes a `Room`, so the case that matters is still a case: the same room
+     * with `fits` the other way round is the whole of what the clause turns on.
+     */
+    const tight = { ...roomIn("the-runtime"), fits: false }
+
+    expect(sentenceOf(tight)).toContain("A shorter page is not the remedy")
+    expect(sentenceOf({ ...tight, fits: true })).not.toContain("A shorter page is not the remedy")
+
     for (const section of docsSections) {
       const room = roomIn(section.slug)
       const sentence = roomSentence(section.slug)
 
-      expect(room.binding.cap, section.slug).toBe(PROSE_TOTAL_GZIP_CAP)
       expect(sentence.includes("A shorter page is not the remedy"), section.slug).toBe(!room.fits)
       expect(sentence.includes("decisions/0353"), section.slug).toBe(!room.fits)
       /*
@@ -230,22 +242,35 @@ describe("the room this site has for another page", () => {
   })
 
   /**
-   * **Two of the five sections still cannot take a page as short as the
-   * shortest one on this site**, and the bill for all five is what binds every
-   * one of them.
+   * **Every section can now take a page as short as the shortest one on this
+   * site**, which is the case that flipped on 13 November.
    *
-   * This is the case that flips when 0353 is answered, and it is written as a
-   * count rather than as a named section so that it says something about the
-   * site rather than about one rail entry. A decision that gives the box more
-   * room makes it fail, and the run that lands it says what the state is then —
-   * which is what the case this replaced was for, with the part that was really
-   * a property taken out of it.
+   * It flipped without 0353 being answered. The words stopped travelling with
+   * their addresses beside them — the file says once what its bodies are
+   * `under` and then says the words, in the order the section's entries are
+   * already in — and the bill fell 4,356 compressed bytes, which is twelve
+   * times what taking the section prefix off those same addresses was worth on
+   * 5 November. The tightest section went from 373 words of room to 2,335.
+   *
+   * Written as a count rather than as a named section, for the reason the case
+   * it replaces was: it is a statement about the site. It is **a state and not
+   * a property** — the property is the case above, which is why that one no
+   * longer reads the site to decide what to assert. A page long enough to
+   * spend 2,335 words makes this fail, and the run that writes it says what
+   * the state is then.
    */
-  it("still has sections that cannot take a page as short as its shortest", () => {
+  it("can take a page as short as its shortest in every section", () => {
     const full = docsSections.filter((section) => !roomIn(section.slug).fits)
 
-    expect(full.length).toBeGreaterThan(0)
-    expect(full.length).toBeLessThan(docsSections.length)
+    expect(full).toEqual([])
+
+    const shortest = shortestWrittenPage()?.words ?? 0
+
+    expect(shortest).toBeGreaterThan(0)
+
+    for (const section of docsSections) {
+      expect(roomIn(section.slug).words, section.slug).toBeGreaterThan(shortest * 5)
+    }
   })
 
   /**
@@ -265,13 +290,21 @@ describe("the room this site has for another page", () => {
     const tightest = docsSections.reduce((least, section) =>
       roomIn(section.slug).words < roomIn(least.slug).words ? section : least
     )
-    const sentence = roomSentence(tightest.slug)
     const room = roomIn(tightest.slug)
+    const sentence = roomSentence(tightest.slug)
 
     expect(sentence.startsWith("loom: ")).toBe(true)
     expect(sentence.indexOf("against a cap of")).toBeLessThan(sentence.indexOf("room for about"))
-    expect(sentence.indexOf("room for about")).toBeLessThan(sentence.indexOf("not the remedy"))
     expect(sentence).toContain(`${room.words.toLocaleString("en-GB")} more words`)
+
+    /*
+     * The third clause's place in the order, off the same constructed room the
+     * property case uses — because the real site prints two clauses now and the
+     * order of three is still the thing this case is about.
+     */
+    const firing = sentenceOf({ ...room, fits: false })
+
+    expect(firing.indexOf("room for about")).toBeLessThan(firing.indexOf("not the remedy"))
   })
 
   /** A sentence about a section says what the rail calls it, not its slug. */

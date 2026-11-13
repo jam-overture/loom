@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest"
 
-import { searchProse } from "./build"
+import { buildSearchIndex, searchProse } from "./build"
+import { addressedProse } from "./model"
 import { roomIn } from "./room"
 import {
   PROSE_SAVINGS,
@@ -97,7 +98,9 @@ describe("the free one, and what it is worth", () => {
   it("changes no address, because no two bodies on this site are the same", () => {
     expect(addressesChangedBy(savingOf("identical-bodies-once"))).toEqual([])
 
-    const words = searchProse().bodies.map(([, body]) => body)
+    const words = addressedProse(buildSearchIndex().entries, searchProse())
+      .map(([, body]) => body)
+      .filter((body) => body !== "")
 
     expect(new Set(words).size).toBe(words.length)
   })
@@ -173,8 +176,10 @@ describe("storing a repeated sentence once", () => {
     const storing = (bodies: readonly (readonly [string, string])[]): number =>
       bodies.filter(([, body]) => body.includes(shared)).length
 
-    expect(storing(searchProse().bodies)).toBeGreaterThan(10)
-    expect(storing(saving.storedAs(searchProse().bodies))).toBe(1)
+    const bodies = addressedProse(buildSearchIndex().entries, searchProse()).filter(([, body]) => body !== "")
+
+    expect(storing(bodies)).toBeGreaterThan(10)
+    expect(storing(saving.storedAs(bodies))).toBe(1)
   })
 })
 
@@ -213,15 +218,22 @@ describe("the three that rewrite the stored sentences", () => {
    * The largest saving, priced and shown in the same case.
    *
    * It is the one worth a test of its own because it is the one a run would
-   * take: thirty times the room of the candidate above it, for a quarter of the
-   * stored bytes. What it spends is the excerpt — **a third of the words come
-   * out of the line a reader is shown** — and the two halves are asserted
+   * take: more room than every other candidate here put together, for a quarter
+   * of the stored bytes. What it spends is the excerpt — **a third of the words
+   * come out of the line a reader is shown** — and the two halves are asserted
    * together so that neither can be quoted without the other.
+   *
+   * **The multiple was thirty until 13 November and is about five now.** The
+   * candidate did not move; the site's own room did, from 373 words to 2,693,
+   * when the prose files stopped writing an address beside every body. A ratio
+   * is a fact about both of its numbers, and this one was mostly a fact about
+   * how little room there was — which is worth knowing about any sentence of
+   * the form *n times the room*, this one included.
    */
-  it("buys thirty times the room, out of a third of the words in the row", () => {
+  it("buys five times the room, out of a third of the words in the row", () => {
     const price = priceOf(savingOf("function-words-dropped"), SECTION)
 
-    expect(price.words).toBeGreaterThan(roomIn(SECTION).words * 10)
+    expect(price.words).toBeGreaterThan(roomIn(SECTION).words * 4)
 
     const shown = shownInstead(savingOf("function-words-dropped"), "serverless")
     const today = wordsOf(shown?.today ?? "").length

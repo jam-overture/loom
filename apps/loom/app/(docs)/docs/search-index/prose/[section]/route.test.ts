@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest"
 
 import { docsSections } from "@/app/(docs)/_lib/nav"
-import { searchProse } from "@/app/(docs)/_lib/search/build"
-import { parseSearchProse, searchProsePath } from "@/app/(docs)/_lib/search/model"
+import { buildSearchIndex } from "@/app/(docs)/_lib/search/build"
+import { addressedProse, parseSearchProse, searchProsePath } from "@/app/(docs)/_lib/search/model"
 import { docsSectionOfPath, proseSectionsIn } from "@/app/(docs)/_lib/search/shards"
 
 import { generateStaticParams, GET } from "./route"
@@ -42,18 +42,7 @@ describe("the words of one section, as an address", () => {
    * of the site stops being searchable by its sentences.
    */
   it("is prebuilt for every section an address on this site is in", () => {
-    const sections = proseSectionsIn({
-      entries: searchProse().bodies.map(([href]) => ({
-        href,
-        title: href,
-        context: "",
-        kind: "heading" as const,
-        summary: "",
-        body: "",
-        code: "",
-        family: "",
-      })),
-    })
+    const sections = proseSectionsIn(buildSearchIndex())
 
     const prebuilt = generateStaticParams().map((params) => params.section)
 
@@ -66,8 +55,9 @@ describe("the words of one section, as an address", () => {
     const words = parseSearchProse(await served("the-runtime"))
 
     expect(words.bodies.length).toBeGreaterThan(0)
+    expect(words.under).toBe("/docs/the-runtime")
 
-    for (const [href] of words.bodies) {
+    for (const [href] of addressedProse(buildSearchIndex().entries, words)) {
       expect(docsSectionOfPath(href), href).toBe("the-runtime")
     }
   })
@@ -92,12 +82,14 @@ describe("the words of one section, as an address", () => {
 
     expect(words.bodies.length).toBeGreaterThan(10)
 
-    for (const [href, body] of words.bodies) {
+    const addressed = addressedProse(buildSearchIndex().entries, words)
+
+    for (const [href, body] of addressed) {
       expect(docsSectionOfPath(href), href).toBe("api-reference")
       expect(body.length, href).toBeGreaterThan(400)
     }
 
-    const front = words.bodies.find(([href]) => href === "/docs/api-reference")?.[1] ?? ""
+    const front = addressed.find(([href]) => href === "/docs/api-reference")?.[1] ?? ""
 
     expect(front).toContain("No import has everything behind it")
   })

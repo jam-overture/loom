@@ -2,9 +2,9 @@ import { gzipSync } from "node:zlib"
 
 import { docsSections } from "../nav"
 
-import { buildSearchIndex, searchProse, searchProseFor } from "./build"
+import { buildSearchIndex } from "./build"
 import { searchDocs } from "./match"
-import { proseAddressOf, withProse, type SearchProse } from "./model"
+import { proseEntriesOf, withProse, type SearchProse } from "./model"
 import { PROSE_TOTAL_GZIP_CAP, wordsUnder, type ProseCap } from "./room"
 
 /**
@@ -218,7 +218,27 @@ let bodies: readonly Body[] | undefined
  * it. Cached for the same reason and with the same safety `room.ts` gives: it
  * is a pure function of the repository as it sits on disk.
  */
-const everyBody = (): readonly Body[] => (bodies ??= searchProse().bodies)
+const everyBody = (): readonly Body[] =>
+  (bodies ??= proseEntriesOf((index ??= buildSearchIndex()).entries, "")
+    .filter((entry) => entry.body !== "")
+    .map((entry) => [entry.href, entry.body] as const))
+
+/**
+ * A set of bodies as a prose file: positions rather than keys, the way one is
+ * really served.
+ *
+ * A candidate rewrites the words and leaves every address where it was, so the
+ * file it would produce is this site's own entries with the rewritten words
+ * dropped into their places. A body the candidate did not rewrite keeps the one
+ * the entry already has, which is what makes a saving that only touches some
+ * pages priceable against the same five files as one that touches all of them.
+ */
+const fileOf = (under: string, rewritten: ReadonlyMap<string, string>): SearchProse => ({
+  under,
+  bodies: proseEntriesOf((index ??= buildSearchIndex()).entries, under).map(
+    (entry) => rewritten.get(entry.href) ?? entry.body
+  ),
+})
 
 /**
  * The five files as this candidate would serve them.
@@ -232,17 +252,7 @@ const everyBody = (): readonly Body[] => (bodies ??= searchProse().bodies)
 const filesUnder = (saving: ProseSaving): readonly string[] => {
   const rewritten = new Map(saving.storedAs(everyBody()))
 
-  return docsSections.map((section) => {
-    const file = searchProseFor(section.slug)
-
-    return JSON.stringify({
-      under: file.under,
-      bodies: file.bodies.map(([key, words]) => [
-        key,
-        rewritten.get(proseAddressOf(file.under, key)) ?? words,
-      ]),
-    })
-  })
+  return docsSections.map((section) => JSON.stringify(fileOf(`/docs/${section.slug}`, rewritten)))
 }
 
 /**
@@ -332,8 +342,8 @@ export const shownInstead = (saving: ProseSaving, query: string): ShownInstead |
     return hit === undefined ? undefined : hit.excerpt.map((part) => part.text).join("")
   }
 
-  const today = excerpt({ under: "", bodies: everyBody() })
-  const instead = excerpt({ under: "", bodies: saving.storedAs(everyBody()) })
+  const today = excerpt(fileOf("", new Map(everyBody())))
+  const instead = excerpt(fileOf("", new Map(saving.storedAs(everyBody()))))
 
   return today === undefined ? undefined : { query, today, instead: instead ?? "" }
 }

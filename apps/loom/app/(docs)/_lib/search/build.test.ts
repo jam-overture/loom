@@ -17,10 +17,12 @@ import {
 } from "./build"
 import { readPageHeadings } from "./headings"
 import {
+  addressedProse,
   namesToEntries,
   parseSearchIndex,
   parseSearchNames,
   parseSearchProse,
+  proseEntriesOf,
   withCode,
   withNames,
   withProse,
@@ -156,7 +158,7 @@ describe("what the index contains", () => {
       writtenDocsSections.flatMap((section) => section.pages.map((page) => docsHref(section.slug, page.slug)))
     )
 
-    const prose = new Map(searchProse().bodies)
+    const prose = new Map(addressedProse(index.entries, searchProse()))
     const hasProse = (entry: { readonly href: string }): boolean => (prose.get(entry.href) ?? "") !== ""
 
     const pagesWithProse = index.entries.filter(
@@ -186,7 +188,7 @@ describe("what the index contains", () => {
 
     expect(generated.length).toBeGreaterThan(0)
 
-    const prose = new Map(searchProse().bodies)
+    const prose = new Map(addressedProse(index.entries, searchProse()))
 
     for (const section of generated) {
       for (const page of section.pages) {
@@ -207,12 +209,23 @@ describe("what the index contains", () => {
     )
   })
 
+  /**
+   * And the invariant the words' *positions* now rest on.
+   *
+   * A prose file writes no addresses: its bodies line up with the entries
+   * `proseEntriesOf` picks out, which are the ones that are not names. That is
+   * only a safe thing to do while no name has a body — a name with one would be
+   * a body with nowhere to travel, and the file after it would be off by one
+   * for the rest of the section. So this is asserted on the entries themselves
+   * rather than through a prose file, where the filter would be asserting about
+   * its own filter.
+   */
   it("carries no words for a name, whose words are its signature", () => {
-    const prose = new Map(searchProse().bodies)
+    const names = index.entries.filter((entry) => entry.kind === "export")
 
-    for (const entry of index.entries.filter((entry) => entry.kind === "export")) {
-      expect(prose.get(entry.href), entry.href).toBeUndefined()
-    }
+    expect(names.length).toBeGreaterThan(100)
+
+    for (const entry of names) expect(entry.body, entry.href).toBe("")
   })
 
   /**
@@ -326,6 +339,16 @@ describe("what the index contains", () => {
    * | Prose — *API reference* | 24.4 KB | 3.3 KB | a band on a reference page is rewritten |
    * | Prose — *Architecture* | 8.6 KB | 3.3 KB | …an architecture paragraph |
    * | Code | 21.9 KB | 6.2 KB | anybody adds a block |
+   *
+   * **Every prose row above is smaller than it says, as of 13 November**, and
+   * the table is left at the figures it was written against rather than
+   * re-typed, because what the rows are *about* is unchanged. A prose file
+   * stopped carrying an address beside each body that day: the five of them
+   * came to 79,590 compressed and 254,057 raw, and they come to **75,234 and
+   * 240,860** now. The same move on the same files on 5 November — taking the
+   * section off the front of those addresses — was worth 341. Taking the rest
+   * of the address was worth **4,356**, and the room a page in the tightest
+   * section has went from 373 words to 2,335.
    *
    * ### The row that was thirteen bytes
    *
@@ -522,9 +545,9 @@ describe("what the index contains", () => {
    * shape only this file has seen.
    */
   it("cuts the words up without losing or repeating one", () => {
-    const whole = searchProse().bodies
-    const parts = docsSections.flatMap(
-      (section) => parseSearchProse(JSON.parse(JSON.stringify(searchProseFor(section.slug)))).bodies
+    const whole = addressedProse(index.entries, searchProse())
+    const parts = docsSections.flatMap((section) =>
+      addressedProse(index.entries, parseSearchProse(JSON.parse(JSON.stringify(searchProseFor(section.slug)))))
     )
 
     expect([...parts].sort()).toEqual([...whole].sort())
@@ -533,45 +556,50 @@ describe("what the index contains", () => {
   })
 
   /**
-   * The part of an address a section's file does not write down.
+   * The addresses a section's file does not write down — which is all of them.
    *
    * The companion to the test above, and the one that fails if the saving is
-   * quietly given back. A file's keys are what is left of its bodies' addresses
-   * once the section the browser asked for is taken off the front — so none of
-   * them starts with `/docs`, and the landing page's key is the empty string
-   * because the landing page *is* the section.
+   * quietly given back. A file says once what its bodies are `under` and then
+   * says the words, so `/docs/` appears in it exactly once however many bodies
+   * it carries, and a key creeping back in — as a pair, as a field, as a
+   * prefix — puts it there a second time.
+   *
+   * The second half is the rule the positions are kept by: a file carries one
+   * body for every entry of its section, so a page with no prose under it holds
+   * its place with an empty string rather than being left out. The runtime's
+   * landing page is the one that does.
    */
-  it("writes down only the part of an address the browser does not know", () => {
+  it("writes down no address at all, and holds a place for a page with no words", () => {
     for (const section of docsSections) {
       const file = searchProseFor(section.slug)
+      const served = JSON.stringify(file)
 
       expect(file.under).toBe(`/docs/${section.slug}`)
-
-      for (const [key] of file.bodies) expect(key.startsWith("/docs")).toBe(false)
+      expect(served.split("/docs/").length - 1, section.slug).toBe(1)
+      expect(file.bodies.length).toBe(proseEntriesOf(index.entries, file.under).length)
     }
 
-    const runtime = searchProseFor("the-runtime")
+    const architecture = searchProseFor("architecture")
 
-    expect(runtime.bodies.map(([key]) => key)).toContain("")
+    expect(architecture.bodies).toContain("")
   })
 
   /**
-   * And putting the prefix back is something that happens once.
+   * And `under` is the one thing a parse may not throw away.
    *
-   * A parsed file's keys are whole addresses, so it says it is under nothing —
-   * and that is the field, rather than a convention, which makes the round trip
-   * safe to do twice. Every test in this directory serialises what it parsed;
-   * one that kept the prefix on the way out would hand the next parse
-   * `/docs/the-runtime/docs/the-runtime/…` and be caught nowhere, because the
-   * addresses would still be strings and the bodies would still be bodies.
-   *
-   * A mutation that kept it survived the whole suite until this was written.
+   * It stopped being a fact about how the file was written down the moment the
+   * bodies lost their keys: it is now the only thing in the file that says
+   * which entries the words belong to. A parse that normalised it away — which
+   * is exactly what this parse did until 13 November, when the keys it stripped
+   * the prefix from still existed — would hand `withProse` a list of strings
+   * and no section, and the count that guards the merge would be the whole
+   * site's rather than the section's.
    */
-  it("puts a section back onto its addresses once and not twice", () => {
+  it("keeps the section a file is about, through the round trip and through it twice", () => {
     const once = parseSearchProse(JSON.parse(JSON.stringify(searchProseFor("the-runtime"))))
     const twice = parseSearchProse(JSON.parse(JSON.stringify(once)))
 
-    expect(once.under).toBe("")
+    expect(once.under).toBe("/docs/the-runtime")
     expect(twice).toEqual(once)
   })
 
@@ -684,11 +712,28 @@ describe("what the index contains", () => {
   })
 
   it("keys the words and the code by an href that names exactly one entry", () => {
-    const hrefs = searchProse().bodies.map(([href]) => href)
+    const hrefs = addressedProse(index.entries, searchProse()).map(([href]) => href)
     const blocks = searchCode().blocks.map(([href]) => href)
 
     expect(new Set(hrefs).size).toBe(hrefs.length)
     expect(new Set(blocks).size).toBe(blocks.length)
+  })
+
+  /**
+   * And a file that does not line up is refused whole.
+   *
+   * The failure this shape could have, written as the test that says it does
+   * not: one body too few and every body after the gap would be on the wrong
+   * page. A refused file leaves the index exactly as it arrived, so a reader
+   * keeps the bands that already worked.
+   */
+  it("refuses a file of words that does not line up with the entries it names", () => {
+    const runtime = searchProseFor("the-runtime")
+    const contents = parseSearchIndex(JSON.parse(JSON.stringify(searchContents())))
+
+    expect(withProse(contents, { ...runtime, bodies: runtime.bodies.slice(1) })).toEqual(contents)
+    expect(withProse(contents, { ...runtime, bodies: [...runtime.bodies, "extra"] })).toEqual(contents)
+    expect(withProse(contents, runtime)).not.toEqual(contents)
   })
 
   /**
