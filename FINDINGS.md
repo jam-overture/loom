@@ -48,6 +48,27 @@ this entry when that piece is on `main`, as the segments entry did for #866.
 Until then the client has nothing to read, and a client that ships first must
 treat an answer without them as *Off*.
 
+**On `main` since `portal-10-door-window` (13 November).** The answer is
+`{ pages, rules, forms, window }`, and `window` is one of:
+
+- `{ "ms": 0 }`: *Off*. Set no cookie and serve `pages` as now. An answer with
+  no `window` at all (a deployment before this piece) means the same.
+- `{ "ms", "floor", "number", "held" }`: hold readers for `ms` milliseconds.
+  `number` is what a reader with no pin is given (the cookie value, expiring
+  `ms` from now); `floor` is the number below which a pin reads the newest.
+  `held` is `[{ "treeId", "versions": [{ "until", "tree" }] }]`, each page's
+  versions oldest first, under the page's own id.
+
+**Numbers are milliseconds** (the time each state was made), so they only
+ever increase, but they do not go up by one; compare them, never count them.
+
+**To resolve a pin `p` for a page:** if `p` is not a whole number, or
+`p < floor`, or `p > number`, serve the page from `pages`. Otherwise serve the
+first of that page's `held` versions whose `until > p`, and the page from
+`pages` where it has none or no such version. Rules and forms were made for
+the version in `pages`; a reader served a held version gets it without a
+segment's form where the form does not apply to it.
+
 ---
 ## 2026-11-12 — `mocks.test.ts` is the one whole-repository sweep 0375 did not reach, and it took the merge gate down on a branch that costs it half a millisecond
 
