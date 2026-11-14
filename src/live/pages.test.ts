@@ -1,17 +1,23 @@
 import { describe, expect, it } from "vitest"
 
 import { audienceIdSchema } from "../audience/audience.js"
+import { describeComposeError, type AudienceForm } from "../audience/compose.js"
 import type { AudienceRule } from "../audience/rule.js"
-import { treeIdSchema } from "../ids.js"
+import { sequentialIdFactory, treeIdSchema } from "../ids.js"
 import { sampleTree } from "../testing/fixtures.js"
+import { buildElement, buildText } from "../tree/builders.js"
+import type { TreeOperation } from "../tree/delta.js"
+import { childrenOf } from "../tree/node.js"
 
 import {
   isPulling,
   livePageOf,
   livePagesHeld,
   NO_LIVE_PAGES,
+  pageForReader,
   segmentOf,
   type LivePages,
+  type ServedPage,
 } from "./pages.js"
 
 const page = sampleTree().tree
@@ -107,5 +113,206 @@ describe("the segment a reader is in, sorted in the site's process (0371 clause 
     const context = { device: "phone", source: "direct" }
 
     expect(segmentOf(ruled([phones, searchers]), page.treeId, context)).toBe(phones.audienceId)
+  })
+})
+
+const spare = sequentialIdFactory("spare")
+
+const form = (
+  word: string,
+  tree: typeof page,
+  operations: readonly TreeOperation[],
+  baseRevision = tree.revision
+): AudienceForm => ({
+  audienceId: audienceIdSchema.parse(`aud_${word}`),
+  delta: { deltaId: spare.deltaId(), treeId: tree.treeId, baseRevision, operations },
+})
+
+const banner = (text: string) =>
+  buildElement(spare, { type: "loom.banner", children: [buildText(spare, text)] })
+
+const serving = (
+  rules: readonly AudienceRule[],
+  forms: readonly AudienceForm[],
+  live: typeof page = page
+): LivePages =>
+  holding([live, other], {
+    rules: new Map([[live.treeId, rules]]),
+    forms: new Map([[live.treeId, forms]]),
+  })
+
+const firstChildOf = (served: ServedPage) => childrenOf(served.tree.root).map((child) => child.id)[0]
+
+describe("the page a reader is served, composed in the site's process (0371 clause 5)", () => {
+  it("serves the live page and no segment where the deployment has none", () => {
+    const served = pageForReader(holding([page]), page, { device: "phone" })
+
+    expect(served.tree).toBe(page)
+    expect(served.audience).toBeUndefined()
+    expect(served.refusal).toBeUndefined()
+  })
+
+  /** The whole of the fallback a host used to write by hand, done once here. */
+  it("serves the built page it was handed for a page the door did not name", () => {
+    const unheld = { ...sampleTree().tree, treeId: treeIdSchema.parse("t_neverpublished") }
+
+    expect(pageForReader(NO_LIVE_PAGES, unheld, { device: "phone" }).tree).toBe(unheld)
+    expect(pageForReader(serving([phones], []), unheld, { device: "phone" }).tree).toBe(unheld)
+  })
+
+  it("applies the form of the segment the reader is in", () => {
+    const { tree, ids } = sampleTree()
+    const sale = banner("Sale")
+    const held = serving(
+      [phones],
+      [form("phone", tree, [{ op: "insert", parentId: ids.page, index: 0, node: sale }])],
+      tree
+    )
+
+    const served = pageForReader(held, tree, { device: "phone" })
+
+    expect(firstChildOf(served)).toBe(sale.id)
+    expect(served.audience).toBe(phones.audienceId)
+    expect(served.refusal).toBeUndefined()
+  })
+
+  it("serves the base to a reader whose context matches no rule", () => {
+    const { tree, ids } = sampleTree()
+    const held = serving(
+      [phones],
+      [form("phone", tree, [{ op: "insert", parentId: ids.page, index: 0, node: banner("Sale") }])],
+      tree
+    )
+
+    const served = pageForReader(held, tree, { device: "desktop" })
+
+    expect(served.tree).toBe(tree)
+    expect(served.audience).toBeUndefined()
+    expect(served.refusal).toBeUndefined()
+  })
+
+  /**
+   * A segment made in the portal and not yet given a form is the state every
+   * segment starts in, and pieces 1 to 3 of 0371 shipped sorting readers into
+   * one. It is a name over the base, not a refusal.
+   */
+  it("sorts a reader into a segment that has no form, and serves them the base", () => {
+    const held = serving([phones, searchers], [])
+    const served = pageForReader(held, page, { device: "phone", source: "search" })
+
+    expect(served.tree).toBe(page)
+    expect(served.audience).toBe(searchers.audienceId)
+    expect(served.refusal).toBeUndefined()
+  })
+
+  it("applies the forms there are and skips the segment that has none", () => {
+    const { tree, ids } = sampleTree()
+    const sale = banner("Sale")
+    const held = serving(
+      [phones, searchers],
+      [form("phone", tree, [{ op: "insert", parentId: ids.page, index: 0, node: sale }])],
+      tree
+    )
+
+    const served = pageForReader(held, tree, { device: "phone", source: "search" })
+
+    expect(firstChildOf(served)).toBe(sale.id)
+    expect(served.audience).toBe(searchers.audienceId)
+  })
+
+  /**
+   * Two deltas reaching one page resolve by the deployment's order, and the
+   * segment a page view is filed under is the last rule that matched (0385).
+   * The two questions have different answers on the same request, on purpose.
+   */
+  it("applies both forms in the rules' order and files the page view under the last", () => {
+    const { tree, ids } = sampleTree()
+    const first = banner("Phones")
+    const second = banner("Searchers")
+    const held = serving(
+      [phones, searchers],
+      [
+        form("phone", tree, [{ op: "insert", parentId: ids.page, index: 0, node: first }]),
+        form("search", tree, [{ op: "insert", parentId: ids.page, index: 0, node: second }]),
+      ],
+      tree
+    )
+
+    const served = pageForReader(held, tree, { device: "phone", source: "search" })
+
+    expect(childrenOf(served.tree.root).map((child) => child.id).slice(0, 2)).toEqual([
+      second.id,
+      first.id,
+    ])
+    expect(served.audience).toBe(searchers.audienceId)
+  })
+
+  it("serves the base and no segment at all when a form cannot be applied", () => {
+    const { tree, ids } = sampleTree()
+    const held = serving(
+      [phones],
+      [form("phone", tree, [{ op: "insert", parentId: ids.page, index: 0, node: banner("Sale") }], 99)],
+      tree
+    )
+
+    const served = pageForReader(held, tree, { device: "phone" })
+
+    expect(served.tree).toBe(tree)
+    expect(served.refusal).toEqual({
+      code: "stale-form",
+      audienceId: phones.audienceId,
+      expected: 99,
+      actual: tree.revision,
+    })
+    expect(served.audience).toBeUndefined()
+  })
+
+  /**
+   * The refusal is what the host logs. A page served as the base whose signals
+   * say `aud_phone` is the measurement 0263 clause 4 refuses, so the name goes
+   * with the form it was promised on.
+   */
+  it("says why in a sentence a host can log", () => {
+    const { tree, ids } = sampleTree()
+    const held = serving(
+      [phones],
+      [form("phone", tree, [{ op: "insert", parentId: ids.page, index: 0, node: banner("Sale") }], 99)],
+      tree
+    )
+
+    const served = pageForReader(held, tree, { device: "phone" })
+
+    expect(served.refusal && describeComposeError(served.refusal)).toContain("aud_phone")
+  })
+
+  it("serves the base to a reader the host gave no context for", () => {
+    const { tree, ids } = sampleTree()
+    const held = serving(
+      [phones],
+      [form("phone", tree, [{ op: "insert", parentId: ids.page, index: 0, node: banner("Sale") }])],
+      tree
+    )
+
+    const served = pageForReader(held, tree, undefined)
+
+    expect(served.tree).toBe(tree)
+    expect(served.audience).toBeUndefined()
+    expect(served.refusal).toBeUndefined()
+  })
+
+  /** Nothing here edits what is held, so a render that has read a page keeps it. */
+  it("leaves the pages it was handed alone", () => {
+    const { tree, ids } = sampleTree()
+    const before = childrenOf(tree.root).length
+    const held = serving(
+      [phones],
+      [form("phone", tree, [{ op: "insert", parentId: ids.page, index: 0, node: banner("Sale") }])],
+      tree
+    )
+
+    pageForReader(held, tree, { device: "phone" })
+
+    expect(childrenOf(tree.root).length).toBe(before)
+    expect(childrenOf(held.pages.get(tree.treeId)?.root ?? tree.root).length).toBe(before)
   })
 })

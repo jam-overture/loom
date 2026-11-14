@@ -1,8 +1,10 @@
 import type { LoomTree, Result, TreeId } from "@jam-overture/loom"
-import type { Application, ApplicationId, AudienceRule } from "@jam-overture/loom/store"
+import type { Application, ApplicationId, AudienceForm, AudienceRule } from "@jam-overture/loom/store"
 
+import type { LiveWindow } from "@/app/(portal)/_lib/proposing/held"
 import { ingestKeySchema, type IngestKeyStore } from "@/app/_lib/reader-signals/keys"
 
+import type { PageOverlay } from "./overlays"
 import type { SitePull } from "./pulls"
 import { bearerOf } from "./receive"
 
@@ -18,13 +20,30 @@ import { bearerOf } from "./receive"
  * would put Loom back in the render path that 0262 keeps it out of. That is
  * enforced here rather than promised by the client.
  *
- * **It answers each page's audience rules beside the pages** (0371 clause 4):
- * `{ pages, rules }`, where `rules` holds one entry per live page that has a
- * rule list, `{ treeId, rules }`, the list in its order, as 0376's store keeps
- * it. A page with no entry is served as it is to every reader. The site gets
- * every rule and sorts each reader itself, so the request still names nobody.
- * Pages and rules are read in one answer and fail together: a site must never
- * hold rules from one pull beside pages from another.
+ * **It answers each page's audience rules and segment forms beside the pages**
+ * (0371 clauses 4 and 5): `{ pages, rules, forms }`. `rules` holds one entry
+ * per live page that has a rule list, `{ treeId, rules }`, the list in its
+ * order, as 0376's store keeps it; `forms` holds one entry per live page that
+ * has a delta a segment earns, `{ treeId, forms }`. A page with no entry in
+ * either is served as it is to every reader. The site gets every rule and
+ * every form and composes each reader's page itself, so the request still
+ * names nobody. All three are read in one answer and fail together: a site
+ * must never hold rules or forms from one pull beside pages from another.
+ *
+ * **It answers the project's reader window beside them** (0383 clause 5):
+ * `window` is `{ ms: 0 }` where readers are not held, and otherwise
+ * `{ ms, floor, number, held }`, the window's length, the number below which
+ * a pin reads the newest pages, the number the pages stand at now, and, for
+ * each page changed inside the window, the versions a pin can still be served
+ * (`held.ts` says how each is found). It is read with the pages, so a site
+ * never holds versions from one pull beside pages from another.
+ *
+ * **A form whose segment the page's rules do not name is left out.** It
+ * matches nobody, so sending it would be sending a draft nobody can be served
+ * to a customer's server, on every pull, for as long as it sat there. A
+ * segment stops being served by leaving the rules rather than by having its
+ * form deleted (0376), which is what makes this the ordinary state rather than
+ * a corner.
  *
  * **It answers with an entity tag.** A server pulling on a short interval
  * mostly asks for what it already holds, and `If-None-Match` lets it be told
@@ -40,14 +59,15 @@ export type ReadDoor = {
   readonly applicationOf: (
     application: ApplicationId
   ) => Promise<Result<Application | null, { readonly detail: string }>>
-  readonly livePagesOf: (
+  /** The project's live pages and its reader window, read together. */
+  readonly liveOf: (
     application: ApplicationId
-  ) => Promise<Result<readonly LoomTree[], { readonly detail: string }>>
-  /** The current rule list of each of the pages, or why they cannot all be read. */
-  readonly rulesOf: (
+  ) => Promise<Result<LiveSite, { readonly detail: string }>>
+  /** The current rules and forms of each of the pages, or why they cannot all be read. */
+  readonly overlaysOf: (
     application: ApplicationId,
     pages: readonly TreeId[]
-  ) => Promise<Result<readonly PageRulesHead[], { readonly detail: string }>>
+  ) => Promise<Result<readonly PageOverlay[], { readonly detail: string }>>
   /**
    * Told of every answer a site took, `200` and `304` alike, after it is
    * answered: whether a site pulls is what tells a person whether *Accept*
@@ -58,14 +78,14 @@ export type ReadDoor = {
   readonly now: () => number
 }
 
-/** One page's rules as its store holds them: `undefined` where nobody wrote any. */
-export type PageRulesHead = {
-  readonly treeId: TreeId
-  readonly rules: readonly AudienceRule[] | undefined
-}
+/** What a site serves now, and what it needs to hold its readers to what they first saw. */
+export type LiveSite = { readonly pages: readonly LoomTree[]; readonly window: LiveWindow }
 
 /** One page's rule list in the door's answer. */
 export type LiveRules = { readonly treeId: TreeId; readonly rules: readonly AudienceRule[] }
+
+/** One page's segment forms in the door's answer. */
+export type LiveForms = { readonly treeId: TreeId; readonly forms: readonly AudienceForm[] }
 
 /**
  * The `rules` of the answer: the pages with a list to sort readers by, in the
@@ -73,10 +93,30 @@ export type LiveRules = { readonly treeId: TreeId; readonly rules: readonly Audi
  * because both mean the same thing to a site, and one spelling keeps the tag
  * still while nothing a reader could be served has changed.
  */
-export const liveRulesOf = (heads: readonly PageRulesHead[]): readonly LiveRules[] =>
-  heads.flatMap(({ treeId, rules }) =>
+export const liveRulesOf = (overlays: readonly PageOverlay[]): readonly LiveRules[] =>
+  overlays.flatMap(({ treeId, rules }) =>
     rules === undefined || rules.length === 0 ? [] : [{ treeId, rules }]
   )
+
+/**
+ * The `forms` of the answer: for each page, the delta of every segment its
+ * rules name, in the rules' order — which is the order they compose in (0359
+ * clause 3), so the site applies them as the deployment set them rather than
+ * as a store happened to list them.
+ *
+ * A form whose segment is in no rule is left out, and a page left with none
+ * has no entry, for `liveRulesOf`'s reason: one spelling for one meaning keeps
+ * the tag still while nothing a reader could be served has changed.
+ */
+export const liveFormsOf = (overlays: readonly PageOverlay[]): readonly LiveForms[] =>
+  overlays.flatMap(({ treeId, rules, forms }) => {
+    const named = (rules ?? []).flatMap(
+      (rule) => forms.find((form) => form.audienceId === rule.audienceId) ?? []
+    )
+    const ordered = [...new Set(named)]
+
+    return ordered.length === 0 ? [] : [{ treeId, forms: ordered }]
+  })
 
 /** A pull is always checked with the door, and kept by the site rather than anything between. */
 const REVALIDATE = { "cache-control": "private, no-cache" } as const
@@ -139,18 +179,24 @@ export const serveLivePages = async (request: Request, door: ReadDoor): Promise<
     return answer(403, "that project is closed, and a closed project serves no live pages")
   }
 
-  const pages = await door.livePagesOf(named.value)
+  const live = await door.liveOf(named.value)
 
-  if (!pages.ok) return answer(503, `live pages are unavailable: ${pages.error.detail}`)
+  if (!live.ok) return answer(503, `live pages are unavailable: ${live.error.detail}`)
 
-  const rules = await door.rulesOf(
+  const { pages, window } = live.value
+  const overlays = await door.overlaysOf(
     named.value,
-    pages.value.map((page) => page.treeId)
+    pages.map((page) => page.treeId)
   )
 
-  if (!rules.ok) return answer(503, `live pages are unavailable: ${rules.error.detail}`)
+  if (!overlays.ok) return answer(503, `live pages are unavailable: ${overlays.error.detail}`)
 
-  const body = JSON.stringify({ pages: pages.value, rules: liveRulesOf(rules.value) })
+  const body = JSON.stringify({
+    pages,
+    rules: liveRulesOf(overlays.value),
+    forms: liveFormsOf(overlays.value),
+    window,
+  })
   const tag = await entityTagOf(body)
   const headers = { ...REVALIDATE, etag: tag }
 

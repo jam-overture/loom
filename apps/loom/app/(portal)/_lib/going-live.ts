@@ -17,13 +17,15 @@ import {
   type Bounds,
   type Measurement,
 } from "./measuring"
+import type { Holding } from "./holding"
 import { firstNamed, namesInOperations, type PartName } from "./part-name"
 import type { PageCopy } from "./proposing/copies"
 import type { MadeFrom } from "./proposing/made-from"
 import { NOT_KEPT_AFTER_MS, pullingWords, type Pulling } from "./pulling"
+import { HELD_FOR } from "./reader-window"
 import { changesOf } from "./revision-view"
 import { STAKES, type PlainLine } from "./vocabulary"
-import { plainDay } from "./when"
+import { plainDay, plainMoment } from "./when"
 
 /**
  * Where a change someone accepted has got to, from *Accept* to its result
@@ -408,6 +410,52 @@ const endingStep = (ending: Exclude<Ending, { kind: "standing" }>): TimelineStep
         lines: ["Someone undid it, so the page is back as it was before it."],
       }
 
+const ENDED_EARLY: Readonly<
+  Record<NonNullable<Extract<Holding, { kind: "held" }>["endedBy"]>, string>
+> = {
+  "newer-version":
+    "Your site published a newer version of its pages before the window ran out, which ended it early: every reader has had the newest pages since.",
+  "taken-back":
+    "A change taken back went live before the window ran out, which ended it early: every reader has had the newest pages since.",
+}
+
+/**
+ * Whether returning readers were kept on the page as it was after the change
+ * went live (0383 clauses 4 and 6), between *Live* and *Measuring*. Nothing
+ * where no window held anyone. Loom can only say what it handed the site: the
+ * site's own Loom keeps a reader on an older page, and tells Loom nothing of it
+ * (clause 3), so the step says so.
+ */
+const holdingSteps = (holding: Holding, now: number): readonly TimelineStep[] => {
+  switch (holding.kind) {
+    case "none":
+      return []
+    case "changed":
+      return [
+        {
+          title: "Whether returning readers were held is not known",
+          state: "done",
+          lines: [
+            `How long a reader keeps the pages they first saw was changed on Settings on ${day(holding.since)}, after this went live, and Loom keeps only the newest choice. So it is measured from when it went live.`,
+          ],
+        },
+      ]
+    case "held":
+      return [
+        {
+          title: `Held for returning readers until ${plainMoment(iso(holding.until))}`,
+          state: now >= holding.until ? "done" : "current",
+          lines: [
+            `Your project keeps a reader on the pages they first saw for ${HELD_FOR[holding.window]}, so a reader who came before it went live may be shown the page as it was until then. New readers get it at once.`,
+            ...(holding.endedBy === undefined ? [] : [ENDED_EARLY[holding.endedBy]]),
+            "Loom hands your site the page as it was for those readers. Whether they are kept on it is up to the version of Loom installed on your site, which keeps them by a cookie it sets.",
+            "It is measured from when this ends, so no hour after it mixes readers of the two versions.",
+          ],
+        },
+      ]
+  }
+}
+
 const AGAINST = `against the ${MEASURING_DAYS} days before`
 
 const onGoal = (goal: string | null): string => (goal === null ? "its goal" : `its goal, ${goal},`)
@@ -470,12 +518,15 @@ const measuringSteps = (
     case "read": {
       const { after } = measurement.windows
       const over = now >= after.to
+      /** Before the after side starts (the hour it went live in, or while readers are held), nothing is measured yet. */
+      const started = now >= after.from
+      const tense = over ? "was" : started ? "is" : "will be"
       const measuring: TimelineStep = {
         title: "Measuring",
-        state: over ? "done" : "current",
+        state: over ? "done" : started ? "current" : "upcoming",
         at: after.from,
         lines: [
-          `It ${over ? "was" : "is"} measured on ${onGoal(goal)} from ${day(after.from)} to ${day(after.to)}, ${AGAINST}.`,
+          `It ${tense} measured on ${onGoal(goal)} from ${day(after.from)} to ${day(after.to)}, ${AGAINST}.`,
         ],
       }
 
@@ -495,10 +546,12 @@ const measuringSteps = (
       return over
         ? [measuring, resultStep(measurement)]
         : [
-            {
-              ...measuring,
-              lines: [...measuring.lines, soFarSentence(measurement.after, measurement.goal)],
-            },
+            started
+              ? {
+                  ...measuring,
+                  lines: [...measuring.lines, soFarSentence(measurement.after, measurement.goal)],
+                }
+              : measuring,
             {
               title: "Result",
               state: "upcoming",
@@ -510,20 +563,26 @@ const measuringSteps = (
 }
 
 /**
- * The timeline: *Accepted* → *Live* → *Measuring* → *Result*, or ending where
- * the change came off the page. *Measuring* names the goal where it is known.
+ * The timeline: *Accepted* → *Live* → *Held for returning readers* where a
+ * reader window held them → *Measuring* → *Result*, or ending where the change
+ * came off the page. *Measuring* names the goal where it is known.
  */
 export const timelineOf = (
   change: AcceptedChange,
   reach: Reach,
   now: number,
   served: Served,
-  measurement: Measurement
+  measurement: Measurement,
+  holding: Holding
 ): readonly TimelineStep[] => {
   const reached = [acceptedStep(change), liveStep(arrivalOf(change, reach), reach)]
 
   return change.ending.kind === "standing"
-    ? [...reached, ...measuringSteps(measurement, now, goalNameOf(served))]
+    ? [
+        ...reached,
+        ...holdingSteps(holding, now),
+        ...measuringSteps(measurement, now, goalNameOf(served)),
+      ]
     : [...reached, endingStep(change.ending)]
 }
 
