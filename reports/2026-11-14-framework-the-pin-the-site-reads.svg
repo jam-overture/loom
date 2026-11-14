@@ -1,0 +1,115 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 760" width="1080" height="760" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif">
+  <style>
+    .title { font-size: 21px; font-weight: 650; fill: #0f172a; }
+    .sub { font-size: 13px; fill: #64748b; }
+    .panel-title { font-size: 11px; font-weight: 650; fill: #475569; letter-spacing: 0.09em; }
+    .note { font-size: 12px; fill: #475569; }
+    .mono { font-size: 11.5px; fill: #334155; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .monob { font-size: 11.5px; font-weight: 650; fill: #0f172a; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .dim { font-size: 11.5px; fill: #94a3b8; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .newest { font-size: 11.5px; font-weight: 650; fill: #b45309; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .ok { font-size: 11.5px; font-weight: 650; fill: #15803d; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .rowhead { font-size: 10px; font-weight: 650; fill: #64748b; letter-spacing: 0.05em; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .emph { font-size: 12.5px; font-weight: 650; fill: #0f172a; }
+  </style>
+
+  <rect width="1080" height="760" fill="#ffffff" />
+
+  <text class="title" x="40" y="46">The pin the site reads</text>
+  <text class="sub" x="40" y="68">0383 — a reader keeps the pages they first saw for a window the project sets. One number, in one first-party cookie, read and written only by the customer's own server.</text>
+  <text class="sub" x="40" y="86">It goes on no signal and no pull. Loom is never asked which reader this is, and is never told.</text>
+
+  <!-- the door's answer -->
+  <rect x="40" y="112" width="420" height="192" rx="8" fill="#f8fafc" stroke="#e2e8f0" />
+  <text class="panel-title" x="60" y="136">WHAT THE DOOR ANSWERS, BESIDE THE PAGES</text>
+  <text class="mono" x="60" y="160">window: {</text>
+  <text class="mono" x="76" y="178">ms:     3600000<tspan class="dim">   // hold readers for an hour</tspan></text>
+  <text class="mono" x="76" y="196">floor:  100<tspan class="dim">       // a snapshot or revert raised it</tspan></text>
+  <text class="mono" x="76" y="214">number: 900<tspan class="dim">       // what the pages stand at now</tspan></text>
+  <text class="mono" x="76" y="232">held:   [{ treeId, versions: [</text>
+  <text class="mono" x="92" y="250">{ until: 500, tree }<tspan class="dim">,  // served to a pin &lt; 500</tspan></text>
+  <text class="mono" x="92" y="268">{ until: 700, tree }<tspan class="dim">   // served to a pin &lt; 700</tspan></text>
+  <text class="mono" x="76" y="286">] }]</text>
+  <text class="mono" x="60" y="304">}</text>
+
+  <!-- the four lines a host writes -->
+  <rect x="488" y="112" width="552" height="192" rx="8" fill="#f8fafc" stroke="#e2e8f0" />
+  <text class="panel-title" x="508" y="136">THE FOUR LINES A HOST ADDS — ALL PURE, ALL OFF THE LAST PULL</text>
+  <text class="mono" x="508" y="162">const pin  = <tspan class="monob">pinIn</tspan>(request.headers.get("cookie"))</text>
+  <text class="mono" x="508" y="180">const page = <tspan class="monob">livePageOf</tspan>(held, treeId, pin)   <tspan class="dim">?? builtTree</tspan></text>
+  <text class="mono" x="508" y="198">const keep = <tspan class="monob">pinCookieFor</tspan>(held, pin)</text>
+  <text class="mono" x="508" y="216">if (keep !== undefined) response.headers.set("set-cookie", keep)</text>
+  <text class="note" x="508" y="248">A project with no window needs none of them, and that is every project</text>
+  <text class="note" x="508" y="266">until somebody chooses one. <tspan class="emph">Off is the default</tspan> — a window puts a cookie</text>
+  <text class="note" x="508" y="284">on the customer's readers, and that is the site owner's choice to disclose.</text>
+
+  <!-- the decision table -->
+  <text class="panel-title" x="40" y="344">EVERY PIN A REQUEST CAN CARRY, AND WHAT IT IS SERVED — floor 100, number 900, versions until 500 and 700</text>
+
+  <line x1="40" y1="356" x2="1040" y2="356" stroke="#cbd5e1" />
+  <text class="rowhead" x="56" y="376">THE COOKIE</text>
+  <text class="rowhead" x="256" y="376">READS AS</text>
+  <text class="rowhead" x="416" y="376">RESOLVES</text>
+  <text class="rowhead" x="576" y="376">THE PAGE SERVED</text>
+  <text class="rowhead" x="836" y="376">SET-COOKIE</text>
+  <line x1="40" y1="388" x2="1040" y2="388" stroke="#cbd5e1" />
+
+  <rect x="40" y="388" width="1000" height="30" fill="#f0fdf4" />
+  <text class="mono" x="56" y="408">(none)</text>
+  <text class="dim" x="256" y="408">no pin</text>
+  <text class="dim" x="416" y="408">—</text>
+  <text class="newest" x="576" y="408">the newest live page</text>
+  <text class="ok" x="836" y="408">loom_pin=900, Max-Age=3600</text>
+
+  <text class="mono" x="56" y="440">loom_pin=400</text>
+  <text class="mono" x="256" y="440">400</text>
+  <text class="ok" x="416" y="440">yes</text>
+  <text class="monob" x="576" y="440">the version until 500</text>
+  <text class="dim" x="836" y="440">none — never re-set</text>
+  <line x1="40" y1="452" x2="1040" y2="452" stroke="#f1f5f9" />
+
+  <text class="mono" x="56" y="472">loom_pin=600</text>
+  <text class="mono" x="256" y="472">600</text>
+  <text class="ok" x="416" y="472">yes</text>
+  <text class="monob" x="576" y="472">the version until 700</text>
+  <text class="dim" x="836" y="472">none — never re-set</text>
+  <line x1="40" y1="484" x2="1040" y2="484" stroke="#f1f5f9" />
+
+  <text class="mono" x="56" y="504">loom_pin=800</text>
+  <text class="mono" x="256" y="504">800</text>
+  <text class="ok" x="416" y="504">yes</text>
+  <text class="newest" x="576" y="504">the newest — past every version</text>
+  <text class="dim" x="836" y="504">none — never re-set</text>
+  <line x1="40" y1="516" x2="1040" y2="516" stroke="#f1f5f9" />
+
+  <text class="mono" x="56" y="536">loom_pin=99</text>
+  <text class="mono" x="256" y="536">99</text>
+  <text class="newest" x="416" y="536">below floor</text>
+  <text class="newest" x="576" y="536">the newest — a snapshot overtook it</text>
+  <text class="dim" x="836" y="536">none — never re-set</text>
+  <line x1="40" y1="548" x2="1040" y2="548" stroke="#f1f5f9" />
+
+  <text class="mono" x="56" y="568">loom_pin=901</text>
+  <text class="mono" x="256" y="568">901</text>
+  <text class="newest" x="416" y="568">above number</text>
+  <text class="newest" x="576" y="568">the newest live page</text>
+  <text class="dim" x="836" y="568">none — never re-set</text>
+  <line x1="40" y1="580" x2="1040" y2="580" stroke="#f1f5f9" />
+
+  <rect x="40" y="580" width="1000" height="30" fill="#f0fdf4" />
+  <text class="mono" x="56" y="600">loom_pin=<tspan class="dim">""</tspan> · <tspan class="dim">1e3</tspan> · <tspan class="dim">abc</tspan></text>
+  <text class="dim" x="256" y="600">no pin</text>
+  <text class="dim" x="416" y="600">—</text>
+  <text class="newest" x="576" y="600">the newest live page</text>
+  <text class="ok" x="836" y="600">loom_pin=900, Max-Age=3600</text>
+  <line x1="40" y1="610" x2="1040" y2="610" stroke="#cbd5e1" />
+
+  <text class="note" x="40" y="634">Only a value <tspan class="emph">pinCookieFor</tspan> could have written is read as a pin. <tspan class="mono">Number("")</tspan> is <tspan class="mono">0</tspan> — a pin below every floor rather than the absence of one — and</text>
+  <text class="note" x="40" y="652"><tspan class="mono">Number("1e3")</tspan> is a pin of 1,000 taken at a moment that never happened. Both green rows are readers who have no pin, so both are given one.</text>
+
+  <!-- the two refusals that are not here -->
+  <rect x="40" y="676" width="1000" height="64" rx="8" fill="#f8fafc" stroke="#e2e8f0" />
+  <text class="note" x="60" y="700"><tspan class="emph">A window the client cannot read keeps the last whole pull</tspan> — it does not read as Off. Reading it as Off would serve a pinned reader a page</text>
+  <text class="note" x="60" y="718">newer than the one they were pinned to, which is the flip this record exists to remove, and it would do it silently. An answer with <tspan class="emph">no</tspan></text>
+  <text class="note" x="60" y="736">window at all is Off: that is a door from before 0383, and a true statement about it. Freshness is what fails, never the page.</text>
+</svg>

@@ -8,7 +8,7 @@
       "files": 100,
       "narrower": [],
       "standing": {
-        "packageNames": 2081,
+        "packageNames": 2087,
         "otherDoors": 18,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -4246,7 +4246,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 2081,
+        "packageNames": 2087,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -4290,7 +4290,7 @@
       "files": 64,
       "narrower": [],
       "standing": {
-        "packageNames": 2081,
+        "packageNames": 2087,
         "otherDoors": 18,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -5249,7 +5249,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 2081,
+        "packageNames": 2087,
         "otherDoors": 18,
         "doorsSharingNothing": 17,
         "widest": false,
@@ -5330,7 +5330,7 @@
       "files": 220,
       "narrower": [],
       "standing": {
-        "packageNames": 2081,
+        "packageNames": 2087,
         "otherDoors": 18,
         "doorsSharingNothing": 17,
         "widest": false,
@@ -5800,7 +5800,7 @@
       "files": 81,
       "narrower": [],
       "standing": {
-        "packageNames": 2081,
+        "packageNames": 2087,
         "otherDoors": 18,
         "doorsSharingNothing": 17,
         "widest": false,
@@ -6888,7 +6888,7 @@
       "files": 38,
       "narrower": [],
       "standing": {
-        "packageNames": 2081,
+        "packageNames": 2087,
         "otherDoors": 18,
         "doorsSharingNothing": 17,
         "widest": false,
@@ -7453,7 +7453,7 @@
       "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 2081,
+        "packageNames": 2087,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -7656,7 +7656,7 @@
       "files": 45,
       "narrower": [],
       "standing": {
-        "packageNames": 2081,
+        "packageNames": 2087,
         "otherDoors": 18,
         "doorsSharingNothing": 17,
         "widest": false,
@@ -8706,7 +8706,7 @@
       "files": 61,
       "narrower": [],
       "standing": {
-        "packageNames": 2081,
+        "packageNames": 2087,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -9085,7 +9085,7 @@
       "files": 45,
       "narrower": [],
       "standing": {
-        "packageNames": 2081,
+        "packageNames": 2087,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -9337,10 +9337,10 @@
       "slug": "live",
       "types": "./dist/live/index.d.ts",
       "requires": [],
-      "files": 22,
+      "files": 23,
       "narrower": [],
       "standing": {
-        "packageNames": 2081,
+        "packageNames": 2087,
         "otherDoors": 18,
         "doorsSharingNothing": 17,
         "widest": false,
@@ -9387,7 +9387,7 @@
             {
               "name": "LivePages",
               "kind": "type",
-              "signature": "type LivePages = {\n    /** The live pages, by the id of the page each one is. */\n    readonly pages: ReadonlyMap<TreeId, LoomTree>;\n    /**\n     * Each live page's segment rules, in the order the portal set. A page with\n     * none is absent, and every reader of it is in no segment.\n     */\n    readonly rules: ReadonlyMap<TreeId, readonly AudienceRule[]>;\n    /**\n     * Each live page's segment forms: the delta one segment's readers are served\n     * over the base. A page with none is absent,\n     * and so is a segment that is only a name — which is what every segment was\n     * before the door answered forms.\n     */\n    readonly forms: ReadonlyMap<TreeId, readonly AudienceForm[]>;\n    /** The entity tag the door gave for exactly these pages, if it gave one. */\n    readonly tag: string | undefined;\n    /** When the door last answered, whether it answered pages or `304`. */\n    readonly pulledAt: number | undefined;\n    /** When these pages arrived, which is older than `pulledAt` after a `304`. */\n    readonly freshAt: number | undefined;\n    /** Failed pulls since the last one the door answered. Zero while current. */\n    readonly failures: number;\n};",
+              "signature": "type LivePages = {\n    /** The live pages, by the id of the page each one is. */\n    readonly pages: ReadonlyMap<TreeId, LoomTree>;\n    /**\n     * Each live page's segment rules, in the order the portal set. A page with\n     * none is absent, and every reader of it is in no segment.\n     */\n    readonly rules: ReadonlyMap<TreeId, readonly AudienceRule[]>;\n    /**\n     * Each live page's segment forms: the delta one segment's readers are served\n     * over the base. A page with none is absent,\n     * and so is a segment that is only a name — which is what every segment was\n     * before the door answered forms.\n     */\n    readonly forms: ReadonlyMap<TreeId, readonly AudienceForm[]>;\n    /**\n     * How long this project holds its readers, and each page's versions a pin can\n     * still be served. `WINDOW_OFF` where nobody chose a window, and for a\n     * door from before the window answered one.\n     */\n    readonly window: LiveWindow;\n    /** The entity tag the door gave for exactly these pages, if it gave one. */\n    readonly tag: string | undefined;\n    /** When the door last answered, whether it answered pages or `304`. */\n    readonly pulledAt: number | undefined;\n    /** When these pages arrived, which is older than `pulledAt` after a `304`. */\n    readonly freshAt: number | undefined;\n    /** Failed pulls since the last one the door answered. Zero while current. */\n    readonly failures: number;\n};",
               "summary": "What a pull leaves behind: the pages, the rules that sort their readers, the tag that names both, and enough of the last outcome to say whether the site is current."
             },
             {
@@ -9399,7 +9399,7 @@
             {
               "name": "livePageOf",
               "kind": "function",
-              "signature": "const livePageOf: (held: LivePages, page: TreeId) => LoomTree | undefined",
+              "signature": "const livePageOf: (held: LivePages, page: TreeId, pin?: number) => LoomTree | undefined",
               "summary": "The live page for this page id, or `undefined` to render the page as built."
             },
             {
@@ -9417,7 +9417,7 @@
             {
               "name": "pageForReader",
               "kind": "function",
-              "signature": "const pageForReader: (held: LivePages, built: LoomTree, context: JsonObject | undefined) => ServedPage",
+              "signature": "const pageForReader: (held: LivePages, built: LoomTree, context: JsonObject | undefined, pin?: number) => ServedPage",
               "summary": "What to render for this reader, and what to file their signals under."
             },
             {
@@ -9472,7 +9472,7 @@
             {
               "name": "SitePullOutcome",
               "kind": "type",
-              "signature": "type SitePullOutcome = {\n    readonly kind: \"fresh\";\n    readonly pages: readonly LoomTree[];\n    readonly rules: readonly LivePageRules[];\n    readonly forms: readonly LivePageForms[];\n    readonly tag: string | undefined;\n} | {\n    readonly kind: \"unchanged\";\n} | {\n    readonly kind: \"failed\";\n    readonly failure: SitePullFailure;\n};",
+              "signature": "type SitePullOutcome = {\n    readonly kind: \"fresh\";\n    readonly pages: readonly LoomTree[];\n    readonly rules: readonly LivePageRules[];\n    readonly forms: readonly LivePageForms[];\n    readonly window: LiveWindow;\n    readonly tag: string | undefined;\n} | {\n    readonly kind: \"unchanged\";\n} | {\n    readonly kind: \"failed\";\n    readonly failure: SitePullFailure;\n};",
               "summary": "What one pull did: brought pages and their rules, confirmed the ones held, or failed."
             },
             {
@@ -9555,6 +9555,49 @@
               "summary": ""
             }
           ]
+        },
+        {
+          "module": "live/window",
+          "title": "Window",
+          "summary": "The pin a reader carries, and the version of a page it asks for.",
+          "symbols": [
+            {
+              "name": "HeldVersion",
+              "kind": "type",
+              "signature": "type HeldVersion = {\n    readonly until: number;\n    readonly tree: LoomTree;\n};",
+              "summary": "One version of a page a pin can still be served."
+            },
+            {
+              "name": "LiveWindow",
+              "kind": "type",
+              "signature": "type LiveWindow = {\n    readonly ms: 0;\n} | ReadersHeld;",
+              "summary": ""
+            },
+            {
+              "name": "WINDOW_OFF",
+              "kind": "value",
+              "signature": "const WINDOW_OFF: LiveWindow",
+              "summary": "Readers are not held: every page view reads the newest live page, no cookie is set, and nothing is kept on a reader's device."
+            },
+            {
+              "name": "PIN_COOKIE",
+              "kind": "value",
+              "signature": "const PIN_COOKIE = \"loom_pin\"",
+              "summary": "The cookie the pin is kept in, first-party, on the customer's own domain."
+            },
+            {
+              "name": "pinIn",
+              "kind": "function",
+              "signature": "const pinIn: (cookies: string | null | undefined) => number | undefined",
+              "summary": "The pin in a request's `Cookie` header, or `undefined` for a reader who has no usable one."
+            },
+            {
+              "name": "pinCookieFor",
+              "kind": "function",
+              "signature": "const pinCookieFor: (held: {\n    readonly window: LiveWindow;\n}, pin: number | undefined) => string | undefined",
+              "summary": "The `Set-Cookie` value for this reader, or `undefined` to set none."
+            }
+          ]
         }
       ]
     },
@@ -9576,7 +9619,7 @@
         }
       ],
       "standing": {
-        "packageNames": 2081,
+        "packageNames": 2087,
         "otherDoors": 18,
         "doorsSharingNothing": 16,
         "widest": true,
@@ -14378,7 +14421,7 @@
       "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 2081,
+        "packageNames": 2087,
         "otherDoors": 18,
         "doorsSharingNothing": 17,
         "widest": false,
@@ -14513,7 +14556,7 @@
       "files": 21,
       "narrower": [],
       "standing": {
-        "packageNames": 2081,
+        "packageNames": 2087,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -14575,7 +14618,7 @@
       "files": 65,
       "narrower": [],
       "standing": {
-        "packageNames": 2081,
+        "packageNames": 2087,
         "otherDoors": 18,
         "doorsSharingNothing": 17,
         "widest": false,
@@ -15149,7 +15192,7 @@
       "files": 43,
       "narrower": [],
       "standing": {
-        "packageNames": 2081,
+        "packageNames": 2087,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -15219,7 +15262,7 @@
       "files": 100,
       "narrower": [],
       "standing": {
-        "packageNames": 2081,
+        "packageNames": 2087,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -15641,7 +15684,7 @@
       "files": 81,
       "narrower": [],
       "standing": {
-        "packageNames": 2081,
+        "packageNames": 2087,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
