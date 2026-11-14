@@ -37,6 +37,7 @@ import {
   type Served,
 } from "./going-live"
 import { goalIdSchema } from "./goals/goal"
+import type { Holding } from "./holding"
 import type { ProposalGoal } from "./goals/serving"
 import { MEASURING_MS, windowsOf, type Measurement, type Side } from "./measuring"
 import { partNameOf } from "./part-name"
@@ -48,6 +49,7 @@ const THIRD_COPY = treeIdSchema.parse("t_home3")
 
 const NOT_RECORDED: Served = { kind: "not-recorded" }
 const NOT_LIVE: Measurement = { kind: "not-live" }
+const NOT_HELD: Holding = { kind: "none" }
 
 const AT = Date.UTC(2026, 10, 7, 9, 0)
 const MINUTE = 60_000
@@ -118,7 +120,7 @@ const naming = (answers: readonly TakenAnswer[], quiet = false): Reach => ({
 })
 
 const titles = (change: AcceptedChange, reach: Reach, now = AT): readonly string[] =>
-  timelineOf(change, reach, now, NOT_RECORDED, NOT_LIVE).map((step) => step.title)
+  timelineOf(change, reach, now, NOT_RECORDED, NOT_LIVE, NOT_HELD).map((step) => step.title)
 
 describe("acceptedChangesOf", () => {
   it("finds nothing on a page nothing was accepted on", () => {
@@ -245,9 +247,10 @@ describe("timelineOf", () => {
     const steps = timelineOf(
       accepted,
       pulling([AT - MINUTE, live]),
-      AT + 3 * MINUTE,
+      AT + 61 * MINUTE,
       SERVED,
-      read(live, { views: 0, count: 0 }, { views: 0, count: 0 })
+      read(live, { views: 0, count: 0 }, { views: 0, count: 0 }),
+      NOT_HELD
     )
 
     expect(steps.map((step) => [step.title, step.state, step.at])).toEqual([
@@ -265,20 +268,20 @@ describe("timelineOf", () => {
   })
 
   it("is live at once on this deployment's own site", () => {
-    const steps = timelineOf(accepted, { kind: "own-site" }, AT, NOT_RECORDED, NOT_LIVE)
+    const steps = timelineOf(accepted, { kind: "own-site" }, AT, NOT_RECORDED, NOT_LIVE, NOT_HELD)
 
     expect(steps[1]).toMatchObject({ title: "Live", state: "done", at: AT })
   })
 
   it("waits for the site's next pull, and says when the site seems to have stopped", () => {
     expect(
-      timelineOf(accepted, pulling([AT - MINUTE]), AT, NOT_RECORDED, NOT_LIVE)[1]
+      timelineOf(accepted, pulling([AT - MINUTE]), AT, NOT_RECORDED, NOT_LIVE, NOT_HELD)[1]
     ).toMatchObject({
       title: "Waiting for your site to pull",
       state: "current",
     })
     expect(
-      timelineOf(accepted, pulling([], true), AT, NOT_RECORDED, NOT_LIVE)[1]?.lines[0]
+      timelineOf(accepted, pulling([], true), AT, NOT_RECORDED, NOT_LIVE, NOT_HELD)[1]?.lines[0]
     ).toContain("has not pulled for over an hour")
   })
 
@@ -292,7 +295,7 @@ describe("timelineOf", () => {
 
     it("is live from the first answer since Accept the site named back, not the first given", () => {
       const reach = naming([kept(AT - 5 * MINUTE), given(AT + MINUTE), kept(AT + 2 * MINUTE)])
-      const live = timelineOf(accepted, reach, AT + 3 * MINUTE, NOT_RECORDED, NOT_LIVE)[1]
+      const live = timelineOf(accepted, reach, AT + 3 * MINUTE, NOT_RECORDED, NOT_LIVE, NOT_HELD)[1]
 
       expect(live).toMatchObject({ title: "Live", state: "done", at: AT + 2 * MINUTE })
       expect(live?.lines[0]).toContain("named it back on its next pull")
@@ -305,7 +308,8 @@ describe("timelineOf", () => {
         naming([kept(AT - 5 * MINUTE), given(AT + MINUTE)]),
         AT + 2 * MINUTE,
         NOT_RECORDED,
-        NOT_LIVE
+        NOT_LIVE,
+        NOT_HELD
       )[1]
 
       expect(live).toMatchObject({ title: "Given to your site", state: "current", at: AT + MINUTE })
@@ -318,7 +322,14 @@ describe("timelineOf", () => {
         given(AT + MINUTE),
         given(AT + 3 * MINUTE, AT + 13 * MINUTE),
       ])
-      const live = timelineOf(accepted, reach, AT + 13 * MINUTE, NOT_RECORDED, NOT_LIVE)[1]
+      const live = timelineOf(
+        accepted,
+        reach,
+        AT + 13 * MINUTE,
+        NOT_RECORDED,
+        NOT_LIVE,
+        NOT_HELD
+      )[1]
 
       expect(live).toMatchObject({
         title: "Your site is not keeping the page with this change",
@@ -338,7 +349,8 @@ describe("timelineOf", () => {
         naming([given(AT + MINUTE, AT + 20 * MINUTE)], true),
         AT + 90 * MINUTE,
         NOT_RECORDED,
-        NOT_LIVE
+        NOT_LIVE,
+        NOT_HELD
       )[1]
 
       expect(live?.title).toBe("Waiting for your site to pull")
@@ -363,14 +375,14 @@ describe("timelineOf", () => {
   })
 
   it("says a site that never pulled is connected for observation only, with the way to connect", () => {
-    const live = timelineOf(accepted, { kind: "never" }, AT, NOT_RECORDED, NOT_LIVE)[1]
+    const live = timelineOf(accepted, { kind: "never" }, AT, NOT_RECORDED, NOT_LIVE, NOT_HELD)[1]
 
     expect(live).toMatchObject({ title: "Your site is not pulling yet", connect: true })
     expect(live?.lines[0]).toContain("connected for observation only")
   })
 
   it("says what it will be measured on before it is live, and measures nothing yet", () => {
-    const steps = timelineOf(accepted, { kind: "never" }, AT, SERVED, NOT_LIVE)
+    const steps = timelineOf(accepted, { kind: "never" }, AT, SERVED, NOT_LIVE, NOT_HELD)
 
     expect(steps[2]?.lines[0]).toBe(
       "Once it is live, it is measured on its goal, Start presses, over the 14 days after, against the 14 days before."
@@ -384,7 +396,8 @@ describe("timelineOf", () => {
       { kind: "own-site" },
       AT + MEASURING_MS,
       SERVED,
-      read(AT, { views: 4_000, count: 100 }, { views: 4_000, count: 160 })
+      read(AT, { views: 4_000, count: 100 }, { views: 4_000, count: 160 }),
+      NOT_HELD
     )
 
     expect(steps[2]).toMatchObject({ title: "Measuring", state: "done" })
@@ -406,13 +419,20 @@ describe("timelineOf", () => {
 
   it("says a side was shorter than 14 days where the page changed inside it", () => {
     const windows = windowsOf(AT, { previous: AT - 3 * 24 * 60 * MINUTE })
-    const steps = timelineOf(accepted, { kind: "own-site" }, AT + MEASURING_MS, SERVED, {
-      kind: "read",
-      goal: "activated",
-      windows,
-      before: { range: windows.before, views: 10, count: 1 },
-      after: { range: windows.after, views: 10, count: 1 },
-    })
+    const steps = timelineOf(
+      accepted,
+      { kind: "own-site" },
+      AT + MEASURING_MS,
+      SERVED,
+      {
+        kind: "read",
+        goal: "activated",
+        windows,
+        before: { range: windows.before, views: 10, count: 1 },
+        after: { range: windows.after, views: 10, count: 1 },
+      },
+      NOT_HELD
+    )
 
     expect(steps[3]?.title).toBe("Result: Too early")
     expect(steps[3]?.lines).toContain(
@@ -421,22 +441,127 @@ describe("timelineOf", () => {
   })
 
   it("says a change with no goal recorded is not measured", () => {
-    const steps = timelineOf(accepted, { kind: "own-site" }, AT, NOT_RECORDED, {
-      kind: "no-goal",
-      liveAt: AT,
-    })
+    const steps = timelineOf(
+      accepted,
+      { kind: "own-site" },
+      AT,
+      NOT_RECORDED,
+      {
+        kind: "no-goal",
+        liveAt: AT,
+      },
+      NOT_HELD
+    )
 
     expect(steps.map((step) => step.title)).toEqual(["Accepted", "Live", "Not measured"])
   })
 
   it("says the figures could not be read, rather than giving a verdict", () => {
-    const steps = timelineOf(accepted, { kind: "own-site" }, AT + MEASURING_MS, SERVED, {
-      kind: "unreadable",
-      windows: windowsOf(AT, {}),
-    })
+    const steps = timelineOf(
+      accepted,
+      { kind: "own-site" },
+      AT + MEASURING_MS,
+      SERVED,
+      {
+        kind: "unreadable",
+        windows: windowsOf(AT, {}),
+      },
+      NOT_HELD
+    )
 
     expect(steps[3]).toMatchObject({ title: "Result", state: "upcoming" })
     expect(steps[3]?.lines[0]).toContain("could not be read")
+  })
+
+  describe("where a reader window held returning readers", () => {
+    const DAY = 24 * 60 * MINUTE
+    const until = AT + DAY
+    const measured = (): Measurement => {
+      const windows = windowsOf(AT, { heldUntil: until })
+
+      return {
+        kind: "read",
+        goal: "activated",
+        windows,
+        before: { range: windows.before, views: 0, count: 0 },
+        after: { range: windows.after, views: 0, count: 0 },
+      }
+    }
+
+    it("says until when between Live and Measuring, and measures from then", () => {
+      const steps = timelineOf(
+        accepted,
+        { kind: "own-site" },
+        AT + 60 * MINUTE,
+        SERVED,
+        measured(),
+        {
+          kind: "held",
+          window: "1d",
+          until,
+        }
+      )
+
+      expect(steps.map((step) => [step.title, step.state])).toEqual([
+        ["Accepted", "done"],
+        ["Live", "done"],
+        ["Held for returning readers until 8 November 2026 at 09:00 UTC", "current"],
+        ["Measuring", "upcoming"],
+        ["Result", "upcoming"],
+      ])
+      expect(steps[2]?.lines).toEqual([
+        "Your project keeps a reader on the pages they first saw for a day, so a reader who came before it went live may be shown the page as it was until then. New readers get it at once.",
+        "Loom hands your site the page as it was for those readers. Whether they are kept on it is up to the version of Loom installed on your site, which keeps them by a cookie it sets.",
+        "It is measured from when this ends, so no hour after it mixes readers of the two versions.",
+      ])
+      expect(steps[3]?.lines).toEqual([
+        "It will be measured on its goal, Start presses, from 8 November 2026 to 22 November 2026, against the 14 days before.",
+      ])
+    })
+
+    it("is done once the hold has ended, and says what ended it early", () => {
+      const [, held] = timelineOf(
+        accepted,
+        { kind: "own-site" },
+        AT + 2 * DAY,
+        SERVED,
+        measured(),
+        { kind: "held", window: "7d", until, endedBy: "newer-version" }
+      ).slice(1)
+
+      expect(held?.state).toBe("done")
+      expect(held?.lines[1]).toBe(
+        "Your site published a newer version of its pages before the window ran out, which ended it early: every reader has had the newest pages since."
+      )
+    })
+
+    it("says it is not known where the window was changed since it went live", () => {
+      const steps = timelineOf(accepted, { kind: "own-site" }, AT, SERVED, NOT_LIVE, {
+        kind: "changed",
+        since: AT + DAY,
+      })
+
+      expect(steps[2]).toMatchObject({
+        title: "Whether returning readers were held is not known",
+        state: "done",
+      })
+      expect(steps[2]?.lines[0]).toContain("changed on Settings on 8 November 2026")
+    })
+
+    it("says nothing of a hold for a change that came off the page", () => {
+      const dropped = only([
+        first([entry(PAGE, 1, "p_1", AT)]),
+        record(SECOND_COPY, AT + MINUTE, []),
+      ])
+
+      expect(
+        timelineOf(dropped, { kind: "own-site" }, AT, NOT_RECORDED, NOT_LIVE, {
+          kind: "held",
+          window: "1d",
+          until,
+        }).map((step) => step.title)
+      ).toEqual(["Accepted", "Live", "No longer fits the site's newer version"])
+    })
   })
 
   it("ends at no longer fitting the site's newer version, after being live", () => {
@@ -451,7 +576,7 @@ describe("timelineOf", () => {
       "No longer fits the site's newer version",
     ])
     expect(
-      timelineOf(dropped, pulling([AT + MINUTE]), AT, NOT_RECORDED, NOT_LIVE).at(-1)
+      timelineOf(dropped, pulling([AT + MINUTE]), AT, NOT_RECORDED, NOT_LIVE, NOT_HELD).at(-1)
     ).toMatchObject({
       state: "ended",
       at: AT + 60 * MINUTE,

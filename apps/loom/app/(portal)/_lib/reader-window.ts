@@ -18,7 +18,7 @@ export const WINDOW_LABEL: Readonly<Record<ReaderWindow, string>> = {
 }
 
 /** A window that holds a reader, as a length of time inside a sentence. */
-const HELD_FOR: Readonly<Record<Exclude<ReaderWindow, "off">, string>> = {
+export const HELD_FOR: Readonly<Record<Exclude<ReaderWindow, "off">, string>> = {
   "1h": "an hour",
   "1d": "a day",
   "7d": "seven days",
