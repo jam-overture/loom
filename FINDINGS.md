@@ -72490,3 +72490,113 @@ needs no knowledge of when anything merges.
 on the same day: three text changes pushed to #851's branch ten minutes after it
 merged, re-applied off `main` as a pull request of their own. Three instances in
 one day, two of them mine, is what makes it a rule rather than bad luck.
+
+---
+## 2026-11-13 (evening) — what a fix to a silent component was worth is answerable now, and the portal view that would say it is bounded by the same floor the census is
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom portal`
+(`apps/loom/app/(portal)/portal/[project]/signals/`) · **Status:** open —
+**nothing is wrong on any screen today**; two readings are available that were
+not, and one of them answers a question nothing in this repository could ask.
+
+§88 landed `librarySendersOf` this morning: *`loom.accordion` is silent in
+thirty-one of the thirty-four places it stands, across nineteen of your pages*.
+That names the component to fix. §89 lands
+[`librarySendersChangeOf`](src/signals/library-senders-change.ts)
+([0394](decisions/0394-what-a-fix-to-a-silent-component-was-worth-is-read-over-the-places-both-windows-could-check.md)),
+which answers the two questions that follow it:
+
+| | |
+| --- | --- |
+| `mostRepaired` | *that fix recovered `loom.accordion` in twenty-nine of the thirty-one places it was silent, across seventeen of your pages* |
+| `mostSilenced` | **the one nothing could see before**: a release that *silenced* a component that was reporting last week. A census sees only that it is silent now |
+
+Both are pure functions of two windows' `PageReading[]` — the same readings the
+census takes — so the screen needs no second query, no store method and no
+migration. The second window is the one *1 · Signals* already has a range picker
+for.
+
+**Four things a screen drawing these has to hold.** Each is published rather than
+left to be worked out, and the record's clause 3 is the one that matters:
+
+1. **`checkable` is the places checkable in *both* windows**, and a surface must
+   not quietly re-derive a denominator from `checkableNow`. A place nobody was
+   under before and is under now has no earlier state to have been silent in —
+   drawn over the later window's places, a week that merely got busier reads as
+   a fix, and nothing on the row looks wrong.
+2. **`checkableWas` and `checkableNow` are the coverage, not the finding.** They
+   move with readers. A chart that put them beside a repair count without saying
+   which is which would invite exactly the reading clause 3 refuses.
+3. **`unclaimable` is not `uncheckable`.** The first says every comparable place
+   reported something that was not a view on one side — nothing is claimed. The
+   second says come back with readers. They are different instructions and
+   `describeSenderFixSilence` has a line for each.
+4. **The figure is a floor**, because §88's is: leaves and unwitnessed places are
+   outside it on both sides. A screen that said *this is everything the fix
+   touched* would be printing something the reading did not say.
+
+**`republished` is the number to draw beside a repair.** A fix to a primitive
+reaches a page by republishing it, so a repair on pages that did not move is a
+repair the library cannot explain.
+
+---
+## 2026-11-13 (evening) — the reader-weighted version of what a fix was worth is 0256's refusal one unit along, and it is the next thing somebody will ask for
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals` (`src/signals/`) ·
+**Status:** open — **nothing is broken and nothing is blocked**; a limit written
+down by the run that created it.
+
+[0394](decisions/0394-what-a-fix-to-a-silent-component-was-worth-is-read-over-the-places-both-windows-could-check.md)
+answers *how many of the places your accordion stands in report themselves now*.
+The question it does not answer is *of the readers who met your accordion, how
+many were measured* — and it is the obvious second question, because the first
+is a count of places and a deployment is paid by readers.
+
+**It is the same refusal 0256 made** about a kind's share of the readers who met
+it, one unit along: it needs the door's scale on both sides, it is a weighted
+mean whose weights move when the pages' traffic moves, and a type carrying a
+sound figure and a corrected one with nothing but prose to tell them apart is a
+type a surface reads past. The library comparison
+([`library-change.ts`](src/signals/library-change.ts)) filed the identical
+question on 24 October and it is still open; this is the second reading to reach
+it.
+
+**What makes this one slightly different, and worth its own line.** The
+denominator there is readers who met a kind. Here the population is *places
+something reported reach below*, which is already a statement about readers —
+so the reader-weighted version is not a second reading over the same places, it
+is a different population. Whoever takes it should decide that first and write
+it down, because the two are easy to describe in one sentence and impossible to
+add together.
+
+**Not a blocker on anything**, and this lane's own view is that the counts are
+the answer a fix is judged by: an author who replaced a primitive wants to know
+how much of the library it reached, and that is places.
+
+---
+## 2026-11-13 (evening) — ten more names on `@jam-overture/loom/signals` with no prose, and it is the fifth entry asking for one paragraph
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom docs`
+(`app/(docs)/docs/the-runtime/what-your-readers-do/page.mdx`) · **Status:**
+open — **the generator said so and `pnpm verify` is green**; nothing is red and
+nothing is blocked.
+
+§89 publishes ten names from `src/signals/library-senders-change.ts`:
+`librarySendersChangeOf`, `LibrarySendersChange`, `KindSenderChange`,
+`SenderMovement`, `SENDER_MOVEMENTS`, `describeSenderMovement`,
+`SenderFixSilence`, `SENDER_FIX_SILENCES`, `describeSenderFixSilence` and
+`SILENCED_EXAMPLES`.
+
+**This is the fifth entry of its kind** — 8 November's seven names, 9 November's
+five, #848's eight, 10 November's sixteen and §88's seven, which the morning
+entry already counted as the fourth. **It does not need a paragraph of its own**,
+and the honest ask is unchanged: one paragraph on that one page answers all
+five. The sentences are here to be lifted rather than rewritten:
+
+> A census says which of your components are silent. Two windows of it say what
+> fixing one was worth — and, the other way round, which component a release
+> silenced. Both are read over the places *both* windows could check, because a
+> place nobody was under last week has no before.
+
+**Nothing is asked by a date.** If the page would rather carry one sentence for
+all five entries than five, that is the better page.

@@ -6,7 +6,7 @@ import { PRIMITIVE_ROLES, type PrimitiveRole } from "../role.js"
 import { readingKeyOf } from "./audiences.js"
 import { kindKeyOf, type KindKey } from "./library.js"
 import type { PageReading } from "./parts.js"
-import { between, extentsOf, prefixOf } from "./subtrees.js"
+import { senderStatesOf, witnessedState, type SenderState } from "./subtrees.js"
 
 /**
  * **Which of a deployment's components are silent.**
@@ -318,10 +318,7 @@ const tallying = (kind: KindKey): Tallying => ({
 type Placement = {
   readonly nodeId: NodeId
   readonly treeId: TreeId
-  readonly leaf: boolean
-  readonly witnessed: boolean
-  readonly silent: boolean
-  readonly indeterminate: boolean
+  readonly state: SenderState
 }
 
 const add = (into: Tallying, at: Placement, revision: string): void => {
@@ -329,13 +326,13 @@ const add = (into: Tallying, at: Placement, revision: string): void => {
   into.trees.add(at.treeId)
   into.revisions.add(revision)
 
-  if (at.leaf) into.leaves += 1
-  else if (!at.witnessed) into.unwitnessed += 1
+  if (at.state === "leaf") into.leaves += 1
+  else if (at.state === "unwitnessed") into.unwitnessed += 1
   else into.witnessed += 1
 
-  if (at.indeterminate) into.indeterminate += 1
+  if (at.state === "indeterminate") into.indeterminate += 1
 
-  if (at.silent) {
+  if (at.state === "silent") {
     into.silent += 1
     into.silentIn.add(at.treeId)
     if (into.examples.length < SILENT_EXAMPLES) into.examples.push(at.nodeId)
@@ -436,29 +433,13 @@ export const librarySendersOf = (readings: readonly PageReading[]): LibrarySende
     trees.add(reading.treeId)
     pages += 1
 
-    const parts = reading.parts
-    const { ends } = extentsOf(parts)
-    const reads = prefixOf(parts, "read")
-
-    for (const [at, part] of parts.entries()) {
-      const end = ends[at] ?? parts.length
-      const beneath = end - at - 1
-      const readBelow = between(reads, at + 1, end)
-      const sawBelow = readBelow > 0
-
-      const placement: Placement = {
-        nodeId: part.nodeId,
-        treeId: reading.treeId,
-        leaf: beneath === 0,
-        witnessed: sawBelow,
-        silent: sawBelow && part.standing === "skipped",
-        indeterminate: sawBelow && part.standing === "unknown",
-      }
+    for (const { part, state } of senderStatesOf(reading.parts)) {
+      const placement: Placement = { nodeId: part.nodeId, treeId: reading.treeId, state }
 
       placements += 1
-      witnessed += sawBelow ? 1 : 0
-      silent += placement.silent ? 1 : 0
-      indeterminate += placement.indeterminate ? 1 : 0
+      witnessed += witnessedState(state) ? 1 : 0
+      silent += state === "silent" ? 1 : 0
+      indeterminate += state === "indeterminate" ? 1 : 0
 
       const keys: readonly KindKey[] = [
         { by: "type", type: part.type },
