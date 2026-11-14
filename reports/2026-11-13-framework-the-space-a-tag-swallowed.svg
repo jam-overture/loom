@@ -1,0 +1,86 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 710" width="1080" height="710" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif">
+  <style>
+    .title { font-size: 21px; font-weight: 650; fill: #0f172a; }
+    .sub { font-size: 13px; fill: #64748b; }
+    .panel-title { font-size: 11px; font-weight: 650; fill: #475569; letter-spacing: 0.09em; }
+    .note { font-size: 12px; fill: #475569; }
+    .mono { font-size: 11.5px; fill: #334155; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .monob { font-size: 11.5px; font-weight: 650; fill: #0f172a; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .dim { font-size: 11px; fill: #94a3b8; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .bad { font-size: 11.5px; font-weight: 650; fill: #b91c1c; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .ok { font-size: 11.5px; font-weight: 650; fill: #15803d; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .rowhead { font-size: 10px; font-weight: 650; fill: #64748b; letter-spacing: 0.05em; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .emph { font-size: 12.5px; font-weight: 650; fill: #0f172a; }
+    .big { font-size: 26px; font-weight: 650; fill: #0f172a; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+  </style>
+
+  <rect width="1080" height="710" fill="#ffffff" />
+
+  <text class="title" x="40" y="46">The space a tag swallowed</text>
+  <text class="sub" x="40" y="68">0398 — the same defect twice. The first spelling left a marker and the check was built on it.</text>
+  <text class="sub" x="40" y="86">The second left none, so this one reads the two characters a reader sees touch.</text>
+
+  <!-- ============ left: two spellings ============ -->
+  <text class="panel-title" x="40" y="110">TWO SPELLINGS OF ONE DEFECT</text>
+
+  <rect x="40" y="124" width="610" height="152" rx="8" fill="#f8fafc" stroke="#e2e8f0" />
+  <text class="rowhead" x="60" y="148">9 SEPTEMBER — THE SPACE MOVED</text>
+  <text class="mono" x="60" y="172">source</text><text class="mono" x="150" y="172">{ARRIVAL_TOTALS.compiled} of those blocks are TypeScript</text>
+  <text class="mono" x="60" y="194">vitest</text><text class="ok" x="150" y="194">16 of those blocks are TypeScript</text>
+  <text class="mono" x="60" y="216">next build</text><text class="bad" x="150" y="216">16&lt;!-- --&gt;of those blocks are TypeScript</text>
+  <text class="mono" x="60" y="238">reader</text><text class="bad" x="150" y="238">16of those blocks are TypeScript</text>
+  <text class="mono" x="60" y="262">detector</text><text class="ok" x="150" y="262">runTogethersIn — the separator is the marker</text>
+
+  <rect x="40" y="292" width="610" height="152" rx="8" fill="#fef2f2" stroke="#fecaca" />
+  <text class="rowhead" x="60" y="316">23 OCTOBER — THE SPACE DROPPED</text>
+  <text class="mono" x="60" y="340">source</text><text class="mono" x="150" y="340">…can say &lt;em&gt;color&lt;/em&gt; in a sentence…</text>
+  <text class="mono" x="60" y="362">vitest</text><text class="ok" x="150" y="362">…can say color in a sentence…</text>
+  <text class="mono" x="60" y="384">next build</text><text class="bad" x="150" y="384">…can say &lt;em&gt;color&lt;/em&gt;in a sentence…</text>
+  <text class="mono" x="60" y="406">reader</text><text class="bad" x="150" y="406">…can say colorin a sentence…</text>
+  <text class="mono" x="60" y="430">detector</text><text class="bad" x="150" y="430">no marker at all — 1,917 junctions read, 0 found</text>
+
+  <text class="emph" x="40" y="482">A hazard that leaves no marker is invisible to a detector built on it.</text>
+  <text class="note" x="40" y="506">So the second class reads the character before an inline end tag</text>
+  <text class="note" x="40" y="524">and the character after it — 0119's rule with the tag in the</text>
+  <text class="note" x="40" y="542">separator's place. &lt;em&gt;color&lt;/em&gt;in reads `r` then `i`.</text>
+
+  <!-- ============ right: the census ============ -->
+  <text class="panel-title" x="690" y="110">WHAT THE RULE MEETS — 139 BUILT PAGES</text>
+
+  <rect x="690" y="124" width="350" height="320" rx="8" fill="#f8fafc" stroke="#e2e8f0" />
+
+  <text class="big" x="710" y="164">82</text>
+  <text class="note" x="752" y="164">inline end tags with text hard against them</text>
+
+  <rect x="710" y="184" width="310" height="10" rx="5" fill="#e2e8f0" />
+  <rect x="710" y="184" width="302" height="10" rx="5" fill="#94a3b8" />
+
+  <text class="monob" x="710" y="226">80</text>
+  <text class="mono" x="750" y="226">&lt;span&gt;Asked: &lt;/span&gt;Make…</text>
+  <text class="dim" x="750" y="243">the space is inside the element</text>
+  <text class="ok" x="750" y="260">not a junction a reader sees</text>
+
+  <text class="monob" x="710" y="294">2</text>
+  <text class="mono" x="750" y="294">&lt;code&gt;Map&lt;/code&gt;s</text>
+  <text class="dim" x="750" y="311">a plural with no second spelling</text>
+  <text class="ok" x="750" y="328">allowed by name, held to one `s`</text>
+
+  <line x1="710" y1="350" x2="1020" y2="350" stroke="#e2e8f0" />
+
+  <text class="monob" x="710" y="378">0</text>
+  <text class="emph" x="750" y="378">reported — the site is clean</text>
+
+  <text class="dim" x="710" y="408">a block end — `&lt;/p&gt;in` — is the next line,</text>
+  <text class="dim" x="710" y="424">not the same one, and is never read</text>
+
+  <text class="panel-title" x="690" y="482">LEFT OPEN, AND MEASURED</text>
+  <text class="note" x="690" y="506">A space lost before a tag — say&lt;em&gt;color&lt;/em&gt; — is the</text>
+  <text class="note" x="690" y="524">same markup as a badge against the text it labels.</text>
+  <text class="note" x="690" y="542">2,134 of those on this site, every one correct.</text>
+
+  <!-- ============ bottom: the gate ============ -->
+  <rect x="40" y="572" width="1000" height="96" rx="8" fill="#0f172a" />
+  <text class="rowhead" x="64" y="600" style="fill:#94a3b8">PNPM PRERENDER:CHECK, WITH A PROBE CARRYING THE 23 OCTOBER SENTENCE PLANTED IN THE BUILD</text>
+  <text class="mono" x="64" y="626" style="fill:#fca5a5">__probe.html: reads "ri" — …so a page can say colorin a sentence and show you a name…</text>
+  <text class="mono" x="64" y="650" style="fill:#e2e8f0">140 prerendered pages, 2103 text junctions, 0 run together; 83 tag junctions, 1 run together  →  exit 1</text>
+</svg>

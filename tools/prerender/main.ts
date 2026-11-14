@@ -1,4 +1,10 @@
-import { describeRunTogether, runTogethersIn, separatorsIn } from "./hazards.js"
+import {
+  describeRunTogether,
+  runTogethersIn,
+  separatorsIn,
+  tagJunctionsIn,
+  tagRunTogethersIn,
+} from "./hazards.js"
 import {
   appRouteKeys,
   describeMetadataError,
@@ -17,10 +23,12 @@ import { describePrerenderError, prerenderedPages } from "./pages.js"
  * asks whether the source is right, and this asks what came out.
  *
  * Two things come out, and each has a defect class of its own. The **pages** a
- * reader is served carry text junctions no `textContent` assertion can see. The
- * **routes** a reader is served are the answer to a question no assertion can
- * ask at all — a metadata file that the build never read produces no artefact
- * to be wrong, only silence.
+ * reader is served carry text junctions no `textContent` assertion can see —
+ * two kinds of them now, one at a separator React wrote and one at an inline
+ * end tag where a space went missing and no separator was written at all
+ * (`0119`, `0398`). The **routes** a reader is served are the answer to a
+ * question no assertion can ask at all — a metadata file that the build never
+ * read produces no artefact to be wrong, only silence.
  *
  * What it prints when it passes matters as much as what it prints when it
  * fails. A count of pages, junctions and conventions read is the difference
@@ -46,15 +54,20 @@ const pages = found.value
 const conventions = await metadataSources()
 
 const hazards = pages.flatMap((page) => runTogethersIn(page.path, page.html))
+const swallowed = pages.flatMap((page) => tagRunTogethersIn(page.path, page.html))
 const separators = pages.reduce((total, page) => total + separatorsIn(page.html), 0)
+const junctions = pages.reduce((total, page) => total + tagJunctionsIn(page.html), 0)
 const unserved = unservedMetadata(conventions, routes.value)
 
-for (const hazard of hazards) process.stderr.write(`${describeRunTogether(hazard)}\n`)
+for (const hazard of [...hazards, ...swallowed]) {
+  process.stderr.write(`${describeRunTogether(hazard)}\n`)
+}
 for (const source of unserved) process.stderr.write(`${describeUnserved(source)}\n`)
 
 process.stdout.write(
   `${pages.length} prerendered pages, ${separators} text junctions, ${hazards.length} run together; ` +
+    `${junctions} tag junctions, ${swallowed.length} run together; ` +
     `${conventions.length} metadata conventions, ${unserved.length} unserved\n`
 )
 
-process.exit(hazards.length === 0 && unserved.length === 0 ? 0 : 1)
+process.exit(hazards.length === 0 && swallowed.length === 0 && unserved.length === 0 ? 0 : 1)
