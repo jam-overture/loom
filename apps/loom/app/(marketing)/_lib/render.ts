@@ -1,13 +1,15 @@
 import type { LoomTree } from "@jam-overture/loom"
+import type { ServedPage } from "@jam-overture/loom/live"
 import { renderLoomTree, type RenderOutput } from "@jam-overture/loom/react"
 
 import { siteFrameOrigins } from "./frames"
-import { liveTreeOf, type SiteLive } from "./live"
+import { servedPageOf, type ServedSitePage, type SiteLive } from "./live"
 import { readersCountedHere } from "./readers/counting"
 import { siteRegistry, siteThemes } from "./registry"
 import { treeFor, type SitePageContext } from "./builders"
 import { asRequested } from "./requested"
 
+import { readerContext } from "./serving"
 import { siteOrigin, type SiteRoute } from "./site"
 
 /**
@@ -48,7 +50,7 @@ export { SITE_PAGES, treeFor } from "./builders"
 
 /**
  * The page as its code authors it, and nothing else: what a reader is served
- * when Loom has no live version of it (`servedTreeFor` below).
+ * when Loom has no live version of it (`servedPageFor` below).
  *
  * **As of 7 November the store is not read on this path**
  * ([0363](../../../../../decisions/0363-the-marketing-site-is-served-from-its-code-and-a-stored-row-is-not-a-second-version-of-it.md)).
@@ -61,7 +63,7 @@ export { SITE_PAGES, treeFor } from "./builders"
  *
  * A change accepted in the portal reaches readers through the live-page pull
  * ([0361](../../../../../decisions/0361-the-site-pulls-into-its-own-process-and-a-host-wires-the-live-page-in-two-calls.md)),
- * layered over this tree by `servedTreeFor` with the built page as its
+ * layered over this tree by `servedPageFor` with the built page as its
  * fallback, so the page served without it is this one by construction rather
  * than by timing.
  *
@@ -80,12 +82,32 @@ export const pageTreeFor = (route: SiteRoute, context: SitePageContext): LoomTre
  * Loom has one, and is served as built otherwise. The palette goes on after,
  * so an accepted change is served in whichever palette the reader asked for.
  */
-export const servedTreeFor = async (
+export const servedPageFor = async (
   route: SiteRoute,
   context: SitePageContext,
   live?: SiteLive
-): Promise<LoomTree> =>
-  asRequested(await liveTreeOf(treeFor(route, context), live), { theme: context.theme })
+): Promise<ServedSitePage> => {
+  const served = await servedPageOf(
+    treeFor(route, context),
+    /**
+     * Read here rather than taken as an argument, because this is the function
+     * that needs it and a context threaded through callers is a context a
+     * caller can forget. It is safe outside a request — `readerContext`
+     * answers the palette alone — so the one path through here is the one path
+     * whether a browser is on the other end or a test is.
+     *
+     * **Nothing injects a context on this path and nothing should.** What a
+     * reader's segment is decided from is `servedPageOf`, which takes the
+     * context explicitly and is where that behaviour is stated; this is the
+     * wiring between it and the request, and wiring with an override is wiring
+     * that can disagree with itself.
+     */
+    await readerContext(context.theme),
+    live
+  )
+
+  return { tree: asRequested(served.tree, { theme: context.theme }), audience: served.audience }
+}
 
 /**
  * A page, rendered.
@@ -122,6 +144,26 @@ export type SiteRenderOptions = {
   /** Whether the markup carries the addresses a reader signal names. */
   readonly addressed?: boolean
   /**
+   * The segment this page was drawn for, written on the root so the page's
+   * signals are filed under it (0284).
+   *
+   * It is an option for `origin`'s reason rather than `addressed`'s: the caller
+   * has it and this function cannot look it up. Which segment a reader is in is
+   * decided while the page is being *composed* — `servedPageOf` answers it out
+   * of the rules and the reader's context — so by the time there is a tree to
+   * render the answer already exists and asking again would be asking a second
+   * time with less to go on.
+   *
+   * **Absent is the honest default and the safe one.** A tree rendered by
+   * anything but `renderSitePage` was not composed for a reader, so it names no
+   * segment; the framework drops `aud_everyone` to `undefined` itself
+   * (`src/render/render.ts`), which is the same answer by the same reasoning.
+   * An unsegmented page costs a figure nobody was comparing, and a page
+   * labelled with a segment it was not drawn for makes every comparison
+   * between two segments wrong.
+   */
+  readonly audience?: ServedPage["audience"]
+  /**
    * The origin this page is being served from, which is the one origin it
    * frames.
    *
@@ -147,12 +189,20 @@ export type SiteRenderOptions = {
 
 export const renderTree = (page: LoomTree, options: SiteRenderOptions = {}): RenderOutput => {
   const origins = siteFrameOrigins(options.origin ?? siteOrigin())
+  const { audience } = options
 
   return renderLoomTree(page, {
     resolver: siteRegistry,
     validator: siteRegistry,
     themes: siteThemes,
     addressed: options.addressed ?? false,
+    /**
+     * Omitted rather than passed as `undefined`, for the reason given below
+     * about `origins`: the seam has always been handed this object shape by a
+     * deployment serving every reader the base, and a key holding `undefined`
+     * is a different object that happens to behave the same.
+     */
+    ...(audience === undefined ? {} : { audience }),
     /**
      * Omitted rather than passed as `undefined` when the origin could not be
      * registered, so a render with no allowlist is the same object shape the
@@ -189,13 +239,21 @@ export const renderSitePage = async (
   options: SiteRenderOptions = {},
   live?: SiteLive
 ): Promise<RenderOutput> => {
-  const [page, addressed] = await Promise.all([
-    servedTreeFor(route, context, live),
+  const [served, addressed] = await Promise.all([
+    servedPageFor(route, context, live),
     options.addressed ?? readersCountedHere(),
   ])
 
-  return renderTree(page, {
+  const audience = options.audience ?? served.audience
+
+  return renderTree(served.tree, {
     addressed,
+    /**
+     * The segment the page was composed for, unless the caller named one. The
+     * override is for the same readers `addressed`' is: a test that renders
+     * both halves without a deployment to compose against.
+     */
+    ...(audience === undefined ? {} : { audience }),
     /**
      * Omitted rather than passed as `undefined`, so a caller that does not know
      * which host it is answering on gets `renderTree`'s own fallback to the
