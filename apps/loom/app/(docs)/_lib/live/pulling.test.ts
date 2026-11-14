@@ -195,6 +195,22 @@ describe("one page, three readers", () => {
     expect(stale?.refusal).toContain("revision")
   })
 
+  /**
+   * **Where** the form's band lands, and not only that one landed.
+   *
+   * The page tells a reader that people who have been here before get an extra
+   * line *at the top*, and until this case existed nothing held that: moving
+   * the insert to the foot of the page changed no assertion, because every
+   * count stayed the same. Found by mutation rather than by reading.
+   */
+  it("puts the form's band at the top, which is what the page says", async () => {
+    const [returning, first, stale] = await produceReaders()
+
+    expect(returning?.formBandAt).toBe(1)
+    expect(first?.formBandAt).toBe(0)
+    expect(stale?.formBandAt).toBe(0)
+  })
+
   /** Every reader's context is the host's own, so none of them names an audience. */
   it("sorts on keys a host would have, and never on one Loom supplied", async () => {
     for (const reader of await produceReaders()) {

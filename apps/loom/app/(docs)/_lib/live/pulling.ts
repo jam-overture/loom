@@ -331,6 +331,16 @@ export type Reader = {
   readonly segment: string
   /** How many bands the page they got has, which is how the insert shows up. */
   readonly bands: number
+  /**
+   * Which band the form added, counting from one, or nought where it added
+   * none.
+   *
+   * **Where** the band lands and not only that one landed, because the page
+   * says the extra line is at the top and nothing else here would notice if it
+   * stopped being. Found by mutation: moving the insert to the foot of the
+   * page changed no assertion, because every count stayed the same.
+   */
+  readonly formBandAt: number
   /** Whether the page they got carries the segment's form. */
   readonly formApplied: boolean
   /** The runtime's sentence about a form it would not apply. */
@@ -353,13 +363,17 @@ export const produceReaders = async (): Promise<readonly Reader[]> => {
 
   const read = (who: string, held: LivePages, context: JsonObject): Reader => {
     const served = pageForReader(held, BUILT, context)
+    const added = served.tree.root.children.findIndex(
+      (band) => !BUILT.root.children.some((original) => original.id === band.id)
+    )
 
     return {
       who,
       context: JSON.stringify(context),
       segment: served.audience ?? "none",
       bands: served.tree.root.children.length,
-      formApplied: served.tree.root.children.length > BUILT.root.children.length,
+      formBandAt: added + 1,
+      formApplied: added >= 0,
       refusal: served.refusal === undefined ? "none" : describeComposeError(served.refusal),
     }
   }

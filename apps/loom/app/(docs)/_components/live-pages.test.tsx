@@ -133,7 +133,7 @@ describe("ThreeReaders", () => {
   it("shows the form as one more band than the base page has", async () => {
     render(await ThreeReaders())
 
-    expect(screen.getByText(`${baseBandCount() + 1} bands, with the form`)).toBeTruthy()
+    expect(screen.getByText(`${baseBandCount() + 1} bands, the form's band first`)).toBeTruthy()
     expect(screen.getAllByText(`${baseBandCount()} bands`)).toHaveLength(2)
   })
 })
@@ -145,6 +145,31 @@ describe("TheOneWait", () => {
     expect(screen.getByText("once, for the first pull")).toBeTruthy()
     expect(screen.getByText("no")).toBeTruthy()
     expect(screen.getByText("Pulls the door had been asked for")).toBeTruthy()
+  })
+
+  /**
+   * The two columns **in order**, which is the whole of this table's argument.
+   *
+   * Swapping the headings left every assertion green: both cells of the first
+   * row say the same number, and the two pills either side are each present
+   * somewhere. So the table said the opposite of what the page says and no
+   * case noticed. The headings are read in order, and the second row's cells
+   * are tied to the column they sit in.
+   */
+  it("puts the first render before every render after it", async () => {
+    const { container } = render(await TheOneWait())
+
+    expect([...container.querySelectorAll("thead th")].map((th) => th.textContent)).toEqual([
+      "",
+      "The first render",
+      "Every render after it",
+    ])
+
+    const rows = [...container.querySelectorAll("tbody tr")].map((row) =>
+      [...row.querySelectorAll("td")].map((cell) => cell.textContent)
+    )
+
+    expect(rows[1]).toEqual(["Waited on the network", "once, for the first pull", "no"])
   })
 
   it("names what a silent Loom costs the first render", async () => {

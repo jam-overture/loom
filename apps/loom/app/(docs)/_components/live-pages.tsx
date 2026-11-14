@@ -243,7 +243,12 @@ export const ThreeReaders = async () => {
                 </Cell>
                 <Cell>
                   <Pill warn={reader.refusal !== "none"}>
-                    {reader.bands} bands{reader.formApplied ? ", with the form" : ""}
+                    {reader.bands} bands
+                    {reader.formBandAt === 0
+                      ? ""
+                      : reader.formBandAt === 1
+                        ? ", the form's band first"
+                        : `, the form's band at ${reader.formBandAt}`}
                   </Pill>
                   <br />
                   <span className="text-ink-muted">
