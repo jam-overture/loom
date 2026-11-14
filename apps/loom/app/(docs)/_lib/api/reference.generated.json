@@ -8,7 +8,7 @@
       "files": 100,
       "narrower": [],
       "standing": {
-        "packageNames": 2077,
+        "packageNames": 2087,
         "otherDoors": 18,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -4246,7 +4246,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 2077,
+        "packageNames": 2087,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -4290,7 +4290,7 @@
       "files": 64,
       "narrower": [],
       "standing": {
-        "packageNames": 2077,
+        "packageNames": 2087,
         "otherDoors": 18,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -5249,7 +5249,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 2077,
+        "packageNames": 2087,
         "otherDoors": 18,
         "doorsSharingNothing": 17,
         "widest": false,
@@ -5330,7 +5330,7 @@
       "files": 220,
       "narrower": [],
       "standing": {
-        "packageNames": 2077,
+        "packageNames": 2087,
         "otherDoors": 18,
         "doorsSharingNothing": 17,
         "widest": false,
@@ -5800,7 +5800,7 @@
       "files": 81,
       "narrower": [],
       "standing": {
-        "packageNames": 2077,
+        "packageNames": 2087,
         "otherDoors": 18,
         "doorsSharingNothing": 17,
         "widest": false,
@@ -6888,7 +6888,7 @@
       "files": 38,
       "narrower": [],
       "standing": {
-        "packageNames": 2077,
+        "packageNames": 2087,
         "otherDoors": 18,
         "doorsSharingNothing": 17,
         "widest": false,
@@ -7453,7 +7453,7 @@
       "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 2077,
+        "packageNames": 2087,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -7656,7 +7656,7 @@
       "files": 45,
       "narrower": [],
       "standing": {
-        "packageNames": 2077,
+        "packageNames": 2087,
         "otherDoors": 18,
         "doorsSharingNothing": 17,
         "widest": false,
@@ -8706,7 +8706,7 @@
       "files": 61,
       "narrower": [],
       "standing": {
-        "packageNames": 2077,
+        "packageNames": 2087,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -9085,7 +9085,7 @@
       "files": 45,
       "narrower": [],
       "standing": {
-        "packageNames": 2077,
+        "packageNames": 2087,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -9340,7 +9340,7 @@
       "files": 23,
       "narrower": [],
       "standing": {
-        "packageNames": 2077,
+        "packageNames": 2087,
         "otherDoors": 18,
         "doorsSharingNothing": 17,
         "widest": false,
@@ -9606,7 +9606,7 @@
       "slug": "signals",
       "types": "./dist/signals/index.d.ts",
       "requires": [],
-      "files": 89,
+      "files": 90,
       "narrower": [
         {
           "specifier": "@jam-overture/loom/signals/broadcast",
@@ -9619,7 +9619,7 @@
         }
       ],
       "standing": {
-        "packageNames": 2077,
+        "packageNames": 2087,
         "otherDoors": 18,
         "doorsSharingNothing": 16,
         "widest": true,
@@ -12433,6 +12433,73 @@
           ]
         },
         {
+          "module": "signals/library-senders-change",
+          "title": "Library senders change",
+          "summary": "**What fixing a silent component was worth.**",
+          "symbols": [
+            {
+              "name": "SenderFixSilence",
+              "kind": "type",
+              "signature": "type SenderFixSilence =\n/**\n * Nothing in the pages read, on either side, is of this kind.\n */\n\"unplaced\"\n/**\n * It stands in both windows and in no place that is in both.\n */\n | \"unpaired\"\n/**\n * Its places stand in both windows and none of them could be checked in both.\n */\n | \"uncheckable\"\n/**\n * Every place checkable in both windows is `unknown` in one of them.\n */\n | \"unclaimable\";",
+              "summary": "Why a kind of part has no before and after for its senders."
+            },
+            {
+              "name": "SENDER_FIX_SILENCES",
+              "kind": "value",
+              "signature": "const SENDER_FIX_SILENCES: readonly SenderFixSilence[]",
+              "summary": ""
+            },
+            {
+              "name": "describeSenderFixSilence",
+              "kind": "function",
+              "signature": "const describeSenderFixSilence: (silence: SenderFixSilence) => string",
+              "summary": "One line per silence, for a surface saying why a kind has no before and after."
+            },
+            {
+              "name": "SenderMovement",
+              "kind": "type",
+              "signature": "type SenderMovement =\n/** More of the places it stands report themselves now, which is what a fix to a primitive looks like. */\n\"repaired\"\n/** Fewer do, which is what a release that broke a sender looks like. */\n | \"regressed\"\n/**\n * Exactly as many do, which includes places trading places: two repaired and\n * two gone silent is `held`, and both counts are published so a surface can\n * say so.\n */\n | \"held\"\n/**\n * No place of it reported itself in either window.\n */\n | \"still-silent\"\n/** {@link KindSenderChange.silence} says why nothing can be said. */\n | \"unknown\";",
+              "summary": "What happened to a kind of part's senders between the two windows."
+            },
+            {
+              "name": "SENDER_MOVEMENTS",
+              "kind": "value",
+              "signature": "const SENDER_MOVEMENTS: readonly SenderMovement[]",
+              "summary": ""
+            },
+            {
+              "name": "describeSenderMovement",
+              "kind": "function",
+              "signature": "const describeSenderMovement: (movement: SenderMovement) => string",
+              "summary": "One line per movement, for a surface putting a component's before and after in front of a person."
+            },
+            {
+              "name": "KindSenderChange",
+              "kind": "type",
+              "signature": "type KindSenderChange = {\n    readonly kind: KindKey;\n    /**\n     * What part a type plays, or `null`. Always `null` on a role row, which\n     * carries it as its key.\n     */\n    readonly role: PrimitiveRole | null;\n    /** Places of this kind that stand in both windows: the same node of the same page, of this kind on both sides. */\n    readonly places: number;\n    /** Places of it in the later window with no counterpart in the earlier one. */\n    readonly gained: number;\n    /** Places of it in the earlier window with no counterpart in the later one. */\n    readonly lost: number;\n    /**\n     * Of {@link places}, those something below reported reach at in the **earlier**\n     * window.\n     */\n    readonly checkableWas: number;\n    /** The same for the later window. */\n    readonly checkableNow: number;\n    /**\n     * Of {@link places}, those checkable in **both** windows — the population this\n     * row is about.\n     */\n    readonly checkable: number;\n    /**\n     * Checkable places that reported something other than a view in one of the two\n     * windows, which are in no transition.\n     */\n    readonly indeterminate: number;\n    /**\n     * `checkable − indeterminate`: the places with a verdict on both sides, which\n     * is the denominator of both shares and the sum of the four transitions.\n     */\n    readonly comparable: number;\n    /** Comparable places silent in the earlier window and reporting in the later one. */\n    readonly repaired: number;\n    /** Comparable places reporting in the earlier window and silent in the later one. */\n    readonly wentSilent: number;\n    /** Comparable places silent in both. */\n    readonly keptSilent: number;\n    /** Comparable places reporting in both. */\n    readonly keptReporting: number;\n    /**\n     * The share of {@link comparable} places that was silent in the earlier\n     * window; `null` where {@link silence} says why not.\n     */\n    readonly silentShareWas: number | null;\n    /** The same share in the later window, over the same places. */\n    readonly silentShareNow: number | null;\n    readonly movement: SenderMovement;\n    /**\n     * Why the two shares are not there, and `null` where they are.\n     */\n    readonly silence: SenderFixSilence | null;\n    /**\n     * Distinct trees with at least one place of this kind repaired.\n     */\n    readonly repairedTrees: number;\n    /** Distinct trees with at least one place of this kind gone silent, by the same rule. */\n    readonly silencedTrees: number;\n    /**\n     * Nodes of this kind that went silent, in the order the pages were paired,\n     * capped at {@link SILENCED_EXAMPLES}.\n     */\n    readonly silencedExamples: readonly NodeId[];\n};",
+              "summary": "One kind of part's senders, held against themselves across two windows."
+            },
+            {
+              "name": "SILENCED_EXAMPLES",
+              "kind": "value",
+              "signature": "const SILENCED_EXAMPLES = 5",
+              "summary": "How many newly silent nodes a row carries as examples."
+            },
+            {
+              "name": "LibrarySendersChange",
+              "kind": "type",
+              "signature": "type LibrarySendersChange = {\n    /**\n     * Every type that stands in either window, most places gone silent first.\n     */\n    readonly byType: readonly KindSenderChange[];\n    /**\n     * Every role in the vocabulary that stands in either window, then the row for\n     * parts whose type declared none, in the same order as {@link byType}.\n     */\n    readonly byRole: readonly KindSenderChange[];\n    /** Forms read in both windows: a page in one of its forms, never a revision. */\n    readonly pages: number;\n    /** Forms read in the later window only, which is not pages published. */\n    readonly pagesGained: number;\n    /** Forms read in the earlier window only, which is not pages withdrawn. */\n    readonly pagesLost: number;\n    /** The audiences each window's forms named, published and never refused. */\n    readonly audiences: ComparedPopulations;\n    /**\n     * Paired pages whose revision moved between the windows.\n     */\n    readonly republished: number;\n    /** Places that stand in both windows, which is the sum of every type row's {@link KindSenderChange.places}. */\n    readonly placements: number;\n    /** Places in the later window only. */\n    readonly gained: number;\n    /** Places in the earlier window only. */\n    readonly lost: number;\n    /**\n     * Paired nodes whose primitive type changed.\n     */\n    readonly recast: number;\n    /**\n     * Places checkable in both windows, over the whole library, which is the sum\n     * of every type row's {@link KindSenderChange.checkable}.\n     */\n    readonly checkable: number;\n    /** Of them, those with a verdict on both sides. */\n    readonly comparable: number;\n    /** Comparable places that went from silent to reporting, over the whole library. */\n    readonly repaired: number;\n    /** Comparable places that went from reporting to silent. */\n    readonly wentSilent: number;\n    /** Comparable places silent in both windows, which is what a fix has not reached yet. */\n    readonly keptSilent: number;\n    /** Comparable places reporting in both. */\n    readonly keptReporting: number;\n    /** Checkable places unclaimed on one of the two sides, over the whole library. */\n    readonly indeterminate: number;\n    /**\n     * A floor on the page views of the earlier window, added over the paired\n     * pages.\n     */\n    readonly viewsWas: number;\n    /** The same floor for the later window, over the same pages. */\n    readonly viewsNow: number;\n    /**\n     * The type that recovered its reporting in the most places, which is what the\n     * fix was worth.\n     */\n    readonly mostRepaired: KindSenderChange | null;\n    /**\n     * The type that went silent in the most places, by the same rule.\n     */\n    readonly mostSilenced: KindSenderChange | null;\n    /**\n     * Forms read at two revisions in one window, which are in nothing above.\n     */\n    readonly ambiguous: readonly PageForm[];\n    /**\n     * Readings of a revision beyond the first, on either side, which were dropped.\n     */\n    readonly duplicated: number;\n    /**\n     * Types the two windows disagree about the role of, where the later window's\n     * answer stands.\n     */\n    readonly roleDisagreed: readonly PrimitiveType[];\n};",
+              "summary": "What a change did to a deployment's senders, by kind of part."
+            },
+            {
+              "name": "librarySendersChangeOf",
+              "kind": "function",
+              "signature": "const librarySendersChangeOf: (was: readonly PageReading[], now: readonly PageReading[]) => LibrarySendersChange",
+              "summary": "What a change did to a deployment's senders, across every page a kind of part stands on."
+            }
+          ]
+        },
+        {
           "module": "signals/library-word-reach-change",
           "title": "Library word reach change",
           "summary": "The words of a kind of part the typical reader who met it reached — before and after.",
@@ -14354,7 +14421,7 @@
       "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 2077,
+        "packageNames": 2087,
         "otherDoors": 18,
         "doorsSharingNothing": 17,
         "widest": false,
@@ -14489,7 +14556,7 @@
       "files": 21,
       "narrower": [],
       "standing": {
-        "packageNames": 2077,
+        "packageNames": 2087,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -14551,7 +14618,7 @@
       "files": 65,
       "narrower": [],
       "standing": {
-        "packageNames": 2077,
+        "packageNames": 2087,
         "otherDoors": 18,
         "doorsSharingNothing": 17,
         "widest": false,
@@ -15125,7 +15192,7 @@
       "files": 43,
       "narrower": [],
       "standing": {
-        "packageNames": 2077,
+        "packageNames": 2087,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -15195,7 +15262,7 @@
       "files": 100,
       "narrower": [],
       "standing": {
-        "packageNames": 2077,
+        "packageNames": 2087,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -15617,7 +15684,7 @@
       "files": 81,
       "narrower": [],
       "standing": {
-        "packageNames": 2077,
+        "packageNames": 2087,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
