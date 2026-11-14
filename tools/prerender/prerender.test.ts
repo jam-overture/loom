@@ -188,7 +188,7 @@ describe("tagRunTogethersIn", () => {
     expect(tagRunTogethersIn("p.html", html).map((hazard) => hazard.joined)).toEqual(["ri", "rk"])
   })
 
-  it("cannot see a space lost across a nested element, which 0394 records as open", () => {
+  it("cannot see a space lost across a nested element, which 0398 records as open", () => {
     expect(tagRunTogethersIn("p.html", `<p><span>Asked:<b>x</b></span>Make</p>`)).toEqual([])
   })
 

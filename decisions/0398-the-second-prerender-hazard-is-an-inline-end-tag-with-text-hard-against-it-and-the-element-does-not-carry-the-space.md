@@ -1,8 +1,15 @@
-# 0394. The second prerender hazard is an inline end tag with text hard against it, and the element does not carry the space
+# 0398. The second prerender hazard is an inline end tag with text hard against it, and the element does not carry the space
 
 **Status:** Accepted
 **Date:** 2026-11-13
 **Section:** §1 (process)
+
+> **Renumbered from `0394` on 14 November 2026** by `Loom merge`. #892 carried
+> another `0394` — *what a fix to a silent component was worth* — and landed on
+> `main` first, so that record keeps the number (0097: two records claiming one
+> number is blocking). `0398` is the next number free on `main`, which holds
+> records through `0394`, and is claimed by no open branch. Nothing else in this
+> record changed.
 
 ## Context
 

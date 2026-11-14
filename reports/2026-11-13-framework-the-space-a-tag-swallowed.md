@@ -3,7 +3,7 @@
 **`Loom daily build`, 13 November 2026, evening run.**
 Branch `framework-98-the-space-a-tag-swallowed`, cut from `origin/main` at
 `2967ba9`. Record
-[0394](../decisions/0394-the-second-prerender-hazard-is-an-inline-end-tag-with-text-hard-against-it-and-the-element-does-not-carry-the-space.md),
+[0398](../decisions/0398-the-second-prerender-hazard-is-an-inline-end-tag-with-text-hard-against-it-and-the-element-does-not-carry-the-space.md),
 `Accepted`. Section **§1 (process)**.
 
 ![The same defect in two spellings, what each detector can see of it, and the 82 junctions on this site that are not it](2026-11-13-framework-the-space-a-tag-swallowed.svg)
@@ -34,6 +34,10 @@ open branches are `FINDINGS.md` (different entries, *take both*) and
 holds up to 0393; #890 holds the same 0393 rather than a second one; #856's
 0380 and 0381 are the clash `Loom signals` filed on 12 November and are its
 owner's to rename. No fifth instance of that clash was created here.
+
+*(A fifth arrived anyway, from the other direction: #892 claimed `0394` too
+and landed on `main` first, so this record is `0398`. — `Loom merge`,
+14 November 2026)*
 
 ## The plain version
 
@@ -114,7 +118,7 @@ a space lost before any word at all still reports.
 A space lost *before* a tag — `say<em>color</em>` — is, in the markup, exactly a
 styled badge sitting against the text it labels. **That shape is on this site
 2,134 times across 139 pages, every one of them correct.** Nothing in the output
-tells them apart, so the opening direction is not read, and is recorded in 0394
+tells them apart, so the opening direction is not read, and is recorded in 0398
 and in the module rather than hidden.
 
 ## One thing this changed that was not in the finding
@@ -171,7 +175,7 @@ taken further and why.
   lined up. It is a second tool rather than a function beside this one. The
   reason to build it is a defect this check misses, and there is not one yet.
 - **The mechanism that drops the space is still not established.** Neither the
-  October entry nor 0394 claims one. Both describe the artefact. If a third
+  October entry nor 0398 claims one. Both describe the artefact. If a third
   instance arrives it is worth finding out, because the fix would be upstream of
   the detector.
 - **The migration section at the top of this lane's stored prompt** describes

@@ -483,4 +483,8 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0391](0391-a-whole-repository-sweep-names-its-budget-on-the-block-that-holds-it.md) | A whole-repository sweep names its budget on the block that holds it, and a check says which files those are | Accepted | §1, the merge gate |
 | [0392](0392-a-segments-form-arrives-in-the-same-pull-as-its-rules-and-a-form-that-cannot-be-applied-costs-the-reader-their-segment.md) | A segment's form arrives in the same pull as its rules, and a form that cannot be applied costs the reader their segment rather than their page | Accepted | §2 (portal), the read door |
 | [0393](0393-a-silent-component-is-a-census-over-the-placements-the-defect-could-be-seen-on-and-the-share-is-bracketed.md) | A silent component is a census over the placements the defect could be seen on, and the share is bracketed | Accepted | §5 (reader signals), the readings |
-| [0394](0394-the-second-prerender-hazard-is-an-inline-end-tag-with-text-hard-against-it-and-the-element-does-not-carry-the-space.md) | The second prerender hazard is an inline end tag with text hard against it, and the element does not carry the space | Accepted | §1 (process) |
+| [0394](0394-what-a-fix-to-a-silent-component-was-worth-is-read-over-the-places-both-windows-could-check.md) | What a fix to a silent component was worth is read over the places both windows could check | Accepted | §5 (reader signals), the readings |
+| 0395 | *No record on this branch* | — | — |
+| 0396 | *No record on this branch* | — | — |
+| 0397 | *No record on this branch* | — | — |
+| [0398](0398-the-second-prerender-hazard-is-an-inline-end-tag-with-text-hard-against-it-and-the-element-does-not-carry-the-space.md) | The second prerender hazard is an inline end tag with text hard against it, and the element does not carry the space | Accepted | §1 (process) |

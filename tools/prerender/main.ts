@@ -26,7 +26,7 @@ import { describePrerenderError, prerenderedPages } from "./pages.js"
  * reader is served carry text junctions no `textContent` assertion can see —
  * two kinds of them now, one at a separator React wrote and one at an inline
  * end tag where a space went missing and no separator was written at all
- * (`0119`, `0394`). The **routes** a reader is served are the answer to a
+ * (`0119`, `0398`). The **routes** a reader is served are the answer to a
  * question no assertion can ask at all — a metadata file that the build never
  * read produces no artefact to be wrong, only silence.
  *

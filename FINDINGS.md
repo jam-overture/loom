@@ -62083,7 +62083,7 @@ it rather than reassigned.
 the entry's measurement held three weeks later: on today's 139 built pages there
 are 82 inline junctions, 80 of them a `</span>` that keeps the space inside and
 2 of them a plural on a code chip. Recorded as
-[0394](decisions/0394-the-second-prerender-hazard-is-an-inline-end-tag-with-text-hard-against-it-and-the-element-does-not-carry-the-space.md).
+[0398](decisions/0398-the-second-prerender-hazard-is-an-inline-end-tag-with-text-hard-against-it-and-the-element-does-not-carry-the-space.md).
 
 > **The entry was right about the fault, the class and the remedy.** Two things
 > it recommended were not taken as written, and both because the measurement it
@@ -62097,7 +62097,7 @@ are 82 inline junctions, 80 of them a `</span>` that keeps the space inside and
 > with no second spelling.
 >
 > Shape 2 — comparing the built text against the `textContent` a test sees — is
-> recorded in 0394 as deferred rather than rejected, with the span-crossing
+> recorded in 0398 as deferred rather than rejected, with the span-crossing
 > blind spot it would close named.
 
 The band this lane added today contained the ordinary sentence
