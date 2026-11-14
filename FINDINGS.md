@@ -72490,3 +72490,181 @@ needs no knowledge of when anything merges.
 on the same day: three text changes pushed to #851's branch ten minutes after it
 merged, re-applied off `main` as a pull request of their own. Three instances in
 one day, two of them mine, is what makes it a rule rather than bad luck.
+
+---
+## 2026-11-14 — the census of silences is swept now, and the set that filed the gap had been joined by a second one nobody noticed
+
+**Filed by:** `Loom signals` · **Owned by:** nobody — **closes the 10 November
+entry** (*a new silence set is published and is not in the census*) · **Status:**
+**closed**
+
+That entry listed three options and preferred the second: *take the census as a
+unit, add the condition, and map both.* That is what
+[0397](decisions/0397-every-silence-set-in-the-subsystem-is-mapped-and-a-sweep-is-what-makes-that-true.md)
+does, and the other two are recorded as rejected with the entry's own reasons.
+
+**What the entry could not have said is the part worth keeping.** By the time it
+was answered there were **two** unmapped sets, not one: `SenderSilence` landed on
+13 November from this lane's own run and nobody noticed that the gap filed three
+days earlier had just widened. The entry was correct, visible, owned and
+unactioned, and the set that widened it was added by the lane that filed it.
+
+So the remedy is not the two mappings. It is
+**`src/signals/silence-sweep.test.ts`**: the table is hand-written, and what was
+missing was anything that looks for a set the table has never heard of. It reads
+this directory's source, finds every published silence set, and resolves each
+one's members and census entry through `index.js`.
+
+**Three conventions it checks, and all three already held.** A set publishes its
+members as `NAME_SILENCES`; a set is mapped by a `meaningOf…` in `silences.ts`;
+and **a set declared in `foo.ts` is the vocabulary `foo`**. Twenty-two of the
+twenty-four held the third by accident of good naming. It is a rule now, and it
+is the one that makes the other two checkable from a file name — which is the
+whole reason a sweep is possible at all.
+
+**One trap in writing it, and it is the trap the thing it replaces fell into.**
+Six sets here open on *another* set rather than on a name of their own —
+`KindActionSilence` begins `| KindReachSilence` — so the first predicate, *a set
+is a union of string literals*, found eighteen of twenty-four and passed. It
+would have passed for ever, silently excluding exactly the sets that share their
+states with another: the ones this census exists to relate. A sweep that can be
+wrong in the direction of finding less is worse than no sweep, and the fix is
+that a set is discriminated by the shape of its alias — a union, where a row type
+carrying a silence is an object.
+
+**The figure that goes with it.** `silences.ts` opened by saying how many sets and
+how many members there were: twenty-one and a hundred and eighteen, against
+twenty-four and a hundred and fifteen. Both false, in a module whose own lane has
+filed four entries about remembered figures. The sentence no longer carries a
+number and the claim it was making — fewer conditions than members — is an
+assertion in the sweep. **That is the pattern to copy and not the correction:** a
+figure that can be measured by the test that cares about it should be measured
+there.
+
+---
+## 2026-11-14 — three silence sets publish no sentence of their own, and the sweep deliberately does not ask for one
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/conversion.ts`, `src/signals/deployment.ts`,
+`src/signals/deployment-change.ts`) · **Status:** open — **nothing is red and
+nothing is asked of anybody today**; a thinness found by a sweep that had to
+decide whether to fail on it
+
+Every silence set in `src/signals/` publishes its members and is mapped by the
+census. Twenty-one of the twenty-four also publish a `describe…Silence` — one
+line per member, for a surface saying why a figure is absent. **Three do not:**
+`ConversionSilence`, `DeploymentSilence` and `DeploymentChangeSilence`.
+
+`silence-sweep.test.ts` could have required one and does not, and the reason is
+written on it: a sweep that fails on the state of the tree it was written
+against is a sweep nobody can land, and writing three sentences for three other
+readings in a run whose unit is the census is a different unit wearing this
+one's clothes.
+
+**What it costs.** `describeSilenceCondition` is the sentence for the *state*,
+which a surface needs when it is speaking about two readings at once; a set's own
+`describe` is the sentence for *that reading*, which is what a card drawing one
+reading prints. A screen drawing a deployment's own silence has the second for
+twenty-one sets and the first only for these three — so it either prints a
+condition's wording where a reading's would read better, or prints the member
+name raw.
+
+**The recommendation**, for whichever run takes it: add the three, then make the
+sweep require a `describe…Silence` as a fourth convention. Doing it in that
+order means the rule lands green and the next set cannot arrive without its
+sentence. It is three short functions and about fifteen lines of prose; it is
+filed rather than done because the set of sentences a reading should print is a
+judgement about its own screen, and `conversion.ts`' seven members are the ones
+most likely to want wording the record would have an opinion about.
+
+---
+## 2026-11-14 — the hourly series publishes two statements about a clock as fields, and the vocabulary now has somewhere to put them
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals`
+(`src/signals/arrivals.ts`, `src/signals/acted.ts`) · **Status:** open — **a
+boundary, not a defect**; nothing is wrong today and no deadline is attached
+
+The 10 November entry predicted this and it is worth writing down now that half
+of it has happened: *`rhythm.ts` is the first reading here whose silence can be
+about time and it will not be the last — the hourly series' own `clipped` and
+`begins` are the same kind of statement, and they are published as fields rather
+than as silences today.*
+
+[0397](decisions/0397-every-silence-set-in-the-subsystem-is-mapped-and-a-sweep-is-what-makes-that-true.md)
+adds the subject (`series`) and two conditions about a clock
+(`no-hour-counted`, `no-hour-settled`), so the vocabulary now has a place for
+them. **That is not an argument for moving them.** `clipped` and `begins` are
+fields on a reading that *answers* — a series with rows in it that does not reach
+the whole range asked for — and a silence set is for a reading that does not. A
+field that says *and the range starts here* is not an absence.
+
+**What to watch for instead**, which is the thing a future run would have to
+decide: a surface that wants to say *this chart is short at its left edge* has to
+read `clipped` and `begins` and compose the sentence itself, in whatever route
+group it is in. That is the shape every silence vocabulary here was written to
+stop. If a second clocked reading arrives wanting the same sentence, the honest
+move is a condition about a **partial** range rather than an absent one — and
+this entry is here so that the run taking it knows the subject already exists and
+does not invent a sixth.
+
+---
+## 2026-11-14 — two entries in this file read as open and are not, and one of them cost this run an hour of its queue
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals` · **Status:**
+**closed on filing** — the two entries are addressed on `main` and this says so
+in the one place a routine reads
+
+This lane's standing instruction is that open findings owned by it are its queue.
+Two of them are not open and say nothing about it, both discovered by reading the
+code they point at:
+
+| entry | what happened | where it says so |
+| --- | --- | --- |
+| 8 Nov — *`PartReading.parentId` can name a node that is in no part's list* | **closed by §80**: `withinId` landed as the second field the entry recommended | the 9 November entry says so, and that is the one with a `closed` status |
+| 9 Nov — *the fix-list orders by a count that is forty times the size of the thing to fix* | **answered by §81 and §83**: `deploymentUnreadOf` ranks on what one place costs, never on a count of parts, and `AgendaRow.unread` carries it | `unread.ts`' module documentation, which argues all three of the entry's rules |
+
+Neither needs anything from anybody. They are filed here because a status line
+that was true when it was written is the one kind of staleness this file cannot
+see: the entry above each of them records the closure, and a run working from
+the status lines alone — which is what the instruction says to do — reads two
+units of work that do not exist.
+
+**The cheap half of the fix is a convention, not a tool.** When an entry closes
+another, the closing entry already says so; what it does not do is reach back.
+The 7 November entry in this file shows the other shape — *Status: closed — the
+field landed on `main` on 8 November … Original status below* — and that is the
+one to copy, because it puts the answer where somebody scanning status lines will
+see it. **This run is not editing the two entries**, for this lane's own rule
+about reflowing a union-merged file; what it can do is say so in an entry of its
+own, which is this one.
+
+---
+## 2026-11-14 — three new names on `@jam-overture/loom/signals`, and the sentence the page would want is about the two kinds of nothing
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/docs/the-runtime/what-your-readers-do/page.mdx`) ·
+**Status:** open — nothing is red, and this is the fifth entry of its kind from
+this lane
+
+`docs:api` reported, on regenerating the reference for
+[0397](decisions/0397-every-silence-set-in-the-subsystem-is-mapped-and-a-sweep-is-what-makes-that-true.md):
+
+```
+@jam-overture/loom/signals — DAY_SHAPE_SILENCES, meaningOfDayShapeSilence,
+  meaningOfSenderSilence
+```
+
+The sentence, if the page wants one: **two readings that both say nothing are not
+necessarily saying the same thing, and the census is how a screen tells which —
+so a card drawing a day shape beside a silent-sender census can now say whether
+one sentence serves both.** The two worth naming on the page are the pair the
+record argues for: *nothing below this part reported being reached* is not
+*this part reported no reach*, and *no hour has been counted* is not *the rollup
+is behind*.
+
+**50 bytes of the names index**, measured both ways on the front-coded file:
+27,462 over 2,131 names on `main`, 27,512 over 2,134 with these three.
+
+**This lane did not write it**, for 5 November's reason: that page is `(docs)`'
+and a run that edits prose on another lane's surface is a conflict waiting for
+whoever is drafting it.

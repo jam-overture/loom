@@ -1,3 +1,5 @@
+import { everyMemberOf } from "../closed-set.js"
+
 import type { ActedSeries } from "./acted.js"
 import { ARRIVAL_HOUR_MS, type ArrivalRange, type ArrivalSeries } from "./arrivals.js"
 
@@ -200,6 +202,21 @@ export type DayShapeSilence =
    * hour. Counting is working and the shape is one hour away from existing.
    */
   | "unsettled"
+
+/**
+ * The members, published so that the set can be enumerated rather than
+ * remembered.
+ *
+ * Every other silence set in this subsystem publishes one, and the census over
+ * them ([`silences.ts`](silences.ts)) is built by mapping each set's members
+ * through its own `meaningOf` — so a set with no published members is a set a
+ * census can only reach by hand, which is how this one stayed outside it for
+ * three days. `silence-sweep.test.ts` now fails on a set that publishes none.
+ */
+export const DAY_SHAPE_SILENCES: readonly DayShapeSilence[] = everyMemberOf<DayShapeSilence>()([
+  "unmeasured",
+  "unsettled",
+])
 
 /**
  * The hours of a reader's day on this deployment, over whatever range was read.

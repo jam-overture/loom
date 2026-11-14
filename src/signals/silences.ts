@@ -17,21 +17,32 @@ import type { KindCopyChangeSilence } from "./library-copy-change.js"
 import type { KindPaceSilence } from "./library-pace.js"
 import type { KindReachChangeSilence } from "./library-reach-change.js"
 import type { KindReachSilence } from "./library-reach.js"
+import type { SenderSilence } from "./library-senders.js"
 import type { KindWordReachChangeSilence } from "./library-word-reach-change.js"
 import type { KindSilence } from "./library.js"
 import type { PaceChangeSilence } from "./pace-change.js"
 import type { PaceSilence } from "./pace.js"
 import type { ReachSilence } from "./reach.js"
+import type { DayShapeSilence } from "./rhythm.js"
 
 /**
  * What two readings mean when they both say nothing, and whether they mean the
  * same thing.
  *
  * Every reading in this subsystem publishes a closed set of reasons a figure is
- * absent, and there are twenty-two of them. Each set's names are right in its own
- * sentence, and across them they overlap in two ways that a surface drawing
- * two readings on one card has to resolve and nothing until now would resolve
- * for it.
+ * absent. Each set's names are right in its own sentence, and across them they
+ * overlap in two ways that a surface drawing two readings on one card has to
+ * resolve and nothing until now would resolve for it.
+ *
+ * **Every set is mapped here, and that is a sweep rather than a claim.** This
+ * table is hand-written, so for three days it was missing two sets that had
+ * landed beside it — a reading of a deployment's day and a census of its silent
+ * senders — and nothing went red, because nothing looked for a set the table had
+ * never heard of. [`silence-sweep.test.ts`](silence-sweep.test.ts) reads this
+ * directory's source, finds every published silence set in it, and fails on one
+ * this module does not map (0397). A count in this prose would be the same kind
+ * of remembered figure, so there is none: the sweep is where the arithmetic
+ * lives.
  *
  * **Two names for one reason.** A window that held no page views is
  * `nothing-measured` to a before-and-after reading and `unmeasured` to a copy
@@ -116,12 +127,28 @@ export type SilenceSubject =
    * from the data could ever report.
    */
   | "kind"
+  /**
+   * The run of hours a series holds, at whatever scope its counters were read.
+   *
+   * The fifth subject, and the first that is about **time** rather than about
+   * anything a page is made of. A fold of an hourly series is silent because the
+   * series holds no hour at all or because it holds no finished one, and neither
+   * sentence is about a page, a part, a pair or a kind — a deployment every
+   * reader in the world had read is in the second of them for the fifty-nine
+   * minutes after it starts counting.
+   *
+   * It is the series and not the range, because the two silences are facts about
+   * what was handed in: a range is a pair of instants and says nothing about
+   * whether a row was ever written under it.
+   */
+  | "series"
 
 export const SILENCE_SUBJECTS: readonly SilenceSubject[] = everyMemberOf<SilenceSubject>()([
   "page",
   "part",
   "comparison",
   "kind",
+  "series",
 ])
 
 /** One line per subject, for a surface naming what a reason is about. */
@@ -135,6 +162,8 @@ export const describeSilenceSubject = (subject: SilenceSubject): string => {
       return "the two readings together, neither side named"
     case "kind":
       return "one kind of part, everywhere it stands in the pages read"
+    case "series":
+      return "the run of hours that was read, whatever scope its counters were of"
   }
 }
 
@@ -165,10 +194,12 @@ export type SilenceVocabulary =
   | "library-pace"
   | "library-reach"
   | "library-reach-change"
+  | "library-senders"
   | "library-word-reach-change"
   | "pace"
   | "pace-change"
   | "reach"
+  | "rhythm"
 
 export const SILENCE_VOCABULARIES: readonly SilenceVocabulary[] =
   everyMemberOf<SilenceVocabulary>()([
@@ -190,10 +221,12 @@ export const SILENCE_VOCABULARIES: readonly SilenceVocabulary[] =
     "library-pace",
     "library-reach",
     "library-reach-change",
+    "library-senders",
     "library-word-reach-change",
     "pace",
     "pace-change",
     "reach",
+    "rhythm",
   ])
 
 /**
@@ -224,19 +257,23 @@ export const SUBJECT_OF_VOCABULARY: Readonly<Record<SilenceVocabulary, SilenceSu
     "library-pace": "kind",
     "library-reach": "kind",
     "library-reach-change": "kind",
+    "library-senders": "kind",
     "library-word-reach-change": "kind",
     pace: "part",
     "pace-change": "comparison",
     reach: "page",
+    rhythm: "series",
   })
 
 /**
  * The state of the world a silence reports, named once for the whole subsystem.
  *
- * Eighteen of them against a hundred and eighteen members across the
- * twenty-one sets, which is the overlap this module exists to state. None of them replaces a set's own name:
- * a reading still reports its own vocabulary, and this is what that vocabulary
- * means.
+ * Fewer of them than there are members across the sets, which is the overlap
+ * this module exists to state — and the figures are left to
+ * [`silence-sweep.test.ts`](silence-sweep.test.ts) rather than written here,
+ * because the two that used to be in this sentence had both gone false. None of
+ * them replaces a set's own name: a reading still reports its own vocabulary,
+ * and this is what that vocabulary means.
  *
  * **Neither the sixth set nor the seventh needed a tenth condition**
  * ([0244](../../decisions/0244-a-pace-moved-because-the-words-moved-or-the-readers-did-and-a-counterfactual-says-which.md),
@@ -430,6 +467,28 @@ export const SUBJECT_OF_VOCABULARY: Readonly<Record<SilenceVocabulary, SilenceSu
  * reading handed both with neither asked for has nothing to hold against
  * anything. A deployment given either in place of the other goes to the wrong
  * remedy.
+ *
+ * **Three arrived together with the two sets this table had never been told
+ * about**
+ * ([0397](../../decisions/0397-every-silence-set-in-the-subsystem-is-mapped-and-a-sweep-is-what-makes-that-true.md)),
+ * and the reason they could not be reused is the same reason the pairs above
+ * are pairs.
+ *
+ * `no-reach-below` is a census of silent senders finding that **nothing under a
+ * part reported being reached**, so nothing it holds could witness whether it
+ * reports itself. Its sibling is `no-reach-reported`, which is the subject's own
+ * counters reporting no reach — and the two send a deployment to different
+ * places: that one to its senders, this one back in a week with readers. A
+ * reading that could not tell them apart would publish *this component is
+ * silent* about a component nobody has stood under.
+ *
+ * `no-hour-counted` and `no-hour-settled` are the first conditions about a
+ * **clock**, and they arrived with the first reading whose subject is a run of
+ * hours. One is a series holding no hour at all; the other is a series holding
+ * hours not one of which is over, which is a deployment fifty-nine minutes into
+ * counting and is the one state here that **fixes itself** if nothing is done.
+ * `no-window-folded` was the near neighbour and could not serve: it asserts that
+ * readers arrived, and a series can be empty because nobody came.
  */
 export type SilenceCondition =
   /** The two readings are of different trees, so nothing in either is comparable. */
@@ -629,6 +688,47 @@ export type SilenceCondition =
    * re-pointing them is the whole of the remedy.
    */
   | "questions-stale"
+  /**
+   * Nothing below it reported being reached, so nothing it holds can witness
+   * anything about it.
+   *
+   * The sibling of `no-reach-reported` and deliberately not a second spelling of
+   * it. That one is the subject's **own** counters reporting no reach; this one
+   * is about the parts **underneath** it — a placement that holds parts, none of
+   * which any view reported reaching. Only a reading that asks whether a part
+   * reports *itself* can be in it, because the witness such a reading needs is a
+   * reader demonstrably below the thing being checked (0382, 0393).
+   *
+   * The remedy is the opposite of its sibling's: that one is a sender to fix,
+   * this one is a window with nobody under the part yet, and a deployment handed
+   * the wrong one either rewrites a working primitive or waits for a defect that
+   * is already there.
+   */
+  | "no-reach-below"
+  /**
+   * No hour of it has ever been counted, so the run of hours is empty.
+   *
+   * Held apart from `no-window-folded`, which is the near neighbour and asserts
+   * something this does not: that readers arrived and the fold has not caught
+   * up. A series can be empty because nobody came, because counting began after
+   * the range ended, or because the range is older than what is kept — and the
+   * three are one state to a fold of it, which is why the condition says what is
+   * absent rather than why.
+   */
+  | "no-hour-counted"
+  /**
+   * It holds hours and not one of them is over.
+   *
+   * **The one condition here about a clock**, and the only one that resolves
+   * itself: a deployment read inside its own first hour, or over a range shorter
+   * than one, is in it for as long as it takes the hour to end. Every other
+   * condition is a state of the deployment, the window, the shape of the page or
+   * the questions it wrote, and none of them changes because time passed.
+   *
+   * It is not `no-hour-counted` and the distance between them is the whole
+   * remedy: counting is working, and the figure is one hour away from existing.
+   */
+  | "no-hour-settled"
 
 export const SILENCE_CONDITIONS: readonly SilenceCondition[] = everyMemberOf<SilenceCondition>()([
   "two-pages",
@@ -650,6 +750,9 @@ export const SILENCE_CONDITIONS: readonly SilenceCondition[] = everyMemberOf<Sil
   "one-population",
   "no-audience-named",
   "questions-stale",
+  "no-reach-below",
+  "no-hour-counted",
+  "no-hour-settled",
 ])
 
 /**
@@ -700,6 +803,12 @@ export const describeSilenceCondition = (condition: SilenceCondition): string =>
       return "nothing recorded which audience it was of"
     case "questions-stale":
       return "every question it is asked names a part the page no longer has"
+    case "no-reach-below":
+      return "nothing below it reported being reached, so nothing it holds can witness it"
+    case "no-hour-counted":
+      return "no hour of it has ever been counted"
+    case "no-hour-settled":
+      return "it holds hours and not one of them is over yet"
   }
 }
 
@@ -1354,6 +1463,60 @@ export const meaningOfConversionSilence = (silence: ConversionSilence): SilenceM
       return meaning("conversion", "no-reach-reported")
     case "inconsistent":
       return meaning("conversion", "readers-above-views")
+  }
+}
+
+/**
+ * What a fold of an hourly series into the hours of a day reports (0389).
+ *
+ * **The twenty-third set, and the first whose subject is a run of hours.** It
+ * brought both of its conditions, which no set had done since the first five,
+ * and the reason is that it is the first reading here that is a fold of a
+ * **clock** rather than of a window: its silences are the two ways a series can
+ * hold no finished hour, and nothing about a page, a part, a pair or a kind can
+ * be in either.
+ *
+ * `unmeasured` is the one worth stating. It is not `no-window-folded`, which is
+ * the state it reads most like — that condition asserts readers arrived and the
+ * rollup has not caught up, and an empty series is equally what a deployment
+ * nobody has read looks like. Collapsing the two would have put *your rollup is
+ * behind* on a deployment with no readers.
+ */
+export const meaningOfDayShapeSilence = (silence: DayShapeSilence): SilenceMeaning => {
+  switch (silence) {
+    case "unmeasured":
+      return meaning("rhythm", "no-hour-counted")
+    case "unsettled":
+      return meaning("rhythm", "no-hour-settled")
+  }
+}
+
+/**
+ * What a census of a library's silent senders reports, of one kind (0393).
+ *
+ * **The twenty-fourth set, and it brought exactly one condition.** Two of its
+ * three members are states already here at the same subject: `unplaced` is the
+ * census's `nothing-of-the-kind`, and `unwitnessable` is `nothing-inside` — a
+ * kind standing only in places with no element part under them, which is the
+ * eleventh set's condition said of the one question a part's own report can be
+ * checked by.
+ *
+ * `unwitnessed` is the new one, and it is `no-reach-below` rather than
+ * `no-reach-reported` because the reach it is missing is not the subject's. A
+ * placement of this kind holds parts and no view reported reaching any of them,
+ * so the defect this reading is about — a part on a reader's screen that said
+ * nothing — cannot be seen there at all. The sibling condition would have sent a
+ * deployment to its senders for a window in which nobody had stood under the
+ * component.
+ */
+export const meaningOfSenderSilence = (silence: SenderSilence): SilenceMeaning => {
+  switch (silence) {
+    case "unplaced":
+      return meaning("library-senders", "nothing-of-the-kind")
+    case "unwitnessable":
+      return meaning("library-senders", "nothing-inside")
+    case "unwitnessed":
+      return meaning("library-senders", "no-reach-below")
   }
 }
 
