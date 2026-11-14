@@ -18,7 +18,8 @@ import { portalApplications, portalProjects } from "@/app/(portal)/_lib/store"
 import { governedPagesFor } from "@/app/(portal)/_lib/write"
 import { readWithin, unavailable } from "@/app/_lib/app/bounded-store"
 import { soleApplicationOf } from "@/app/_lib/app/sole-application"
-import { appSitePulls, publishedPagesFor } from "@/app/_lib/pages/store"
+import type { KeptReaderWindow } from "@/app/_lib/pages/reader-windows"
+import { appReaderWindows, appSitePulls, publishedPagesFor } from "@/app/_lib/pages/store"
 
 /**
  * What both screens under *Accepted* read: every change accepted on the
@@ -42,6 +43,11 @@ export type AcceptedReading =
       readonly pages: ReadonlyMap<string, string>
       /** Every part of every published page, named, for the sentences about a change. */
       readonly parts: ReadonlyMap<TreeId, ReadonlyMap<string, PartName>>
+      /**
+       * How long a reader keeps the pages they first saw (0383), `null` where
+       * nobody chose or it could not be read: *Off*, as the read door reads it.
+       */
+      readonly window: KeptReaderWindow | null
     }
 
 /**
@@ -87,10 +93,11 @@ export const readAccepted = async (projectId: ProjectId, now: number): Promise<A
 
   if (application === undefined) return { kind: "no-site" }
 
-  const [published, copies, span] = await Promise.all([
+  const [published, copies, span, window] = await Promise.all([
     readWithin(() => publishedPagesFor(application).list(), unavailable),
     readWithin(() => pageCopiesFor(application).list(), unavailable),
     readWithin(() => appSitePulls.span(application), unavailable),
+    readWithin(() => appReaderWindows.kept(application), unavailable),
   ])
 
   if (!published.ok || !copies.ok) return { kind: "unavailable" }
@@ -129,5 +136,6 @@ export const readAccepted = async (projectId: ProjectId, now: number): Promise<A
     origins,
     pages: pageNamesOf(published.value),
     parts: new Map(published.value.map((page) => [page.tree.treeId, namesInTree(page.tree)])),
+    window: window.ok ? window.value : null,
   }
 }

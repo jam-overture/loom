@@ -94,6 +94,23 @@ describe("windowsOf", () => {
     })
   })
 
+  it("starts the after side once returning readers stopped being held, for 14 days from then", () => {
+    const windows = windowsOf(LIVE, { heldUntil: LIVE + DAY + 1 })
+
+    expect(windows.before).toEqual({ from: LIVE - MEASURING_MS, to: LIVE })
+    expect(windows.after).toEqual({
+      from: LIVE + DAY + HOUR,
+      to: LIVE + DAY + HOUR + MEASURING_MS,
+    })
+  })
+
+  it("leaves no after side where the page changed again before the hold ended", () => {
+    expect(windowsOf(LIVE, { heldUntil: LIVE + DAY, next: LIVE + 2 * HOUR }).after).toEqual({
+      from: LIVE + DAY,
+      to: LIVE + DAY,
+    })
+  })
+
   it("never makes a side that ends before it starts", () => {
     const windows = windowsOf(LIVE, { next: LIVE + 1 }, LIVE + DAY)
 
