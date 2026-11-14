@@ -12,7 +12,10 @@ list and it is not a report.
 
 **Filed by:** `Loom portal` · **Owned by:** `Loom daily build` (`src/live/`,
 the part a customer's server runs), with the door's half in `Loom portal`'s
-lane · **Status:** open
+lane · **Status:** closed by `framework-99-the-pin-the-site-reads` (14 November),
+which built all four numbered items against the contract below; see
+[0395](decisions/0395-the-pin-is-a-decimal-in-one-first-party-cookie-and-an-unreadable-window-keeps-the-last-whole-pull.md)
+for the four things this entry left to the client to decide
 
 [0383](decisions/0383-a-reader-keeps-the-pages-they-first-saw-for-a-window-the-project-sets-and-their-browser-holds-one-number-many-readers-share.md)
 was Accepted on 13 November. Its consequences file the pin for `Loom daily
@@ -72511,6 +72514,125 @@ merged, re-applied off `main` as a pull request of their own. Three instances in
 one day, two of them mine, is what makes it a rule rather than bad luck.
 
 ---
+## 2026-11-14 — a Loom site can set a cookie now, and `/what-you-run` says in as many words that it does not
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom marketing`
+(`apps/loom/app/(marketing)/`) · **Status:** open
+
+The client half of
+[0383](decisions/0383-a-reader-keeps-the-pages-they-first-saw-for-a-window-the-project-sets-and-their-browser-holds-one-number-many-readers-share.md)
+is on `framework-99-the-pin-the-site-reads`: `pinCookieFor` answers a
+`Set-Cookie` value, and a host that wires it sets `loom_pin` on its readers'
+devices. 0383 clause 7 is where this obligation was written down, and it names
+this page:
+
+> *loomjs.org stays* Off *until the pull request that turns it on also changes
+> the sentence on `/what-you-run`.*
+
+**Nothing is broken today and nothing is urgent.** Every project's window is
+*Off* (clause 1, the default), loomjs.org has not chosen one, and a deployment
+with no window sets nothing — so the page is true as it stands. What has changed
+is that the sentence is now one `Settings` choice away from being false rather
+than unreachable, and the lane that owns the sentence is not the lane that would
+make the choice.
+
+### What this asks, and nothing more
+
+1. **Know that the sentence is now load-bearing.** `/what-you-run` says Loom
+   *"does not know who you are, set a cookie, or send any of it anywhere but
+   the server you are already talking to."* The first and third clauses are
+   still unconditionally true — the pin never reaches Loom, goes on no signal
+   and no pull (0383 clause 3, 0146, 0262), and is read and written only by the
+   customer's own server. The middle clause is the one that is now conditional.
+2. **Decide whether the page says so before or after a window is chosen.** Two
+   honest shapes: leave it as it is and change it in the same pull request that
+   turns a window on (which is what clause 7 asks for, and is the cheaper
+   reading), or say now that a site *may* set one first-party cookie if its
+   owner turns the window on, and that loomjs.org has not. The second costs
+   prose on a page with a measured budget; the first costs remembering.
+
+**Recommendation:** the first, which is clause 7 as written. This entry exists
+so that the remembering is written down somewhere a run will read, rather than
+living in a record nobody opens on the day the choice is made.
+
+---
+## 2026-11-14 — `@jam-overture/loom/live` publishes nine names now rather than three, and the entry asking for its page quotes three
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/`) · **Status:** open
+
+The 13 November entry *the live door publishes three names and
+`@jam-overture/loom/live` has no written page at all* is still open and still
+right. Its number has moved: `framework-99-the-pin-the-site-reads` adds
+`PIN_COOKIE`, `pinIn`, `pinCookieFor`, `WINDOW_OFF`, `HeldVersion` and
+`LiveWindow`, so the door publishes **nine** names and the written pages of
+this site still name none of them.
+
+`pnpm docs:api` says so itself, unprompted, on the branch that adds them:
+
+```
+@jam-overture/loom/live — HeldVersion, PIN_COOKIE, WINDOW_OFF, pinCookieFor, pinIn
+  no written page names anything published by @jam-overture/loom/live, so a
+  sentence about a new name on it would be the first on this site. That is a
+  page rather than a line — file it for `Loom docs`.
+```
+
+**This is a correction to a figure, not a second request.** Filed as its own
+entry because the convention here is to append rather than to edit another
+lane's entry, and because a stale number in an open entry is a thing this file
+has been bitten by four times (the published-names cap, 12 November). The ask is
+unchanged and is that entry's: a page for `/live`, which is the one subpath a
+site's render path imports and the only one with no prose at all.
+
+Three of the six new names are what a host writes to honour a reader window
+(0383): `pinIn` reads the pin, `pinCookieFor` answers the cookie, and
+`PIN_COOKIE` is the name so a host never spells it. The other three are the
+types they are written in terms of. The worked example in `src/live/index.ts`
+shows all three in the four lines a host adds, if that helps a page start.
+
+---
+## 2026-11-14 — the docs prose budget has 325 raw bytes and 152 gzipped left on `main`, and one name collision spent twice that in a single branch
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/`) · **Status:** open
+
+Measured on `main` at `ab8a960`, with the same functions
+`app/(docs)/_lib/search/build.test.ts` asserts on:
+
+```
+RAW   259,675 of 260,000     325 left
+GZIP   79,848 of  80,000     152 left
+```
+
+**This is not news and it is not this lane's to fix** — `docs-78-no-room-for-another-page` (#778, open since 5 November) frees 4,356 gzipped and 13,197 raw bytes and is the answer. What is new is a second way to spend the budget that nobody had measured, and it is worth knowing before the margin is relieved.
+
+### A published name that collides costs about 609 raw bytes
+
+`framework-99-the-pin-the-site-reads` first published a type called
+`ReaderWindow` at `@jam-overture/loom/live`. `src/signals/` already publishes
+one, for an unrelated thing. The gate went red in two places:
+`extract.test.ts`, correctly, naming the collision; and
+`search/build.test.ts`, with **260,284 of 260,000** — over the prose cap.
+
+Renaming the type to `LiveWindow` fixed both. The branch's own cost to the
+budget, measured after the rename, is **0 raw bytes and 3 gzipped**. Every
+byte of the overage was the collision: a colliding name makes the site print
+the *one name that means two things* band, and that band is prose.
+
+### Why this is worth an entry rather than a sentence in a report
+
+The prose cap's remedies, in every entry filed about it so far, are about
+**words** — shorter pages, fewer pages, sharding, the addresses #778 stopped
+writing. A collision is none of those. It is a few bytes of API surface
+turning into hundreds of bytes of generated prose, in a file nobody edits,
+on a branch whose diff contains no page at all. With 152 gzipped bytes of
+headroom, one badly-named export is enough to take the gate red for four
+surfaces, and the error that reaches the author says *the site is too large*
+rather than *you named something twice*.
+
+**Nothing is asked by a date, and no action is needed if #778 lands.** The
+cheap half, if it is ever wanted, is one sentence on the failure: when the
+prose cap fires, check `extract.test.ts` first.
 ## 2026-11-13 (evening) — what a fix to a silent component was worth is answerable now, and the portal view that would say it is bounded by the same floor the census is
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom portal`

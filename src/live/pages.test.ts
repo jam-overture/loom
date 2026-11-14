@@ -316,3 +316,164 @@ describe("the page a reader is served, composed in the site's process (0371 clau
     expect(childrenOf(held.pages.get(tree.treeId)?.root ?? tree.root).length).toBe(before)
   })
 })
+
+const HOUR = 3_600_000
+
+/**
+ * A revision starts at 0 and counts up per accepted delta, so a version a pin
+ * can be served is the earlier revision and the live page is the later one.
+ */
+const was = page
+const now: typeof page = { ...page, revision: page.revision + 1 }
+const otherNow: typeof other = { ...other, revision: other.revision + 1 }
+
+type Version = { readonly until: number; readonly tree: typeof page }
+
+/** A holding whose window can serve a pin the versions named here. */
+const pinning = (
+  live: readonly (typeof page)[],
+  held: readonly (readonly [typeof page, readonly Version[]])[],
+  bounds: { readonly floor?: number; readonly number?: number } = {}
+): LivePages =>
+  holding(live, {
+    window: {
+      ms: HOUR,
+      floor: bounds.floor ?? 0,
+      number: bounds.number ?? 900,
+      held: new Map(held.map(([tree, versions]) => [tree.treeId, versions])),
+    },
+  })
+
+describe("the version a pinned reader is drawn (0383)", () => {
+  it("draws the version the reader was pinned to rather than the newest", () => {
+    const held = pinning([now], [[now, [{ until: 500, tree: was }]]])
+
+    expect(livePageOf(held, now.treeId, 400)).toBe(was)
+    expect(livePageOf(held, now.treeId, 500)).toBe(now)
+  })
+
+  it("draws the newest for a reader with no pin, which is every reader today", () => {
+    const held = pinning([now], [[now, [{ until: 500, tree: was }]]])
+
+    expect(livePageOf(held, now.treeId)).toBe(now)
+    expect(livePageOf(held, now.treeId, undefined)).toBe(now)
+  })
+
+  it("draws the newest for every pin while the project has no window", () => {
+    expect(livePageOf(holding([page]), page.treeId, 400)).toBe(page)
+    expect(livePageOf(NO_LIVE_PAGES, page.treeId, 400)).toBeUndefined()
+  })
+
+  /**
+   * Clause 2: what a reader keeps is the site, not one page. One number holds
+   * them to every page as it stood, so a change that assumed an old home page
+   * was gone cannot meet a reader still being served it.
+   */
+  it("holds one reader to every page of the site at once", () => {
+    const held = pinning(
+      [now, otherNow],
+      [
+        [now, [{ until: 500, tree: was }]],
+        [otherNow, [{ until: 700, tree: other }]],
+      ]
+    )
+
+    expect(livePageOf(held, now.treeId, 400)).toBe(was)
+    expect(livePageOf(held, otherNow.treeId, 400)).toBe(other)
+  })
+
+  it("draws the newest page a pin was never held a version of", () => {
+    const held = pinning([now, otherNow], [[now, [{ until: 500, tree: was }]]])
+
+    expect(livePageOf(held, otherNow.treeId, 400)).toBe(otherNow)
+  })
+
+  it("draws the newest for a pin below the floor a snapshot or a revert raised", () => {
+    const held = pinning([now], [[now, [{ until: 500, tree: was }]]], { floor: 450 })
+
+    expect(livePageOf(held, now.treeId, 400)).toBe(now)
+  })
+})
+
+describe("the segment a pinned reader is sorted into (0383, Audiences)", () => {
+  /** A holding that both sorts readers of `live` and can serve a pin `version`. */
+  const sortingAndPinning = (
+    live: typeof page,
+    version: typeof page,
+    rules: readonly AudienceRule[],
+    forms: readonly AudienceForm[]
+  ): LivePages => ({
+    ...holding([live, other], {
+      rules: new Map([[live.treeId, rules]]),
+      forms: new Map([[live.treeId, forms]]),
+    }),
+    window: {
+      ms: HOUR,
+      floor: 0,
+      number: 900,
+      held: new Map([[live.treeId, [{ until: 500, tree: version }]]]),
+    },
+  })
+
+  it("applies the reader's form to the version the pin chose", () => {
+    const { tree, ids } = sampleTree()
+    const sale = banner("Sale")
+    const version = { ...tree }
+    const held = sortingAndPinning(
+      tree,
+      version,
+      [phones],
+      [form("phone", tree, [{ op: "insert", parentId: ids.page, index: 0, node: sale }])]
+    )
+
+    const served = pageForReader(held, tree, { device: "phone" }, 400)
+
+    expect(firstChildOf(served)).toBe(sale.id)
+    expect(served.audience).toBe(phones.audienceId)
+    expect(served.refusal).toBeUndefined()
+  })
+
+  /**
+   * The forms were authored against the version in `pages`. A pinned reader
+   * whose form does not apply to the version they were pinned to keeps that
+   * version and loses their segment, which is the trade `refusal` already
+   * describes one dimension across (0263 clause 4).
+   */
+  it("serves the pinned version without the form where the form does not apply to it", () => {
+    const { tree, ids } = sampleTree()
+    const later = { ...tree, revision: tree.revision + 1 }
+    const held = sortingAndPinning(
+      later,
+      tree,
+      [phones],
+      [
+        form(
+          "phone",
+          later,
+          [{ op: "insert", parentId: ids.page, index: 0, node: banner("Sale") }],
+          later.revision
+        ),
+      ]
+    )
+
+    const served = pageForReader(held, later, { device: "phone" }, 400)
+
+    expect(served.tree).toBe(tree)
+    expect(served.audience).toBeUndefined()
+    expect(served.refusal).not.toBeUndefined()
+  })
+
+  /** A pinned reader of a deployment with no segments is the ordinary case. */
+  it("serves the pinned version and no segment where the deployment has none", () => {
+    const served = pageForReader(
+      pinning([now], [[now, [{ until: 500, tree: was }]]]),
+      now,
+      undefined,
+      400
+    )
+
+    expect(served.tree).toBe(was)
+    expect(served.audience).toBeUndefined()
+    expect(served.refusal).toBeUndefined()
+  })
+})
