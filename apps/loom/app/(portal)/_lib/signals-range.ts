@@ -1,10 +1,13 @@
 import {
+  ARRIVAL_DAY_MS,
   ARRIVAL_HOUR_MS,
+  arrivalDaysOf,
   arrivalRangeOf,
   type ArrivalChange,
   type ArrivalRange,
   type ArrivalReading,
   type ArrivalSeries,
+  type DayBucket,
 } from "@jam-overture/loom/signals"
 
 import { plainDay, plainMoment, plainTickDay, plainTime } from "./when"
@@ -13,7 +16,7 @@ import { plainDay, plainMoment, plainTickDay, plainTime } from "./when"
  * The stretch of time *Signals* is read over, and what the screen says about
  * the page views counted in it (`docs/portal-wireframes.md`, *1 · Signals*:
  * a range picker, page views in the range with the change on the period
- * before, and a bar chart of page views by hour).
+ * before, and a bar chart of page views by hour, drawn by day for thirty days).
  *
  * The figures come from the intake's hourly counter (0356) through
  * `readReaderArrivals`, which reads the range and the period before it in one
@@ -125,15 +128,43 @@ export const rangeFigureOf = (
         note: `${changeSentence(reading.change, range)} ${count(total)} since counting began.`,
       }
 
+/**
+ * What one bar of the chart stands for: an hour for a day or a week, a day for
+ * thirty days.
+ *
+ * Thirty days by the hour is 720 bars, under half a pixel each across a phone,
+ * so the month is drawn by the day instead (FINDINGS, 10 November): the days
+ * come from `arrivalDaysOf`, folded from the same hourly reading as the figure,
+ * so the bars still add up to it. Days are cut at UTC midnight, as every time
+ * the portal prints is (`when.ts`).
+ */
+export type RangeStep = "hour" | "day"
+
+const STEPS: Readonly<Record<SignalsRange, RangeStep>> = {
+  "24h": "hour",
+  "7d": "hour",
+  "30d": "day",
+}
+
+const STEP_MS: Readonly<Record<RangeStep, number>> = {
+  hour: ARRIVAL_HOUR_MS,
+  day: ARRIVAL_DAY_MS,
+}
+
 /** One bar: where it sits in the range, its height on the scale, and what it says when pointed at. */
 export type RangeBar = {
-  readonly hour: number
-  /** Its place across the range, in hours from the range's first. */
+  /** The instant its hour or day began. */
+  readonly at: number
+  /** Its place across the range, in steps from the chart's first. */
   readonly slot: number
   readonly views: number
   /** Between 0 and 1, the top of the scale being 1. */
   readonly height: number
-  /** False for the hour still in progress, drawn lighter so it does not read as a dip. */
+  /**
+   * False for an hour or a day not wholly counted, drawn lighter so it does not
+   * read as a dip: the one in progress, and on a chart of days, a first day the
+   * range or the start of counting cut short.
+   */
   readonly whole: boolean
   readonly title: string
 }
@@ -145,17 +176,18 @@ export type RangeTick = {
 }
 
 export type RangeChart = {
+  readonly step: RangeStep
   /**
-   * Hours in the whole range, which is how many places the chart has.
+   * Hours or days in the whole range, which is how many places the chart has.
    *
    * The chart is always as wide as the range, whatever was counted in it, so a
-   * bar sits where its hour is: two hours of counting on a week's chart are two
+   * bar sits where its time is: two hours of counting on a week's chart are two
    * thin bars at the right-hand end, not two bars stretched across the week.
    */
   readonly slots: number
   readonly bars: readonly RangeBar[]
   /**
-   * The hours at the start of the range before counting by hour began.
+   * The places at the start of the range before counting by hour began.
    *
    * Drawn as a shaded band rather than as noughts, because nobody was counting
    * then (0356): a chart that drew them flat would claim a quiet day.
@@ -164,7 +196,7 @@ export type RangeChart = {
   /** The page views the top of the chart stands for, said at the top of its scale. */
   readonly scale: number
   readonly ticks: readonly RangeTick[]
-  /** The most page views in one hour. */
+  /** The most page views in one hour, or in one day on a chart of days. */
   readonly tallest: number
   /** Where the range starts and ends, said beneath the bars. */
   readonly starts: string | undefined
@@ -178,17 +210,17 @@ export type RangeChart = {
   readonly summary: string
 }
 
-const hourWord = (views: number): string => (views === 1 ? "page view" : "page views")
+const viewWord = (views: number): string => (views === 1 ? "page view" : "page views")
 
 /** Days for a range of days, the minute for a day, so the two ends read alike. */
 const endLabel = (instant: number, range: SignalsRange): string =>
   range === "24h" ? plainMoment(isoOf(instant)) : plainDay(isoOf(instant))
 
-const noteOf = (series: ArrivalSeries): string | undefined => {
+const noteOf = (series: ArrivalSeries, step: RangeStep): string | undefined => {
   if (series.begins === undefined) return "No page view has been counted by hour yet."
   if (series.hours.length === 0) return "Counting by hour began after this range ended."
   if (series.clipped) {
-    return `Page views are counted by hour from ${plainMoment(isoOf(series.begins))}. The shaded hours before that were not counted.`
+    return `Page views are counted by hour from ${plainMoment(isoOf(series.begins))}. The shaded ${step}s before that were not counted.`
   }
 
   return undefined
@@ -206,7 +238,7 @@ export const LEAST_SCALE = 5
 const SCALE_STEPS: readonly number[] = [1, 2, 5, 10]
 
 /**
- * The top of the chart: the tallest hour rounded up to 1, 2 or 5 times a power
+ * The top of the chart: the tallest bar rounded up to 1, 2 or 5 times a power
  * of ten, and never under {@link LEAST_SCALE}, so the number at the top of the
  * scale is one a person reads at a glance and every bar is measured against it.
  */
@@ -218,25 +250,22 @@ export const scaleOf = (tallest: number): number => {
 }
 
 /**
- * Which hours get a mark under the chart, and what the mark says.
+ * Which places get a mark under the chart, and what the mark says.
  *
  * A day is marked every six hours by the time, with the date at midnight; a
- * week, at each midnight by the date; thirty days, at each Monday's midnight.
- * Each is four to seven marks, which fits across a phone. All UTC, as every
- * time the portal prints is (`when.ts`).
+ * week, at each midnight by the date; thirty days, at each Monday. Each is four
+ * to seven marks, which fits across a phone. All UTC, as every time the portal
+ * prints is (`when.ts`).
  */
-const TICKS: Readonly<Record<SignalsRange, (hour: Date) => string | undefined>> = {
-  "24h": (hour) =>
-    hour.getUTCHours() === 0
-      ? plainTickDay(hour.toISOString())
-      : hour.getUTCHours() % 6 === 0
-        ? plainTime(hour.toISOString())
+const TICKS: Readonly<Record<SignalsRange, (at: Date) => string | undefined>> = {
+  "24h": (at) =>
+    at.getUTCHours() === 0
+      ? plainTickDay(at.toISOString())
+      : at.getUTCHours() % 6 === 0
+        ? plainTime(at.toISOString())
         : undefined,
-  "7d": (hour) => (hour.getUTCHours() === 0 ? plainTickDay(hour.toISOString()) : undefined),
-  "30d": (hour) =>
-    hour.getUTCHours() === 0 && hour.getUTCDay() === 1
-      ? plainTickDay(hour.toISOString())
-      : undefined,
+  "7d": (at) => (at.getUTCHours() === 0 ? plainTickDay(at.toISOString()) : undefined),
+  "30d": (at) => (at.getUTCDay() === 1 ? plainTickDay(at.toISOString()) : undefined),
 }
 
 /**
@@ -245,53 +274,120 @@ const TICKS: Readonly<Record<SignalsRange, (hour: Date) => string | undefined>> 
  */
 const TICK_ROOM = 0.9
 
-const ticksOf = (range: ArrivalRange, slots: number, picked: SignalsRange): readonly RangeTick[] =>
+/** Where the chart's places are counted from, and how long each one is. */
+type Grid = {
+  readonly origin: number
+  readonly size: number
+}
+
+const startOf = (instant: number, size: number): number => Math.floor(instant / size) * size
+
+/**
+ * The places a range is drawn in: its hours, or every UTC day it touches, the
+ * first and last usually only partly inside it.
+ */
+const gridOf = (range: ArrivalRange, step: RangeStep): Grid => {
+  const size = STEP_MS[step]
+
+  return { origin: startOf(range.from, size), size }
+}
+
+const slotOf = (grid: Grid, instant: number): number =>
+  Math.round((instant - grid.origin) / grid.size)
+
+const slotsOf = (grid: Grid, range: ArrivalRange): number =>
+  slotOf(grid, startOf(range.to - ARRIVAL_HOUR_MS, grid.size)) + 1
+
+const ticksOf = (grid: Grid, slots: number, picked: SignalsRange): readonly RangeTick[] =>
   Array.from({ length: slots }, (_, slot) => slot)
     .filter((slot) => slot / slots <= TICK_ROOM)
     .flatMap((slot) => {
-      const label = TICKS[picked](new Date(range.from + slot * ARRIVAL_HOUR_MS))
+      const label = TICKS[picked](new Date(grid.origin + slot * grid.size))
 
       return label === undefined ? [] : [{ slot, label }]
     })
 
-const slotOf = (range: ArrivalRange, instant: number): number =>
-  Math.round((instant - range.from) / ARRIVAL_HOUR_MS)
+/** A bar before it is placed and measured: when it began, what it counted, what it says. */
+type Counted = {
+  readonly at: number
+  readonly views: number
+  readonly whole: boolean
+  readonly title: string
+}
+
+const hourBarsOf = (series: ArrivalSeries): readonly Counted[] =>
+  series.hours.map((hour) => ({
+    at: hour.hour,
+    views: hour.views,
+    whole: hour.whole,
+    title: `${plainMoment(isoOf(hour.hour))}: ${count(hour.views)} ${viewWord(hour.views)}${
+      hour.whole ? "" : ", so far"
+    }`,
+  }))
 
 /**
- * The bar chart of page views by hour across the whole range, from the same
- * reading as the figure.
+ * A partial day says why it is short: the day in progress is *so far*; any
+ * other, the range's first day or the day counting began, says how many of its
+ * hours were counted, so a short bar does not read as a quiet day (FINDINGS,
+ * 10 November, point 3).
+ */
+const dayCaveat = (day: DayBucket, last: number): string =>
+  day.whole
+    ? ""
+    : day.day === last
+      ? ", so far"
+      : `, in the ${day.hours} of its 24 hours this range counted`
+
+const dayBarsOf = (series: ArrivalSeries): readonly Counted[] => {
+  const last = startOf(series.range.to - ARRIVAL_HOUR_MS, ARRIVAL_DAY_MS)
+
+  return arrivalDaysOf(series).days.map((day) => ({
+    at: day.day,
+    views: day.count,
+    whole: day.whole,
+    title: `${plainDay(isoOf(day.day))}: ${count(day.count)} ${viewWord(day.count)}${dayCaveat(day, last)}`,
+  }))
+}
+
+const BARS: Readonly<Record<RangeStep, (series: ArrivalSeries) => readonly Counted[]>> = {
+  hour: hourBarsOf,
+  day: dayBarsOf,
+}
+
+/**
+ * The bar chart of page views across the whole range, from the same reading as
+ * the figure: by hour for a day or a week, by day for thirty days.
  *
- * Every hour of the range has its place whether or not it was counted, the
- * hours before counting began are shaded rather than drawn, and bars are
- * measured on a rounded scale with a floor, so a project with a handful of
- * page views reads as a handful and not as a wall of full-height bars.
+ * Every place of the range is there whether or not it was counted, the places
+ * before counting began are shaded rather than drawn, and bars are measured on
+ * a rounded scale with a floor, so a project with a handful of page views reads
+ * as a handful and not as a wall of full-height bars.
  */
 export const rangeChartOf = (series: ArrivalSeries, range: SignalsRange): RangeChart => {
-  const tallest = series.hours.reduce((most, hour) => Math.max(most, hour.views), 0)
+  const step = STEPS[range]
+  const grid = gridOf(series.range, step)
+  const counted = BARS[step](series)
+  const tallest = counted.reduce((most, bar) => Math.max(most, bar.views), 0)
   const scale = scaleOf(tallest)
-  const slots = slotOf(series.range, series.range.to)
-  const first = series.hours[0]
-  const counted = first !== undefined
+  const slots = slotsOf(grid, series.range)
+  const first = counted[0]
+  const drawn = first !== undefined
 
   return {
+    step,
     slots,
-    bars: series.hours.map((hour) => ({
-      hour: hour.hour,
-      slot: slotOf(series.range, hour.hour),
-      views: hour.views,
-      height: hour.views / scale,
-      whole: hour.whole,
-      title: `${plainMoment(isoOf(hour.hour))}: ${count(hour.views)} ${hourWord(hour.views)}${
-        hour.whole ? "" : ", so far"
-      }`,
+    bars: counted.map((bar) => ({
+      ...bar,
+      slot: slotOf(grid, bar.at),
+      height: bar.views / scale,
     })),
-    uncounted: first === undefined ? 0 : slotOf(series.range, first.hour),
+    uncounted: first === undefined ? 0 : slotOf(grid, first.at),
     scale,
-    ticks: counted ? ticksOf(series.range, slots, range) : [],
+    ticks: drawn ? ticksOf(grid, slots, range) : [],
     tallest,
-    starts: counted ? endLabel(series.range.from, range) : undefined,
-    ends: counted ? endLabel(series.range.to - ARRIVAL_HOUR_MS, range) : undefined,
-    note: noteOf(series),
-    summary: `Page views by hour, ${LABELS[range].toLocaleLowerCase("en-GB")}: ${count(series.views)} in all, at most ${count(tallest)} in one hour.`,
+    starts: drawn ? endLabel(series.range.from, range) : undefined,
+    ends: drawn ? endLabel(series.range.to - ARRIVAL_HOUR_MS, range) : undefined,
+    note: noteOf(series, step),
+    summary: `Page views by ${step}, ${LABELS[range].toLocaleLowerCase("en-GB")}: ${count(series.views)} in all, at most ${count(tallest)} in one ${step}.`,
   }
 }

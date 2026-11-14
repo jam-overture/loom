@@ -277,7 +277,14 @@ word for two states, which is the fault that 9 October entry is about).
 ## 2026-11-10 — the thirty-day range the portal already offers can be drawn by day, and there is a second chart in the same reading
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom portal`
-(`apps/loom/app/(portal)/portal/[project]/signals/`) · **Status:** open —
+(`apps/loom/app/(portal)/portal/[project]/signals/`) · **Status:** **half
+closed 14 November** by the portal: the 30-day chart draws `arrivalDaysOf`, one
+bar a day, with a partial day lighter and saying *so far* or how many of its
+hours the range counted (point 3), at UTC (the offset question below stays
+open; UTC is what every time on the portal is printed in).
+`arrivalDayShapeOf` and the busiest and quietest hours are **not** drawn: no
+screen of `portal-wireframes.md` has a place for a reader's day, so drawing it
+waits for one (*no surface without a unit*). Original status: open —
 **nothing is wrong on the screen today**; two figures are available that were
 not, and one of them is a chart the wireframe asks for and cannot draw honestly.
 
