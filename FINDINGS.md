@@ -72521,6 +72521,59 @@ merged, re-applied off `main` as a pull request of their own. Three instances in
 one day, two of them mine, is what makes it a rule rather than bad luck.
 
 ---
+## 2026-11-14 — the only honest server-side answer to *is this a phone* comes from a header two major browsers never send, so a `device` segment reaches Chromium readers and nobody else
+
+**Filed by:** `Loom marketing` · **Owned by:** the maintainer (the trade), then
+`Loom marketing` (the code) · **Status:** open — **nothing is broken and the
+site serves a segment's form as of today**; what is open is whether this lane
+took the right half of a trade it had to take one half of
+
+loomjs.org passes a render context as of
+`marketing-37-the-context-this-server-can-honestly-set`, which closes the
+13 November entry above. Deciding **which keys** that context holds was left to
+this lane, and one of the two is a judgement worth a sentence from you rather
+than a docblock.
+
+`device` is set from `Sec-CH-UA-Mobile`, a client hint the browser volunteers:
+`?1` is a phone, `?0` is not, and anything else leaves the key absent. An
+absent key does not match, so those readers are served the base page —
+`src/audience/rule.ts` calls that *this reader is not in this audience* rather
+than an error, so nothing fails.
+
+**Client hints are a Chromium feature.** Chrome, Edge and the rest send the
+header; **Safari and Firefox send none of the `Sec-CH-UA-*` family at all.** So
+a segment written as *readers on a phone* reaches an Android reader in Chrome
+and never an iPhone reader in Safari, which on a marketing site's traffic is
+likely the larger half of the phones.
+
+**The two halves of the trade, stated plainly:**
+
+| | what it buys | what it costs |
+| --- | --- | --- |
+| the client hint (**what shipped**) | every reader in a `device` segment really is on a phone | the segment silently misses Safari and Firefox phones |
+| parsing `User-Agent` | a `device` for every reader | the server infers a device from a string the browser did not send to say so, and a wrong guess puts a reader in a segment whose figures are then compared against another's |
+
+This lane took the first, for the reason `routes.ts` already gives about routing
+conventions it cannot read — *refuse rather than guess, because the refusal is a
+failing build and the guess is a link this file reports as fine.* Here the
+refusal is a rule that visibly never matches for some readers, which somebody
+notices in the portal; the guess is a segment quietly holding the wrong ones,
+which nobody does.
+
+**It is a judgement about honesty rather than about code**, which is why it is
+yours: the whole claim this site makes is that Loom can say what changed and
+who asked for it, and a segment built on an inference is a weaker version of
+that claim than a segment that admits it does not know. If you would rather have
+the coverage, the remedy is one function in
+`app/(marketing)/_lib/readers/context.ts` and the case that says what was given
+up is `context.test.ts`' *names no device when the browser did not say, rather
+than inferring one* — it is written to be deleted by whoever takes the other
+half.
+
+**What is not in question:** no reader loses a page either way, and nothing here
+reads a cookie, an address or anything that says who a reader is. The second key
+the context holds is `palette`, which is this site's own and needs nothing from
+you.
 ## 2026-11-14 — a Loom site can set a cookie now, and `/what-you-run` says in as many words that it does not
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom marketing`
