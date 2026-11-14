@@ -11,6 +11,7 @@ import { goalsFor, proposalGoalsFor } from "../goals/stores"
 import { projectModel } from "../interpreter"
 import type { WeighedAgainst } from "../outcome"
 import { portalRegistry } from "../registry"
+import { rebuildSegmentFormsFor } from "../segments/kept"
 import { beginWrite } from "../write"
 import { proposeFor, type ProposeError, type Proposed } from "./propose"
 import { followsItsSite, madeFromFor, pageCopiesFor, turnedDownFor } from "./stores"
@@ -69,6 +70,14 @@ export const runOnPage = async ({
   })
 
   await write.finish()
+
+  /**
+   * A run follows the site's newer version before it proposes, and the Gate
+   * may make what it proposes outright: either moves the page every segment's
+   * form stands on (0386 clause 6). A page with no change for a segment costs
+   * one read.
+   */
+  await rebuildSegmentFormsFor(application, [published])
 
   return { run, weighedAgainst: write.weighedAgainst }
 }

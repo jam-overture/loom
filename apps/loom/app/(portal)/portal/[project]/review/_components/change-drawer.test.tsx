@@ -71,6 +71,7 @@ const drawer = (over: Partial<Parameters<typeof ChangeDrawer>[0]> = {}) =>
       acceptedBy="approver"
       goalsRead
       standing={STANDING}
+      segments={[]}
       projectId="prj_a"
       close={CLOSE}
       {...over}
@@ -135,6 +136,32 @@ describe("the drawer for one change waiting for review", () => {
     expect(screen.getByText(/no longer the one your site serves/u)).toBeDefined()
     expect(screen.queryByRole("button", { name: "Accept" })).toBeNull()
     expect(screen.getByRole("button", { name: "Turn down" })).toBeDefined()
+  })
+
+  it("offers Accept for each segment the page has readers counted in, beside Accept for everyone", () => {
+    drawer({ segments: ["phone", "search"] })
+
+    expect(screen.getByRole("button", { name: "Accept" })).toBeDefined()
+    expect(
+      (screen.getByRole("button", { name: "Accept for phone only" }) as HTMLButtonElement).value
+    ).toBe("accept-for:phone")
+    expect(screen.getByRole("button", { name: "Accept for search only" })).toBeDefined()
+    expect(screen.getByText(/Everyone else keeps the page as it is/u)).toBeDefined()
+  })
+
+  it("offers no segment where none has readers counted, or where the change no longer fits", () => {
+    drawer()
+
+    expect(screen.queryByRole("button", { name: /only$/u })).toBeNull()
+    expect(screen.queryByText(/Accepting for one segment/u)).toBeNull()
+
+    drawer({
+      row: { ...ROW, standing: "conflicts", standingSentence: "It no longer fits." },
+      drawn: { kind: "conflicts" },
+      segments: ["phone"],
+    })
+
+    expect(screen.queryByRole("button", { name: "Accept for phone only" })).toBeNull()
   })
 
   it("marks a stale change amber", () => {

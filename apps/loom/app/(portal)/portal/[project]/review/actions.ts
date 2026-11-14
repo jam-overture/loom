@@ -1,18 +1,33 @@
 "use server"
 
-import { proposalIdSchema } from "@jam-overture/loom"
-import { confirmHeld, discardHeld } from "@jam-overture/loom/write"
+import { proposalIdSchema, type LoomTree } from "@jam-overture/loom"
+import type { ApplicationId } from "@jam-overture/loom/store"
+import { confirmHeld, discardHeld, type HeldProposal } from "@jam-overture/loom/write"
 
 import { mayAccept } from "@/app/(portal)/_lib/auth/roles"
 import { reportOf, type WriteReport } from "@/app/(portal)/_lib/outcome"
-import { pageOfCopy } from "@/app/(portal)/_lib/proposing/copies"
+import { pageOfCopy, type PageCopy } from "@/app/(portal)/_lib/proposing/copies"
 import { holdStandingOf } from "@/app/(portal)/_lib/proposing/following"
 import { madeFromOf } from "@/app/(portal)/_lib/proposing/made-from"
 import { mayPropose, siteReport } from "@/app/(portal)/_lib/proposing/report"
 import { madeFromFor, pageCopiesFor, turnedDownFor } from "@/app/(portal)/_lib/proposing/stores"
 import { reasonFrom } from "@/app/(portal)/_lib/proposing/turned-down"
+import { rebuildSegmentFormsFor, segmentFormsGivenFor } from "@/app/(portal)/_lib/segments/kept"
+import { readOfferedSegments } from "@/app/(portal)/_lib/segments/offered"
+import { audienceRulesFor } from "@/app/(portal)/_lib/segments/rules"
+import { audienceOfSegment, segmentWordSchema } from "@/app/(portal)/_lib/segments/segment"
+import {
+  segmentAcceptedReport,
+  segmentNotOfferedOf,
+  segmentOfAnswer,
+  segmentRefusalOf,
+} from "@/app/(portal)/_lib/segments/segment-answer"
+import { acceptForSegment } from "@/app/(portal)/_lib/segments/segment-forms"
 import { plainState } from "@/app/(portal)/_lib/vocabulary"
-import { beginWrite } from "@/app/(portal)/_lib/write"
+import { beginWrite, type PortalWrite } from "@/app/(portal)/_lib/write"
+import { boundedReaderTallyStore } from "@/app/_lib/app/bounded-store"
+import { publishedPagesFor } from "@/app/_lib/pages/store"
+import { readingsFor } from "@/app/_lib/reader-signals/intake"
 
 import { siteFor } from "../_lib/owned-site"
 
@@ -25,6 +40,65 @@ export type AnswerReport = {
 }
 
 const ALREADY = plainState("already-answered")
+
+/**
+ * *Accept for <segment> only* (0386): the change narrowed to one segment the
+ * page's rules name and has readers counted in, checked against that
+ * segment's form of the page as it is live, and written to it. The page
+ * itself does not move, so no other form is touched.
+ */
+const acceptedForSegment = async (
+  write: PortalWrite,
+  given: {
+    readonly application: ApplicationId
+    readonly copies: readonly PageCopy[]
+    readonly held: HeldProposal
+    readonly page: LoomTree | undefined
+    readonly word: string
+    readonly actor: string
+  }
+): Promise<AnswerReport> => {
+  const word = segmentWordSchema.safeParse(given.word)
+
+  if (!word.success || given.page === undefined) {
+    await write.finish()
+
+    return { refusal: "That is not a segment of a page this project's site has published." }
+  }
+
+  const audienceId = audienceOfSegment(word.data)
+  const offered = await readOfferedSegments(
+    {
+      rules: audienceRulesFor(given.application),
+      tallies: boundedReaderTallyStore(readingsFor(given.application).tallies),
+    },
+    given.page.treeId
+  )
+
+  if (!offered.includes(audienceId)) {
+    await write.finish()
+
+    return { refusal: segmentNotOfferedOf(word.data) }
+  }
+
+  const accepted = await acceptForSegment(
+    { ...segmentFormsGivenFor(given.application, given.copies), holds: write.path.holds },
+    { held: given.held, published: given.page, audienceId, actor: given.actor }
+  )
+
+  await write.finish()
+
+  if (!accepted.ok) return { refusal: segmentRefusalOf(accepted.error, word.data) }
+
+  await madeFromFor(given.application).record({
+    proposalId: given.held.proposalId,
+    intentId: given.held.proposal.intentId,
+    stakes: given.held.disposition.stakes,
+    at: accepted.value.acceptedAt,
+  })
+
+  return { report: segmentAcceptedReport(accepted.value, word.data) }
+}
 
 /**
  * Yes or no to a change the Gate held (0329), from a person whose role may
@@ -43,6 +117,9 @@ const ALREADY = plainState("already-answered")
  * stake), which the page's record does not, so its timeline leads with the
  * goal it serves. The change is made whether or not that is kept, as a *no* is
  * turned down whether or not it is remembered.
+ *
+ * A *yes* for one segment only goes through `acceptedForSegment` instead,
+ * and leaves the page as it is for everyone else.
  *
  * A *no* is remembered, with the reason when one was given, so the AI weighs
  * its next proposal for the page against it (0341). The change is turned down
@@ -80,7 +157,10 @@ export const answerAction = async (
 
   if (!copies.ok) return { refusal: "The store did not answer. Try again in a moment." }
 
-  if (form.get("answer") !== "accept") {
+  const choice = form.get("answer")
+  const segment = segmentOfAnswer(choice)
+
+  if (choice !== "accept" && segment === undefined) {
     const discarded = await discardHeld(write.path, answer)
 
     await write.finish()
@@ -116,13 +196,34 @@ export const answerAction = async (
     }
   }
 
+  const pageId = pageOfCopy(copies.value, held.value.treeId)
+  const published = await publishedPagesFor(application).list()
+  const page = published.ok
+    ? published.value.find((each) => each.tree.treeId === pageId)?.tree
+    : undefined
+
+  if (segment !== undefined) {
+    return acceptedForSegment(write, {
+      application,
+      copies: copies.value,
+      held: held.value,
+      page,
+      word: segment,
+      actor: site.actor,
+    })
+  }
+
   const outcome = await confirmHeld(write.path, answer)
 
   await write.finish()
 
   const made = madeFromOf(outcome, Date.now())
 
-  if (made !== undefined) await madeFromFor(application).record(made)
+  if (made !== undefined) {
+    await madeFromFor(application).record(made)
+    /** The page every segment's form stands on moved (0386 clause 6). */
+    if (page !== undefined) await rebuildSegmentFormsFor(application, [page])
+  }
 
   const report = siteReport(reportOf(outcome, write.weighedAgainst), application)
 
