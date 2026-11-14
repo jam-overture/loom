@@ -10,7 +10,7 @@ import { readPageProse } from "./search/prose"
  *
  * **The plain version.** Every other number this surface holds is about the
  * *search box*: five caps, the largest of them 80,000 compressed bytes for the
- * prose of all thirty-five written pages at once. They exist because somebody
+ * prose of all thirty-six written pages at once. They exist because somebody
  * asked what a reader's connection is being spent on. Nobody had ever asked the
  * same question about **a page** — and one page of this site sends a reader
  * three hundred thousand compressed bytes, which is close to four times the

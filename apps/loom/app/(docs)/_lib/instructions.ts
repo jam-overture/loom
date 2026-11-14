@@ -278,7 +278,11 @@ export const NOT_AN_INSTRUCTION: readonly NotAnInstruction[] = [
   {
     reason:
       "The reader's own machine or their own past: where they are sitting, or what they did on an earlier page.",
-    says: ["on your own machine", "you said yes yourself"],
+    says: [
+      "on your own machine",
+      "you said yes yourself",
+      "Your site is running on your own server, somewhere Loom has never been.",
+    ],
   },
   {
     reason:
@@ -324,7 +328,10 @@ export const NOT_AN_INSTRUCTION: readonly NotAnInstruction[] = [
   {
     reason:
       "A hypothetical host in an argument about the runtime's design, which asks nothing of the reader's.",
-    says: ["A host that switches on seven codes has to hold all of them"],
+    says: [
+      "A host that switches on seven codes has to hold all of them",
+      "a caller that has to catch has a path on which the page is lost",
+    ],
   },
 ]
 

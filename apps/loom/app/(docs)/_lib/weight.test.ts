@@ -305,7 +305,7 @@ describe("what a page puts in front of a reader", () => {
 
     /** Both halves are non-empty, so neither reader is silently returning nothing. */
     it("reads both kinds of page", () => {
-      expect(writtenPageWeights().length).toBe(35)
+      expect(writtenPageWeights().length).toBe(36)
       expect(generatedPageWeights().length).toBe(20)
     })
   })
