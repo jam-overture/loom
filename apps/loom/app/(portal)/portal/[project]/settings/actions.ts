@@ -5,6 +5,8 @@ import { revalidatePath } from "next/cache"
 import { readRename, type NamingFault } from "@/app/(portal)/_lib/registering"
 import { portalApplicationsForWriting, portalProjectsForWriting } from "@/app/(portal)/_lib/store"
 import { readModelKey } from "@/app/_lib/models/model-keys"
+import { readReaderWindow } from "@/app/_lib/pages/reader-windows"
+import { appReaderWindows } from "@/app/_lib/pages/store"
 import { removeModelKey, setModelKey } from "@/app/_lib/models/store"
 
 import { ownedSite } from "../_lib/owned-site"
@@ -111,4 +113,38 @@ export const removeModelKeyAction = async (
   revalidatePath(`/portal/${site.projectId}`, "layout")
 
   return {}
+}
+
+export type ReaderWindowReport = {
+  readonly fault?: string
+  readonly saved?: boolean
+}
+
+/**
+ * An owner choosing how long a reader keeps the pages they first saw (0383
+ * clause 1). Only an owner, for `ownedSite`'s reason: it decides what the
+ * project's site puts on its readers' devices.
+ */
+export const saveReaderWindowAction = async (
+  _previous: ReaderWindowReport | null,
+  form: FormData
+): Promise<ReaderWindowReport> => {
+  const site = await ownedSite(form)
+
+  if (!site.ok) return { fault: site.report.detail ?? "That is not a project you can change." }
+
+  const chosen = readReaderWindow(form.get("window"))
+
+  if (!chosen.ok) return { fault: chosen.error }
+
+  const kept = await appReaderWindows.put(site.application.applicationId, {
+    window: chosen.value,
+    setAt: Date.now(),
+  })
+
+  if (!kept.ok) return { fault: "The choice could not be kept, so nothing changed. Try again." }
+
+  revalidatePath(`/portal/${site.projectId}/settings`)
+
+  return { saved: true }
 }

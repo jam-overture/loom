@@ -8,6 +8,68 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-11-13 — a project can choose how long its readers keep the pages they first saw, and nothing yet holds one, because the pin is the site's code
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom daily build` (`src/live/`,
+the part a customer's server runs), with the door's half in `Loom portal`'s
+lane · **Status:** open
+
+[0383](decisions/0383-a-reader-keeps-the-pages-they-first-saw-for-a-window-the-project-sets-and-their-browser-holds-one-number-many-readers-share.md)
+was Accepted on 13 November. Its consequences file the pin for `Loom daily
+build` once it was; this is that finding. With it, unit 10's first piece is on
+its way to `main`: *Settings* keeps each project's window (*Off · 1 hour · 1 day
+· 7 days*, `loom_reader_windows`, *Off* where nobody chose) and says plainly
+that it is not in effect yet.
+
+### What the client must do, and nothing more
+
+1. **Read the pin** from a request's `Cookie` header and the versions the last
+   pull held, and answer the tree to draw: the newest version of the page live
+   at or before the pin, or the newest live page where the pin cannot be
+   resolved (malformed, older than anything held, below the floor, or no window
+   set), and the page as built where there is none (clause 5). A pure function
+   beside `livePageOf`.
+2. **Answer the `Set-Cookie` value** for a reader with no pin: the current
+   number, `HttpOnly; Secure; SameSite=Lax; Path=/`, expiring the window from
+   now, and **never re-set** for a reader who has one (clause 3). Nothing when
+   the window is *Off*. A pure function too.
+3. **Send nothing new to Loom.** The pin goes on no signal and no pull (0146,
+   0262).
+4. **Audience selection runs after the pin**, against the version it chose
+   (0383, *Audiences*).
+
+### What the door will answer, so the two halves meet
+
+The portal's next piece grows `/api/pages/live`'s answer by `window` (the
+milliseconds, `0` for *Off*), `floor` (the number below which a pin reads the
+newest), `number` (the current one), and, per page, the versions live inside
+the window with the number each became live at. The exact field names go in
+this entry when that piece is on `main`, as the segments entry did for #866.
+Until then the client has nothing to read, and a client that ships first must
+treat an answer without them as *Off*.
+
+**On `main` since `portal-10-door-window` (13 November).** The answer is
+`{ pages, rules, forms, window }`, and `window` is one of:
+
+- `{ "ms": 0 }`: *Off*. Set no cookie and serve `pages` as now. An answer with
+  no `window` at all (a deployment before this piece) means the same.
+- `{ "ms", "floor", "number", "held" }`: hold readers for `ms` milliseconds.
+  `number` is what a reader with no pin is given (the cookie value, expiring
+  `ms` from now); `floor` is the number below which a pin reads the newest.
+  `held` is `[{ "treeId", "versions": [{ "until", "tree" }] }]`, each page's
+  versions oldest first, under the page's own id.
+
+**Numbers are milliseconds** (the time each state was made), so they only
+ever increase, but they do not go up by one; compare them, never count them.
+
+**To resolve a pin `p` for a page:** if `p` is not a whole number, or
+`p < floor`, or `p > number`, serve the page from `pages`. Otherwise serve the
+first of that page's `held` versions whose `until > p`, and the page from
+`pages` where it has none or no such version. Rules and forms were made for
+the version in `pages`; a reader served a held version gets it without a
+segment's form where the form does not apply to it.
+
+---
 ## 2026-11-12 — `mocks.test.ts` is the one whole-repository sweep 0375 did not reach, and it took the merge gate down on a branch that costs it half a millisecond
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom daily build`

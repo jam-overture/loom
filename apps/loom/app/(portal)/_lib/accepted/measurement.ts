@@ -7,6 +7,7 @@ import {
   type AcceptedChange,
   type Served,
 } from "@/app/(portal)/_lib/going-live"
+import { holdingOf, heldUntilOf, type Holding } from "@/app/(portal)/_lib/holding"
 import { chartRangeOf, dailyChartOf, type DailyChart } from "@/app/(portal)/_lib/daily-rate"
 import type { GoalKind } from "@/app/(portal)/_lib/goals/goal"
 import {
@@ -60,12 +61,37 @@ export const readSides = async (
   })
 }
 
+type Read = Extract<AcceptedReading, { readonly kind: "read" }>
+
+/**
+ * Whether returning readers were kept on the page as it was after an accepted
+ * change went live, and until when (0383): nobody for a change no reader has
+ * been given. The hold ends early at the first copy started of any of the
+ * project's pages, or the first change taken back going live, after it.
+ */
+export const holdingFor = (reading: Read, change: AcceptedChange): Holding => {
+  const liveAt = liveAtOf(change, reading.reach)
+
+  if (liveAt === undefined) return { kind: "none" }
+
+  return holdingOf(liveAt, reading.window, {
+    newerVersions: [...reading.copyStarts.values()].flat(),
+    takenBack: reading.changes.flatMap((other) => {
+      const at = other.undoes === undefined ? undefined : liveAtOf(other, reading.reach)
+
+      return at === undefined ? [] : [at]
+    }),
+  })
+}
+
 /**
  * One accepted change's before and after on the goal it served, from when it
- * went live, each side ending where the page changed again.
+ * went live, each side ending where the page changed again. Where returning
+ * readers were held on the page as it was, the after side starts once they
+ * stopped being (0383 clause 6).
  */
 export const readMeasurement = async (
-  reading: Extract<AcceptedReading, { readonly kind: "read" }>,
+  reading: Read,
   change: AcceptedChange,
   served: Served
 ): Promise<Measurement> => {
@@ -77,19 +103,18 @@ export const readMeasurement = async (
 
   if (goal === null) return { kind: "no-goal", liveAt }
 
-  return readSides(
-    reading.application,
-    change.pageId,
-    goal,
-    liveAt,
-    boundsOf(
+  const heldUntil = heldUntilOf(holdingFor(reading, change))
+
+  return readSides(reading.application, change.pageId, goal, liveAt, {
+    ...boundsOf(
       change,
       liveAt,
       reading.changes,
       reading.copyStarts.get(change.pageId) ?? [],
       reading.reach
-    )
-  )
+    ),
+    ...(heldUntil === undefined ? {} : { heldUntil }),
+  })
 }
 
 /** The chart on a page's history, or why it could not be drawn. */

@@ -1,6 +1,7 @@
 import type { LoomTree, Result, TreeId } from "@jam-overture/loom"
 import type { Application, ApplicationId, AudienceForm, AudienceRule } from "@jam-overture/loom/store"
 
+import type { LiveWindow } from "@/app/(portal)/_lib/proposing/held"
 import { ingestKeySchema, type IngestKeyStore } from "@/app/_lib/reader-signals/keys"
 
 import type { PageOverlay } from "./overlays"
@@ -29,6 +30,14 @@ import { bearerOf } from "./receive"
  * names nobody. All three are read in one answer and fail together: a site
  * must never hold rules or forms from one pull beside pages from another.
  *
+ * **It answers the project's reader window beside them** (0383 clause 5):
+ * `window` is `{ ms: 0 }` where readers are not held, and otherwise
+ * `{ ms, floor, number, held }`, the window's length, the number below which
+ * a pin reads the newest pages, the number the pages stand at now, and, for
+ * each page changed inside the window, the versions a pin can still be served
+ * (`held.ts` says how each is found). It is read with the pages, so a site
+ * never holds versions from one pull beside pages from another.
+ *
  * **A form whose segment the page's rules do not name is left out.** It
  * matches nobody, so sending it would be sending a draft nobody can be served
  * to a customer's server, on every pull, for as long as it sat there. A
@@ -50,9 +59,10 @@ export type ReadDoor = {
   readonly applicationOf: (
     application: ApplicationId
   ) => Promise<Result<Application | null, { readonly detail: string }>>
-  readonly livePagesOf: (
+  /** The project's live pages and its reader window, read together. */
+  readonly liveOf: (
     application: ApplicationId
-  ) => Promise<Result<readonly LoomTree[], { readonly detail: string }>>
+  ) => Promise<Result<LiveSite, { readonly detail: string }>>
   /** The current rules and forms of each of the pages, or why they cannot all be read. */
   readonly overlaysOf: (
     application: ApplicationId,
@@ -67,6 +77,9 @@ export type ReadDoor = {
   readonly pulled: (pull: SitePull) => void
   readonly now: () => number
 }
+
+/** What a site serves now, and what it needs to hold its readers to what they first saw. */
+export type LiveSite = { readonly pages: readonly LoomTree[]; readonly window: LiveWindow }
 
 /** One page's rule list in the door's answer. */
 export type LiveRules = { readonly treeId: TreeId; readonly rules: readonly AudienceRule[] }
@@ -166,21 +179,23 @@ export const serveLivePages = async (request: Request, door: ReadDoor): Promise<
     return answer(403, "that project is closed, and a closed project serves no live pages")
   }
 
-  const pages = await door.livePagesOf(named.value)
+  const live = await door.liveOf(named.value)
 
-  if (!pages.ok) return answer(503, `live pages are unavailable: ${pages.error.detail}`)
+  if (!live.ok) return answer(503, `live pages are unavailable: ${live.error.detail}`)
 
+  const { pages, window } = live.value
   const overlays = await door.overlaysOf(
     named.value,
-    pages.value.map((page) => page.treeId)
+    pages.map((page) => page.treeId)
   )
 
   if (!overlays.ok) return answer(503, `live pages are unavailable: ${overlays.error.detail}`)
 
   const body = JSON.stringify({
-    pages: pages.value,
+    pages,
     rules: liveRulesOf(overlays.value),
     forms: liveFormsOf(overlays.value),
+    window,
   })
   const tag = await entityTagOf(body)
   const headers = { ...REVALIDATE, etag: tag }
