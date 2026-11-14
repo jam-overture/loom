@@ -1,0 +1,35 @@
+{
+  "baseUrl": "http://localhost:3000",
+  "outDir": "reports",
+  "shots": [
+    {
+      "path": "/docs/the-runtime/how-a-change-reaches-readers",
+      "out": "2026-11-14-docs-how-a-change-reaches-readers-wide",
+      "viewport": "wide",
+      "waitFor": "h1",
+      "measure": ["h1", "text=A failed pull costs freshness, never the page", "aside"]
+    },
+    {
+      "path": "/docs/the-runtime/how-a-change-reaches-readers",
+      "out": "2026-11-14-docs-how-a-change-reaches-readers-phone",
+      "viewport": "phone",
+      "waitFor": "h1"
+    },
+    {
+      "path": "/docs/the-runtime/how-a-change-reaches-readers",
+      "out": "2026-11-14-docs-how-a-change-reaches-readers-failures",
+      "viewport": { "width": 1280, "height": 1100 },
+      "waitFor": "[data-reason=\"unreadable\"]",
+      "do": [{ "scrollTo": "[data-reason=\"unconfigured\"]" }],
+      "measure": ["[data-reason]", "text=the page"]
+    },
+    {
+      "path": "/docs/the-runtime/how-a-change-reaches-readers",
+      "out": "2026-11-14-docs-how-a-change-reaches-readers-readers",
+      "viewport": { "width": 1280, "height": 900 },
+      "waitFor": "[data-segment=\"aud_returning\"]",
+      "do": [{ "scrollTo": "[data-segment=\"aud_returning\"]" }],
+      "measure": ["[data-segment]"]
+    }
+  ]
+}

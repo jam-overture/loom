@@ -72460,7 +72460,37 @@ is why this is filed here rather than only fixed there.
 ## 2026-11-13 — the live door publishes three names and `@jam-overture/loom/live` has no written page at all, so the one call a site's render path makes is documented only by its signature
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom docs`
-(`apps/loom/app/(docs)/`) · **Status:** open — **nothing is broken and nothing
+(`apps/loom/app/(docs)/`) · **Status:** **closed by
+`docs-85` on `docs-78-no-room-for-another-page`**, 14 November.
+Original status below.
+
+> **`Loom docs`, 14 November.** *How a change reaches readers* exists, in
+> *The runtime*, between *Going to production* and *What a render reports*. It
+> is the page this entry asked for rather than the line it said a line would be,
+> and the entry was right about why: a sentence about a new name on this door
+> would have been the first on the site, with nothing around it to make sense
+> of.
+>
+> **What the page names, measured rather than claimed:** four of the twenty-nine
+> — `startPullingLivePages`, `pageForReader`, `describeSitePullFailure` and
+> `describeComposeError` — which are the four a host writes. They are in fenced
+> blocks, so `api/mentions.ts` offers this page on all four reference entries
+> from this commit, with nobody told to update anything. The other twenty-five
+> are in the reference and in the producer.
+>
+> **The entry was right that the docblock was a page's worth of prose, and it
+> was the source for most of this one.** Three properties, each with the
+> sentence it was written to be lifted as. What the docblock could not supply
+> was the thing a page needs most, which is somebody being wrong in a way a
+> reader will recognize — so the page's four blocks are a real pull, five real
+> failures, three real readers and two real renders, and its longest section is
+> the one about the form that could not be applied.
+>
+> One thing the entry did not predict and this run found: **the render call the
+> docblock shows does not compile.** That is filed, today, against
+> `src/render/render.ts`.
+
+**Original status:** open — **nothing is broken and nothing
 is blocked**; the generated reference has the three names and their doc
 comments, and `pnpm verify` is green
 
@@ -72913,3 +72943,224 @@ needs no knowledge of when anything merges.
 on the same day: three text changes pushed to #851's branch ten minutes after it
 merged, re-applied off `main` as a pull request of their own. Three instances in
 one day, two of them mine, is what makes it a rule rather than bad luck.
+
+---
+## 2026-11-14 — the one render call `@jam-overture/loom/live` exists to feed does not compile under this repository's own strictness, and its own docblock shows the spelling that fails
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom daily build`
+(`src/render/render.ts`) · **Status:** open — **nothing is broken at runtime**
+and the page documents the spelling that works; this is one character in a type
+declaration
+
+Writing the `(docs)` page for `/live` meant writing the render call, and the
+call the module's own docblock shows does not compile here:
+
+```
+app/(docs)/_lib/fences/compiled/the-runtime--how-a-change-reaches-readers.ts(40,29):
+error TS2379: Argument of type
+'{ resolver: PrimitiveResolver; audience: (string & BRAND<"AudienceId">) | undefined; }'
+is not assignable to parameter of type 'RenderOptions' with
+'exactOptionalPropertyTypes: true'.
+```
+
+`src/live/index.ts`'s worked example ends on:
+
+```ts
+renderLoomTree(served.tree, { resolver, addressed: true, audience: served.audience })
+```
+
+`ServedPage.audience` is `AudienceId | undefined`, because a reader in no
+segment is the ordinary case. `RenderOptions.audience` is declared
+`readonly audience?: AudienceId`, with no `| undefined`. Under
+`exactOptionalPropertyTypes` — which this repository compiles with, and which
+`@tsconfig/strictest` turns on — the two cannot be joined, and the one call the
+`/live` module exists to feed is the one call that will not typecheck.
+
+**The remedy is `readonly audience?: AudienceId | undefined`**, in
+`RenderOptions`. It widens nothing at runtime and it is what every other
+optional whose value arrives from a `| undefined` producer wants.
+
+**What the page does meanwhile**, because a page documents what is true:
+
+```ts
+renderLoomTree(served.tree, {
+  resolver: registry,
+  ...(served.audience === undefined ? {} : { audience: served.audience }),
+})
+```
+
+with a comment saying why, so a reader who copies it and does not need the
+spread knows that. **This lane would rather delete that comment than keep it.**
+
+**One thing worth noticing about how it was found.** It was not found by
+reading the docblock, which three runs of this lane have now read. It was found
+because this site compiles every code block on every page as a program, so the
+first run to write that call wrote it into a typechecker. The fence pipeline
+found a defect in `src/` from the documentation side, which is the thing it was
+built hoping for and had not done before.
+
+---
+## 2026-11-14 — a host that reads a pull's segment rules has no published name for them, while the type it does get names a brand nothing publishes
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom daily build`
+(`src/live/index.ts`, `src/audience/`) · **Status:** open — **nothing is
+broken**; `pnpm verify` is green and the documentation page works around it by
+building the door's answer as JSON
+
+`@jam-overture/loom/live` publishes `AudienceForm` and `ComposeError`, and
+`LivePages` holds `rules: ReadonlyMap<TreeId, readonly AudienceRule[]>`. But:
+
+| name | published on |
+| --- | --- |
+| `AudienceForm` | `/live` |
+| `ComposeError` | `/live` |
+| **`AudienceRule`** | **nowhere** |
+| **`AudienceClause`** | **nowhere** |
+| **`AudienceId`** | **nowhere** |
+| **`audienceIdSchema`** | **nowhere** |
+
+Checked against the built entry points rather than read off the source: no
+export of any of the four appears on `.`, `/live`, `/sdk`, `/react` or any
+other door in `package.json`.
+
+Two consequences, and the second is the one that bites:
+
+- A host that wants to **look at** the rules it is holding — to log which
+  segments a project has, or to check a context against them before shipping —
+  has no type to name them by.
+- `AudienceForm.audienceId` is `AudienceId`, which is a **branded** string. A
+  host cannot construct one, cannot name the type, and cannot parse a string
+  into one, so the only `AudienceForm` a host can hold is one it got from a
+  pull. That is fine for the render path and wrong for a test: a host writing a
+  unit test over its own segment handling has to reach for `as never`.
+
+**What this page did instead**, and it is the honest shape rather than a
+workaround: the producer assembles **the door's answer as JSON** and lets
+`pullLivePages` parse it. That is what really happens over the wire, so the
+page's blocks demonstrate the parse as well as the composition, and an id that
+did not match the grammar would be refused where a deployment would refuse it.
+So nothing is blocked here. The ask is about a host's own code, not about this
+site.
+
+**Recommendation:** publish `AudienceRule`, `AudienceClause`, `AudienceId` and
+`audienceIdSchema` on `/live`, beside `AudienceForm`, for the reason `/live`
+already re-exports `describeComposeError`: the place a host meets these is the
+render path.
+
+---
+## 2026-11-14 — this site's written-page count is stated in five doc comments and checked in one, so adding a page leaves four of them wrong
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/_lib/`) · **Status:** open — **nothing is broken**; the
+one that is checked went red correctly and the four are prose
+
+Adding one page took `weight.test.ts` red on `expected 36 to be 35`, which is
+the check doing its job. The same number is written in four other places and
+nothing reads any of them:
+
+| where | what it says | what it is |
+| --- | --- | --- |
+| `weight.test.ts` | `toBe(35)` | **checked.** Went red, updated to 36 |
+| `weight.ts` | *the prose of all thirty-five written pages* | present tense. Updated by hand to thirty-six |
+| `api/fields.ts` | *safe to point at thirty-five pages* | present tense. Updated by hand to thirty-six |
+| `instructions.ts` | *The counts, over the thirty-five written pages* | a **dated** table of measurements. Left |
+| `plain.ts` | *On the morning this was written, across the thirty-five written pages* | dated. Left |
+
+The two dated ones are right to be left: a measurement with a date on it is an
+account of a morning and the 12 November entry on correcting merged records
+argues that case. The two present-tense ones were simply wrong for as long as
+this branch was open, and a run that had not happened to grep for the digit
+would have left them wrong.
+
+**What would stop it rather than fix this instance:** `writtenPageWeights()`
+already answers the number, so a doc comment wanting it could be a produced
+sentence the way `room.ts` and `savings.ts` are. That is more machinery than
+two words of prose deserve. The cheaper half is the one worth having: **a
+present-tense count of this site's own pages, spelled out, in a doc comment, is
+the shape to stop writing.** It reads as context and behaves as an
+unmaintained assertion.
+
+Filed rather than built because this lane has shipped four instruments in six
+runs and this is a fifth, over two words.
+
+---
+## 2026-11-14 — the room this site has for another page is now nineteen words above the floor, and the next written page takes `room.test.ts` red whatever its length
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` and
+**@jonathanbravecredit** (the call) · **Status:** open — **nothing is broken,
+`pnpm verify` is green, and no deadline is attached**; this is the state of the
+site stated by the run that changed it
+
+`room.test.ts` says, in as many words, that *a page long enough to spend 2,335
+words makes this fail, and the run that writes it says what the state is then*.
+This is that run, and this is the state.
+
+| | words of room | the floor |
+| --- | --- | --- |
+| `architecture` | **1,749** | 1,730 |
+| `getting-started` | 1,838 | 1,730 |
+| `building-with-loom` | 1,984 | 1,730 |
+| `the-runtime` | 2,019 | 1,730 |
+| `api-reference` | 2,847 | 1,730 |
+
+The floor is five times the shortest page on the site, which is *Decision
+records* at 346 words. `architecture` is the tightest because it compresses
+worst, not because it is the biggest.
+
+**What this page cost.** 1,177 compressed bytes of the 4,750 that the saving on
+this branch bought — 633 words of prose for four produced blocks, two code
+blocks and a mounted example. It was **895 words in its first draft**, and the
+147 words that came out first were cut to clear exactly this floor; the second
+115 came out by moving the explanation of `pageForReader`'s three answers into
+the code block as comments, where a copier reads it and the prose index does not
+pay for it.
+
+**So the state is: nineteen words.** The next written page on this site fails
+this case whatever its length, and the run that writes it has three choices and
+no good one:
+
+1. **Answer 0353.** Candidate C buys about 2,305 words, which is less than the
+   2,335 this branch had before this page, so it does not solve this on its own.
+2. **Find another saving.** `savings.ts` prices five and refuses all five, and
+   the one that was not in that table — the addresses — is what this branch
+   already took.
+3. **Move the floor.** `shortest * 5` is a margin somebody chose, and nothing
+   says five. This lane will not change it in the run that is pressed against
+   it, which is exactly the run that should not be trusted to.
+
+**The recommendation is 3, by somebody who is not under the margin.** The
+honest reading of the last three weeks is that the floor is measuring the wrong
+thing: it asks whether five more copies of the shortest page would fit, and the
+shortest page on this site is a generated index of decision records. Four of
+this lane's last six runs have been instruments about this number, and the
+number has gone red in a different place each time.
+
+---
+## 2026-11-14 — the moving comment in `the-runtime--*.ts` is a line number, so a one-word prose edit above a code block is a regeneration
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/_lib/fences/`) · **Status:** **closed on filing — it
+cost nothing this run and it has cost two runs before**, and it is written down
+because the thing that saved it was luck
+
+A compiled fence records `// page.mdx:32 — a program`, which is the right thing
+to record: a compiler error points at a place in the page rather than at a place
+in the generated file. The consequence is that **any edit that changes the
+number of lines above a code block makes every compiled line number below it
+stale**, and nothing says so until `compiled.test.ts` runs.
+
+This run edited reader-facing prose above two code blocks **seven times** while
+trimming the page to fit its section's cap, and each time the edit happened to
+keep the line count. That was not care. It was the shape of the edits — a
+sentence shortened within its own two lines — and the eighth one would not have
+been.
+
+**The remedy is one sentence and this lane is following it from now on:**
+`pnpm --filter @loom/app docs:fences` is part of editing a page, not part of
+adding a code block to one. It is two seconds and it is idempotent.
+
+The 12 November report has the same failure from the other direction — *adding
+two imports to the page moved every line below them* — and called it
+mechanical. It is mechanical. What makes it worth an entry is that the trigger
+is **prose**, which is the edit a documentation run makes most often and the one
+least likely to make anybody think about generated files.

@@ -21,8 +21,8 @@ live the next time your server asks for it, and your server asks on a timer.
 
 ## Your server asks, and keeps the answer
 
-Loom is never in the path of a request (0262). If it were, every reader of every
-page would be waiting on somebody else's network.
+Loom is never in the path of a request. If it were, every reader of every page
+would be waiting on somebody else's network.
 
 So nothing is fetched while a reader waits. One loop, started where your
 application starts, asks for the project's pages every so often and keeps them
