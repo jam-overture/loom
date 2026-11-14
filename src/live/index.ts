@@ -39,12 +39,21 @@
  * // wherever a page is rendered, with the tree the site was built with, and
  * // what this server knows about the request in the keys the rules read
  * const held = await live.ready()
- * const served = pageForReader(held, builtTree, { device: "phone", returning: true })
+ * const pin = pinIn(request.headers.get("cookie"))
+ * const served = pageForReader(held, builtTree, { device: "phone", returning: true }, pin)
+ * const keep = pinCookieFor(held, pin)
  *
  * if (served.refusal !== undefined) log.warn(describeComposeError(served.refusal))
+ * if (keep !== undefined) response.headers.set("set-cookie", keep)
  *
  * renderLoomTree(served.tree, { resolver, addressed: true, audience: served.audience })
  * ```
+ *
+ * The last two of those are what a project with a reader window costs a host
+ * (0383): a reader keeps the pages they first saw for as long as the project
+ * set, and a project with no window — which is every project until somebody
+ * chooses one — needs neither line. Both are pure, both read only what the last
+ * pull brought, and nothing about the reader leaves the process.
  *
  * The page's signals are filed under the segment it was rendered for (0284):
  * the root carries it, and the broadcaster reads it from there.
@@ -68,6 +77,14 @@ export {
   type LivePages,
   type ServedPage,
 } from "./pages.js"
+export {
+  PIN_COOKIE,
+  pinCookieFor,
+  pinIn,
+  WINDOW_OFF,
+  type HeldVersion,
+  type LiveWindow,
+} from "./window.js"
 export {
   describeSitePullFailure,
   DEFAULT_PULL_CEILING_MS,

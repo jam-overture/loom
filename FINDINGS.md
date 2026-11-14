@@ -12,7 +12,10 @@ list and it is not a report.
 
 **Filed by:** `Loom portal` · **Owned by:** `Loom daily build` (`src/live/`,
 the part a customer's server runs), with the door's half in `Loom portal`'s
-lane · **Status:** open
+lane · **Status:** closed by `framework-99-the-pin-the-site-reads` (14 November),
+which built all four numbered items against the contract below; see
+[0395](decisions/0395-the-pin-is-a-decimal-in-one-first-party-cookie-and-an-unreadable-window-keeps-the-last-whole-pull.md)
+for the four things this entry left to the client to decide
 
 [0383](decisions/0383-a-reader-keeps-the-pages-they-first-saw-for-a-window-the-project-sets-and-their-browser-holds-one-number-many-readers-share.md)
 was Accepted on 13 November. Its consequences file the pin for `Loom daily
@@ -62078,8 +62081,27 @@ it rather than reassigned.
 ## 2026-10-23 — a space lost between a tag and the text after it leaves no separator, so the one check written for run-together text cannot see it
 
 **Filed by:** `Loom docs` · **Owned by:** `Loom daily build`
-(`tools/prerender/hazards.ts`) · **Status:** open — **the instance is fixed and
-the gap is not**; one page, caught in a screenshot rather than by any check
+(`tools/prerender/hazards.ts`) · **Status:** **closed by
+`framework-98-the-space-a-tag-swallowed`** — the gap is shut with shape 1, and
+the entry's measurement held three weeks later: on today's 139 built pages there
+are 82 inline junctions, 80 of them a `</span>` that keeps the space inside and
+2 of them a plural on a code chip. Recorded as
+[0398](decisions/0398-the-second-prerender-hazard-is-an-inline-end-tag-with-text-hard-against-it-and-the-element-does-not-carry-the-space.md).
+
+> **The entry was right about the fault, the class and the remedy.** Two things
+> it recommended were not taken as written, and both because the measurement it
+> itself supplied pointed further. The 77 `</span>`s are answered by reading the
+> character *before* the end tag — the space is inside the element — rather than
+> by allowing `span`, which would have exempted the one element the defect is
+> most likely to appear on. And the sweep reads only **text-level** elements,
+> because a block element's end is the next line rather than the same one, and
+> flagging `</p>in` would be a red gate for four surfaces over correct output.
+> Only the plural on a chip is allowed by name, as the one shape in the class
+> with no second spelling.
+>
+> Shape 2 — comparing the built text against the `textContent` a test sees — is
+> recorded in 0398 as deferred rather than rejected, with the span-crossing
+> blind spot it would close named.
 
 The band this lane added today contained the ordinary sentence
 
@@ -72545,3 +72567,230 @@ half.
 reads a cookie, an address or anything that says who a reader is. The second key
 the context holds is `palette`, which is this site's own and needs nothing from
 you.
+## 2026-11-14 — a Loom site can set a cookie now, and `/what-you-run` says in as many words that it does not
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom marketing`
+(`apps/loom/app/(marketing)/`) · **Status:** open
+
+The client half of
+[0383](decisions/0383-a-reader-keeps-the-pages-they-first-saw-for-a-window-the-project-sets-and-their-browser-holds-one-number-many-readers-share.md)
+is on `framework-99-the-pin-the-site-reads`: `pinCookieFor` answers a
+`Set-Cookie` value, and a host that wires it sets `loom_pin` on its readers'
+devices. 0383 clause 7 is where this obligation was written down, and it names
+this page:
+
+> *loomjs.org stays* Off *until the pull request that turns it on also changes
+> the sentence on `/what-you-run`.*
+
+**Nothing is broken today and nothing is urgent.** Every project's window is
+*Off* (clause 1, the default), loomjs.org has not chosen one, and a deployment
+with no window sets nothing — so the page is true as it stands. What has changed
+is that the sentence is now one `Settings` choice away from being false rather
+than unreachable, and the lane that owns the sentence is not the lane that would
+make the choice.
+
+### What this asks, and nothing more
+
+1. **Know that the sentence is now load-bearing.** `/what-you-run` says Loom
+   *"does not know who you are, set a cookie, or send any of it anywhere but
+   the server you are already talking to."* The first and third clauses are
+   still unconditionally true — the pin never reaches Loom, goes on no signal
+   and no pull (0383 clause 3, 0146, 0262), and is read and written only by the
+   customer's own server. The middle clause is the one that is now conditional.
+2. **Decide whether the page says so before or after a window is chosen.** Two
+   honest shapes: leave it as it is and change it in the same pull request that
+   turns a window on (which is what clause 7 asks for, and is the cheaper
+   reading), or say now that a site *may* set one first-party cookie if its
+   owner turns the window on, and that loomjs.org has not. The second costs
+   prose on a page with a measured budget; the first costs remembering.
+
+**Recommendation:** the first, which is clause 7 as written. This entry exists
+so that the remembering is written down somewhere a run will read, rather than
+living in a record nobody opens on the day the choice is made.
+
+---
+## 2026-11-14 — `@jam-overture/loom/live` publishes nine names now rather than three, and the entry asking for its page quotes three
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/`) · **Status:** open
+
+The 13 November entry *the live door publishes three names and
+`@jam-overture/loom/live` has no written page at all* is still open and still
+right. Its number has moved: `framework-99-the-pin-the-site-reads` adds
+`PIN_COOKIE`, `pinIn`, `pinCookieFor`, `WINDOW_OFF`, `HeldVersion` and
+`LiveWindow`, so the door publishes **nine** names and the written pages of
+this site still name none of them.
+
+`pnpm docs:api` says so itself, unprompted, on the branch that adds them:
+
+```
+@jam-overture/loom/live — HeldVersion, PIN_COOKIE, WINDOW_OFF, pinCookieFor, pinIn
+  no written page names anything published by @jam-overture/loom/live, so a
+  sentence about a new name on it would be the first on this site. That is a
+  page rather than a line — file it for `Loom docs`.
+```
+
+**This is a correction to a figure, not a second request.** Filed as its own
+entry because the convention here is to append rather than to edit another
+lane's entry, and because a stale number in an open entry is a thing this file
+has been bitten by four times (the published-names cap, 12 November). The ask is
+unchanged and is that entry's: a page for `/live`, which is the one subpath a
+site's render path imports and the only one with no prose at all.
+
+Three of the six new names are what a host writes to honour a reader window
+(0383): `pinIn` reads the pin, `pinCookieFor` answers the cookie, and
+`PIN_COOKIE` is the name so a host never spells it. The other three are the
+types they are written in terms of. The worked example in `src/live/index.ts`
+shows all three in the four lines a host adds, if that helps a page start.
+
+---
+## 2026-11-14 — the docs prose budget has 325 raw bytes and 152 gzipped left on `main`, and one name collision spent twice that in a single branch
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/`) · **Status:** open
+
+Measured on `main` at `ab8a960`, with the same functions
+`app/(docs)/_lib/search/build.test.ts` asserts on:
+
+```
+RAW   259,675 of 260,000     325 left
+GZIP   79,848 of  80,000     152 left
+```
+
+**This is not news and it is not this lane's to fix** — `docs-78-no-room-for-another-page` (#778, open since 5 November) frees 4,356 gzipped and 13,197 raw bytes and is the answer. What is new is a second way to spend the budget that nobody had measured, and it is worth knowing before the margin is relieved.
+
+### A published name that collides costs about 609 raw bytes
+
+`framework-99-the-pin-the-site-reads` first published a type called
+`ReaderWindow` at `@jam-overture/loom/live`. `src/signals/` already publishes
+one, for an unrelated thing. The gate went red in two places:
+`extract.test.ts`, correctly, naming the collision; and
+`search/build.test.ts`, with **260,284 of 260,000** — over the prose cap.
+
+Renaming the type to `LiveWindow` fixed both. The branch's own cost to the
+budget, measured after the rename, is **0 raw bytes and 3 gzipped**. Every
+byte of the overage was the collision: a colliding name makes the site print
+the *one name that means two things* band, and that band is prose.
+
+### Why this is worth an entry rather than a sentence in a report
+
+The prose cap's remedies, in every entry filed about it so far, are about
+**words** — shorter pages, fewer pages, sharding, the addresses #778 stopped
+writing. A collision is none of those. It is a few bytes of API surface
+turning into hundreds of bytes of generated prose, in a file nobody edits,
+on a branch whose diff contains no page at all. With 152 gzipped bytes of
+headroom, one badly-named export is enough to take the gate red for four
+surfaces, and the error that reaches the author says *the site is too large*
+rather than *you named something twice*.
+
+**Nothing is asked by a date, and no action is needed if #778 lands.** The
+cheap half, if it is ever wanted, is one sentence on the failure: when the
+prose cap fires, check `extract.test.ts` first.
+## 2026-11-13 (evening) — what a fix to a silent component was worth is answerable now, and the portal view that would say it is bounded by the same floor the census is
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom portal`
+(`apps/loom/app/(portal)/portal/[project]/signals/`) · **Status:** open —
+**nothing is wrong on any screen today**; two readings are available that were
+not, and one of them answers a question nothing in this repository could ask.
+
+§88 landed `librarySendersOf` this morning: *`loom.accordion` is silent in
+thirty-one of the thirty-four places it stands, across nineteen of your pages*.
+That names the component to fix. §89 lands
+[`librarySendersChangeOf`](src/signals/library-senders-change.ts)
+([0394](decisions/0394-what-a-fix-to-a-silent-component-was-worth-is-read-over-the-places-both-windows-could-check.md)),
+which answers the two questions that follow it:
+
+| | |
+| --- | --- |
+| `mostRepaired` | *that fix recovered `loom.accordion` in twenty-nine of the thirty-one places it was silent, across seventeen of your pages* |
+| `mostSilenced` | **the one nothing could see before**: a release that *silenced* a component that was reporting last week. A census sees only that it is silent now |
+
+Both are pure functions of two windows' `PageReading[]` — the same readings the
+census takes — so the screen needs no second query, no store method and no
+migration. The second window is the one *1 · Signals* already has a range picker
+for.
+
+**Four things a screen drawing these has to hold.** Each is published rather than
+left to be worked out, and the record's clause 3 is the one that matters:
+
+1. **`checkable` is the places checkable in *both* windows**, and a surface must
+   not quietly re-derive a denominator from `checkableNow`. A place nobody was
+   under before and is under now has no earlier state to have been silent in —
+   drawn over the later window's places, a week that merely got busier reads as
+   a fix, and nothing on the row looks wrong.
+2. **`checkableWas` and `checkableNow` are the coverage, not the finding.** They
+   move with readers. A chart that put them beside a repair count without saying
+   which is which would invite exactly the reading clause 3 refuses.
+3. **`unclaimable` is not `uncheckable`.** The first says every comparable place
+   reported something that was not a view on one side — nothing is claimed. The
+   second says come back with readers. They are different instructions and
+   `describeSenderFixSilence` has a line for each.
+4. **The figure is a floor**, because §88's is: leaves and unwitnessed places are
+   outside it on both sides. A screen that said *this is everything the fix
+   touched* would be printing something the reading did not say.
+
+**`republished` is the number to draw beside a repair.** A fix to a primitive
+reaches a page by republishing it, so a repair on pages that did not move is a
+repair the library cannot explain.
+
+---
+## 2026-11-13 (evening) — the reader-weighted version of what a fix was worth is 0256's refusal one unit along, and it is the next thing somebody will ask for
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals` (`src/signals/`) ·
+**Status:** open — **nothing is broken and nothing is blocked**; a limit written
+down by the run that created it.
+
+[0394](decisions/0394-what-a-fix-to-a-silent-component-was-worth-is-read-over-the-places-both-windows-could-check.md)
+answers *how many of the places your accordion stands in report themselves now*.
+The question it does not answer is *of the readers who met your accordion, how
+many were measured* — and it is the obvious second question, because the first
+is a count of places and a deployment is paid by readers.
+
+**It is the same refusal 0256 made** about a kind's share of the readers who met
+it, one unit along: it needs the door's scale on both sides, it is a weighted
+mean whose weights move when the pages' traffic moves, and a type carrying a
+sound figure and a corrected one with nothing but prose to tell them apart is a
+type a surface reads past. The library comparison
+([`library-change.ts`](src/signals/library-change.ts)) filed the identical
+question on 24 October and it is still open; this is the second reading to reach
+it.
+
+**What makes this one slightly different, and worth its own line.** The
+denominator there is readers who met a kind. Here the population is *places
+something reported reach below*, which is already a statement about readers —
+so the reader-weighted version is not a second reading over the same places, it
+is a different population. Whoever takes it should decide that first and write
+it down, because the two are easy to describe in one sentence and impossible to
+add together.
+
+**Not a blocker on anything**, and this lane's own view is that the counts are
+the answer a fix is judged by: an author who replaced a primitive wants to know
+how much of the library it reached, and that is places.
+
+---
+## 2026-11-13 (evening) — ten more names on `@jam-overture/loom/signals` with no prose, and it is the fifth entry asking for one paragraph
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom docs`
+(`app/(docs)/docs/the-runtime/what-your-readers-do/page.mdx`) · **Status:**
+open — **the generator said so and `pnpm verify` is green**; nothing is red and
+nothing is blocked.
+
+§89 publishes ten names from `src/signals/library-senders-change.ts`:
+`librarySendersChangeOf`, `LibrarySendersChange`, `KindSenderChange`,
+`SenderMovement`, `SENDER_MOVEMENTS`, `describeSenderMovement`,
+`SenderFixSilence`, `SENDER_FIX_SILENCES`, `describeSenderFixSilence` and
+`SILENCED_EXAMPLES`.
+
+**This is the fifth entry of its kind** — 8 November's seven names, 9 November's
+five, #848's eight, 10 November's sixteen and §88's seven, which the morning
+entry already counted as the fourth. **It does not need a paragraph of its own**,
+and the honest ask is unchanged: one paragraph on that one page answers all
+five. The sentences are here to be lifted rather than rewritten:
+
+> A census says which of your components are silent. Two windows of it say what
+> fixing one was worth — and, the other way round, which component a release
+> silenced. Both are read over the places *both* windows could check, because a
+> place nobody was under last week has no before.
+
+**Nothing is asked by a date.** If the page would rather carry one sentence for
+all five entries than five, that is the better page.

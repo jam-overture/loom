@@ -17,6 +17,7 @@ import {
   type PullFetch,
   type SitePullOutcome,
 } from "./pull.js"
+import { WINDOW_OFF } from "./window.js"
 
 const DEPLOYMENT = "https://loom.example.com"
 const KEY = "lk_0123456789abcdef0123456789abcdef"
@@ -158,6 +159,7 @@ describe("one pull", () => {
       pages: [page, other],
       rules: [],
       forms: [],
+      window: WINDOW_OFF,
       tag: '"fresh"',
     })
   })
@@ -170,6 +172,7 @@ describe("one pull", () => {
       pages: [],
       rules: [],
       forms: [],
+      window: WINDOW_OFF,
       tag: '"empty"',
     })
   })
@@ -273,6 +276,7 @@ describe("the segment rules a pull reads beside the pages (0371 clause 4)", () =
       pages: [page, other],
       rules: [{ treeId: page.treeId, rules: [onPhones] }],
       forms: [],
+      window: WINDOW_OFF,
       tag: '"ruled"',
     })
   })
@@ -330,7 +334,7 @@ describe("what an outcome does to what is held", () => {
   it("holds fresh pages by their own ids, with the tag that names them", () => {
     const held = withPullOutcome(
       NO_LIVE_PAGES,
-      { kind: "fresh", pages: [page, other], rules: [], forms: [], tag: '"one"' },
+      { kind: "fresh", pages: [page, other], rules: [], forms: [], window: WINDOW_OFF, tag: '"one"' },
       1_000
     )
 
@@ -344,10 +348,10 @@ describe("what an outcome does to what is held", () => {
   it("drops a page the newest answer no longer names, so it renders as built", () => {
     const both = withPullOutcome(
       NO_LIVE_PAGES,
-      { kind: "fresh", pages: [page, other], rules: [], forms: [], tag: undefined },
+      { kind: "fresh", pages: [page, other], rules: [], forms: [], window: WINDOW_OFF, tag: undefined },
       1
     )
-    const one = withPullOutcome(both, { kind: "fresh", pages: [page], rules: [], forms: [], tag: undefined }, 2)
+    const one = withPullOutcome(both, { kind: "fresh", pages: [page], rules: [], forms: [], window: WINDOW_OFF, tag: undefined }, 2)
 
     expect([...one.pages.keys()]).toEqual([page.treeId])
   })
@@ -355,7 +359,7 @@ describe("what an outcome does to what is held", () => {
   it("moves only the moment of the pull when nothing had changed", () => {
     const fresh = withPullOutcome(
       NO_LIVE_PAGES,
-      { kind: "fresh", pages: [page], rules: [], forms: [], tag: '"one"' },
+      { kind: "fresh", pages: [page], rules: [], forms: [], window: WINDOW_OFF, tag: '"one"' },
       1_000
     )
     const again = withPullOutcome(fresh, { kind: "unchanged" }, 2_000)
@@ -370,7 +374,7 @@ describe("what an outcome does to what is held", () => {
   it("keeps every page, and the tag that names them, through a failure", () => {
     const fresh = withPullOutcome(
       NO_LIVE_PAGES,
-      { kind: "fresh", pages: [page], rules: [], forms: [], tag: '"one"' },
+      { kind: "fresh", pages: [page], rules: [], forms: [], window: WINDOW_OFF, tag: '"one"' },
       1_000
     )
     const failed = withPullOutcome(
@@ -408,6 +412,7 @@ describe("what an outcome does to what is held", () => {
           { treeId: other.treeId, rules: [] },
         ],
         forms: [],
+        window: WINDOW_OFF,
         tag: '"one"',
       },
       1
@@ -420,10 +425,10 @@ describe("what an outcome does to what is held", () => {
   it("drops the rules the newest answer no longer carries", () => {
     const ruled = withPullOutcome(
       NO_LIVE_PAGES,
-      { kind: "fresh", pages: [page], rules: [{ treeId: page.treeId, rules: [onPhones] }], forms: [], tag: '"one"' },
+      { kind: "fresh", pages: [page], rules: [{ treeId: page.treeId, rules: [onPhones] }], forms: [], window: WINDOW_OFF, tag: '"one"' },
       1
     )
-    const unruled = withPullOutcome(ruled, { kind: "fresh", pages: [page], rules: [], forms: [], tag: '"two"' }, 2)
+    const unruled = withPullOutcome(ruled, { kind: "fresh", pages: [page], rules: [], forms: [], window: WINDOW_OFF, tag: '"two"' }, 2)
 
     expect(unruled.rules.size).toBe(0)
   })
@@ -431,7 +436,7 @@ describe("what an outcome does to what is held", () => {
   it("keeps the rules beside the pages through a failure, never one without the other", () => {
     const ruled = withPullOutcome(
       NO_LIVE_PAGES,
-      { kind: "fresh", pages: [page], rules: [{ treeId: page.treeId, rules: [onPhones] }], forms: [], tag: '"one"' },
+      { kind: "fresh", pages: [page], rules: [{ treeId: page.treeId, rules: [onPhones] }], forms: [], window: WINDOW_OFF, tag: '"one"' },
       1
     )
     const failed = withPullOutcome(
@@ -445,9 +450,9 @@ describe("what an outcome does to what is held", () => {
   })
 
   it("never edits what it was handed", () => {
-    const fresh = withPullOutcome(NO_LIVE_PAGES, { kind: "fresh", pages: [page], rules: [], forms: [], tag: '"one"' }, 1)
+    const fresh = withPullOutcome(NO_LIVE_PAGES, { kind: "fresh", pages: [page], rules: [], forms: [], window: WINDOW_OFF, tag: '"one"' }, 1)
 
-    withPullOutcome(fresh, { kind: "fresh", pages: [other], rules: [], forms: [], tag: '"two"' }, 2)
+    withPullOutcome(fresh, { kind: "fresh", pages: [other], rules: [], forms: [], window: WINDOW_OFF, tag: '"two"' }, 2)
 
     expect([...fresh.pages.keys()]).toEqual([page.treeId])
     expect(NO_LIVE_PAGES.pages.size).toBe(0)
@@ -474,6 +479,7 @@ describe("the segment forms a pull reads beside the pages (0371 clause 5)", () =
       pages: [page, other],
       rules: [],
       forms: [{ treeId: page.treeId, forms: [phoneForm] }],
+      window: WINDOW_OFF,
       tag: '"formed"',
     })
   })
@@ -542,6 +548,7 @@ describe("the segment forms a pull reads beside the pages (0371 clause 5)", () =
           { treeId: page.treeId, forms: [phoneForm] },
           { treeId: other.treeId, forms: [] },
         ],
+        window: WINDOW_OFF,
         tag: '"formed"',
       },
       1
@@ -559,6 +566,7 @@ describe("the segment forms a pull reads beside the pages (0371 clause 5)", () =
         pages: [page],
         rules: [{ treeId: page.treeId, rules: [onPhones] }],
         forms: [{ treeId: page.treeId, forms: [phoneForm] }],
+        window: WINDOW_OFF,
         tag: '"formed"',
       },
       1
@@ -582,16 +590,216 @@ describe("the segment forms a pull reads beside the pages (0371 clause 5)", () =
         pages: [page],
         rules: [],
         forms: [{ treeId: page.treeId, forms: [phoneForm] }],
+        window: WINDOW_OFF,
         tag: '"one"',
       },
       1
     )
     const bare = withPullOutcome(
       formed,
-      { kind: "fresh", pages: [page], rules: [], forms: [], tag: '"two"' },
+      { kind: "fresh", pages: [page], rules: [], forms: [], window: WINDOW_OFF, tag: '"two"' },
       2
     )
 
     expect(bare.forms.size).toBe(0)
+  })
+})
+
+/** The door's answer since 0383: the project's reader window beside the pages. */
+const answersPagesAndWindow = (pages: readonly unknown[], window: unknown): Response =>
+  new Response(JSON.stringify({ pages, rules: [], forms: [], window }), {
+    status: 200,
+    headers: { "content-type": "application/json", etag: '"windowed"' },
+  })
+
+const HOUR = 3_600_000
+/**
+ * A page and the version of it a pin can still be served. A tree's revision
+ * starts at 0 and counts up per accepted delta, so the live page is the later
+ * revision and `page` itself is what it stood at before.
+ */
+const nowPage: LoomTree = { ...page, revision: page.revision + 1 }
+const wasPage = page
+
+describe("the reader window the door answers (0383 clause 5)", () => {
+  it("reads the window and each page's held versions", async () => {
+    const asking = door(
+      answersPagesAndWindow([nowPage], {
+        ms: HOUR,
+        floor: 100,
+        number: 900,
+        held: [{ treeId: page.treeId, versions: [{ until: 500, tree: wasPage }] }],
+      })
+    )
+
+    const outcome = await pull({ fetch: asking.fetch })
+
+    expect(outcome.kind).toBe("fresh")
+    if (outcome.kind !== "fresh" || !("floor" in outcome.window)) {
+      throw new Error("not a held window")
+    }
+
+    expect(outcome.window.ms).toBe(HOUR)
+    expect(outcome.window.floor).toBe(100)
+    expect(outcome.window.number).toBe(900)
+    expect(outcome.window.held.get(page.treeId)?.map((version) => version.until)).toEqual([500])
+    expect(outcome.window.held.get(page.treeId)?.[0]?.tree.revision).toBe(page.revision)
+  })
+
+  it("reads `{ ms: 0 }` as readers not held", async () => {
+    const asking = door(answersPagesAndWindow([page], { ms: 0 }))
+
+    await expect(pull({ fetch: asking.fetch })).resolves.toMatchObject({ window: WINDOW_OFF })
+  })
+
+  /**
+   * A door from before 0383 answers no window at all, and its readers are not
+   * held. That is a true statement about that deployment rather than a guess,
+   * so it is read rather than refused.
+   */
+  it("reads an answer with no window at all as readers not held", async () => {
+    const asking = door(answersPages([page], { etag: '"old"' }))
+
+    await expect(pull({ fetch: asking.fetch })).resolves.toMatchObject({ window: WINDOW_OFF })
+  })
+
+  it("holds no entry for a page the door held no versions of", async () => {
+    const asking = door(
+      answersPagesAndWindow([page, other], {
+        ms: HOUR,
+        floor: 0,
+        number: 900,
+        held: [{ treeId: other.treeId, versions: [] }],
+      })
+    )
+
+    const outcome = await pull({ fetch: asking.fetch })
+
+    if (outcome.kind !== "fresh" || !("floor" in outcome.window)) {
+      throw new Error("not a held window")
+    }
+
+    expect(outcome.window.held.size).toBe(0)
+  })
+
+  /**
+   * Every one of these refuses the whole answer rather than reading as *Off*.
+   * A server that quietly stops holding readers serves a pinned reader a page
+   * newer than the one they were pinned to, which is the flip 0383 removes, and
+   * it would do it silently.
+   */
+  it.each([
+    ["a window of another shape", { ms: HOUR }],
+    ["a window that is not an object", 3_600_000],
+    ["a negative length", { ms: -1, floor: 0, number: 9, held: [] }],
+    ["a fractional length", { ms: 1.5, floor: 0, number: 9, held: [] }],
+    ["a negative floor", { ms: HOUR, floor: -1, number: 9, held: [] }],
+    ["held versions that are not a list", { ms: HOUR, floor: 0, number: 9, held: {} }],
+  ])("refuses the whole answer for %s", async (_what, window) => {
+    const asking = door(answersPagesAndWindow([page], window))
+    const outcome = await pull({ fetch: asking.fetch })
+
+    expect(outcome.kind).toBe("failed")
+    expect(outcome.kind === "failed" && outcome.failure.reason).toBe("unreadable")
+  })
+
+  it("refuses a held entry for a page the answer does not hold", async () => {
+    const asking = door(
+      answersPagesAndWindow([page], {
+        ms: HOUR,
+        floor: 0,
+        number: 900,
+        held: [{ treeId: other.treeId, versions: [{ until: 500, tree: other }] }],
+      })
+    )
+
+    const outcome = await pull({ fetch: asking.fetch })
+
+    expect(outcome.kind === "failed" && outcome.failure.detail).toContain(
+      "a page the answer does not hold"
+    )
+  })
+
+  it("refuses two held entries for one page", async () => {
+    const entry = { treeId: page.treeId, versions: [{ until: 500, tree: wasPage }] }
+    const asking = door(
+      answersPagesAndWindow([page], { ms: HOUR, floor: 0, number: 900, held: [entry, entry] })
+    )
+
+    const outcome = await pull({ fetch: asking.fetch })
+
+    expect(outcome.kind === "failed" && outcome.failure.detail).toContain(
+      "repeats a page already answered"
+    )
+  })
+
+  it("refuses a held version that is not a tree, and says which one", async () => {
+    const asking = door(
+      answersPagesAndWindow([page], {
+        ms: HOUR,
+        floor: 0,
+        number: 900,
+        held: [
+          {
+            treeId: page.treeId,
+            versions: [{ until: 500, tree: wasPage }, { until: 700, tree: { nonsense: true } }],
+          },
+        ],
+      })
+    )
+
+    const outcome = await pull({ fetch: asking.fetch })
+
+    expect(outcome.kind === "failed" && outcome.failure.detail).toContain("version 2 of 2 held for")
+  })
+
+  /** A version filed under another page's id would be served for the wrong page. */
+  it("refuses a held version of a different page than the entry names", async () => {
+    const asking = door(
+      answersPagesAndWindow([page, other], {
+        ms: HOUR,
+        floor: 0,
+        number: 900,
+        held: [{ treeId: page.treeId, versions: [{ until: 500, tree: other }] }],
+      })
+    )
+
+    const outcome = await pull({ fetch: asking.fetch })
+
+    expect(outcome.kind === "failed" && outcome.failure.detail).toContain("a version of another page")
+  })
+
+  /**
+   * The window's `number` pins new readers and its `held` versions are of the
+   * pages beside it, so one pull's window over another pull's pages would pin a
+   * reader to a state those pages were never in.
+   */
+  it("moves the window only with the pages it arrived beside", async () => {
+    const windowed = withPullOutcome(
+      NO_LIVE_PAGES,
+      {
+        kind: "fresh",
+        pages: [page],
+        rules: [],
+        forms: [],
+        window: { ms: HOUR, floor: 0, number: 900, held: new Map() },
+        tag: '"one"',
+      },
+      1
+    )
+
+    expect(windowed.window.ms).toBe(HOUR)
+    expect(withPullOutcome(windowed, { kind: "unchanged" }, 2).window).toBe(windowed.window)
+    expect(
+      withPullOutcome(windowed, { kind: "failed", failure: { reason: "unreachable", detail: "no" } }, 2)
+        .window
+    ).toBe(windowed.window)
+    expect(
+      withPullOutcome(
+        windowed,
+        { kind: "fresh", pages: [page], rules: [], forms: [], window: WINDOW_OFF, tag: '"two"' },
+        3
+      ).window
+    ).toBe(WINDOW_OFF)
   })
 })
