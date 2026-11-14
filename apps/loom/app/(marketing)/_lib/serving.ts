@@ -1,6 +1,9 @@
 import { headers } from "next/headers"
 
-import { originFromHost, siteOrigin } from "./site"
+import type { JsonObject } from "@jam-overture/loom"
+
+import { readerContextFrom } from "./readers/context"
+import { originFromHost, siteOrigin, type SiteThemeName } from "./site"
 
 /**
  * Next's own words for *there is no request here at all*.
@@ -64,7 +67,16 @@ export const isNoRequestScope = (thrown: unknown): boolean =>
  * an immediate re-run of the same tree. A behaviour a test has to fake is a
  * behaviour the function should have.
  */
-const headersOrNone = async (): Promise<Headers> => {
+/**
+ * Exported as of 14 November, for `readerContext` below and for nothing else.
+ *
+ * It is the one request-scoped read on this surface and it answers the one
+ * throw that is not an error, so a second caller wanting headers should reach
+ * it rather than call `headers()` and re-answer `NO_REQUEST_SCOPE` its own way.
+ * Two readings of *there is no request here* would eventually disagree, and the
+ * one that disagreed would be whichever was not looked at.
+ */
+export const headersOrNone = async (): Promise<Headers> => {
   try {
     return await headers()
   } catch (thrown) {
@@ -119,3 +131,22 @@ export const servedOrigin = async (): Promise<string> => {
     ) ?? siteOrigin()
   )
 }
+
+/**
+ * The render context for this request: what the browser said about itself, and
+ * what the reader asked for.
+ *
+ * The request-scoped half of `readers/context.ts`, here because this module is
+ * where this surface reads headers and that file is pure on purpose. The split
+ * is the one stated above for `servedOrigin`: the read belongs on this side of
+ * the line and the parsing on the other.
+ *
+ * **Called where there is no request it answers the palette alone**, by the
+ * same path a request that sent no client hint takes. That is the honest answer
+ * rather than a convenient one — a render outside a request really does know
+ * nothing about a browser — and it is why `readerContextFrom` takes the palette
+ * as an argument instead of reading it from somewhere: the palette is known to
+ * the caller in both cases.
+ */
+export const readerContext = async (palette: SiteThemeName): Promise<JsonObject> =>
+  readerContextFrom(await headersOrNone(), palette)

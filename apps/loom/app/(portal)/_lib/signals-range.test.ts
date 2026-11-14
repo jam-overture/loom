@@ -181,10 +181,7 @@ describe("the chart of page views by hour", () => {
   })
 
   it("does not let one page view fill the chart", () => {
-    const chart = rangeChartOf(
-      readingOf(stored([[THIS_HOUR, 1]], day.from), day).series,
-      "24h"
-    )
+    const chart = rangeChartOf(readingOf(stored([[THIS_HOUR, 1]], day.from), day).series, "24h")
 
     expect(chart.scale).toBe(5)
     expect(chart.bars.at(-1)?.height).toBe(0.2)
@@ -230,6 +227,99 @@ describe("the chart of page views by hour", () => {
     expect(chart.bars).toHaveLength(168)
     expect(chart.starts).toBe("30 October 2026")
     expect(chart.ends).toBe("6 November 2026")
+  })
+})
+
+describe("the chart of thirty days, by day", () => {
+  const month = arrivalRangeFor("30d", NOW)
+  const OCT_8 = Date.parse("2026-10-08T00:00:00.000Z")
+
+  it("draws one bar a day, every day the range touches, adding up to the figure", () => {
+    const chart = rangeChartOf(
+      readingOf(
+        stored(
+          [
+            [month.from, 4],
+            [OCT_8 + 10 * HOUR, 6],
+            [OCT_8 + 11 * HOUR, 7],
+            [THIS_HOUR, 2],
+          ],
+          month.from - HOUR
+        ),
+        month
+      ).series,
+      "30d"
+    )
+
+    expect(chart.step).toBe("day")
+    expect(chart.slots).toBe(31)
+    expect(chart.bars).toHaveLength(31)
+    expect(chart.uncounted).toBe(0)
+    expect(chart.bars.reduce((sum, bar) => sum + bar.views, 0)).toBe(19)
+    expect(chart.tallest).toBe(13)
+    expect(chart.scale).toBe(20)
+    expect(chart.bars[1]).toMatchObject({
+      slot: 1,
+      views: 13,
+      height: 0.65,
+      whole: true,
+      title: "8 October 2026: 13 page views",
+    })
+    expect(chart.bars[2]?.title).toBe("9 October 2026: 0 page views")
+    expect(chart.starts).toBe("7 October 2026")
+    expect(chart.ends).toBe("6 November 2026")
+    expect(chart.summary).toBe("Page views by day, last 30 days: 19 in all, at most 13 in one day.")
+  })
+
+  it("draws a day the range cut short lighter, saying how much of it was counted", () => {
+    const chart = rangeChartOf(
+      readingOf(stored([[month.from, 4]], month.from - HOUR), month).series,
+      "30d"
+    )
+
+    expect(chart.bars[0]).toMatchObject({
+      slot: 0,
+      views: 4,
+      whole: false,
+      title: "7 October 2026: 4 page views, in the 8 of its 24 hours this range counted",
+    })
+  })
+
+  it("says so far of the day in progress, never that it was quiet", () => {
+    const chart = rangeChartOf(
+      readingOf(stored([[THIS_HOUR, 2]], month.from - HOUR), month).series,
+      "30d"
+    )
+
+    expect(chart.bars.at(-1)).toMatchObject({
+      slot: 30,
+      views: 2,
+      whole: false,
+      title: "6 November 2026: 2 page views, so far",
+    })
+  })
+
+  it("shades the days before counting began and starts the bars on the day it did", () => {
+    const begins = Date.parse("2026-11-04T09:00:00.000Z")
+    const chart = rangeChartOf(readingOf(stored([[begins, 3]], begins), month).series, "30d")
+
+    expect(chart.slots).toBe(31)
+    expect(chart.uncounted).toBe(28)
+    expect(chart.bars.map((bar) => bar.slot)).toEqual([28, 29, 30])
+    expect(chart.bars[0]?.title).toBe(
+      "4 November 2026: 3 page views, in the 15 of its 24 hours this range counted"
+    )
+    expect(chart.note).toBe(
+      "Page views are counted by hour from 4 November 2026 at 09:00 UTC. The shaded days before that were not counted."
+    )
+  })
+
+  it("keeps a day and a week by the hour", () => {
+    const week = arrivalRangeFor("7d", NOW)
+    const chart = rangeChartOf(readingOf(stored([], week.from - HOUR), week).series, "7d")
+
+    expect(chart.step).toBe("hour")
+    expect(chart.slots).toBe(168)
   })
 })
 

@@ -4,7 +4,13 @@ import { join } from "node:path"
 
 import { describe, expect, it } from "vitest"
 
-import { describeRunTogether, runTogethersIn, separatorsIn } from "./hazards.js"
+import {
+  describeRunTogether,
+  runTogethersIn,
+  separatorsIn,
+  tagJunctionsIn,
+  tagRunTogethersIn,
+} from "./hazards.js"
 import { describePrerenderError, prerenderedPages } from "./pages.js"
 
 /**
@@ -122,5 +128,84 @@ describe("prerenderedPages", () => {
       expect(found.ok).toBe(false)
       expect(!found.ok && describePrerenderError(found.error)).toContain("nothing was checked")
     })
+  })
+})
+
+/**
+ * The sentence from the 23 October finding, as `next build` wrote it.
+ *
+ * Quoted rather than reconstructed, for `THE_DEFECT`'s reason: this is what a
+ * reader was served on the theming page, and the point of the second class is
+ * that it fails on exactly this.
+ */
+const THE_SWALLOWED = `<p>…so a page can say <em>color</em>in a sentence and show you a name…</p>`
+
+/** The same sentence with the space the source had. */
+const THE_SPACE_BACK = `<p>…so a page can say <em>color</em> in a sentence and show you a name…</p>`
+
+describe("tagRunTogethersIn", () => {
+  it("fails on the sentence that shipped", () => {
+    const [hazard, ...rest] = tagRunTogethersIn("docs/theming.html", THE_SWALLOWED)
+
+    expect(rest).toEqual([])
+    expect(hazard?.joined).toBe("ri")
+    expect(hazard?.page).toBe("docs/theming.html")
+  })
+
+  it("passes the same sentence once the space is back", () => {
+    expect(tagRunTogethersIn("docs/theming.html", THE_SPACE_BACK)).toEqual([])
+  })
+
+  it("prints the sentence a reader sees, with the markup taken out", () => {
+    const [hazard] = tagRunTogethersIn("docs/theming.html", THE_SWALLOWED)
+
+    expect(describeRunTogether(hazard!)).toContain("colorin a sentence")
+    expect(describeRunTogether(hazard!)).toContain("docs/theming.html")
+  })
+
+  it("leaves the element alone when it carries its own space inside", () => {
+    expect(tagRunTogethersIn("p.html", `<p><span>Asked: </span>Make the main heading</p>`)).toEqual([])
+  })
+
+  it("leaves a plural hung on the element's text alone, and only a plural", () => {
+    expect(tagRunTogethersIn("p.html", `<p>two <code>Map</code>s, for a test</p>`)).toEqual([])
+    expect(tagRunTogethersIn("p.html", `<p>two <code>Map</code>some, for a test</p>`)).not.toEqual([])
+  })
+
+  it("leaves a block element's end alone, because the next line is not run together", () => {
+    expect(tagRunTogethersIn("p.html", `<div><p>colour</p>in a sentence</div>`)).toEqual([])
+    expect(tagRunTogethersIn("p.html", `<ul><li>one</li>two</ul>`)).toEqual([])
+  })
+
+  it("leaves a junction alone when either side is not a joining character", () => {
+    expect(tagRunTogethersIn("p.html", `<p>a <em>price</em>, and more</p>`)).toEqual([])
+    expect(tagRunTogethersIn("p.html", `<p>a <em>$</em>16</p>`)).toEqual([])
+  })
+
+  it("reports every junction on a page rather than the first", () => {
+    const html = `<p>say <em>color</em>in a sentence</p><p>and <code>four</code>kinds</p>`
+
+    expect(tagRunTogethersIn("p.html", html).map((hazard) => hazard.joined)).toEqual(["ri", "rk"])
+  })
+
+  it("cannot see a space lost across a nested element, which 0398 records as open", () => {
+    expect(tagRunTogethersIn("p.html", `<p><span>Asked:<b>x</b></span>Make</p>`)).toEqual([])
+  })
+
+  it("does not read an attribute that looks like an end tag", () => {
+    expect(tagRunTogethersIn("p.html", `<p data-x="</em>in">colour</p>`)).toEqual([])
+  })
+})
+
+describe("tagJunctionsIn", () => {
+  it("counts what was read, so a clean page and an unread one are different numbers", () => {
+    expect(tagJunctionsIn(THE_SWALLOWED)).toBe(1)
+    expect(tagJunctionsIn(THE_SPACE_BACK)).toBe(0)
+    expect(tagJunctionsIn(`<p><span>Asked: </span>Make</p>`)).toBe(1)
+    expect(tagJunctionsIn(`<p>two <code>Map</code>s</p>`)).toBe(1)
+  })
+
+  it("counts no junction at a block element's end", () => {
+    expect(tagJunctionsIn(`<div><p>colour</p>in</div>`)).toBe(0)
   })
 })

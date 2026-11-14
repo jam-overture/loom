@@ -30,6 +30,7 @@ import { describeTreeError } from "../tree/errors.js"
 import { parseTree, type LoomTree } from "../tree/tree.js"
 
 import { type LivePages } from "./pages.js"
+import { WINDOW_OFF, type HeldVersion, type LiveWindow } from "./window.js"
 
 /** The one path the client asks for, so no customer's configuration holds it. */
 export const LIVE_PAGES_PATH = "/api/pages/live"
@@ -77,6 +78,7 @@ export type SitePullOutcome =
       readonly pages: readonly LoomTree[]
       readonly rules: readonly LivePageRules[]
       readonly forms: readonly LivePageForms[]
+      readonly window: LiveWindow
       readonly tag: string | undefined
     }
   | { readonly kind: "unchanged" }
@@ -175,12 +177,14 @@ export const livePagesUrlOf = (deployment: string): Result<URL, SitePullFailure>
  * neither, and a site pulling from one has no segments — which is true of it
  * rather than a guess. They are read separately for the same reason: a door
  * that answers rules and no forms is every deployment whose segments are still
- * only names.
+ * only names. `window` is optional for the same reason and reads as *Off*
+ * (0383): a door from before it holds nobody.
  */
 const answerSchema = z.object({
   pages: z.array(z.unknown()),
   rules: z.array(z.unknown()).optional(),
   forms: z.array(z.unknown()).optional(),
+  window: z.unknown().optional(),
 })
 
 const pageRulesSchema = z.object({
@@ -191,6 +195,32 @@ const pageRulesSchema = z.object({
 const pageFormsSchema = z.object({
   treeId: treeIdSchema,
   forms: z.array(z.object({ audienceId: audienceIdSchema, delta: treeDeltaSchema })),
+})
+
+/**
+ * The door's `window` (0383): *Off*, or the window's length with what a pin
+ * needs to be resolved against.
+ *
+ * The numbers are milliseconds — when each state of the pages was made — so a
+ * whole number is the only shape worth reading; `ms` is a length and the other
+ * two are instants, and all three are compared and never counted.
+ *
+ * `held`'s trees are read one at a time below, so a refusal can say which page
+ * could not be read, which is what `pages` already does.
+ */
+const windowSchema = z.union([
+  z.object({ ms: z.literal(0) }),
+  z.object({
+    ms: z.number().int().positive(),
+    floor: z.number().int().nonnegative(),
+    number: z.number().int().nonnegative(),
+    held: z.array(z.unknown()),
+  }),
+])
+
+const heldPageSchema = z.object({
+  treeId: treeIdSchema,
+  versions: z.array(z.object({ until: z.number().int().nonnegative(), tree: z.unknown() })),
 })
 
 const refusals: Readonly<Record<number, string>> = {
@@ -282,12 +312,80 @@ const readForms = (
     return parsed.success ? ok(parsed.data) : err(unreadableEntry(parsed.error.issues, "forms"))
   })
 
+/**
+ * The window the door answered, read against the pages it answered beside it.
+ *
+ * **No `window` at all is *Off*.** That is a deployment from before 0383 and a
+ * true statement about it: its readers are not held, and the client has nothing
+ * to resolve a pin against.
+ *
+ * **A `window` that cannot be read refuses the whole answer**, as an unreadable
+ * rule list does. Reading it as *Off* would be the cheap branch and it is the
+ * wrong one: a server that quietly stops holding readers serves a pinned reader
+ * a page newer than the one they were pinned to, which is the flip 0383 exists
+ * to remove, and it would do it silently. Keeping the last whole answer costs
+ * freshness, says why in the log, and holds every reader on what they had.
+ *
+ * `number` below `floor` is not refused. The door answers one at or above the
+ * other, and an answer where it is not makes every pin unresolvable by
+ * `heldVersionFor`'s own arithmetic, which is already the safe reading.
+ */
+const readWindow = (
+  answered: unknown,
+  pages: ReadonlySet<TreeId>
+): Result<LiveWindow, string> => {
+  if (answered === undefined) return ok(WINDOW_OFF)
+
+  const parsed = windowSchema.safeParse(answered)
+
+  if (!parsed.success) {
+    const [issue] = parsed.error.issues
+    const at = issue === undefined ? "" : ` (${issue.path.join(".") || "the window"}: ${issue.message})`
+
+    return err(`the reader window is not one this version can read${at}`)
+  }
+  if (!("floor" in parsed.data)) return ok(WINDOW_OFF)
+
+  const { ms, floor, number } = parsed.data
+  const held = readPerPage(parsed.data.held, pages, "held page", (entry) => {
+    const page = heldPageSchema.safeParse(entry)
+
+    return page.success ? ok(page.data) : err(unreadableEntry(page.error.issues, "versions"))
+  })
+
+  if (!held.ok) return err(held.error)
+
+  const versions = new Map<TreeId, readonly HeldVersion[]>()
+
+  for (const page of held.value) {
+    const read: HeldVersion[] = []
+
+    for (const [index, version] of page.versions.entries()) {
+      const where = `version ${index + 1} of ${page.versions.length} held for ${page.treeId}`
+      const tree = parseTree(version.tree)
+
+      if (!tree.ok) {
+        return err(`${where} is not a tree this version can read: ${describeTreeError(tree.error)}`)
+      }
+      if (tree.value.treeId !== page.treeId) {
+        return err(`${where} is a version of another page: ${tree.value.treeId}`)
+      }
+
+      read.push({ until: version.until, tree: tree.value })
+    }
+
+    if (read.length > 0) versions.set(page.treeId, read)
+  }
+
+  return ok({ ms, floor, number, held: versions })
+}
+
 const readPages = async (answer: Response): Promise<SitePullOutcome> => {
   const body = await answer.json().catch(() => undefined)
   const envelope = answerSchema.safeParse(body)
 
   if (!envelope.success) {
-    return unreadable("the answer was not `{ pages: [...], rules: [...], forms: [...] }`")
+    return unreadable("the answer was not `{ pages: [...], rules: [...], forms: [...], window: {...} }`")
   }
 
   const pages: LoomTree[] = []
@@ -322,11 +420,16 @@ const readPages = async (answer: Response): Promise<SitePullOutcome> => {
 
   if (!forms.ok) return unreadable(forms.error)
 
+  const window = readWindow(envelope.data.window, seen)
+
+  if (!window.ok) return unreadable(window.error)
+
   return {
     kind: "fresh",
     pages,
     rules: rules.value,
     forms: forms.value,
+    window: window.value,
     tag: answer.headers.get("etag") ?? undefined,
   }
 }
@@ -437,6 +540,11 @@ export const pullLivePages = async (
  * freshness is what is lost, never the page. A tag moves only with the pages it
  * names, so what is sent back as `If-None-Match` always describes what is held,
  * and the rules move only with the pages they sort readers of (0371 clause 4).
+ *
+ * The window moves with them for the same reason, and it has to: its `number`
+ * is what a reader with no pin is pinned to and its `held` versions are of the
+ * pages beside it, so a window from one pull over another pull's pages would
+ * pin new readers to a state those pages were never in (0383 clause 5).
  */
 export const withPullOutcome = (
   held: LivePages,
@@ -454,6 +562,7 @@ export const withPullOutcome = (
     forms: new Map(
       outcome.forms.filter(({ forms }) => forms.length > 0).map(({ treeId, forms }) => [treeId, forms])
     ),
+    window: outcome.window,
     tag: outcome.tag,
     pulledAt: at,
     freshAt: at,

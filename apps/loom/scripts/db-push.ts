@@ -29,6 +29,7 @@ import { ensureIngestKeysSchema } from "../app/_lib/reader-signals/keys-postgres
 import { ensurePublishKeysSchema } from "../app/_lib/pages/publish-keys-postgres"
 import { ensurePublishedPagesSchema } from "../app/_lib/pages/published-postgres"
 import { ensureSitePullsSchema } from "../app/_lib/pages/pulls-postgres"
+import { ensureReaderWindowsSchema } from "../app/_lib/pages/reader-windows-postgres"
 import { ensureModelKeysSchema } from "../app/_lib/models/model-keys-postgres"
 import { ensureReaderRefusalsSchema } from "../app/_lib/reader-signals/refusals-postgres"
 import { ensurePageCopiesSchema } from "../app/(portal)/_lib/proposing/copies-postgres"
@@ -215,6 +216,12 @@ try {
    */
   await ensureAudienceOverlaySchema(db)
   /**
+   * How long each project's readers keep the pages they first saw (0383). A
+   * deployment that has not run this shows *Settings* saying it cannot tell,
+   * offers no choice, and every reader gets the newest pages, which is *Off*.
+   */
+  await ensureReaderWindowsSchema(db)
+  /**
    * Last, because it is the only data statement here and every column it writes
    * to has to exist first. It carries rows written before 12 October from
    * `prj_default` to `app_default`, and is a no-op on a database that has
@@ -244,8 +251,8 @@ try {
       "loom_applications, loom_reader_signals, loom_reader_tallies, loom_reader_funnels, " +
       "loom_signin_attempts, loom_portal_accounts, loom_portal_memberships, loom_ingest_keys, " +
       "loom_reader_refusals, loom_publish_keys, loom_published_pages, loom_model_keys, " +
-      "loom_page_copies, loom_turned_down, loom_goals, loom_proposal_goals, loom_site_pulls and " +
-      "loom_made_changes " +
+      "loom_page_copies, loom_turned_down, loom_goals, loom_proposal_goals, loom_site_pulls, " +
+      "loom_made_changes and loom_reader_windows " +
       "are present, and this deployment's pages are in them"
   )
 } finally {

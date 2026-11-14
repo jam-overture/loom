@@ -1,19 +1,19 @@
 import type { RangeChart as Chart } from "@/app/(portal)/_lib/signals-range"
 
 /**
- * Page views by hour across the range, one place an hour
+ * Page views across the range, one place an hour, or one a day for thirty days
  * (`docs/portal-wireframes.md`, *1 · Signals*).
  *
- * Drawn on the server as one SVG stretched to the width it is given, so a
- * thirty-day range is 720 places without a script or a charting library. The
- * chart is always the whole range: the hours before counting by hour began are
- * a shaded band, a counted hour nobody arrived in sits on the baseline, and the
- * scale on the left says what the top stands for. Times sit under the bars in
- * HTML, placed by share of the width, so they are not stretched with the bars.
- * Each bar says its hour and count when pointed at; the hour still in progress
- * is lighter, so the right-hand edge does not read as readers leaving. The
- * whole chart is one sentence for a screen reader, and the figure beside it
- * carries the numbers.
+ * Drawn on the server as one SVG stretched to the width it is given, without a
+ * script or a charting library. The chart is always the whole range: the places
+ * before counting by hour began are a shaded band, a counted one nobody arrived
+ * in sits on the baseline, and the scale on the left says what the top stands
+ * for. Times sit under the bars in HTML, placed by share of the width, so they
+ * are not stretched with the bars. Each bar says its time and count when
+ * pointed at; one not wholly counted, the one in progress above all, is
+ * lighter, so the right-hand edge does not read as readers leaving. The whole
+ * chart is one sentence for a screen reader, and the figure beside it carries
+ * the numbers.
  */
 
 const HEIGHT = 100
@@ -51,7 +51,7 @@ const Bars = ({ chart }: { chart: Chart }) => (
           y={0}
           width={chart.uncounted * SLOT}
           height={HEIGHT}
-          className="fill-surface-muted"
+          className="fill-surface-hover"
         />
       )}
       <rect
@@ -66,7 +66,7 @@ const Bars = ({ chart }: { chart: Chart }) => (
 
         return (
           <rect
-            key={bar.hour}
+            key={bar.at}
             x={bar.slot * SLOT + GAP / 2}
             y={HEIGHT - tall}
             width={SLOT - GAP}

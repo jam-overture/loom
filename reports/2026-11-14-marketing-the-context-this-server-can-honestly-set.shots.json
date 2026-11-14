@@ -1,0 +1,29 @@
+{
+  "outDir": "reports",
+  "shots": [
+    {
+      "path": "/",
+      "out": "2026-11-14-marketing-the-context-front-door",
+      "viewport": "wide",
+      "waitFor": "h1"
+    },
+    {
+      "path": "/?theme=bold",
+      "out": "2026-11-14-marketing-the-context-bold",
+      "viewport": "wide",
+      "waitFor": "h1"
+    },
+    {
+      "path": "/?theme=editorial",
+      "out": "2026-11-14-marketing-the-context-editorial",
+      "viewport": "wide",
+      "waitFor": "h1"
+    },
+    {
+      "path": "/",
+      "out": "2026-11-14-marketing-the-context-phone",
+      "viewport": "phone",
+      "waitFor": "h1"
+    }
+  ]
+}
