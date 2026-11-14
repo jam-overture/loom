@@ -28,6 +28,8 @@ import type { TreeId } from "../ids.js"
 import type { JsonObject } from "../json.js"
 import type { LoomTree } from "../tree/tree.js"
 
+import { heldVersionFor, WINDOW_OFF, type LiveWindow } from "./window.js"
+
 /**
  * What a pull leaves behind: the pages, the rules that sort their readers, the
  * tag that names both, and enough of the last outcome to say whether the site
@@ -54,6 +56,12 @@ export type LivePages = {
    * before the door answered forms.
    */
   readonly forms: ReadonlyMap<TreeId, readonly AudienceForm[]>
+  /**
+   * How long this project holds its readers, and each page's versions a pin can
+   * still be served (0383). `WINDOW_OFF` where nobody chose a window, and for a
+   * door from before the window answered one.
+   */
+  readonly window: LiveWindow
   /** The entity tag the door gave for exactly these pages, if it gave one. */
   readonly tag: string | undefined
   /** When the door last answered, whether it answered pages or `304`. */
@@ -76,6 +84,7 @@ export const NO_LIVE_PAGES: LivePages = {
   pages: new Map(),
   rules: new Map(),
   forms: new Map(),
+  window: WINDOW_OFF,
   tag: undefined,
   pulledAt: undefined,
   freshAt: undefined,
@@ -88,9 +97,20 @@ export const NO_LIVE_PAGES: LivePages = {
  * This is the only call a render path makes. Selection for an audience (0263)
  * happens after it, in the customer's process, against the tree this answers —
  * the pull carries no audience and the door refuses a request that names one.
+ *
+ * **With a reader's pin, the version they were pinned to** (0383 clause 2),
+ * which is the newest version of this page live at or before the pin. A pin the
+ * server cannot resolve, and a page it holds no earlier version of, read the
+ * newest live page; so does every reader of a project with no window, which is
+ * every project until one is chosen. `pinIn` reads the pin from the request's
+ * `Cookie` header and nothing about the reader goes any further than this call.
+ *
+ * The pin is an optional argument rather than a second function because the
+ * question is one question — *what do I draw for this reader* — and a host that
+ * honours a window should not have a second call to remember on each page.
  */
-export const livePageOf = (held: LivePages, page: TreeId): LoomTree | undefined =>
-  held.pages.get(page)
+export const livePageOf = (held: LivePages, page: TreeId, pin?: number): LoomTree | undefined =>
+  heldVersionFor(held.window, page, pin) ?? held.pages.get(page)
 
 /**
  * The segment this reader of this page is in, or `undefined` for none — which
@@ -191,13 +211,24 @@ const overlayFor = (
  *
  * A deployment with no segments, a reader the rules do not match, and a server
  * that has never pulled all answer the same way: the page, and no segment.
+ *
+ * **The pin is applied first, and the segment is chosen against the version it
+ * chose** (0383, *Audiences*). The rules sort the reader as they do now — they
+ * read the context, never the page — but the forms were authored against the
+ * version in `pages`, so a form that does not apply to the version a pinned
+ * reader was given is refused by the composition, and this answers that reader
+ * the version they were pinned to without their segment's form. That is the
+ * same trade `refusal` already describes one dimension across: the reader keeps
+ * their page, their signals say they were shown the base, and the deployment is
+ * told why.
  */
 export const pageForReader = (
   held: LivePages,
   built: LoomTree,
-  context: JsonObject | undefined
+  context: JsonObject | undefined,
+  pin?: number
 ): ServedPage => {
-  const base = held.pages.get(built.treeId) ?? built
+  const base = livePageOf(held, built.treeId, pin) ?? built
   const audience = segmentOf(held, built.treeId, context)
   const forms = held.forms.get(built.treeId) ?? []
 
