@@ -382,6 +382,12 @@ const orderedSections: readonly DocsSection[] = [
           "The three places a deployment keeps state, the tables Loom creates for them, and what your app is told when the database is not there.",
       },
       {
+        slug: "how-a-change-reaches-readers",
+        title: "How a change reaches readers",
+        summary:
+          "A change somebody accepted is live without a deploy, because your server asks for it on a timer and keeps the answer: the three lines that start the loop, the one call your render path makes, and what a reader gets on the day Loom cannot be reached.",
+      },
+      {
         slug: "what-a-render-reports",
         title: "What a render reports",
         summary:

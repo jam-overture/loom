@@ -1,0 +1,31 @@
+{
+  "baseUrl": "http://127.0.0.1:3100",
+  "outDir": "reports",
+  "shots": [
+    {
+      "path": "/docs/the-runtime/what-the-gate-decides",
+      "out": "2026-11-13-docs-the-saving-that-was-not-in-the-words-wide-found",
+      "viewport": "wide",
+      "waitFor": "h1",
+      "do": [
+        { "click": "button:has-text(\"Search the documentation\")" },
+        { "waitFor": "input[role='combobox']" },
+        { "fill": "input[role='combobox']", "text": "deterministic interpreter" },
+        { "wait": 2500 }
+      ],
+      "measure": ["[role='listbox']", "[role='listbox'] li"]
+    },
+    {
+      "path": "/docs/the-runtime/what-the-gate-decides",
+      "out": "2026-11-13-docs-the-saving-that-was-not-in-the-words-phone-found",
+      "viewport": "phone",
+      "waitFor": "h1",
+      "do": [
+        { "click": "button:has-text(\"Search the documentation\")" },
+        { "waitFor": "input[role='combobox']" },
+        { "fill": "input[role='combobox']", "text": "deterministic interpreter" },
+        { "wait": 2500 }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 660" width="1080" height="660" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif">
+  <style>
+    .title { font-size: 21px; font-weight: 650; fill: #0f172a; }
+    .sub { font-size: 13px; fill: #64748b; }
+    .panel-title { font-size: 12px; font-weight: 650; fill: #475569; letter-spacing: 0.09em; }
+    .net { font-size: 13.5px; font-weight: 650; fill: #334155; }
+    .code { font-size: 12px; fill: #334155; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .gone { font-size: 12px; fill: #b91c1c; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .kept { font-size: 12px; fill: #15803d; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .val { font-size: 12px; fill: #334155; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .big { font-size: 26px; font-weight: 650; fill: #0f172a; }
+    .note { font-size: 11.5px; fill: #64748b; }
+    .legend { font-size: 12px; fill: #475569; }
+  </style>
+  <rect width="1080" height="660" fill="#ffffff"/>
+  <text x="72" y="48" class="title">The saving was not in the words. It was in what was written beside them.</text>
+  <text x="72" y="72" class="sub">One prose file of the Loom documentation site's search index, as it is served. Measured on this branch against its parent.</text>
+
+  <text x="72" y="126" class="panel-title">BEFORE — 5 NOVEMBER, THE SECTION TAKEN OFF THE FRONT OF EVERY KEY</text>
+  <rect x="72" y="142" width="936" height="86" rx="6" fill="#f8fafc" stroke="#e2e8f0"/>
+  <text x="90" y="168" class="code">{"under":"/docs/the-runtime","bodies":[</text>
+  <text x="110" y="190" class="code">[<tspan class="gone">""</tspan>,"The runtime is the half of Loom that runs when somebody asks for a change…"],</text>
+  <text x="110" y="210" class="code">[<tspan class="gone">"/proposing-a-change#what-the-gate-sees"</tspan>,"The Gate reads the delta, not the words…"], …</text>
+  <text x="72" y="250" class="note">111 keys in this file, 272 across the five. gzip had already found the shared prefixes; what it could not do was stop them being written.</text>
+
+  <text x="72" y="306" class="panel-title">AFTER — 13 NOVEMBER, NO ADDRESS AT ALL</text>
+  <rect x="72" y="322" width="936" height="86" rx="6" fill="#f8fafc" stroke="#e2e8f0"/>
+  <text x="90" y="348" class="code">{"under":"<tspan class="kept">/docs/the-runtime</tspan>","bodies":[</text>
+  <text x="110" y="370" class="code">"The runtime is the half of Loom that runs when somebody asks for a change…",</text>
+  <text x="110" y="390" class="code">"The Gate reads the delta, not the words…", …</text>
+  <text x="72" y="430" class="note">One body per entry of this section, in the order the browser has had them since the table of contents landed. Empty where a page has no prose.</text>
+
+  <rect x="72" y="470" width="300" height="130" rx="6" fill="#f8fafc" stroke="#e2e8f0"/>
+  <text x="92" y="498" class="panel-title">THE BILL</text>
+  <text x="92" y="534" class="big">75,234</text>
+  <text x="92" y="558" class="val">of 80,000 compressed</text>
+  <text x="92" y="582" class="note">79,590 before · 4,356 saved</text>
+
+  <rect x="390" y="470" width="300" height="130" rx="6" fill="#f8fafc" stroke="#e2e8f0"/>
+  <text x="410" y="498" class="panel-title">ROOM IN THE TIGHTEST SECTION</text>
+  <text x="410" y="534" class="big">2,335 words</text>
+  <text x="410" y="558" class="val">373 yesterday</text>
+  <text x="410" y="582" class="note">the shortest page here is 346</text>
+
+  <rect x="708" y="470" width="300" height="130" rx="6" fill="#f8fafc" stroke="#e2e8f0"/>
+  <text x="728" y="498" class="panel-title">WHAT WAS GIVEN UP</text>
+  <text x="728" y="534" class="big">nothing</text>
+  <text x="728" y="558" class="val">every word still travels</text>
+  <text x="728" y="582" class="note">0353's four candidates each gave something up</text>
+
+  <text x="72" y="632" class="legend">Taking the section prefix off those same keys, eight days earlier, was worth 341 bytes. Taking the rest of the key was worth twelve times that.</text>
+</svg>

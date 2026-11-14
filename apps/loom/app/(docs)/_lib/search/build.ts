@@ -7,6 +7,7 @@ import { readPageHeadings } from "./headings"
 import {
   encodeSearchNames,
   namesToEntries,
+  proseEntriesOf,
   type SearchCode,
   type SearchEntry,
   type SearchIndex,
@@ -16,7 +17,6 @@ import {
   type TravellingIndex,
 } from "./model"
 import { readPageProse } from "./prose"
-import { docsSectionOfPath } from "./shards"
 
 /**
  * The index, assembled from what the site already knows.
@@ -255,25 +255,40 @@ export const searchContents = (): TravellingIndex => ({
  * from one that has quietly started repeating itself.
  */
 export const searchProse = (): SearchProse => ({
-  bodies: buildSearchIndex()
-    .entries.filter((entry) => entry.body !== "")
-    .map((entry) => [entry.href, entry.body] as const),
+  /** The whole site, so there is no one section to be under. */
+  under: "",
+  bodies: proseEntriesOf(buildSearchIndex().entries, "").map((entry) => entry.body),
 })
 
 /**
  * The words of one section.
  *
  * A filter over the whole rather than a walk of its own, which is what makes
- * the four files a partition: every body is in exactly one of them because
- * every address has exactly one section, and `docsSectionOfPath` is the one
- * function that says which — the same one the browser uses to decide what to
- * ask for. A section nobody has written words under answers with an empty list
- * rather than a 404, so the browser can ask for every section the table of
- * contents mentions without holding a second idea of which of them are written.
+ * the five files a partition: every body is in exactly one of them because
+ * every address has exactly one section, and `proseEntriesOf` is the one
+ * function that says which — the same one `withProse` uses to decide which
+ * entries the words that arrive are about. A section nobody has written words
+ * under answers with an empty list rather than a 404, so the browser can ask
+ * for every section the table of contents mentions without holding a second
+ * idea of which of them are written.
+ *
+ * **There are no keys**, which is the only difference between the words here
+ * and the same words in the whole above. The browser asked for this file by its
+ * section and has had that section's entries since the table of contents
+ * landed, so the file states the section once as `under` and then states the
+ * words in the order those entries are already in. An entry with no prose under
+ * it — a landing page that is all links, an index — holds its place with an
+ * empty string rather than being left out, because a list whose length is the
+ * claim cannot have holes in it.
  */
-export const searchProseFor = (sectionSlug: string): SearchProse => ({
-  bodies: searchProse().bodies.filter(([href]) => docsSectionOfPath(href) === sectionSlug),
-})
+export const searchProseFor = (sectionSlug: string): SearchProse => {
+  const under = `/docs/${sectionSlug}`
+
+  return {
+    under,
+    bodies: proseEntriesOf(buildSearchIndex().entries, under).map((entry) => entry.body),
+  }
+}
 
 /** The blocks nobody waits for, keyed the same way. */
 export const searchCode = (): SearchCode => ({

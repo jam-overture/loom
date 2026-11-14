@@ -269,39 +269,150 @@ export const parseSearchIndex = (value: unknown): SearchIndex => {
 /**
  * The words under the entries, as they travel.
  *
- * A pair rather than an object per entry, because there are two useful fields
- * and one of them is the key: `href` already identifies an entry uniquely — a
- * page by its path, a heading by its fragment — so the prose file is a list of
- * `[href, words]` and nothing else. That is about a fifth of what repeating the
- * entries would cost, and it cannot drift from the index, because an href it
- * does not recognize is simply dropped.
+ * **A list of words and nothing else.** There is no key beside each body,
+ * because the browser already has the list the keys would point into: it was
+ * sent the table of contents first and has been searching it since, and the
+ * words arrive afterwards in the order those entries are already sitting in.
+ * So the file says once what its bodies are `under`, and then says the words.
+ *
+ * That is the same sentence the names file was rewritten around on 19
+ * September — *what is written down is a name and not an address* — taken one
+ * step further than it was taken here on 5 November. That day this type stopped
+ * writing `/docs/the-runtime` at the front of ninety keys and kept the rest of
+ * each key: 5,377 raw bytes and **341 compressed**. The rest of the key turns
+ * out to be worth **4,356 compressed**, twelve times the prefix, because what
+ * a reader can work out was never the section — it was the whole address.
+ *
+ * **What it costs is a rule instead of a lookup, and the rule is checkable.**
+ * A keyed file could be read against an index it disagreed with and simply
+ * drop what did not match; a positional one cannot, so `withProse` counts the
+ * entries it is about and refuses a file that does not have exactly that many
+ * bodies. A silent half-merge is the failure this shape could have, and it is
+ * the one it is not allowed to have.
  */
 export type SearchProse = {
-  readonly bodies: readonly (readonly [string, string])[]
+  /**
+   * The section these bodies are about — `/docs/the-runtime` for the runtime's
+   * words — or the empty string for a file about the whole site.
+   *
+   * It is the only addressing this file does. `proseEntriesOf` turns it into
+   * the entries the bodies line up with, and is the one definition of that, so
+   * the half that builds a file and the half that reads one cannot hold two
+   * ideas of which entries a section has.
+   */
+  readonly under: string
+  /** One body per entry of `proseEntriesOf`, in that order. Empty where a page has no prose. */
+  readonly bodies: readonly string[]
 }
 
 const isTextPair = (value: unknown): value is readonly [string, string] =>
   Array.isArray(value) && value.length === 2 && typeof value[0] === "string" && typeof value[1] === "string"
+
+/**
+ * Whether an address is one of the addresses a prose file is about.
+ *
+ * The boundary characters are the whole of it: `/docs/the-runtime` is the
+ * section itself, `/docs/the-runtime#x` a heading on its landing page, and
+ * `/docs/the-runtime/…` a page inside it — and a bare `startsWith` would also
+ * claim `/docs/the-runtime-extras`, a section this site does not have today and
+ * would not notice gaining. `build.test.ts` holds this against
+ * `docsSectionOfPath`, which is the other answer to the same question, over
+ * every entry the site has.
+ */
+const isUnder = (href: string, under: string): boolean =>
+  under === "" || href === under || href.startsWith(`${under}/`) || href.startsWith(`${under}#`)
+
+/**
+ * The entries one prose file is about, in the order it writes their words.
+ *
+ * **Exports are not among them**, and that is what makes the order a property
+ * of the site rather than of the fetch that happened to land first. The names
+ * bring 2,100 entries of their own, they arrive on their own connection, and a
+ * positional file that counted them would mean something different depending on
+ * whether the names or the words got back first. `searchContents` draws the
+ * same line for the same reason and this is the same predicate.
+ */
+export const proseEntriesOf = <TEntry extends { readonly href: string; readonly kind: SearchKind }>(
+  entries: readonly TEntry[],
+  under: string,
+): readonly TEntry[] => entries.filter((entry) => entry.kind !== "export" && isUnder(entry.href, under))
+
+/**
+ * A prose file's words back under their addresses.
+ *
+ * The thing the file no longer writes down, worked out the way every reader of
+ * one has to work it out — and the one place it is worked out, so that a caller
+ * wanting a body by its href is not tempted to zip the two lists by hand and
+ * get the filter subtly wrong.
+ */
+export const addressedProse = <TEntry extends { readonly href: string; readonly kind: SearchKind }>(
+  entries: readonly TEntry[],
+  prose: SearchProse,
+): readonly (readonly [string, string])[] =>
+  proseEntriesOf(entries, prose.under).map((entry, nth) => [entry.href, prose.bodies[nth] ?? ""] as const)
 
 export const parseSearchProse = (value: unknown): SearchProse => {
   if (!isRecord(value) || !Array.isArray(value.bodies)) {
     throw new Error("loom: the search prose has no bodies")
   }
 
-  return { bodies: value.bodies.filter(isTextPair) }
+  /*
+   * **`under` survives the parse**, where the keys it used to be stripped from
+   * did not. It stopped being a fact about how the file was written down the
+   * moment the bodies lost their keys: it is now the only thing in the file
+   * that says which entries the words belong to, so dropping it would leave a
+   * list of strings with nothing to say where they go.
+   */
+  return {
+    under: typeof value.under === "string" ? value.under : "",
+    /*
+     * **A body that is not a string becomes an empty one, and is not dropped.**
+     * Dropping was what the keyed shape did, and it was right there: a pair
+     * that was not a pair said nothing about any other pair. Here a body's
+     * place is its address, so dropping one moves every body after it onto the
+     * wrong entry — or, if the count guard catches it, costs the reader the
+     * whole section's sentences over one bad value. Emptying costs them that
+     * one body and nothing else.
+     */
+    bodies: value.bodies.map((body) => (typeof body === "string" ? body : "")),
+  }
 }
 
 /**
  * The two halves, put back together.
  *
- * An entry the prose file says nothing about keeps the empty body it arrived
- * with, which is the ordinary case for the 863 published names — their words are
- * the signature on the reference page rather than a paragraph.
+ * An entry outside this file's section keeps the body it arrived with, which is
+ * how five files merge into one index without any of them having an opinion
+ * about the others.
+ *
+ * **A file that does not fit is refused whole, rather than merged as far as it
+ * goes.** One body per entry is the only thing holding the words to their
+ * addresses now, so a file carrying a different number of them is a file whose
+ * every body after the first gap is on the wrong page — and a search box
+ * quoting one page's sentence under another page's title is worse than one that
+ * has no sentences yet. `build.test.ts` is where that mismatch is loud; here it
+ * is simply not done.
+ *
+ * **Refused and not thrown**, which the component's own tests argued. Throwing
+ * was written first and it took the whole box down: a reader who had been
+ * searching titles since the contents landed lost those too, because one of the
+ * four files that arrive afterwards did not line up. Refusing costs that reader
+ * the sentence band and keeps everything else they already had.
  */
 export const withProse = (index: SearchIndex, prose: SearchProse): SearchIndex => {
-  const bodies = new Map(prose.bodies)
+  const mine = proseEntriesOf(index.entries, prose.under)
 
-  return { entries: index.entries.map((entry) => ({ ...entry, body: bodies.get(entry.href) ?? entry.body })) }
+  if (mine.length !== prose.bodies.length) return index
+
+  const bodies = new Map(mine.map((entry, nth) => [entry.href, prose.bodies[nth] ?? ""] as const))
+
+  return {
+    entries: index.entries.map((entry) => {
+      const body = bodies.get(entry.href)
+
+      return body === undefined ? entry : { ...entry, body }
+    }),
+  }
 }
 
 /**

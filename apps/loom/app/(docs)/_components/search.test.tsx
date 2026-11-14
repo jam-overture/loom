@@ -146,10 +146,23 @@ const names = encodeSearchNames({ entryPoints: [{ specifier: "@jam-overture/loom
  */
 const PROSE_SECTIONS = ["the-runtime", "getting-started", "api-reference"] as const
 
+/*
+ * **No addresses at all, as the real files have none.** A prose file states once
+ * what its bodies are `under` and then states the words, in the order the
+ * section's entries are already in — so a fixture writing addresses down would
+ * be a fixture that passes while the box has forgotten how to line the two
+ * lists up, which is the one thing this shape can get wrong and the reason the
+ * comment above says *the way the builder cuts them*.
+ *
+ * **One body per entry, empty ones included.** A page with no prose under it
+ * holds its place, because the length of this list is what says the file
+ * belongs to this section's entries at all.
+ */
 const proseFor = (section: string): unknown => ({
+  under: `/docs/${section}`,
   bodies: index.entries
-    .filter((entry) => entry.body !== "" && docsSectionOfPath(entry.href) === section)
-    .map((entry) => [entry.href, entry.body]),
+    .filter((entry) => entry.kind !== "export" && docsSectionOfPath(entry.href) === section)
+    .map((entry) => entry.body),
 })
 
 const code = {

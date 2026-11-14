@@ -1,0 +1,154 @@
+import { pageMetadata } from "@/app/(docs)/_lib/metadata"
+import {
+  EveryWayAPullFails,
+  OnePull,
+  TheOneWait,
+  ThreeReaders,
+} from "@/app/(docs)/_components/live-pages"
+
+export const metadata = pageMetadata("the-runtime", "how-a-change-reaches-readers")
+
+# How a change reaches readers
+
+Somebody asked for a change, the Gate held it, and a person said yes. Your site
+is running on your own server, somewhere Loom has never been. This page is the
+step in between.
+
+There is no deploy in it. No pull request, no merge, no build. The change is
+live the next time your server asks for it, and your server asks on a timer.
+
+<Example id="a-page-a-reader-scrolls" />
+
+## Your server asks, and keeps the answer
+
+Loom is never in the path of a request. If it were, every reader of every page
+would be waiting on somebody else's network.
+
+So nothing is fetched while a reader waits. One loop, started where your
+application starts, asks for the project's pages every so often and keeps them
+in the process:
+
+```ts
+import { describeSitePullFailure, startPullingLivePages } from "@jam-overture/loom/live"
+
+const live = startPullingLivePages({
+  deployment: process.env.LOOM_URL ?? "",
+  key: process.env.LOOM_PROJECT_KEY ?? "",
+  onOutcome: (outcome) => {
+    if (outcome.kind === "failed") log.warn(describeSitePullFailure(outcome.failure))
+  },
+})
+```
+
+Two settings and somewhere to put a warning. Here is what one ask brought back
+while this page was built:
+
+<OnePull />
+
+## One call, where you render
+
+Your render path asks one question: what should this person see?
+
+```ts
+import { describeComposeError, pageForReader } from "@jam-overture/loom/live"
+import { renderLoomTree } from "@jam-overture/loom/react"
+
+// whatever this server already knows about the request
+const context = { returning: request.cookies.has("seen-us-before"), device: "phone" }
+
+const held = await live.ready()
+
+// Three answers, and you need all three:
+//   served.tree     — what to render. The live page if the loop has one, the
+//                     page your site was built with if it does not.
+//   served.audience — the segment to count this page view under, where this
+//                     reader is in one. A project defines segments in the portal.
+//   served.refusal  — why a segment's change was not applied, on the rare
+//                     occasions it was not. A line for your log, never a screen.
+const served = pageForReader(held, builtTree, context)
+
+if (served.refusal !== undefined) log.warn(describeComposeError(served.refusal))
+
+renderLoomTree(served.tree, {
+  resolver: registry,
+  // Spread rather than `audience: served.audience`. The option is declared
+  // without `| undefined`, and this site compiles with
+  // `exactOptionalPropertyTypes` turned on. If your project does not, you can
+  // write the plain version.
+  ...(served.audience === undefined ? {} : { audience: served.audience }),
+})
+```
+
+The comments say what each answer is for. The next two sections are about the
+last two.
+
+## Loom never learns who your readers are
+
+The ask carries your project key and a tag saying what the server already holds.
+Nothing about any reader goes with it, and there is no field for one.
+
+What comes back is **every** segment's rules and **every** segment's change,
+beside the pages. Sorting this reader, and building the page they get, both
+happen afterwards, inside your process, against rules already in memory.
+
+That is a deliberate trade: a site downloads more than one reader needs so that
+no reader is ever the subject of a request to somebody else.
+
+<Callout>
+  The key is the same public project key your pages already post reader signals
+  with. It says which project is asking and nothing about who is reading.
+</Callout>
+
+## Three readers, one page
+
+One page, one segment: people who have been here before get an extra line at the
+top.
+
+<ThreeReaders />
+
+The third reader is the one worth a second look. Their segment's change was
+written against an earlier revision, and the page has since moved past it.
+
+**What that reader loses is their segment, not their page.** They get the page,
+counted as everybody's. Counting them as the segment while showing them the
+plain page would be worse than it sounds: every later comparison between two
+segments would be a comparison between one segment's real change and another
+segment's name over the same old page, and the number would look right forever.
+
+## A failed pull costs freshness, never the page
+
+This is the property to take away. Every way an ask can go wrong is a kind of
+answer rather than an exception: the client never throws, because a caller that
+has to catch has a path on which the page is lost. Each row is a real ask that
+really failed:
+
+<EveryWayAPullFails />
+
+A server that was never configured, cannot find Loom, is not answered by it, is
+turned away, or cannot make sense of the answer serves the site it was built
+with. There is no broken state to design a screen for.
+
+<Callout kind="warning">
+  Which means a misconfigured deployment looks exactly like a working one, until
+  somebody notices that accepted changes are not showing up. That is what the
+  warning in the first code block is for. One log line per failed ask is cheap,
+  and it is the only thing that tells the two apart.
+</Callout>
+
+## Only the first reader waits
+
+One reader does wait, once, on purpose: the first person to arrive after your
+server starts.
+
+<TheOneWait />
+
+They wait so that they get the live page, rather than the old page followed by a
+different one when they press something. After that, asks happen beside requests
+and no reader waits on one.
+
+## What this does not decide
+
+Where your pages come from and what your server knows about a request are
+yours. The keys in that context are whatever your rules were written against.
+What the segments are, and what each one's readers get, is decided in the
+portal. This page is only the half that runs on your side.

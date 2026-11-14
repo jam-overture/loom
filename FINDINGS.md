@@ -8,6 +8,82 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-11-05 — this site has room for about 331 more words of prose in total, which is less than its shortest page
+
+**Filed by:** `Loom docs` · **Owned by:** the maintainer, then `Loom docs`
+(`apps/loom/app/(docs)/_lib/search/`) · **Status:** open — **the documentation
+site cannot take another page until this is answered**, and the answer is one
+word on [0353](decisions/0353-the-search-box-sends-a-reader-the-sentences-of-their-own-section-and-the-rest-of-the-site-by-title.md)
+
+The search box sends a reader the sentences of every page on this site. There is
+a cap on that — **80,000 compressed bytes for all five sections' words** — and
+after this branch's saving the site spends **79,414** of it.
+
+Converted into the unit a page is written in, by `_lib/search/room.ts`: **about
+331 words, for every page this site will ever add.** The shortest page already
+written here is *Decision records* at **346**. The median written page is about
+**1,200**.
+
+**So the next page on this site is red before it is written**, and this is the
+first run at which that is a fact rather than a worry. Nine reports have carried
+it as *the search box is near its cap*; what was missing was the conversion into
+words and the comparison with a real page, and both are now derived rather than
+typed.
+
+**Three remedies are ruled out with numbers, not opinions.** A bigger cap is
+refused by a rule older than the cap (`build.ts`, when the names left the
+contents file): *split the index rather than take the number up*. Splitting
+further makes it **worse** — five files of this prose cost 2,786 more compressed
+bytes than one, so cutting the runtime's file by page, which its own cap's
+comment recommends, raises the bill. And a shorter page cannot be written: 331
+words is shorter than anything here, and a page that just fitted would leave
+nothing for the next one.
+
+**What is asked of the maintainer** is the choice in 0353 — four candidates,
+each with its measured bill and the room it leaves. The recommendation is **C**:
+the box sends the sentences of the reader's own section and the rest of the site
+by title and summary, with an affordance to ask for the rest. It leaves about
+**2,305 words per section** and it is the only candidate that scales, because
+the cap that binds stops being a number about all five sections at once.
+
+**What this lane did instead of waiting.** The one reduction that is
+promise-preserving and entirely inside this lane: a section's prose file states
+once what its addresses are `under` and writes down only what is left of them,
+which is the lesson the names file learned on 19 September applied to the other
+file still writing addresses down. It is worth **5,223 raw bytes and 251
+compressed** — honestly small, which is why it is reported as a saving rather
+than as a remedy. It took the room from 201 words to 331.
+
+---
+## 2026-11-05 — `@jam-overture/loom/cli` says it drives a proposal from the terminal, and it scaffolds
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom daily build` (`src/cli/`) ·
+**Status:** open — **nothing is broken**; the sentence is in a docblock and no
+page on this site prints it
+
+`src/cli/index.ts` opens:
+
+> The commands `loom` runs. Scaffolding a new project, **and driving a proposal
+> from the terminal against the same runtime a server would use.**
+
+The second half is not true of the module. `parseArguments` accepts `init`,
+`add primitive` and `--help`, and nothing else; `CLI_USAGE` — the command's own
+answer to `--help` — describes itself as *scaffolding for the Loom primitive
+registry* and lists those three. There is no proposal anywhere behind this door.
+
+**Found while costing a page about this import**, which is why it is filed
+rather than fixed: the sentence is in `src/` and this lane does not edit `src/`.
+
+**It does not reach a reader today**, and that was checked rather than assumed:
+the API reference generator reads the docblocks of the *sub-modules* — `cli/args`,
+`cli/run`, `cli/plan` — and not the index's, so the string appears nowhere in
+`reference.generated.json` and on no page of this site. It is a sentence read by
+the next person to open the file.
+
+**Recommendation: delete the clause**, rather than widen the CLI. Whether the
+terminal should be able to drive a proposal is a real question and a different
+one; a docblock is not where it gets answered, and a door whose summary promises
+a capability is how a reader spends an afternoon looking for it.
 ## 2026-11-13 — a project can choose how long its readers keep the pages they first saw, and nothing yet holds one, because the pin is the site's code
 
 **Filed by:** `Loom portal` · **Owned by:** `Loom daily build` (`src/live/`,
@@ -67988,6 +68064,25 @@ declaration sentence. What they lack is the paragraph that says what the tool is
 for.
 
 ---
+> **Still open on 5 November, and now blocked rather than queued.** This was the
+> first candidate on this lane's queue and the run that picked it up could not
+> write it. The reason is not the page: **this site has room for about 331 more
+> words of prose in total** and the shortest honest version of this page is about
+> 400. The measurement, the four candidate remedies and what each buys are in
+> today's entry at the top of this file and in
+> [0353](decisions/0353-the-search-box-sends-a-reader-the-sentences-of-their-own-section-and-the-rest-of-the-site-by-title.md).
+>
+> **The page was not trimmed to fit and should not be.** 331 words is shorter
+> than any page on this site; a page squeezed into it would leave nothing for
+> the one after it and would be the worst version of the page that answers the
+> question.
+>
+> **The recommendation of 4 November is unchanged** — a page in *The runtime*,
+> about the tool, naming the import once. What is added is a second thing to say
+> on it: the door's own docblock claims it can drive a proposal from the terminal
+> and it cannot, which is filed separately for `Loom daily build`.
+
+---
 > **Fourth measurement, 4 November**, on #761, and the pattern is now stable
 > enough to stop re-measuring: the session declined to subscribe, said so in the
 > pull request comment, and **was subscribed 92 seconds after the pull request
@@ -70908,6 +71003,232 @@ explicitly nowhere — that is worth a sentence in the table rather than a third
 finding that opens by saying the table does not cover this.
 
 ---
+## 2026-11-11 — every saving over the stored words is priced now, and all five are refused by one sentence: a body is shown as well as matched
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/_lib/search/savings.ts`) · **Status:** **closed on
+filing** by `docs-78-no-room-for-another-page` — the class is priced, in a
+module a test holds, and is in 0353's alternatives
+
+[0353](decisions/0353-the-search-box-sends-a-reader-the-sentences-of-their-own-section-and-the-rest-of-the-site-by-title.md)
+priced four candidates and every one of them changes **which bodies travel**.
+It priced none of the class anybody reaching a full index tries first: **make
+the stored words smaller.** Five shapes of it are now registered, applied to
+the real words of all thirty-five pages, and priced off the live index.
+
+| the saving | the bill | room | what it costs a reader |
+| --- | --- | --- | --- |
+| a repeated **body** stored once | 79,339 | **373** | nothing, and it buys nothing |
+| a repeated **sentence** stored once | 79,146 | 483 | the row, on eighteen of nineteen doors |
+| lower-casing the stored words | 77,863 | 1,208 | the excerpt's capitals |
+| dropping the punctuation | 75,273 | 2,674 | the excerpt's punctuation |
+| dropping the commonest function words | **60,352** | **11,114** | the excerpt as a sentence at all |
+
+**One sentence refuses all five, and it is the reason worth keeping: a body is
+not only matched, it is shown.** `match.ts` cuts a window out of `entry.body`,
+marks the reader's own words in it and puts that on the screen as the row's
+excerpt. So every byte stored is a byte that may end up in front of somebody,
+and a saving that normalises the words buys its bytes out of the one thing a
+result row has to be. Run rather than asserted: each candidate's words go into
+a real index through the published `withProse` and a real query comes back
+through `searchDocs` with the excerpt that candidate would have shown.
+
+**Two figures are worth having even from somebody who agrees with the refusal.**
+
+- **Deduplicating is worth nothing.** The nineteen reference pages repeat seven
+  *sentences*, not their bodies — no two bodies on this site are byte-identical
+  — and taking a fifteenth of the stored text out (16,598 bytes) buys **110
+  words**, because gzip has already been paid for the repetition and gives back
+  a back-reference rather than a sentence. This is the first thing a run reaching
+  the cap proposes and it is the one that buys least.
+- **Price and harm run together.** The candidate that buys thirty times the rest
+  is the one that takes the small words out of every sentence this site would
+  quote back to a reader. The registry is ordered on price so that the table
+  reads that way.
+
+### What is not closed by it
+
+**Nothing here recovers the room**, which is the point: the class was priced in
+order to be refused with a number rather than with an opinion. What recovers
+room is still 0353, and 0353 is still `Proposed`.
+
+---
+## 2026-11-11 — a test that said "the site is full" went stale in six days, and its own comment had promised it could only flip when the question was answered
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/_lib/search/room.test.ts`) · **Status:** **closed on
+filing** — the property and the state are two cases now; the shape is filed
+because it is not about this test
+
+`room.test.ts` asserted, of *The runtime*, that `roomIn(…).fits` is `false` —
+the site cannot take a page as short as its own shortest. Its comment said the
+assertion **flips when the question in 0353 is answered**, and that *the run
+that lands it has to come back here and say what the site's state is now*.
+
+**0353 has not been answered and the assertion flipped anyway.** Six days of
+`main` took the bill from 79,414 compressed bytes to 79,339 — 75 bytes, about
+42 words at this site's compression and bytes-per-word — and the room in *The
+runtime* went from 331 words to **373**, past the 346 of the shortest page.
+Where those 75 bytes went is not isolated and is not worth isolating: two stale
+sentences left *What your readers do* on 9 November, the reference's generated
+prose grew, and the net of everything written on this site in six days is 75
+bytes.
+
+**The shape, which is the part worth filing.** The case bundled two different
+claims and the comment only noticed one of them:
+
+- **A property**: `sentenceOf` prints its third clause exactly where a page as
+  short as the shortest here would not fit. True whichever way 0353 goes, and
+  the thing the clause's own docblock promises.
+- **A state**: this site is full. True on 5 November, 60% true today — two of
+  the five sections still cannot take a 346-word page and three now can.
+
+Bundled, the property went untested the moment the state moved, and the failure
+read as *the measurement is broken* rather than as *the site changed*. They are
+two cases now: the property swept over all five sections, and the state as a
+count of sections rather than a named one, so that it says something about the
+site rather than about one rail entry.
+
+**The general version, for any lane:** *a test that asserts the state of the
+repository should say so in a case of its own, and should not be the same case
+as the property that holds whichever way the state goes.* A comment predicting
+when an assertion will flip is not a substitute, because it cannot predict the
+other reason.
+
+---
+## 2026-11-11 — 0353 has been unanswered for six days and five of this lane's open findings are behind it
+
+**Filed by:** `Loom docs` · **Owned by:** `@jonathanbravecredit` ·
+**Status:** open — **nothing is broken and the gate is green**; what is open is
+one word, and the queue it holds up is now long enough to be worth a count
+
+[#778](https://github.com/jam-overture/loom/pull/778) has carried `0353` as
+`Proposed` since 5 November. It asks which of four candidates the search box
+should become, and the pull request says *one word is enough*.
+
+**What is behind it**, all owned by this lane and all needing prose this site
+cannot afford to write:
+
+| filed | the page that is missing a sentence | costed at |
+| --- | --- | --- |
+| 4 Nov | `@jam-overture/loom/cli` publishes twenty-five names and no written page says one of them | ~400 words |
+| 4 Nov | seven telemetry names appear only in the generated reference | — |
+| 8 Nov | seven new names on `@jam-overture/loom/signals` | — |
+| 9 Nov | five more | — |
+| 9 Nov | eight more, with the two sentences written to be lifted | — |
+
+The three signals entries are one paragraph between them and the signals lane
+wrote the sentences. **The room is 326 to 373 words depending on the section.**
+One paragraph would fit and would leave the site with nothing, which is why no
+run has written it: the next lane's page would then be red, and the gate is the
+merge gate for four surfaces rather than one.
+
+**What this entry adds to the pull request's own ask:** the class of remedies a
+run would reach for instead is now priced and refused (entry above), so there
+is no cheaper thing left to try. The honest statement of the position is that
+**this lane can keep building instruments indefinitely and cannot write a
+sentence**, and four of the last five units have been instruments for that
+reason.
+
+**Recommendation unchanged: C** — the reader's own section's sentences, the rest
+of the site by title. It is the only candidate that scales, and what it gives up
+is a match on a sentence inside a page the reader is not on. If it is A, that is
+one page of room and the same conversation in a fortnight.
+
+---
+## 2026-11-11 — an ellipsis inside an arbitrary-value class in a comment stopped `next dev` serving the whole `(docs)` route group, for five weeks, with the gate green
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/_lib/chrome.test.ts`) · **Status:** **closed on filing**
+by `docs-78-no-room-for-another-page` — one word in a comment, and a sweep so
+it cannot come back
+
+A docblock in `chrome.test.ts` abbreviated a real Tailwind class by putting an
+ellipsis where its custom property goes. **Tailwind scans source files for
+things shaped like class names and does not know a comment from a
+`className`**, so it generated a rule setting `scroll-margin-top` to a `var` of
+an ellipsis, and dev's PostCSS pass refuses it:
+
+```
+Unexpected token Ident("…")
+./apps/loom/app/(docs)/globals.css:786:28
+  GET /docs 500
+```
+
+**Every page in `(docs)` 500s under `next dev`.** It arrived with #684 and has
+been there since; `git show origin/main` has it today.
+
+### Why nothing caught it
+
+**`next build` is green on it** — measured on this branch, `EXIT=0`, 139
+prerendered pages — and so is `pnpm verify`, which does not run dev. The
+deploys are built, so the previews are right. The only person who meets this is
+somebody running the site locally, and the run that met it was this one, trying
+to photograph its own search box.
+
+That is the same shape as the git-floor entries in `docs/routines.md`: a thing
+that is green on every scheduled run and red in exactly one place — except that
+here the one place is *anybody's* local dev server rather than the maintainer's
+git.
+
+### What it is held by now
+
+A sweep over **every** source in the route group, tests included, for an
+arbitrary-value class with an ellipsis in it. That is the one place
+`chrome.test.ts` deliberately differs from its other sweep, which excludes
+tests on the grounds that *what a test may spell is the subject of the test
+doing the sweeping* — and a comment is exactly where this happens, because a
+comment is where somebody writes a class name loosely.
+
+**The test failed on itself on the first run**, because its own docblock quoted
+the banned spelling while explaining it. The docblock describes it instead now,
+and that failure is the shortest demonstration there is that the scanner cannot
+tell prose from markup.
+
+### For other lanes
+
+`(marketing)`, `(lessons)`, `(demo)` and `(portal)` have their own sources and
+the same scanner. **This sweep covers `(docs)` only** and is not extended into
+another lane's route group. Whether the other four have one is unmeasured here;
+the check is four lines and the recipe is in `chrome.test.ts`.
+
+---
+## 2026-11-11 — running `next dev` in a session leaves type files behind that `pnpm verify` then typechecks, and the gate goes red for a reason the diff cannot explain
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom daily build`
+(`docs/routines.md`, beside the merge-gate rule) · **Status:** open —
+**nothing is broken, it cost this run one gate re-run**, and it will cost the
+next lane that photographs a screen the same unless it is written down
+
+`next dev` writes `.next/dev/types/routes.d.ts` and `.next/dev/types/validator.ts`
+as it discovers routes. A dev server stopped part-way through leaves them
+**truncated**, and `@loom/app`'s verify is `pnpm build && tsc --noEmit && pnpm test`
+— so the next gate typechecks them:
+
+```
+.next/dev/types/routes.d.ts(186,1): error TS1160: Unterminated template literal.
+.next/dev/types/validator.ts(593,1): error TS1434: Unexpected keyword or identifier.
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @loom/app@0.0.1 verify
+```
+
+**Fifteen errors, none of them in a file anybody wrote, and none of them named
+in the diff.** `rm -rf apps/loom/.next` and the gate is green again; `pnpm clean`
+is the published spelling of it.
+
+**Why a lane meets this at all.** Every brief asks for a screenshot, and the
+screen worth photographing is sometimes one that needs the application running
+— this lane's search box is the case today. `docs/routines.md` has the harness
+recipe for *an address* and says nothing about what starting the server does to
+the next gate.
+
+**The recommendation is one line beside the merge-gate rule**: *if you started
+the application in this session, `pnpm clean` before the gate.* It is the same
+shape as the rule already there — the thing that tells you the gate failed is
+not the gate — one step earlier: **the thing that failed the gate was not in
+your diff.**
+
+**Not fixed here**, because `docs/routines.md` is not this lane's file and is
+the document it is bound by rather than one it writes.
 ## 2026-11-11 — React's first static render of a deep page drops elements and says nothing, and the second one does not
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom daily build`
@@ -71923,6 +72244,108 @@ number it guards is grown by every other lane, and **no decision record covers
 it** — which was true when the margin was 148 bytes and is still true now that
 it is 12,795. Nothing is blocked by that and it is not this lane's to write.
 
+## 2026-11-13 — the prose cap is relieved, and a table of candidates is a table of the places somebody looked
+
+**Filed by:** `Loom docs` · **Owned by:** `@jonathanbravecredit` (0353, which is
+still `Proposed` and still his) · **Status:** **closes the 12 November entry
+about 165 bytes, and the four entries behind it**, measured on this branch
+
+The search index's prose files stopped writing an address beside every body.
+A file says once what its bodies are `under` and then says the words, in the
+order the section's entries are already sitting in — an order the browser has
+had since the table of contents landed.
+
+```
+prose  79,590 → 75,234 gzipped of 80,000     saved 4,356
+raw   254,057 → 240,860 of 260,000           saved 13,197
+room      373 → 2,335 words in the tightest section (the shortest page here is 346)
+```
+
+**This lane spent nine reports and a priced table of five candidates on the
+wrong axis.** `savings.ts` prices five ways to make the stored *words* smaller
+and refuses all five, correctly, because a body is shown as well as matched.
+0353's four candidates are four ways to send *fewer words*. Every one of them
+is a saving over the text, and the text was never where the slack was: 272
+addresses, 4,005 compressed bytes of them, in a file whose reader already holds
+every one.
+
+**The 5 November version of this same move is why it is worth an entry rather
+than a line in a report.** That day a prose file stopped writing the section at
+the front of each key and kept the rest: 341 bytes, and the module's own
+docblock called it *small, which is stated here rather than left to be inferred
+from the absence of a number*. The rest of the key was worth **4,356**. The
+lane that measured the prefix and moved on had the whole saving under its hand
+and stopped at an eighth of it — because the sentence it was working from was
+*the browser knows the section*, when the true one was *the browser has the
+list*.
+
+**What is open and what is not.** The cap is not open: no section of this site
+now fails to take a page as short as its shortest, and the four entries that
+said otherwise (12 November's 165 bytes, 11 November's 373 words, and the two
+of 10 November about this lane's queue) are closed by it. **0353 is open and is
+not this lane's to close.** It asks whether a reader should be sent sentences
+from pages they are not on, which is still a real question about what the box
+is; what it is no longer is the thing holding the queue. Its candidate table is
+deliberately not re-priced — each would have to be built to be re-priced
+honestly, and none is worth building today.
+
+**The one sentence to carry out of it.** *A table of candidates is a table of
+the places somebody looked.* Five priced savings and four lettered alternatives
+read as a search that had been exhaustive, and what they were was thorough
+inside one axis. The question that would have found this is not *which of these
+is cheapest* but *what else is in the file*.
+
+## 2026-11-13 — four branches that could not fire, and the two mutations that found them cost nothing to plant
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** **closed in
+the same run**; filed because the shape is general and this lane has now met it
+twice
+
+Sixteen mutations, sixteen killed, six survivors on the first pass. Two wanted
+a test. **Four wanted a deletion**, which is the part worth writing down:
+
+| what survived | why it could not fire |
+| --- | --- |
+| the empty-body clause in `withProse` | the five files partition the entries, so a body only ever arrives for an entry in the file it came in |
+| the `kind === "export"` check beside it | it guarded a name's address colliding with a heading's, which this site does not have |
+| the empty-body filter in `room.ts` | everything downstream joins the bodies and counts words |
+| the fallback to an entry's own body in `savings.ts` | `storedAs` answers for every body it is given, and is given every entry |
+
+Each read as a rule — *empties are special*, *names might collide*, *a candidate
+may rewrite only some pages* — and none of them was one. The export check was
+replaced by the invariant that makes it unnecessary, as a case in
+`build.test.ts` that fails if an anchor scheme changes; the other three are
+simply gone.
+
+**The general version, which is the 12 November entry's seen from the other
+side.** That entry said *a mutation to a constant finds a field nobody draws*.
+This one says **a mutation to a guard finds a rule nobody has**. Both are found
+by mutating the thing that does not look like logic, and in both cases the fix
+that looked right — write a test — was the wrong one. A test over a branch that
+cannot fire is a test that cannot fail.
+
+## 2026-11-13 — `withProse` threw, and one file that did not line up took the whole search box down
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** **closed on
+filing**, by the refusal that replaced the throw
+
+The positional shape needs a guard: one body per entry is the only thing holding
+the words to their addresses, so a file carrying a different number of them has
+every body after the first gap on the wrong page. It was written as a `throw`,
+and the component's own suite answered within one run — **33 of its 41 cases
+failed with `<body><div /></body>`**. A reader who had been searching titles
+since the contents file landed lost those too, because one of the four files
+that arrive afterwards did not fit.
+
+It refuses the file and returns the index as it arrived now. The reader loses
+that section's sentence band and keeps everything they already had, and
+`build.test.ts` is where the mismatch is loud.
+
+**What is worth keeping is where the argument came from.** It was not reasoned
+to; it was a fixture that had not been updated, failing in the way the real
+thing would fail. **A guard that runs in a browser is a guard whose failure mode
+a reader experiences**, and the question to ask of one is not *is this
+unreachable* but *what does a reader see on the day it is reached*.
 ---
 ## 2026-11-13 — a two-column `loom.faq-list` is a grid of equal-height cells, so the question beside an open one is a 51px question in a 172px box
 
@@ -72037,7 +72460,37 @@ is why this is filed here rather than only fixed there.
 ## 2026-11-13 — the live door publishes three names and `@jam-overture/loom/live` has no written page at all, so the one call a site's render path makes is documented only by its signature
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom docs`
-(`apps/loom/app/(docs)/`) · **Status:** open — **nothing is broken and nothing
+(`apps/loom/app/(docs)/`) · **Status:** **closed by
+`docs-85` on `docs-78-no-room-for-another-page`**, 14 November.
+Original status below.
+
+> **`Loom docs`, 14 November.** *How a change reaches readers* exists, in
+> *The runtime*, between *Going to production* and *What a render reports*. It
+> is the page this entry asked for rather than the line it said a line would be,
+> and the entry was right about why: a sentence about a new name on this door
+> would have been the first on the site, with nothing around it to make sense
+> of.
+>
+> **What the page names, measured rather than claimed:** four of the twenty-nine
+> — `startPullingLivePages`, `pageForReader`, `describeSitePullFailure` and
+> `describeComposeError` — which are the four a host writes. They are in fenced
+> blocks, so `api/mentions.ts` offers this page on all four reference entries
+> from this commit, with nobody told to update anything. The other twenty-five
+> are in the reference and in the producer.
+>
+> **The entry was right that the docblock was a page's worth of prose, and it
+> was the source for most of this one.** Three properties, each with the
+> sentence it was written to be lifted as. What the docblock could not supply
+> was the thing a page needs most, which is somebody being wrong in a way a
+> reader will recognize — so the page's four blocks are a real pull, five real
+> failures, three real readers and two real renders, and its longest section is
+> the one about the form that could not be applied.
+>
+> One thing the entry did not predict and this run found: **the render call the
+> docblock shows does not compile.** That is filed, today, against
+> `src/render/render.ts`.
+
+**Original status:** open — **nothing is broken and nothing
 is blocked**; the generated reference has the three names and their doc
 comments, and `pnpm verify` is green
 
@@ -72490,3 +72943,224 @@ needs no knowledge of when anything merges.
 on the same day: three text changes pushed to #851's branch ten minutes after it
 merged, re-applied off `main` as a pull request of their own. Three instances in
 one day, two of them mine, is what makes it a rule rather than bad luck.
+
+---
+## 2026-11-14 — the one render call `@jam-overture/loom/live` exists to feed does not compile under this repository's own strictness, and its own docblock shows the spelling that fails
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom daily build`
+(`src/render/render.ts`) · **Status:** open — **nothing is broken at runtime**
+and the page documents the spelling that works; this is one character in a type
+declaration
+
+Writing the `(docs)` page for `/live` meant writing the render call, and the
+call the module's own docblock shows does not compile here:
+
+```
+app/(docs)/_lib/fences/compiled/the-runtime--how-a-change-reaches-readers.ts(40,29):
+error TS2379: Argument of type
+'{ resolver: PrimitiveResolver; audience: (string & BRAND<"AudienceId">) | undefined; }'
+is not assignable to parameter of type 'RenderOptions' with
+'exactOptionalPropertyTypes: true'.
+```
+
+`src/live/index.ts`'s worked example ends on:
+
+```ts
+renderLoomTree(served.tree, { resolver, addressed: true, audience: served.audience })
+```
+
+`ServedPage.audience` is `AudienceId | undefined`, because a reader in no
+segment is the ordinary case. `RenderOptions.audience` is declared
+`readonly audience?: AudienceId`, with no `| undefined`. Under
+`exactOptionalPropertyTypes` — which this repository compiles with, and which
+`@tsconfig/strictest` turns on — the two cannot be joined, and the one call the
+`/live` module exists to feed is the one call that will not typecheck.
+
+**The remedy is `readonly audience?: AudienceId | undefined`**, in
+`RenderOptions`. It widens nothing at runtime and it is what every other
+optional whose value arrives from a `| undefined` producer wants.
+
+**What the page does meanwhile**, because a page documents what is true:
+
+```ts
+renderLoomTree(served.tree, {
+  resolver: registry,
+  ...(served.audience === undefined ? {} : { audience: served.audience }),
+})
+```
+
+with a comment saying why, so a reader who copies it and does not need the
+spread knows that. **This lane would rather delete that comment than keep it.**
+
+**One thing worth noticing about how it was found.** It was not found by
+reading the docblock, which three runs of this lane have now read. It was found
+because this site compiles every code block on every page as a program, so the
+first run to write that call wrote it into a typechecker. The fence pipeline
+found a defect in `src/` from the documentation side, which is the thing it was
+built hoping for and had not done before.
+
+---
+## 2026-11-14 — a host that reads a pull's segment rules has no published name for them, while the type it does get names a brand nothing publishes
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom daily build`
+(`src/live/index.ts`, `src/audience/`) · **Status:** open — **nothing is
+broken**; `pnpm verify` is green and the documentation page works around it by
+building the door's answer as JSON
+
+`@jam-overture/loom/live` publishes `AudienceForm` and `ComposeError`, and
+`LivePages` holds `rules: ReadonlyMap<TreeId, readonly AudienceRule[]>`. But:
+
+| name | published on |
+| --- | --- |
+| `AudienceForm` | `/live` |
+| `ComposeError` | `/live` |
+| **`AudienceRule`** | **nowhere** |
+| **`AudienceClause`** | **nowhere** |
+| **`AudienceId`** | **nowhere** |
+| **`audienceIdSchema`** | **nowhere** |
+
+Checked against the built entry points rather than read off the source: no
+export of any of the four appears on `.`, `/live`, `/sdk`, `/react` or any
+other door in `package.json`.
+
+Two consequences, and the second is the one that bites:
+
+- A host that wants to **look at** the rules it is holding — to log which
+  segments a project has, or to check a context against them before shipping —
+  has no type to name them by.
+- `AudienceForm.audienceId` is `AudienceId`, which is a **branded** string. A
+  host cannot construct one, cannot name the type, and cannot parse a string
+  into one, so the only `AudienceForm` a host can hold is one it got from a
+  pull. That is fine for the render path and wrong for a test: a host writing a
+  unit test over its own segment handling has to reach for `as never`.
+
+**What this page did instead**, and it is the honest shape rather than a
+workaround: the producer assembles **the door's answer as JSON** and lets
+`pullLivePages` parse it. That is what really happens over the wire, so the
+page's blocks demonstrate the parse as well as the composition, and an id that
+did not match the grammar would be refused where a deployment would refuse it.
+So nothing is blocked here. The ask is about a host's own code, not about this
+site.
+
+**Recommendation:** publish `AudienceRule`, `AudienceClause`, `AudienceId` and
+`audienceIdSchema` on `/live`, beside `AudienceForm`, for the reason `/live`
+already re-exports `describeComposeError`: the place a host meets these is the
+render path.
+
+---
+## 2026-11-14 — this site's written-page count is stated in five doc comments and checked in one, so adding a page leaves four of them wrong
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/_lib/`) · **Status:** open — **nothing is broken**; the
+one that is checked went red correctly and the four are prose
+
+Adding one page took `weight.test.ts` red on `expected 36 to be 35`, which is
+the check doing its job. The same number is written in four other places and
+nothing reads any of them:
+
+| where | what it says | what it is |
+| --- | --- | --- |
+| `weight.test.ts` | `toBe(35)` | **checked.** Went red, updated to 36 |
+| `weight.ts` | *the prose of all thirty-five written pages* | present tense. Updated by hand to thirty-six |
+| `api/fields.ts` | *safe to point at thirty-five pages* | present tense. Updated by hand to thirty-six |
+| `instructions.ts` | *The counts, over the thirty-five written pages* | a **dated** table of measurements. Left |
+| `plain.ts` | *On the morning this was written, across the thirty-five written pages* | dated. Left |
+
+The two dated ones are right to be left: a measurement with a date on it is an
+account of a morning and the 12 November entry on correcting merged records
+argues that case. The two present-tense ones were simply wrong for as long as
+this branch was open, and a run that had not happened to grep for the digit
+would have left them wrong.
+
+**What would stop it rather than fix this instance:** `writtenPageWeights()`
+already answers the number, so a doc comment wanting it could be a produced
+sentence the way `room.ts` and `savings.ts` are. That is more machinery than
+two words of prose deserve. The cheaper half is the one worth having: **a
+present-tense count of this site's own pages, spelled out, in a doc comment, is
+the shape to stop writing.** It reads as context and behaves as an
+unmaintained assertion.
+
+Filed rather than built because this lane has shipped four instruments in six
+runs and this is a fifth, over two words.
+
+---
+## 2026-11-14 — the room this site has for another page is now nineteen words above the floor, and the next written page takes `room.test.ts` red whatever its length
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` and
+**@jonathanbravecredit** (the call) · **Status:** open — **nothing is broken,
+`pnpm verify` is green, and no deadline is attached**; this is the state of the
+site stated by the run that changed it
+
+`room.test.ts` says, in as many words, that *a page long enough to spend 2,335
+words makes this fail, and the run that writes it says what the state is then*.
+This is that run, and this is the state.
+
+| | words of room | the floor |
+| --- | --- | --- |
+| `architecture` | **1,749** | 1,730 |
+| `getting-started` | 1,838 | 1,730 |
+| `building-with-loom` | 1,984 | 1,730 |
+| `the-runtime` | 2,019 | 1,730 |
+| `api-reference` | 2,847 | 1,730 |
+
+The floor is five times the shortest page on the site, which is *Decision
+records* at 346 words. `architecture` is the tightest because it compresses
+worst, not because it is the biggest.
+
+**What this page cost.** 1,177 compressed bytes of the 4,750 that the saving on
+this branch bought — 633 words of prose for four produced blocks, two code
+blocks and a mounted example. It was **895 words in its first draft**, and the
+147 words that came out first were cut to clear exactly this floor; the second
+115 came out by moving the explanation of `pageForReader`'s three answers into
+the code block as comments, where a copier reads it and the prose index does not
+pay for it.
+
+**So the state is: nineteen words.** The next written page on this site fails
+this case whatever its length, and the run that writes it has three choices and
+no good one:
+
+1. **Answer 0353.** Candidate C buys about 2,305 words, which is less than the
+   2,335 this branch had before this page, so it does not solve this on its own.
+2. **Find another saving.** `savings.ts` prices five and refuses all five, and
+   the one that was not in that table — the addresses — is what this branch
+   already took.
+3. **Move the floor.** `shortest * 5` is a margin somebody chose, and nothing
+   says five. This lane will not change it in the run that is pressed against
+   it, which is exactly the run that should not be trusted to.
+
+**The recommendation is 3, by somebody who is not under the margin.** The
+honest reading of the last three weeks is that the floor is measuring the wrong
+thing: it asks whether five more copies of the shortest page would fit, and the
+shortest page on this site is a generated index of decision records. Four of
+this lane's last six runs have been instruments about this number, and the
+number has gone red in a different place each time.
+
+---
+## 2026-11-14 — the moving comment in `the-runtime--*.ts` is a line number, so a one-word prose edit above a code block is a regeneration
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/_lib/fences/`) · **Status:** **closed on filing — it
+cost nothing this run and it has cost two runs before**, and it is written down
+because the thing that saved it was luck
+
+A compiled fence records `// page.mdx:32 — a program`, which is the right thing
+to record: a compiler error points at a place in the page rather than at a place
+in the generated file. The consequence is that **any edit that changes the
+number of lines above a code block makes every compiled line number below it
+stale**, and nothing says so until `compiled.test.ts` runs.
+
+This run edited reader-facing prose above two code blocks **seven times** while
+trimming the page to fit its section's cap, and each time the edit happened to
+keep the line count. That was not care. It was the shape of the edits — a
+sentence shortened within its own two lines — and the eighth one would not have
+been.
+
+**The remedy is one sentence and this lane is following it from now on:**
+`pnpm --filter @loom/app docs:fences` is part of editing a page, not part of
+adding a code block to one. It is two seconds and it is idempotent.
+
+The 12 November report has the same failure from the other direction — *adding
+two imports to the page moved every line below them* — and called it
+mechanical. It is mechanical. What makes it worth an entry is that the trigger
+is **prose**, which is the edit a documentation run makes most often and the one
+least likely to make anybody think about generated files.

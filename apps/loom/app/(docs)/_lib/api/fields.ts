@@ -108,7 +108,7 @@ export const declaredNamesIn = (signature: string): readonly string[] =>
  *
  * A capital letter after a lowercase one. That is the whole rule, and it is a
  * fact about the spelling rather than an opinion about the word — which is the
- * only reason a check over 294 names is safe to point at thirty-five pages
+ * only reason a check over 294 names is safe to point at thirty-six pages
  * nobody is going to re-read.
  */
 export const isJargon = (name: string): boolean => /^[a-z][a-z0-9]*[A-Z]/.test(name)
