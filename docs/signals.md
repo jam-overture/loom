@@ -5592,6 +5592,74 @@ what it may say is bounded by the floor above. And the sweep the 11 November
 entry asked for — *how many other fixtures in this repository model the defect by
 accident* — is still open and still two lanes' work.
 
+### 90. Every silence set is in the census, and a sweep is what says so · `Loom signals` · **done, 14 November**
+
+[0240](../decisions/0240-a-silence-is-a-condition-and-a-subject-and-the-two-names-for-one-state-were-not-synonyms.md)
+publishes a census over the reasons every reading here gives for saying nothing:
+which **condition** each name reports, and what **subject** that condition is
+true of. It is a **hand-written table**, and nothing in the repository looked
+for a set it had never heard of — so a set that landed beside it and was never
+added to it was invisible. No test failed and no type complained.
+
+Two had accumulated. `DayShapeSilence` (§82, 10 November) was filed as a gap in
+`FINDINGS.md` by the run that created it, with three options and a stated
+preference. `SenderSilence` (§88, 13 November) was added by this lane three days
+later and nobody noticed the same gap had just widened — which is the evidence
+that filing it was not enough.
+
+**Done**
+([0397](../decisions/0397-every-silence-set-in-the-subsystem-is-mapped-and-a-sweep-is-what-makes-that-true.md)),
+as a sweep and the two mappings it found. Nothing is collected, stored, sent or
+counted: a table over vocabularies, and a test that reads this directory's
+source.
+
+- **`silence-sweep.test.ts` is the artefact.** It reads `src/signals/`, finds
+  every `export type …Silence` whose alias is a union, and resolves that set's
+  published members and its census entry through `index.js`. A set that is not
+  mapped fails it, in the diff that adds it.
+- **Three conventions, all of which already held, are now checked.** A set
+  publishes its members as `NAME_SILENCES`; a set is mapped by a `meaningOf…`;
+  and a set declared in `foo.ts` is the vocabulary `foo`. The third is what makes
+  the first two checkable from a file name, and twenty-two of the twenty-four
+  held it by accident of good naming.
+- **A set is found by the shape of its alias, not by its members.** Six sets open
+  on another set — `KindActionSilence` begins `| KindReachSilence` — so a sweep
+  looking for a string literal first would have dropped exactly the sets that
+  share their states with another.
+- **`rhythm` brings the fifth subject and both of its conditions.** `series` is
+  the run of hours that was read, which is not a page, a part, a pair or a kind.
+  `no-hour-counted` is a series holding no hour; `no-hour-settled` is a series
+  holding hours not one of which is over — **the only state in this table that
+  resolves itself if nothing is done.** `no-window-folded` could not serve: it
+  asserts readers arrived, and three of the four ways a series can be empty have
+  no rollup to run.
+- **`library-senders` brings one condition and reuses two.** `unplaced` is
+  `nothing-of-the-kind` and `unwitnessable` is `nothing-inside`, both `one-state`
+  with their originals. `unwitnessed` is **`no-reach-below`** and deliberately
+  not `no-reach-reported`: that one is the subject's own counters reporting no
+  reach and its remedy is a sender to fix, this one is about the parts
+  underneath and its remedy is to come back with readers.
+- **The counts leave the prose.** `silences.ts` opened by saying how many sets
+  and how many members there were, and both figures had gone false —
+  twenty-one and a hundred and eighteen against twenty-four and a hundred and
+  fifteen. The sentence carries no number now and the claim it made, that there
+  are fewer conditions than members, is asserted in the sweep.
+
+**Three names reach `@jam-overture/loom/signals`** — `meaningOfDayShapeSilence`,
+`meaningOfSenderSilence` and `DAY_SHAPE_SILENCES`. Measured on the front-coded
+index by building the file both ways: **27,462 bytes over 2,131 names on `main`,
+27,512 over 2,134 with these three — 50 bytes of the 12,538 there were.**
+
+**Nothing reaches a reader's browser.** `broadcast.ts` and its import graph are
+untouched and the bundle measures **7,852 minified and 3,458 gzipped**,
+re-measured on this branch, which is `main`'s figure to the byte.
+
+**What is left and is filed:** three sets here publish no `describe…Silence`
+(`conversion`, `deployment`, `deployment-change`), which the sweep deliberately
+does not require; and the hourly series' own `clipped` and `begins` are
+statements about a clock published as fields rather than as silences, which the
+10 November entry predicted would not be the last of their kind.
+
 ## Still not in scope
 
 - **Signal-to-intent derivation** — a signal automatically becoming a

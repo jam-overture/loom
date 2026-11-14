@@ -483,3 +483,7 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0391](0391-a-whole-repository-sweep-names-its-budget-on-the-block-that-holds-it.md) | A whole-repository sweep names its budget on the block that holds it, and a check says which files those are | Accepted | §1, the merge gate |
 | [0392](0392-a-segments-form-arrives-in-the-same-pull-as-its-rules-and-a-form-that-cannot-be-applied-costs-the-reader-their-segment.md) | A segment's form arrives in the same pull as its rules, and a form that cannot be applied costs the reader their segment rather than their page | Accepted | §2 (portal), the read door |
 | [0393](0393-a-silent-component-is-a-census-over-the-placements-the-defect-could-be-seen-on-and-the-share-is-bracketed.md) | A silent component is a census over the placements the defect could be seen on, and the share is bracketed | Accepted | §5 (reader signals), the readings |
+| 0394 | *No record on this branch* | — | — |
+| 0395 | *No record on this branch* | — | — |
+| 0396 | *No record on this branch* | — | — |
+| [0397](0397-every-silence-set-in-the-subsystem-is-mapped-and-a-sweep-is-what-makes-that-true.md) | Every silence set in the subsystem is mapped, and a sweep is what makes that true | Accepted | §5 (reader signals), the readings |

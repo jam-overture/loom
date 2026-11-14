@@ -8,7 +8,7 @@
       "files": 100,
       "narrower": [],
       "standing": {
-        "packageNames": 2071,
+        "packageNames": 2074,
         "otherDoors": 18,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -4246,7 +4246,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 2071,
+        "packageNames": 2074,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -4290,7 +4290,7 @@
       "files": 64,
       "narrower": [],
       "standing": {
-        "packageNames": 2071,
+        "packageNames": 2074,
         "otherDoors": 18,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -5249,7 +5249,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 2071,
+        "packageNames": 2074,
         "otherDoors": 18,
         "doorsSharingNothing": 17,
         "widest": false,
@@ -5330,7 +5330,7 @@
       "files": 220,
       "narrower": [],
       "standing": {
-        "packageNames": 2071,
+        "packageNames": 2074,
         "otherDoors": 18,
         "doorsSharingNothing": 17,
         "widest": false,
@@ -5800,7 +5800,7 @@
       "files": 81,
       "narrower": [],
       "standing": {
-        "packageNames": 2071,
+        "packageNames": 2074,
         "otherDoors": 18,
         "doorsSharingNothing": 17,
         "widest": false,
@@ -6888,7 +6888,7 @@
       "files": 38,
       "narrower": [],
       "standing": {
-        "packageNames": 2071,
+        "packageNames": 2074,
         "otherDoors": 18,
         "doorsSharingNothing": 17,
         "widest": false,
@@ -7453,7 +7453,7 @@
       "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 2071,
+        "packageNames": 2074,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -7656,7 +7656,7 @@
       "files": 45,
       "narrower": [],
       "standing": {
-        "packageNames": 2071,
+        "packageNames": 2074,
         "otherDoors": 18,
         "doorsSharingNothing": 17,
         "widest": false,
@@ -8706,7 +8706,7 @@
       "files": 61,
       "narrower": [],
       "standing": {
-        "packageNames": 2071,
+        "packageNames": 2074,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -9085,7 +9085,7 @@
       "files": 45,
       "narrower": [],
       "standing": {
-        "packageNames": 2071,
+        "packageNames": 2074,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -9340,7 +9340,7 @@
       "files": 22,
       "narrower": [],
       "standing": {
-        "packageNames": 2071,
+        "packageNames": 2074,
         "otherDoors": 18,
         "doorsSharingNothing": 17,
         "widest": false,
@@ -9576,7 +9576,7 @@
         }
       ],
       "standing": {
-        "packageNames": 2071,
+        "packageNames": 2074,
         "otherDoors": 18,
         "doorsSharingNothing": 16,
         "widest": true,
@@ -13419,6 +13419,12 @@
               "summary": "Why a shape has nothing to say about any hour of the day."
             },
             {
+              "name": "DAY_SHAPE_SILENCES",
+              "kind": "value",
+              "signature": "const DAY_SHAPE_SILENCES: readonly DayShapeSilence[]",
+              "summary": "The members, published so that the set can be enumerated rather than remembered."
+            },
+            {
               "name": "DayShape",
               "kind": "type",
               "signature": "type DayShape = {\n    /** Twenty-four entries, ascending from hour 0. */\n    readonly hours: readonly DayHour[];\n    /** What was counted into the shape: the range's whole hours, summed. */\n    readonly count: number;\n    /**\n     * What the range counted and the shape left out, because the hour was not over.\n     */\n    readonly incomplete: number;\n    /** How many days contributed any whole hour at all. */\n    readonly days: number;\n    /**\n     * Whether every hour of the day rests on the same number of days.\n     */\n    readonly even: boolean;\n    /** The offset the hours were named at, in whole hours from UTC. */\n    readonly offsetHours: number;\n    /** Why there is nothing to read, where there is nothing. */\n    readonly silence?: DayShapeSilence;\n};",
@@ -13659,7 +13665,7 @@
             {
               "name": "SilenceSubject",
               "kind": "type",
-              "signature": "type SilenceSubject =\n/** One revision of one page, and the window of counters read against it. */\n\"page\"\n/** One part of one revision. */\n | \"part\"\n/**\n * The two readings held against each other, naming neither side.\n */\n | \"comparison\"\n/**\n * One kind of part, everywhere it stands in the pages read.\n */\n | \"kind\";",
+              "signature": "type SilenceSubject =\n/** One revision of one page, and the window of counters read against it. */\n\"page\"\n/** One part of one revision. */\n | \"part\"\n/**\n * The two readings held against each other, naming neither side.\n */\n | \"comparison\"\n/**\n * One kind of part, everywhere it stands in the pages read.\n */\n | \"kind\"\n/**\n * The run of hours a series holds, at whatever scope its counters were read.\n */\n | \"series\";",
               "summary": "What a silence is a fact about."
             },
             {
@@ -13677,7 +13683,7 @@
             {
               "name": "SilenceVocabulary",
               "kind": "type",
-              "signature": "type SilenceVocabulary = \"action-change\" | \"change\" | \"conversion\" | \"copy\" | \"copy-change\" | \"deployment\" | \"deployment-change\" | \"form-action\" | \"form-copy\" | \"forms\" | \"funnel-change\" | \"library\" | \"library-action\" | \"library-change\" | \"library-copy-change\" | \"library-pace\" | \"library-reach\" | \"library-reach-change\" | \"library-word-reach-change\" | \"pace\" | \"pace-change\" | \"reach\";",
+              "signature": "type SilenceVocabulary = \"action-change\" | \"change\" | \"conversion\" | \"copy\" | \"copy-change\" | \"deployment\" | \"deployment-change\" | \"form-action\" | \"form-copy\" | \"forms\" | \"funnel-change\" | \"library\" | \"library-action\" | \"library-change\" | \"library-copy-change\" | \"library-pace\" | \"library-reach\" | \"library-reach-change\" | \"library-senders\" | \"library-word-reach-change\" | \"pace\" | \"pace-change\" | \"reach\" | \"rhythm\";",
               "summary": "Which reading published a silence."
             },
             {
@@ -13695,7 +13701,7 @@
             {
               "name": "SilenceCondition",
               "kind": "type",
-              "signature": "type SilenceCondition =\n/** The two readings are of different trees, so nothing in either is comparable. */\n\"two-pages\"\n/**\n * The two readings are of two audiences, so they are of two populations.\n */\n | \"two-audiences\"\n/**\n * Nothing reported a view of it.\n */\n | \"no-view-reported\"\n/**\n * There is no page-view row at the door for this revision.\n */\n | \"no-arrivals-counted\"\n/**\n * The row is there and nothing in it says a page view ever began.\n */\n | \"no-openings-marked\"\n/** Readers arrived and no rollup has folded a window of their reading yet. */\n | \"no-window-folded\"\n/** It says nothing that could have been read: no words, and nothing undeclared either. */\n | \"says-nothing\"\n/**\n * Some of its words are a floor, because a type in it declares no `copy`\n *.\n */\n | \"words-a-floor\"\n/**\n * It reports more readers than it has views, which no rollup produces.\n */\n | \"readers-above-views\"\n/** The change left no word of the page as it was, so there is no carried text to read. */\n | \"nothing-carried\"\n/**\n * The window holds actions and credits none of them to a reader.\n */\n | \"no-action-credited\"\n/**\n * There is none of it in the pages read.\n */\n | \"nothing-of-the-kind\"\n/**\n * It has nothing inside it, so there is nothing a reader could act in.\n */\n | \"nothing-inside\"\n/**\n * Its counters are there and not one of them reports being reached.\n */\n | \"no-reach-reported\"\n/**\n * One window holds two forms of the page and the asking named neither.\n */\n | \"two-forms-unsplit\"\n/**\n * The two readings are of two revisions of the page.\n */\n | \"two-revisions\"\n/**\n * Both readings are of one audience, so there is not a second population.\n */\n | \"one-population\"\n/**\n * Nothing recorded which audience the window was of.\n */\n | \"no-audience-named\"\n/**\n * Every question it is asked names a part the page no longer has.\n */\n | \"questions-stale\";",
+              "signature": "type SilenceCondition =\n/** The two readings are of different trees, so nothing in either is comparable. */\n\"two-pages\"\n/**\n * The two readings are of two audiences, so they are of two populations.\n */\n | \"two-audiences\"\n/**\n * Nothing reported a view of it.\n */\n | \"no-view-reported\"\n/**\n * There is no page-view row at the door for this revision.\n */\n | \"no-arrivals-counted\"\n/**\n * The row is there and nothing in it says a page view ever began.\n */\n | \"no-openings-marked\"\n/** Readers arrived and no rollup has folded a window of their reading yet. */\n | \"no-window-folded\"\n/** It says nothing that could have been read: no words, and nothing undeclared either. */\n | \"says-nothing\"\n/**\n * Some of its words are a floor, because a type in it declares no `copy`\n *.\n */\n | \"words-a-floor\"\n/**\n * It reports more readers than it has views, which no rollup produces.\n */\n | \"readers-above-views\"\n/** The change left no word of the page as it was, so there is no carried text to read. */\n | \"nothing-carried\"\n/**\n * The window holds actions and credits none of them to a reader.\n */\n | \"no-action-credited\"\n/**\n * There is none of it in the pages read.\n */\n | \"nothing-of-the-kind\"\n/**\n * It has nothing inside it, so there is nothing a reader could act in.\n */\n | \"nothing-inside\"\n/**\n * Its counters are there and not one of them reports being reached.\n */\n | \"no-reach-reported\"\n/**\n * One window holds two forms of the page and the asking named neither.\n */\n | \"two-forms-unsplit\"\n/**\n * The two readings are of two revisions of the page.\n */\n | \"two-revisions\"\n/**\n * Both readings are of one audience, so there is not a second population.\n */\n | \"one-population\"\n/**\n * Nothing recorded which audience the window was of.\n */\n | \"no-audience-named\"\n/**\n * Every question it is asked names a part the page no longer has.\n */\n | \"questions-stale\"\n/**\n * Nothing below it reported being reached, so nothing it holds can witness\n * anything about it.\n */\n | \"no-reach-below\"\n/**\n * No hour of it has ever been counted, so the run of hours is empty.\n */\n | \"no-hour-counted\"\n/**\n * It holds hours and not one of them is over.\n */\n | \"no-hour-settled\";",
               "summary": "The state of the world a silence reports, named once for the whole subsystem."
             },
             {
@@ -13847,6 +13853,18 @@
               "kind": "function",
               "signature": "const meaningOfConversionSilence: (silence: ConversionSilence) => SilenceMeaning",
               "summary": "What an order of a deployment's conversions reports."
+            },
+            {
+              "name": "meaningOfDayShapeSilence",
+              "kind": "function",
+              "signature": "const meaningOfDayShapeSilence: (silence: DayShapeSilence) => SilenceMeaning",
+              "summary": "What a fold of an hourly series into the hours of a day reports."
+            },
+            {
+              "name": "meaningOfSenderSilence",
+              "kind": "function",
+              "signature": "const meaningOfSenderSilence: (silence: SenderSilence) => SilenceMeaning",
+              "summary": "What a census of a library's silent senders reports, of one kind."
             },
             {
               "name": "SilenceRelation",
@@ -14311,7 +14329,7 @@
       "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 2071,
+        "packageNames": 2074,
         "otherDoors": 18,
         "doorsSharingNothing": 17,
         "widest": false,
@@ -14446,7 +14464,7 @@
       "files": 21,
       "narrower": [],
       "standing": {
-        "packageNames": 2071,
+        "packageNames": 2074,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -14508,7 +14526,7 @@
       "files": 65,
       "narrower": [],
       "standing": {
-        "packageNames": 2071,
+        "packageNames": 2074,
         "otherDoors": 18,
         "doorsSharingNothing": 17,
         "widest": false,
@@ -15082,7 +15100,7 @@
       "files": 43,
       "narrower": [],
       "standing": {
-        "packageNames": 2071,
+        "packageNames": 2074,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -15152,7 +15170,7 @@
       "files": 100,
       "narrower": [],
       "standing": {
-        "packageNames": 2071,
+        "packageNames": 2074,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,
@@ -15574,7 +15592,7 @@
       "files": 81,
       "narrower": [],
       "standing": {
-        "packageNames": 2071,
+        "packageNames": 2074,
         "otherDoors": 18,
         "doorsSharingNothing": 18,
         "widest": false,

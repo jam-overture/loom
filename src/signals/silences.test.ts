@@ -32,6 +32,11 @@ import {
   KIND_WORD_REACH_CHANGE_SILENCES,
   KIND_REACH_SILENCES,
   KIND_SILENCES,
+  arrivalDayShapeOf,
+  arrivalSeriesOf,
+  DAY_SHAPE_SILENCES,
+  librarySendersOf,
+  SENDER_SILENCES,
   libraryActionOf,
   libraryChangeOf,
   libraryCopyChangeOf,
@@ -40,6 +45,7 @@ import {
   meaningOfActionChangeSilence,
   meaningOfChangeSilence,
   meaningOfConversionSilence,
+  meaningOfDayShapeSilence,
   meaningOfCopyChangeSilence,
   meaningOfCopySilence,
   meaningOfDeploymentChangeSilence,
@@ -59,6 +65,7 @@ import {
   meaningOfPaceChangeSilence,
   meaningOfPaceSilence,
   meaningOfReachSilence,
+  meaningOfSenderSilence,
   PACE_CHANGE_SILENCES,
   PACE_SILENCES,
   pageReachOf,
@@ -76,6 +83,7 @@ import {
   type SilenceCondition,
   type SilenceMeaning,
   type SilenceVocabulary,
+  type StoredArrivals,
   type StoredPageViews,
 } from "./index.js"
 
@@ -151,6 +159,10 @@ const row = (counts: Partial<StoredPageViews> = {}): StoredPageViews => ({
   ...counts,
 })
 
+/** Midnight UTC, so an hour boundary is readable in a failure. */
+const MIDNIGHT = Date.parse("2026-11-06T00:00:00.000Z")
+const HOUR = 3_600_000
+
 const words = (count: number): string => Array.from({ length: count }, () => "word").join(" ")
 
 const PAGE = element("page", "loom.stack", {}, [
@@ -187,6 +199,8 @@ const EVERY_MEANING: readonly SilenceMeaning[] = [
   ...PACE_SILENCES.map(meaningOfPaceSilence),
   ...PACE_CHANGE_SILENCES.map(meaningOfPaceChangeSilence),
   ...REACH_SILENCES.map(meaningOfReachSilence),
+  ...DAY_SHAPE_SILENCES.map(meaningOfDayShapeSilence),
+  ...SENDER_SILENCES.map(meaningOfSenderSilence),
 ]
 
 describe("what a reading means when it says nothing", () => {
@@ -213,7 +227,9 @@ describe("what a reading means when it says nothing", () => {
         KIND_WORD_REACH_CHANGE_SILENCES.length +
         PACE_SILENCES.length +
         PACE_CHANGE_SILENCES.length +
-        REACH_SILENCES.length
+        REACH_SILENCES.length +
+        DAY_SHAPE_SILENCES.length +
+        SENDER_SILENCES.length
     )
 
     for (const meaning of EVERY_MEANING) {
@@ -333,6 +349,16 @@ describe("what a reading means when it says nothing", () => {
           CONVERSION_SILENCES.map((of) => meaningOfConversionSilence(of).condition),
           ["questions-stale"],
         ],
+        [
+          "rhythm",
+          DAY_SHAPE_SILENCES.map((of) => meaningOfDayShapeSilence(of).condition),
+          ["no-hour-counted", "no-hour-settled"],
+        ],
+        [
+          "library-senders",
+          SENDER_SILENCES.map((of) => meaningOfSenderSilence(of).condition),
+          ["no-reach-below"],
+        ],
       ]
 
     /** The five sets that were there before any of the above, in arrival order. */
@@ -420,9 +446,11 @@ describe("what a reading means when it says nothing", () => {
       "kind",
       "kind",
       "kind",
+      "kind",
       "part",
       "comparison",
       "page",
+      "series",
     ])
   })
 
@@ -1196,5 +1224,121 @@ describe("the mapping, against what the readings actually say", () => {
     expect(section?.silence).toBe("floored")
     expect(section?.words.change).toBeNull()
     expect(section?.words.readShareNow).toBe(1)
+  })
+
+  /**
+   * The twenty-third set, driven through the fold that produces it rather than
+   * asserted off the table (0397).
+   *
+   * The pair this one exists for is `no-hour-counted` against
+   * `no-window-folded`: the second asserts readers arrived and the rollup is
+   * behind, and an empty run of hours is equally what a deployment nobody has
+   * read looks like. A surface handed one for the other prints *your counting is
+   * behind* at a deployment with no readers.
+   */
+  it("maps a run of hours nothing was ever counted in to no hour having been counted", () => {
+    const range = { from: MIDNIGHT, to: MIDNIGHT + 24 * HOUR }
+    const empty: StoredArrivals = { hours: [] }
+    const shape = arrivalDayShapeOf(arrivalSeriesOf(empty, range))
+
+    expect(shape.silence).toBe("unmeasured")
+    expect(meaningOfDayShapeSilence("unmeasured")).toEqual({
+      condition: "no-hour-counted",
+      subject: "series",
+      vocabulary: "rhythm",
+    })
+    expect(
+      relateSilences(
+        meaningOfDayShapeSilence("unmeasured"),
+        meaningOfConversionSilence("uncounted")
+      )
+    ).toBe("unrelated")
+  })
+
+  /**
+   * The one state in this table that resolves itself, and the reason it is not
+   * the one above: counting is working and the figure is one hour away.
+   */
+  it("maps a run of hours none of which is over to no hour having settled", () => {
+    const shape = arrivalDayShapeOf(
+      arrivalSeriesOf(
+        {
+          hours: [
+            {
+              audienceId: DEFAULT_AUDIENCE_ID,
+              treeId: TREE,
+              revision: 1,
+              hour: MIDNIGHT,
+              views: 3,
+              updatedAt: "2026-11-06T00:00:00.000Z",
+            },
+          ],
+          begins: MIDNIGHT,
+        },
+        { from: MIDNIGHT, to: MIDNIGHT + HOUR },
+        { now: MIDNIGHT + 60_000 }
+      )
+    )
+
+    expect(shape.silence).toBe("unsettled")
+    expect(meaningOfDayShapeSilence("unsettled").condition).toBe("no-hour-settled")
+    expect(
+      relateSilences(
+        meaningOfDayShapeSilence("unsettled"),
+        meaningOfDayShapeSilence("unmeasured")
+      )
+    ).toBe("unrelated")
+  })
+
+  /**
+   * The twenty-fourth set, and the two of its three members that brought
+   * nothing: a kind nothing places, and a kind standing only where nothing is
+   * inside it. Both are states already here at the same subject, which is what
+   * `one-state` says.
+   */
+  it("maps a silent-sender census's two reused reasons onto the states already here", () => {
+    const senders = librarySendersOf([
+      readingOf(
+        treeOf(element("page", "loom.stack", {}, [element("intro", "loom.section")])),
+        [],
+        NOTHING_DECLARED
+      ),
+    ])
+    const section = senders.byType.find(
+      (of) => of.kind.by === "type" && of.kind.type === "loom.section"
+    )
+
+    expect(section?.silence).toBe("unwitnessable")
+    expect(
+      relateSilences(meaningOfSenderSilence("unwitnessable"), meaningOfKindActionSilence("unenterable"))
+    ).toBe("one-state")
+    expect(
+      relateSilences(meaningOfSenderSilence("unplaced"), meaningOfKindSilence("unplaced"))
+    ).toBe("one-state")
+  })
+
+  /**
+   * The pair the twenty-fourth set's one new condition exists for, and the
+   * sharpest in this file: a part whose **own** counters report no reach is a
+   * sender to fix, and a part nothing has been reported *below* is a window to
+   * come back to. Two conditions, never one, because the remedies are opposite.
+   */
+  it("keeps nothing reported below a part apart from the part reporting no reach", () => {
+    const tree = treeOf(
+      element("page", "loom.stack", {}, [element("intro", "loom.section")])
+    )
+    const senders = librarySendersOf([readingOf(tree, [], NOTHING_DECLARED)])
+    const stack = senders.byType.find(
+      (of) => of.kind.by === "type" && of.kind.type === "loom.stack"
+    )
+
+    expect(stack).toMatchObject({ unwitnessed: 1, witnessed: 0, silence: "unwitnessed" })
+    expect(meaningOfSenderSilence("unwitnessed").condition).toBe("no-reach-below")
+    expect(
+      relateSilences(meaningOfSenderSilence("unwitnessed"), meaningOfKindReachSilence("unread"))
+    ).toBe("unrelated")
+    expect(
+      relateSilences(meaningOfSenderSilence("unwitnessed"), meaningOfCopySilence("unspoken"))
+    ).toBe("unrelated")
   })
 })
