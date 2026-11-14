@@ -231,3 +231,51 @@ things it reads from outside the route group are both published entry points —
 `@jam-overture/loom/live` for the composition and `@jam-overture/loom/store` in
 a test, for the one schema the **portal** owns and the server deliberately does
 not import.
+
+---
+
+# Note, 14 November, after `main` was merged in
+
+`Loom merge` merged `origin/main` into this branch at 15:33 (`5df451f`), four
+commits after the base this run was built and measured on. **Three of them touch
+`src/live/`, which is the module this pull request's one new call comes from**,
+so the gate was run again on the merged tree rather than assumed. The figures
+above are the run against `ab8a960` and are left as they were written; these are
+the same gate on the branch head.
+
+| | files | tests |
+| --- | --- | --- |
+| framework and tools | 295 | **7,174** |
+| application | 497 | **7,999** |
+| | **792** | **15,173** |
+
+**EXIT=0. 15,173 pass, nothing failed, nothing skipped, no test weakened.**
+`findings:check` **1,555 findings, 0 malformed**. `prerender:check` 139 pages,
+2,103 text junctions and 82 tag junctions, 0 run together.
+
+## What came in, and why it changes nothing here
+
+[0383](../decisions/0383-a-reader-keeps-the-pages-they-first-saw-for-a-window-the-project-sets-and-their-browser-holds-one-number-many-readers-share.md)'s
+client half landed in #897, and **`pageForReader` grew a fourth parameter**:
+
+```ts
+pageForReader(held, built, context, pin?)
+```
+
+`pin` is optional and this site passes none, so the call in `live.ts` compiles
+and behaves exactly as it was measured. A site that passes one holds its readers
+on the pages they first saw for a window the project sets; **this site has
+chosen no window**, which is every project's default (0383 clause 1).
+
+That matters for one thing beyond compilation. `Loom daily build` filed an entry
+against this lane the same day — *a Loom site can set a cookie now, and
+`/what-you-run` says in as many words that it does not* — because 0383 clause 7
+binds the sentence on that page to the pull request that turns a window on:
+
+> *loomjs.org stays* Off *until the pull request that turns it on also changes
+> the sentence on `/what-you-run`.*
+
+**This is not that pull request.** It passes no pin, sets no cookie and turns no
+window on, so the sentence on `/what-you-run` is still true and is deliberately
+left alone. The entry stays open for whichever run chooses a window, which is
+the shape it recommends for itself.
