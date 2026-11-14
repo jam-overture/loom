@@ -9,12 +9,15 @@ import { mayAdminister } from "@/app/(portal)/_lib/auth/roles"
 import { acceptedFrom } from "@/app/(portal)/_lib/connecting"
 import { plainMoment } from "@/app/(portal)/_lib/when"
 import { portalApplications, portalProjects } from "@/app/(portal)/_lib/store"
+import { readWithin } from "@/app/_lib/app/bounded-store"
 import { soleApplicationOf } from "@/app/_lib/app/sole-application"
 import type { ModelKeyStanding } from "@/app/_lib/models/model-keys"
 import { modelKeyOf, modelKeysKeepable } from "@/app/_lib/models/store"
+import { appReaderWindows } from "@/app/_lib/pages/store"
 import { ClosingControls } from "@/app/(portal)/portal/_components/closing-controls"
 
 import { ModelKeyControls } from "./_components/model-key-controls"
+import { ReaderWindowSection } from "./_components/reader-window-section"
 import { SettingsForm } from "./_components/settings-form"
 
 /** What the project's model key is, said to anybody who opens Settings. */
@@ -33,7 +36,8 @@ const keySentence = (standing: ModelKeyStanding | undefined): string => {
 
 /**
  * *Settings*: what a project is called, where its site lives, the model key
- * its proposals are paid with (0332), and closing it — the plan's Settings
+ * its proposals are paid with (0332), how long a reader keeps the pages they
+ * first saw (0383), and closing it — the plan's Settings
  * tab (`docs/portal.md`, *Three surfaces*) with the parts of it that exist so
  * far.
  *
@@ -66,6 +70,13 @@ const SettingsPage = async ({ params }: { params: Promise<{ project: string }> }
   const owner = mayAdminister(role)
   const key = application === undefined ? undefined : await modelKeyOf(application.applicationId)
   const standing = key?.ok === true ? key.value : undefined
+  const readerWindow =
+    application === undefined
+      ? undefined
+      : await readWithin(
+          () => appReaderWindows.kept(application.applicationId),
+          (detail) => ({ code: "unavailable" as const, detail })
+        )
 
   const body = (() => {
     if (!project.ok || !applications.ok) {
@@ -123,6 +134,15 @@ const SettingsPage = async ({ params }: { params: Promise<{ project: string }> }
             !owner && <p className="text-ink-muted m-0 text-xs">Only an owner can set it.</p>
           )}
         </section>
+
+        {readerWindow !== undefined && (
+          <ReaderWindowSection
+            projectId={projectId}
+            changeable={owner && !closed}
+            owner={owner}
+            kept={readerWindow}
+          />
+        )}
 
         {owner && (
           <section

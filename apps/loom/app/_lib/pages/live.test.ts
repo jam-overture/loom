@@ -12,6 +12,7 @@ import {
   type AudienceRule,
 } from "@jam-overture/loom/store"
 
+import { WINDOW_OFF, type LiveWindow } from "@/app/(portal)/_lib/proposing/held"
 import { issueIngestKey, type IngestKey } from "@/app/_lib/reader-signals/keys"
 import { memoryIngestKeyStore } from "@/app/_lib/reader-signals/keys-memory"
 
@@ -62,6 +63,7 @@ const fixtureOf = async (
   over: Partial<ReadDoor> & {
     readonly application?: Application | null
     readonly pages?: readonly LoomTree[]
+    readonly window?: LiveWindow
     /** Each page's rules, by page id; a page missing has none. */
     readonly rules?: Readonly<Record<string, readonly AudienceRule[]>>
     /** Each page's segment forms, by page id; a page missing has none. */
@@ -94,10 +96,15 @@ const fixtureOf = async (
                 : null
           )
         ),
-      livePagesOf: (id) => {
+      liveOf: (id) => {
         asked.push(id)
 
-        return Promise.resolve(ok(id === SITE.applicationId ? (over.pages ?? [HOME, PRICING]) : []))
+        return Promise.resolve(
+          ok({
+            pages: id === SITE.applicationId ? (over.pages ?? [HOME, PRICING]) : [],
+            window: over.window ?? WINDOW_OFF,
+          })
+        )
       },
       overlaysOf: (_, pages) =>
         Promise.resolve(
@@ -142,7 +149,12 @@ describe("serveLivePages", () => {
 
     expect(response.status).toBe(200)
     expect(response.headers.get("content-type")).toMatch(/^application\/json/)
-    expect(JSON.parse(body)).toEqual({ pages: [HOME, PRICING], rules: [], forms: [] })
+    expect(JSON.parse(body)).toEqual({
+      pages: [HOME, PRICING],
+      rules: [],
+      forms: [],
+      window: { ms: 0 },
+    })
     expect(response.headers.get("etag")).toBe(await entityTagOf(body))
     expect(response.headers.get("cache-control")).toBe("private, no-cache")
     expect(asked).toEqual([SITE.applicationId])
@@ -153,7 +165,7 @@ describe("serveLivePages", () => {
 
     const response = await serveLivePages(pull(`Bearer ${otherKey}`), door)
 
-    expect(await response.json()).toEqual({ pages: [], rules: [], forms: [] })
+    expect(await response.json()).toEqual({ pages: [], rules: [], forms: [], window: { ms: 0 } })
     expect(asked).toEqual([OTHER])
   })
 
@@ -180,7 +192,7 @@ describe("serveLivePages", () => {
     )
 
     expect(again.status).toBe(200)
-    expect(await again.json()).toEqual({ pages: [HOME], rules: [], forms: [] })
+    expect(await again.json()).toEqual({ pages: [HOME], rules: [], forms: [], window: { ms: 0 } })
   })
 
   it("tells of each answer the site took, the 304s as well as the 200s, under its project", async () => {
@@ -215,7 +227,7 @@ describe("serveLivePages", () => {
     const closed = await fixtureOf({
       application: { ...SITE, closedAt: "2026-11-01T00:00:00.000Z" },
     })
-    const down = await fixtureOf({ livePagesOf: () => Promise.resolve(err(DOWN)) })
+    const down = await fixtureOf({ liveOf: () => Promise.resolve(err(DOWN)) })
 
     await serveLivePages(pull(`Bearer ${closed.key}`), closed.door)
     await serveLivePages(pull(`Bearer ${down.key}`), down.door)
@@ -284,7 +296,7 @@ describe("serveLivePages", () => {
   it("answers 503 when a store cannot be read, and never an empty site", async () => {
     const keysDown = await fixtureOf()
     const applicationsDown = await fixtureOf({ applicationOf: () => Promise.resolve(err(DOWN)) })
-    const pagesDown = await fixtureOf({ livePagesOf: () => Promise.resolve(err(DOWN)) })
+    const pagesDown = await fixtureOf({ liveOf: () => Promise.resolve(err(DOWN)) })
     const rulesDown = await fixtureOf({ overlaysOf: () => Promise.resolve(err(DOWN)) })
 
     const answers = await Promise.all([
@@ -310,6 +322,41 @@ describe("serveLivePages", () => {
   })
 })
 
+describe("the reader window beside the pages (0383 clause 5)", () => {
+  const HELD: LiveWindow = {
+    ms: 60 * 60 * 1000,
+    floor: AT - 5_000,
+    number: AT - 1_000,
+    held: [{ treeId: HOME.treeId, versions: [{ until: AT - 1_000, tree: HOME }] }],
+  }
+
+  it("answers the window it was handed with the pages, held versions and all", async () => {
+    const { door, key } = await fixtureOf({ window: HELD })
+
+    const response = await serveLivePages(pull(`Bearer ${key}`), door)
+
+    expect(await response.json()).toEqual({
+      pages: [HOME, PRICING],
+      rules: [],
+      forms: [],
+      window: HELD,
+    })
+  })
+
+  it("answers the pages again when only the window moved, so a site never holds a stale one", async () => {
+    const { door, key } = await fixtureOf()
+    const first = await serveLivePages(pull(`Bearer ${key}`), door)
+    const { door: held } = await fixtureOf({ window: HELD })
+
+    const again = await serveLivePages(
+      pull(`Bearer ${key}`, { ifNoneMatch: first.headers.get("etag") ?? "" }),
+      { ...held, keys: door.keys }
+    )
+
+    expect(again.status).toBe(200)
+  })
+})
+
 describe("the rules beside the pages (0371 clause 4)", () => {
   it("answers each page's rule list in its order, for the pages it answers", async () => {
     const { door, key } = await fixtureOf({
@@ -325,6 +372,7 @@ describe("the rules beside the pages (0371 clause 4)", () => {
         { treeId: PRICING.treeId, rules: [ADS] },
       ],
       forms: [],
+      window: { ms: 0 },
     })
   })
 

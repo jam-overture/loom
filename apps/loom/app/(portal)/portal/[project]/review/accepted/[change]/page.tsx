@@ -20,7 +20,7 @@ import {
 import { plainDay } from "@/app/(portal)/_lib/when"
 
 import { Timeline } from "../_components/timeline"
-import { readMeasurement } from "@/app/(portal)/_lib/accepted/measurement"
+import { holdingFor, readMeasurement } from "@/app/(portal)/_lib/accepted/measurement"
 import { readAccepted } from "@/app/(portal)/_lib/accepted/reading"
 
 /**
@@ -116,7 +116,14 @@ const ChangeScreen = async ({
 
       <section className="border-edge-subtle bg-surface-base flex flex-col gap-3 rounded-lg border p-4">
         <Timeline
-          steps={timelineOf(change, reading.reach, now, served, measurement)}
+          steps={timelineOf(
+            change,
+            reading.reach,
+            now,
+            served,
+            measurement,
+            holdingFor(reading, change)
+          )}
           projectId={projectId}
         />
         <TechnicalDetail summary="The change as Loom keeps it">

@@ -57,6 +57,12 @@ const ceilHour = (at: number): number => Math.ceil(at / ARRIVAL_HOUR_MS) * ARRIV
 export type Bounds = {
   readonly previous?: number
   readonly next?: number
+  /**
+   * When the last returning reader stopped being given the page as it was,
+   * where a reader window held them (0383 clause 6). Until then some readers
+   * still read the old version, so the after side starts no earlier.
+   */
+  readonly heldUntil?: number
 }
 
 /** The two stretches compared, each whole hours, closed at the start and open at the end. */
@@ -74,12 +80,13 @@ export type Windows = {
  *
  * The before side starts no earlier than the page's previous change and no
  * earlier than counting began (`countingSince`), so a side is never padded with
- * hours nothing was counted in. The after side ends no later than the page's
- * next change.
+ * hours nothing was counted in. The after side starts no earlier than the
+ * hold on returning readers ended (`heldUntil`), and ends no later than the
+ * page's next change.
  */
 export const windowsOf = (liveAt: number, bounds: Bounds, countingSince?: number): Windows => {
   const beforeTo = floorHour(liveAt)
-  const afterFrom = ceilHour(liveAt)
+  const afterFrom = ceilHour(Math.max(liveAt, bounds.heldUntil ?? liveAt))
   const beforeFrom = Math.max(
     beforeTo - MEASURING_MS,
     ...[bounds.previous, countingSince].flatMap((at) => (at === undefined ? [] : [ceilHour(at)]))
