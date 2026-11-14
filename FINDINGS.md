@@ -62085,8 +62085,27 @@ it rather than reassigned.
 ## 2026-10-23 — a space lost between a tag and the text after it leaves no separator, so the one check written for run-together text cannot see it
 
 **Filed by:** `Loom docs` · **Owned by:** `Loom daily build`
-(`tools/prerender/hazards.ts`) · **Status:** open — **the instance is fixed and
-the gap is not**; one page, caught in a screenshot rather than by any check
+(`tools/prerender/hazards.ts`) · **Status:** **closed by
+`framework-98-the-space-a-tag-swallowed`** — the gap is shut with shape 1, and
+the entry's measurement held three weeks later: on today's 139 built pages there
+are 82 inline junctions, 80 of them a `</span>` that keeps the space inside and
+2 of them a plural on a code chip. Recorded as
+[0398](decisions/0398-the-second-prerender-hazard-is-an-inline-end-tag-with-text-hard-against-it-and-the-element-does-not-carry-the-space.md).
+
+> **The entry was right about the fault, the class and the remedy.** Two things
+> it recommended were not taken as written, and both because the measurement it
+> itself supplied pointed further. The 77 `</span>`s are answered by reading the
+> character *before* the end tag — the space is inside the element — rather than
+> by allowing `span`, which would have exempted the one element the defect is
+> most likely to appear on. And the sweep reads only **text-level** elements,
+> because a block element's end is the next line rather than the same one, and
+> flagging `</p>in` would be a red gate for four surfaces over correct output.
+> Only the plural on a chip is allowed by name, as the one shape in the class
+> with no second spelling.
+>
+> Shape 2 — comparing the built text against the `textContent` a test sees — is
+> recorded in 0398 as deferred rather than rejected, with the span-crossing
+> blind spot it would close named.
 
 The band this lane added today contained the ordinary sentence
 
